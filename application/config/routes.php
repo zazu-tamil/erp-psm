@@ -62,13 +62,7 @@ $route['get-data'] = 'general/get_data';
 $route['update-data'] = 'general/update_data';
 $route['insert-data'] = 'general/insert_data';
 $route['delete-record'] = 'general/delete_record';
-$route['get-content'] = 'general/get_content';  
-
-
-
-
-
-
+$route['get-content'] = 'general/get_content';   
 
 $route['company-list'] = 'master/company_list';
 $route['company-list/(:num)'] = 'master/company_list/$1';
@@ -87,3 +81,9 @@ $route['uom-list/(:num)'] = 'master/uom_list/$1';
  
 $route['gst-list'] = 'master/gst_list';
 $route['gst-list/(:num)'] = 'master/gst_list/$1';
+
+$route['user-list'] = 'master/user_list';
+$route['user-list/(:num)'] = 'master/user_list/$1';
+
+$route['vendor-list'] = 'master/vendor_list';
+$route['vendor-list/(:num)'] = 'master/vendor_list/$1';

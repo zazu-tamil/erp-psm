@@ -112,111 +112,97 @@ class Master extends CI_Controller
         $this->load->view('page/master/user-list', $data);
     }
 
-    public function company_list()
-    {
-        if (!$this->session->userdata(SESS_HD . 'logged_in'))
-            redirect();
+public function company_list()
+{
+    if (!$this->session->userdata(SESS_HD . 'logged_in'))
+        redirect();
 
-        if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin'
-            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
-        ) {
-            echo "<h3 style='color:red;'>Permission Denied</h3>";
-            exit;
-        }
-
-
-        $data['js'] = 'company-list.inc';
-
-
-        if ($this->input->post('mode') == 'Add') {
-            $ins = array(
-                'company_name' => $this->input->post('company_name'),
-                'contact_name' => $this->input->post('contact_name'),
-                'crno' => $this->input->post('crno'),
-                'address' => $this->input->post('address'),
-                'GST' => $this->input->post('GST'),
-                'mobile' => $this->input->post('mobile'),
-                'email' => $this->input->post('email'),
-                'status' => $this->input->post('status')
-            );
-
-            $this->db->insert('company_info', $ins);
-            redirect('company-list/' . $this->uri->segment(2, 0));
-        }
-
-        if ($this->input->post('mode') == 'Edit') {
-            $upd = array(
-                'company_name' => $this->input->post('company_name'),
-                'contact_name' => $this->input->post('contact_name'),
-                'crno' => $this->input->post('crno'),
-                'address' => $this->input->post('address'),
-                'GST' => $this->input->post('GST'),
-                'mobile' => $this->input->post('mobile'),
-                'email' => $this->input->post('email'),
-                'status' => $this->input->post('status')
-            );
-
-            $this->db->where('company_id', $this->input->post('company_id'));
-            $this->db->update('company_info', $upd);
-
-            redirect('company-list/' . $this->uri->segment(2, 0));
-        }
-
-
-        $this->load->library('pagination');
-
-        $this->db->where('status != ', 'Delete');
-        $this->db->from('company_info');
-        $data['total_records'] = $cnt = $this->db->count_all_results();
-
-        $data['sno'] = $this->uri->segment(2, 0);
-
-        $config['base_url'] = trim(site_url('company-list/'), '/' . $this->uri->segment(2, 0));
-        $config['total_rows'] = $cnt;
-        $config['per_page'] = 50;
-        $config['uri_segment'] = 2;
-        //$config['num_links'] = 2; 
-        $config['attributes'] = array('class' => 'page-link');
-        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
-        $config['full_tag_close'] = '</ul>';
-        $config['num_tag_open'] = '<li class="page-item">';
-        $config['num_tag_close'] = '</li>';
-        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
-        $config['cur_tag_close'] = '<span class="sr-only">(current)</span></a></li>';
-        $config['prev_tag_open'] = '<li class="page-item">';
-        $config['prev_tag_close'] = '</li>';
-        $config['next_tag_open'] = '<li class="page-item">';
-        $config['next_tag_close'] = '</li>';
-        $config['first_tag_open'] = '<li class="page-item">';
-        $config['first_tag_close'] = '</li>';
-        $config['last_tag_open'] = '<li class="page-item">';
-        $config['last_tag_close'] = '</li>';
-        $config['prev_link'] = "Prev";
-        $config['next_link'] = "Next";
-        $this->pagination->initialize($config);
-
-        $sql = "
-            SELECT *
-            FROM company_info
-            WHERE status != 'Delete'
-                limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
-        ";
-
-        $data['record_list'] = array();
-
-        $query = $this->db->query($sql);
-
-        foreach ($query->result_array() as $row) {
-            $data['record_list'][] = $row;
-        }
-
-
-
-        $data['pagination'] = $this->pagination->create_links();
-
-        $this->load->view('page/master/company-list', $data);
+    if ($this->session->userdata(SESS_HD . 'level') != 'Admin' && $this->session->userdata(SESS_HD . 'level') != 'Staff') {
+        echo "<h3 style='color:red;'>Permission Denied</h3>";
+        exit;
     }
+
+    $data['js'] = 'company-list.inc';
+
+    // Check if a company already exists
+    $existing_company = $this->db->get('company_info')->row_array();
+    $data['existing_company'] = $existing_company;
+
+    // Handle Add (only if none exists)
+    if ($this->input->post('mode') == 'Add' && !$existing_company) {
+        $ins = array(
+            'company_name' => $this->input->post('company_name'),
+            'contact_name' => $this->input->post('contact_name'),
+            'crno'        => $this->input->post('crno'),
+            'address'     => $this->input->post('address'),
+            'GST'         => $this->input->post('GST'),
+            'mobile'      => $this->input->post('mobile'),
+            'email'       => $this->input->post('email'),
+            'status'      => $this->input->post('status')
+        );
+
+        $this->db->insert('company_info', $ins);
+        redirect('company-list');
+    }
+
+    // Handle Edit (only one allowed)
+    if ($this->input->post('mode') == 'Edit' && $existing_company) {
+        $upd = array(
+            'company_name' => $this->input->post('company_name'),
+            'contact_name' => $this->input->post('contact_name'),
+            'crno'        => $this->input->post('crno'),
+            'address'     => $this->input->post('address'),
+            'GST'         => $this->input->post('GST'),
+            'mobile'      => $this->input->post('mobile'),
+            'email'       => $this->input->post('email'),
+            'status'      => $this->input->post('status')
+        );
+
+        $this->db->where('company_id', $this->input->post('company_id'));
+        $this->db->update('company_info', $upd);
+        redirect('company-list');
+    }
+
+    // Pagination (only one record, but keep structure)
+    $this->load->library('pagination');
+
+    $this->db->where('status !=', 'Delete');
+    $total = $this->db->count_all_results('company_info');
+    $data['total_records'] = $total;
+
+    $config['base_url'] = site_url('company-list');
+    $config['total_rows'] = $total;
+    $config['per_page'] = 50;
+    $config['uri_segment'] = 2;
+    $config['attributes'] = array('class' => 'page-link');
+    $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+    $config['full_tag_close'] = '</ul>';
+    $config['num_tag_open'] = '<li class="page-item">';
+    $config['num_tag_close'] = '</li>';
+    $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+    $config['cur_tag_close'] = '</a></li>';
+    $config['prev_tag_open'] = '<li class="page-item">';
+    $config['prev_tag_close'] = '</li>';
+    $config['next_tag_open'] = '<li class="page-item">';
+    $config['next_tag_close'] = '</li>';
+    $config['first_tag_open'] = '<li class="page-item">';
+    $config['first_tag_close'] = '</li>';
+    $config['last_tag_open'] = '<li class="page-item">';
+    $config['last_tag_close'] = '</li>';
+    $config['prev_link'] = 'Prev';
+    $config['next_link'] = 'Next';
+
+    $this->pagination->initialize($config);
+
+    $this->db->where('status !=', 'Delete');
+    $this->db->limit($config['per_page'], $this->uri->segment(2, 0));
+    $query = $this->db->get('company_info');
+
+    $data['record_list'] = $query->result_array();
+    $data['pagination'] = $this->pagination->create_links();
+
+    $this->load->view('page/master/company-list', $data);
+}
     public function category_list()
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
@@ -826,5 +812,113 @@ class Master extends CI_Controller
 
         $data['pagination'] = $this->pagination->create_links();
         $this->load->view('page/master/items-list', $data);
+    }
+
+    public function vendor_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        if (
+            $this->session->userdata(SESS_HD . 'level') != 'Admin'
+            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
+        ) {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+        $data['js'] = 'vendor-list.inc';
+
+        /* ===================== ADD ===================== */
+        if ($this->input->post('mode') == 'Add') {
+            $ins = array(
+                'vendor_name' => $this->input->post('vendor_name'),
+                'contact_name' => $this->input->post('contact_name'),
+                'crno' => $this->input->post('crno'),
+                'address' => $this->input->post('address'),
+                'mobile' => $this->input->post('mobile'),
+                'mobile_alt' => $this->input->post('mobile_alt'),
+                'email' => $this->input->post('email'),
+                'remarks' => $this->input->post('remarks'),
+                'gst' => $this->input->post('gst'),
+                'latitude' => $this->input->post('latitude'),
+                'longitude' => $this->input->post('longitude'),
+                'google_map_location' => $this->input->post('google_map_location'),
+                'status' => $this->input->post('status'),
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_date' => date('Y-m-d H:i:s'),
+            );
+            $this->db->insert('vendor_info', $ins);
+            redirect('vendor-list/');
+        }
+        if ($this->input->post('mode') == 'Edit') {
+            $this->db->where('vendor_id', $this->input->post('vendor_id'));
+            $upd = array(
+                'vendor_name' => $this->input->post('vendor_name'),
+                'contact_name' => $this->input->post('contact_name'),
+                'crno' => $this->input->post('crno'),
+                'address' => $this->input->post('address'),
+                'mobile' => $this->input->post('mobile'),
+                'mobile_alt' => $this->input->post('mobile_alt'),
+                'email' => $this->input->post('email'),
+                'remarks' => $this->input->post('remarks'),
+                'gst' => $this->input->post('gst'),
+                'latitude' => $this->input->post('latitude'),
+                'longitude' => $this->input->post('longitude'),
+                'google_map_location' => $this->input->post('google_map_location'),
+                'status' => $this->input->post('status'),
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_date' => date('Y-m-d H:i:s'),
+            );
+            $this->db->where('vendor_id', $this->input->post('vendor_id'));
+            $this->db->update('vendor_info', $upd);
+
+            redirect('vendor-list/');
+        }
+
+        $this->load->library('pagination');
+
+        $this->db->where('status != ', 'Delete');
+        $this->db->from('vendor_info');
+        $data['total_records'] = $cnt = $this->db->count_all_results();
+
+        $data['sno'] = $this->uri->segment(2, 0);
+
+        $config['base_url'] = site_url('vendor-list');
+        $config['total_rows'] = $cnt;
+        $config['per_page'] = 20;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '</a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['prev_link'] = "Prev";
+        $config['next_link'] = "Next";
+        $this->pagination->initialize($config); 
+
+        $sql = "
+            SELECT v.* 
+            FROM vendor_info v
+           
+            WHERE v.status != 'Delete'
+            ORDER BY v.status ASC, v.vendor_name ASC 
+            LIMIT " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "
+        ";
+
+        $query = $this->db->query($sql);
+        $data['record_list'] = $query->result_array();
+
+
+        $data['pagination'] = $this->pagination->create_links();
+
+        $this->load->view('page/master/vendor-list', $data);
     }
 }

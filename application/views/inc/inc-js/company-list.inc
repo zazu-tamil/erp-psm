@@ -48,3 +48,29 @@
   });
   
 </script>
+<script>
+  $(document).ready(function () {
+    let total = parseInt("<?php echo $total_records; ?>");
+
+    // Set value for display
+    $("#user_limet").text(total);
+
+    // Show "Add" button only if total_records == 0
+    if (total === 0) {
+      $("#btn_add_new").show();
+    } else {
+      $("#btn_add_new").hide();
+    }
+  });
+  // Auto-generate login name and password from mobile number
+  $("#add_modal #mobile").change(function () {
+    if ($(this).val().length === 10) {
+      var txt = $(this).val().substring(5, 10);
+      $("#add_modal #login_name").val(txt);
+      $("#add_modal #login_pwd").val(txt);
+    } else {
+      alert("Invalid Mobile Number");
+      $(this).focus();
+    }
+  });
+</script>

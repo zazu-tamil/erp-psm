@@ -1,6 +1,6 @@
 <?php
 // Define master menu pages
-$g_master = ['company-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list'];
+$g_master = ['company-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list'];
 
 // Get current page segment
 $current_page = $this->uri->segment(1, 0);
@@ -56,5 +56,16 @@ $current_page = $this->uri->segment(1, 0);
                 <i class="fa fa-tags"></i> VAT List
             </a>
         </li>
+        <li class="<?= ($current_page === 'user-list') ? 'active' : '' ?>">
+            <a href="<?= site_url('user-list') ?>">
+                <i class="fa fa-tags"></i> user List
+            </a>
+        </li>
+        <li class="<?= ($current_page === 'vendor-list') ? 'active' : '' ?>">
+            <a href="<?= site_url('vendor-list') ?>">
+                <i class="fa fa-tags"></i> Vendor List
+            </a>
+        </li>
+       
     </ul>
 </li>

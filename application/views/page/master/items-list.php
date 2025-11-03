@@ -109,15 +109,15 @@
                                         ); ?>
                                     </div>
 
-                                    <div class="form-group col-md-6 mb-3">
+                                    <div class="form-group col-md-12 mb-3">
                                         <label>Item Name</label>
                                         <input class="form-control" type="text" name="item_name" required id="item_name"
                                             placeholder="Enter your item name">
                                     </div>
-                                    <div class="form-group col-md-6 mb-3">
+                                    <div class="form-group col-md-12 mb-3">
                                         <label>Description</label>
                                         <textarea class="form-control" name="item_description" id="item_description"
-                                            rows="1"></textarea>
+                                            rows="3"></textarea>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -205,15 +205,15 @@
                                         ); ?>
                                     </div>
 
-                                    <div class="form-group col-md-6 mb-3">
+                                    <div class="form-group col-md-12 mb-3">
                                         <label>Item Name</label>
                                         <input class="form-control" type="text" name="item_name" required
                                             id="item_name">
                                     </div>
-                                    <div class="form-group col-md-6 mb-3">
+                                    <div class="form-group col-md-12 mb-3">
                                         <label>Description</label>
                                         <textarea class="form-control" name="item_description" id="item_description"
-                                            rows="1"></textarea>
+                                            rows="3"></textarea>
                                     </div>
 
                                 </div>
