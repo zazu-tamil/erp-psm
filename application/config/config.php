@@ -38,7 +38,7 @@ $config['base_url'] = $base;
 |
 */
 // $config['index_page'] = 'index.php';
-$config['index_page'] = 'index.php';
+$config['index_page'] = '';
 
 /*
 |--------------------------------------------------------------------------
