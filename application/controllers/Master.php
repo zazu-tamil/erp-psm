@@ -110,7 +110,7 @@ class Master extends CI_Controller
         $data['pagination'] = $this->pagination->create_links();
 
         $this->load->view('page/master/user-list', $data);
-    } 
+    }
     public function company_list()
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
@@ -648,7 +648,7 @@ class Master extends CI_Controller
                 'gst' => $this->input->post('gst'),
                 'item_image' => $item_image,
                 'status' => $this->input->post('status'),
-                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s')
             );
             $this->db->insert('item_info', $ins);
@@ -867,8 +867,8 @@ class Master extends CI_Controller
                 'longitude' => $this->input->post('longitude'),
                 'google_map_location' => $this->input->post('google_map_location'),
                 'status' => $this->input->post('status'),
-                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
-                'created_date' => date('Y-m-d H:i:s'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s'),
             );
             $this->db->where('vendor_id', $this->input->post('vendor_id'));
             $this->db->update('vendor_info', $upd);
@@ -919,5 +919,110 @@ class Master extends CI_Controller
         $data['pagination'] = $this->pagination->create_links();
 
         $this->load->view('page/master/vendor-list', $data);
+    }
+    public function customer_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        if (
+            $this->session->userdata(SESS_HD . 'level') != 'Admin'
+            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
+        ) {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+        $data['js'] = 'customer-list.inc';
+
+        /* ===================== ADD ===================== */
+        if ($this->input->post('mode') == 'Add') {
+            $ins = array(
+                'customer_name' => $this->input->post('customer_name'),
+                'contact_name' => $this->input->post('contact_name'),
+                'crno' => $this->input->post('crno'),
+                'address' => $this->input->post('address'),
+                'mobile' => $this->input->post('mobile'),
+                'mobile_alt' => $this->input->post('mobile_alt'),
+                'email' => $this->input->post('email'),
+                'remarks' => $this->input->post('remarks'),
+                'gst' => $this->input->post('gst'),
+                'latitude' => $this->input->post('latitude'),
+                'longitude' => $this->input->post('longitude'),
+                'google_map_location' => $this->input->post('google_map_location'),
+                'status' => $this->input->post('status'),
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_date' => date('Y-m-d H:i:s'),
+            );
+            $this->db->insert('customer_info', $ins);
+            redirect('customer-list/');
+        }
+        if ($this->input->post('mode') == 'Edit') {
+             $upd = array(
+                'customer_name' => $this->input->post('customer_name'),
+                'contact_name' => $this->input->post('contact_name'),
+                'crno' => $this->input->post('crno'),
+                'address' => $this->input->post('address'),
+                'mobile' => $this->input->post('mobile'),
+                'mobile_alt' => $this->input->post('mobile_alt'),
+                'email' => $this->input->post('email'),
+                'remarks' => $this->input->post('remarks'),
+                'gst' => $this->input->post('gst'),
+                'latitude' => $this->input->post('latitude'),
+                'longitude' => $this->input->post('longitude'),
+                'google_map_location' => $this->input->post('google_map_location'),
+                'status' => $this->input->post('status'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s'),
+            );
+            $this->db->where('customer_id', $this->input->post('customer_id'));
+            $this->db->update('customer_info', $upd);
+
+            redirect('customer-list/');
+        }
+
+        $this->load->library('pagination');
+
+        $this->db->where('status != ', 'Delete');
+        $this->db->from('customer_info');
+        $data['total_records'] = $cnt = $this->db->count_all_results();
+
+        $data['sno'] = $this->uri->segment(2, 0);
+
+        $config['base_url'] = site_url('customer-list');
+        $config['total_rows'] = $cnt;
+        $config['per_page'] = 20;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '</a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['prev_link'] = "Prev";
+        $config['next_link'] = "Next";
+        $this->pagination->initialize($config);
+
+        $sql = "
+            SELECT c.* 
+            FROM customer_info c 
+            WHERE c.status != 'Delete'
+            ORDER BY c.status ASC, c.customer_name ASC 
+            LIMIT " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "
+        ";
+
+        $query = $this->db->query($sql);
+        $data['record_list'] = $query->result_array();
+
+
+        $data['pagination'] = $this->pagination->create_links();
+
+        $this->load->view('page/master/customer-list', $data);
     }
 }

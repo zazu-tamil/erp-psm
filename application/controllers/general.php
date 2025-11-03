@@ -158,6 +158,21 @@ class General extends CI_Controller
             }
 
         } 
+        if ($table == 'customer_info') {
+            $query = $this->db->query(" 
+                select 
+                a.* 
+                from customer_info as a  
+                where a.customer_id = '" . $rec_id . "'
+            ");
+
+            $rec_list = array();
+
+            foreach ($query->result_array() as $row) {
+                $rec_list = $row;
+            }
+
+        } 
 
         $this->db->close();
 
@@ -218,6 +233,11 @@ class General extends CI_Controller
         if ($table == 'vendor_info') {
             $this->db->where('vendor_id', $rec_id);
             $this->db->update('vendor_info', array('status' => 'Delete'));
+            echo "Record Deleted Successfully";
+        }
+        if ($table == 'customer_info') {
+            $this->db->where('customer_id', $rec_id);
+            $this->db->update('customer_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
         }
 

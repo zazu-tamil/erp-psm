@@ -1,6 +1,6 @@
 <?php
 // Define master menu pages
-$g_master = ['company-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list'];
+$g_master = ['company-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list', 'customer-list'];
 
 // Get current page segment
 $current_page = $this->uri->segment(1, 0);
@@ -66,5 +66,11 @@ $current_page = $this->uri->segment(1, 0);
                 <i class="fa fa-users"></i> Vendor List
             </a>
         </li>
+        <li class="<?= ($current_page === 'customer-list') ? 'active' : '' ?>">
+            <a href="<?= site_url('customer-list') ?>">
+                <i class="fa fa-users"></i> <span>Customer List</span>
+            </a>
+        </li>
+
     </ul>
 </li>

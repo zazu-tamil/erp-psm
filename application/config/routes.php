@@ -87,3 +87,6 @@ $route['user-list/(:num)'] = 'master/user_list/$1';
 
 $route['vendor-list'] = 'master/vendor_list';
 $route['vendor-list/(:num)'] = 'master/vendor_list/$1';
+
+$route['customer-list'] = 'master/customer_list';
+$route['customer-list/(:num)'] = 'master/customer_list/$1';
