@@ -86,28 +86,8 @@ defined('EXIT__AUTO_MAX') or define('EXIT__AUTO_MAX', 125); // highest automatic
 
 defined('EDIT_ALLOW_DAYS') or define('EDIT_ALLOW_DAYS', 1);
 
-defined('SESS_HD') or define('SESS_HD', 'ALM_PYR_');
-defined('PG_HEAD') or define('PG_HEAD', 'CLASS WALL');
-defined('DEF_WDS_MONTH') or define('DEF_WDS_MONTH', 30);  // Default Working Days In a Month
-
-defined('ENB_LOAN') or define('ENB_LOAN', 0);
-defined('ENB_ADVANCE') or define('ENB_ADVANCE', 0);
-
-if (date('m') <= '05') {
-    defined('ACADEMIC_YEAR_START') or define('ACADEMIC_YEAR_START', (date('Y') - 1) . '-06-01');
-    defined('ACADEMIC_YEAR_END') or define('ACADEMIC_YEAR_END', date('Y') . '-05-31');
-} else {
-    defined('ACADEMIC_YEAR_START') or define('ACADEMIC_YEAR_START', date('Y') . '-06-01');
-    defined('ACADEMIC_YEAR_END') or define('ACADEMIC_YEAR_END', (date('Y') + 1) . '-05-31');
-}
-
-defined('MONTESSORI') or define('MONTESSORI', 2);
-defined('IGCSE') or define('IGCSE', 1);
-defined('SCHOOL') or define('SCHOOL', 'The Aalam International School');
-defined('CUR_AY') or define('CUR_AY', 'AY 25-26');
-defined('CUR_AY_ID') or define('CUR_AY_ID', '1'); 
-
-// define('RAZORPAY_KEY_ID', 'rzp_test_RF8OsCKV6XKZXs');
-// define('RAZORPAY_KEY_SECRET', '0GTZ9sOOwO8dH46UqA1NcwzR');
-define('RAZORPAY_KEY_ID', 'rzp_live_RTd3zByMwGPYUM');
-define('RAZORPAY_KEY_SECRET', '4tL57YBtsBwG8fL7xN21TVgQ');
+defined('SESS_HD') or define('SESS_HD', 'ERP_PSM_');
+defined('PG_HEAD') or define('PG_HEAD', 'ERP PSM System');  
+defined('COMPANY') or define('COMPANY', '-');  
+ 
+ 
