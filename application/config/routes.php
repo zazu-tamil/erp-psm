@@ -56,5 +56,31 @@ $route['translate_uri_dashes'] = FALSE;
 $route['logout'] = 'login/logout'; 
 
 $route['change-password'] = 'login/change_password';
+$route['dash'] = 'dashboard'; 
+$route['get-data'] = 'general/get_data';
+$route['update-data'] = 'general/update_data';
+$route['insert-data'] = 'general/insert_data';
+$route['delete-record'] = 'general/delete_record';
+$route['get-content'] = 'general/get_content';  
 
+
+
+
+
+$route['company-list'] = 'master/company_list';
+$route['company-list/(:num)'] = 'master/company_list/$1';
+
+$route['category-list'] = 'master/category_list';
+$route['category-list/(:num)'] = 'master/category_list/$1';
+
+$route['items-list'] = 'master/items_list';
+$route['items-list/(:num)'] = 'master/items_list/$1';
+
+$route['brand-list'] = 'master/brand_list';
+$route['brand-list/(:num)'] = 'master/brand_list/$1';
+
+$route['uom-list'] = 'master/uom_list';
+$route['uom-list/(:num)'] = 'master/uom_list/$1';
  
+$route['gst-list'] = 'master/gst_list';
+$route['gst-list/(:num)'] = 'master/gst_list/$1';

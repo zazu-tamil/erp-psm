@@ -54,7 +54,7 @@ public function index()
                     SESS_HD . 'user_id'  => $row->id,
                     SESS_HD . 'user_name'  => $row->user_name, 
                     SESS_HD . 'staff_name'  => $row->staff_name,  
-                    SESS_HD . 'user_type'  =>  $row->level, 
+                    SESS_HD . 'level'  =>  $row->level, 
                     SESS_HD . 'logged_in' => TRUE,
                     SESS_HD . 'login_time' => time()
                );
@@ -95,7 +95,7 @@ public function index()
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if ($this->session->userdata(SESS_HD . 'user_type') != 'Admin') {
+        if ($this->session->userdata(SESS_HD . 'level') != 'Admin') {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }

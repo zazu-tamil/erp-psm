@@ -85,7 +85,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 <img src="<?php echo base_url() ?>asset/images/user.jpg" class="user-image"
                                     alt="User Image">
                                 <span
-                                    class="hidden-xs"><?php echo strtoupper($this->session->userdata(SESS_HD . 'user_name')) ;?></span>
+                                    class="hidden-xs"><?php echo strtoupper($this->session->userdata(SESS_HD . 'staff_name')) ;?></span>
                             </a>
                             <ul class="dropdown-menu">
                                 <!-- User image -->
@@ -94,7 +94,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                         alt="User Image">
 
                                     <p>
-                                        <?php echo strtoupper($this->session->userdata(SESS_HD . 'user_name')) ;?>
+                                        <?php echo strtoupper($this->session->userdata(SESS_HD . 'staff_name')) ;?>
                                         <small><?php echo date('d-M-Y')?></small>
                                     </p>
                                 </li>
