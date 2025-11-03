@@ -10,7 +10,8 @@
 <section class="content">
     <div class="box box-success">
         <div class="box-header with-border">
-            <button type="button" class="btn btn-success mb-1" data-toggle="modal" data-target="#add_modal">
+            <button type="button" class="btn btn-success mb-1" id="btn_add_new" data-toggle="modal"
+                data-target="#add_modal">
                 <span class="fa fa-plus-circle"></span> Add New
             </button>
         </div>
@@ -234,7 +235,7 @@
         </div>
         <div class="box-footer">
             <div class="form-group col-sm-6">
-                <label>Total Records : <?php echo $total_records; ?></label>
+                <label>Total Records : <span id="user_limet"><?php echo $total_records; ?></span></label>
             </div>
             <div class="form-group col-sm-6">
                 <?php echo $pagination; ?>

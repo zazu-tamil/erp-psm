@@ -54,9 +54,9 @@
 
             <!-- Add Modal -->
             <div class="modal fade" id="add_modal" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-md" role="document">
+                <div class="modal-dialog modal-sm" role="document">
                     <div class="modal-content">
-                        <form method="post" action="<?php echo site_url('category-list'); ?>" id="frmadd"
+                        <form method="post" action="<?php echo site_url('user-list'); ?>" id="frmadd"
                             enctype="multipart/form-data">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -81,14 +81,14 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="form-group has-feedback col-md-12">
+                                    <div class="form-group col-md-12">
                                         <label for="user_pwd">Password</label>
                                         <div class="input-group">
-                                            <input type="password" name="user_pwd" class="form-control" id="user_pwd"
-                                                placeholder="Enter password" required autocomplete="current-password">
+                                            <input type="password" name="user_pwd" id="user_pwd" class="form-control"
+                                                placeholder="Enter password" required>
                                             <span class="input-group-btn">
-                                                <button class="btn btn-default" type="button" id="togglePassword">
-                                                    <i class="fa fa-eye-slash" id="eyeIcon"></i>
+                                                <button class="btn btn-default togglePassword" type="button">
+                                                    <i class="fa fa-eye-slash"></i>
                                                 </button>
                                             </span>
                                         </div>
@@ -124,7 +124,7 @@
             <div class="modal fade" id="edit_modal" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-sm" role="document">
                     <div class="modal-content">
-                        <form method="post" action="<?php echo site_url('category-list'); ?>" id="frmedit"
+                        <form method="post" action="<?php echo site_url('user-list'); ?>" id="frmedit"
                             class="form-material">
                             <div class="modal-header">
 
@@ -138,10 +138,32 @@
                             <div class="modal-body">
                                 <div class="row">
                                     <div class="form-group col-md-12">
-                                        <label>Category Name</label>
-                                        <input class="form-control" type="text" name="category_name" id="category_name"
-                                            value="" placeholder="Category Name" required="true">
+                                        <label>Staff Name</label>
+                                        <input class="form-control" type="text" name="staff_name" id="staff_name"
+                                            value="" placeholder="Enter Staff Name" required="true">
                                     </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label>User Name</label>
+                                        <input class="form-control" type="text" name="user_name" id="user_name" value=""
+                                            placeholder="Enter User Name" required="true">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label for="user_pwd">Password</label>
+                                        <div class="input-group">
+                                            <input type="password" name="user_pwd" id="user_pwd" class="form-control"
+                                                placeholder="Enter password" required>
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-default togglePassword" type="button">
+                                                    <i class="fa fa-eye-slash"></i>
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+
                                 </div>
                                 <div class="row">
                                     <div class="form-group col-md-12">
@@ -184,17 +206,3 @@
 </section>
 <!-- /.content -->
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const passwordField = document.getElementById('user_pwd');
-    const toggleBtn = document.getElementById('togglePassword');
-    const eyeIcon = document.getElementById('eyeIcon');
-
-    toggleBtn.addEventListener('click', function () {
-        const isPassword = passwordField.getAttribute('type') === 'password';
-        passwordField.setAttribute('type', isPassword ? 'text' : 'password');
-        eyeIcon.classList.toggle('fa-eye');
-        eyeIcon.classList.toggle('fa-eye-slash');
-    });
-});
-</script>

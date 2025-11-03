@@ -23,7 +23,7 @@ class General extends CI_Controller
     {
         //$this->load->view('page/dashboard');
     }
-  
+
 
     public function get_data()
     {
@@ -66,7 +66,7 @@ class General extends CI_Controller
             }
 
         }
- 
+
         if ($table == 'brand_info') {
             $query = $this->db->query(" 
                 select 
@@ -112,7 +112,7 @@ class General extends CI_Controller
             }
 
         }
- 
+
         if ($table == 'item_info') {
             $query = $this->db->query(" 
                 select 
@@ -128,9 +128,36 @@ class General extends CI_Controller
             }
 
         }
- 
-  
+        if ($table == 'user_login_info') {
+            $query = $this->db->query(" 
+                select 
+                a.* 
+                from user_login_info as a  
+                where a.user_id = '" . $rec_id . "'
+            ");
 
+            $rec_list = array();
+
+            foreach ($query->result_array() as $row) {
+                $rec_list = $row;
+            }
+
+        }
+        if ($table == 'vendor_info') {
+            $query = $this->db->query(" 
+                select 
+                a.* 
+                from vendor_info as a  
+                where a.vendor_id = '" . $rec_id . "'
+            ");
+
+            $rec_list = array();
+
+            foreach ($query->result_array() as $row) {
+                $rec_list = $row;
+            }
+
+        } 
 
         $this->db->close();
 
@@ -138,7 +165,7 @@ class General extends CI_Controller
 
         echo (json_encode($rec_list));
     }
- 
+
     public function delete_record()
     {
 
@@ -156,34 +183,44 @@ class General extends CI_Controller
             $this->db->where('company_id', $rec_id);
             $this->db->update('company_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
-        } 
+        }
 
         if ($table == 'category_info') {
             $this->db->where('category_id', $rec_id);
             $this->db->update('category_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
-        } 
+        }
         if ($table == 'brand_info') {
             $this->db->where('brand_id', $rec_id);
             $this->db->update('brand_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
-        } 
+        }
         if ($table == 'uom_info') {
             $this->db->where('uom_id', $rec_id);
             $this->db->update('uom_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
-        } 
+        }
         if ($table == 'gst_info') {
             $this->db->where('gst_id', $rec_id);
             $this->db->update('gst_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
-        } 
+        }
         if ($table == 'item_info') {
             $this->db->where('item_id', $rec_id);
             $this->db->update('item_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
-        } 
+        }
+        if ($table == 'user_login_info') {
+            $this->db->where('user_id', $rec_id);
+            $this->db->update('user_login_info', array('status' => 'Delete'));
+            echo "Record Deleted Successfully";
+        }
+        if ($table == 'vendor_info') {
+            $this->db->where('vendor_id', $rec_id);
+            $this->db->update('vendor_info', array('status' => 'Delete'));
+            echo "Record Deleted Successfully";
+        }
 
     }
- 
+
 }
