@@ -9,6 +9,108 @@ class Master extends CI_Controller
     {
         $this->load->view('page/dashboard');
     }
+    public function user_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        if (
+            $this->session->userdata(SESS_HD . 'level') != 'Admin'
+            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
+        ) {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+
+        $data['js'] = 'user-list.inc';
+
+
+        if ($this->input->post('mode') == 'Add') {
+            $ins = array(
+                'staff_name' => $this->input->post('staff_name'),
+                'user_name' => $this->input->post('user_name'),
+                'user_pwd' => $this->input->post('user_pwd'),
+                'level' => 'Admin',
+                'ref_id' => '0',
+                'status' => $this->input->post('status')
+            );
+
+            $this->db->insert('user_login_info', $ins);
+            redirect('user-list/');
+        }
+
+        if ($this->input->post('mode') == 'Edit') {
+            $upd = array(
+                'staff_name' => $this->input->post('staff_name'),
+                'user_name' => $this->input->post('user_name'),
+                'user_pwd' => $this->input->post('user_pwd'),
+                'level' => 'Admin',
+                'ref_id' => '0',
+                'status' => $this->input->post('status')
+            );
+
+            $this->db->where('user_id', $this->input->post('user_id'));
+            $this->db->update('user_login_info', $upd);
+
+            redirect('user-list/');
+        }
+
+
+        $this->load->library('pagination');
+
+        $this->db->where('status != ', 'Delete');
+        $this->db->from('user_login_info');
+        $data['total_records'] = $cnt = $this->db->count_all_results();
+
+        $data['sno'] = $this->uri->segment(2, 0);
+
+        $config['base_url'] = trim(site_url('user-list') . '/' . $this->uri->segment(2, 0));
+        $config['total_rows'] = $cnt;
+        $config['per_page'] = 50;
+        $config['uri_segment'] = 2;
+        //$config['num_links'] = 2; 
+        $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '<span class="sr-only">(current)</span></a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = "Prev";
+        $config['next_link'] = "Next";
+        $this->pagination->initialize($config);
+
+        $sql = "
+            SELECT *
+            FROM user_login_info
+            WHERE status != 'Delete'
+            order by user_id desc
+            limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
+        ";
+
+        $data['record_list'] = array();
+
+        $query = $this->db->query($sql);
+
+        foreach ($query->result_array() as $row) {
+            $data['record_list'][] = $row;
+        }
+
+
+
+        $data['pagination'] = $this->pagination->create_links();
+
+        $this->load->view('page/master/user-list', $data);
+    }
 
     public function company_list()
     {
@@ -522,7 +624,7 @@ class Master extends CI_Controller
         if (!empty($srch_category_id)) {
             $where .= " AND (i.category_id = '" . $this->db->escape_str($srch_category_id) . "')";
         }
- 
+
         $data['record_list'] = array();
 
 
@@ -725,5 +827,4 @@ class Master extends CI_Controller
         $data['pagination'] = $this->pagination->create_links();
         $this->load->view('page/master/items-list', $data);
     }
-
 }
