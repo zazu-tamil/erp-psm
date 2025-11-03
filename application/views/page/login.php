@@ -169,7 +169,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="inputPassword" class="form-label">Password</label>
+                                <label for="user_pwd" class="form-label">Password</label>
                                 <div class="input-group">
                                     <input type="password" name="user_pwd" class="form-control" id="user_pwd"
                                         placeholder="Enter password" required autocomplete="current-password" />
@@ -187,13 +187,11 @@
         </div>
     </div>
 
-    <!-- Bootstrap 5 Bundle (includes Popper) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+ 
 
-    <!-- Password toggle -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const passwordField = document.getElementById('inputPassword');
+            const passwordField = document.getElementById('user_pwd'); // ✅ corrected ID
             const toggleBtn = document.getElementById('togglePassword');
             const eyeIcon = document.getElementById('eyeIcon');
 

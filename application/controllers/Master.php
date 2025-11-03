@@ -506,19 +506,23 @@ class Master extends CI_Controller
 
         $data['js'] = 'items-list.inc';
         $data['title'] = 'Items List';
+        $where = "i.status != 'Delete'";
 
 
-        if (isset($_POST['srch_category_id'])) {
+        // Filters (Company, Customer, Project, Vendor)
+        if ($this->input->post('srch_category_id') !== null) {
             $data['srch_category_id'] = $srch_category_id = $this->input->post('srch_category_id');
-
+            $this->session->set_userdata('srch_category_id', $srch_category_id);
+        } elseif ($this->session->userdata('srch_category_id')) {
+            $data['srch_category_id'] = $srch_category_id = $this->session->userdata('srch_category_id');
         } else {
             $data['srch_category_id'] = $srch_category_id = '';
         }
-        $where = "";
-        if (!empty($srch_category_id)) {
-            $where .= " and i.category_id = '" . $srch_category_id . "'";
-        }  
 
+        if (!empty($srch_category_id)) {
+            $where .= " AND (i.category_id = '" . $this->db->escape_str($srch_category_id) . "')";
+        }
+ 
         $data['record_list'] = array();
 
 
@@ -607,8 +611,7 @@ class Master extends CI_Controller
         }
 
         $this->load->library('pagination');
-
-        $this->db->where('  i.status != ', 'Delete');
+        $this->db->where('i.status != ', 'Delete');
         $this->db->where($where);
         $this->db->from('item_info as i');
         $data['total_records'] = $cnt = $this->db->count_all_results();
@@ -639,14 +642,22 @@ class Master extends CI_Controller
         $config['next_link'] = "Next";
         $this->pagination->initialize($config);
         $sql = "
-            SELECT i.*, c.category_name, b.brand_name 
-            FROM item_info i
-            LEFT JOIN category_info c ON i.category_id=c.category_id
-            LEFT JOIN brand_info b ON i.brand_id=b.brand_id
-            WHERE i.status != 'Delete'
-            $where
-            ORDER BY i.item_name ASC 
-            limit ". $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
+           SELECT
+                i.*,
+                c.category_name,
+                b.brand_name
+            FROM
+                item_info i
+            LEFT JOIN category_info c ON
+                i.category_id = c.category_id
+            LEFT JOIN brand_info b ON
+                i.brand_id = b.brand_id
+            WHERE
+                i.status != 'Delete'
+            and $where
+            ORDER BY
+                i.item_name ASC
+            limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
          ";
 
         $query = $this->db->query($sql);
