@@ -10,7 +10,7 @@ $current_page = $this->uri->segment(1, 0);
 <li class="header">Dashboard</li>
 <li class="<?= ($current_page === 'dash') ? 'active' : '' ?>">
     <a href="<?= site_url('dash') ?>">
-        <i class="fa fa-chart-line"></i> 
+        <i class="fa fa-line-chart"></i>
         <span>Dashboard</span>
     </a>
 </li>
@@ -19,7 +19,7 @@ $current_page = $this->uri->segment(1, 0);
 <li class="header">Master</li>
 <li class="treeview <?= in_array($current_page, $g_master) ? 'active' : '' ?>">
     <a href="#">
-        <i class="fa fa-database"></i> 
+        <i class="fa fa-database"></i>
         <span>Master</span>
         <span class="pull-right-container">
             <i class="fa fa-angle-left pull-right"></i>
@@ -33,39 +33,38 @@ $current_page = $this->uri->segment(1, 0);
         </li>
         <li class="<?= ($current_page === 'category-list') ? 'active' : '' ?>">
             <a href="<?= site_url('category-list') ?>">
-                <i class="fa fa-tags"></i> Category List
+                <i class="fa fa-folder-open"></i> Category List
             </a>
         </li>
         <li class="<?= ($current_page === 'brand-list') ? 'active' : '' ?>">
             <a href="<?= site_url('brand-list') ?>">
-                <i class="fa fa-tags"></i> Brand List
+                <i class="fa fa-industry"></i> Brand List
             </a>
         </li>
         <li class="<?= ($current_page === 'items-list') ? 'active' : '' ?>">
             <a href="<?= site_url('items-list') ?>">
-                <i class="fa fa-tags"></i> items List
+                <i class="fa fa-cubes"></i> Items List
             </a>
         </li>
         <li class="<?= ($current_page === 'uom-list') ? 'active' : '' ?>">
             <a href="<?= site_url('uom-list') ?>">
-                <i class="fa fa-tags"></i> UOM List
+                <i class="fa fa-balance-scale"></i> UOM List
             </a>
         </li>
         <li class="<?= ($current_page === 'gst-list') ? 'active' : '' ?>">
             <a href="<?= site_url('gst-list') ?>">
-                <i class="fa fa-tags"></i> VAT List
+                <i class="fa fa-percent"></i> VAT List
             </a>
         </li>
         <li class="<?= ($current_page === 'user-list') ? 'active' : '' ?>">
             <a href="<?= site_url('user-list') ?>">
-                <i class="fa fa-tags"></i> user List
+                <i class="fa fa-user"></i> User List
             </a>
         </li>
         <li class="<?= ($current_page === 'vendor-list') ? 'active' : '' ?>">
             <a href="<?= site_url('vendor-list') ?>">
-                <i class="fa fa-tags"></i> Vendor List
+                <i class="fa fa-users"></i> Vendor List
             </a>
         </li>
-       
     </ul>
 </li>

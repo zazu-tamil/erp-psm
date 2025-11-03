@@ -110,99 +110,98 @@ class Master extends CI_Controller
         $data['pagination'] = $this->pagination->create_links();
 
         $this->load->view('page/master/user-list', $data);
+    } 
+    public function company_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        if ($this->session->userdata(SESS_HD . 'level') != 'Admin' && $this->session->userdata(SESS_HD . 'level') != 'Staff') {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+        $data['js'] = 'company-list.inc';
+
+        // Check if a company already exists
+        $existing_company = $this->db->get('company_info')->row_array();
+        $data['existing_company'] = $existing_company;
+
+        // Handle Add (only if none exists)
+        if ($this->input->post('mode') == 'Add' && !$existing_company) {
+            $ins = array(
+                'company_name' => $this->input->post('company_name'),
+                'contact_name' => $this->input->post('contact_name'),
+                'crno' => $this->input->post('crno'),
+                'address' => $this->input->post('address'),
+                'GST' => $this->input->post('GST'),
+                'mobile' => $this->input->post('mobile'),
+                'email' => $this->input->post('email'),
+                'status' => $this->input->post('status')
+            );
+
+            $this->db->insert('company_info', $ins);
+            redirect('company-list');
+        }
+
+        // Handle Edit (only one allowed)
+        if ($this->input->post('mode') == 'Edit' && $existing_company) {
+            $upd = array(
+                'company_name' => $this->input->post('company_name'),
+                'contact_name' => $this->input->post('contact_name'),
+                'crno' => $this->input->post('crno'),
+                'address' => $this->input->post('address'),
+                'GST' => $this->input->post('GST'),
+                'mobile' => $this->input->post('mobile'),
+                'email' => $this->input->post('email'),
+                'status' => $this->input->post('status')
+            );
+
+            $this->db->where('company_id', $this->input->post('company_id'));
+            $this->db->update('company_info', $upd);
+            redirect('company-list');
+        }
+
+        // Pagination (only one record, but keep structure)
+        $this->load->library('pagination');
+
+        $this->db->where('status !=', 'Delete');
+        $total = $this->db->count_all_results('company_info');
+        $data['total_records'] = $total;
+
+        $config['base_url'] = site_url('company-list');
+        $config['total_rows'] = $total;
+        $config['per_page'] = 50;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '</a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = 'Prev';
+        $config['next_link'] = 'Next';
+
+        $this->pagination->initialize($config);
+
+        $this->db->where('status !=', 'Delete');
+        $this->db->limit($config['per_page'], $this->uri->segment(2, 0));
+        $query = $this->db->get('company_info');
+
+        $data['record_list'] = $query->result_array();
+        $data['pagination'] = $this->pagination->create_links();
+
+        $this->load->view('page/master/company-list', $data);
     }
-
-public function company_list()
-{
-    if (!$this->session->userdata(SESS_HD . 'logged_in'))
-        redirect();
-
-    if ($this->session->userdata(SESS_HD . 'level') != 'Admin' && $this->session->userdata(SESS_HD . 'level') != 'Staff') {
-        echo "<h3 style='color:red;'>Permission Denied</h3>";
-        exit;
-    }
-
-    $data['js'] = 'company-list.inc';
-
-    // Check if a company already exists
-    $existing_company = $this->db->get('company_info')->row_array();
-    $data['existing_company'] = $existing_company;
-
-    // Handle Add (only if none exists)
-    if ($this->input->post('mode') == 'Add' && !$existing_company) {
-        $ins = array(
-            'company_name' => $this->input->post('company_name'),
-            'contact_name' => $this->input->post('contact_name'),
-            'crno'        => $this->input->post('crno'),
-            'address'     => $this->input->post('address'),
-            'GST'         => $this->input->post('GST'),
-            'mobile'      => $this->input->post('mobile'),
-            'email'       => $this->input->post('email'),
-            'status'      => $this->input->post('status')
-        );
-
-        $this->db->insert('company_info', $ins);
-        redirect('company-list');
-    }
-
-    // Handle Edit (only one allowed)
-    if ($this->input->post('mode') == 'Edit' && $existing_company) {
-        $upd = array(
-            'company_name' => $this->input->post('company_name'),
-            'contact_name' => $this->input->post('contact_name'),
-            'crno'        => $this->input->post('crno'),
-            'address'     => $this->input->post('address'),
-            'GST'         => $this->input->post('GST'),
-            'mobile'      => $this->input->post('mobile'),
-            'email'       => $this->input->post('email'),
-            'status'      => $this->input->post('status')
-        );
-
-        $this->db->where('company_id', $this->input->post('company_id'));
-        $this->db->update('company_info', $upd);
-        redirect('company-list');
-    }
-
-    // Pagination (only one record, but keep structure)
-    $this->load->library('pagination');
-
-    $this->db->where('status !=', 'Delete');
-    $total = $this->db->count_all_results('company_info');
-    $data['total_records'] = $total;
-
-    $config['base_url'] = site_url('company-list');
-    $config['total_rows'] = $total;
-    $config['per_page'] = 50;
-    $config['uri_segment'] = 2;
-    $config['attributes'] = array('class' => 'page-link');
-    $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
-    $config['full_tag_close'] = '</ul>';
-    $config['num_tag_open'] = '<li class="page-item">';
-    $config['num_tag_close'] = '</li>';
-    $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
-    $config['cur_tag_close'] = '</a></li>';
-    $config['prev_tag_open'] = '<li class="page-item">';
-    $config['prev_tag_close'] = '</li>';
-    $config['next_tag_open'] = '<li class="page-item">';
-    $config['next_tag_close'] = '</li>';
-    $config['first_tag_open'] = '<li class="page-item">';
-    $config['first_tag_close'] = '</li>';
-    $config['last_tag_open'] = '<li class="page-item">';
-    $config['last_tag_close'] = '</li>';
-    $config['prev_link'] = 'Prev';
-    $config['next_link'] = 'Next';
-
-    $this->pagination->initialize($config);
-
-    $this->db->where('status !=', 'Delete');
-    $this->db->limit($config['per_page'], $this->uri->segment(2, 0));
-    $query = $this->db->get('company_info');
-
-    $data['record_list'] = $query->result_array();
-    $data['pagination'] = $this->pagination->create_links();
-
-    $this->load->view('page/master/company-list', $data);
-}
     public function category_list()
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
@@ -902,7 +901,7 @@ public function company_list()
         $config['next_tag_close'] = '</li>';
         $config['prev_link'] = "Prev";
         $config['next_link'] = "Next";
-        $this->pagination->initialize($config); 
+        $this->pagination->initialize($config);
 
         $sql = "
             SELECT v.* 
