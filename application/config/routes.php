@@ -69,7 +69,6 @@ $route['get-content'] = 'general/get_content';
 
 
 
-
 $route['company-list'] = 'master/company_list';
 $route['company-list/(:num)'] = 'master/company_list/$1';
 
