@@ -4,220 +4,90 @@ defined('BASEPATH') or exit('No direct script access allowed');
 class Login extends CI_Controller
 {
 
-
-    public function index()
-    {
-        $data['js'] = '';
-        $data['login'] = true;
-
+    	 
+public function index()
+	{
+	   
+	    $data['js'] = '';
+        $data['login'] = true; 
+       
+       	 
         $this->load->library('form_validation');
         $this->form_validation->set_rules('user_name', 'User Name', 'required');
-        $this->form_validation->set_rules('user_pwd', 'Password', 'required', array('required' => 'You must provide %s.'));
+        $this->form_validation->set_rules('user_pwd', 'Password', 'required',array('required' => 'You must provide %s.'));
+        if ($this->form_validation->run() == FALSE)
+        {
+             
+            $this->load->view('page/login',$data); 
+        }
+        else
+        {
+              
+           $this->db->query('SET GLOBAL sql_mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"');   
+              
+              
+            $user_info = array(); 
+            
+              $sql = "
+              select 
+              a.user_id as id, 
+              a.staff_name , 
+              a.user_name as  user_name , 
+              a.level  
+              from user_login_info as a  
+              where a.user_name = '".$this->input->post('user_name')."' 
+              and a.user_pwd = '".$this->input->post('user_pwd')."' 
+              and a.status = 'Active' 
+            "; 
+          
+            $query = $this->db->query($sql); 
 
-        if ($this->form_validation->run() == FALSE) {
-            $this->load->view('page/login', $data);
-        } else {
-            $this->load->model('User_session_model');
-            $this->load->model('Parent_session_model');
-            $this->load->model('Student_session_model');
-            $lat_lng = $this->security->xss_clean($this->input->post('lat_lng'));
-
-            $username = $this->security->xss_clean($this->input->post('user_name'));
-            $password = $this->security->xss_clean($this->input->post('user_pwd'));
-
-            $sql = "
-                
-                SELECT 
-                    a.user_id as id, 
-                    a.user_name,
-                    if(a.ref_id = 0 , a.user_name , LOWER(b.employee_name)) as name,
-                    a.level,
-                    a.edit_flg,
-                    a.ref_id,
-                    if(a.ref_id = 0 , '' , b.photo_img) as photo_img, 
-                    IFNULL(b.department_head, 0) as department_head,
-                    b.department_id,
-                    IFNULL(b.mgt_head, 0) as mgt_head,
-                    IFNULL(b.emp_category_head, 0) as emp_category_head,
-                    b.employee_category
-                FROM user_login a
-                LEFT JOIN pyr_employee_info b ON b.employee_id = a.ref_id
-                WHERE a.user_name = '$username'
-                  AND a.user_pwd = '$password'
-                  AND a.status = 'Active'
-                  AND a.level IN ('Admin', 'Staff', 'Manager', 'PF Office','Canteen','Printing')
-            ";
-
-            $query = $this->db->query($sql);
+            $cnt = $query->num_rows(); 
+            
+            
+             
             $row = $query->row();
-
-            if ($row) {
-                $session_id = $this->User_session_model->log_login($row->id, $row->ref_id);
-                $mentor_class_id = $this->User_session_model->get_mentor_class_id($row->ref_id);
-                $coordinator_class_category_id = $this->User_session_model->get_class_category_by_coordinator($row->ref_id);
-
-                $session_data = [
-                    SESS_HD . 'user_id' => $row->id,
-                    SESS_HD . 'user_name' => $row->name,
-                    SESS_HD . 'user_type' => $row->level,
-                    SESS_HD . 'ref_id' => $row->ref_id,
-                    SESS_HD . 'emp_photo' => (($row->ref_id == 0 or $row->photo_img == '') ? '' : '../payroll/' . $row->photo_img),
-                    SESS_HD . 'department_head' => $row->department_head,
-                    SESS_HD . 'department_id' => $row->department_id,
-                    SESS_HD . 'employee_category' => $row->employee_category,
-                    SESS_HD . 'emp_category_head' => $row->emp_category_head,
-                    SESS_HD . 'mgt_head' => $row->mgt_head,
-                    SESS_HD . 'session_record_id' => $session_id,
-                    SESS_HD . 'mentor_class_id' => ($mentor_class_id != '' ? $mentor_class_id : 0),
-                    SESS_HD . 'coordinator_class_category_id' => ($coordinator_class_category_id != '' ? $coordinator_class_category_id : 0),
+            
+            if (isset($row))
+            { 
+                $newdata = array(
+                    SESS_HD . 'user_id'  => $row->id,
+                    SESS_HD . 'user_name'  => $row->user_name, 
+                    SESS_HD . 'staff_name'  => $row->staff_name,  
+                    SESS_HD . 'user_type'  =>  $row->level, 
                     SESS_HD . 'logged_in' => TRUE,
                     SESS_HD . 'login_time' => time()
-                ];
+               );
+               
+                $this->session->set_userdata($newdata); 
+              
+                redirect('dash');   
+            
+            } 
+            else 
+            {
+				$data['msg'] = ' Invalid User';
+				$data['login'] =false;	                 
+				$this->load->view('page/login',$data);
+			} 			 
+        } 		
+	}  
+    
 
-                $this->session->set_userdata($session_data);
-
-                $this->db->insert('crit_user_track_info', [
-                    'user_id' => $row->id,
-                    'page' => 'Payroll-Login',
-                    'date_time' => date('Y-m-d H:i:s'),
-                    'lat_lng' => $lat_lng
-                ]);
-
-                if ($row->level == 'Canteen')
-                    redirect('canteen-dash');
-                elseif ($row->level == 'Manager')
-                    redirect('manager-dash');
-                elseif ($row->level == 'Printing')
-                    redirect('calendar');
-                else
-                    redirect('module');
-
-            } else {
-
-                // 1. Check Parent Login
-                $parent_sql = "
-                    SELECT 
-                    *
-                    FROM sas_parent_login_info
-                    WHERE p_user_name = ?
-                    AND p_user_pwd = ?
-                    AND status = 'Active'
-                    LIMIT 1
-                ";
-
-                $query2 = $this->db->query($parent_sql, [$username, $password]);
-                $parent = $query2->row();
-
-
-                // 2. Check Student Login
-                $student_sql = "
-                    SELECT 
-                    a.student_login_id ,
-                    a.s_name ,
-                    a.stud_id ,
-                    b.student_photo 
-                    FROM sas_student_login_info as a
-                    left join sas_student_info as b on b.student_id = a.stud_id 
-                    WHERE a.s_user_name = ?
-                    AND a.s_user_pwd = ?
-                    AND a.status = 'Active'
-                    and b.status = 'Active'
-                    LIMIT 1
-                ";
-                $query = $this->db->query($student_sql, [$username, $password]);
-                $student = $query->row();
-
-                // ... inside if ($parent) { ... }
-                if ($parent) {
-                    // Log parent login session: user_id = parent_login_id, emp_id = 0
-                    $session_id = $this->Parent_session_model->log_login($parent->parent_login_id, $parent->parent_login_id);
-                    $session_data = [
-                        SESS_HD . 'user_id' => $parent->parent_login_id,
-                        SESS_HD . 'user_name' => $parent->p_name,
-                        SESS_HD . 'user_type' => 'Parent',
-                        SESS_HD . 'ref_id' => $parent->stud_id,
-                        SESS_HD . 'emp_photo' => '',
-                        SESS_HD . 'department_head' => '',
-                        SESS_HD . 'department_id' => '',
-                        SESS_HD . 'employee_category' => '',
-                        SESS_HD . 'emp_category_head' => '',
-                        SESS_HD . 'mgt_head' => '',
-                        SESS_HD . 'session_record_id_parent' => $session_id, // Stores the actual session ID from user_sessions_info
-                        SESS_HD . 'logged_in' => TRUE,
-                        SESS_HD . 'login_time' => time()
-                    ];
-                    $this->session->set_userdata($session_data);
-                    redirect('parent-dash');
-                }
-                // ... inside elseif ($student) { ... }
-                elseif ($student) {
-                    // Log student login session: user_id = student_login_id, emp_id = 0
-                    $session_id = $this->Student_session_model->log_login($student->student_login_id, 0);
-                    $session_data = [
-                        SESS_HD . 'user_id' => $student->student_login_id,
-                        SESS_HD . 'user_name' => $student->s_name,
-                        SESS_HD . 'user_type' => 'Student',
-                        SESS_HD . 'ref_id' => $student->stud_id,
-                        SESS_HD . 'emp_photo' => $student->student_photo,
-                        SESS_HD . 'department_head' => '',
-                        SESS_HD . 'department_id' => '',
-                        SESS_HD . 'employee_category' => '',
-                        SESS_HD . 'emp_category_head' => '',
-                        SESS_HD . 'mgt_head' => '',
-                        SESS_HD . 'session_record_id_student' => $session_id, // Stores the actual session ID from user_sessions_info
-                        SESS_HD . 'logged_in' => TRUE,
-                        SESS_HD . 'login_time' => time()
-                    ];
-                    $this->session->set_userdata($session_data);
-                    redirect('student/dash');
-                } else {
-                    //  No match
-                    $data['msg'] = 'Invalid Username or Password';
-                    $data['login'] = false;
-                    $this->load->view('page/login', $data);
-                }
-            }
-        }
-    }
-
- public function logout($reason = 'manual')
-{
-    $this->load->model('User_session_model');
-    $this->load->model('Parent_session_model');
-    $this->load->model('Student_session_model');
-
-    $session_record_id = $this->session->userdata(SESS_HD . 'session_record_id');
-    if ($session_record_id) {
-        $this->User_session_model->log_logout($session_record_id, $reason);
-    }
-
-    $session_record_id_parent = $this->session->userdata(SESS_HD . 'session_record_id_parent');
-    if ($session_record_id_parent) {
-        $this->Parent_session_model->log_logout($session_record_id_parent, $reason);
-    }
-
-    $session_record_id_student = $this->session->userdata(SESS_HD . 'session_record_id_student');
-    if ($session_record_id_student) {
+    public function logout($reason = 'manual')
+    {
         
-        $this->Student_session_model->log_logout($session_record_id_student, $reason);
+
+        // Flash message
+        if ($reason === 'timeout') {
+            $this->session->set_flashdata('session_expired', 'Your session has expired due to inactivity. Please log in again.');
+        } else {
+            $this->session->set_flashdata('logout_msg', 'You have been logged out successfully.');
+        }
+
+        $this->session->sess_destroy();
+        redirect('');
     }
-
-    $this->db->insert('crit_user_track_info', [
-        'user_id' => $this->session->userdata(SESS_HD . 'user_id'),
-        'page' => 'Payroll-Logout',
-        'date_time' => date('Y-m-d H:i:s')
-    ]);
-
-    // Flash message
-    if ($reason === 'timeout') {
-        $this->session->set_flashdata('session_expired', 'Your session has expired due to inactivity. Please log in again.');
-    } else {
-        $this->session->set_flashdata('logout_msg', 'You have been logged out successfully.');
-    }
-
-    $this->session->sess_destroy();
-    redirect('');
-}
 
 
     public function user_list()
