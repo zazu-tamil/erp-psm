@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title><?php echo PG_HEAD; if(isset($title)) echo " - " . $title; ?></title>
-    <link rel="icon" type="image/png" sizes="32x32" href="<?php echo base_url() ?>/asset/images/Classwall-Logo-SM.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="<?php echo base_url() ?>/asset/images/icon-cce.png">
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <!-- Bootstrap 3.3.7 -->
@@ -54,15 +54,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <!-- Logo -->
             <a href="" class="logo">
                 <!-- mini logo for sidebar mini 50x50 pixels -->
-                <span class=" logo-mini" style="background-color:white;border-radius:5px;"> <img
+                <span class=" logo-mini"> 
+                    <!-- <img
                         src="<?php echo base_url() ?>/asset/images/Classwall-Logo-SM.png"
-                        class="img-circle img-responsive" alt="<?php echo PG_HEAD;?>">
+                        class="img-circle img-responsive" alt="<?php echo PG_HEAD;?>"> -->
+                        <?php echo PG_HEAD; ?>
                 </span>
                 <!-- logo for regular state and mobile devices -->
-                <!-- <span class="logo-lg"><?php echo PG_HEAD; ?></span> -->
-                <div class="logo-lg" style="background-color:#f4f4f4;border-radius:0px; "><img
+                <span class="logo-lg"><?php echo PG_HEAD; ?></span>
+                <!-- <div class="logo-lg" style="background-color:#f4f4f4;border-radius:0px; ">
+                    <img
                         src="<?php echo base_url() ?>/asset/images/Classwall-H.png" class="img-rounded img-responsive"
-                        alt="<?php echo PG_HEAD;?>"></div>
+                        alt="<?php echo PG_HEAD;?>"></div> -->
             </a>
             <!-- Header Navbar: style can be found in header.less -->
             <nav class="navbar navbar-static-top">
@@ -72,7 +75,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </a>
 
                 <span class="navbar-brand hidden-xs" style="font-size: 18px; color: #fff; margin-left: 15px;">
-                    <?php echo SCHOOL; ?>
+                    <?php echo COMPANY; ?>
                 </span>
 
                 <div class="navbar-custom-menu">

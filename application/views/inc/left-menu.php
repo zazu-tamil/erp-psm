@@ -9,7 +9,7 @@
             </div>
             <div class="pull-left info">
                 <a href="#">
-                    <p><?php echo strtoupper($this->session->userdata(SESS_HD . 'user_name')); ?></p>
+                    <p><?php echo strtoupper($this->session->userdata(SESS_HD . 'staff_name')); ?></p>
                 </a>
                 <a href="#"><i class="fa fa-circle text-success"></i> Online </a>
 
