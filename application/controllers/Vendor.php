@@ -138,6 +138,7 @@ class Vendor extends CI_Controller
             WHERE a.status = 'Active' ORDER BY a.tender_enquiry_id , a.enquiry_no ASC
         ";
         $query = $this->db->query($sql);
+        $data['tender_enquiry_opt']=array();
         foreach ($query->result_array() as $row) {
             $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_enquiry_id'] . ' -> ' . $row['enquiry_no'] . ' -> ' . $row['company_name'] . ' -> ' . $row['customer_name'];
         }
