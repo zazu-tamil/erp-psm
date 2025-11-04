@@ -121,14 +121,10 @@ class Master extends CI_Controller
             exit;
         }
 
-        $data['js'] = 'company-list.inc';
-
-        // Check if a company already exists
-        $existing_company = $this->db->get('company_info')->row_array();
-        $data['existing_company'] = $existing_company;
-
+        $data['js'] = 'company-list.inc'; 
+        
         // Handle Add (only if none exists)
-        if ($this->input->post('mode') == 'Add' && !$existing_company) {
+        if ($this->input->post('mode') == 'Add') {
             $ins = array(
                 'company_name' => $this->input->post('company_name'),
                 'contact_name' => $this->input->post('contact_name'),
@@ -145,7 +141,7 @@ class Master extends CI_Controller
         }
 
         // Handle Edit (only one allowed)
-        if ($this->input->post('mode') == 'Edit' && $existing_company) {
+        if ($this->input->post('mode') == 'Edit') {
             $upd = array(
                 'company_name' => $this->input->post('company_name'),
                 'contact_name' => $this->input->post('contact_name'),
@@ -162,24 +158,26 @@ class Master extends CI_Controller
             redirect('company-list');
         }
 
-        // Pagination (only one record, but keep structure)
         $this->load->library('pagination');
 
-        $this->db->where('status !=', 'Delete');
-        $total = $this->db->count_all_results('company_info');
-        $data['total_records'] = $total;
+        $this->db->where('status != ', 'Delete');
+        $this->db->from('company_info');
+        $data['total_records'] = $cnt = $this->db->count_all_results();
 
-        $config['base_url'] = site_url('company-list');
-        $config['total_rows'] = $total;
+        $data['sno'] = $this->uri->segment(2, 0);
+
+        $config['base_url'] = trim(site_url('company-list') . '/' . $this->uri->segment(2, 0));
+        $config['total_rows'] = $cnt;
         $config['per_page'] = 50;
         $config['uri_segment'] = 2;
+        //$config['num_links'] = 2; 
         $config['attributes'] = array('class' => 'page-link');
         $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
         $config['full_tag_close'] = '</ul>';
         $config['num_tag_open'] = '<li class="page-item">';
         $config['num_tag_close'] = '</li>';
         $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
-        $config['cur_tag_close'] = '</a></li>';
+        $config['cur_tag_close'] = '<span class="sr-only">(current)</span></a></li>';
         $config['prev_tag_open'] = '<li class="page-item">';
         $config['prev_tag_close'] = '</li>';
         $config['next_tag_open'] = '<li class="page-item">';
@@ -188,17 +186,31 @@ class Master extends CI_Controller
         $config['first_tag_close'] = '</li>';
         $config['last_tag_open'] = '<li class="page-item">';
         $config['last_tag_close'] = '</li>';
-        $config['prev_link'] = 'Prev';
-        $config['next_link'] = 'Next';
-
+        $config['prev_link'] = "Prev";
+        $config['next_link'] = "Next";
         $this->pagination->initialize($config);
 
-        $this->db->where('status !=', 'Delete');
-        $this->db->limit($config['per_page'], $this->uri->segment(2, 0));
-        $query = $this->db->get('company_info');
+        $sql = "
+            SELECT *
+            FROM company_info
+            WHERE status != 'Delete'
+            order by company_id desc
+            limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
+        ";
 
-        $data['record_list'] = $query->result_array();
+        $data['record_list'] = array();
+
+        $query = $this->db->query($sql);
+
+        foreach ($query->result_array() as $row) {
+            $data['record_list'][] = $row;
+        }
+
+
+
         $data['pagination'] = $this->pagination->create_links();
+
+        
 
         $this->load->view('page/master/company-list', $data);
     }
