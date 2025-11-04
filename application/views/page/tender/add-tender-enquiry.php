@@ -76,7 +76,7 @@
                         <div id="item_rows"></div>
                     </div>
 
-                    <button type="button" class="btn btn-primary mt-3" id="add_more">
+                    <button type="button" class="btn btn-primary mt-" id="add_more" style="margin-top: 10px;">
                         <i class="fa fa-plus"></i> Add More Item
                     </button>
                 </fieldset>
