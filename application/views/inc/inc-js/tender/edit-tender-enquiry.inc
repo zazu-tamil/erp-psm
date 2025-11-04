@@ -257,36 +257,6 @@ jQuery(function($){
         }
     });
 
-    // Company change - populate customers
-    $('#srch_company_id').on('change', function(){
-        const companyId = $(this).val();
-        const $customerSelect = $('#srch_customer_id');
 
-        $customerSelect.html('<option value="">Select Customer</option>');
-
-        if(companyId){
-            $.ajax({
-                url: siteUrl,
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    tbl: 'get-company-customer-list',
-                    id: companyId
-                },
-                success: function(customers){
-                    if(customers && customers.length > 0){
-                        $.each(customers, function(i, cust){
-                            $customerSelect.append(
-                                `<option value="${cust.customer_id}">${cust.customer_name}</option>`
-                            );
-                        });
-                    }
-                },
-                error: function(xhr, status, error){
-                    console.error('Error loading customers:', error);
-                }
-            });
-        }
-    }).trigger('change');
 });
 </script>
