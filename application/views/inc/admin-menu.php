@@ -65,6 +65,34 @@ $current_page = $this->uri->segment(1, 0);
         </li>
     </ul>
 </li>
+<!-- tender_quotation_info -->
+<li class="header">Tender Quotation</li>
+
+<li class="treeview <?= in_array($current_page, ['tender-quotation-list', 'tender-quotation-add']) ? 'active' : '' ?>">
+    <a href="#">
+        <i class="fa fa-file-text"></i>
+        <span>Tender Quotation</span>
+        <span class="pull-right-container">
+            <i class="fa fa-angle-left pull-right"></i>
+        </span>
+    </a>
+
+    <ul class="treeview-menu">
+        <li class="<?= ($current_page === 'tender-quotation-add') ? 'active' : '' ?>">
+            <a href="<?= site_url('tender-quotation-add') ?>">
+                <i class="fa fa-plus-circle"></i> Add Tender Quotation
+            </a>
+        </li>
+
+        <li class="<?= ($current_page === 'tender-quotation-list') ? 'active' : '' ?>">
+            <a href="<?= site_url('tender-quotation-list') ?>">
+                <i class="fa fa-list-ul"></i> Vendor Enquiry List
+            </a>
+        </li>
+    </ul>
+</li>
+
+
 
 
 

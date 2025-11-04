@@ -101,3 +101,6 @@ $route['customer-list/(:num)'] = 'master/customer_list/$1';
 
 $route['vendor-rate-enquiry'] = 'vendor/vendor_rate_enquiry';
 $route['vendor-rate-enquiry-edit/(:num)'] = 'vendor/vendor_rate_enquiry_edit/$1';
+
+$route['tender-quotation-add'] = 'tender/tender_quotation_add';
+$route['tender-quotation-edit/(:num)'] = 'tender/tender_quotation_edit/$1';
