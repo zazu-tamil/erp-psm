@@ -150,9 +150,9 @@
 
                                 <div class="row">
                                     <div class="form-group col-md-6">
-                                        <label>GST</label>
+                                        <label>VAT No</label>
                                         <input class="form-control" type="text" name="gst" id="gst"
-                                            placeholder="GST No">
+                                            placeholder="VAT No">
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Remarks</label>
@@ -269,9 +269,9 @@
 
                                 <div class="row">
                                     <div class="form-group col-md-6">
-                                        <label>GST</label>
+                                        <label>VAT No</label>
                                         <input class="form-control" type="text" name="gst" id="gst"
-                                            placeholder="GST No">
+                                            placeholder="VAT No">
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Remarks</label>
