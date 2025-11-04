@@ -105,8 +105,7 @@ jQuery(function($){
     const uomOpt = <?php echo $uom_json; ?>;
     const siteUrl = "<?php echo site_url('tender/get_data'); ?>";
 
-    console.log('Tender edit page loaded');
-    console.log('Item list count:', $('.item-row').length);
+  
 
     // Populate items for existing rows on page load
     $('.item-row').each(function(idx){
@@ -115,7 +114,7 @@ jQuery(function($){
         const itemId = parseInt($row.data('item-id')) || 0;
         const itemName = $row.data('item-name') || '';
 
-        console.log(`Row ${idx}: catId=${catId}, itemId=${itemId}, name=${itemName}`);
+      
 
         if(catId > 0 && itemId > 0){
             loadItemsForCategory($row, catId, itemId, itemName);
@@ -153,7 +152,7 @@ jQuery(function($){
                     $itemSelect.append(`<option value="${selectedItemId}" selected>${selectedItemName}</option>`);
                 }
 
-                console.log(`Loaded items for category ${catId}, selected item: ${selectedItemId}`);
+               
             },
             error: function(xhr, status, error){
                 console.error('Error loading items:', error);
@@ -241,7 +240,7 @@ jQuery(function($){
             </div>`;
 
         $('#item_rows').append(newRow);
-        console.log('New row added');
+    
     });
 
     // Remove row
@@ -251,7 +250,7 @@ jQuery(function($){
         
         if(rowCount > 1){
             $(this).closest('.item-row').remove();
-            console.log('Row removed');
+          
         } else {
             alert('At least one item is required.');
         }
