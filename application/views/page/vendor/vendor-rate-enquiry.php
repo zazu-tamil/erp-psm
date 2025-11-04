@@ -5,7 +5,7 @@
 <section class="content-header">
     <h1><?php echo htmlspecialchars($title); ?></h1>
     <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-file-text"></i> Tender</a></li>
+        <li><a href="#"><i class="fa fa-file-text"></i> Vendor</a></li>
         <li class="active">Add <?php echo htmlspecialchars($title); ?></li>
     </ol>
 </section>
@@ -13,7 +13,7 @@
 <section class="content">
     <div class="box box-info">
         <div class="box-header with-border">
-            <h3 class="box-title"><i class="fa fa-plus-circle"></i> Add Tender Enquiry</h3>
+            <h3 class="box-title"><i class="fa fa-plus-circle"></i> Add Vendor Rate Enquiry</h3>
         </div>
 
         <form method="post" action="" id="frmadd" enctype="multipart/form-data">
