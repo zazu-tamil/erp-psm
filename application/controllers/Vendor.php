@@ -311,6 +311,73 @@ class Vendor extends CI_Controller
         $this->load->view('page/vendor/vendor-rate-enquiry-edit', $data);
     }
 
+
+
+public function vendor_rate_enquiry_print($vendor_rate_enquiry_id = 0)
+{
+    if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+        redirect();
+    }
+
+    if (!$vendor_rate_enquiry_id) {
+        show_404();
+    }
+
+    // Fetch main record
+    $sql = "
+        SELECT 
+            vrei.*,
+            c.customer_name,
+            v.vendor_name,
+            v.mobile AS vendor_mobile,
+            v.address AS vendor_address,
+            te.enquiry_no AS tender_enquiry_no,
+            ci.company_name AS our_company
+        FROM vendor_rate_enquiry_info vrei
+        LEFT JOIN customer_info c ON vrei.customer_id = c.customer_id
+        LEFT JOIN vendor_info v ON vrei.vendor_id = v.vendor_id
+        LEFT JOIN tender_enquiry_info te ON vrei.tender_enquiry_id = te.tender_enquiry_id
+        LEFT JOIN company_info ci ON te.company_id = ci.company_id AND ci.status = 'Active'
+        WHERE vrei.vendor_rate_enquiry_id = ? AND vrei.status != 'Delete'
+    ";
+    $query = $this->db->query($sql, [$vendor_rate_enquiry_id]);
+    $data['record'] = $query->row_array();
+
+    if (!$data['record']) {
+        show_404();
+    }
+
+    // Fetch items
+    $sql = "
+        SELECT 
+            vrei_item.*,
+            cat.category_name,
+            item.item_name,
+            item.item_description,
+            item.uom AS item_uom
+        FROM vendor_rate_enquiry_item_info vrei_item
+        LEFT JOIN category_info cat ON vrei_item.category_id = cat.category_id
+        LEFT JOIN item_info item ON vrei_item.item_id = item.item_id
+        WHERE vrei_item.vendor_rate_enquiry_id = ? AND vrei_item.status = 'Active'
+        ORDER BY vrei_item.vendor_rate_enquiry_item_id
+    ";
+    $query = $this->db->query($sql, [$vendor_rate_enquiry_id]);
+    $data['items'] = $query->result_array();
+
+    // Calculate totals
+    $data['grand_total'] = 0;
+    $data['total_gst'] = 0;
+    foreach ($data['items'] as &$item) {
+        $item['amount'] = $item['rate'] * $item['qty'];
+        $item['gst_amount'] = $item['amount'] * ($item['gst'] / 100);
+        $data['grand_total'] += $item['amount'];
+        $data['total_gst'] += $item['gst_amount'];
+    }
+    $data['final_total'] = $data['grand_total'] + $data['total_gst'];
+
+    $this->load->view('page/vendor/vendor-rate-enquiry-print', $data);
+}
+
     public function get_data()
     {
         $table = $this->input->post('tbl');
