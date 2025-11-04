@@ -796,6 +796,92 @@ class Tender extends CI_Controller
     $this->load->view('page/tender/tender-quotation-list', $data);
 }
 
+public function tender_quotation_print($tender_quotation_id = 0)
+{
+    if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+        redirect();
+    }
+
+    if (!$tender_quotation_id) {
+        show_404();
+    }
+
+    // === MAIN RECORD ===
+    $sql = "
+        SELECT 
+            tqi.*,
+            c.customer_name,
+            ci.company_name AS our_company,
+            te.enquiry_no AS tender_enquiry_no
+        FROM tender_quotation_info tqi
+        LEFT JOIN customer_info c ON tqi.customer_id = c.customer_id AND c.status = 'Active'
+        LEFT JOIN company_info ci ON tqi.company_id = ci.company_id AND ci.status = 'Active'
+        LEFT JOIN tender_enquiry_info te ON tqi.tender_enquiry_id = te.tender_enquiry_id AND te.status = 'Active'
+        WHERE tqi.tender_quotation_id = ? AND tqi.status != 'Delete'
+    ";
+    $query = $this->db->query($sql, [$tender_quotation_id]);
+    $data['record'] = $query->row_array();
+
+    if (!$data['record']) {
+        show_404();
+    }
+
+    // === ITEMS WITH RATE CALCULATION ===
+    $sql = "
+        SELECT 
+            tqii.*,
+            cat.category_name,
+            item.item_name,
+            item.item_description,
+            item.uom AS item_uom
+        FROM tender_quotation_item_info tqii
+        LEFT JOIN category_info cat ON tqii.category_id = cat.category_id
+        LEFT JOIN item_info item ON tqii.item_id = item.item_id
+        WHERE tqii.tender_quotation_id = ? 
+          AND tqii.status IN ('Active', 'Inactive')
+        ORDER BY tqii.tender_quotation_item_id
+    ";
+    $query = $this->db->query($sql, [$tender_quotation_id]);
+    $items = $query->result_array();
+
+    $data['items'] = [];
+    $gst_summary = [];
+
+    foreach ($items as $item) {
+        $qty = floatval($item['qty']);
+        $gst = floatval($item['gst']);
+        $amount = floatval($item['amount']);
+
+        // === Calculate Rate (exclusive of GST) ===
+        $rate = $qty > 0 ? $amount / ($qty * (1 + $gst / 100)) : 0;
+
+        // === GST Amount ===
+        $gst_amount = $amount - ($qty * $rate);
+
+        // === Store in item ===
+        $item['rate'] = $rate;
+        $item['gst_amount'] = $gst_amount;
+        $item['base_amount'] = $qty * $rate;
+
+        $data['items'][] = $item;
+
+        // === GST Summary ===
+        $gst_key = number_format($gst, 2);
+        if (!isset($gst_summary[$gst_key])) {
+            $gst_summary[$gst_key] = ['gst' => $gst, 'base' => 0, 'gst_amount' => 0];
+        }
+        $gst_summary[$gst_key]['base'] += $qty * $rate;
+        $gst_summary[$gst_key]['gst_amount'] += $gst_amount;
+    }
+
+    $data['gst_summary'] = $gst_summary;
+    $data['grand_total'] = array_sum(array_column($data['items'], 'base_amount'));
+    $data['total_gst'] = array_sum(array_column($data['items'], 'gst_amount'));
+    $data['final_total'] = $data['grand_total'] + $data['total_gst'];
+
+    $this->load->view('page/tender/tender-quotation-print', $data);
+}
+
 
 
     public function get_data()
