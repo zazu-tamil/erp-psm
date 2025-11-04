@@ -163,8 +163,7 @@
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Remarks</label>
-                                        <input type="text" name="remarks" id="remarks" class="form-control"
-                                            placeholder="Enter remarks">
+                                        <textarea name="remarks" id="remarks" class="form-control" rows="1"></textarea>
                                     </div>
                                 </div>
 
@@ -290,8 +289,7 @@
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Remarks</label>
-                                        <input type="text" name="remarks" id="remarks" class="form-control"
-                                            placeholder="Enter remarks">
+                                        <textarea name="remarks" id="remarks" class="form-control" rows="1"></textarea>
                                     </div>
                                 </div>
 
