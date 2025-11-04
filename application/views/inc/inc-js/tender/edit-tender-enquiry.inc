@@ -222,7 +222,7 @@ jQuery(function($){
                     </select>
                 </div>
                 <div class="item-desc-block">
-                    <textarea name="item_desc[]" class="form-control" rows="3"></textarea>
+                    <textarea name="item_desc[]" class="form-control" rows="5"></textarea>
                 </div>
                 <div class="uom-block">
                     <select name="uom[]" class="form-control">

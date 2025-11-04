@@ -44,7 +44,8 @@
                           <div class="col-md-6">
                               <div class="form-group">
                                   <label>Item Description</label>
-                                  <textarea name="item_desc[]" class="form-control desc-textarea" rows="3" readonly>${row.item_desc}</textarea>
+                                <textarea name="item_desc[]" class="form-control desc-textarea" style="height: 120px;" readonly>${row.item_desc}</textarea>
+
                               </div>
                           </div>
                           <div class="col-md-2">
