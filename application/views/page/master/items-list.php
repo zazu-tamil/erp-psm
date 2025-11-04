@@ -40,11 +40,11 @@
                         <th>Category</th>
                         <th>Brand</th>
                         <th>UOM</th>
+                        <th>Item Code</th>
                         <th>HSN Code</th>
                         <th>VAT</th>
                         <th>Status</th>
-                        <th class="text-center">Edit</th>
-                        <th class="text-center">Delete</th>
+                        <th class="text-center" colspan="2">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -55,6 +55,7 @@
                             <td><?= $ls['category_name'] ?></td>
                             <td><?= $ls['brand_name'] ?></td>
                             <td><?= $ls['uom'] ?></td>
+                            <td><?= $ls['item_code'] ?></td>
                             <td><?= $ls['hsn_code'] ?></td>
                             <td><?= $ls['gst'] ?></td>
                             <td><?= $ls['status'] ?></td>
@@ -109,10 +110,15 @@
                                         ); ?>
                                     </div>
 
-                                    <div class="form-group col-md-12 mb-3">
+                                    <div class="form-group col-md-6 mb-3">
                                         <label>Item Name</label>
                                         <input class="form-control" type="text" name="item_name" required id="item_name"
                                             placeholder="Enter your item name">
+                                    </div>
+                                    <div class="form-group col-md-6 mb-3">
+                                        <label>Item Code</label>
+                                        <input class="form-control" type="text" name="item_code" required id="item_code"
+                                            placeholder="Enter your item code">
                                     </div>
                                     <div class="form-group col-md-12 mb-3">
                                         <label>Description</label>
@@ -205,10 +211,15 @@
                                         ); ?>
                                     </div>
 
-                                    <div class="form-group col-md-12 mb-3">
+                                   <div class="form-group col-md-6 mb-3">
                                         <label>Item Name</label>
-                                        <input class="form-control" type="text" name="item_name" required
-                                            id="item_name">
+                                        <input class="form-control" type="text" name="item_name" required id="item_name"
+                                            placeholder="Enter your item name">
+                                    </div>
+                                    <div class="form-group col-md-6 mb-3">
+                                        <label>Item Code</label>
+                                        <input class="form-control" type="text" name="item_code" required id="item_code"
+                                            placeholder="Enter your item code">
                                     </div>
                                     <div class="form-group col-md-12 mb-3">
                                         <label>Description</label>

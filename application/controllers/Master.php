@@ -133,7 +133,7 @@ class Master extends CI_Controller
                 'contact_name' => $this->input->post('contact_name'),
                 'crno' => $this->input->post('crno'),
                 'address' => $this->input->post('address'),
-                'GST' => $this->input->post('GST'),
+                 'GST' => $this->input->post('GST'),
                 'mobile' => $this->input->post('mobile'),
                 'country' => $this->input->post('country'),
                 'email' => $this->input->post('email'),
@@ -153,7 +153,7 @@ class Master extends CI_Controller
                 'address' => $this->input->post('address'),
                 'GST' => $this->input->post('GST'),
                 'mobile' => $this->input->post('mobile'),
-                'country' => $this->input->post('country'),
+                 'country' => $this->input->post('country'),
                 'email' => $this->input->post('email'),
                 'status' => $this->input->post('status')
             );
@@ -735,7 +735,7 @@ class Master extends CI_Controller
                 'hsn_code' => $this->input->post('hsn_code'),
                 'gst' => $this->input->post('gst'),
                 'item_image' => $item_image,
-                // 'item_code' => $this->input->post('item_code'),
+                'item_code' => $this->input->post('item_code'),
                 'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'updated_date' => date('Y-m-d H:i:s')

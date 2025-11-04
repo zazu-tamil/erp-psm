@@ -99,9 +99,9 @@
                                 </div>
                                 <div class="row">
                                     <div class="form-group col-md-6">
-                                        <label>CRNO</label>
+                                        <label>Cr No</label>
                                         <input class="form-control" type="text" name="crno" id="crno"
-                                            placeholder="Enter your CRNO">
+                                            placeholder="Enter your Cr No">
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>VAT No</label>
@@ -193,9 +193,9 @@
                                 </div>
                                 <div class="row">
                                     <div class="form-group col-md-6">
-                                        <label>CRNO</label>
+                                        <label>Cr No</label>
                                         <input class="form-control" type="text" name="crno" id="crno"
-                                            placeholder="Enter your CRNO">
+                                            placeholder="Enter your Cr No">
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>VAT No</label>
