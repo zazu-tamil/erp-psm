@@ -57,6 +57,8 @@ $route['logout'] = 'login/logout';
 $route['dash'] = 'dashboard'; 
 
 $route['add-tender-enquiry']='tender/add_tender_enquiry';
+$route['tender-enquiry-list'] = 'tender/tender_enquiry_list';
+$route['tender-enquiry-edit/(:num)'] = 'tender/edit_tender_enquiry/$1';
 
 $route['change-password'] = 'login/change_password';
 $route['dash'] = 'dashboard'; 
