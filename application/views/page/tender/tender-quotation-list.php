@@ -34,7 +34,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="form-group col-md-12 text-left">
+                    <div class="form-group col-md-12">
                         <button type="submit" class="btn btn-success"><i class="fa fa-search"></i> Show</button>
                     </div>
                 </div>
@@ -45,13 +45,11 @@
     <!-- List Table -->
     <div class="box box-info">
         <div class="box-header with-border">
-            <a href="<?php echo site_url('tender-quotation-add'); ?>" class="btn btn-success">
+            <a href="<?php echo site_url('add-tender-quotation'); ?>" class="btn btn-success">
                 <i class="fa fa-plus-circle"></i> Add New
             </a>
             <div class="box-tools pull-right">
-                <button type="button" class="btn btn-box-tool" data-widget="collapse">
-                    <i class="fa fa-minus"></i>
-                </button>
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
             </div>
         </div>
 
@@ -67,7 +65,7 @@
                         <th>Company</th>
                         <th>Customer</th>
                         <th>Status</th>
-                        <th class="text-center" colspan="2">Action</th>
+                        <th class="text-center" colspan="3">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -83,15 +81,31 @@
                                 <td><?php echo htmlspecialchars($row['customer_name']); ?></td>
                                 <td>
                                     <span class="label label-<?php echo $row['status'] == 'Active' ? 'success' : 'danger'; ?>">
-                                        <?php echo htmlspecialchars($row['status']); ?>
+                                        <?php echo $row['status']; ?>
                                     </span>
                                 </td>
+
+
+                                  <!-- PRINT -->
+                                <td class="text-center">
+                                    <a href="<?php echo site_url('tender-quotation-print/' . $row['tender_quotation_id']); ?>" 
+                                       target="_blank"
+                                       class="btn btn-info btn-xs" title="Print">
+                                        <i class="fa fa-print"></i>
+                                    </a>
+                                </td>
+                                
+                                <!-- EDIT -->
                                 <td class="text-center">
                                     <a href="<?php echo site_url('tender-quotation-edit/' . $row['tender_quotation_id']); ?>" 
                                        class="btn btn-primary btn-xs" title="Edit">
                                         <i class="fa fa-edit"></i>
                                     </a>
                                 </td>
+
+                              
+
+                                <!-- DELETE -->
                                 <td class="text-center">
                                     <button value="<?php echo $row['tender_quotation_id']; ?>" 
                                             class="del_record btn btn-danger btn-xs" title="Delete">
@@ -102,7 +116,7 @@
                         <?php endforeach; ?>
                     <?php else : ?>
                         <tr>
-                            <td colspan="10" class="text-center text-danger">No records found.</td>
+                            <td colspan="11" class="text-center text-danger">No records found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -121,5 +135,3 @@
 </section>
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
-
-

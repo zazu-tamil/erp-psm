@@ -66,6 +66,7 @@ $route['vendor-rate-enquiry-print/(:num)'] = 'vendor/vendor_rate_enquiry_print/$
 
 
 $route['tender-quotation-list'] = 'tender/tender_quotation_list';
+$route['tender-quotation-print/(:num)'] = 'tender/tender_quotation_print/$1';
 
 $route['change-password'] = 'login/change_password';
 $route['dash'] = 'dashboard'; 
