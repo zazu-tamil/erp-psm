@@ -67,6 +67,16 @@
             margin-top: 50px;
         }
 
+        .hide-rate-value {
+            color: transparent;
+            user-select: none;
+        }
+
+        .empty-space {
+            min-height: 20px;
+            border-bottom: 1px solid #000;
+        }
+
         /* Keep printer's default margins */
         @page {
             size: A4;
@@ -147,9 +157,9 @@
                     <th style="width:25%;">Item Description</th>
                     <th style="width:8%;">UOM</th>
                     <th style="width:8%;">Qty</th>
-                    <th style="width:10%;">Rate</th>
-                    <th style="width:8%;">VAT (%)</th>
-                    <th style="width:10%;">Amount</th>
+                    <th class="rate-column" style="width:10%;">Rate</th>
+                    <th class="rate-column" style="width:8%;">VAT (%)</th>
+                    <th class="rate-column" style="width:10%;">Amount</th>
                 </tr>
             </thead>
             <tbody>
@@ -165,9 +175,9 @@
                             </td>
                             <td style="text-align:center;"><?php echo htmlspecialchars($item['uom'] ?: $item['item_uom'] ?: '-'); ?></td>
                             <td style="text-align:center;"><?php echo number_format($item['qty'], 2); ?></td>
-                            <td style="text-align:right;"><?php echo number_format($item['rate'], 2); ?></td>
-                            <td style="text-align:center;"><?php echo number_format($item['gst'], 2); ?></td>
-                            <td style="text-align:right;"><?php echo number_format($item['amount'], 2); ?></td>
+                            <td class="rate-column" style="text-align:right;"><span class="rate-value"><?php echo number_format($item['rate'], 2); ?></span></td>
+                            <td class="rate-column" style="text-align:center;"><span class="rate-value"><?php echo number_format($item['gst'], 2); ?></span></td>
+                            <td class="rate-column" style="text-align:right;"><span class="rate-value"><?php echo number_format($item['amount'], 2); ?></span></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -177,17 +187,17 @@
                 <?php endif; ?>
             </tbody>
             <tfoot>
-                <tr>
+                <tr class="rate-column">
                     <th colspan="6" style="text-align:right;">Sub Total</th>
-                    <th style="text-align:right;"><?php echo number_format($grand_total, 2); ?></th>
+                    <th style="text-align:right;"><span class="rate-value"><?php echo number_format($grand_total, 2); ?></span></th>
                 </tr>
-                <tr>
+                <tr class="rate-column">
                     <th colspan="6" style="text-align:right;">VAT</th>
-                    <th style="text-align:right;"><?php echo number_format($total_gst, 2); ?></th>
+                    <th style="text-align:right;"><span class="rate-value"><?php echo number_format($total_gst, 2); ?></span></th>
                 </tr>
-                <tr>
+                <tr class="rate-column">
                     <th colspan="6" style="text-align:right; font-size:13pt;">Grand Total</th>
-                    <th style="text-align:right; font-size:13pt;"><?php echo number_format($final_total, 2); ?></th>
+                    <th style="text-align:right; font-size:13pt;"><span class="rate-value"><?php echo number_format($final_total, 2); ?></span></th>
                 </tr>
             </tfoot>
         </table>
@@ -212,8 +222,36 @@
     </div>
 
     <div style="text-align:center; margin:20px;">
-        <button onclick="window.print()">Print</button>
+        <button onclick="printWithRate()">Print with Rate</button>
+        <button onclick="printWithoutRate()">Print without Rate</button>
     </div>
+
+    <script>
+        function printWithRate() {
+            // Show all rate values
+            const rateValues = document.querySelectorAll('.rate-value');
+            rateValues.forEach(val => {
+                val.classList.remove('hide-rate-value');
+            });
+            window.print();
+        }
+
+        function printWithoutRate() {
+            // Hide rate values but keep the space
+            const rateValues = document.querySelectorAll('.rate-value');
+            rateValues.forEach(val => {
+                val.classList.add('hide-rate-value');
+            });
+            window.print();
+
+            // Show them again after print (so user can see them on screen)
+            setTimeout(() => {
+                rateValues.forEach(val => {
+                    val.classList.remove('hide-rate-value');
+                });
+            }, 500);
+        }
+    </script>
 
 </body>
 

@@ -159,6 +159,7 @@ CREATE TABLE `tender_quotation_item_info` (
   `item_desc` text DEFAULT NULL,
   `uom` varchar(50) DEFAULT NULL,
   `qty` decimal(10,2) DEFAULT NULL,
+  `rate` decimal(10,2) DEFAULT NULL,
   `gst` decimal(10,2) DEFAULT NULL,
   `amount` decimal(10,2) DEFAULT NULL,
   `status` varchar(50) DEFAULT NULL,
@@ -167,6 +168,15 @@ CREATE TABLE `tender_quotation_item_info` (
   `updated_by` int(11) DEFAULT NULL,
   `updated_date` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
+
+
+
+
+
+  
 
 
 
