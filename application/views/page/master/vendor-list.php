@@ -153,7 +153,7 @@
                                     <div class="form-group col-md-6">
                                         <label>VAT No</label>
                                         <input class="form-control" type="text" name="gst" id="gst"
-                                            placeholder="GST No">
+                                            placeholder="VAT No">
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Remarks</label>
@@ -272,7 +272,7 @@
                                     <div class="form-group col-md-6">
                                         <label>VAT No</label>
                                         <input class="form-control" type="text" name="gst" id="gst"
-                                            placeholder="GST No">
+                                            placeholder="VAT No">
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Remarks</label>

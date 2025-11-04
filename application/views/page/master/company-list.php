@@ -104,9 +104,9 @@
                                             placeholder="Enter your CRNO">
                                     </div>
                                     <div class="form-group col-md-6">
-                                        <label>GST No</label>
+                                        <label>VAT No</label>
                                         <input class="form-control" type="text" name="GST" id="GST"
-                                            placeholder="Enter your GST" required="true">
+                                            placeholder="Enter your VAT No" required="true">
                                     </div>
                                 </div>
                                 <div class="row">
@@ -194,7 +194,7 @@
                                     <div class="form-group col-md-6">
                                         <label>VAT No</label>
                                         <input class="form-control" type="text" name="GST" id="GST"
-                                            placeholder="Enter your GST" required="true">
+                                            placeholder="Enter your VAT No" required="true">
                                     </div>
                                 </div>
                                 <div class="row">
