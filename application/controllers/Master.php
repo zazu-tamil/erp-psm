@@ -59,9 +59,11 @@ class Master extends CI_Controller
 
         $this->load->library('pagination');
 
-        $this->db->where('status != ', 'Delete');
+        $this->db->where('status !=', 'Delete');
+        $this->db->where('user_id !=', '1');
         $this->db->from('user_login_info');
         $data['total_records'] = $cnt = $this->db->count_all_results();
+
 
         $data['sno'] = $this->uri->segment(2, 0);
 
@@ -93,7 +95,8 @@ class Master extends CI_Controller
             SELECT *
             FROM user_login_info
             WHERE status != 'Delete'
-            order by user_id desc
+            and user_id != '1'
+            order by user_id desc 
             limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
         ";
 
