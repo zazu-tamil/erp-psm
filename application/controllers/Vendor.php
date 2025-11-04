@@ -23,7 +23,7 @@ class Vendor extends CI_Controller
             $insert_data = array(
                 'customer_id' => $this->input->post('srch_customer_id'),
                 'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
-                'vendor_id' => $this->input->post('srch_vendor_id'), 
+                'vendor_id' => $this->input->post('srch_vendor_id'),
                 'enquiry_date' => $this->input->post('enquiry_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('enquiry_date'))) : null,
                 'opening_date' => $this->input->post('opening_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('opening_date'))) : null,
                 'closing_date' => $this->input->post('closing_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('closing_date'))) : null,
@@ -156,6 +156,159 @@ class Vendor extends CI_Controller
 
         $data['pagination'] = $this->pagination->create_links();
         $this->load->view('page/vendor/vendor-rate-enquiry', $data);
+    }
+
+    public function vendor_rate_enquiry_edit($id = 0)
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+        if ($this->session->userdata(SESS_HD . 'level') != 'Admin' && $this->session->userdata(SESS_HD . 'level') != 'Staff') {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+        if ($id <= 0)
+            redirect('vendor-rate-enquiry-list');
+
+        $data['js'] = 'vendor/vendor-rate-enquiry-edit.inc';
+        $data['title'] = 'Edit Vendor Rate Enquiry';
+
+        if ($this->input->post('mode') == 'Edit') {
+            $this->db->trans_start();
+            $update_data = array(
+                'customer_id' => $this->input->post('srch_customer_id'),
+                'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
+                'vendor_id' => $this->input->post('srch_vendor_id'),
+                'enquiry_date' => $this->input->post('enquiry_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('enquiry_date'))) : null,
+                'opening_date' => $this->input->post('opening_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('opening_date'))) : null,
+                'closing_date' => $this->input->post('closing_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('closing_date'))) : null,
+                'enquiry_no' => $this->input->post('enquiry_no'),
+                'status' => $this->input->post('status') ?: 'Active',
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            );
+            $this->db->where('vendor_rate_enquiry_id', $id);
+            $this->db->update('vendor_rate_enquiry_info', $update_data);
+
+            $this->db->where('vendor_rate_enquiry_id', $id);
+            $this->db->delete('vendor_rate_enquiry_item_info');
+
+            $tender_enquiry_item_ids = $this->input->post('tender_enquiry_item_id');
+            $category_ids = $this->input->post('category_id');
+            $item_ids = $this->input->post('item_id');
+            $item_descs = $this->input->post('item_desc');
+            $uoms = $this->input->post('uom');
+            $qtys = $this->input->post('qty');
+
+            if (!empty($item_ids) && is_array($item_ids)) {
+                foreach ($item_ids as $index => $item_id) {
+                    if (!empty($item_id)) {
+                        $insert_item_data = array(
+                            'vendor_rate_enquiry_id' => $id,
+                            'tender_enquiry_item_id' => $tender_enquiry_item_ids[$index] ?? 0,
+                            'category_id' => $category_ids[$index] ?? 0,
+                            'item_id' => $item_id,
+                            'item_desc' => $item_descs[$index] ?? '',
+                            'uom' => $uoms[$index] ?? '',
+                            'qty' => $qtys[$index] ?? 0.00,
+                            'status' => 'Active',
+                            'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                            'created_date' => date('Y-m-d H:i:s')
+                        );
+                        $this->db->insert('vendor_rate_enquiry_item_info', $insert_item_data);
+                    }
+                }
+            }
+
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE) {
+                $this->session->set_flashdata('error', 'Error updating data.');
+            } else {
+                $this->session->set_flashdata('success', 'Vendor Rate Enquiry updated successfully.');
+            }
+            redirect('vendor-rate-enquiry-list/');
+        }
+
+        // Load main record
+        $sql = "
+            SELECT * FROM 
+            vendor_rate_enquiry_info 
+            WHERE vendor_rate_enquiry_id = ? 
+            AND status != 'Delete'
+        ";
+        $query = $this->db->query($sql, array($id));
+        if ($query->num_rows() == 0)
+            redirect('vendor-rate-enquiry-list');
+        $data['main'] = $query->row_array();
+
+        $data['customer_opt'] = [];
+        $data['vendor_opt'] = [];
+        $data['tender_enquiry_opt'] = [];
+
+        $sql = "
+            SELECT vendor_id, vendor_name 
+            FROM vendor_info 
+            WHERE status = 'Active' 
+            ORDER BY vendor_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+        }
+
+        $sql = "
+             SELECT
+                customer_id,
+                customer_name
+            FROM
+                customer_info
+            WHERE
+            STATUS
+                = 'Active'
+            ORDER BY
+                customer_name ASC 
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
+        $sql = "
+            SELECT 
+            a.tender_enquiry_id,
+            a.enquiry_no, 
+            b.company_name, 
+            c.customer_name
+            FROM tender_enquiry_info AS a
+            LEFT JOIN company_info as b on a.company_id = b.company_id and b.status='Active'
+            LEFT JOIN customer_info as c on a.customer_id = c.customer_id and c.status='Active'
+            WHERE a.status = 'Active'
+            ORDER BY a.tender_enquiry_id , a.enquiry_no ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_enquiry_id'] . ' -> ' . $row['enquiry_no'] . ' -> ' . $row['company_name'] . ' -> ' . $row['customer_name'];
+        }
+
+        $sql = "
+           SELECT
+                a.*,
+                b.category_name,
+                c.item_name
+            FROM
+                vendor_rate_enquiry_item_info a
+            LEFT JOIN category_info b ON
+                a.category_id = b.category_id
+            LEFT JOIN item_info c ON
+                a.item_id = c.item_id
+            WHERE
+            a.status ='Active'
+            and a.vendor_rate_enquiry_id = ?
+            GROUP by a.vendor_rate_enquiry_id 
+        ";
+        $query = $this->db->query($sql, array($id));
+        $data['item_rows'] = $query->result_array();
+
+        $this->load->view('page/vendor/vendor-rate-enquiry-edit', $data);
     }
 
     public function get_data()

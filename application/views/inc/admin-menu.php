@@ -38,6 +38,34 @@ $current_page = $this->uri->segment(1, 0);
         </li>
     </ul>
 </li>
+<!-- Vendor Enquiry Section -->
+<li class="header">Vendor Enquiry</li>
+
+<li
+    class="treeview <?= in_array($current_page, ['vendor-rate-enquiry-list', 'vendor-rate-enquiry']) ? 'active' : '' ?>">
+    <a href="#">
+        <i class="fa fa-handshake-o"></i>
+        <span>Vendor Enquiry</span>
+        <span class="pull-right-container">
+            <i class="fa fa-angle-left pull-right"></i>
+        </span>
+    </a>
+
+    <ul class="treeview-menu">
+        <li class="<?= ($current_page === 'vendor-rate-enquiry') ? 'active' : '' ?>">
+            <a href="<?= site_url('vendor-rate-enquiry') ?>">
+                <i class="fa fa-file-text-o"></i> Add Vendor Enquiry
+            </a>
+        </li>
+
+        <li class="<?= ($current_page === 'vendor-rate-enquiry-list') ? 'active' : '' ?>">
+            <a href="<?= site_url('vendor-rate-enquiry-list') ?>">
+                <i class="fa fa-list-alt"></i> Vendor Enquiry List
+            </a>
+        </li>
+    </ul>
+</li>
+
 
 
 <!-- Master Section -->
