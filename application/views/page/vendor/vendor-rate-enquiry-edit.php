@@ -14,14 +14,13 @@
         <form method="post" action="" id="frmadd" enctype="multipart/form-data">
             <div class="box-body">
                 <input type="hidden" name="mode" value="Edit" />
-                <input type="hidden" name="customer_id" id="customer_id" value="<?php echo $main['customer_id']; ?>" />
-                <input type="hidden" name="tender_enquiry_id" id="tender_enquiry_id" value="<?php echo $main['tender_enquiry_id']; ?>" />
+                <input type="hidden" name="old_tender_enquiry_id" id="old_tender_enquiry_id" value="<?php echo $main['tender_enquiry_id']; ?>" />
                 <fieldset class="tender-inward">
                     <legend class="text-light-blue">Vendor Rate Enquiry</legend>
                     <div class="row">
                         <div class="form-group col-md-3">
                             <label for="srch_customer_id">Customer</label>
-                            <?php echo form_dropdown('srch_customer_id', ['' => 'Select'] + $customer_opt, $main['customer_id'], 'id="srch_customer_id" class="form-control " disabled'); ?>
+                            <?php echo form_dropdown('srch_customer_id', ['' => 'Select'] + $customer_opt, $main['customer_id'], 'id="srch_customer_id" class="form-control"'); ?>
                         </div>
                         <div class="form-group col-md-3">
                             <label for="srch_tender_enquiry_id">Tender Enquiry No</label>
@@ -29,7 +28,7 @@
                         </div>
                         <div class="form-group col-md-3">
                             <label for="srch_vendor_id">Vendor Name</label>
-                            <?php echo form_dropdown('srch_vendor_id', ['' => 'Select'] + $vendor_opt, $main['vendor_id'], 'id="srch_vendor_id" class="form-control "'); ?>
+                            <?php echo form_dropdown('srch_vendor_id', ['' => 'Select'] + $vendor_opt, $main['vendor_id'], 'id="srch_vendor_id" class="form-control"'); ?>
                         </div>
                         <div class="form-group col-md-3">
                             <label>Enquiry No</label>
@@ -67,62 +66,102 @@
                 <fieldset class="mt-4">
                     <legend class="text-light-blue">Item Details</legend>
                     <div id="item_container">
-                        <?php 
-                        foreach ($item_rows as $i => $row){
-                        ?>
-                        <div class="item-card border p-3 mb-3" style="background-color:#f9f9f9; border-radius:8px;">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h5 class="text-primary mb-0">Item Details <?php echo $i + 1; ?></h5>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="<?php echo $i; ?>" id="check_<?php echo $i; ?>" checked>
-                                    <label class="form-check-label" for="check_<?php echo $i; ?>">Select</label>
+                        <?php foreach ($item_rows as $i => $row): ?>
+                            <div class="item-card border p-3 mb-3" style="background-color:#f9f9f9; border-radius:8px;">
+                                <h5 class="text-primary mb-3">Item Details <?php echo $i + 1; ?></h5>
+                                <input type="hidden" name="vendor_rate_enquiry_item_id[]" value="<?php echo $row['vendor_rate_enquiry_item_id']; ?>" id="item_<?php echo $row['vendor_rate_enquiry_item_id']; ?>">
+                                <input type="hidden" name="tender_enquiry_item_id[]" value="<?php echo $row['tender_enquiry_item_id']; ?>">
+                                <input type="hidden" name="category_id[]" value="<?php echo $row['category_id']; ?>">
+                                <input type="hidden" name="item_id[]" value="<?php echo $row['item_id']; ?>">
+                                <div class="row">
+                                    <div class="col-md-1">
+                                        <div class="form-group" style="margin-top: 25px;">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="<?php echo $i; ?>" id="check_<?php echo $i; ?>" <?php echo ($row['status'] == 'Active') ? 'checked' : ''; ?>>
+                                                <label class="form-check-label" for="check_<?php echo $i; ?>" style="margin-left: 5px;">Select</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label>Category Name</label>
+                                                    <input type="text" class="form-control" value="<?php echo $row['category_name']; ?>" readonly>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label>Item Name</label>
+                                                    <input type="text" class="form-control" value="<?php echo $row['item_name']; ?>" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Item Description</label>
+                                            <textarea name="item_desc[]" class="form-control desc-textarea" rows="3"><?php echo $row['item_desc']; ?></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>UOM</label>
+                                                    <input type="text" name="uom[]" class="form-control" value="<?php echo $row['uom']; ?>" readonly>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Quantity</label>
+                                                    <input type="number" step="0.01" name="qty[]" class="form-control qty-input" value="<?php echo $row['qty']; ?>" readonly>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Rate</label>
+                                                    <input type="number" step="0.01" name="rate[]" class="form-control rate-input" value="<?php echo $row['rate']; ?>">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>VAT %</label>
+                                                    <select name="gst[]" class="form-control vat-dropdown">
+                                                        <option value="">Select</option>
+                                                        <?php if(isset($gst_opt)): ?>
+                                                            <?php foreach($gst_opt as $gst_id => $gst_pct): ?>
+                                                                <option value="<?php echo $gst_pct; ?>" <?php echo ($row['gst'] == $gst_pct) ? 'selected' : ''; ?>><?php echo $gst_pct; ?>%</option>
+                                                            <?php endforeach; ?>
+                                                        <?php endif; ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label>Amount (Qty × Rate × VAT %)</label>
+                                                    <input type="number" step="0.01" name="amount[]" class="form-control amount-input" value="<?php echo $row['amount']; ?>" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <input type="hidden" name="tender_enquiry_item_id[]" value="<?php echo $row['tender_enquiry_item_id']; ?>" id="item_<?php echo $row['tender_enquiry_item_id']; ?>">
-                            <input type="hidden" name="category_id[]" value="<?php echo $row['category_id']; ?>">
-                            <input type="hidden" name="item_id[]" value="<?php echo $row['item_id']; ?>">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Category Name</label>
-                                                <input type="text" class="form-control" value="<?php echo $row['category_name']; ?>" readonly>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Item Name</label>
-                                                <input type="text" class="form-control" value="<?php echo $row['item_name']; ?>" readonly>
-                                            </div>
-                                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <div class="alert alert-info" style="background-color:#f0f8ff; border: 2px solid #007bff;">
+                                <div class="row">
+                                    <div class="col-md-10 text-right">
+                                        <h4 style="margin: 0;"><strong>Grand Total:</strong></h4>
                                     </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Item Description</label>
-                                        <textarea name="item_desc[]" class="form-control desc-textarea" rows="3" readonly><?php echo $row['item_desc']; ?></textarea>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>UOM</label>
-                                                <input type="text" name="uom[]" class="form-control" value="<?php echo $row['uom']; ?>" readonly>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Quantity</label>
-                                                <input type="number" step="0.01" name="qty[]" class="form-control" value="<?php echo $row['qty']; ?>" readonly>
-                                            </div>
-                                        </div>
+                                    <div class="col-md-2">
+                                        <input type="number" step="0.01" id="grand_total" class="form-control" value="0.00" readonly style="font-weight: bold; font-size: 16px; text-align: center;">
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <?php }?>
                     </div>
                 </fieldset>
             </div>
