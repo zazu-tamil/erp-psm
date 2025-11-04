@@ -41,7 +41,7 @@
                         <th>Brand</th>
                         <th>UOM</th>
                         <th>HSN Code</th>
-                        <th>vAT</th>
+                        <th>VAT</th>
                         <th>Status</th>
                         <th class="text-center">Edit</th>
                         <th class="text-center">Delete</th>
