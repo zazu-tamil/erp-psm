@@ -108,7 +108,7 @@
                                     <div class="form-group col-md-4">
                                         <label>Customer Name</label>
                                         <input class="form-control" type="text" name="customer_name" id="customer_name"
-                                            placeholder="Vendor Name">
+                                            placeholder="Customer Name">
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label>Contact Name</label>
@@ -234,7 +234,7 @@
                                     <div class="form-group col-md-4">
                                         <label>Customer Name</label>
                                         <input class="form-control" type="text" name="customer_name" id="customer_name"
-                                            placeholder="Vendor Name">
+                                            placeholder="Customer Name">
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label>Contact Name</label>
