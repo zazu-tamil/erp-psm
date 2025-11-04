@@ -678,6 +678,7 @@ class Master extends CI_Controller
                 'item_description' => $this->input->post('item_description'),
                 'uom' => $this->input->post('uom'),
                 'hsn_code' => $this->input->post('hsn_code'),
+                'item_code' => $this->input->post('item_code'),
                 'gst' => $this->input->post('gst'),
                 'item_image' => $item_image,
                 'status' => $this->input->post('status'),
@@ -690,8 +691,8 @@ class Master extends CI_Controller
 
         // EDIT Item
         if ($this->input->post('mode') == 'Edit') {
+            $item_id = $this->input->post('item_id');
             $item_name = $this->input->post('item_name');
-            $item_image = '';
 
             // 1. Handle file uploads
             $upload_path = 'Item_doc/';
@@ -705,30 +706,44 @@ class Master extends CI_Controller
 
             $this->load->library('upload', $config);
 
+            $item_image = ''; // Initialize
+
             if (!empty($_FILES['item_image']['name'])) {
+                // Upload new image
                 if ($this->upload->do_upload('item_image')) {
                     $upload_data = $this->upload->data();
                     $item_image = $upload_path . $upload_data['file_name']; // Full path saved
                 }
+            } else {
+                // No new image uploaded → keep old image
+                $old = $this->db->get_where('item_info', ['item_id' => $item_id])->row();
+                if ($old && !empty($old->item_image)) {
+                    $item_image = $old->item_image;
+                }
             }
 
+            // Prepare update array
             $upd = array(
                 'category_id' => $this->input->post('category_id'),
                 'brand_id' => $this->input->post('brand_id'),
-                'item_name' => $this->input->post('item_name'),
+                'item_name' => $item_name,
                 'item_description' => $this->input->post('item_description'),
                 'uom' => $this->input->post('uom'),
                 'hsn_code' => $this->input->post('hsn_code'),
                 'gst' => $this->input->post('gst'),
                 'item_image' => $item_image,
+                // 'item_code' => $this->input->post('item_code'),
                 'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'updated_date' => date('Y-m-d H:i:s')
             );
-            $this->db->where('item_id', $this->input->post('item_id'));
+
+            $this->db->where('item_id', $item_id);
             $this->db->update('item_info', $upd);
+
             redirect('items-list');
         }
+
 
         $this->load->library('pagination');
         $this->db->where('i.status != ', 'Delete');
