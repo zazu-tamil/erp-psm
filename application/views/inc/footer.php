@@ -70,47 +70,4 @@ include_once('inc-js/' . $js);
 ?>
 </body>
 </html>
- 
-<!-- Bootstrap 3 Modal Dialog -->
-<div class="modal fade" id="whatsappContactModal" tabindex="-1" role="dialog" aria-labelledby="whatsappModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <!-- Modal header, body, footer -->
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="whatsappModalLabel">Contact List</h4>
-            </div>
-            <div class="modal-body">
-                <!-- Put contact list or details here -->
-                <p>Your contact list goes here.</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Styles: Floating Button Position -->
-<style>
-    #whatsapp-fixed-button-right {
-        position: fixed;
-        bottom: 35px;
-        right: 25px;
-        z-index: 9999;
-    }
-
-    #whatsapp-fixed-button-right img {
-        border-radius: 50%;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        transition: box-shadow 0.2s;
-    }
-
-    #whatsapp-fixed-button-right img:hover {
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-    }
-</style>
-
-<script>
-    $('#openWhatsappModal').on('click', function () {
-        $('#whatsappContactModal').modal('show');
-    });
-</script>
+  
