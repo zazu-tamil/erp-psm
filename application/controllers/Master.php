@@ -121,8 +121,8 @@ class Master extends CI_Controller
             exit;
         }
 
-        $data['js'] = 'company-list.inc'; 
-        
+        $data['js'] = 'company-list.inc';
+
         // Handle Add (only if none exists)
         if ($this->input->post('mode') == 'Add') {
             $ins = array(
@@ -132,6 +132,7 @@ class Master extends CI_Controller
                 'address' => $this->input->post('address'),
                 'GST' => $this->input->post('GST'),
                 'mobile' => $this->input->post('mobile'),
+                'country' => $this->input->post('country'),
                 'email' => $this->input->post('email'),
                 'status' => $this->input->post('status')
             );
@@ -149,6 +150,7 @@ class Master extends CI_Controller
                 'address' => $this->input->post('address'),
                 'GST' => $this->input->post('GST'),
                 'mobile' => $this->input->post('mobile'),
+                'country' => $this->input->post('country'),
                 'email' => $this->input->post('email'),
                 'status' => $this->input->post('status')
             );
@@ -191,6 +193,25 @@ class Master extends CI_Controller
         $this->pagination->initialize($config);
 
         $sql = "
+          SELECT
+                a.country_id,
+                a.country_name
+            FROM
+                country_info AS a
+            WHERE
+                a.status != 'Delete'
+            ORDER BY
+                a.country_name ASC
+         ";
+
+        $query = $this->db->query($sql);
+        $data['country_opt'] = array();
+        foreach ($query->result_array() as $row) {
+            $data['country_opt'][$row['country_name']] = $row['country_name'];
+        }
+
+
+        $sql = "
             SELECT *
             FROM company_info
             WHERE status != 'Delete'
@@ -210,7 +231,7 @@ class Master extends CI_Controller
 
         $data['pagination'] = $this->pagination->create_links();
 
-        
+
 
         $this->load->view('page/master/company-list', $data);
     }
@@ -847,6 +868,7 @@ class Master extends CI_Controller
                 'vendor_name' => $this->input->post('vendor_name'),
                 'contact_name' => $this->input->post('contact_name'),
                 'crno' => $this->input->post('crno'),
+                'country' => $this->input->post('country'),
                 'address' => $this->input->post('address'),
                 'mobile' => $this->input->post('mobile'),
                 'mobile_alt' => $this->input->post('mobile_alt'),
@@ -870,6 +892,7 @@ class Master extends CI_Controller
                 'contact_name' => $this->input->post('contact_name'),
                 'crno' => $this->input->post('crno'),
                 'address' => $this->input->post('address'),
+                'country' => $this->input->post('country'),
                 'mobile' => $this->input->post('mobile'),
                 'mobile_alt' => $this->input->post('mobile_alt'),
                 'email' => $this->input->post('email'),
@@ -914,6 +937,23 @@ class Master extends CI_Controller
         $config['prev_link'] = "Prev";
         $config['next_link'] = "Next";
         $this->pagination->initialize($config);
+        $sql = "
+          SELECT
+                a.country_id,
+                a.country_name
+            FROM
+                country_info AS a
+            WHERE
+                a.status != 'Delete'
+            ORDER BY
+                a.country_name ASC
+         ";
+
+        $query = $this->db->query($sql);
+        $data['country_opt'] = array();
+        foreach ($query->result_array() as $row) {
+            $data['country_opt'][$row['country_name']] = $row['country_name'];
+        }
 
         $sql = "
             SELECT v.* 
@@ -954,6 +994,7 @@ class Master extends CI_Controller
                 'customer_name' => $this->input->post('customer_name'),
                 'contact_name' => $this->input->post('contact_name'),
                 'crno' => $this->input->post('crno'),
+                'country' => $this->input->post('country'),
                 'address' => $this->input->post('address'),
                 'mobile' => $this->input->post('mobile'),
                 'mobile_alt' => $this->input->post('mobile_alt'),
@@ -971,10 +1012,11 @@ class Master extends CI_Controller
             redirect('customer-list/');
         }
         if ($this->input->post('mode') == 'Edit') {
-             $upd = array(
+            $upd = array(
                 'customer_name' => $this->input->post('customer_name'),
                 'contact_name' => $this->input->post('contact_name'),
                 'crno' => $this->input->post('crno'),
+                'country' => $this->input->post('country'),
                 'address' => $this->input->post('address'),
                 'mobile' => $this->input->post('mobile'),
                 'mobile_alt' => $this->input->post('mobile_alt'),
@@ -1020,6 +1062,23 @@ class Master extends CI_Controller
         $config['prev_link'] = "Prev";
         $config['next_link'] = "Next";
         $this->pagination->initialize($config);
+        $sql = "
+          SELECT
+                a.country_id,
+                a.country_name
+            FROM
+                country_info AS a
+            WHERE
+                a.status != 'Delete'
+            ORDER BY
+                a.country_name ASC
+         ";
+
+        $query = $this->db->query($sql);
+        $data['country_opt'] = array();
+        foreach ($query->result_array() as $row) {
+            $data['country_opt'][$row['country_name']] = $row['country_name'];
+        }
 
         $sql = "
             SELECT c.* 

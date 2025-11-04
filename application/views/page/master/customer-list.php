@@ -3,7 +3,7 @@
     <h1>Customer List</h1>
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-cubes"></i> Master</a></li>
-         <li class="active">Customer List</li>
+        <li class="active">Customer List</li>
     </ol>
 </section>
 
@@ -123,13 +123,20 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="form-group col-md-12">
-                                        <label>Address</label>
-                                        <textarea class="form-control" name="address" id="address" placeholder="Address"
-                                            rows="2"></textarea>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Country</label>
+                                            <?php echo form_dropdown('country', ['' => 'Select Country'] + $country_opt, set_value('country'), 'id="country" class="form-control" required'); ?>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="address">Address</label>
+                                            <textarea class="form-control" name="address" id="address"
+                                                placeholder="Address" required="true" rows="4"></textarea>
+                                        </div>
                                     </div>
                                 </div>
-
                                 <div class="row">
                                     <div class="form-group col-md-4">
                                         <label>Mobile</label>
@@ -242,10 +249,18 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="form-group col-md-12">
-                                        <label>Address</label>
-                                        <textarea class="form-control" name="address" id="address" placeholder="Address"
-                                            rows="2"></textarea>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Country</label>
+                                            <?php echo form_dropdown('country', ['' => 'Select Country'] + $country_opt, set_value('country'), 'id="country" class="form-control" required'); ?>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="address">Address</label>
+                                            <textarea class="form-control" name="address" id="address"
+                                                placeholder="Address" required="true" rows="4"></textarea>
+                                        </div>
                                     </div>
                                 </div>
 

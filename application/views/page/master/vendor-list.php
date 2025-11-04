@@ -124,10 +124,18 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="form-group col-md-12">
-                                        <label>Address</label>
-                                        <textarea class="form-control" name="address" id="address" placeholder="Address"
-                                            rows="2"></textarea>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Country <span class="text-danger">*</span></label>
+                                            <?php echo form_dropdown('country', ['' => 'Select Country'] + $country_opt, set_value('country'), 'id="country" class="form-control" required'); ?>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="address">Address</label>
+                                            <textarea class="form-control" name="address" id="address"
+                                                placeholder="Address" required="true" rows="4"></textarea>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -157,8 +165,7 @@
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Remarks</label>
-                                        <input type="text" name="remarks" id="remarks" class="form-control"
-                                            placeholder="Enter remarks">
+                                        <textarea name="remarks" id="remarks" rows="1" class="form-control"></textarea>
                                     </div>
                                 </div>
 
@@ -241,12 +248,19 @@
                                             placeholder="Commercial Registration No">
                                     </div>
                                 </div>
-
                                 <div class="row">
-                                    <div class="form-group col-md-12">
-                                        <label>Address</label>
-                                        <textarea class="form-control" name="address" id="address" placeholder="Address"
-                                            rows="2"></textarea>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Country</label>
+                                            <?php echo form_dropdown('country', ['' => 'Select Country'] + $country_opt, set_value('country'), 'id="country" class="form-control" required'); ?>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="address">Address</label>
+                                            <textarea class="form-control" name="address" id="address"
+                                                placeholder="Address" required="true" rows="4"></textarea>
+                                        </div>
                                     </div>
                                 </div>
 

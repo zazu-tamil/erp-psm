@@ -68,6 +68,7 @@
           $("#edit_modal #vendor_name").val(d.vendor_name);
           $("#edit_modal #contact_name").val(d.contact_name);
           $("#edit_modal #crno").val(d.crno);
+          $("#edit_modal #country").val(d.country);
           $("#edit_modal #address").val(d.address);
           $("#edit_modal #mobile").val(d.mobile);
           $("#edit_modal #mobile_alt").val(d.mobile_alt);

@@ -12,6 +12,8 @@
           console.log(d); // Debugging: Log the response
           $("#edit_modal #company_id").val(d.company_id);
           $("#edit_modal #company_name").val(d.company_name);
+          $("#edit_modal #contact_name").val(d.contact_name);
+          $("#edit_modal #country").val(d.country);
           $("#edit_modal #email").val(d.email);
           $("#edit_modal #crno").val(d.crno);
           $("#edit_modal #address").val(d.address);
@@ -61,16 +63,5 @@
     } else {
       $("#btn_add_new").hide();
     }
-  });
-  // Auto-generate login name and password from mobile number
-  $("#add_modal #mobile").change(function () {
-    if ($(this).val().length === 10) {
-      var txt = $(this).val().substring(5, 10);
-      $("#add_modal #login_name").val(txt);
-      $("#add_modal #login_pwd").val(txt);
-    } else {
-      alert("Invalid Mobile Number");
-      $(this).focus();
-    }
-  });
+  }); 
 </script>
