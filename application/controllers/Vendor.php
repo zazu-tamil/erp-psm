@@ -176,6 +176,140 @@ class Vendor extends CI_Controller
 
         $this->load->view('page/vendor/vendor-rate-enquiry', $data);
     }
+
+
+     public function vendor_rate_enquiry_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data = array();
+        $data['js'] = 'vendor/vendor-rate-enquiry-list.inc';
+        $data['s_url'] = 'vendor-rate-enquiry-list';
+        $data['title'] = 'Vendor Rate Enquiry List';
+
+        // === FILTERS ===
+        $where = "1 = 1";
+
+        // Customer Filter
+        if ($this->input->post('srch_customer_id') !== null) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
+            $this->session->set_userdata('srch_customer_id', $srch_customer_id);
+        } elseif ($this->session->userdata('srch_customer_id')) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->session->userdata('srch_customer_id');
+        } else {
+            $data['srch_customer_id'] = $srch_customer_id = '';
+        }
+        if (!empty($srch_customer_id)) {
+            $where .= " AND a.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
+        }
+
+        // Vendor Filter
+        if ($this->input->post('srch_vendor_id') !== null) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->input->post('srch_vendor_id');
+            $this->session->set_userdata('srch_vendor_id', $srch_vendor_id);
+        } elseif ($this->session->userdata('srch_vendor_id')) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->session->userdata('srch_vendor_id');
+        } else {
+            $data['srch_vendor_id'] = $srch_vendor_id = '';
+        }
+        if (!empty($srch_vendor_id)) {
+            $where .= " AND a.vendor_id = '" . $this->db->escape_str($srch_vendor_id) . "'";
+        }
+
+        // Status Filter
+        if ($this->input->post('srch_status') !== null) {
+            $data['srch_status'] = $srch_status = $this->input->post('srch_status');
+            $this->session->set_userdata('srch_status', $srch_status);
+        } elseif ($this->session->userdata('srch_status')) {
+            $data['srch_status'] = $srch_status = $this->session->userdata('srch_status');
+        } else {
+            $data['srch_status'] = $srch_status = '';
+        }
+        if (!empty($srch_status) && $srch_status !== 'All') {
+            $where .= " AND a.status = '" . $this->db->escape_str($srch_status) . "'";
+        }
+
+        // === COUNT TOTAL ===
+        $sql_count = "SELECT COUNT(*) as total FROM vendor_rate_enquiry_info a WHERE a.status != 'Delete' AND $where";
+        $query_count = $this->db->query($sql_count);
+        $data['total_records'] = $query_count->row()->total;
+
+        // === PAGINATION ===
+        $data['sno'] = $this->uri->segment(2, 0);
+        $this->load->library('pagination');
+
+        $config['base_url'] = trim(site_url($data['s_url']), '/' . $this->uri->segment(2, 0));
+        $config['total_rows'] = $data['total_records'];
+        $config['per_page'] = 25;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = ['class' => 'page-link'];
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '</a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = 'Prev';
+        $config['next_link'] = 'Next';
+
+        $this->pagination->initialize($config);
+        $data['pagination'] = $this->pagination->create_links();
+
+        // === FETCH RECORDS ===
+        $sql = "
+            SELECT 
+                a.vendor_rate_enquiry_id,
+                a.enquiry_date,
+                a.enquiry_no,
+                a.opening_date,
+                a.closing_date,
+                a.status,
+                c.customer_name,
+                v.vendor_name,
+                t.enquiry_no AS tender_enquiry_no
+            FROM vendor_rate_enquiry_info a
+            LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
+            LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
+            LEFT JOIN tender_enquiry_info t ON a.tender_enquiry_id = t.tender_enquiry_id AND t.status != 'Delete'
+            WHERE a.status != 'Delete' AND $where
+            ORDER BY a.vendor_rate_enquiry_id DESC
+            LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
+
+        $query = $this->db->query($sql);
+        $data['record_list'] = $query->result_array();
+
+        // === DROPDOWNS ===
+        $data['customer_opt'] = ['' => 'All'];
+        $sql = "SELECT customer_id, customer_name FROM customer_info WHERE status = 'Active' ORDER BY customer_name";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
+        $data['vendor_opt'] = ['' => 'All'];
+        $sql = "SELECT vendor_id, vendor_name FROM vendor_info WHERE status = 'Active' ORDER BY vendor_name";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+        }
+
+        $data['status_opt'] = ['' => 'All', 'Active' => 'Active', 'Inactive' => 'Inactive'];
+
+        $this->load->view('page/vendor/vendor-rate-enquiry-list', $data);
+    }
+
+
+
     public function get_data()
     {
         $table = $this->input->post('tbl');
@@ -214,6 +348,25 @@ class Vendor extends CI_Controller
         }
         header('Content-Type: application/x-json; charset=utf-8');
         echo json_encode($rec_list);
+    }
+
+    
+     public function delete_record()
+    {
+        $table = $this->input->post('tbl');
+        $rec_id = $this->input->post('id');
+
+        if ($table == 'vendor_rate_enquiry_info' && !empty($rec_id)) {
+            $this->db->where('vendor_rate_enquiry_id', $rec_id);
+            $this->db->update('vendor_rate_enquiry_info', [
+                'status' => 'Delete',
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            ]);
+            echo 'Vendor Rate Enquiry marked as deleted.';
+        } else {
+            echo 'Invalid request.';
+        }
     }
 
 }
