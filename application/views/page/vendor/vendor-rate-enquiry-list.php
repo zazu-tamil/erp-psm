@@ -63,7 +63,7 @@
                         <th>Opening Date</th>
                         <th>Closing Date</th>
                         <th>Status</th>
-                        <th class="text-center" colspan="2">Action</th>
+                        <th class="text-center" colspan="3">Action</th> <!-- Now 3 columns -->
                     </tr>
                 </thead>
                 <tbody>
@@ -83,12 +83,24 @@
                                         <?php echo htmlspecialchars($row['status']); ?>
                                     </span>
                                 </td>
+                               
+                                
+                                <!-- PRINT / VIEW -->
+                                <td class="text-center">
+                                    <a href="<?php echo site_url('vendor-rate-enquiry-print/' . $row['vendor_rate_enquiry_id']); ?>" 
+                                       target="_blank" 
+                                       class="btn btn-info btn-xs" title="Print / View">
+                                        <i class="fa fa-print"></i>
+                                    </a>
+                                </td>
+                                   <!-- EDIT -->
                                 <td class="text-center">
                                     <a href="<?php echo site_url('vendor-rate-enquiry-edit/' . $row['vendor_rate_enquiry_id']); ?>" 
                                        class="btn btn-primary btn-xs" title="Edit">
                                         <i class="fa fa-edit"></i>
                                     </a>
                                 </td>
+                                <!-- DELETE -->
                                 <td class="text-center">
                                     <button value="<?php echo $row['vendor_rate_enquiry_id']; ?>" 
                                             class="del_record btn btn-danger btn-xs" title="Delete">
@@ -99,7 +111,7 @@
                         <?php endforeach; ?>
                     <?php else : ?>
                         <tr>
-                            <td colspan="11" class="text-center text-danger">No records found.</td>
+                            <td colspan="12" class="text-center text-danger">No records found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
