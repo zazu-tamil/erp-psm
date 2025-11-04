@@ -75,25 +75,48 @@ public function add_tender_enquiry()
         $data['uom_opt'] = [];
 
         // Companies
-        $query = $this->db->query("SELECT company_id, company_name FROM company_info WHERE status = 'Active' ORDER BY company_name");
+        $query = $this->db->query("
+        SELECT 
+        company_id, 
+        company_name 
+        FROM company_info 
+        WHERE status = 'Active' 
+        ORDER BY company_name");
         foreach ($query->result_array() as $row) {
             $data['company_opt'][$row['company_id']] = $row['company_name'];
         }
 
         // Customers
-        $query = $this->db->query("SELECT customer_id, customer_name FROM customer_info WHERE status = 'Active' ORDER BY customer_name");
+        $query = $this->db->query("
+        SELECT 
+        customer_id, 
+        customer_name 
+        FROM customer_info 
+        WHERE status = 'Active' 
+        ORDER BY customer_name");
         foreach ($query->result_array() as $row) {
             $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
         }
 
         // Categories
-        $query = $this->db->query("SELECT category_id, category_name FROM category_info WHERE status = 'Active' ORDER BY category_name");
+        $query = $this->db->query("
+        SELECT 
+        category_id, 
+        category_name 
+        FROM category_info 
+        WHERE status = 'Active' 
+        ORDER BY category_name");
         foreach ($query->result_array() as $row) {
             $data['category_opt'][$row['category_id']] = $row['category_name'];
         }
 
         // UOMs (using uom_name as key and value)
-        $query = $this->db->query("SELECT uom_name FROM uom_info WHERE status = 'Active' ORDER BY uom_name");
+        $query = $this->db->query("
+        SELECT 
+        uom_name 
+        FROM uom_info 
+        WHERE status = 'Active' 
+        ORDER BY uom_name");
         foreach ($query->result_array() as $row) {
             $data['uom_opt'][$row['uom_name']] = $row['uom_name'];
         }
@@ -212,14 +235,26 @@ public function add_tender_enquiry()
 
     // === DROPDOWNS ===
     $data['company_opt'] = ['' => 'All'];
-    $sql = "SELECT company_id, company_name FROM company_info WHERE status = 'Active' ORDER BY company_name";
+    $sql = "
+    SELECT 
+    company_id, 
+    company_name 
+    FROM company_info 
+    WHERE status = 'Active' 
+    ORDER BY company_name";
     $query = $this->db->query($sql);
     foreach ($query->result_array() as $row) {
         $data['company_opt'][$row['company_id']] = $row['company_name'];
     }
 
     $data['customer_opt'] = ['' => 'All'];
-    $sql = "SELECT customer_id, customer_name FROM customer_info WHERE status = 'Active' ORDER BY customer_name";
+    $sql = "
+    SELECT 
+    customer_id, 
+    customer_name 
+    FROM customer_info 
+    WHERE status = 'Active' 
+    ORDER BY customer_name";
     $query = $this->db->query($sql);
     foreach ($query->result_array() as $row) {
         $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
@@ -363,28 +398,51 @@ public function edit_tender_enquiry($tender_enquiry_id = 0)
 
     // === DROPDOWNS ===
     $data['company_opt'] = ['' => 'Select Company'];
-    $sql = "SELECT company_id, company_name FROM company_info WHERE status = 'Active' ORDER BY company_name";
+    $sql = "
+    SELECT 
+    company_id, 
+    company_name 
+    FROM company_info 
+    WHERE status = 'Active' 
+    ORDER BY company_name";
     $query = $this->db->query($sql);
     foreach ($query->result_array() as $row) {
         $data['company_opt'][$row['company_id']] = $row['company_name'];
     }
 
     $data['customer_opt'] = ['' => 'Select Customer'];
-    $sql = "SELECT customer_id, customer_name FROM customer_info WHERE status = 'Active' ORDER BY customer_name";
+    $sql = "
+    SELECT 
+    customer_id, 
+    customer_name 
+    FROM customer_info 
+    WHERE status = 'Active' 
+    ORDER BY customer_name";
     $query = $this->db->query($sql);
     foreach ($query->result_array() as $row) {
         $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
     }
 
     $data['category_opt'] = ['' => 'Select Category'];
-    $sql = "SELECT category_id, category_name FROM category_info WHERE status = 'Active' ORDER BY category_name";
+    $sql = "
+    SELECT 
+    category_id, 
+    category_name 
+    FROM category_info 
+    WHERE status = 'Active' 
+    ORDER BY category_name";
     $query = $this->db->query($sql);
     foreach ($query->result_array() as $row) {
         $data['category_opt'][$row['category_id']] = $row['category_name'];
     }
 
     $data['uom_opt'] = [];
-    $sql = "SELECT uom_name FROM uom_info WHERE status = 'Active' ORDER BY uom_name";
+    $sql = "
+    SELECT 
+    uom_name 
+    FROM uom_info 
+    WHERE status = 'Active' 
+    ORDER BY uom_name";
     $query = $this->db->query($sql);
     foreach ($query->result_array() as $row) {
         $data['uom_opt'][$row['uom_name']] = $row['uom_name'];
