@@ -15,6 +15,31 @@ $current_page = $this->uri->segment(1, 0);
     </a>
 </li>
 
+<!-- Tender Enquiry Section -->
+<li class="header">Tender Enquiry</li>
+<li class="treeview <?= in_array($current_page, ['add-tender-enquiry', 'tender-enquiry-list']) ? 'active' : '' ?>">
+    <a href="#">
+        <i class="fa fa-file-text-o"></i>
+        <span>Tender Enquiry</span>
+        <span class="pull-right-container">
+            <i class="fa fa-angle-left pull-right"></i>
+        </span>
+    </a>
+    <ul class="treeview-menu">
+        <li class="<?= ($current_page === 'add-tender-enquiry') ? 'active' : '' ?>">
+            <a href="<?= site_url('add-tender-enquiry') ?>">
+                <i class="fa fa-plus-circle"></i> Add Tender Enquiry
+            </a>
+        </li>
+        <li class="<?= ($current_page === 'tender-enquiry-list') ? 'active' : '' ?>">
+            <a href="<?= site_url('tender-enquiry-list') ?>">
+                <i class="fa fa-list"></i> Tender Enquiry List
+            </a>
+        </li>
+    </ul>
+</li>
+
+
 <!-- Master Section -->
 <li class="header">Master</li>
 <li class="treeview <?= in_array($current_page, $g_master) ? 'active' : '' ?>">
