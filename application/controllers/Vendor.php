@@ -20,12 +20,10 @@ class Vendor extends CI_Controller
         if ($this->input->post('mode') == 'Add') {
             $this->db->trans_start();
 
-            // Insert main record
             $insert_data = array(
-                'customer_id' => $this->input->post('customer_id'),
-                'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
-                'vendor_id' => $this->input->post('vendor_id'),
-                'customer_id' => $this->input->post('customer_id'),
+                'customer_id' => $this->input->post('srch_customer_id'),
+                'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
+                'vendor_id' => $this->input->post('srch_vendor_id'), 
                 'enquiry_date' => $this->input->post('enquiry_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('enquiry_date'))) : null,
                 'opening_date' => $this->input->post('opening_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('opening_date'))) : null,
                 'closing_date' => $this->input->post('closing_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('closing_date'))) : null,
@@ -37,7 +35,7 @@ class Vendor extends CI_Controller
             $this->db->insert('vendor_rate_enquiry_info', $insert_data);
             $vendor_rate_enquiry_id = $this->db->insert_id();
 
-            // Insert item records
+            $selected_items = $this->input->post('selected_items');
             $tender_enquiry_item_id = $this->input->post('tender_enquiry_item_id');
             $category_ids = $this->input->post('category_id');
             $item_ids = $this->input->post('item_id');
@@ -45,14 +43,14 @@ class Vendor extends CI_Controller
             $uoms = $this->input->post('uom');
             $qtys = $this->input->post('qty');
 
-            if (!empty($item_ids)) {
-                foreach ($item_ids as $index => $item_id) {
-                    if (!empty($item_id)) {
+            if (!empty($selected_items)) {
+                foreach ($selected_items as $index) {
+                    if (!empty($item_ids[$index])) {
                         $insert_item_data = array(
                             'vendor_rate_enquiry_id' => $vendor_rate_enquiry_id,
-                            'tender_enquiry_item_id' => $tender_enquiry_item_id,
+                            'tender_enquiry_item_id' => $tender_enquiry_item_id[$index] ?? 0,
                             'category_id' => $category_ids[$index] ?? 0,
-                            'item_id' => $item_id,
+                            'item_id' => $item_ids[$index],
                             'item_desc' => $item_descs[$index] ?? '',
                             'uom' => $uoms[$index] ?? '',
                             'qty' => $qtys[$index] ?? 0.00,
@@ -86,7 +84,6 @@ class Vendor extends CI_Controller
         $config['total_rows'] = $cnt;
         $config['per_page'] = 50;
         $config['uri_segment'] = 2;
-        //$config['num_links'] = 2; 
         $config['attributes'] = array('class' => 'page-link');
         $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
         $config['full_tag_close'] = '</ul>';
@@ -106,15 +103,11 @@ class Vendor extends CI_Controller
         $config['next_link'] = "Next";
         $this->pagination->initialize($config);
 
-
         $data['customer_opt'] = [];
         $data['vendor_opt'] = [];
 
-        // Companies
         $sql = "
-            SELECT 
-            vendor_id, 
-            vendor_name 
+            SELECT vendor_id,vendor_name 
             FROM vendor_info 
             WHERE status = 'Active' 
             ORDER BY vendor_name ASC";
@@ -124,61 +117,89 @@ class Vendor extends CI_Controller
         }
 
         $sql = "
-            SELECT 
-            customer_id, 
-            customer_name 
-            FROM customer_info 
+            SELECT customer_id,customer_name
+            FROM customer_info
             WHERE status = 'Active' 
-            ORDER BY customer_name ASC";
+            ORDER BY customer_name ASC
+        ";
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
             $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
         }
+
         $sql = "
-            SELECT
+            SELECT 
                 a.tender_enquiry_id,
                 a.enquiry_no,
                 b.company_name,
                 c.customer_name 
-            FROM
-                tender_enquiry_info AS a
-                LEFT JOIN company_info as b on a.company_id = b.company_id and b.status='Active'
-                LEFT JOIN customer_info as c on a.customer_id = c.customer_id and c.status='Active'
-            WHERE
-                a.status = 'Active'
-            ORDER BY a.tender_enquiry_id , a.enquiry_no ASC";
+            FROM tender_enquiry_info AS a LEFT JOIN company_info as b on a.company_id = b.company_id and b.status='Active' 
+            LEFT JOIN customer_info as c on a.customer_id = c.customer_id and c.status='Active' 
+            WHERE a.status = 'Active' ORDER BY a.tender_enquiry_id , a.enquiry_no ASC
+        ";
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
             $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_enquiry_id'] . ' -> ' . $row['enquiry_no'] . ' -> ' . $row['company_name'] . ' -> ' . $row['customer_name'];
         }
 
         $sql = "
-            SELECT *
-            FROM company_info
-            WHERE status != 'Delete'
-            order by company_id desc
-            limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
-        ";
-
+            SELECT * FROM company_info 
+            WHERE status != 'Delete' 
+            order by company_id desc 
+            limit " . $this->uri->segment(2, 0) . "," . $config['per_page']
+        ;
         $data['record_list'] = array();
-
         $query = $this->db->query($sql);
-
         foreach ($query->result_array() as $row) {
             $data['record_list'][] = $row;
         }
 
-
-
         $data['pagination'] = $this->pagination->create_links();
-
-
-
         $this->load->view('page/vendor/vendor-rate-enquiry', $data);
     }
 
+    public function get_data()
+    {
+        $table = $this->input->post('tbl');
+        $rec_id = $this->input->post('id');
 
-     public function vendor_rate_enquiry_list()
+        $this->db->query('SET SQL_BIG_SELECTS=1');
+        $rec_list = array();
+
+        if ($table == 'get-tender-enquiry-item-list-rate') {
+            $query = $this->db->query("
+            SELECT
+                a.tender_enquiry_item_id,
+                d.category_id,
+                d.category_name,
+                c.item_id,
+                c.item_name,
+                a.item_desc,
+                a.uom,
+                a.qty,
+                a.status
+            FROM
+                tender_enquiry_item_info AS a
+            LEFT JOIN tender_enquiry_info AS b
+            ON
+                a.tender_enquiry_id = b.tender_enquiry_id AND b.status = 'Active'
+            LEFT JOIN item_info AS c
+            ON
+                a.item_id = c.item_id AND c.status = 'Active'
+            LEFT JOIN category_info AS d
+            ON
+                a.category_id = d.category_id AND d.status = 'Active'
+            WHERE
+                a.status = 'Active' AND a.tender_enquiry_id = '" . $rec_id . "'
+            ");
+            $rec_list = $query->result_array();
+        }
+        header('Content-Type: application/x-json; charset=utf-8');
+        echo json_encode($rec_list);
+    }
+
+
+    public function vendor_rate_enquiry_list()
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in')) {
             redirect();
@@ -308,50 +329,7 @@ class Vendor extends CI_Controller
         $this->load->view('page/vendor/vendor-rate-enquiry-list', $data);
     }
 
-
-
-    public function get_data()
-    {
-        $table = $this->input->post('tbl');
-        $rec_id = $this->input->post('id');
-
-        $this->db->query('SET SQL_BIG_SELECTS=1');
-        $rec_list = array();
-
-        if ($table == 'get-tender-enquiry-item-list-rate') {
-            $query = $this->db->query(" 
-            SELECT
-                d.category_name,
-                c.item_name,
-                a.item_desc,
-                a.uom,
-                a.qty,
-                a.status
-            FROM
-                tender_enquiry_item_info AS a
-            LEFT JOIN tender_enquiry_info AS b
-            ON
-                a.tender_enquiry_id = b.tender_enquiry_id AND b.status = 'Active'
-            LEFT JOIN item_info AS c
-            ON
-                a.item_id = c.item_id AND c.status = 'Active'
-            LEFT JOIN category_info AS d
-            ON
-                a.category_id = d.category_id AND d.status = 'Active'
-            WHERE
-                a.status = 'Active'
-            and a.tender_enquiry_id = '" . $rec_id . "'
-                
-            ");
-
-            $rec_list = $query->result_array();
-        }
-        header('Content-Type: application/x-json; charset=utf-8');
-        echo json_encode($rec_list);
-    }
-
-    
-     public function delete_record()
+    public function delete_record()
     {
         $table = $this->input->post('tbl');
         $rec_id = $this->input->post('id');

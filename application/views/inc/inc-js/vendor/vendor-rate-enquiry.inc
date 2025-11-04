@@ -1,20 +1,13 @@
 <script>
   $(document).ready(function () {
-    // When tender enquiry changes
     $("#srch_tender_enquiry_id").on("change", function () {
       const tender_enquiry_id = $(this).val();
-
-      // Clear previous items
       $("#item_container").html("");
-
       if (tender_enquiry_id) {
         $.ajax({
           url: '<?php echo site_url("vendor/get_data"); ?>',
           type: "POST",
-          data: {
-            tbl: "get-tender-enquiry-item-list-rate",
-            id: tender_enquiry_id,
-          },
+          data: { tbl: "get-tender-enquiry-item-list-rate", id: tender_enquiry_id },
           dataType: "json",
           success: function (res) {
             if (res.length > 0) {
@@ -28,6 +21,9 @@
                               <label class="form-check-label" for="check_${i}">Select</label>
                           </div>
                       </div>
+                      <input type="hidden" name="tender_enquiry_item_id[]" value="${row.tender_enquiry_item_id}">
+                      <input type="hidden" name="category_id[]" value="${row.category_id}">
+                      <input type="hidden" name="item_id[]" value="${row.item_id}">
                       <div class="row">
                           <div class="col-md-4">
                               <div class="row">
@@ -73,23 +69,11 @@
                 $("#item_container").append(itemHtml);
               });
             } else {
-              $("#item_container").html(
-                '<div class="alert alert-warning">No items found for this tender enquiry.</div>'
-              );
+              $("#item_container").html('<div class="alert alert-warning">No items found for this tender enquiry.</div>');
             }
           },
         });
       }
-    });
-
-    // Before submitting form - only send checked item values
-    $("form").on("submit", function (e) {
-      $(".item-card").each(function () {
-        const isChecked = $(this).find(".item-check").is(":checked");
-        if (!isChecked) {
-          $(this).find("input, textarea, select").prop("disabled", true);
-        }
-      });
     });
   });
 </script>
