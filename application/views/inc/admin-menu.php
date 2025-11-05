@@ -86,7 +86,7 @@ $current_page = $this->uri->segment(1, 0);
 
         <li class="<?= ($current_page === 'tender-quotation-list') ? 'active' : '' ?>">
             <a href="<?= site_url('tender-quotation-list') ?>">
-                <i class="fa fa-list-ul"></i> Vendor Enquiry List
+                <i class="fa fa-list-ul"></i> Tender Quotation List
             </a>
         </li>
     </ul>
