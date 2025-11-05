@@ -62,7 +62,7 @@
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
-                                <h3 class="modal-title" id="scrollmodalLabel"><strong>Add Company Info</strong></h3>
+                                <h3 class="modal-title" id="scrollmodalLabel"><strong>Add User Info</strong></h3>
                                 <input type="hidden" name="mode" value="Add" />
                             </div>
                             <div class="modal-body">
@@ -131,9 +131,9 @@
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
-                                <h3 class="modal-title" id="scrollmodalLabel">Edit Category</h3>
+                                <h3 class="modal-title" id="scrollmodalLabel">Edit User</h3>
                                 <input type="hidden" name="mode" value="Edit" />
-                                <input type="hidden" name="category_id" id="category_id" value="" />
+                                <input type="hidden" name="user_id" id="user_id" value="" />
                             </div>
                             <div class="modal-body">
                                 <div class="row">
