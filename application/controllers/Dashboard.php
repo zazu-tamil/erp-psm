@@ -36,6 +36,39 @@ class Dashboard extends MY_Controller
         $this->db->where('status !=', 'Delete');
         $data['customer_count'] = $this->db->count_all_results('customer_info');
 
+        $sql = "
+            SELECT COUNT(*) AS total_enquiry 
+            FROM tender_enquiry_info 
+            WHERE status != 'Delete' 
+            AND DATE(created_date) = CURDATE()
+        ";
+
+        $query = $this->db->query($sql);
+        $row = $query->row();
+        $data['total_enquiry'] = $row ? $row->total_enquiry : 0;
+
+        $sql = "
+            SELECT COUNT(*) AS tender_quotation_count 
+            FROM tender_quotation_info 
+            WHERE status != 'Delete' 
+            AND DATE(created_date) = CURDATE()
+        ";
+
+        $query = $this->db->query($sql);
+        $row = $query->row();
+        $data['tender_quotation_count'] = $row ? $row->tender_quotation_count : 0;
+
+        $sql = "
+            SELECT COUNT(*) AS vendor_enquiry_count 
+            FROM vendor_rate_enquiry_info 
+            WHERE status != 'Delete' 
+            AND DATE(created_date) = CURDATE()
+        ";
+
+        $query = $this->db->query($sql);
+        $row = $query->row();
+        $data['vendor_enquiry_count'] = $row ? $row->vendor_enquiry_count : 0;
+
 
 
 
