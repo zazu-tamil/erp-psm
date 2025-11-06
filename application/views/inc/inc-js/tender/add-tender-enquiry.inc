@@ -283,7 +283,7 @@
         console.log(formData);
 
         $.ajax({
-            url: '<?php echo base_url("tender/ajax_add_customer"); ?>',
+            url: '<?php echo base_url("tender/ajax_add_master_inline"); ?>',
             type: 'POST',
             data: formData,
             dataType: 'json',

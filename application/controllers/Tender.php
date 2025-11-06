@@ -900,7 +900,7 @@ class Tender extends CI_Controller
         }
     }
 
-    public function ajax_add_customer()
+    public function ajax_add_master_inline()
     {
         if($this->input->post('mode') == 'Add Customer')
         {
