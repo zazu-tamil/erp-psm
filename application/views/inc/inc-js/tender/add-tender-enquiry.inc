@@ -1,3 +1,5 @@
+ 
+
 <style>
   .text-light-blue {
     color: #3c8dbc !important;
@@ -141,6 +143,12 @@
 </style>
 <script>
   jQuery(function ($) {
+
+
+    
+
+
+
     // Company → Customer
     $("#srch_company_id").change(function () {
       const companyId = $(this).val();
@@ -265,6 +273,54 @@
 
     // Initialize
     addEmptyRow();
+
+
+    $('input[name="btn_add_customer"]').on('click', function (e) {
+        e.preventDefault();
+
+        var formData = $('#frmadd_Customer').serializeArray();
+
+        console.log(formData);
+
+        $.ajax({
+            url: '<?php echo base_url("tender/ajax_add_customer"); ?>',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            beforeSend: function () {
+                $('input[name="btn_add_customer"]').val('Saving...').prop('disabled', true);
+            },
+            success: function (response) {
+
+              console.log(response);
+                if (response.status === 'success') {
+
+                    // Add new option to the dropdown dynamically
+                    var newOption = new Option(response.name, response.id, true, true);
+                    $('#srch_customer_id').append(newOption).trigger('change');
+
+                    // Reset form & close modal
+                    $('#frmadd')[0].reset();
+                    $('#add_customer').modal('hide');
+
+                    // Optional success alert
+                    //toastr.success(response.message);
+                    alert(response.message);
+                } else {
+                    //toastr.error('Failed to add customer.');
+                    alert('Failed to add customer.');
+                }
+            },
+            error: function (xhr, status, error) {
+                //toastr.error('Error: ' + error);
+                alert('Error: ' + error);
+            },
+            complete: function () {
+                $('input[name="btn_add_customer"]').val('Save').prop('disabled', false);
+            }
+        });
+    }); 
+
   });
 </script>
 <style>
