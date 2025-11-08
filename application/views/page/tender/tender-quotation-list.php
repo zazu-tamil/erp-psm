@@ -45,7 +45,7 @@
     <!-- List Table -->
     <div class="box box-info">
         <div class="box-header with-border">
-            <a href="<?php echo site_url('add-tender-quotation'); ?>" class="btn btn-success">
+            <a href="<?php echo site_url('tender-quotation-add'); ?>" class="btn btn-success">
                 <i class="fa fa-plus-circle"></i> Add New
             </a>
             <div class="box-tools pull-right">
