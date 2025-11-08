@@ -73,6 +73,19 @@
                     <legend class="text-light-blue"><i class="fa fa-list"></i> Item Details</legend>
 
                     <div class="item-details-container">
+                        <div class="grid-header">
+                            <div class="form-group">
+                                <button type="button" class="btn btn-primary" data-toggle="modal"
+                                    data-target="#add_category">
+                                    <i class="fa fa-tags"></i> Add Category
+                                </button>
+                                <button type="button" class="btn btn-success" data-toggle="modal"
+                                    data-target="#add_item">
+                                    <i class="fa fa-plus"></i> Add Item
+                                </button>
+                            </div>
+
+                        </div>
                         <!-- Header -->
                         <div class="grid-header">
                             <div>Category / Item</div>
@@ -139,12 +152,6 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label>Country</label>
-                                <?php echo form_dropdown('country', ['' => 'Select Country'] + $country_opt, set_value('country'), 'id="country" class="form-control" required'); ?>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="form-group">
                                 <label for="address">Address</label>
                                 <textarea class="form-control" name="address" id="address" placeholder="Address"
                                     required="true" rows="4"></textarea>
@@ -152,60 +159,24 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="form-group col-md-4">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Country</label>
+                                <?php echo form_dropdown('country', ['' => 'Select Country'] + $country_opt, set_value('country'), 'id="country" class="form-control" required'); ?>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
                             <label>Mobile</label>
                             <input class="form-control" type="text" name="mobile" id="mobile" placeholder="Mobile">
                         </div>
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-6">
                             <label>Alternate Mobile</label>
                             <input class="form-control" type="text" name="mobile_alt" id="mobile_alt"
                                 placeholder="Alternate Mobile">
                         </div>
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-6">
                             <label>Email</label>
                             <input class="form-control" type="email" name="email" id="email" placeholder="Email">
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="form-group col-md-6">
-                            <label>VAT No</label>
-                            <input class="form-control" type="text" name="gst" id="gst" placeholder="VAT No">
-                        </div>
-                        <div class="form-group col-md-6">
-                            <label>Remarks</label>
-                            <input type="text" name="remarks" id="remarks" class="form-control"
-                                placeholder="Enter remarks">
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label>Latitude</label>
-                            <input class="form-control" type="text" name="latitude" id="latitude"
-                                placeholder="Latitude">
-                        </div>
-                        <div class="col-md-6">
-                            <label>Longitude</label>
-                            <input class="form-control" type="text" name="longitude" id="longitude"
-                                placeholder="Longitude">
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label>Google Map Location</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" name="google_map_location"
-                                        id="google_map_location" placeholder="Google Map Location URL">
-                                    <span class="input-group-btn">
-                                        <button type="button" class="btn btn-primary" id="get-location-btn">
-                                            <i class="fa fa-map-marker"></i> Capture Location
-                                        </button>
-                                    </span>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -216,6 +187,18 @@
                             <label><input type="radio" name="status" value="Active" checked> Active</label>
                             <label class="ml-3"><input type="radio" name="status" value="InActive">
                                 InActive</label>
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label>VAT No</label>
+                            <input class="form-control" type="text" name="gst" id="gst" placeholder="VAT No">
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="form-group col-md-12">
+                            <label>Remarks</label>
+                            <textarea name="remarks" id="remarks" class="form-control" rows="3"
+                                placeholder="Enter your remarks"></textarea>
                         </div>
                     </div>
                 </div>
@@ -228,6 +211,147 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="add_category" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <form method="post" action="" id="frmadd_Category" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h3 class="modal-title">Add Category</h3>
+                    <input type="hidden" name="mode" value="Add Category" />
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label>Category Name</label>
+                            <input class="form-control" type="text" name="category_name" id="category_name" value=""
+                                placeholder="Category Name" required="true">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label>Status</label>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="status" value="Active" checked="true" />
+                                    Active
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="status" value="InActive" /> InActive
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <input type="submit" name="btn_add_category" value="Save" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="add_item" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <form method="post" action="" id="frmadd_Item" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h3 class="modal-title">Add Item</h3>
+                    <input type="hidden" name="mode" value="Add Item" />
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col-md-6 mb-3">
+                            <label>Category</label>
+                            <?php echo form_dropdown(
+                                'category_id',
+                                array('' => 'Select Category') + $category_opt,
+                                '',
+                                'id="category_id" class="form-control category-select" required'
+                            ); ?>
+                        </div>
+
+                        <div class="form-group col-md-6 mb-3">
+                            <label>Brand</label>
+                            <?php echo form_dropdown(
+                                'brand_id',
+                                array('' => 'Select Brand') + $brand_opt,
+                                '',
+                                'id="brand_id" class="form-control" required'
+                            ); ?>
+                        </div>
+
+                        <div class="form-group col-md-6 mb-3">
+                            <label>Item Name</label>
+                            <input class="form-control" type="text" name="item_name" required id="item_name"
+                                placeholder="Enter your item name">
+                        </div>
+                        <div class="form-group col-md-6 mb-3">
+                            <label>Item Code</label>
+                            <input class="form-control" type="text" name="item_code" required id="item_code"
+                                placeholder="Enter your item code">
+                        </div>
+                        <div class="form-group col-md-12 mb-3">
+                            <label>Description</label>
+                            <textarea class="form-control" name="item_description" id="item_description"
+                                rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-6 mb-3">
+                            <label>UOM</label>
+                            <?php echo form_dropdown(
+                                'uom',
+                                array('' => 'Select UOM') + $uom_opt,
+                                '',
+                                'id="uom" class="form-control" required'
+                            ); ?>
+                        </div>
+
+                        <div class="form-group col-md-6 mb-3">
+                            <label>HSN Code</label>
+                            <input class="form-control" type="text" name="hsn_code" id="hsn_code">
+                        </div>
+                        <div class="form-group col-md-6 mb-3">
+                            <label>VAT (%)</label>
+                            <?php echo form_dropdown(
+                                'gst',
+                                array('' => 'Select gst') + $gst_opt,
+                                '',
+                                'id="gst" class="form-control" required'
+                            ); ?>
+                        </div>
+
+                        <div class="form-group col-md-6 mb-3">
+                            <label>Item Image</label>
+                            <input class="form-control" type="file" name="item_image" id="item_image" accept="image/*">
+                            <img src="" alt="" id="item_image_preview" style="display:none;" width="100px"
+                                height="100px">
+                        </div>
+                        <div class="form-group col-md-12 mb-3">
+                            <label>Status</label><br>
+                            <label><input type="radio" name="status" value="Active" checked>
+                                Active</label>&nbsp;&nbsp;&nbsp;
+                            <label><input type="radio" name="status" value="InActive"> InActive</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <input type="submit" name="btn_add_item" value="Save" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
 
 

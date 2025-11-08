@@ -105,6 +105,25 @@ class Vendor extends CI_Controller
 
         $data['customer_opt'] = [];
         $data['vendor_opt'] = [];
+        $data['country_opt'] = [];
+
+        $sql = "
+          SELECT
+                a.country_id,
+                a.country_name
+            FROM
+                country_info AS a
+            WHERE
+                a.status != 'Delete'
+            ORDER BY
+                a.country_name ASC
+         ";
+
+        $query = $this->db->query($sql);
+        $data['country_opt'] = array();
+        foreach ($query->result_array() as $row) {
+            $data['country_opt'][$row['country_name']] = $row['country_name'];
+        }
 
         $sql = "
             SELECT vendor_id,vendor_name 
@@ -138,7 +157,7 @@ class Vendor extends CI_Controller
             WHERE a.status = 'Active' ORDER BY a.tender_enquiry_id , a.enquiry_no ASC
         ";
         $query = $this->db->query($sql);
-        $data['tender_enquiry_opt']=array();
+        $data['tender_enquiry_opt'] = array();
         foreach ($query->result_array() as $row) {
             $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_enquiry_id'] . ' -> ' . $row['enquiry_no'] . ' -> ' . $row['company_name'] . ' -> ' . $row['customer_name'];
         }
@@ -314,18 +333,18 @@ class Vendor extends CI_Controller
 
 
 
-public function vendor_rate_enquiry_print($vendor_rate_enquiry_id = 0)
-{
-    if (!$this->session->userdata(SESS_HD . 'logged_in')) {
-        redirect();
-    }
+    public function vendor_rate_enquiry_print($vendor_rate_enquiry_id = 0)
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
 
-    if (!$vendor_rate_enquiry_id) {
-        show_404();
-    }
+        if (!$vendor_rate_enquiry_id) {
+            show_404();
+        }
 
-    // Fetch main record
-    $sql = "
+        // Fetch main record
+        $sql = "
         SELECT 
             vrei.*,
             c.customer_name,
@@ -341,15 +360,15 @@ public function vendor_rate_enquiry_print($vendor_rate_enquiry_id = 0)
         LEFT JOIN company_info ci ON te.company_id = ci.company_id AND ci.status = 'Active'
         WHERE vrei.vendor_rate_enquiry_id = ? AND vrei.status != 'Delete'
     ";
-    $query = $this->db->query($sql, [$vendor_rate_enquiry_id]);
-    $data['record'] = $query->row_array();
+        $query = $this->db->query($sql, [$vendor_rate_enquiry_id]);
+        $data['record'] = $query->row_array();
 
-    if (!$data['record']) {
-        show_404();
-    }
+        if (!$data['record']) {
+            show_404();
+        }
 
-    // Fetch items
-    $sql = "
+        // Fetch items
+        $sql = "
         SELECT 
             vrei_item.*,
             cat.category_name,
@@ -362,22 +381,22 @@ public function vendor_rate_enquiry_print($vendor_rate_enquiry_id = 0)
         WHERE vrei_item.vendor_rate_enquiry_id = ? AND vrei_item.status = 'Active'
         ORDER BY vrei_item.vendor_rate_enquiry_item_id
     ";
-    $query = $this->db->query($sql, [$vendor_rate_enquiry_id]);
-    $data['items'] = $query->result_array();
+        $query = $this->db->query($sql, [$vendor_rate_enquiry_id]);
+        $data['items'] = $query->result_array();
 
-    // Calculate totals
-    $data['grand_total'] = 0;
-    $data['total_gst'] = 0;
-    foreach ($data['items'] as &$item) {
-        $item['amount'] = $item['rate'] * $item['qty'];
-        $item['gst_amount'] = $item['amount'] * ($item['gst'] / 100);
-        $data['grand_total'] += $item['amount'];
-        $data['total_gst'] += $item['gst_amount'];
+        // Calculate totals
+        $data['grand_total'] = 0;
+        $data['total_gst'] = 0;
+        foreach ($data['items'] as &$item) {
+            $item['amount'] = $item['rate'] * $item['qty'];
+            $item['gst_amount'] = $item['amount'] * ($item['gst'] / 100);
+            $data['grand_total'] += $item['amount'];
+            $data['total_gst'] += $item['gst_amount'];
+        }
+        $data['final_total'] = $data['grand_total'] + $data['total_gst'];
+
+        $this->load->view('page/vendor/vendor-rate-enquiry-print', $data);
     }
-    $data['final_total'] = $data['grand_total'] + $data['total_gst'];
-
-    $this->load->view('page/vendor/vendor-rate-enquiry-print', $data);
-}
 
     public function get_data()
     {
@@ -566,6 +585,40 @@ public function vendor_rate_enquiry_print($vendor_rate_enquiry_id = 0)
         } else {
             echo 'Invalid request.';
         }
+    }
+    public function ajax_add_master_inline()
+    {
+        if ($this->input->post('mode') == 'Add Vendor') {
+
+            $data = [
+                'vendor_name' => $this->input->post('vendor_name'),
+                'contact_name' => $this->input->post('contact_name'),
+                'crno' => $this->input->post('crno'),
+                'country' => $this->input->post('country'),
+                'address' => $this->input->post('address'),
+                'mobile' => $this->input->post('mobile'),
+                'mobile_alt' => $this->input->post('mobile_alt'),
+                'email' => $this->input->post('email'),
+                'remarks' => $this->input->post('remarks'),
+                'gst' => $this->input->post('gst'), 
+                'status' => $this->input->post('status'), 
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_date' => date('Y-m-d H:i:s'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            ];
+
+            $this->db->insert('vendor_info', $data);
+            $insert_id = $this->db->insert_id();
+
+            // Return response for JS
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Vendor added successfully!',
+                'id' => $insert_id,
+                'name' => $data['vendor_name']
+            ]);
+        } 
     }
 
 }

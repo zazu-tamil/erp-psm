@@ -121,7 +121,7 @@ class Tender extends CI_Controller
             $data['uom_opt'][$row['uom_name']] = $row['uom_name'];
         }
 
-         $sql = "
+        $sql = "
           SELECT
                 a.country_id,
                 a.country_name
@@ -137,6 +137,34 @@ class Tender extends CI_Controller
         $data['country_opt'] = array();
         foreach ($query->result_array() as $row) {
             $data['country_opt'][$row['country_name']] = $row['country_name'];
+        }
+
+
+        $sql = "
+               select 
+               a.gst_id, 
+               a.gst_percentage 
+            from gst_info as a 
+            where status != 'Delete' 
+            order by a.status asc , a.gst_percentage asc
+        ";
+        $query = $this->db->query($sql);
+        $data['gst_opt'] = array();
+        foreach ($query->result_array() as $row) {
+            $data['gst_opt'][$row['gst_percentage']] = $row['gst_percentage'];
+        }
+
+        // Brands
+        $sql = " 
+            SELECT brand_id, brand_name 
+            FROM brand_info WHERE status != 'Delete'
+            ORDER BY brand_name ASC
+        ";
+
+        $query = $this->db->query($sql);
+        $data['brand_opt'] = array();
+        foreach ($query->result_array() as $row) {
+            $data['brand_opt'][$row['brand_id']] = $row['brand_name'];
         }
 
         $data['status_opt'] = ['Active' => 'Active', 'Inactive' => 'Inactive'];
@@ -519,7 +547,7 @@ class Tender extends CI_Controller
                 $item_descs = $this->input->post('item_desc') ?? [];
                 $uoms = $this->input->post('uom') ?? [];
                 $qtys = $this->input->post('qty') ?? [];
-                 $gsts = $this->input->post('gst') ?? [];
+                $gsts = $this->input->post('gst') ?? [];
                 $amounts = $this->input->post('amount') ?? [];
 
                 foreach ($selected_idxs as $idx) {
@@ -531,7 +559,7 @@ class Tender extends CI_Controller
                         'item_desc' => $item_descs[$idx] ?? '',
                         'uom' => $uoms[$idx] ?? '',
                         'qty' => $qtys[$idx] ?? 0,
-                         'gst' => $gsts[$idx] ?? 0,
+                        'gst' => $gsts[$idx] ?? 0,
                         'amount' => $amounts[$idx] ?? 0,
                         'status' => 'Active',
                         'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
@@ -665,107 +693,107 @@ class Tender extends CI_Controller
 
 
     public function tender_quotation_list()
-{
-    if (!$this->session->userdata(SESS_HD . 'logged_in')) {
-        redirect();
-    }
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
 
-    $data = array();
-    $data['js'] = 'tender/tender-quotation-list.inc';
-    $data['s_url'] = 'tender-quotation-list';
-    $data['title'] = 'Tender Quotation List';
+        $data = array();
+        $data['js'] = 'tender/tender-quotation-list.inc';
+        $data['s_url'] = 'tender-quotation-list';
+        $data['title'] = 'Tender Quotation List';
 
-    // === FILTERS ===
-    $where = "1";
+        // === FILTERS ===
+        $where = "1";
 
-    // Company Filter
-    if ($this->input->post('srch_company_id') !== null) {
-        $data['srch_company_id'] = $srch_company_id = $this->input->post('srch_company_id');
-        $this->session->set_userdata('srch_company_id', $srch_company_id);
-    } elseif ($this->session->userdata('srch_company_id')) {
-        $data['srch_company_id'] = $srch_company_id = $this->session->userdata('srch_company_id');
-    } else {
-        $data['srch_company_id'] = $srch_company_id = '';
-    }
-    if (!empty($srch_company_id)) {
-        $where .= " AND a.company_id = '" . $this->db->escape_str($srch_company_id) . "'";
-    }
+        // Company Filter
+        if ($this->input->post('srch_company_id') !== null) {
+            $data['srch_company_id'] = $srch_company_id = $this->input->post('srch_company_id');
+            $this->session->set_userdata('srch_company_id', $srch_company_id);
+        } elseif ($this->session->userdata('srch_company_id')) {
+            $data['srch_company_id'] = $srch_company_id = $this->session->userdata('srch_company_id');
+        } else {
+            $data['srch_company_id'] = $srch_company_id = '';
+        }
+        if (!empty($srch_company_id)) {
+            $where .= " AND a.company_id = '" . $this->db->escape_str($srch_company_id) . "'";
+        }
 
-    // Customer Filter
-    if ($this->input->post('srch_customer_id') !== null) {
-        $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
-        $this->session->set_userdata('srch_customer_id', $srch_customer_id);
-    } elseif ($this->session->userdata('srch_customer_id')) {
-        $data['srch_customer_id'] = $srch_customer_id = $this->session->userdata('srch_customer_id');
-    } else {
-        $data['srch_customer_id'] = $srch_customer_id = '';
-    }
-    if (!empty($srch_customer_id)) {
-        $where .= " AND a.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
-    }
+        // Customer Filter
+        if ($this->input->post('srch_customer_id') !== null) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
+            $this->session->set_userdata('srch_customer_id', $srch_customer_id);
+        } elseif ($this->session->userdata('srch_customer_id')) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->session->userdata('srch_customer_id');
+        } else {
+            $data['srch_customer_id'] = $srch_customer_id = '';
+        }
+        if (!empty($srch_customer_id)) {
+            $where .= " AND a.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
+        }
 
-    // Tender Enquiry Filter
-    if ($this->input->post('srch_tender_enquiry_id') !== null) {
-        $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = $this->input->post('srch_tender_enquiry_id');
-        $this->session->set_userdata('srch_tender_enquiry_id', $srch_tender_enquiry_id);
-    } elseif ($this->session->userdata('srch_tender_enquiry_id')) {
-        $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = $this->session->userdata('srch_tender_enquiry_id');
-    } else {
-        $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = '';
-    }
-    if (!empty($srch_tender_enquiry_id)) {
-        $where .= " AND a.tender_enquiry_id = '" . $this->db->escape_str($srch_tender_enquiry_id) . "'";
-    }
+        // Tender Enquiry Filter
+        if ($this->input->post('srch_tender_enquiry_id') !== null) {
+            $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = $this->input->post('srch_tender_enquiry_id');
+            $this->session->set_userdata('srch_tender_enquiry_id', $srch_tender_enquiry_id);
+        } elseif ($this->session->userdata('srch_tender_enquiry_id')) {
+            $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = $this->session->userdata('srch_tender_enquiry_id');
+        } else {
+            $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = '';
+        }
+        if (!empty($srch_tender_enquiry_id)) {
+            $where .= " AND a.tender_enquiry_id = '" . $this->db->escape_str($srch_tender_enquiry_id) . "'";
+        }
 
-    // Status Filter
-    if ($this->input->post('srch_status') !== null) {
-        $data['srch_status'] = $srch_status = $this->input->post('srch_status');
-        $this->session->set_userdata('srch_status', $srch_status);
-    } elseif ($this->session->userdata('srch_status')) {
-        $data['srch_status'] = $srch_status = $this->session->userdata('srch_status');
-    } else {
-        $data['srch_status'] = $srch_status = '';
-    }
-    if (!empty($srch_status) && $srch_status !== 'All') {
-        $where .= " AND a.status = '" . $this->db->escape_str($srch_status) . "'";
-    }
+        // Status Filter
+        if ($this->input->post('srch_status') !== null) {
+            $data['srch_status'] = $srch_status = $this->input->post('srch_status');
+            $this->session->set_userdata('srch_status', $srch_status);
+        } elseif ($this->session->userdata('srch_status')) {
+            $data['srch_status'] = $srch_status = $this->session->userdata('srch_status');
+        } else {
+            $data['srch_status'] = $srch_status = '';
+        }
+        if (!empty($srch_status) && $srch_status !== 'All') {
+            $where .= " AND a.status = '" . $this->db->escape_str($srch_status) . "'";
+        }
 
-    // === COUNT TOTAL ===
-    $sql_count = "SELECT COUNT(*) as total FROM tender_quotation_info a WHERE a.status != 'Delete' AND $where";
-    $query_count = $this->db->query($sql_count);
-    $data['total_records'] = $query_count->row()->total;
+        // === COUNT TOTAL ===
+        $sql_count = "SELECT COUNT(*) as total FROM tender_quotation_info a WHERE a.status != 'Delete' AND $where";
+        $query_count = $this->db->query($sql_count);
+        $data['total_records'] = $query_count->row()->total;
 
-    // === PAGINATION ===
-    $data['sno'] = $this->uri->segment(2, 0);
-    $this->load->library('pagination');
+        // === PAGINATION ===
+        $data['sno'] = $this->uri->segment(2, 0);
+        $this->load->library('pagination');
 
-    $config['base_url'] = trim(site_url($data['s_url']), '/' . $this->uri->segment(2, 0));
-    $config['total_rows'] = $data['total_records'];
-    $config['per_page'] = 25;
-    $config['uri_segment'] = 2;
-    $config['attributes'] = ['class' => 'page-link'];
-    $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
-    $config['full_tag_close'] = '</ul>';
-    $config['num_tag_open'] = '<li class="page-item">';
-    $config['num_tag_close'] = '</li>';
-    $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
-    $config['cur_tag_close'] = '</a></li>';
-    $config['prev_tag_open'] = '<li class="page-item">';
-    $config['prev_tag_close'] = '</li>';
-    $config['next_tag_open'] = '<li class="page-item">';
-    $config['next_tag_close'] = '</li>';
-    $config['first_tag_open'] = '<li class="page-item">';
-    $config['first_tag_close'] = '</li>';
-    $config['last_tag_open'] = '<li class="page-item">';
-    $config['last_tag_close'] = '</li>';
-    $config['prev_link'] = 'Prev';
-    $config['next_link'] = 'Next';
+        $config['base_url'] = trim(site_url($data['s_url']), '/' . $this->uri->segment(2, 0));
+        $config['total_rows'] = $data['total_records'];
+        $config['per_page'] = 25;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = ['class' => 'page-link'];
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '</a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = 'Prev';
+        $config['next_link'] = 'Next';
 
-    $this->pagination->initialize($config);
-    $data['pagination'] = $this->pagination->create_links();
+        $this->pagination->initialize($config);
+        $data['pagination'] = $this->pagination->create_links();
 
-    // === FETCH RECORDS ===
-    $sql = "
+        // === FETCH RECORDS ===
+        $sql = "
         SELECT 
             a.tender_quotation_id,
             a.quotation_no,
@@ -784,35 +812,35 @@ class Tender extends CI_Controller
         ORDER BY a.tender_quotation_id DESC
         LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
-    $query = $this->db->query($sql);
-    $data['record_list'] = $query->result_array();
+        $query = $this->db->query($sql);
+        $data['record_list'] = $query->result_array();
 
-    // === DROPDOWNS ===
-    $data['company_opt'] = ['' => 'All'];
-    $sql = "SELECT company_id, company_name FROM company_info WHERE status = 'Active' ORDER BY company_name";
-    $query = $this->db->query($sql);
-    foreach ($query->result_array() as $row) {
-        $data['company_opt'][$row['company_id']] = $row['company_name'];
+        // === DROPDOWNS ===
+        $data['company_opt'] = ['' => 'All'];
+        $sql = "SELECT company_id, company_name FROM company_info WHERE status = 'Active' ORDER BY company_name";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['company_opt'][$row['company_id']] = $row['company_name'];
+        }
+
+        $data['customer_opt'] = ['' => 'All'];
+        $sql = "SELECT customer_id, customer_name FROM customer_info WHERE status = 'Active' ORDER BY customer_name";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
+        $data['tender_enquiry_opt'] = ['' => 'All'];
+        $sql = "SELECT tender_enquiry_id, enquiry_no FROM tender_enquiry_info WHERE status = 'Active' ORDER BY enquiry_no";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['enquiry_no'];
+        }
+
+        $data['status_opt'] = ['' => 'All', 'Active' => 'Active', 'Inactive' => 'Inactive'];
+
+        $this->load->view('page/tender/tender-quotation-list', $data);
     }
-
-    $data['customer_opt'] = ['' => 'All'];
-    $sql = "SELECT customer_id, customer_name FROM customer_info WHERE status = 'Active' ORDER BY customer_name";
-    $query = $this->db->query($sql);
-    foreach ($query->result_array() as $row) {
-        $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
-    }
-
-    $data['tender_enquiry_opt'] = ['' => 'All'];
-    $sql = "SELECT tender_enquiry_id, enquiry_no FROM tender_enquiry_info WHERE status = 'Active' ORDER BY enquiry_no";
-    $query = $this->db->query($sql);
-    foreach ($query->result_array() as $row) {
-        $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['enquiry_no'];
-    }
-
-    $data['status_opt'] = ['' => 'All', 'Active' => 'Active', 'Inactive' => 'Inactive'];
-
-    $this->load->view('page/tender/tender-quotation-list', $data);
-}
 
 
 
@@ -902,24 +930,20 @@ class Tender extends CI_Controller
 
     public function ajax_add_master_inline()
     {
-        if($this->input->post('mode') == 'Add Customer')
-        {
-            
+        if ($this->input->post('mode') == 'Add Customer') {
+
             $data = [
                 'customer_name' => $this->input->post('customer_name'),
-                'contact_name'  => $this->input->post('contact_name'),
-                'crno'          => $this->input->post('crno'),
-                'country'       => $this->input->post('country'),
-                'address'       => $this->input->post('address'),
-                'mobile'        => $this->input->post('mobile'),
-                'mobile_alt'    => $this->input->post('mobile_alt'),
-                'email'         => $this->input->post('email'),
-                'gst'           => $this->input->post('gst'),
-                'remarks'       => $this->input->post('remarks'),
-                'latitude'      => $this->input->post('latitude'),
-                'longitude'     => $this->input->post('longitude'),
-                'google_map_location' => $this->input->post('google_map_location'),
-                'status'        => $this->input->post('status'),
+                'contact_name' => $this->input->post('contact_name'),
+                'crno' => $this->input->post('crno'),
+                'country' => $this->input->post('country'),
+                'address' => $this->input->post('address'),
+                'mobile' => $this->input->post('mobile'),
+                'mobile_alt' => $this->input->post('mobile_alt'),
+                'email' => $this->input->post('email'),
+                'gst' => $this->input->post('gst'),
+                'remarks' => $this->input->post('remarks'), 
+                'status' => $this->input->post('status'),
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
@@ -935,6 +959,78 @@ class Tender extends CI_Controller
                 'message' => 'Customer added successfully!',
                 'id' => $insert_id,
                 'name' => $data['customer_name']
+            ]);
+        }
+
+        if ($this->input->post('mode') == 'Add Category') {
+
+            $data = [
+                'category_name' => $this->input->post('category_name'),
+                'status' => $this->input->post('status')
+            ];
+
+            $this->db->insert('category_info', $data);
+            $insert_id = $this->db->insert_id();
+
+            // Return response for JS
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Category added successfully!',
+                'id' => $insert_id,
+                'name' => $data['category_name']
+            ]);
+        }
+
+
+        if ($this->input->post('mode') == 'Add Item') {
+
+
+            $item_name = $this->input->post('item_name');
+            $item_image = '';
+
+            // 1. Handle file uploads
+            $upload_path = 'Item_doc/';
+            if (!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, true);
+            }
+
+            $config['upload_path'] = $upload_path;
+            $config['allowed_types'] = 'jpg|jpeg|png';
+            $config['max_size'] = 2048;
+
+            $this->load->library('upload', $config);
+
+            if (!empty($_FILES['item_image']['name'])) {
+                if ($this->upload->do_upload('item_image')) {
+                    $upload_data = $this->upload->data();
+                    $item_image = $upload_path . $upload_data['file_name']; // Full path saved
+                }
+            }
+
+            $data = array(
+                'category_id' => $this->input->post('category_id'),
+                'brand_id' => $this->input->post('brand_id'),
+                'item_name' => $item_name,
+                'item_description' => $this->input->post('item_description'),
+                'uom' => $this->input->post('uom'),
+                'hsn_code' => $this->input->post('hsn_code'),
+                'item_code' => $this->input->post('item_code'),
+                'gst' => $this->input->post('gst'),
+                'item_image' => $item_image,
+                'status' => $this->input->post('status'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_date' => date('Y-m-d H:i:s')
+            );
+
+            $this->db->insert('item_info', $data);
+            $insert_id = $this->db->insert_id();
+
+            // Return response for JS
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Item added successfully!',
+                'id' => $insert_id,
+                'name' => $data['item_name']
             ]);
         }
     }

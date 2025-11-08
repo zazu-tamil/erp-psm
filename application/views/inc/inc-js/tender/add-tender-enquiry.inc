@@ -1,5 +1,3 @@
- 
-
 <style>
   .text-light-blue {
     color: #3c8dbc !important;
@@ -109,7 +107,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    
   }
 
   .action-block button:hover {
@@ -143,12 +140,6 @@
 </style>
 <script>
   jQuery(function ($) {
-
-
-    
-
-
-
     // Company → Customer
     $("#srch_company_id").change(function () {
       const companyId = $(this).val();
@@ -274,57 +265,179 @@
     // Initialize
     addEmptyRow();
 
+    $('input[name="btn_add_customer"]').on("click", function (e) {
+      e.preventDefault();
 
-    $('input[name="btn_add_customer"]').on('click', function (e) {
-        e.preventDefault();
+      var formData = $("#frmadd_Customer").serializeArray();
 
-        var formData = $('#frmadd_Customer').serializeArray();
+      console.log(formData);
 
-        console.log(formData);
+      $.ajax({
+        url: '<?php echo base_url("tender/ajax_add_master_inline"); ?>',
+        type: "POST",
+        data: formData,
+        dataType: "json",
+        beforeSend: function () {
+          $('input[name="btn_add_customer"]')
+            .val("Saving...")
+            .prop("disabled", true);
+        },
+        success: function (response) {
+          console.log(response);
+          if (response.status === "success") {
+            // Add new option to the dropdown dynamically
+            var newOption = new Option(response.name, response.id, true, true);
+            $("#srch_customer_id").append(newOption).trigger("change");
 
-        $.ajax({
-            url: '<?php echo base_url("tender/ajax_add_master_inline"); ?>',
-            type: 'POST',
-            data: formData,
-            dataType: 'json',
-            beforeSend: function () {
-                $('input[name="btn_add_customer"]').val('Saving...').prop('disabled', true);
-            },
-            success: function (response) {
+            // Reset form & close modal
+            $("#frmadd")[0].reset();
+            $("#add_customer").modal("hide");
 
-              console.log(response);
-                if (response.status === 'success') {
+            // Optional success alert
+            //toastr.success(response.message);
+            alert(response.message);
+          } else {
+            //toastr.error('Failed to add customer.');
+            alert("Failed to add customer.");
+          }
+        },
+        error: function (xhr, status, error) {
+          //toastr.error('Error: ' + error);
+          alert("Error: " + error);
+        },
+        complete: function () {
+          $('input[name="btn_add_customer"]')
+            .val("Save")
+            .prop("disabled", false);
+        },
+      });
+    });
+    $('input[name="btn_add_category"]').on("click", function (e) {
+      e.preventDefault();
 
-                    // Add new option to the dropdown dynamically
-                    var newOption = new Option(response.name, response.id, true, true);
-                    $('#srch_customer_id').append(newOption).trigger('change');
+      var formData = $("#frmadd_Category").serialize(); // simpler & cleaner
 
-                    // Reset form & close modal
-                    $('#frmadd')[0].reset();
-                    $('#add_customer').modal('hide');
+      $.ajax({
+        url: '<?php echo base_url("tender/ajax_add_master_inline"); ?>',
+        type: "POST",
+        data: formData,
+        dataType: "json",
+        beforeSend: function () {
+          $('input[name="btn_add_category"]')
+            .val("Saving...")
+            .prop("disabled", true);
+        },
+        success: function (response) {
+          console.log(response);
 
-                    // Optional success alert
-                    //toastr.success(response.message);
-                    alert(response.message);
-                } else {
-                    //toastr.error('Failed to add customer.');
-                    alert('Failed to add customer.');
-                }
-            },
-            error: function (xhr, status, error) {
-                //toastr.error('Error: ' + error);
-                alert('Error: ' + error);
-            },
-            complete: function () {
-                $('input[name="btn_add_customer"]').val('Save').prop('disabled', false);
-            }
-        });
-    }); 
+          if (response.status === "success") {
+            // Add new category to all dropdowns dynamically
+            $(".category-select").each(function () {
+              var exists = $(this).find(
+                "option[value='" + response.id + "']"
+              ).length;
+              if (!exists) {
+                var newOption = new Option(
+                  response.name,
+                  response.id,
+                  false,
+                  false
+                );
+                $(this).append(newOption);
+              }
+            });
 
+            // Select the newly added category in the last row
+            $(".item-row:last .category-select")
+              .val(response.id)
+              .trigger("change");
+
+            $("#add_item .category-select")
+              .val(response.id)
+              .trigger("change");
+
+            // Reset modal form & close modal
+            $("#frmadd_Category")[0].reset();
+            $("#add_category").modal("hide");
+
+            // Success message
+            alert(response.message);
+            // toastr.success(response.message);
+          } else {
+            alert(response.message || "Failed to add category.");
+          }
+        },
+        error: function (xhr, status, error) {
+          alert("Error: " + error);
+        },
+        complete: function () {
+          $('input[name="btn_add_category"]')
+            .val("Save")
+            .prop("disabled", false);
+        },
+      });
+    });
+    $('input[name="btn_add_item"]').on("click", function (e) {
+      e.preventDefault();
+
+      var formData = $("#frmadd_Item").serialize(); // Item form data
+
+      $.ajax({
+         url: '<?php echo base_url("tender/ajax_add_master_inline"); ?>',
+        type: "POST",
+        data: formData,
+        dataType: "json",
+        beforeSend: function () {
+          $('input[name="btn_add_item"]')
+            .val("Saving...")
+            .prop("disabled", true);
+        },
+        success: function (response) {
+          console.log(response);
+
+          if (response.status === "success") {
+            // Add new item to all item dropdowns dynamically
+            $(".item-select").each(function () {
+              var exists = $(this).find(
+                "option[value='" + response.id + "']"
+              ).length;
+              if (!exists) {
+                var newOption = new Option(
+                  response.name,
+                  response.id,
+                  false,
+                  false
+                );
+                $(this).append(newOption);
+              }
+            });
+
+            // Select the newly added item in the last row
+            $(".item-row:last .item-select").val(response.id).trigger("change");
+
+            // Reset modal form & close modal
+            $("#frmadd_Item")[0].reset();
+            $("#add_item").modal("hide");
+
+            // Success message
+            alert(response.message);
+            // toastr.success(response.message);
+          } else {
+            alert(response.message || "Failed to add item.");
+          }
+        },
+        error: function (xhr, status, error) {
+          alert("Error: " + error);
+        },
+        complete: function () {
+          $('input[name="btn_add_item"]').val("Save").prop("disabled", false);
+        },
+      });
+    });
   });
 </script>
 <style>
   .form-control[name="item_desc[]"] {
-    height:80px !important;
+    height: 80px !important;
   }
 </style>
