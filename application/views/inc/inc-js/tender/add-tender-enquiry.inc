@@ -273,7 +273,7 @@
       console.log(formData);
 
       $.ajax({
-        url: '<?php echo base_url("tender/ajax_add_master_inline"); ?>',
+        url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
         type: "POST",
         data: formData,
         dataType: "json",
@@ -318,7 +318,7 @@
       var formData = $("#frmadd_Category").serialize(); // simpler & cleaner
 
       $.ajax({
-        url: '<?php echo base_url("tender/ajax_add_master_inline"); ?>',
+        url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
         type: "POST",
         data: formData,
         dataType: "json",
@@ -383,7 +383,7 @@
       var formData = $("#frmadd_Item").serialize(); // Item form data
 
       $.ajax({
-         url: '<?php echo base_url("tender/ajax_add_master_inline"); ?>',
+         url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
         type: "POST",
         data: formData,
         dataType: "json",
