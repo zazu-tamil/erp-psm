@@ -1,4 +1,10 @@
-<?php include_once(VIEWPATH . 'inc/header.php'); ?>
+<?php include_once(VIEWPATH . 'inc/header.php'); 
+
+
+// echo'<pre>';
+// print_r($header);
+// echo'</pre>';
+?>
 
 <section class="content-header">
     <h1><?php echo htmlspecialchars($title); ?></h1>
@@ -48,13 +54,7 @@
                             <input type="text" name="tender_ref_no" id="tender_ref_no" class="form-control"
                                 value="<?php echo htmlspecialchars($header['tender_ref_no']); ?>"
                                 placeholder="e.g., TEN-2025-001">
-                        </div>
-
-                        <div class="form-group col-md-3">
-                            <label for="remarks">Remarks</label>
-                            <textarea name="remarks" class="form-control" id="remarks" rows="1"
-                                placeholder="Enter your remarks"><?php echo htmlspecialchars($header['remarks']); ?></textarea>
-                        </div>
+                        </div> 
 
                         <div class="form-group col-md-3">
                             <label>Quotation Date</label>
@@ -70,6 +70,21 @@
                             <label class="radio-inline">
                                 <input type="radio" name="status" value="Pending" <?php echo ($header['status'] == 'Pending') ? 'checked' : ''; ?>> Pending
                             </label>
+                        </div>
+                    </div>
+                    <div class="row">
+                          <div class="form-group col-md-6">
+                            <label for="remarks">Remarks</label>
+                            <textarea name="remarks" class="form-control" id="remarks" rows="7"
+                                placeholder="Enter your remarks"><?php echo htmlspecialchars($header['remarks']); ?></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Terms</label>
+                                <textarea id="editor1_edit_modal" name="terms"
+                                    class="form-control custom-textarea" placeholder="Enter quotation terms"><?php echo htmlspecialchars($header['terms']); ?></textarea>
+                                     
+                            </div>
                         </div>
                     </div>
                 </fieldset>
@@ -131,7 +146,8 @@
                                                     <div class="form-group">
                                                         <label>Rate</label>
                                                         <input type="number" step="0.01" name="rate[]"
-                                                            class="form-control rate-input" value="<?php echo htmlspecialchars($row['rate']); ?>">
+                                                            class="form-control rate-input"
+                                                            value="<?php echo htmlspecialchars($row['rate']); ?>">
                                                     </div>
                                                 </div>
 

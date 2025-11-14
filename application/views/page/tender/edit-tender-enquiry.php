@@ -34,8 +34,18 @@
                             <label>Enquiry No</label>
                             <input type="text" name="enquiry_no" class="form-control" value="<?php echo htmlspecialchars(set_value('enquiry_no', $main_record['enquiry_no'])); ?>" required>
                         </div>
-                    </div>
-                    <div class="row">
+                        <div class="form-group col-md-4">
+                            <label>Company S.No</label>
+                            <input type="text" name="company_sno" class="form-control" placeholder="e.g., 001"
+                                value="<?php echo htmlspecialchars(set_value('company_sno', $main_record['company_sno'])); ?>">
+                        </div>
+                     
+                        <div class="form-group col-md-4">
+                            <label>Customer S.No</label>
+                            <input type="text" name="customer_sno" class="form-control" placeholder="e.g., 001"
+                                value="<?php echo htmlspecialchars(set_value('customer_sno', $main_record['customer_sno'])); ?>">
+                        </div>
+                     
                         <div class="form-group col-md-4">
                             <label>Enquiry Date</label>
                             <input type="date" name="enquiry_date" class="form-control" value="<?php echo set_value('enquiry_date', $main_record['enquiry_date']); ?>" required>
@@ -48,8 +58,7 @@
                             <label>Closing Date & Time</label>
                             <input type="datetime-local" name="closing_date" class="form-control" value="<?php echo $main_record['closing_date'] ? date('Y-m-d\TH:i', strtotime($main_record['closing_date'])) : ''; ?>">
                         </div>
-                    </div>
-                    <div class="row">
+                    
                         <div class="form-group col-md-4">
                             <label>Status</label>
                             <?php echo form_dropdown('status', $status_opt, set_value('status', $main_record['status']), 'class="form-control select2"'); ?>

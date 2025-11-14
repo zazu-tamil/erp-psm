@@ -74,6 +74,7 @@
           $("#edit_modal #mobile_alt").val(d.mobile_alt);
           $("#edit_modal #email").val(d.email);
           $("#edit_modal #remarks").val(d.remarks);
+          $("#edit_modal #customer_code").val(d.customer_code);
           $("#edit_modal #gst").val(d.gst);
           $("#edit_modal #latitude").val(d.latitude);
           $("#edit_modal #longitude").val(d.longitude);

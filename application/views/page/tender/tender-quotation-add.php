@@ -1,5 +1,3 @@
-   
-
 <?php include_once(VIEWPATH . 'inc/header.php'); ?>
 
 <section class="content-header">
@@ -34,31 +32,47 @@
                         </div>
                         <div class="form-group col-md-3">
                             <label for="srch_tender_enquiry_id">Tender Enquiry No</label>
-                            <?php echo form_dropdown('srch_tender_enquiry_id',['' => 'Select'] + $tender_enquiry_opt,set_value('srch_tender_enquiry_id'),'id="srch_tender_enquiry_id" class="form-control"'); ?>
-                        </div> 
+                            <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select'] + $tender_enquiry_opt, set_value('srch_tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control"'); ?>
+                        </div>
                         <div class="form-group col-md-3">
                             <label>Quotation No</label>
-                            <input type="text" name="quotation_no" id="quotation_no" class="form-control" placeholder="e.g., TEN-2025-001" value="<?php echo set_value('quotation_no'); ?>">
+                            <input type="text" name="quotation_no" id="quotation_no" class="form-control"
+                                placeholder="e.g., TEN-2025-001" value="<?php echo set_value('quotation_no'); ?>">
                         </div>
                         <div class="form-group col-md-3">
                             <label>Tender Ref No</label>
-                            <input type="text" name="tender_ref_no" id="tender_ref_no" class="form-control" placeholder="e.g., TEN-2025-001" value="<?php echo set_value('tender_ref_no'); ?>">
+                            <input type="text" name="tender_ref_no" id="tender_ref_no" class="form-control"
+                                placeholder="e.g., TEN-2025-001" value="<?php echo set_value('tender_ref_no'); ?>">
                         </div>
-                        <div class="form-group col-md-3">
-                            <label for="remarks">Remarks</label>
-                            <textarea name="remarks" class="form-control" id="remarks" placeholder="Enter your remarks " rows="1"></textarea>
-                        </div>
-                   
                         <div class="form-group col-md-3">
                             <label>Quotation Date</label>
-                            <input type="date" name="quote_date" id="quote_date" class="form-control" value="<?php echo set_value('quote_date', date('Y-m-d')); ?>">
-                        </div> 
+                            <input type="date" name="quote_date" id="quote_date" class="form-control"
+                                value="<?php echo set_value('quote_date', date('Y-m-d')); ?>">
+                        </div>
                         <div class="form-group col-md-3">
                             <label>Status</label><br>
-                            <label class="radio-inline"><input type="radio" name="status" value="Confirmed" > Confirmed</label>
-                            <label class="radio-inline"><input type="radio" name="status" value="Pending" checked> Pending</label>
+                            <label class="radio-inline"><input type="radio" name="status" value="Confirmed">
+                                Confirmed</label>
+                            <label class="radio-inline"><input type="radio" name="status" value="Pending" checked>
+                                Pending</label>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label for="remarks">Remarks</label>
+                            <textarea name="remarks" class="form-control" id="remarks" placeholder="Enter your remarks "
+                                rows="8"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Quotation Terms</label>
+                                <textarea id="editor1" name="terms"
+                                    class="form-control custom-textarea" placeholder="Enter quotation terms"
+                                    required></textarea>
+                            </div>
+                        </div>
+                    </div>
+
                 </fieldset>
 
                 <fieldset class="mt-4">
@@ -68,7 +82,8 @@
             </div>
 
             <div class="box-footer text-right">
-                <a href="<?php echo site_url('vendor-rate-enquiry-list'); ?>" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back To List</a>
+                <a href="<?php echo site_url('vendor-rate-enquiry-list'); ?>" class="btn btn-default"><i
+                        class="fa fa-arrow-left"></i> Back To List</a>
                 <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
             </div>
         </form>
@@ -76,4 +91,3 @@
 </section>
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
- 

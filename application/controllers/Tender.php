@@ -76,47 +76,47 @@ class Tender extends CI_Controller
 
         // Companies
         $query = $this->db->query("
-        SELECT 
-        company_id, 
-        company_name 
-        FROM company_info 
-        WHERE status = 'Active' 
-        ORDER BY company_name");
+            SELECT 
+            company_id, 
+            company_name 
+            FROM company_info 
+            WHERE status = 'Active' 
+            ORDER BY company_name");
         foreach ($query->result_array() as $row) {
             $data['company_opt'][$row['company_id']] = $row['company_name'];
         }
 
         // Customers
         $query = $this->db->query("
-        SELECT 
-        customer_id, 
-        customer_name 
-        FROM customer_info 
-        WHERE status = 'Active' 
-        ORDER BY customer_name");
+            SELECT 
+            customer_id, 
+            customer_name 
+            FROM customer_info 
+            WHERE status = 'Active' 
+            ORDER BY customer_name");
         foreach ($query->result_array() as $row) {
             $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
         }
 
         // Categories
         $query = $this->db->query("
-        SELECT 
-        category_id, 
-        category_name 
-        FROM category_info 
-        WHERE status = 'Active' 
-        ORDER BY category_name");
+            SELECT 
+            category_id, 
+            category_name 
+            FROM category_info 
+            WHERE status = 'Active' 
+            ORDER BY category_name");
         foreach ($query->result_array() as $row) {
             $data['category_opt'][$row['category_id']] = $row['category_name'];
         }
 
         // UOMs (using uom_name as key and value)
         $query = $this->db->query("
-        SELECT 
-        uom_name 
-        FROM uom_info 
-        WHERE status = 'Active' 
-        ORDER BY uom_name");
+            SELECT 
+            uom_name 
+            FROM uom_info 
+            WHERE status = 'Active' 
+            ORDER BY uom_name");
         foreach ($query->result_array() as $row) {
             $data['uom_opt'][$row['uom_name']] = $row['uom_name'];
         }
@@ -260,21 +260,21 @@ class Tender extends CI_Controller
 
         // === FETCH RECORDS ===
         $sql = "
-        SELECT 
-            a.tender_enquiry_id,
-            a.enquiry_date,
-            a.enquiry_no,
-            a.opening_date,
-            a.closing_date,
-            a.status,
-            b.company_name,
-            c.customer_name
-        FROM tender_enquiry_info a
-        LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status = 'Active'
-        LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
-        WHERE a.status != 'Delete' AND $where
-        ORDER BY a.tender_enquiry_id DESC
-        LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
+            SELECT 
+                a.tender_enquiry_id,
+                a.enquiry_date,
+                a.enquiry_no,
+                a.opening_date,
+                a.closing_date,
+                a.status,
+                b.company_name,
+                c.customer_name
+            FROM tender_enquiry_info a
+            LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status = 'Active'
+            LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
+            WHERE a.status != 'Delete' AND $where
+            ORDER BY a.tender_enquiry_id DESC
+            LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();
@@ -282,12 +282,12 @@ class Tender extends CI_Controller
         // === DROPDOWNS ===
         $data['company_opt'] = ['' => 'All'];
         $sql = "
-    SELECT 
-    company_id, 
-    company_name 
-    FROM company_info 
-    WHERE status = 'Active' 
-    ORDER BY company_name";
+            SELECT 
+            company_id, 
+            company_name 
+            FROM company_info 
+            WHERE status = 'Active' 
+            ORDER BY company_name";
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
             $data['company_opt'][$row['company_id']] = $row['company_name'];
@@ -295,12 +295,12 @@ class Tender extends CI_Controller
 
         $data['customer_opt'] = ['' => 'All'];
         $sql = "
-    SELECT 
-    customer_id, 
-    customer_name 
-    FROM customer_info 
-    WHERE status = 'Active' 
-    ORDER BY customer_name";
+            SELECT 
+            customer_id, 
+            customer_name 
+            FROM customer_info 
+            WHERE status = 'Active' 
+            ORDER BY customer_name";
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
             $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
@@ -338,6 +338,8 @@ class Tender extends CI_Controller
                 'enquiry_date' => $this->input->post('enquiry_date'),
                 'enquiry_no' => $this->input->post('enquiry_no'),
                 'customer_id' => $this->input->post('customer_id'),
+                'company_sno' => $this->input->post('company_sno'),
+                'customer_sno' => $this->input->post('customer_sno'),
                 'opening_date' => $this->input->post('opening_date')
                     ? date('Y-m-d H:i:s', strtotime($this->input->post('opening_date'))) : null,
                 'closing_date' => $this->input->post('closing_date')
@@ -417,9 +419,7 @@ class Tender extends CI_Controller
                 $this->session->set_flashdata('success', 'Tender Enquiry updated successfully.');
             }
             redirect('tender-enquiry-list');
-        }
-
-        /* ---------- LOAD MAIN RECORD ---------- */
+        } 
         $sql = "SELECT * FROM tender_enquiry_info WHERE tender_enquiry_id = ? AND status != 'Deleted'";
         $q = $this->db->query($sql, [$tender_enquiry_id]);
         $data['main_record'] = $q->row_array();
@@ -429,29 +429,28 @@ class Tender extends CI_Controller
             redirect('tender-enquiry-list');
         }
 
-        /* ---------- LOAD ITEMS ---------- */
         $sql = "
-        SELECT tei.*,
-               ii.item_name,
-               ii.item_description,
-               ii.uom AS item_uom
-        FROM tender_enquiry_item_info tei
-        LEFT JOIN item_info ii ON ii.item_id = tei.item_id AND ii.status = 'Active'
-        WHERE tei.tender_enquiry_id = ? AND tei.status = 'Active'
-        ORDER BY tei.tender_enquiry_item_id ASC
-    ";
+            SELECT tei.*,
+                ii.item_name,
+                ii.item_description,
+                ii.uom AS item_uom
+            FROM tender_enquiry_item_info tei
+            LEFT JOIN item_info ii ON ii.item_id = tei.item_id AND ii.status = 'Active'
+            WHERE tei.tender_enquiry_id = ? AND tei.status = 'Active'
+            ORDER BY tei.tender_enquiry_item_id ASC
+        ";
         $q = $this->db->query($sql, [$tender_enquiry_id]);
         $data['item_list'] = $q->result_array();
 
         // === DROPDOWNS ===
         $data['company_opt'] = ['' => 'Select Company'];
         $sql = "
-    SELECT 
-    company_id, 
-    company_name 
-    FROM company_info 
-    WHERE status = 'Active' 
-    ORDER BY company_name";
+            SELECT 
+            company_id, 
+            company_name 
+            FROM company_info 
+            WHERE status = 'Active' 
+            ORDER BY company_name";
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
             $data['company_opt'][$row['company_id']] = $row['company_name'];
@@ -459,12 +458,12 @@ class Tender extends CI_Controller
 
         $data['customer_opt'] = ['' => 'Select Customer'];
         $sql = "
-    SELECT 
-    customer_id, 
-    customer_name 
-    FROM customer_info 
-    WHERE status = 'Active' 
-    ORDER BY customer_name";
+            SELECT 
+            customer_id, 
+            customer_name 
+            FROM customer_info 
+            WHERE status = 'Active' 
+            ORDER BY customer_name";
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
             $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
@@ -472,12 +471,12 @@ class Tender extends CI_Controller
 
         $data['category_opt'] = ['' => 'Select Category'];
         $sql = "
-    SELECT 
-    category_id, 
-    category_name 
-    FROM category_info 
-    WHERE status = 'Active' 
-    ORDER BY category_name";
+            SELECT 
+            category_id, 
+            category_name 
+            FROM category_info 
+            WHERE status = 'Active' 
+            ORDER BY category_name";
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
             $data['category_opt'][$row['category_id']] = $row['category_name'];
@@ -485,11 +484,11 @@ class Tender extends CI_Controller
 
         $data['uom_opt'] = [];
         $sql = "
-    SELECT 
-    uom_name 
-    FROM uom_info 
-    WHERE status = 'Active' 
-    ORDER BY uom_name";
+            SELECT 
+            uom_name 
+            FROM uom_info 
+            WHERE status = 'Active' 
+            ORDER BY uom_name";
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
             $data['uom_opt'][$row['uom_name']] = $row['uom_name'];
@@ -529,7 +528,8 @@ class Tender extends CI_Controller
                 'tender_ref_no' => $this->input->post('tender_ref_no'),
                 'quote_date' => $this->input->post('quote_date'),
                 'remarks' => $this->input->post('remarks'),
-                'status' => $this->input->post('status') ?: 'Pending',
+                'terms' => $this->input->post('terms'),
+                 'status' => $this->input->post('status') ?: 'Pending',
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s')
             ];
@@ -576,7 +576,7 @@ class Tender extends CI_Controller
             } else {
                 $this->session->set_flashdata('success', 'Tender Quotation saved successfully.');
             }
-            redirect('vendor-rate-enquiry-list/');
+            redirect('tender-quotation-list/');
         }
 
 
@@ -794,23 +794,23 @@ class Tender extends CI_Controller
 
         // === FETCH RECORDS ===
         $sql = "
-        SELECT 
-            a.tender_quotation_id,
-            a.quotation_no,
-            a.tender_ref_no,
-            a.quote_date,
-            a.remarks,
-            a.status,
-            b.company_name,
-            c.customer_name,
-            d.enquiry_no AS tender_enquiry_no
-        FROM tender_quotation_info a
-        LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status = 'Active'
-        LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
-        LEFT JOIN tender_enquiry_info d ON a.tender_enquiry_id = d.tender_enquiry_id AND d.status = 'Active'
-        WHERE a.status != 'Delete' AND $where
-        ORDER BY a.tender_quotation_id DESC
-        LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
+            SELECT 
+                a.tender_quotation_id,
+                a.quotation_no,
+                a.tender_ref_no,
+                a.quote_date,
+                a.remarks,
+                a.status,
+                b.company_name,
+                c.customer_name,
+                d.enquiry_no AS tender_enquiry_no
+            FROM tender_quotation_info a
+            LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status = 'Active'
+            LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
+            LEFT JOIN tender_enquiry_info d ON a.tender_enquiry_id = d.tender_enquiry_id AND d.status = 'Active'
+            WHERE a.status != 'Delete' AND $where
+            ORDER BY a.tender_quotation_id DESC
+            LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();
@@ -866,6 +866,7 @@ class Tender extends CI_Controller
                 'tender_ref_no' => $this->input->post('tender_ref_no'),
                 'quote_date' => $this->input->post('quote_date'),
                 'remarks' => $this->input->post('remarks'),
+                'terms' => $this->input->post('terms'),
                 'status' => $this->input->post('status') ?: 'Pending',
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'updated_date' => date('Y-m-d H:i:s')
@@ -918,7 +919,7 @@ class Tender extends CI_Controller
             } else {
                 $this->session->set_flashdata('success', 'Tender Quotation updated successfully.');
             }
-            redirect('tender-quotation-list/');
+            redirect('tender-quotation-list');
         }
 
         $this->load->library('pagination');

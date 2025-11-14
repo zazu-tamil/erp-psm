@@ -128,14 +128,40 @@ class Master extends CI_Controller
 
         // Handle Add (only if none exists)
         if ($this->input->post('mode') == 'Add') {
+
+            // 1. Handle file uploads
+            $upload_path = 'letterpad';
+            $folder = 'letterpad';
+            if (!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, true);
+            }
+
+            $config['upload_path'] = $upload_path;
+            $config['allowed_types'] = 'jpg|jpeg|png';
+            $config['max_size'] = 2048;
+
+            $this->load->library('upload', $config);
+
+            $ltr_header_img = '';
+
+            if (!empty($_FILES['ltr_header_img']['name'])) {
+                if ($this->upload->do_upload('ltr_header_img')) {
+                    $ltr_header_img = $this->upload->data('file_name');
+                }
+            }
+
             $ins = array(
                 'company_name' => $this->input->post('company_name'),
                 'contact_name' => $this->input->post('contact_name'),
                 'crno' => $this->input->post('crno'),
                 'address' => $this->input->post('address'),
-                 'GST' => $this->input->post('GST'),
+                'GST' => $this->input->post('GST'),
+                'company_code' => $this->input->post('company_code'),
                 'mobile' => $this->input->post('mobile'),
+                'quote_terms' => $this->input->post('quote_terms'),
+                'invoice_terms' => $this->input->post('invoice_terms'),
                 'country' => $this->input->post('country'),
+                'ltr_header_img' => $folder . '/' . $ltr_header_img,
                 'email' => $this->input->post('email'),
                 'status' => $this->input->post('status')
             );
@@ -146,6 +172,20 @@ class Master extends CI_Controller
 
         // Handle Edit (only one allowed)
         if ($this->input->post('mode') == 'Edit') {
+
+            // 1. Handle file uploads
+            $upload_path = 'letterpad';
+            $folder = 'letterpad';
+            if (!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, true);
+            }
+
+            $config['upload_path'] = $upload_path;
+            $config['allowed_types'] = 'jpg|jpeg|png';
+            $config['max_size'] = 2048;
+
+            $this->load->library('upload', $config);
+
             $upd = array(
                 'company_name' => $this->input->post('company_name'),
                 'contact_name' => $this->input->post('contact_name'),
@@ -153,10 +193,19 @@ class Master extends CI_Controller
                 'address' => $this->input->post('address'),
                 'GST' => $this->input->post('GST'),
                 'mobile' => $this->input->post('mobile'),
-                 'country' => $this->input->post('country'),
+                'country' => $this->input->post('country'),
+                'quote_terms' => $this->input->post('quote_terms'),
+                'invoice_terms' => $this->input->post('invoice_terms'),
+                'company_code' => $this->input->post('company_code'),
                 'email' => $this->input->post('email'),
                 'status' => $this->input->post('status')
             );
+
+            if (!empty($_FILES['ltr_header_img']['name'])) {
+                if ($this->upload->do_upload('ltr_header_img')) {
+                    $upd['ltr_header_img'] = $folder . '/' . $this->upload->data('file_name');
+                }
+            }
 
             $this->db->where('company_id', $this->input->post('company_id'));
             $this->db->update('company_info', $upd);
@@ -1016,6 +1065,7 @@ class Master extends CI_Controller
                 'address' => $this->input->post('address'),
                 'mobile' => $this->input->post('mobile'),
                 'mobile_alt' => $this->input->post('mobile_alt'),
+                'customer_code' => $this->input->post('customer_code'),
                 'email' => $this->input->post('email'),
                 'remarks' => $this->input->post('remarks'),
                 'gst' => $this->input->post('gst'),
@@ -1038,6 +1088,7 @@ class Master extends CI_Controller
                 'address' => $this->input->post('address'),
                 'mobile' => $this->input->post('mobile'),
                 'mobile_alt' => $this->input->post('mobile_alt'),
+                'customer_code' => $this->input->post('customer_code'),
                 'email' => $this->input->post('email'),
                 'remarks' => $this->input->post('remarks'),
                 'gst' => $this->input->post('gst'),

@@ -123,7 +123,12 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-md-12">
+                                    <div class="form-group col-md-6">
+                                        <label>Customer Code</label>
+                                        <input class="form-control" type="text" name="customer_code" id="customer_code"
+                                            placeholder="Enter your Customer Code" required="true">
+                                    </div>
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Country</label>
                                             <?php echo form_dropdown('country', ['' => 'Select Country'] + $country_opt, set_value('country'), 'id="country" class="form-control" required'); ?>
@@ -248,7 +253,12 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-md-12">
+                                    <div class="form-group col-md-6">
+                                        <label>Customer Code</label>
+                                        <input class="form-control" type="text" name="customer_code" id="customer_code"
+                                            placeholder="Enter your Customer Code" required="true">
+                                    </div>
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Country</label>
                                             <?php echo form_dropdown('country', ['' => 'Select Country'] + $country_opt, set_value('country'), 'id="country" class="form-control" required'); ?>

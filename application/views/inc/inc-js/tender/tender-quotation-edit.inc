@@ -1,18 +1,24 @@
+<script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
+
 <script>
   $(document).ready(function () {
     // Calculate totals on load
     calculateTotalAmount();
 
     // Trigger calculation on quantity, rate, or VAT change
-    $(document).on("input change", ".qty-input, .rate-input, .vat-dropdown", function () {
-      const $row = $(this).closest(".item-card");
-      const qty = parseFloat($row.find(".qty-input").val()) || 0;
-      const rate = parseFloat($row.find(".rate-input").val()) || 0;
-      const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
-      const amount = qty * rate * (1 + gst / 100);
-      $row.find(".amount-input").val(amount.toFixed(2));
-      calculateTotalAmount();
-    });
+    $(document).on(
+      "input change",
+      ".qty-input, .rate-input, .vat-dropdown",
+      function () {
+        const $row = $(this).closest(".item-card");
+        const qty = parseFloat($row.find(".qty-input").val()) || 0;
+        const rate = parseFloat($row.find(".rate-input").val()) || 0;
+        const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
+        const amount = qty * rate * (1 + gst / 100);
+        $row.find(".amount-input").val(amount.toFixed(2));
+        calculateTotalAmount();
+      }
+    );
 
     // Function to calculate and update total amount
     function calculateTotalAmount() {
@@ -27,8 +33,65 @@
       });
     }
   });
+  $(function () {
+    
+    CKEDITOR.replace("editor1_edit_modal", {
+      height: 100,
+      extraPlugins: "justify,colorbutton,font,table",
+      removeButtons: "",
+      toolbar: [
+        {
+          name: "clipboard",
+          items: [
+            "Cut",
+            "Copy",
+            "Paste",
+            "PasteText",
+            "PasteFromWord",
+            "-",
+            "Undo",
+            "Redo",
+          ],
+        },
+        {
+          name: "basicstyles",
+          items: [
+            "Bold",
+            "Italic",
+            "Underline",
+            "Strike",
+            "RemoveFormat",
+            "CopyFormatting",
+          ],
+        },
+        {
+          name: "paragraph",
+          items: [
+            "NumberedList",
+            "BulletedList",
+            "-",
+            "Outdent",
+            "Indent",
+            "-",
+            "Blockquote",
+            "JustifyLeft",
+            "JustifyCenter",
+            "JustifyRight",
+            "JustifyBlock",
+          ],
+        },
+        { name: "links", items: ["Link", "Unlink", "Anchor"] },
+        {
+          name: "insert",
+          items: ["Image", "Table", "HorizontalRule", "SpecialChar"],
+        },
+        { name: "styles", items: ["Format", "Font", "FontSize"] },
+        { name: "colors", items: ["TextColor", "BGColor"] },
+        { name: "tools", items: ["Maximize", "ShowBlocks"] },
+      ],
+    });
+  });
 </script>
-
 
 <style>
   .total-section {
