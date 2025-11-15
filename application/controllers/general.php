@@ -203,6 +203,21 @@ class General extends CI_Controller
             }
 
         } 
+        if ($table == 'currency_info') {
+            $query = $this->db->query(" 
+                select 
+                a.* 
+                from currencies_info as a  
+                where a.currency_id = '" . $rec_id . "'
+            ");
+
+            $rec_list = array();
+
+            foreach ($query->result_array() as $row) {
+                $rec_list = $row;
+            }
+
+        } 
 
         $this->db->close();
 
@@ -243,6 +258,11 @@ class General extends CI_Controller
         if ($table == 'uom_info') {
             $this->db->where('uom_id', $rec_id);
             $this->db->update('uom_info', array('status' => 'Delete'));
+            echo "Record Deleted Successfully";
+        }
+        if ($table == 'currencies_info') {
+            $this->db->where('currency_id', $rec_id);
+            $this->db->update('currencies_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
         }
         if ($table == 'gst_info') {

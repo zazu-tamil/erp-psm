@@ -1,6 +1,6 @@
 <?php
 // Define master menu pages
-$g_master = ['company-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list', 'customer-list', 'customer-contact-list', 'vendor-contact-list'];
+$g_master = ['company-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list', 'customer-list', 'customer-contact-list', 'vendor-contact-list', 'currency-list'];
 
 // Get current page
 $current_page = $this->uri->segment(1, 0);
@@ -106,7 +106,7 @@ $current_page = $this->uri->segment(1, 0);
 
         <!-- General -->
         <li
-            class="treeview <?= in_array($current_page, ['category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list']) ? 'active' : '' ?>">
+            class="treeview <?= in_array($current_page, ['category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list','currency-list']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-cog"></i> General
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
@@ -132,6 +132,9 @@ $current_page = $this->uri->segment(1, 0);
 
                 <li class="<?= ($current_page === 'gst-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('gst-list') ?>"><i class="fa fa-percent"></i> VAT List</a>
+                </li>
+                <li class="<?= ($current_page === 'currency-list') ? 'active' : '' ?>">
+                    <a href="<?= site_url('currency-list') ?>"><i class="fa fa-money"></i>Currency List</a>
                 </li>
             </ul>
         </li>

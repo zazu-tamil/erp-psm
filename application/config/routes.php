@@ -91,6 +91,9 @@ $route['brand-list/(:num)'] = 'master/brand_list/$1';
 $route['uom-list'] = 'master/uom_list';
 $route['uom-list/(:num)'] = 'master/uom_list/$1';
  
+$route['currency-list'] = 'master/currency_list';
+$route['currency-list/(:num)'] = 'master/currency_list/$1';
+ 
 $route['gst-list'] = 'master/gst_list';
 $route['gst-list/(:num)'] = 'master/gst_list/$1';
 

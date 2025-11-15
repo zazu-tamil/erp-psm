@@ -1265,7 +1265,7 @@ class Master extends CI_Controller
         $config['next_link'] = "Next";
         $this->pagination->initialize($config);
 
-        $data['customer_opt'] = array ('' => 'All');   
+        $data['customer_opt'] = array('' => 'All');
         $sql = "
             SELECT customer_id,customer_name
             FROM customer_info
@@ -1392,7 +1392,7 @@ class Master extends CI_Controller
         $config['next_link'] = "Next";
         $this->pagination->initialize($config);
 
-        $data['vendor_opt'] = array ('' => 'All');   
+        $data['vendor_opt'] = array('' => 'All');
         $sql = "
             SELECT vendor_id,vendor_name
             FROM vendor_info
@@ -1419,5 +1419,91 @@ class Master extends CI_Controller
         $data['pagination'] = $this->pagination->create_links();
 
         $this->load->view('page/master/vendor-contact-list', $data);
+    }
+
+    public function currency_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        if (!in_array($this->session->userdata(SESS_HD . 'level'), ['Admin', 'Staff'])) {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+           
+        }
+
+        $data['js'] = 'currency-list.inc';
+
+        /* ---------- INSERT ---------- */
+        if ($this->input->post('mode') == 'Add') {
+            $ins = [
+                'currency_code' => strtoupper($this->input->post('currency_code')),
+                'currency_name' => $this->input->post('currency_name'),
+                'symbol' => $this->input->post('symbol'),
+                'country_name' => $this->input->post('country_name'),
+                'exchange_rate' => $this->input->post('exchange_rate'),
+                'is_base_currency' => $this->input->post('is_base_currency') ?: 0,
+                'status' => $this->input->post('status')
+            ];
+            $this->db->insert('currencies_info', $ins);
+            redirect('currency-list');
+        }
+
+        /* ---------- UPDATE ---------- */
+        if ($this->input->post('mode') == 'Edit') {
+            $upd = [
+                'currency_code' => strtoupper($this->input->post('currency_code')),
+                'currency_name' => $this->input->post('currency_name'),
+                'symbol' => $this->input->post('symbol'),
+                'country_name' => $this->input->post('country_name'),
+                'exchange_rate' => $this->input->post('exchange_rate'),
+                'is_base_currency' => $this->input->post('is_base_currency') ?: 0,
+                'status' => $this->input->post('status')
+            ];
+            $this->db->where('currency_id', $this->input->post('currency_id'))
+                ->update('currencies_info', $upd);
+            redirect('currency-list');
+        }
+
+        /* ---------- PAGINATION ---------- */
+        $this->load->library('pagination');
+
+        $this->db->where('status !=', 'Delete');
+        $data['total_records'] = $this->db->count_all_results('currencies_info');
+
+        $data['sno'] = $segment = (int) $this->uri->segment(2, 0);
+
+        $config['base_url'] = site_url('currency-list');
+        $config['total_rows'] = $data['total_records'];
+        $config['per_page'] = 50;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = ['class' => 'page-link'];
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '</a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = 'Prev';
+        $config['next_link'] = 'Next';
+        $this->pagination->initialize($config);
+
+        $sql = "SELECT * FROM currencies_info 
+            WHERE status != 'Delete' 
+            ORDER BY currency_name ASC 
+            LIMIT $segment, {$config['per_page']}";
+
+        $query = $this->db->query($sql);
+        $data['record_list'] = $query->result_array();
+        $data['pagination'] = $this->pagination->create_links();
+
+        $this->load->view('page/master/currency-list', $data);
     }
 }
