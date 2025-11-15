@@ -1,9 +1,9 @@
 <?php include_once(VIEWPATH . '/inc/header.php'); ?>
 <section class="content-header">
-    <h1>Customer Contact List</h1>
+    <h1>Vendor Contact List</h1>
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-cubes"></i> Master</a></li>
-        <li class="active">Customer Contact List</li>
+        <li class="active">Vendor Contact List</li>
     </ol>
 </section>
 
@@ -16,8 +16,8 @@
             <form method="post" action="" id="frmsearch">
                 <div class="row">
                     <div class="form-group col-md-3">
-                        <label>Customer</label>
-                        <?php echo form_dropdown('srch_customer_id', $customer_opt, set_value('srch_customer_id', $srch_customer_id), 'id="srch_customer_id" class="form-control select2"'); ?>
+                        <label>Vendor</label>
+                        <?php echo form_dropdown('srch_vendor_id', $vendor_opt, set_value('srch_vendor_id', $srch_vendor_id), 'id="srch_vendor_id" class="form-control select2"'); ?>
                     </div> 
                     <div class="form-group col-md-3 text-left">
                         <br>
@@ -47,7 +47,7 @@
                 <thead>
                     <tr>
                         <th>S.No</th>
-                        <th>Customer</th>
+                        <th>Vendor</th>
                         <th>Contact Person</th>
                         <th>Department</th>
                         <th>Designation</th>
@@ -62,7 +62,7 @@
                     <?php foreach ($record_list as $j => $ls): ?>
                         <tr>
                             <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
-                            <td><?php echo htmlspecialchars($ls['customer_name'] ?? '-'); ?></td>
+                            <td><?php echo htmlspecialchars($ls['vendor_name'] ?? '-'); ?></td>
                             <td><?php echo htmlspecialchars($ls['contact_person_name']); ?></td>
                             <td><?php echo htmlspecialchars($ls['department']); ?></td>
                             <td><?php echo htmlspecialchars($ls['designation']); ?></td>
@@ -72,14 +72,14 @@
                             <td><?php echo $ls['status']; ?></td>
                             <td>
                                 <button data-toggle="modal" data-target="#edit_modal"
-                                    value="<?php echo $ls['customer_contact_id']; ?>"
+                                    value="<?php echo $ls['vendor_contact_id']; ?>"
                                     class="edit_record btn btn-primary btn-xs" title="Edit">
                                     <i class="fa fa-edit"></i>
                                 </button>
                             </td>
                             <td>
                                 <?php if ($this->session->userdata(SESS_HD . 'level') == 'Admin'): ?>
-                                    <button value="<?php echo $ls['customer_contact_id']; ?>"
+                                    <button value="<?php echo $ls['vendor_contact_id']; ?>"
                                         class="del_record btn btn-danger btn-xs" title="Delete">
                                         <i class="fa fa-remove"></i>
                                     </button>
@@ -103,8 +103,8 @@
                             <div class="modal-body">
                                 <div class="row">
                                     <div class="form-group col-md-6">
-                                        <label>Customer <span class="text-danger">*</span></label>
-                                        <?php echo form_dropdown('customer_id', $customer_opt, '', 'class="form-control" required'); ?>
+                                        <label>Vendor <span class="text-danger">*</span></label>
+                                        <?php echo form_dropdown('vendor_id', $vendor_opt, '', 'class="form-control" required'); ?>
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Contact Person Name</label>
@@ -159,13 +159,13 @@
                                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                                 <h3 class="modal-title">Edit Contact Person</h3>
                                 <input type="hidden" name="mode" value="Edit" />
-                                <input type="hidden" name="customer_contact_id" id="customer_contact_id" />
+                                <input type="hidden" name="vendor_contact_id" id="vendor_contact_id" />
                             </div>
                             <div class="modal-body">
                                 <div class="row">
                                     <div class="form-group col-md-6">
-                                        <label>Customer</label>
-                                        <?php echo form_dropdown('customer_id', $customer_opt, '', 'id="customer_id" class="form-control" required'); ?>
+                                        <label>Vendor</label>
+                                        <?php echo form_dropdown('vendor_id', $vendor_opt, '', 'id="vendor_id" class="form-control" required'); ?>
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Contact Person Name</label>

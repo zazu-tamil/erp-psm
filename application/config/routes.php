@@ -100,6 +100,9 @@ $route['user-list/(:num)'] = 'master/user_list/$1';
 $route['vendor-list'] = 'master/vendor_list';
 $route['vendor-list/(:num)'] = 'master/vendor_list/$1';
 
+$route['vendor-contact-list'] = 'master/vendor_contact_list';
+$route['vendor-contact-list/edit/(:num)'] = 'master/vendor_contact_list/$1';
+
 $route['customer-list'] = 'master/customer_list';
 $route['customer-list/(:num)'] = 'master/customer_list/$1';
 $route['customer-contact-list'] = 'master/customer_contact_list';
@@ -112,4 +115,4 @@ $route['tender-quotation-add'] = 'tender/tender_quotation_add';
 $route['tender-quotation-edit/(:num)'] = 'tender/tender_quotation_edit/$1';
 
 $route['tender-quotation-po'] = 'tender/tender_quotation_po';
-$route['tender-quotation-p0/edit/(:num)'] = 'tender/tender_quotation_po/$1';
+$route['tender-quotation-po/(:num)'] = 'tender/tender_quotation_po/$1';
