@@ -62,24 +62,51 @@
                                 value="<?php echo htmlspecialchars($header['quote_date']); ?>">
                         </div>
 
-                        <div class="form-group col-md-3">
-                            <label>Quotation Status</label><br>
-                            <label class="radio-inline">
-                                <input type="radio" name="quotation_status" value="Confirmed" <?php echo ($header['quotation_status'] == 'Confirmed') ? 'checked' : ''; ?>> Confirmed
-                            </label>
-                            <label class="radio-inline">
-                                <input type="radio" name="quotation_status" value="Pending" <?php echo ($header['quotation_status'] == 'Pending') ? 'checked' : ''; ?>> Pending
-                            </label>
-                        </div> 
-                        <div class="form-group col-md-3">
-                            <label>Status</label><br>
-                            <label class="radio-inline">
-                                <input type="radio" name="status" value="Active" <?php echo ($header['status'] == 'Active') ? 'checked' : ''; ?>> Active
-                            </label>
-                            <label class="radio-inline">
-                                <input type="radio" name="status" value="Inactive" <?php echo ($header['status'] == 'Inactive') ? 'checked' : ''; ?>> Inactive
-                            </label>
-                        </div>  
+                       <div class="form-group col-md-3">
+                        <label>Quotation Status</label><br>
+
+                        <label class="radio-inline">
+                            <input type="radio" name="quotation_status" value="Open"
+                                <?php echo ($header['quotation_status'] == 'Open') ? 'checked' : ''; ?>>
+                            Open
+                        </label>
+
+                        <label class="radio-inline">
+                            <input type="radio" name="quotation_status" value="Quoted"
+                                <?php echo ($header['quotation_status'] == 'Quoted') ? 'checked' : ''; ?>>
+                            Quoted
+                        </label>
+
+                        <label class="radio-inline">
+                            <input type="radio" name="quotation_status" value="Won"
+                                <?php echo ($header['quotation_status'] == 'Won') ? 'checked' : ''; ?>>
+                            Won
+                        </label>
+
+                        <label class="radio-inline">
+                            <input type="radio" name="quotation_status" value="On Hold"
+                                <?php echo ($header['quotation_status'] == 'On Hold') ? 'checked' : ''; ?>>
+                            On Hold
+                        </label>
+                    </div>
+
+
+                    <div class="form-group col-md-3">
+                        <label>Status</label><br>
+
+                        <label class="radio-inline">
+                            <input type="radio" name="status" value="Active"
+                                <?php echo ($header['status'] == 'Active') ? 'checked' : ''; ?>>
+                            Active
+                        </label>
+
+                        <label class="radio-inline">
+                            <input type="radio" name="status" value="Inactive"
+                                <?php echo ($header['status'] == 'Inactive') ? 'checked' : ''; ?>>
+                            Inactive
+                        </label>
+                    </div>
+
                     </div>
                     <div class="row">
                         <div class="form-group col-md-6">

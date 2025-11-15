@@ -56,8 +56,10 @@
 
                         <div class="form-group col-md-3">
                             <label>Quotation Status</label><br>
-                            <label class="radio-inline"><input type="radio" name="quotation_status" value="Confirmed"> Confirmed</label>
-                            <label class="radio-inline"><input type="radio" name="quotation_status" value="Pending" checked> Pending</label>
+                            <label class="radio-inline"><input type="radio" name="quotation_status" value="Open">Open</label>
+                            <label class="radio-inline"><input type="radio" name="quotation_status" value="Quoted" > Quoted</label>
+                            <label class="radio-inline"><input type="radio" name="quotation_status" value="Won" > Won</label>
+                            <label class="radio-inline"><input type="radio" name="quotation_status" value="On Hold" > On Hold</label>
                         </div>
 
                         <div class="form-group col-md-3">

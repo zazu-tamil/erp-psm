@@ -70,3 +70,8 @@ AUTO_INCREMENT=1
 
 -----------------------------------------------------------------------------------------------------
 
+
+
+ALTER TABLE tender_quotation_info ADD quotation_status VARCHAR(50) NULL DEFAULT 'Pending' AFTER quote_date;
+
+ 

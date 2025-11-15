@@ -49,7 +49,8 @@
                 <i class="fa fa-plus-circle"></i> Add New
             </a>
             <div class="box-tools pull-right">
-                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i
+                        class="fa fa-minus"></i></button>
             </div>
         </div>
 
@@ -69,8 +70,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (!empty($record_list)) : ?>
-                        <?php foreach ($record_list as $j => $row) : ?>
+                    <?php if (!empty($record_list)): ?>
+                        <?php foreach ($record_list as $j => $row): ?>
                             <tr>
                                 <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
                                 <td><strong><?php echo htmlspecialchars($row['quotation_no']); ?></strong></td>
@@ -79,42 +80,54 @@
                                 <td><?php echo date('d-m-Y', strtotime($row['quote_date'])); ?></td>
                                 <td><?php echo htmlspecialchars($row['company_name']); ?></td>
                                 <td><?php echo htmlspecialchars($row['customer_name']); ?></td>
+                                <?php
+                                $status = $row['quotation_status'];
+
+                                $badge_colors = [
+                                    'Open' => 'primary',
+                                    'Quoted' => 'info',
+                                    'Won' => 'success',
+                                    'On Hold' => 'warning',
+                                 ];
+
+                                $color = isset($badge_colors[$status]) ? $badge_colors[$status] : 'default';
+                                ?>
                                 <td>
-                                    <span class="label label-<?php echo $row['quotation_status'] == 'Confirmed' ? 'success' : 'danger'; ?>">
-                                        <?php echo $row['quotation_status']; ?>
+                                    <span class="label label-<?php echo $color; ?>">
+                                        <?php echo $status; ?>
                                     </span>
                                 </td>
 
 
-                                  <!-- PRINT -->
+
+                                <!-- PRINT -->
                                 <td class="text-center">
-                                    <a href="<?php echo site_url('tender-quotation-print/' . $row['tender_quotation_id']); ?>" 
-                                       target="_blank"
-                                       class="btn btn-info btn-xs" title="Print">
+                                    <a href="<?php echo site_url('tender-quotation-print/' . $row['tender_quotation_id']); ?>"
+                                        target="_blank" class="btn btn-info btn-xs" title="Print">
                                         <i class="fa fa-print"></i>
                                     </a>
                                 </td>
-                                
+
                                 <!-- EDIT -->
                                 <td class="text-center">
-                                    <a href="<?php echo site_url('tender-quotation-edit/' . $row['tender_quotation_id']); ?>" 
-                                       class="btn btn-primary btn-xs" title="Edit">
+                                    <a href="<?php echo site_url('tender-quotation-edit/' . $row['tender_quotation_id']); ?>"
+                                        class="btn btn-primary btn-xs" title="Edit">
                                         <i class="fa fa-edit"></i>
                                     </a>
                                 </td>
 
-                              
+
 
                                 <!-- DELETE -->
                                 <td class="text-center">
-                                    <button value="<?php echo $row['tender_quotation_id']; ?>" 
-                                            class="del_record btn btn-danger btn-xs" title="Delete">
+                                    <button value="<?php echo $row['tender_quotation_id']; ?>"
+                                        class="del_record btn btn-danger btn-xs" title="Delete">
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
-                    <?php else : ?>
+                    <?php else: ?>
                         <tr>
                             <td colspan="11" class="text-center text-danger">No records found.</td>
                         </tr>
