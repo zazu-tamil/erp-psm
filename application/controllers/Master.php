@@ -1182,6 +1182,24 @@ class Master extends CI_Controller
 
         $data['js'] = 'customer-contact-list.inc';
 
+
+        // === FILTERS ===
+        $where = "1 = 1";
+
+        // Customer Filter
+        if ($this->input->post('srch_customer_id') !== null) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
+            $this->session->set_userdata('srch_customer_id', $srch_customer_id);
+        } elseif ($this->session->userdata('srch_customer_id')) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->session->userdata('srch_customer_id');
+        } else {
+            $data['srch_customer_id'] = $srch_customer_id = '';
+        }
+        if (!empty($srch_customer_id)) {
+            $where .= " AND cci.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
+        }
+
+
         /* ===================== ADD ===================== */
         if ($this->input->post('mode') == 'Add') {
             $ins = array(
@@ -1222,7 +1240,8 @@ class Master extends CI_Controller
         $this->load->library('pagination');
 
         $this->db->where('status != ', 'Delete');
-        $this->db->from('customer_contact_info');
+        $this->db->where($where);
+        $this->db->from('customer_contact_info cci');
         $data['total_records'] = $cnt = $this->db->count_all_results();
 
         $data['sno'] = $this->uri->segment(2, 0);
@@ -1246,6 +1265,7 @@ class Master extends CI_Controller
         $config['next_link'] = "Next";
         $this->pagination->initialize($config);
 
+        $data['customer_opt'] = array ('' => 'All');   
         $sql = "
             SELECT customer_id,customer_name
             FROM customer_info
@@ -1262,6 +1282,7 @@ class Master extends CI_Controller
         FROM customer_contact_info cci
         LEFT JOIN customer_info ci ON cci.customer_id = ci.customer_id
         WHERE cci.status != 'Delete'
+        and $where
         ORDER BY cci.status ASC, ci.customer_name ASC, cci.contact_person_name ASC
         LIMIT " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "
     ";
@@ -1271,5 +1292,132 @@ class Master extends CI_Controller
         $data['pagination'] = $this->pagination->create_links();
 
         $this->load->view('page/master/customer-contact-list', $data);
+    }
+    public function vendor_contact_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        if (
+            $this->session->userdata(SESS_HD . 'level') != 'Admin'
+            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
+        ) {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+        $data['js'] = 'vendor-contact-list.inc';
+
+
+        // === FILTERS ===
+        $where = "1 = 1";
+
+        // Customer Filter
+        if ($this->input->post('srch_vendor_id') !== null) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->input->post('srch_vendor_id');
+            $this->session->set_userdata('srch_vendor_id', $srch_vendor_id);
+        } elseif ($this->session->userdata('srch_vendor_id')) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->session->userdata('srch_vendor_id');
+        } else {
+            $data['srch_vendor_id'] = $srch_vendor_id = '';
+        }
+        if (!empty($srch_vendor_id)) {
+            $where .= " AND vci.vendor_id = '" . $this->db->escape_str($srch_vendor_id) . "'";
+        }
+
+
+        /* ===================== ADD ===================== */
+        if ($this->input->post('mode') == 'Add') {
+            $ins = array(
+                'vendor_id' => $this->input->post('vendor_id'),
+                'contact_person_name' => $this->input->post('contact_person_name'),
+                'mobile' => $this->input->post('mobile'),
+                'email' => $this->input->post('email'),
+                'address' => $this->input->post('address'),
+                'department' => $this->input->post('department'),
+                'designation' => $this->input->post('designation'),
+                'status' => $this->input->post('status'),
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_date' => date('Y-m-d H:i:s'),
+            );
+            $this->db->insert('vendor_contact_info', $ins);
+            redirect('vendor-contact-list/');
+        }
+
+        /* ===================== EDIT ===================== */
+        if ($this->input->post('mode') == 'Edit') {
+            $upd = array(
+                'vendor_id' => $this->input->post('vendor_id'),
+                'contact_person_name' => $this->input->post('contact_person_name'),
+                'mobile' => $this->input->post('mobile'),
+                'email' => $this->input->post('email'),
+                'address' => $this->input->post('address'),
+                'department' => $this->input->post('department'),
+                'designation' => $this->input->post('designation'),
+                'status' => $this->input->post('status'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s'),
+            );
+            $this->db->where('vendor_contact_id', $this->input->post('vendor_contact_id'));
+            $this->db->update('vendor_contact_info', $upd);
+            redirect('vendor-contact-list/');
+        }
+
+        $this->load->library('pagination');
+
+        $this->db->where('status != ', 'Delete');
+        $this->db->where($where);
+        $this->db->from('vendor_contact_info vci');
+        $data['total_records'] = $cnt = $this->db->count_all_results();
+
+        $data['sno'] = $this->uri->segment(2, 0);
+
+        $config['base_url'] = site_url('vendor-contact-list');
+        $config['total_rows'] = $cnt;
+        $config['per_page'] = 20;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '</a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['prev_link'] = "Prev";
+        $config['next_link'] = "Next";
+        $this->pagination->initialize($config);
+
+        $data['vendor_opt'] = array ('' => 'All');   
+        $sql = "
+            SELECT vendor_id,vendor_name
+            FROM vendor_info
+            WHERE status = 'Active' 
+            ORDER BY vendor_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+        }
+
+        $sql = "
+        SELECT vci.*, ci.vendor_name 
+        FROM vendor_contact_info vci
+        LEFT JOIN vendor_info ci ON vci.vendor_id = ci.vendor_id
+        WHERE vci.status != 'Delete'
+        and $where
+        ORDER BY vci.status ASC, ci.vendor_name ASC, vci.contact_person_name ASC
+        LIMIT " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "
+    ";
+        $query = $this->db->query($sql);
+        $data['record_list'] = $query->result_array();
+
+        $data['pagination'] = $this->pagination->create_links();
+
+        $this->load->view('page/master/vendor-contact-list', $data);
     }
 }
