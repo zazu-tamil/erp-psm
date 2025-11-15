@@ -1,0 +1,51 @@
+
+ALTER TABLE `company_info`
+	ADD COLUMN `company_code` VARCHAR(10) NOT NULL AFTER `company_name`;
+
+
+ALTER TABLE `customer_info`
+	ADD COLUMN `customer_code` VARCHAR(10) NOT NULL AFTER `customer_name`; 
+
+
+ALTER TABLE `tender_enquiry_info`
+	ADD COLUMN `company_sno` INT(5) ZEROFILL NULL AFTER `company_id`,
+	ADD COLUMN `customer_sno` INT(5) ZEROFILL NULL DEFAULT NULL AFTER `customer_id`; 
+
+
+ALTER TABLE `company_info`
+	ADD COLUMN `ltr_header_img` VARCHAR(200) NOT NULL AFTER `email`; 
+
+ALTER TABLE `tender_quotation_info`
+	ADD COLUMN `terms` TEXT NULL DEFAULT NULL AFTER `remarks`;
+
+
+ALTER TABLE `company_info`
+	ADD COLUMN `quote_terms` TEXT NOT NULL AFTER `ltr_header_img`,
+	ADD COLUMN `invoice_terms` TEXT NOT NULL AFTER `quote_terms`; 
+
+
+CREATE TABLE `customer_contact_info` (
+	`customer_contact_id` INT(11) NOT NULL AUTO_INCREMENT,
+	`customer_id` INT(11) NULL DEFAULT NULL,
+	`contact_person_name` VARCHAR(50) NULL DEFAULT NULL,
+	`mobile` VARCHAR(50) NULL DEFAULT NULL,
+	`email` VARCHAR(50) NULL DEFAULT NULL,
+	`address` TEXT NULL DEFAULT NULL,
+	`department` VARCHAR(100) NULL DEFAULT NULL,
+	`designation` VARCHAR(100) NULL DEFAULT NULL,
+	`status` VARCHAR(50) NULL DEFAULT NULL,
+	`created_by` INT(11) NULL DEFAULT NULL,
+	`created_date` DATETIME NULL DEFAULT NULL,
+	`updated_by` INT(11) NULL DEFAULT NULL,
+	`updated_date` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`customer_contact_id`)
+)
+ENGINE=InnoDB
+;;
+
+sstcs.in phpmyadmin Login Details
+URL : https://auth-db1474.hstgr.io/index.php?db=u275129022_sstcs_db
+Hostname: MySQL server hostname is: srv1474.hstgr.io or you can use this IP as your hostname: 193.203.184.93
+Username: u275129022_ckdhanabalan
+pwd: Ckdhanabalan1966@2025
+DB: u275129022_sstcs_db
