@@ -621,4 +621,45 @@ class Vendor extends CI_Controller
         } 
     }
 
+public function get_all_customers()
+{
+    $sql = "
+        SELECT customer_id, customer_name
+        FROM customer_info
+        WHERE status = 'Active'
+        ORDER BY customer_name ASC
+    ";
+    $query = $this->db->query($sql);
+    echo json_encode($query->result_array());
+}
+
+// Add this method to get tender enquiries by customer
+public function get_tender_enquiries_by_customer()
+{
+    $company_id = $this->input->post('company_id');
+    $customer_id = $this->input->post('customer_id');
+    
+    $sql = "
+        SELECT 
+            a.tender_enquiry_id,
+            a.enquiry_no,
+            b.company_name,
+            c.customer_name 
+        FROM tender_enquiry_info AS a
+        LEFT JOIN company_info AS b ON a.company_id = b.company_id AND b.status = 'Active'
+        LEFT JOIN customer_info AS c ON a.customer_id = c.customer_id AND c.status = 'Active'
+        WHERE a.company_id = ? AND a.customer_id = ? AND a.status = 'Active'
+        ORDER BY a.tender_enquiry_id, a.enquiry_no ASC
+    ";
+    $query = $this->db->query($sql, [$company_id, $customer_id]);
+    $result = [];
+    foreach ($query->result_array() as $row) {
+        $result[] = [
+            'tender_enquiry_id' => $row['tender_enquiry_id'],
+            'display' => $row['tender_enquiry_id'] . ' -> ' . $row['enquiry_no'] . ' -> ' . $row['company_name'] . ' -> ' . $row['customer_name']
+        ];
+    }
+    echo json_encode($result);
+}
+
 }
