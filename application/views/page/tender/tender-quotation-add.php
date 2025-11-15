@@ -17,65 +17,38 @@
         <form method="post" action="" id="frmadd" enctype="multipart/form-data">
             <div class="box-body">
                 <input type="hidden" name="mode" value="Add" />
-
                 <fieldset class="tender-inward">
                     <legend class="text-light-blue"><i class="fa fa-file-text-o"></i> Tender Quotation</legend>
 
                     <div class="row">
-                        <!-- Company -->
+
                         <div class="form-group col-md-3">
                             <label for="srch_company_id">Company</label>
-                            <?php echo form_dropdown(
-                                'srch_company_id',
-                                ['' => 'Select'] + $company_opt,
-                                set_value('srch_company_id'),
-                                'id="srch_company_id" class="form-control"'
-                            ); ?>
+                            <?php echo form_dropdown('srch_company_id', ['' => 'Select'] + $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control "'); ?>
                         </div>
-
-                        <!-- Customer -->
                         <div class="form-group col-md-3">
                             <label for="srch_customer_id">Customer</label>
-                            <?php echo form_dropdown(
-                                'srch_customer_id',
-                                ['' => 'Select'] + $customer_opt,
-                                set_value('srch_customer_id'),
-                                'id="srch_customer_id" class="form-control"'
-                            ); ?>
+                            <?php echo form_dropdown('srch_customer_id', ['' => 'Select'] + $customer_opt, set_value('srch_customer_id'), 'id="srch_customer_id" class="form-control "'); ?>
                         </div>
-
-                        <!-- Tender Enquiry -->
                         <div class="form-group col-md-3">
                             <label for="srch_tender_enquiry_id">Tender Enquiry No</label>
-                            <?php echo form_dropdown(
-                                'srch_tender_enquiry_id',
-                                ['' => 'Select'], // initial empty
-                                set_value('srch_tender_enquiry_id'),
-                                'id="srch_tender_enquiry_id" class="form-control"'
-                            ); ?>
+                            <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select'] + $tender_enquiry_opt, set_value('srch_tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control"'); ?>
                         </div>
-
-                        <!-- Quotation No -->
                         <div class="form-group col-md-3">
                             <label>Quotation No</label>
                             <input type="text" name="quotation_no" id="quotation_no" class="form-control"
                                 placeholder="e.g., TEN-2025-001" value="<?php echo set_value('quotation_no'); ?>">
                         </div>
-
-                        <!-- Tender Ref No -->
                         <div class="form-group col-md-3">
                             <label>Tender Ref No</label>
                             <input type="text" name="tender_ref_no" id="tender_ref_no" class="form-control"
                                 placeholder="e.g., TEN-2025-001" value="<?php echo set_value('tender_ref_no'); ?>">
                         </div>
-
-                        <!-- Quotation Date -->
                         <div class="form-group col-md-3">
                             <label>Quotation Date</label>
                             <input type="date" name="quote_date" id="quote_date" class="form-control"
                                 value="<?php echo set_value('quote_date', date('Y-m-d')); ?>">
                         </div>
-
                         <!-- Quotation Status -->
                         <div class="form-group col-md-3">
                             <label>Quotation Status</label><br>
@@ -90,19 +63,18 @@
                             <label class="radio-inline"><input type="radio" name="status" value="Inactive"> Inactive</label>
                         </div>
                     </div>
-
                     <div class="row">
-                        <!-- Remarks -->
                         <div class="form-group col-md-6">
                             <label for="remarks">Remarks</label>
-                            <textarea name="remarks" class="form-control" id="remarks" placeholder="Enter your remarks" rows="8"></textarea>
+                            <textarea name="remarks" class="form-control" id="remarks" placeholder="Enter your remarks "
+                                rows="8"></textarea>
                         </div>
-
-                        <!-- Terms -->
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Quotation Terms</label>
-                                <textarea id="editor1" name="terms" class="form-control custom-textarea" placeholder="Enter quotation terms" required></textarea>
+                                <textarea id="editor1" name="terms"
+                                    class="form-control custom-textarea" placeholder="Enter quotation terms"
+                                    required></textarea>
                             </div>
                         </div>
                     </div>
@@ -113,13 +85,11 @@
                     <legend class="text-light-blue"><i class="fa fa-list"></i> Item Details</legend>
                     <div id="item_container"></div>
                 </fieldset>
-
             </div>
 
             <div class="box-footer text-right">
-                <a href="<?php echo site_url('tender-quotation-list'); ?>" class="btn btn-default">
-                    <i class="fa fa-arrow-left"></i> Back To List
-                </a>
+                <a href="<?php echo site_url('vendor-rate-enquiry-list'); ?>" class="btn btn-default"><i
+                        class="fa fa-arrow-left"></i> Back To List</a>
                 <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
             </div>
         </form>
