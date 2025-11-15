@@ -58,6 +58,10 @@
                             <label>Closing Date & Time</label>
                             <input type="datetime-local" name="closing_date" class="form-control" value="<?php echo $main_record['closing_date'] ? date('Y-m-d\TH:i', strtotime($main_record['closing_date'])) : ''; ?>">
                         </div>
+                        <div class="form-group col-md-4">
+                            <label>Tender Enquiry Status</label>
+                            <?php echo form_dropdown('tender_status',  $tender_status_opt, set_value('tender_status', $main_record['tender_status']), 'class="form-control"'); ?>
+                        </div>
                     
                         <div class="form-group col-md-4">
                             <label>Status</label>

@@ -24,6 +24,7 @@ class Tender extends CI_Controller
                 'company_id' => $srch_company_id,
                 'enquiry_date' => $this->input->post('enquiry_date'),
                 'enquiry_no' => $this->input->post('enquiry_no'),
+                'tender_status' => $this->input->post('tender_status'),
                 'customer_id' => $srch_customer_id,
                 'opening_date' => $this->input->post('opening_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('opening_date'))) : null,
                 'closing_date' => $this->input->post('closing_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('closing_date'))) : null,
@@ -168,6 +169,7 @@ class Tender extends CI_Controller
         }
 
         $data['status_opt'] = ['Active' => 'Active', 'Inactive' => 'Inactive'];
+        $data['tender_status_opt'] =['' => 'Select Tender Status', 'Open' => 'Open', 'Quoted' => 'Quoted', 'Won' => 'Won', 'On Hold' => 'On Hold'];
         $this->load->view('page/tender/add-tender-enquiry', $data);
     }
     public function tender_enquiry_list()
@@ -335,6 +337,7 @@ class Tender extends CI_Controller
                 'company_id' => $this->input->post('company_id'),
                 'enquiry_date' => $this->input->post('enquiry_date'),
                 'enquiry_no' => $this->input->post('enquiry_no'),
+                'tender_status' => $this->input->post('tender_status'),
                 'customer_id' => $this->input->post('customer_id'),
                 'company_sno' => $this->input->post('company_sno'),
                 'customer_sno' => $this->input->post('customer_sno'),
@@ -493,6 +496,7 @@ class Tender extends CI_Controller
         }
 
         $data['status_opt'] = ['' => 'Select Status', 'Active' => 'Active', 'Inactive' => 'Inactive'];
+         $data['tender_status_opt'] =['' => 'Select Tender Status', 'Open' => 'Open', 'Quoted' => 'Quoted', 'Won' => 'Won', 'On Hold' => 'On Hold'];
 
         // JSON encode for JavaScript
         $data['category_json'] = json_encode($data['category_opt']);

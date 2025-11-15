@@ -62,6 +62,11 @@
 
                     <div class="row">
                         <div class="form-group col-md-4">
+                            <label>Tender Enquiry Status</label>
+                            <?php echo form_dropdown('tender_status', ['' => 'Select'] + $tender_status_opt, set_value('tender_status', 'Active'), 'class="form-control"'); ?>
+                        </div>
+                    
+                        <div class="form-group col-md-4">
                             <label>Status</label>
                             <?php echo form_dropdown('status', ['' => 'Select'] + $status_opt, set_value('status', 'Active'), 'class="form-control select2"'); ?>
                         </div>
