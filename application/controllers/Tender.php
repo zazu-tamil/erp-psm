@@ -419,7 +419,7 @@ class Tender extends CI_Controller
                 $this->session->set_flashdata('success', 'Tender Enquiry updated successfully.');
             }
             redirect('tender-enquiry-list');
-        } 
+        }
         $sql = "SELECT * FROM tender_enquiry_info WHERE tender_enquiry_id = ? AND status != 'Deleted'";
         $q = $this->db->query($sql, [$tender_enquiry_id]);
         $data['main_record'] = $q->row_array();
@@ -529,7 +529,8 @@ class Tender extends CI_Controller
                 'quote_date' => $this->input->post('quote_date'),
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
-                 'status' => $this->input->post('status') ?: 'Pending',
+                'quotation_status' => $this->input->post('quotation_status'),
+                'status' => 'Active',
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s')
             ];
@@ -690,8 +691,7 @@ class Tender extends CI_Controller
         $data['pagination'] = $this->pagination->create_links();
         $this->load->view('page/tender/tender-quotation-add', $data);
     }
-
-
+  
     public function tender_quotation_list()
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in')) {
@@ -746,16 +746,16 @@ class Tender extends CI_Controller
         }
 
         // Status Filter
-        if ($this->input->post('srch_status') !== null) {
-            $data['srch_status'] = $srch_status = $this->input->post('srch_status');
-            $this->session->set_userdata('srch_status', $srch_status);
-        } elseif ($this->session->userdata('srch_status')) {
-            $data['srch_status'] = $srch_status = $this->session->userdata('srch_status');
+        if ($this->input->post('srch_quotation_status') !== null) {
+            $data['srch_quotation_status'] = $srch_quotation_status = $this->input->post('srch_quotation_status');
+            $this->session->set_userdata('srch_quotation_status', $srch_quotation_status);
+        } elseif ($this->session->userdata('srch_quotation_status')) {
+            $data['srch_quotation_status'] = $srch_quotation_status = $this->session->userdata('srch_quotation_status');
         } else {
-            $data['srch_status'] = $srch_status = '';
+            $data['srch_quotation_status'] = $srch_quotation_status = '';
         }
-        if (!empty($srch_status) && $srch_status !== 'All') {
-            $where .= " AND a.status = '" . $this->db->escape_str($srch_status) . "'";
+        if (!empty($srch_quotation_status) && $srch_quotation_status !== 'All') {
+            $where .= " AND a.quotation_status = '" . $this->db->escape_str($srch_quotation_status) . "'";
         }
 
         // === COUNT TOTAL ===
@@ -802,6 +802,7 @@ class Tender extends CI_Controller
                 a.remarks,
                 a.status,
                 b.company_name,
+                a.quotation_status,
                 c.customer_name,
                 d.enquiry_no AS tender_enquiry_no
             FROM tender_quotation_info a
@@ -837,7 +838,7 @@ class Tender extends CI_Controller
             $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['enquiry_no'];
         }
 
-        $data['status_opt'] = ['' => 'All', 'Active' => 'Active', 'Inactive' => 'Inactive'];
+        $data['quotation_status_opt'] = ['' => 'All', 'Confirmed' => 'Confirmed', 'Pending' => 'Pending'];
 
         $this->load->view('page/tender/tender-quotation-list', $data);
     }
@@ -867,7 +868,8 @@ class Tender extends CI_Controller
                 'quote_date' => $this->input->post('quote_date'),
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
-                'status' => $this->input->post('status') ?: 'Pending',
+                'quotation_status' => $this->input->post('quotation_status'),
+                'status' => 'Active',
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'updated_date' => date('Y-m-d H:i:s')
             ];
@@ -1037,19 +1039,19 @@ class Tender extends CI_Controller
         $this->load->view('page/tender/tender-quotation-edit', $data);
     }
 
-    
-public function tender_quotation_print($tender_quotation_id = 0)
-{
-    if (!$this->session->userdata(SESS_HD . 'logged_in')) {
-        redirect();
-    }
 
-    if (!$tender_quotation_id) {
-        show_404();
-    }
+    public function tender_quotation_print($tender_quotation_id = 0)
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
 
-    // === MAIN RECORD ===
-    $sql = "
+        if (!$tender_quotation_id) {
+            show_404();
+        }
+
+        // === MAIN RECORD ===
+        $sql = "
         SELECT 
             tqi.*,
             c.customer_name,
@@ -1061,15 +1063,15 @@ public function tender_quotation_print($tender_quotation_id = 0)
         LEFT JOIN tender_enquiry_info te ON tqi.tender_enquiry_id = te.tender_enquiry_id AND te.status = 'Active'
         WHERE tqi.tender_quotation_id = ? AND tqi.status != 'Delete'
     ";
-    $query = $this->db->query($sql, [$tender_quotation_id]);
-    $data['record'] = $query->row_array();
+        $query = $this->db->query($sql, [$tender_quotation_id]);
+        $data['record'] = $query->row_array();
 
-    if (!$data['record']) {
-        show_404();
-    }
+        if (!$data['record']) {
+            show_404();
+        }
 
-    // === ITEMS WITH RATE CALCULATION ===
-    $sql = "
+        // === ITEMS WITH RATE CALCULATION ===
+        $sql = "
         SELECT 
             tqii.*,
             cat.category_name,
@@ -1083,45 +1085,45 @@ public function tender_quotation_print($tender_quotation_id = 0)
           AND tqii.status IN ('Active', 'Inactive')
         ORDER BY tqii.tender_quotation_item_id
     ";
-    $query = $this->db->query($sql, [$tender_quotation_id]);
-    $items = $query->result_array();
+        $query = $this->db->query($sql, [$tender_quotation_id]);
+        $items = $query->result_array();
 
-    $data['items'] = [];
-    $gst_summary = [];
+        $data['items'] = [];
+        $gst_summary = [];
 
-    foreach ($items as $item) {
-        $qty = floatval($item['qty']);
-        $gst = floatval($item['gst']);
-        $amount = floatval($item['amount']);
-        $rate = floatval($item['rate']);
+        foreach ($items as $item) {
+            $qty = floatval($item['qty']);
+            $gst = floatval($item['gst']);
+            $amount = floatval($item['amount']);
+            $rate = floatval($item['rate']);
 
-      
-        // === GST Amount ===
-        $gst_amount = $amount - ($qty * $rate);
 
-        // === Store in item ===
-        $item['rate'] = $rate;
-        $item['gst_amount'] = $gst_amount;
-        $item['base_amount'] = $qty * $rate;
+            // === GST Amount ===
+            $gst_amount = $amount - ($qty * $rate);
 
-        $data['items'][] = $item;
+            // === Store in item ===
+            $item['rate'] = $rate;
+            $item['gst_amount'] = $gst_amount;
+            $item['base_amount'] = $qty * $rate;
 
-        // === GST Summary ===
-        $gst_key = number_format($gst, 2);
-        if (!isset($gst_summary[$gst_key])) {
-            $gst_summary[$gst_key] = ['gst' => $gst, 'base' => 0, 'gst_amount' => 0];
+            $data['items'][] = $item;
+
+            // === GST Summary ===
+            $gst_key = number_format($gst, 2);
+            if (!isset($gst_summary[$gst_key])) {
+                $gst_summary[$gst_key] = ['gst' => $gst, 'base' => 0, 'gst_amount' => 0];
+            }
+            $gst_summary[$gst_key]['base'] += $qty * $rate;
+            $gst_summary[$gst_key]['gst_amount'] += $gst_amount;
         }
-        $gst_summary[$gst_key]['base'] += $qty * $rate;
-        $gst_summary[$gst_key]['gst_amount'] += $gst_amount;
+
+        $data['gst_summary'] = $gst_summary;
+        $data['grand_total'] = array_sum(array_column($data['items'], 'base_amount'));
+        $data['total_gst'] = array_sum(array_column($data['items'], 'gst_amount'));
+        $data['final_total'] = $data['grand_total'] + $data['total_gst'];
+
+        $this->load->view('page/tender/tender-quotation-print', $data);
     }
-
-    $data['gst_summary'] = $gst_summary;
-    $data['grand_total'] = array_sum(array_column($data['items'], 'base_amount'));
-    $data['total_gst'] = array_sum(array_column($data['items'], 'gst_amount'));
-    $data['final_total'] = $data['grand_total'] + $data['total_gst'];
-
-    $this->load->view('page/tender/tender-quotation-print', $data);
-}
 
 
 
@@ -1225,7 +1227,7 @@ public function tender_quotation_print($tender_quotation_id = 0)
                 'mobile_alt' => $this->input->post('mobile_alt'),
                 'email' => $this->input->post('email'),
                 'gst' => $this->input->post('gst'),
-                'remarks' => $this->input->post('remarks'), 
+                'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s'),
@@ -1317,6 +1319,5 @@ public function tender_quotation_print($tender_quotation_id = 0)
             ]);
         }
     }
-
-
+ 
 }

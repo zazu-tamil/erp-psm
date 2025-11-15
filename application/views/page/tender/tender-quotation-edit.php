@@ -1,4 +1,4 @@
-<?php include_once(VIEWPATH . 'inc/header.php'); 
+<?php include_once(VIEWPATH . 'inc/header.php');
 
 
 // echo'<pre>';
@@ -54,7 +54,7 @@
                             <input type="text" name="tender_ref_no" id="tender_ref_no" class="form-control"
                                 value="<?php echo htmlspecialchars($header['tender_ref_no']); ?>"
                                 placeholder="e.g., TEN-2025-001">
-                        </div> 
+                        </div>
 
                         <div class="form-group col-md-3">
                             <label>Quotation Date</label>
@@ -63,17 +63,26 @@
                         </div>
 
                         <div class="form-group col-md-3">
+                            <label>Quotation Status</label><br>
+                            <label class="radio-inline">
+                                <input type="radio" name="quotation_status" value="Confirmed" <?php echo ($header['quotation_status'] == 'Confirmed') ? 'checked' : ''; ?>> Confirmed
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="quotation_status" value="Pending" <?php echo ($header['quotation_status'] == 'Pending') ? 'checked' : ''; ?>> Pending
+                            </label>
+                        </div> 
+                        <div class="form-group col-md-3">
                             <label>Status</label><br>
                             <label class="radio-inline">
-                                <input type="radio" name="status" value="Confirmed" <?php echo ($header['status'] == 'Confirmed') ? 'checked' : ''; ?>> Confirmed
+                                <input type="radio" name="status" value="Active" <?php echo ($header['status'] == 'Active') ? 'checked' : ''; ?>> Active
                             </label>
                             <label class="radio-inline">
-                                <input type="radio" name="status" value="Pending" <?php echo ($header['status'] == 'Pending') ? 'checked' : ''; ?>> Pending
+                                <input type="radio" name="status" value="Inactive" <?php echo ($header['status'] == 'Inactive') ? 'checked' : ''; ?>> Inactive
                             </label>
-                        </div>
+                        </div>  
                     </div>
                     <div class="row">
-                          <div class="form-group col-md-6">
+                        <div class="form-group col-md-6">
                             <label for="remarks">Remarks</label>
                             <textarea name="remarks" class="form-control" id="remarks" rows="7"
                                 placeholder="Enter your remarks"><?php echo htmlspecialchars($header['remarks']); ?></textarea>
@@ -81,9 +90,9 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Terms</label>
-                                <textarea id="editor1_edit_modal" name="terms"
-                                    class="form-control custom-textarea" placeholder="Enter quotation terms"><?php echo htmlspecialchars($header['terms']); ?></textarea>
-                                     
+                                <textarea id="editor1_edit_modal" name="terms" class="form-control custom-textarea"
+                                    placeholder="Enter quotation terms"><?php echo htmlspecialchars($header['terms']); ?></textarea>
+
                             </div>
                         </div>
                     </div>

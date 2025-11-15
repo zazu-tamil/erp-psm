@@ -1165,4 +1165,111 @@ class Master extends CI_Controller
 
         $this->load->view('page/master/customer-list', $data);
     }
+
+    public function customer_contact_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        if (
+            $this->session->userdata(SESS_HD . 'level') != 'Admin'
+            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
+        ) {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+        $data['js'] = 'customer-contact-list.inc';
+
+        /* ===================== ADD ===================== */
+        if ($this->input->post('mode') == 'Add') {
+            $ins = array(
+                'customer_id' => $this->input->post('customer_id'),
+                'contact_person_name' => $this->input->post('contact_person_name'),
+                'mobile' => $this->input->post('mobile'),
+                'email' => $this->input->post('email'),
+                'address' => $this->input->post('address'),
+                'department' => $this->input->post('department'),
+                'designation' => $this->input->post('designation'),
+                'status' => $this->input->post('status'),
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_date' => date('Y-m-d H:i:s'),
+            );
+            $this->db->insert('customer_contact_info', $ins);
+            redirect('customer-contact-list/');
+        }
+
+        /* ===================== EDIT ===================== */
+        if ($this->input->post('mode') == 'Edit') {
+            $upd = array(
+                'customer_id' => $this->input->post('customer_id'),
+                'contact_person_name' => $this->input->post('contact_person_name'),
+                'mobile' => $this->input->post('mobile'),
+                'email' => $this->input->post('email'),
+                'address' => $this->input->post('address'),
+                'department' => $this->input->post('department'),
+                'designation' => $this->input->post('designation'),
+                'status' => $this->input->post('status'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s'),
+            );
+            $this->db->where('customer_contact_id', $this->input->post('customer_contact_id'));
+            $this->db->update('customer_contact_info', $upd);
+            redirect('customer-contact-list/');
+        }
+
+        $this->load->library('pagination');
+
+        $this->db->where('status != ', 'Delete');
+        $this->db->from('customer_contact_info');
+        $data['total_records'] = $cnt = $this->db->count_all_results();
+
+        $data['sno'] = $this->uri->segment(2, 0);
+
+        $config['base_url'] = site_url('customer-contact-list');
+        $config['total_rows'] = $cnt;
+        $config['per_page'] = 20;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '</a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['prev_link'] = "Prev";
+        $config['next_link'] = "Next";
+        $this->pagination->initialize($config);
+
+        $sql = "
+            SELECT customer_id,customer_name
+            FROM customer_info
+            WHERE status = 'Active' 
+            ORDER BY customer_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
+        $sql = "
+        SELECT cci.*, ci.customer_name 
+        FROM customer_contact_info cci
+        LEFT JOIN customer_info ci ON cci.customer_id = ci.customer_id
+        WHERE cci.status != 'Delete'
+        ORDER BY cci.status ASC, ci.customer_name ASC, cci.contact_person_name ASC
+        LIMIT " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "
+    ";
+        $query = $this->db->query($sql);
+        $data['record_list'] = $query->result_array();
+
+        $data['pagination'] = $this->pagination->create_links();
+
+        $this->load->view('page/master/customer-contact-list', $data);
+    }
 }

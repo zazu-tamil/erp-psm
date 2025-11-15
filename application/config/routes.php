@@ -102,6 +102,8 @@ $route['vendor-list/(:num)'] = 'master/vendor_list/$1';
 
 $route['customer-list'] = 'master/customer_list';
 $route['customer-list/(:num)'] = 'master/customer_list/$1';
+$route['customer-contact-list'] = 'master/customer_contact_list';
+$route['customer-contact-list/edit/(:num)'] = 'master/customer_contact_list/$1';
 
 $route['vendor-rate-enquiry'] = 'vendor/vendor_rate_enquiry';
 $route['vendor-rate-enquiry-edit/(:num)'] = 'vendor/vendor_rate_enquiry_edit/$1';

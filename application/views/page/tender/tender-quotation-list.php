@@ -29,8 +29,8 @@
                         <?php echo form_dropdown('srch_tender_enquiry_id', $tender_enquiry_opt, set_value('srch_tender_enquiry_id', $srch_tender_enquiry_id), 'id="srch_tender_enquiry_id" class="form-control select2"'); ?>
                     </div>
                     <div class="form-group col-md-3">
-                        <label>Status</label>
-                        <?php echo form_dropdown('srch_status', $status_opt, set_value('srch_status', $srch_status), 'id="srch_status" class="form-control select2"'); ?>
+                        <label>Quotation Status</label>
+                        <?php echo form_dropdown('srch_quotation_status', $quotation_status_opt, set_value('srch_quotation_status', $srch_quotation_status), 'id="srch_quotation_status" class="form-control"'); ?>
                     </div>
                 </div>
                 <div class="row">
@@ -64,7 +64,7 @@
                         <th>Quote Date</th>
                         <th>Company</th>
                         <th>Customer</th>
-                        <th>Status</th>
+                        <th>Customer Status</th>
                         <th class="text-center" colspan="3">Action</th>
                     </tr>
                 </thead>
@@ -80,8 +80,8 @@
                                 <td><?php echo htmlspecialchars($row['company_name']); ?></td>
                                 <td><?php echo htmlspecialchars($row['customer_name']); ?></td>
                                 <td>
-                                    <span class="label label-<?php echo $row['status'] == 'Active' ? 'success' : 'danger'; ?>">
-                                        <?php echo $row['status']; ?>
+                                    <span class="label label-<?php echo $row['quotation_status'] == 'Confirmed' ? 'success' : 'danger'; ?>">
+                                        <?php echo $row['quotation_status']; ?>
                                     </span>
                                 </td>
 
