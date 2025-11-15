@@ -43,9 +43,6 @@ CREATE TABLE `customer_contact_info` (
 ENGINE=InnoDB
 ;;
 
-sstcs.in phpmyadmin Login Details
-URL : https://auth-db1474.hstgr.io/index.php?db=u275129022_sstcs_db
-Hostname: MySQL server hostname is: srv1474.hstgr.io or you can use this IP as your hostname: 193.203.184.93
-Username: u275129022_ckdhanabalan
-pwd: Ckdhanabalan1966@2025
-DB: u275129022_sstcs_db
+ALTER TABLE `tender_enquiry_info`
+	ADD COLUMN `tender_status` VARCHAR(100) NULL AFTER `status`;
+
