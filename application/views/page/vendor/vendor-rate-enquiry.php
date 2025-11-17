@@ -22,9 +22,9 @@
 
                     <div class="row">
                         <div class="form-group col-md-3">
-                            <label>Customer</label>
+                            <label>Customer <span class="text-red">*</span></label>
                             <div class="form-group">
-                                <?php echo form_dropdown('srch_customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('srch_customer_id'), 'id="srch_customer_id" class="form-control"'); ?>
+                                <?php echo form_dropdown('srch_customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('srch_customer_id'), 'id="srch_customer_id" class="form-control" required'); ?>
                             </div>
                         </div>
                         <div class="form-group col-md-3">
@@ -32,9 +32,9 @@
                             <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select'] + $tender_enquiry_opt, set_value('srch_tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control"'); ?>
                         </div>
                         <div class="form-group col-md-3">
-                            <label for="srch_vendor_id">Vendor Name</label>
+                            <label for="srch_vendor_id">Vendor Name <span class="text-red">*</span></label>
                             <div class="input-group">
-                                <?php echo form_dropdown('srch_vendor_id', ['' => 'Select'] + $vendor_opt, set_value('srch_vendor_id'), 'id="srch_vendor_id" class="form-control "'); ?>
+                                <?php echo form_dropdown('srch_vendor_id', ['' => 'Select'] + $vendor_opt, set_value('srch_vendor_id'), 'id="srch_vendor_id" class="form-control" required'); ?>
                                 <span class="input-group-btn">
                                     <button type="button" class="btn btn-info" data-toggle="modal"
                                         data-target="#add_vendor">Add New</button>
@@ -61,17 +61,17 @@
                                 placeholder="e.g., TEN-2025-001" value="<?php echo set_value('enquiry_no'); ?>">
                         </div>
                         <div class="form-group col-md-3">
-                            <label>Enquiry Date</label>
+                            <label>Enquiry Date <span class="text-red">*</span></label>
                             <input type="date" name="enquiry_date" id="enquiry_date" class="form-control"
-                                value="<?php echo set_value('enquiry_date', date('Y-m-d')); ?>">
+                                value="<?php echo set_value('enquiry_date', date('Y-m-d')); ?>" required>
                         </div>
-                        <div class="form-group col-md-3">
+                        <!-- <div class="form-group col-md-3">
                             <label>Opening Date & Time</label>
                             <input type="datetime-local" name="opening_date" id="opening_date" class="form-control"
                                 value="<?php echo set_value('opening_date'); ?>">
-                        </div>
+                        </div> -->
                         <div class="form-group col-md-3">
-                            <label>Closing Date & Time</label>
+                            <label>Due Date & Time</label>
                             <input type="datetime-local" name="closing_date" id="closing_date" class="form-control"
                                 value="<?php echo set_value('closing_date'); ?>">
                         </div>
