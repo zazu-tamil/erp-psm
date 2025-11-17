@@ -26,9 +26,9 @@
                             <?php echo form_dropdown('company_id', ['' => 'Select Company'] + $company_opt, set_value('company_id'), 'id="srch_company_id" class="form-control select2" required'); ?>
                         </div>
                         <div class="form-group col-md-4">
-                            <label>Customer</label>
+                            <label>Customer <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="srch_customer_id" class="form-control"'); ?>
+                                <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="srch_customer_id" class="form-control" required'); ?>
                                 <span class="input-group-btn">
                                     <button type="button" class="btn btn-info" data-toggle="modal"
                                         data-target="#add_customer">Add New</button>
@@ -36,14 +36,14 @@
                             </div>
                         </div>
                         <div class="form-group col-md-4">
-                            <label>Customer Contact Person</label>
+                            <label>Customer Contact Person <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <?php
                                 echo form_dropdown(
                                     'customer_contact_id',
                                     ['' => 'Select Contact Person'],
                                     set_value('customer_contact_id'),
-                                    'id="srch_customer_contact_id" class="form-control"'
+                                    'id="srch_customer_contact_id" class="form-control" required'
                                 );
                                 ?>
                                 <span class="input-group-btn">
@@ -75,8 +75,8 @@
                         </div>
                   
                         <div class="form-group col-md-4">
-                            <label>Tender Enquiry Status</label>
-                            <?php echo form_dropdown('tender_status', ['' => 'Select'] + $tender_status_opt, set_value('tender_status', 'Active'), 'class="form-control"'); ?>
+                            <label>Tender Enquiry Status <span class="text-danger">*</span></label>
+                            <?php echo form_dropdown('tender_status', ['' => 'Select'] + $tender_status_opt, set_value('tender_status', 'Active'), 'class="form-control" required'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
@@ -200,6 +200,11 @@
         </div>
     </div>
 </div>
+<style>
+    .text-danger{
+        color: red !important;
+    }
+</style>
 <div class="modal fade" id="add_customer" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
