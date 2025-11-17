@@ -236,7 +236,7 @@
                             <div class="form-group">
                                 <label for="address">Address</label>
                                 <textarea class="form-control" name="address" id="address" placeholder="Address"
-                                    required="true" rows="4"></textarea>
+                                 rows="4"></textarea>
                             </div>
                         </div>
                     </div>
@@ -244,7 +244,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Country</label>
-                                <?php echo form_dropdown('country', ['' => 'Select Country'] + $country_opt, set_value('country'), 'id="country" class="form-control" required'); ?>
+                                <?php echo form_dropdown('country', ['' => 'Select Country'] + $country_opt, set_value('country'), 'id="country" class="form-control"'); ?>
                             </div>
                         </div>
                         <div class="form-group col-md-6">
@@ -307,7 +307,7 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="form-group col-md-12">
-                            <label>Category Name</label>
+                            <label>Category Name<span class="text-danger">*</span></label>
                             <input class="form-control" type="text" name="category_name" id="category_name" value=""
                                 placeholder="Category Name" required="true">
                         </div>
@@ -351,7 +351,7 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="form-group col-md-6 mb-3">
-                            <label>Category</label>
+                            <label>Category<span class="text-danger">*</span></label>
                             <?php echo form_dropdown(
                                 'category_id',
                                 array('' => 'Select Category') + $category_opt,
@@ -361,7 +361,7 @@
                         </div>
 
                         <div class="form-group col-md-6 mb-3">
-                            <label>Brand</label>
+                            <label>Brand<span class="text-danger">*</span></label>
                             <?php echo form_dropdown(
                                 'brand_id',
                                 array('' => 'Select Brand') + $brand_opt,
@@ -371,13 +371,13 @@
                         </div>
 
                         <div class="form-group col-md-6 mb-3">
-                            <label>Item Name</label>
+                            <label>Item Name <span class="text-danger">*</span></label>
                             <input class="form-control" type="text" name="item_name" required id="item_name"
                                 placeholder="Enter your item name">
                         </div>
                         <div class="form-group col-md-6 mb-3">
-                            <label>Item Code</label>
-                            <input class="form-control" type="text" name="item_code" required id="item_code"
+                            <label>Item Code<span class="text-danger">*</span></label>
+                            <input class="form-control" type="text" name="item_code" id="item_code"
                                 placeholder="Enter your item code">
                         </div>
                         <div class="form-group col-md-12 mb-3">
@@ -393,7 +393,7 @@
                                 'uom',
                                 array('' => 'Select UOM') + $uom_opt,
                                 '',
-                                'id="uom" class="form-control" required'
+                                'id="uom" class="form-control"'
                             ); ?>
                         </div>
 
@@ -407,7 +407,7 @@
                                 'gst',
                                 array('' => 'Select gst') + $gst_opt,
                                 '',
-                                'id="gst" class="form-control" required'
+                                'id="gst" class="form-control"'
                             ); ?>
                         </div>
 

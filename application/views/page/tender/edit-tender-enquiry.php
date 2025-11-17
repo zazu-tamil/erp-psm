@@ -31,15 +31,16 @@ echo '</pre>';
                             <?php echo form_dropdown('company_id', $company_opt, set_value('company_id', $main_record['company_id']), 'id="srch_company_id" class="form-control select2" required'); ?>
                         </div>
                         <div class="form-group col-md-4">
-                            <label>Customer</label>
-                            <?php echo form_dropdown('customer_id', $customer_opt, set_value('customer_id', $main_record['customer_id']), 'id="srch_customer_id" class="form-control select2"'); ?>
+                            <label>Customer<span class="text-danger">*</span></label>
+                            <?php echo form_dropdown('customer_id', $customer_opt, set_value('customer_id', $main_record['customer_id']), 'id="srch_customer_id" class="form-control select2" required'); ?>
                         </div>
                         <div class="form-group col-md-4">
-                            <label>Customer Contact Person</label>
-                            <?php echo form_dropdown('customer_contact_id', $customer_contact_opt, set_value('srch_customer_contact_id',$main_record['customer_contact_id']), 'id="srch_customer_contact_id" class="form-control select2"'); ?>
+                            <label>Customer Contact Person<span class="text-danger">*</span></label>
+                            <?php echo form_dropdown('customer_contact_id', $customer_contact_opt, set_value('srch_customer_contact_id',$main_record['customer_contact_id']), 'id="srch_customer_contact_id" class="form-control select2"
+                                required'); ?>
                         </div>
                         <div class="form-group col-md-4">
-                            <label>Enquiry No</label>
+                            <label>Enquiry No <span class="text-danger">*</span></label>
                             <input type="text" name="enquiry_no" class="form-control" value="<?php echo htmlspecialchars(set_value('enquiry_no', $main_record['enquiry_no'])); ?>" required>
                         </div>
                         <div class="form-group col-md-4">
@@ -67,8 +68,8 @@ echo '</pre>';
                             <input type="datetime-local" name="closing_date" class="form-control" value="<?php echo $main_record['closing_date'] ? date('Y-m-d\TH:i', strtotime($main_record['closing_date'])) : ''; ?>">
                         </div>
                         <div class="form-group col-md-4">
-                            <label>Tender Enquiry Status</label>
-                            <?php echo form_dropdown('tender_status',  $tender_status_opt, set_value('tender_status', $main_record['tender_status']), 'class="form-control"'); ?>
+                            <label>Tender Enquiry Status<span class="text-danger">*</span></label>
+                            <?php echo form_dropdown('tender_status',  $tender_status_opt, set_value('tender_status', $main_record['tender_status']), 'class="form-control" required'); ?>
                         </div>
                     
                         <div class="form-group col-md-4">
