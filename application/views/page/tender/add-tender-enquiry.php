@@ -57,7 +57,7 @@
                             <input type="text" name="enquiry_no" class="form-control" placeholder="e.g., TEN-2025-001"
                                 value="<?php echo set_value('enquiry_no'); ?>">
                         </div>
-                     
+
                         <div class="form-group col-md-4">
                             <label>Enquiry Date</label>
                             <input type="date" name="enquiry_date" class="form-control"
@@ -73,7 +73,7 @@
                             <input type="datetime-local" name="closing_date" class="form-control"
                                 value="<?php echo set_value('closing_date'); ?>">
                         </div>
-                  
+
                         <div class="form-group col-md-4">
                             <label>Tender Enquiry Status <span class="text-danger">*</span></label>
                             <?php echo form_dropdown('tender_status', ['' => 'Select'] + $tender_status_opt, set_value('tender_status', 'Active'), 'class="form-control" required'); ?>
@@ -153,12 +153,20 @@
                     <div class="row">
                         <div class="form-group col-md-6">
                             <label>Customer <span class="text-danger">*</span></label>
-                            <?php echo form_dropdown('customer_id', $customer_opt, '', 'class="form-control" required'); ?>
+                            <?php
+                            echo form_dropdown(
+                                'customer_id',
+                                ['' => 'Select Customer'] + $customer_opt, // default + dynamic options
+                                '',                                        // selected value
+                                'class="form-control" required'
+                            );
+                            ?>
                         </div>
+
                         <div class="form-group col-md-6">
-                            <label>Contact Person Name</label>
-                            <input type="text" name="contact_person_name" class="form-control" placeholder="Name"
-                                required>
+                            <label>Contact Person Name <span class="text-danger">*</span></label>
+                            <input type="text" name="contact_person_name" id="contact_person_name" class="form-control"
+                                placeholder="Name" required="true">
                         </div>
                     </div>
                     <div class="row">
@@ -201,10 +209,11 @@
     </div>
 </div>
 <style>
-    .text-danger{
+    .text-danger {
         color: red !important;
     }
 </style>
+
 <div class="modal fade" id="add_customer" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -241,7 +250,7 @@
                             <div class="form-group">
                                 <label for="address">Address</label>
                                 <textarea class="form-control" name="address" id="address" placeholder="Address"
-                                 rows="4"></textarea>
+                                    rows="4"></textarea>
                             </div>
                         </div>
                     </div>

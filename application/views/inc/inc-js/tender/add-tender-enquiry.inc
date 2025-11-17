@@ -317,6 +317,15 @@
 
       var formData = $("#frmadd_Customer_Contact").serializeArray();
 
+      // ✅ Required field validation ONLY for contact_person_name
+      var contactName = $('input[name="contact_person_name"]').val().trim();
+
+      if (contactName === "") {
+        alert("Contact Person Name is required.");
+        $('input[name="contact_person_name"]').focus();
+        return false; // Stop the code
+      }
+
       $.ajax({
         url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
         type: "POST",
@@ -334,10 +343,7 @@
             var newOption = new Option(response.name, response.id, true, true);
             $("#srch_customer_contact_id").append(newOption).trigger("change");
 
-            // FIXED RESET
             $("#frmadd_Customer_Contact")[0].reset();
-
-            // Close modal (fixed ID)
             $("#add_customer_contact_id").modal("hide");
 
             alert(response.message);
