@@ -30,6 +30,7 @@ class Tender extends CI_Controller
                 'opening_date' => $this->input->post('opening_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('opening_date'))) : null,
                 'closing_date' => $this->input->post('closing_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('closing_date'))) : null,
                 'status' => $this->input->post('status') ?: 'Active',
+                'tender_name' => $this->input->post('tender_name'),
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s')
             );
@@ -348,6 +349,7 @@ class Tender extends CI_Controller
                 'closing_date' => $this->input->post('closing_date')
                     ? date('Y-m-d H:i:s', strtotime($this->input->post('closing_date'))) : null,
                 'status' => $this->input->post('status') ?: 'Active',
+                'tender_name' => $this->input->post('tender_name'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'updated_date' => date('Y-m-d H:i:s')
             ];

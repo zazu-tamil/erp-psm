@@ -80,7 +80,12 @@
                             <label>Status</label>
                             <?php echo form_dropdown('status', $status_opt, set_value('status', $main_record['status']), 'class="form-control select2"'); ?>
                         </div>
+                           <div class="form-group col-md-4">
+                            <label>Tender Name</label>
+                            <input type="text" name="tender_name" class="form-control" value="<?php echo htmlspecialchars(set_value('tender_name', $main_record['tender_name'])); ?>">
+                        </div>
                     </div>
+                 
                 </fieldset>
 
                 <!-- Item Details -->
