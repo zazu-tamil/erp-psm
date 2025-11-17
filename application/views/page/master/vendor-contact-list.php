@@ -8,6 +8,7 @@
 </section>
 
 <section class="content">
+   
         <div class="box box-info">
         <div class="box-header with-border">
             <h3 class="box-title text-white">Search Filter</h3>

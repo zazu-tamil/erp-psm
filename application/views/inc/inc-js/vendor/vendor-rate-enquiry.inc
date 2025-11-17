@@ -2,34 +2,31 @@
 $(document).ready(function () {
   
   // Load vendor contacts when vendor is selected
-  $("#srch_vendor_id").on("change", function () {
+ $("#srch_vendor_id").on("change", function () {
     const vendor_id = $(this).val();
-    
-    // Clear the contact person dropdown
+
+    // Auto-set vendor in Add Contact Person modal
+    $("#contact_vendor_id").val(vendor_id);
+
+    // Clear dropdown before loading
     $("#srch_vendor_contact_id").html('<option value="">Select Contact Person</option>');
-    
+
     if (vendor_id) {
       $.ajax({
         url: '<?php echo site_url("vendor/get_data"); ?>',
         type: "POST",
-        data: {
-          tbl: "get-vendor-contacts",
-          id: vendor_id
-        },
+        data: { tbl: "get-vendor-contacts", id: vendor_id },
         dataType: "json",
         success: function (res) {
           if (res.length > 0) {
             $.each(res, function (i, contact) {
-              const option = `<option value="${contact.vendor_contact_id}">${contact.contact_person_name}</option>`;
-              $("#srch_vendor_contact_id").append(option);
+              $("#srch_vendor_contact_id").append(
+                `<option value="${contact.vendor_contact_id}">${contact.contact_person_name}</option>`
+              );
             });
           } else {
-            $("#srch_vendor_contact_id").html('<option value="">No contacts found</option>');
+            $("#srch_vendor_contact_id").html('<option>No contacts found</option>');
           }
-        },
-        error: function(xhr, status, error) {
-          console.error("Error loading vendor contacts:", error);
-          $("#srch_vendor_contact_id").html('<option value="">Error loading contacts</option>');
         }
       });
     }
@@ -141,7 +138,7 @@ $(document).ready(function () {
           .prop("disabled", true);
       },
       success: function (response) {
-        console.log(response);
+       
 
         if (response.status === "success") {
           // Add new vendor option dynamically
@@ -154,8 +151,17 @@ $(document).ready(function () {
           // Close the modal
           $("#add_vendor").modal("hide");
 
+           $('#zazualert').html(`
+                    <div class="alert alert-success sticky-notification" role="alert">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Note:</strong>
+                        <div class="note-content">`+ response.message + `</div>
+                    </div>
+                `);
+
+
           // Success message
-          alert(response.message);
+          
         } else {
           alert(response.message || "Failed to add vendor.");
         }
@@ -173,6 +179,7 @@ $(document).ready(function () {
   // Handle Add Contact Person form submission
   $('input[name="btn_add_contact"]').on("click", function (e) {
     e.preventDefault();
+
 
     // Validate vendor selection
     var vendorId = $("#contact_vendor_id").val();
@@ -201,7 +208,7 @@ $(document).ready(function () {
           .prop("disabled", true);
       },
       success: function (response) {
-        console.log(response);
+  
 
         if (response.status === "success") {
           // Add new contact option dynamically
@@ -215,7 +222,16 @@ $(document).ready(function () {
           $("#add_vendor_contact_pereson").modal("hide");
 
           // Success message
-          alert(response.message);
+
+           $('#zazualert').html(`
+                    <div class="alert alert-success sticky-notification" role="alert">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Note:</strong>
+                        <div class="note-content">`+ response.message + `</div>
+                    </div>
+                `);
+
+        
         } else {
           alert(response.message || "Failed to add contact person.");
         }

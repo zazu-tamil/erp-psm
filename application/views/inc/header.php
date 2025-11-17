@@ -141,3 +141,4 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <?php  include_once('left-menu.php'); ?>
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
+            <div id="zazualert"></div>

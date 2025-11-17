@@ -21,17 +21,17 @@
                     <legend class="text-light-blue"><i class="fa fa-file-text-o"></i>Vendor Rate Enquiry</legend>
 
                     <div class="row">
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label>Customer <span class="text-red">*</span></label>
                             <div class="form-group">
                                 <?php echo form_dropdown('srch_customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('srch_customer_id'), 'id="srch_customer_id" class="form-control" required'); ?>
                             </div>
                         </div>
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label for="srch_tender_enquiry_id">Tender Enquiry No</label>
                             <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select'] + $tender_enquiry_opt, set_value('srch_tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control"'); ?>
                         </div>
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label for="srch_vendor_id">Vendor Name <span class="text-red">*</span></label>
                             <div class="input-group">
                                 <?php echo form_dropdown('srch_vendor_id', ['' => 'Select'] + $vendor_opt, set_value('srch_vendor_id'), 'id="srch_vendor_id" class="form-control" required'); ?>
@@ -41,7 +41,10 @@
                                 </span>
                             </div>
                         </div>
-                         <div class="form-group col-md-3">
+                    </div>
+
+                    <div class="row">
+                          <div class="form-group col-md-4">
                             <label for="srch_vendor_contact_id">Contact Person</label>
                             <div class="input-group">
                                 <?php echo form_dropdown('srch_vendor_contact_id', ['' => 'Select'] + $vendor_contact_opt, set_value('srch_vendor_contact_id'), 'id="srch_vendor_contact_id" class="form-control "'); ?>
@@ -51,16 +54,12 @@
                                 </span>
                             </div>
                         </div>
-                      
-                    </div>
-
-                    <div class="row">
-                          <div class="form-group col-md-3">
+                          <div class="form-group col-md-4">
                             <label>Enquiry No</label>
                             <input type="text" name="enquiry_no" id="enquiry_no" class="form-control"
                                 placeholder="e.g., TEN-2025-001" value="<?php echo set_value('enquiry_no'); ?>">
                         </div>
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label>Enquiry Date <span class="text-red">*</span></label>
                             <input type="date" name="enquiry_date" id="enquiry_date" class="form-control"
                                 value="<?php echo set_value('enquiry_date', date('Y-m-d')); ?>" required>
@@ -70,18 +69,23 @@
                             <input type="datetime-local" name="opening_date" id="opening_date" class="form-control"
                                 value="<?php echo set_value('opening_date'); ?>">
                         </div> -->
-                        <div class="form-group col-md-3">
+                       
+                    </div>
+                    <div class="row">
+
+                     <div class="form-group col-md-4">
                             <label>Due Date & Time</label>
                             <input type="datetime-local" name="closing_date" id="closing_date" class="form-control"
                                 value="<?php echo set_value('closing_date'); ?>">
                         </div>
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label>Status</label><br>
                             <label class="radio-inline"><input type="radio" name="status" value="Active" checked>
                                 Active</label>
                             <label class="radio-inline"><input type="radio" name="status" value="InActive">
                                 InActive</label>
                         </div>
+
                     </div>
                 </fieldset>
 
