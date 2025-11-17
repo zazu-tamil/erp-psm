@@ -1,4 +1,4 @@
-<style>
+ <style>
     .text-light-blue { color: #3c8dbc !important; }
     fieldset { border: 1px solid #d2d6de; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
     legend { font-size: 16px; font-weight: bold; width: auto; padding: 0 12px; }

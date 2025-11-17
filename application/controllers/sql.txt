@@ -78,3 +78,6 @@ ALTER TABLE tender_quotation_info ADD quotation_status VARCHAR(50) NULL DEFAULT 
  ALTER TABLE `vendor_rate_enquiry_info` ADD `vendor_contact_person_id` INT(11) NULL DEFAULT NULL AFTER `vendor_id`;
 
  ALTER TABLE tender_enquiry_info ADD customer_contact_id INT(11) NULL AFTER customer_id;
+
+
+ ALTER TABLE `tender_enquiry_info` ADD COLUMN `tender_document` VARCHAR(255) NULL AFTER `tender_name`;
