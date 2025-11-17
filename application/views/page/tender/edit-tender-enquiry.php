@@ -10,7 +10,11 @@
         <li class="active">Edit Tender Enquiry</li>
     </ol>
 </section>
-
+<style>
+    .text-danger{
+        color: red !important;
+    }
+</style>
 <section class="content">
     <div class="box box-info">
         <div class="box-header with-border">
