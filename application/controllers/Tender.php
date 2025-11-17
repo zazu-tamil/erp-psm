@@ -24,6 +24,7 @@ class Tender extends CI_Controller
                 'company_id' => $srch_company_id,
                 'enquiry_date' => $this->input->post('enquiry_date'),
                 'enquiry_no' => $this->input->post('enquiry_no'),
+                'customer_contact_id' => $this->input->post('customer_contact_id'),
                 'tender_status' => $this->input->post('tender_status'),
                 'customer_id' => $srch_customer_id,
                 'opening_date' => $this->input->post('opening_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('opening_date'))) : null,
@@ -340,6 +341,7 @@ class Tender extends CI_Controller
                 'tender_status' => $this->input->post('tender_status'),
                 'customer_id' => $this->input->post('customer_id'),
                 'company_sno' => $this->input->post('company_sno'),
+                'customer_contact_id' => $this->input->post('customer_contact_id'),
                 'customer_sno' => $this->input->post('customer_sno'),
                 'opening_date' => $this->input->post('opening_date')
                     ? date('Y-m-d H:i:s', strtotime($this->input->post('opening_date'))) : null,
@@ -471,17 +473,26 @@ class Tender extends CI_Controller
         }
 
         $data['category_opt'] = ['' => 'Select Category'];
+          $data['customer_contact_opt'] = [];
         $sql = "
-            SELECT 
-            category_id, 
-            category_name 
-            FROM category_info 
-            WHERE status = 'Active' 
-            ORDER BY category_name";
+                    SELECT
+                a.customer_contact_id,
+                a.contact_person_name
+            FROM
+                customer_contact_info AS a
+            LEFT JOIN customer_info AS b
+            ON
+                a.customer_id = b.customer_id AND b.status = 'Active'
+            WHERE
+                a.status = 'Active'
+            ORDER BY
+                a.contact_person_name";
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
-            $data['category_opt'][$row['category_id']] = $row['category_name'];
+            $data['customer_contact_opt'][$row['customer_contact_id']] = $row['contact_person_name'];
         }
+      
+ 
 
         $data['uom_opt'] = [];
         $sql = "
@@ -757,7 +768,7 @@ class Tender extends CI_Controller
             'Quoted' => 'Quoted',
             'Won' => 'Won',
             'On Hold' => 'On Hold',
-         ];
+        ];
 
 
         $this->load->view('page/tender/tender-quotation-list', $data);
@@ -1294,6 +1305,23 @@ class Tender extends CI_Controller
             $rec_list = $query->result_array();
         }
 
+        if ($table == 'get-customer-contacts') {
+
+            $sql = "
+            SELECT 
+                customer_contact_id, 
+                contact_person_name
+            FROM customer_contact_info
+            WHERE customer_id = ?
+              AND status = 'active'
+        ";
+
+            $query = $this->db->query($sql, [$rec_id]);
+
+            echo json_encode($query->result());
+            return;
+        }
+
         header('Content-Type: application/json');
         echo json_encode($rec_list);
     }
@@ -1314,6 +1342,34 @@ class Tender extends CI_Controller
 
     public function ajax_add_master_inline()
     {
+        if ($this->input->post('mode') == 'Add Customer Contact') {
+
+            $data = [
+                'customer_id' => $this->input->post('customer_id'),
+                'contact_person_name' => $this->input->post('contact_person_name'),
+                'mobile' => $this->input->post('mobile'),
+                'email' => $this->input->post('email'),
+                'address' => $this->input->post('address'),
+                'department' => $this->input->post('department'),
+                'designation' => $this->input->post('designation'),
+                'status' => $this->input->post('status'),
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_date' => date('Y-m-d H:i:s'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            ];
+
+            $this->db->insert('customer_contact_info', $data);
+            $insert_id = $this->db->insert_id();
+
+            // Return response for JS
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Customer contact added successfully!',
+                'id' => $insert_id,
+                'name' => $data['contact_person_name']
+            ]);
+        }
         if ($this->input->post('mode') == 'Add Customer') {
 
             $data = [

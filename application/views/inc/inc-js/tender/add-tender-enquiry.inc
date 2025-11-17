@@ -312,6 +312,50 @@
         },
       });
     });
+    $('input[name="btn_add_customer_contact"]').on("click", function (e) {
+      e.preventDefault();
+
+      var formData = $("#frmadd_Customer_Contact").serializeArray();
+
+      $.ajax({
+        url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
+        type: "POST",
+        data: formData,
+        dataType: "json",
+        beforeSend: function () {
+          $('input[name="btn_add_customer_contact"]')
+            .val("Saving...")
+            .prop("disabled", true);
+        },
+        success: function (response) {
+          console.log(response);
+
+          if (response.status === "success") {
+            var newOption = new Option(response.name, response.id, true, true);
+            $("#srch_customer_contact_id").append(newOption).trigger("change");
+
+            // FIXED RESET
+            $("#frmadd_Customer_Contact")[0].reset();
+
+            // Close modal (fixed ID)
+            $("#add_customer_contact_id").modal("hide");
+
+            alert(response.message);
+          } else {
+            alert("Failed to add contact person.");
+          }
+        },
+        error: function (xhr, status, error) {
+          alert("Error: " + error);
+        },
+        complete: function () {
+          $('input[name="btn_add_customer_contact"]')
+            .val("Save")
+            .prop("disabled", false);
+        },
+      });
+    });
+
     $('input[name="btn_add_category"]').on("click", function (e) {
       e.preventDefault();
 
@@ -352,9 +396,7 @@
               .val(response.id)
               .trigger("change");
 
-            $("#add_item .category-select")
-              .val(response.id)
-              .trigger("change");
+            $("#add_item .category-select").val(response.id).trigger("change");
 
             // Reset modal form & close modal
             $("#frmadd_Category")[0].reset();
@@ -383,7 +425,7 @@
       var formData = $("#frmadd_Item").serialize(); // Item form data
 
       $.ajax({
-         url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
+        url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
         type: "POST",
         data: formData,
         dataType: "json",
@@ -431,6 +473,35 @@
         },
         complete: function () {
           $('input[name="btn_add_item"]').val("Save").prop("disabled", false);
+        },
+      });
+    });
+    $("#srch_customer_id").change(function () {
+      var customerId = $(this).val();
+
+      // Reset contact dropdown
+      var $contact = $("#srch_customer_contact_id");
+      $contact.html('<option value="">Select Contact Person</option>');
+
+      if (!customerId) return;
+
+      $.ajax({
+        url: "<?php echo site_url('tender/get_data'); ?>",
+        type: "POST",
+        data: { tbl: "get-customer-contacts", id: customerId },
+        dataType: "json",
+        success: function (data) {
+          $.each(data, function (i, item) {
+            $contact.append(
+              $("<option>")
+                .val(item.customer_contact_id)
+                .text(item.contact_person_name)
+            );
+          });
+        },
+        error: function (xhr) {
+          console.error(xhr.responseText);
+          alert("Failed to load contact persons");
         },
       });
     });

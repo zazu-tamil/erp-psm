@@ -243,6 +243,36 @@ jQuery(function($){
     
     });
 
+    $("#srch_customer_id").change(function () {
+      var customerId = $(this).val();
+
+      // Reset contact dropdown
+      var $contact = $("#srch_customer_contact_id");
+      $contact.html('<option value="">Select Contact Person</option>');
+
+      if (!customerId) return;
+
+      $.ajax({
+        url: "<?php echo site_url('tender/get_data'); ?>",
+        type: "POST",
+        data: { tbl: "get-customer-contacts", id: customerId },
+        dataType: "json",
+        success: function (data) {
+          $.each(data, function (i, item) {
+            $contact.append(
+              $("<option>")
+                .val(item.customer_contact_id)
+                .text(item.contact_person_name)
+            );
+          });
+        },
+        error: function (xhr) {
+          console.error(xhr.responseText);
+          alert("Failed to load contact persons");
+        },
+      });
+    });
+
     // Remove row
     $(document).on('click', '.btn-remove-row', function(e){
         e.preventDefault();

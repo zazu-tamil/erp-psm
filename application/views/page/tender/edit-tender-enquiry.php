@@ -1,4 +1,8 @@
-<?php include_once(VIEWPATH . 'inc/header.php'); ?>
+<?php include_once(VIEWPATH . 'inc/header.php');
+echo '<pre>';
+print_r($main_record);
+echo '</pre>';
+?>
 <section class="content-header">
     <h1><?php echo htmlspecialchars($title); ?></h1>
     <ol class="breadcrumb">
@@ -29,6 +33,10 @@
                         <div class="form-group col-md-4">
                             <label>Customer</label>
                             <?php echo form_dropdown('customer_id', $customer_opt, set_value('customer_id', $main_record['customer_id']), 'id="srch_customer_id" class="form-control select2"'); ?>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Customer Contact Person</label>
+                            <?php echo form_dropdown('customer_contact_id', $customer_contact_opt, set_value('srch_customer_contact_id',$main_record['customer_contact_id']), 'id="srch_customer_contact_id" class="form-control select2"'); ?>
                         </div>
                         <div class="form-group col-md-4">
                             <label>Enquiry No</label>

@@ -36,13 +36,28 @@
                             </div>
                         </div>
                         <div class="form-group col-md-4">
+                            <label>Customer Contact Person</label>
+                            <div class="input-group">
+                                <?php
+                                echo form_dropdown(
+                                    'customer_contact_id',
+                                    ['' => 'Select Contact Person'],
+                                    set_value('customer_contact_id'),
+                                    'id="srch_customer_contact_id" class="form-control"'
+                                );
+                                ?>
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-info" data-toggle="modal"
+                                        data-target="#add_customer_contact_id">Add New</button>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
                             <label>Enquiry No</label>
                             <input type="text" name="enquiry_no" class="form-control" placeholder="e.g., TEN-2025-001"
                                 value="<?php echo set_value('enquiry_no'); ?>">
                         </div>
-                    </div>
-
-                    <div class="row">
+                     
                         <div class="form-group col-md-4">
                             <label>Enquiry Date</label>
                             <input type="date" name="enquiry_date" class="form-control"
@@ -58,14 +73,12 @@
                             <input type="datetime-local" name="closing_date" class="form-control"
                                 value="<?php echo set_value('closing_date'); ?>">
                         </div>
-                    </div>
-
-                    <div class="row">
+                  
                         <div class="form-group col-md-4">
                             <label>Tender Enquiry Status</label>
                             <?php echo form_dropdown('tender_status', ['' => 'Select'] + $tender_status_opt, set_value('tender_status', 'Active'), 'class="form-control"'); ?>
                         </div>
-                    
+
                         <div class="form-group col-md-4">
                             <label>Status</label>
                             <?php echo form_dropdown('status', ['' => 'Select'] + $status_opt, set_value('status', 'Active'), 'class="form-control select2"'); ?>
@@ -123,6 +136,70 @@
 </section>
 
 
+<div class="modal fade" id="add_customer_contact_id" role="dialog" aria-labelledby="scrollmodalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <form method="post" action="" id="frmadd_Customer_Contact" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h3 class="modal-title">Add Customer Contact</h3>
+                    <input type="hidden" name="mode" value="Add Customer Contact" />
+                </div>
+
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label>Customer <span class="text-danger">*</span></label>
+                            <?php echo form_dropdown('customer_id', $customer_opt, '', 'class="form-control" required'); ?>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Contact Person Name</label>
+                            <input type="text" name="contact_person_name" class="form-control" placeholder="Name"
+                                required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label>Department</label>
+                            <input type="text" name="department" class="form-control" placeholder="Department">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Designation</label>
+                            <input type="text" name="designation" class="form-control" placeholder="Designation">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-4">
+                            <label>Mobile</label>
+                            <input type="text" name="mobile" class="form-control" placeholder="Mobile">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Email</label>
+                            <input type="email" name="email" class="form-control" placeholder="Email">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Status</label><br>
+                            <label><input type="radio" name="status" value="Active" checked> Active</label>
+                            <label class="ml-3"><input type="radio" name="status" value="InActive"> InActive</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        <textarea name="address" class="form-control" rows="3" placeholder="Full Address"></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <input type="submit" name="btn_add_customer_contact" value="Save" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <div class="modal fade" id="add_customer" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
