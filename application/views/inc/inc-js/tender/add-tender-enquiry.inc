@@ -312,6 +312,22 @@
         },
       });
     });
+
+    
+    $("#srch_customer_id").on("change", function () {
+      let v = $(this).val();
+      $("#customer_id_two").val(v); // select same value
+    });
+    $("#srch_customer_id").on("change", function () {
+      let v = $(this).val();
+
+      $('select[name="customer_id"]').each(function () {
+        if ($(this).attr("id") !== "srch_customer_id") {
+          $(this).val(v);
+        }
+      });
+    });
+
     $('input[name="btn_add_customer_contact"]').on("click", function (e) {
       e.preventDefault();
 
@@ -325,7 +341,6 @@
         $('input[name="contact_person_name"]').focus();
         return false; // Stop the code
       }
-
       $.ajax({
         url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
         type: "POST",
@@ -337,7 +352,7 @@
             .prop("disabled", true);
         },
         success: function (response) {
-          console.log(response);
+          // console.log(response);
 
           if (response.status === "success") {
             var newOption = new Option(response.name, response.id, true, true);

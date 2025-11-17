@@ -52,6 +52,12 @@
                                 </span>
                             </div>
                         </div>
+                        <script>
+                            $document.ready(function () {
+                                $('#srch_customer_contact_id').trigger('change').val('#srch_customer_id').trigger('change');
+
+                            });
+                        </script>
                         <div class="form-group col-md-4">
                             <label>Enquiry No</label>
                             <input type="text" name="enquiry_no" class="form-control" placeholder="e.g., TEN-2025-001"
@@ -153,15 +159,15 @@
                     <div class="row">
                         <div class="form-group col-md-6">
                             <label>Customer <span class="text-danger">*</span></label>
-                            <?php
-                            echo form_dropdown(
-                                'customer_id',
-                                ['' => 'Select Customer'] + $customer_opt, // default + dynamic options
-                                '',                                        // selected value
-                                'class="form-control" required'
-                            );
-                            ?>
+                            <select id="customer_id_two" name="customer_id" class="form-control" required>
+                                <option value="">Select Customer</option>
+                                <?php foreach ($customer_opt as $key => $val) { ?>
+                                    <option value="<?= $key ?>"><?= $val ?></option>
+                                <?php } ?>
+                            </select>
+
                         </div>
+
 
                         <div class="form-group col-md-6">
                             <label>Contact Person Name <span class="text-danger">*</span></label>
