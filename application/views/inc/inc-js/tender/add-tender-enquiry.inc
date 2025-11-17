@@ -312,11 +312,35 @@
         },
       });
     });
+
+    
+    $("#srch_customer_id").on("change", function () {
+      let v = $(this).val();
+      $("#customer_id_two").val(v); // select same value
+    });
+    $("#srch_customer_id").on("change", function () {
+      let v = $(this).val();
+
+      $('select[name="customer_id"]').each(function () {
+        if ($(this).attr("id") !== "srch_customer_id") {
+          $(this).val(v);
+        }
+      });
+    });
+
     $('input[name="btn_add_customer_contact"]').on("click", function (e) {
       e.preventDefault();
 
       var formData = $("#frmadd_Customer_Contact").serializeArray();
 
+      // ✅ Required field validation ONLY for contact_person_name
+      var contactName = $('input[name="contact_person_name"]').val().trim();
+
+      if (contactName === "") {
+        alert("Contact Person Name is required.");
+        $('input[name="contact_person_name"]').focus();
+        return false; // Stop the code
+      }
       $.ajax({
         url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
         type: "POST",
@@ -328,16 +352,13 @@
             .prop("disabled", true);
         },
         success: function (response) {
-          console.log(response);
+          // console.log(response);
 
           if (response.status === "success") {
             var newOption = new Option(response.name, response.id, true, true);
             $("#srch_customer_contact_id").append(newOption).trigger("change");
 
-            // FIXED RESET
             $("#frmadd_Customer_Contact")[0].reset();
-
-            // Close modal (fixed ID)
             $("#add_customer_contact_id").modal("hide");
 
             alert(response.message);
