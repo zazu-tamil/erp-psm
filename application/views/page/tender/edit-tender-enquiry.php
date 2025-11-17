@@ -1,7 +1,7 @@
 <?php include_once(VIEWPATH . 'inc/header.php');
-echo '<pre>';
-print_r($main_record);
-echo '</pre>';
+// echo '<pre>';
+// print_r($main_record);
+// echo '</pre>';
 ?>
 <section class="content-header">
     <h1><?php echo htmlspecialchars($title); ?></h1>
