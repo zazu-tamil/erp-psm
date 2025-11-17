@@ -19,16 +19,16 @@
                     <legend class="text-light-blue">Vendor Rate Enquiry</legend>
                     <div class="row">
                         <div class="form-group col-md-3">
-                            <label for="srch_customer_id">Customer</label>
-                            <?php echo form_dropdown('srch_customer_id', ['' => 'Select'] + $customer_opt, $main['customer_id'], 'id="srch_customer_id" class="form-control"'); ?>
+                            <label for="srch_customer_id">Customer <span class="text-red">*</span></label>
+                            <?php echo form_dropdown('srch_customer_id', ['' => 'Select'] + $customer_opt, $main['customer_id'], 'id="srch_customer_id" class="form-control" required'); ?>
                         </div>
                         <div class="form-group col-md-3">
                             <label for="srch_tender_enquiry_id">Tender Enquiry No</label>
                             <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select'] + $tender_enquiry_opt, $main['tender_enquiry_id'], 'id="srch_tender_enquiry_id" class="form-control"'); ?>
                         </div>
                         <div class="form-group col-md-3">
-                            <label for="srch_vendor_id">Vendor Name</label>
-                            <?php echo form_dropdown('srch_vendor_id', ['' => 'Select'] + $vendor_opt, $main['vendor_id'], 'id="srch_vendor_id" class="form-control"'); ?>
+                            <label for="srch_vendor_id">Vendor Name <span class="text-red">*</span></label>
+                            <?php echo form_dropdown('srch_vendor_id', ['' => 'Select'] + $vendor_opt, $main['vendor_id'], 'id="srch_vendor_id" class="form-control" required'); ?>
                         </div>
                          <div class="form-group col-md-3">
                             <label for="srch_vendor_contact_id">Contact Person</label>
@@ -43,17 +43,17 @@
                                 value="<?php echo $main['enquiry_no']; ?>">
                         </div>
                         <div class="form-group col-md-3">
-                            <label>Enquiry Date</label>
+                            <label>Enquiry Date <span class="text-red">*</span></label>
                             <input type="date" name="enquiry_date" id="enquiry_date" class="form-control"
-                                value="<?php echo date('Y-m-d', strtotime($main['enquiry_date'])); ?>">
+                                value="<?php echo date('Y-m-d', strtotime($main['enquiry_date'])); ?>" required>
                         </div>
-                        <div class="form-group col-md-3">
+                        <!-- <div class="form-group col-md-3">
                             <label>Opening Date & Time</label>
                             <input type="datetime-local" name="opening_date" id="opening_date" class="form-control"
                                 value="<?php echo date('Y-m-d\TH:i', strtotime($main['opening_date'])); ?>">
-                        </div>
+                        </div> -->
                         <div class="form-group col-md-3">
-                            <label>Closing Date & Time</label>
+                            <label>Due Date & Time</label>
                             <input type="datetime-local" name="closing_date" id="closing_date" class="form-control"
                                 value="<?php echo date('Y-m-d\TH:i', strtotime($main['closing_date'])); ?>">
                         </div>
