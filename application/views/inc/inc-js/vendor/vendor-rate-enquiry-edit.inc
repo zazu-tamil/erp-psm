@@ -2,12 +2,61 @@
 $(document).ready(function () {
     const tender_enquiry_id = $("#old_tender_enquiry_id").val();
     
+    // Store GST options from PHP
+    const gstOptions = [
+        <?php if(isset($gst_opt) && !empty($gst_opt)): ?>
+            <?php foreach($gst_opt as $gst_id => $gst_pct): ?>
+                { id: '<?php echo $gst_id; ?>', value: '<?php echo $gst_pct; ?>' },
+            <?php endforeach; ?>
+        <?php endif; ?>
+    ];
+    
     // Initialize grand total on page load
     calculateGrandTotal();
+    
+    // Calculate amounts for existing items on page load
+    $(".item-card").each(function() {
+        calculateAmount($(this));
+    });
     
     // Initialize with saved items if tender enquiry is the same
     if (tender_enquiry_id) {
         // Items are already loaded from PHP, no AJAX call needed on initial load
+    }
+
+    // Handle vendor change - load contact persons
+    $("#srch_vendor_id").on("change", function () {
+        const vendor_id = $(this).val();
+        
+        // Clear contact person dropdown
+        $("#srch_vendor_contact_id").html('<option value="">Select</option>');
+        
+        if (vendor_id) {
+            loadVendorContacts(vendor_id);
+        }
+    });
+
+    function loadVendorContacts(vendor_id) {
+        $.ajax({
+            url: '<?php echo site_url("vendor/get_data"); ?>',
+            type: "POST",
+            data: { tbl: "get-vendor-contacts", id: vendor_id },
+            dataType: "json",
+            success: function (res) {
+                let options = '<option value="">Select</option>';
+                
+                if (res.length > 0) {
+                    $.each(res, function (i, row) {
+                        options += `<option value="${row.vendor_contact_id}">${row.contact_person_name}</option>`;
+                    });
+                }
+                
+                $("#srch_vendor_contact_id").html(options);
+            },
+            error: function() {
+                alert('Error loading vendor contacts.');
+            }
+        });
     }
 
     // Handle tender enquiry change
@@ -49,6 +98,12 @@ $(document).ready(function () {
                 
                 if (res.length > 0) {
                     $.each(res, function (i, row) {
+                        // Build GST dropdown options
+                        let gstOptionsHtml = '<option value="">Select</option>';
+                        gstOptions.forEach(function(gst) {
+                            gstOptionsHtml += `<option value="${gst.value}">${gst.value}%</option>`;
+                        });
+                        
                         const itemHtml = `
                             <div class="item-card border p-3 mb-3" style="background-color:#f9f9f9; border-radius:8px;">
                                 <h5 class="text-primary mb-3">Item Details ${i + 1}</h5>
@@ -69,13 +124,13 @@ $(document).ready(function () {
                                             <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Category Name</label>
-                                                    <input type="text" class="form-control" value="${row.category_name}" readonly>
+                                                    <input type="text" class="form-control" value="${row.category_name || ''}" readonly>
                                                 </div>
                                             </div>
                                             <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Item Name</label>
-                                                    <input type="text" class="form-control" value="${row.item_name}" readonly>
+                                                    <input type="text" class="form-control" value="${row.item_name || ''}" readonly>
                                                 </div>
                                             </div>
                                         </div>
@@ -83,7 +138,7 @@ $(document).ready(function () {
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Item Description</label>
-                                            <textarea name="item_desc[]" class="form-control desc-textarea" rows="3">${row.item_desc}</textarea>
+                                            <textarea name="item_desc[]" class="form-control desc-textarea" rows="3">${row.item_desc || ''}</textarea>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
@@ -91,31 +146,26 @@ $(document).ready(function () {
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label>UOM</label>
-                                                    <input type="text" name="uom[]" class="form-control" value="${row.uom}" readonly>
+                                                    <input type="text" name="uom[]" class="form-control" value="${row.uom || ''}" readonly>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label>Quantity</label>
-                                                    <input type="number" step="0.01" name="qty[]" class="form-control qty-input" value="${row.qty}" readonly>
+                                                    <input type="number" step="0.01" name="qty[]" class="form-control qty-input" value="${row.qty || 0}" readonly>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label>Rate</label>
-                                                    <input type="number" step="0.01" name="rate[]" class="form-control rate-input" value="${row.rate ?? 0}">
+                                                    <input type="number" step="0.01" name="rate[]" class="form-control rate-input" value="0">
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label>VAT %</label>
                                                     <select name="gst[]" class="form-control vat-dropdown">
-                                                        <option value="">Select</option>
-                                                        <?php if(isset($gst_opt)): ?>
-                                                            <?php foreach($gst_opt as $gst_id => $gst_pct): ?>
-                                                                <option value="<?php echo $gst_pct; ?>"><?php echo $gst_pct; ?>%</option>
-                                                            <?php endforeach; ?>
-                                                        <?php endif; ?>
+                                                        ${gstOptionsHtml}
                                                     </select>
                                                 </div>
                                             </div>

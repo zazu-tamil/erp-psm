@@ -30,13 +30,18 @@
                             <label for="srch_vendor_id">Vendor Name</label>
                             <?php echo form_dropdown('srch_vendor_id', ['' => 'Select'] + $vendor_opt, $main['vendor_id'], 'id="srch_vendor_id" class="form-control"'); ?>
                         </div>
-                        <div class="form-group col-md-3">
+                         <div class="form-group col-md-3">
+                            <label for="srch_vendor_contact_id">Contact Person</label>
+                            <?php echo form_dropdown('srch_vendor_contact_id', ['' => 'Select'] + $vendor_contact_opt, $main['vendor_contact_person_id'], 'id="srch_vendor_contact_id" class="form-control"'); ?>
+                        </div>
+                      
+                    </div>
+                    <div class="row">
+                          <div class="form-group col-md-3">
                             <label>Enquiry No</label>
                             <input type="text" name="enquiry_no" id="enquiry_no" class="form-control"
                                 value="<?php echo $main['enquiry_no']; ?>">
                         </div>
-                    </div>
-                    <div class="row">
                         <div class="form-group col-md-3">
                             <label>Enquiry Date</label>
                             <input type="date" name="enquiry_date" id="enquiry_date" class="form-control"

@@ -75,3 +75,4 @@ AUTO_INCREMENT=1
 ALTER TABLE tender_quotation_info ADD quotation_status VARCHAR(50) NULL DEFAULT 'Pending' AFTER quote_date;
 
  
+ ALTER TABLE `vendor_rate_enquiry_info` ADD `vendor_contact_person_id` INT(11) NULL DEFAULT NULL AFTER `vendor_id`;

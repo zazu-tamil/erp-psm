@@ -41,14 +41,25 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="form-group col-md-3">
+                         <div class="form-group col-md-3">
+                            <label for="srch_vendor_contact_id">Contact Person</label>
+                            <div class="input-group">
+                                <?php echo form_dropdown('srch_vendor_contact_id', ['' => 'Select'] + $vendor_contact_opt, set_value('srch_vendor_contact_id'), 'id="srch_vendor_contact_id" class="form-control "'); ?>
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-info" data-toggle="modal"
+                                        data-target="#add_vendor_contact_pereson">Add New</button>
+                                </span>
+                            </div>
+                        </div>
+                      
+                    </div>
+
+                    <div class="row">
+                          <div class="form-group col-md-3">
                             <label>Enquiry No</label>
                             <input type="text" name="enquiry_no" id="enquiry_no" class="form-control"
                                 placeholder="e.g., TEN-2025-001" value="<?php echo set_value('enquiry_no'); ?>">
                         </div>
-                    </div>
-
-                    <div class="row">
                         <div class="form-group col-md-3">
                             <label>Enquiry Date</label>
                             <input type="date" name="enquiry_date" id="enquiry_date" class="form-control"
@@ -180,6 +191,67 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     <input type="submit" name="btn_add_vendor" value="Save" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+ <div class="modal fade" id="add_vendor_contact_pereson">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="" id="frmadd_contact_person" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h3 class="modal-title">Add Contact Person</h3>
+                    <!-- CHANGED: mode value from 'Add' to 'Add Contact Person' -->
+                    <input type="hidden" name="mode" value="Add Contact Person" />
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label>Vendor <span class="text-danger">*</span></label>
+                            <?php echo form_dropdown('vendor_id', $vendor_opt, '', 'id="contact_vendor_id" class="form-control" required'); ?>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Contact Person Name <span class="text-danger">*</span></label>
+                            <input type="text" name="contact_person_name" id="contact_person_name" class="form-control" placeholder="Name" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label>Department</label>
+                            <input type="text" name="department" id="contact_department" class="form-control" placeholder="Department">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Designation</label>
+                            <input type="text" name="designation" id="contact_designation" class="form-control" placeholder="Designation">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-4">
+                            <label>Mobile</label>
+                            <input type="text" name="mobile" id="contact_mobile" class="form-control" placeholder="Mobile">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Email</label>
+                            <input type="email" name="email" id="contact_email" class="form-control" placeholder="Email">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Status</label><br>
+                            <label><input type="radio" name="status" value="Active" checked> Active</label>
+                            <label class="ml-3"><input type="radio" name="status" value="InActive"> InActive</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        <textarea name="address" id="contact_address" class="form-control" rows="3" placeholder="Full Address"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <input type="button" name="btn_add_contact" value="Save" class="btn btn-primary" />
                 </div>
             </form>
         </div>
