@@ -120,6 +120,12 @@ $route['tender-quotation-edit/(:num)'] = 'tender/tender_quotation_edit/$1';
 $route['tender-quotation-po'] = 'tender/tender_quotation_po';
 $route['tender-quotation-po/(:num)'] = 'tender/tender_quotation_po/$1';
 
+$route['customer-tender-po-add'] = 'tender/customer_tender_po_add';
+$route['tender/get_quotations_by_customer'] = 'tender/get_quotations_by_customer';
+$route['tender/get_quotation_items'] = 'tender/get_quotation_items';
+$route['customer-tender-po-list'] = 'tender/customer_tender_po_list';
+$route['customer-tender-po-edit/(:num)'] = 'tender/customer_tender_po_edit/$1';
+
 
 /*Accounts Routes*/ 
 
