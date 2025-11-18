@@ -119,3 +119,47 @@ $route['tender-quotation-edit/(:num)'] = 'tender/tender_quotation_edit/$1';
 
 $route['tender-quotation-po'] = 'tender/tender_quotation_po';
 $route['tender-quotation-po/(:num)'] = 'tender/tender_quotation_po/$1';
+
+
+/*Accounts Routes*/ 
+
+$route['inward-list'] = 'accounts/cash_inward_list'; 
+$route['inward-list/(:num)'] = 'accounts/cash_inward_list/$1'; 
+
+$route['outward-list'] = 'accounts/cash_outward_list'; 
+$route['outward-list/(:num)'] = 'accounts/cash_outward_list/$1'; 
+
+$route['opening-balance-list'] = 'accounts/opening_balance_list';
+$route['opening-balance-list/(:num)'] = 'accounts/opening_balance_list/$1';
+
+$route['print-voucher/(:num)'] = 'accounts/print_voucher/$1';
+$route['print-receipt/(:num)'] = 'accounts/print_receipt/$1';
+
+$route['cash-ledger'] = 'accounts/cash_ledger';
+
+$route['cash-in-statement'] = 'accounts/cash_in_statement'; 
+$route['na-cash-in-statement'] = 'accounts/na_cash_in_statement'; 
+$route['cash-out-statement'] = 'accounts/cash_out_statement';
+$route['na-cash-out-statement'] = 'accounts/na_cash_out_statement';
+$route['outward-summary'] = 'accounts/outward_summary';
+$route['inward-summary'] = 'accounts/inward_summary';
+
+$route['tds-report'] = 'accounts/tds_report';
+$route['bills-report'] = 'accounts/bills_report';
+
+$route['account-head-list'] = 'accounts/account_head_list';
+$route['account-head-list/(:num)'] = 'accounts/account_head_list/$1';
+
+$route['sub-account-head-list'] = 'accounts/sub_account_head_list';
+$route['sub-account-head-list/(:num)'] = 'accounts/sub_account_head_list/$1';
+
+$route['account-head-for-list'] = 'accounts/account_head_for_list';
+$route['account-head-for-list/(:num)'] = 'accounts/account_head_for_list/$1';
+
+$route['company-bank-list'] = 'accounts/company_bank_list';
+$route['company-bank-list/(:num)'] = 'accounts/company_bank_list/$1';
+
+$route['voucher-type-list'] = 'accounts/voucher_type_list';
+$route['voucher-type-list/(:num)'] = 'accounts/voucher_type_list/$1';
+
+
