@@ -89,6 +89,19 @@
                             <label>Status</label>
                             <?php echo form_dropdown('status', ['' => 'Select'] + $status_opt, set_value('status', 'Active'), 'class="form-control select2"'); ?>
                         </div>
+                        
+                        </div>
+                        <div class="row">
+                             <div class="form-group col-md-4">
+                            <label>Tender Name</label>
+                            <input type="text" name="tender_name" class="form-control" placeholder="tender_name"
+                                value="<?php echo set_value('tender_name'); ?>">
+                        </div>
+                        <div class="form-group col-md-4">
+                        <label>Tender Document</label>
+                        <input type="file" name="tender_document" id="tender_document" class="form-control">
+                        <small class="text-muted">All file types allowed (Max 10MB)</small>
+                    </div>
                     </div>
                 </fieldset>
 

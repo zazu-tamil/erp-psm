@@ -21,7 +21,7 @@
             <h3 class="box-title">Edit Tender Enquiry</h3>
         </div>
 
-        <form method="post" action="" id="frmadd">
+        <form method="post" action="" id="frmadd" enctype="multipart/form-data">
             <div class="box-body">
                 <input type="hidden" name="mode" value="Edit" />
                 <input type="hidden" name="tender_enquiry_id" value="<?php echo (int)$tender_enquiry_id; ?>" />
@@ -80,7 +80,37 @@
                             <label>Status</label>
                             <?php echo form_dropdown('status', $status_opt, set_value('status', $main_record['status']), 'class="form-control select2"'); ?>
                         </div>
+                           <div class="form-group col-md-4">
+                            <label>Tender Name</label>
+                            <input type="text" name="tender_name" class="form-control" value="<?php echo htmlspecialchars(set_value('tender_name', $main_record['tender_name'])); ?>">
+                        </div>
+                        <div class="form-group col-md-4">
+                        <label>Tender Document</label>
+                        <input type="file" name="tender_document" class="form-control" id="tender_document_input">
+                        <small class="text-muted">All file types allowed (Max 10MB)</small>
+                        
+                        <?php 
+                        $doc_path = $main_record['tender_document'];
+                        if ($doc_path): 
+                            $file_url = site_url($doc_path); // Create URL path
+                            $file_ext = pathinfo($doc_path, PATHINFO_EXTENSION);
+                        ?>
+                            <p class="mt-2">
+                                <strong>Current File:</strong> 
+                                <?php if (in_array(strtolower($file_ext), ['jpg', 'jpeg', 'png', 'gif'])): ?>
+                                    <a href="<?php echo $file_url; ?>" target="_blank">
+                                        <img src="<?php echo $file_url; ?>" alt="Tender Document Image" style="max-height: 50px; max-width: 50px; border: 1px solid #ddd; margin-top: 5px;">
+                                    </a>
+                                <?php else: ?>
+                                    <a href="<?php echo $file_url; ?>" target="_blank" class="text-blue">
+                                        <i class="fa fa-file-text-o"></i> View Document
+                                    </a>
+                                <?php endif; ?>
+                            </p>
+                        <?php endif; ?>
                     </div>
+                    </div>
+                 
                 </fieldset>
 
                 <!-- Item Details -->
