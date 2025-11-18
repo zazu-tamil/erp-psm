@@ -224,18 +224,9 @@
 
 					$.each(d, function (key, info) {
 						var opt = $("<option />");
-						opt.val(info.project_id);
+						opt.val(info.tender_enquiry_id);
 						opt.text(
-							info.project_id +
-								" => " +
-								info.customer +
-								" => " +
-								info.branch +
-								" => " +
-								info.work_name +
-								" => " +
-								info.work_place
-						);
+							info.enquiry_no);
 						$("#add_modal #project_id").append(opt);
 					});
 				},

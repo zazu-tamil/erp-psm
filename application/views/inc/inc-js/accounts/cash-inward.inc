@@ -200,7 +200,7 @@ jQuery(function($) {
                     data: { tbl : 'cash_intward_info_delet', id: $(this).val() },
                     success: function(d) {  
                         alert(d);
-                        location.reload();
+                       location.reload();
                     }
              });
          }
@@ -224,8 +224,8 @@ jQuery(function($) {
 
                 $.each(d, function(key, info) {
                     var opt = $('<option />'); 
-                    opt.val(info.project_id);
-                    opt.text(info.project_id + ' => ' + info.customer + ' => ' + info.work_name + ' => ' + info.work_place);
+                    opt.val(info.tender_enquiry_id);
+                    opt.text(info.enquiry_no);
                     $('#add_modal #project_id').append(opt); 
                 });
             }

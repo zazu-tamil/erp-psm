@@ -6,9 +6,9 @@ class Accounts extends CI_Controller
 
     // public function project_list()
     // {
-    //     if(!$this->session->userdata(SS_PFIX .'logged_in'))  redirect(); 
+    //     if(!$this->session->userdata(SESS_HD .'logged_in'))  redirect(); 
 
-    //     if($this->session->userdata(SS_PFIX .'user_type') != 'Admin')
+    //     if($this->session->userdata(SESS_HD .'level') != 'Admin')
     //     { 
     //         echo "<h3 style='color:red;'>Permission Denied</h3>"; exit;
     //     }  
@@ -109,10 +109,10 @@ class Accounts extends CI_Controller
 
     public function account_head_list()
     {
-        if (!$this->session->userdata(SS_PFIX . 'logged_in'))
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if ($this->session->userdata(SS_PFIX . 'user_type') != 'Admin') {
+        if ($this->session->userdata(SESS_HD . 'level') != 'Admin') {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -199,10 +199,10 @@ class Accounts extends CI_Controller
 
     public function sub_account_head_list()
     {
-        if (!$this->session->userdata(SS_PFIX . 'logged_in'))
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if ($this->session->userdata(SS_PFIX . 'user_type') != 'Admin') {
+        if ($this->session->userdata(SESS_HD . 'level') != 'Admin') {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -296,10 +296,10 @@ class Accounts extends CI_Controller
     public function account_head_for_list()
     {
 
-        if (!$this->session->userdata(SS_PFIX . 'logged_in'))
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if ($this->session->userdata(SS_PFIX . 'user_type') != 'Admin') {
+        if ($this->session->userdata(SESS_HD . 'level') != 'Admin') {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -368,7 +368,7 @@ class Accounts extends CI_Controller
 
     public function cash_inward_list()
     {
-        if (!$this->session->userdata(SS_PFIX . 'logged_in'))
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
         /*if($this->session->userdata('m_is_admin') != USER_ADMIN) 
@@ -491,13 +491,11 @@ class Accounts extends CI_Controller
         $sql = "
                 select 
                 a.*,
-                f.company_name,
-                g.work_name,
-                g.project_id,
-                h.company_name as customer_name,
-                i.branch_name as customer_branch_name,
+                f.company_name, 
+                g.tender_enquiry_id, 
                 b.account_head_name,
                 c.sub_account_head_name,
+                g.enquiry_no,
                 DATEDIFF(current_date(), a.inward_date) as days,
                 d.voucher_type_name,
                 d.prefix,
@@ -508,13 +506,10 @@ class Accounts extends CI_Controller
                 left join cb_voucher_type_info as d on d.voucher_type_id = a.voucher_type_id and d.status != 'Delete'
                 left join cb_sub_account_head_lvl3_info as e on e.sub_account_headlvl3_id = a.sub_account_headlvl3_id and e.status != 'Delete'
                 left JOIN company_info as f on f.company_id = a.company_id and f.status='Active'
-                left JOIN project_info as g on g.project_id = a.project_id and f.status='Active'
+                left JOIN tender_enquiry_info as g on g.tender_enquiry_id = a.project_id and f.status='Active'
                 left join customer_info as h on h.customer_id = g.customer_id and h.status='Active'
-                left join customer_branch_info as i on i.customer_branch_id = g.customer_branch_id and i.status='Active'
-                where a.status != 'Delete' and $where  
-
-
-              
+                 
+                where a.status != 'Delete' and $where   
                 order by  a.inward_date desc , a.cash_inward_id desc
                 limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
         ";
@@ -585,8 +580,8 @@ class Accounts extends CI_Controller
         }
 
         $sql = "
-              SELECT a.project_id, a.work_name
-                FROM project_info AS a
+              SELECT a.tender_enquiry_id
+                FROM tender_enquiry_info AS a
                 INNER JOIN company_info as b
                 on b.company_id = a.company_id
                 WHERE a.status = 'Active'  
@@ -598,7 +593,7 @@ class Accounts extends CI_Controller
         $data['project_opt'] = array();
 
         foreach ($query->result_array() as $row) {
-            $data['project_opt'][$row['project_id']] = $row['work_name'];
+            $data['project_opt'][$row['tender_enquiry_id']] = $row['tender_enquiry_id'];
         }
 
 
@@ -612,7 +607,7 @@ class Accounts extends CI_Controller
 
     public function cash_outward_list()
     {
-        if (!$this->session->userdata(SS_PFIX . 'logged_in'))
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
         /*if($this->session->userdata('m_is_admin') != USER_ADMIN) 
@@ -666,7 +661,7 @@ class Accounts extends CI_Controller
                 'sub_account_headlvl3_id' => $this->input->post('sub_account_headlvl3_id'),
                 'amount' => $this->input->post('amount'),
                 'remarks' => $this->input->post('remarks'),
-                  'bill_type' => $this->input->post('bill_type'),
+                'bill_type' => $this->input->post('bill_type'),
                 'bill_photo' => $photo_path,
                 'status' => $this->input->post('status'),
                 'created_by' => $this->session->userdata('cr_user_id'),
@@ -722,7 +717,7 @@ class Accounts extends CI_Controller
                 'sub_account_headlvl3_id' => $this->input->post('sub_account_headlvl3_id'),
                 'amount' => $this->input->post('amount'),
                 'remarks' => $this->input->post('remarks'),
-                  'bill_type' => $this->input->post('bill_type'),
+                'bill_type' => $this->input->post('bill_type'),
                 'bill_photo' => $photo_path,
                 'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata('cr_user_id'),
@@ -800,14 +795,14 @@ class Accounts extends CI_Controller
                 DATEDIFF(current_date(), a.outward_date) as days ,
                 d.voucher_type_name,
                 d.prefix,
-                e.sub_account_headlvl3_name as out_for,
-                f.work_name
+                e.sub_account_headlvl3_name as out_for, 
+                f.enquiry_no
                 from cb_cash_outward_info as a 
                 left join cb_account_head_info as b on b.account_head_id = a.account_head_id and b.status != 'Delete'
                 left join cb_sub_account_head_info as c on c.sub_account_head_id = a.sub_account_head_id and c.status != 'Delete'
                 left join cb_voucher_type_info as d on d.voucher_type_id = a.voucher_type_id and d.status != 'Delete'
                 left join cb_sub_account_head_lvl3_info as e on e.sub_account_headlvl3_id = a.sub_account_headlvl3_id and e.status != 'Delete'
-                left join project_info as f on f.project_id = a.project_id and f.status != 'Delete'
+                left join tender_enquiry_info as f on f.tender_enquiry_id = a.project_id and f.status != 'Delete'
                 where a.status != 'Delete' and $where  
                 order by a.outward_date desc , a.cash_outward_id desc
                 limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
@@ -821,21 +816,22 @@ class Accounts extends CI_Controller
             $data['record_list'][] = $row;
         }
 
-        $sql = "
-                select 
-                a.project_id,                
-                a.work_name       
-                from project_info as a  
-                where a.status = 'Active'  
-                order by a.project_id desc                 
+         $sql = "
+              SELECT a.tender_enquiry_id, a.enquiry_no
+                FROM tender_enquiry_info AS a
+                INNER JOIN company_info as b
+                on b.company_id = a.company_id
+                WHERE a.status = 'Active'  
+                AND b.status= 'Active'      
         ";
+
 
         $query = $this->db->query($sql);
 
         $data['project_opt'] = array();
 
         foreach ($query->result_array() as $row) {
-            $data['project_opt'][$row['project_id']] = $row['work_name'];
+            $data['project_opt'][$row['tender_enquiry_id']] = $row['enquiry_no'];
         }
 
 
@@ -894,22 +890,7 @@ class Accounts extends CI_Controller
             $data['company_name_opt'][$row['company_id']] = $row['company_name'];
         }
 
-        $sql = "
-              SELECT a.project_id, a.work_name
-                FROM project_info AS a
-                INNER JOIN company_info as b
-                on b.company_id = a.company_id
-                WHERE a.status = 'Active'  
-                AND b.status= 'Active'      
-        ";
-
-        $query = $this->db->query($sql);
-
-        $data['project_opt'] = array();
-
-        foreach ($query->result_array() as $row) {
-            $data['project_opt'][$row['project_id']] = $row['work_name'];
-        }
+       
 
         $data['pagination'] = $this->pagination->create_links();
 
@@ -986,10 +967,10 @@ class Accounts extends CI_Controller
 
     public function cash_ledger()
     {
-        if (!$this->session->userdata(SS_PFIX . 'logged_in'))
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if ($this->session->userdata(SS_PFIX . 'user_type') != 'Admin') {
+        if ($this->session->userdata(SESS_HD . 'level') != 'Admin') {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -1498,7 +1479,7 @@ class Accounts extends CI_Controller
 
     public function cash_in_statement()
     {
-        if (!$this->session->userdata(SS_PFIX . 'logged_in'))
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
         /*if($this->session->userdata('m_is_admin') != USER_ADMIN) 
@@ -1508,7 +1489,7 @@ class Accounts extends CI_Controller
 
         $data['js'] = 'accounts/cash-in-statement.inc';
 
-        if ($this->session->userdata('cr_user_type') != 'Admin') {
+        if ($this->session->userdata('cr_level') != 'Admin') {
             $data['min_date'] = date('Y-m-d', strtotime(date('Y-m-d') . ' - 2 days'));
             ;
             $data['max_date'] = date('Y-m-d');
@@ -1522,7 +1503,7 @@ class Accounts extends CI_Controller
             $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
 
         } else {
-            if ($this->session->userdata('cr_user_type') != 'Admin')
+            if ($this->session->userdata('cr_level') != 'Admin')
                 $data['srch_from_date'] = $srch_from_date = $data['min_date'];
             else
                 $data['srch_from_date'] = $srch_from_date = date('Y-m') . '-01';
@@ -1694,7 +1675,7 @@ class Accounts extends CI_Controller
 
     public function na_cash_in_statement()
     {
-        if (!$this->session->userdata(SS_PFIX . 'logged_in'))
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
         /*if($this->session->userdata('m_is_admin') != USER_ADMIN) 
@@ -1704,7 +1685,7 @@ class Accounts extends CI_Controller
 
         $data['js'] = 'accounts/cash-in-statement.inc';
 
-        if ($this->session->userdata('cr_user_type') != 'Admin') {
+        if ($this->session->userdata('cr_level') != 'Admin') {
             $data['min_date'] = date('Y-m-d', strtotime(date('Y-m-d') . ' - 2 days'));
             ;
             $data['max_date'] = date('Y-m-d');
@@ -1718,7 +1699,7 @@ class Accounts extends CI_Controller
             $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
 
         } else {
-            if ($this->session->userdata('cr_user_type') != 'Admin')
+            if ($this->session->userdata('cr_level') != 'Admin')
                 $data['srch_from_date'] = $srch_from_date = $data['min_date'];
             else
                 $data['srch_from_date'] = $srch_from_date = date('Y-m') . '-01';
@@ -1889,7 +1870,7 @@ class Accounts extends CI_Controller
 
     public function cash_out_statement()
     {
-        if (!$this->session->userdata(SS_PFIX . 'logged_in'))
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
         /*if($this->session->userdata('m_is_admin') != USER_ADMIN) 
@@ -1899,7 +1880,7 @@ class Accounts extends CI_Controller
 
         $data['js'] = 'accounts/cash-out-statement.inc';
 
-        if ($this->session->userdata('cr_user_type') != 'Admin') {
+        if ($this->session->userdata('cr_level') != 'Admin') {
             $data['min_date'] = date('Y-m-d', strtotime(date('Y-m-d') . ' - 2 days'));
             ;
             $data['max_date'] = date('Y-m-d');
@@ -1916,7 +1897,7 @@ class Accounts extends CI_Controller
             $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
 
         } else {
-            if ($this->session->userdata('cr_user_type') != 'Admin')
+            if ($this->session->userdata('cr_level') != 'Admin')
                 $data['srch_from_date'] = $srch_from_date = $data['min_date'];
             else
                 $data['srch_from_date'] = $srch_from_date = date('Y-m') . '-01';
@@ -1982,11 +1963,11 @@ class Accounts extends CI_Controller
 
         $sql = "
                 select 
-                a.project_id,                
-                a.work_name       
-                from project_info as a  
+                a.tender_enquiry_id,
+                a.enquiry_no
+                from tender_enquiry_info as a  
                 where a.status = 'Active'  
-                order by a.project_id desc                 
+                order by a.enquiry_no desc                 
         ";
 
         $query = $this->db->query($sql);
@@ -1994,7 +1975,7 @@ class Accounts extends CI_Controller
         $data['project_opt'] = array();
 
         foreach ($query->result_array() as $row) {
-            $data['project_opt'][$row['project_id']] = $row['work_name'];
+            $data['project_opt'][$row['tender_enquiry_id']] = $row['enquiry_no'];
         }
 
 
@@ -2047,13 +2028,13 @@ class Accounts extends CI_Controller
             a.remarks,
             a.bill_photo,
             e.sub_account_headlvl3_name as outward_for ,
-            f.work_name
+            f.enquiry_no
             from cb_cash_outward_info as a
             left join cb_account_head_info as b on b.account_head_id = a.account_head_id
             left join cb_sub_account_head_info as c on c.sub_account_head_id = a.sub_account_head_id
             left join cb_voucher_type_info as d on d.voucher_type_id  = a.voucher_type_id
             left join cb_sub_account_head_lvl3_info as e on e.sub_account_headlvl3_id  = a.sub_account_headlvl3_id
-            left join project_info as f on f.project_id  = a.project_id
+            left join tender_enquiry_info as f on f.tender_enquiry_id  = a.project_id
             where a.`status` = 'Active'
             and b.ac_table = '1'
             and c.ac_table = '1'
@@ -2124,7 +2105,7 @@ class Accounts extends CI_Controller
 
     public function na_cash_out_statement()
     {
-        if (!$this->session->userdata(SS_PFIX . 'logged_in'))
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
         /*if($this->session->userdata('m_is_admin') != USER_ADMIN) 
@@ -2134,7 +2115,7 @@ class Accounts extends CI_Controller
 
         $data['js'] = 'accounts/cash-out-statement.inc';
 
-        if ($this->session->userdata('cr_user_type') != 'Admin') {
+        if ($this->session->userdata('cr_level') != 'Admin') {
             $data['min_date'] = date('Y-m-d', strtotime(date('Y-m-d') . ' - 2 days'));
             ;
             $data['max_date'] = date('Y-m-d');
@@ -2151,7 +2132,7 @@ class Accounts extends CI_Controller
             $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
 
         } else {
-            if ($this->session->userdata('cr_user_type') != 'Admin')
+            if ($this->session->userdata('cr_level') != 'Admin')
                 $data['srch_from_date'] = $srch_from_date = $data['min_date'];
             else
                 $data['srch_from_date'] = $srch_from_date = date('Y-m') . '-01';
@@ -2215,11 +2196,11 @@ class Accounts extends CI_Controller
 
         $sql = "
                 select 
-                a.project_id,                
-                a.work_name       
-                from project_info as a  
+                a.tender_enquiry_id,
+                a.enquiry_no
+                from tender_enquiry_info as a  
                 where a.status = 'Active'  
-                order by a.project_id desc                 
+                order by a.enquiry_no desc                 
         ";
 
         $query = $this->db->query($sql);
@@ -2227,7 +2208,7 @@ class Accounts extends CI_Controller
         $data['project_opt'] = array();
 
         foreach ($query->result_array() as $row) {
-            $data['project_opt'][$row['project_id']] = $row['work_name'];
+            $data['project_opt'][$row['tender_enquiry_id']] = $row['enquiry_no'];
         }
 
         $data['record_list'] = array();
@@ -2259,7 +2240,7 @@ class Accounts extends CI_Controller
         }
 
         if (!empty($srch_project_id)) {
-            $where .= " and a.project_id = '" . $srch_project_id . "'";
+            $where .= " and a.tender_enquiry_id = '" . $srch_project_id . "'";
         } else {
             $where .= " and 1=1 ";
         }
@@ -2352,7 +2333,7 @@ class Accounts extends CI_Controller
 
     public function inward_summary()
     {
-        if (!$this->session->userdata(SS_PFIX . 'logged_in'))
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
         /*if($this->session->userdata('m_is_admin') != USER_ADMIN) 
@@ -2433,7 +2414,7 @@ class Accounts extends CI_Controller
 
     public function outward_summary()
     {
-        if (!$this->session->userdata(SS_PFIX . 'logged_in'))
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
         /*if($this->session->userdata('m_is_admin') != USER_ADMIN) 
@@ -2513,10 +2494,10 @@ class Accounts extends CI_Controller
 
     public function voucher_type_list()
     {
-        if (!$this->session->userdata(SS_PFIX . 'logged_in'))
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if ($this->session->userdata(SS_PFIX . 'user_type') != 'Admin') {
+        if ($this->session->userdata(SESS_HD . 'level') != 'Admin') {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -2587,10 +2568,10 @@ class Accounts extends CI_Controller
 
     public function opening_balance_list()
     {
-        if (!$this->session->userdata(SS_PFIX . 'logged_in'))
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if ($this->session->userdata(SS_PFIX . 'user_type') != 'Admin') {
+        if ($this->session->userdata(SESS_HD . 'level') != 'Admin') {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -2654,7 +2635,7 @@ class Accounts extends CI_Controller
 
     public function tds_report()
     {
-        if (!$this->session->userdata(SS_PFIX . 'logged_in'))
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
 
@@ -2916,7 +2897,7 @@ class Accounts extends CI_Controller
 
     public function bills_report()
     {
-        if (!$this->session->userdata(SS_PFIX . 'logged_in'))
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
 
@@ -3162,14 +3143,15 @@ class Accounts extends CI_Controller
         $this->load->view('page/accounts/bills-report', $data);
     }
 
-public function company_bank_list($page = 1) {
+    public function company_bank_list($page = 1)
+    {
         // Check if user is logged in
-        if (!$this->session->userdata(SS_PFIX . 'logged_in')) {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
             redirect();
         }
 
         // Check user permissions
-        if ($this->session->userdata(SS_PFIX . 'user_type') != 'Admin') {
+        if ($this->session->userdata(SESS_HD . 'level') != 'Admin') {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -3178,89 +3160,89 @@ public function company_bank_list($page = 1) {
         $data['js'] = 'accounts/company-bank.inc';
 
         // Handle Add
-   if ($this->input->post('mode') == 'Add') {
+        if ($this->input->post('mode') == 'Add') {
 
-    $upload_path = './bank_qr_code/';
-    if (!is_dir($upload_path)) {
-        mkdir($upload_path, 0777, true);
-    }
+            $upload_path = './bank_qr_code/';
+            if (!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, true);
+            }
 
-    $config['upload_path'] = $upload_path;
-    $config['allowed_types'] = 'jpg|jpeg|png';
-    $config['max_size'] = 2048;
+            $config['upload_path'] = $upload_path;
+            $config['allowed_types'] = 'jpg|jpeg|png';
+            $config['max_size'] = 2048;
 
-    $this->load->library('upload', $config);
+            $this->load->library('upload', $config);
 
-    $qr_code_img = ''; // initialize properly
+            $qr_code_img = ''; // initialize properly
 
-    if (!empty($_FILES['qr_code']['name'])) {
-        if ($this->upload->do_upload('qr_code')) {
-            $qr_code_img = $this->upload->data('file_name');
-        } else {
-            // Log upload error if needed
-            log_message('error', 'QR Upload failed: ' . $this->upload->display_errors());
+            if (!empty($_FILES['qr_code']['name'])) {
+                if ($this->upload->do_upload('qr_code')) {
+                    $qr_code_img = $this->upload->data('file_name');
+                } else {
+                    // Log upload error if needed
+                    log_message('error', 'QR Upload failed: ' . $this->upload->display_errors());
+                }
+            }
+
+            $ins = array(
+                'company' => $this->input->post('company'),
+                'bank_name' => $this->input->post('bank_name'),
+                'branch' => $this->input->post('branch'),
+                'account_type' => $this->input->post('account_type'),
+                'account_no' => $this->input->post('account_no'),
+                'IFSC_code' => $this->input->post('IFSC_code'),
+                'remarks' => $this->input->post('remarks'),
+                'qr_code' => $qr_code_img,
+                'status' => $this->input->post('status') ?: 'Active'
+            );
+
+            $this->db->insert('company_bank_info', $ins);
+            redirect('company-bank-list');
         }
-    }
-
-    $ins = array(
-        'company'        => $this->input->post('company'),
-        'bank_name'      => $this->input->post('bank_name'),
-        'branch'         => $this->input->post('branch'),
-        'account_type'   => $this->input->post('account_type'),
-        'account_no'     => $this->input->post('account_no'),
-        'IFSC_code'      => $this->input->post('IFSC_code'),
-        'remarks'        => $this->input->post('remarks'),
-        'qr_code'        => $qr_code_img,
-        'status'         => $this->input->post('status') ?: 'Active'
-    );
-
-    $this->db->insert('company_bank_info', $ins);
-    redirect('company-bank-list');
-}
 
 
-/* -------------------------------
-   EDIT MODE
--------------------------------- */
-if ($this->input->post('mode') == 'Edit') {
+        /* -------------------------------
+           EDIT MODE
+        -------------------------------- */
+        if ($this->input->post('mode') == 'Edit') {
 
-    $upload_path = './bank_qr_code/';
-    if (!is_dir($upload_path)) {
-        mkdir($upload_path, 0777, true);
-    }
+            $upload_path = './bank_qr_code/';
+            if (!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, true);
+            }
 
-    $config['upload_path'] = $upload_path;
-    $config['allowed_types'] = 'jpg|jpeg|png';
-    $config['max_size'] = 2048;
+            $config['upload_path'] = $upload_path;
+            $config['allowed_types'] = 'jpg|jpeg|png';
+            $config['max_size'] = 2048;
 
-    $this->load->library('upload', $config);
+            $this->load->library('upload', $config);
 
-    $qr_code_img = $this->input->post('existing_qr_code') ?? ''; // optional hidden field
+            $qr_code_img = $this->input->post('existing_qr_code') ?? ''; // optional hidden field
 
-    if (!empty($_FILES['qr_code']['name'])) {
-        if ($this->upload->do_upload('qr_code')) {
-            $qr_code_img = $this->upload->data('file_name');
-        } else {
-            log_message('error', 'QR Upload failed: ' . $this->upload->display_errors());
+            if (!empty($_FILES['qr_code']['name'])) {
+                if ($this->upload->do_upload('qr_code')) {
+                    $qr_code_img = $this->upload->data('file_name');
+                } else {
+                    log_message('error', 'QR Upload failed: ' . $this->upload->display_errors());
+                }
+            }
+
+            $upd = array(
+                'company' => $this->input->post('company'),
+                'bank_name' => $this->input->post('bank_name'),
+                'branch' => $this->input->post('branch'),
+                'account_type' => $this->input->post('account_type'),
+                'account_no' => $this->input->post('account_no'),
+                'IFSC_code' => $this->input->post('IFSC_code'),
+                'remarks' => $this->input->post('remarks'),
+                'qr_code' => $qr_code_img,
+                'status' => $this->input->post('status') ?: 'Active'
+            );
+
+            $this->db->where('bank_id', $this->input->post('bank_id'));
+            $this->db->update('company_bank_info', $upd);
+            redirect('company-bank-list');
         }
-    }
-
-    $upd = array(
-        'company'        => $this->input->post('company'),
-        'bank_name'      => $this->input->post('bank_name'),
-        'branch'         => $this->input->post('branch'),
-        'account_type'   => $this->input->post('account_type'),
-        'account_no'     => $this->input->post('account_no'),
-        'IFSC_code'      => $this->input->post('IFSC_code'),
-        'remarks'        => $this->input->post('remarks'),
-        'qr_code'        => $qr_code_img,
-        'status'         => $this->input->post('status') ?: 'Active'
-    );
-
-    $this->db->where('bank_id', $this->input->post('bank_id'));
-    $this->db->update('company_bank_info', $upd);
-    redirect('company-bank-list');
-}
 
 
         // Handle Search Filter
@@ -3348,6 +3330,93 @@ if ($this->input->post('mode') == 'Edit') {
         $data['companies'] = $query_search->result_array();
 
         $this->load->view('page/accounts/company-bank-list', $data);
+    }
+
+    public function delete_record()
+    {
+
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        date_default_timezone_set("Asia/Calcutta");
+
+
+        $table = $this->input->post('tbl');
+        $rec_id = $this->input->post('id');
+
+        if ($table == 'cash_inward_info') {
+            $this->db->where('cash_inward_id', $rec_id);
+            $this->db->update('crit_cash_inward_info', array(
+                'status' => 'Delete',
+                'updated_by' => $this->session->userdata('cr_user_id'),
+                'updated_datetime' => date('Y-m-d H:i:s')
+            ));
+            echo 'Record Successfully deleted';
+        }
+
+        if ($table == 'cash_outward_info') {
+            $this->db->where('cash_outward_id', $rec_id);
+            $this->db->update('crit_cash_outward_info', array(
+                'status' => 'Delete',
+                'updated_by' => $this->session->userdata('cr_user_id'),
+                'updated_datetime' => date('Y-m-d H:i:s')
+            ));
+            echo 'Record Successfully deleted';
+        }
+
+        if ($table == 'account_head_info') {
+            $this->db->where('account_head_id', $rec_id);
+            $this->db->update('cb_account_head_info', array(
+                'status' => 'Delete',
+                'updated_by' => $this->session->userdata('cr_user_id'),
+                'updated_datetime' => date('Y-m-d H:i:s')
+            ));
+            echo 'Record Successfully deleted';
+        }
+
+
+        if ($table == 'sub_account_head_info') {
+            $this->db->where('sub_account_head_id', $rec_id);
+            $this->db->update('cb_sub_account_head_info', array(
+                'status' => 'Delete',
+                'updated_by' => $this->session->userdata('cr_user_id'),
+                'updated_datetime' => date('Y-m-d H:i:s')
+            ));
+            echo 'Record Successfully deleted';
+        }
+        if ($table == 'cb_sub_account_head_lvl3_info') {
+            $this->db->where('sub_account_headlvl3_id', $rec_id);
+            $this->db->update('cb_sub_account_head_lvl3_info', array(
+                'status' => 'Delete',
+                'updated_by' => $this->session->userdata('cr_user_id'),
+                'updated_datetime' => date('Y-m-d H:i:s')
+            ));
+            echo 'Record Successfully deleted';
+        }
+
+        if ($table == 'voucher_type_info') {
+            $this->db->where('voucher_type_id', $rec_id);
+            $this->db->update('cb_voucher_type_info', array('status' => 'Delete'));
+
+            echo 'Record Successfully deleted';
+        }
+
+
+        if ($table == 'cb_opening_balance_info_delet') {
+            $this->db->where('opening_balance_id', $rec_id);
+            $this->db->update('cb_opening_balance_info', array('status' => 'Delete'));
+
+            echo 'Record Successfully deleted';
+        }
+
+        if ($table == 'sub_account_head_lvl3_info') {
+            $this->db->where('sub_account_headlvl3_id', $rec_id);
+            $this->db->update('sub_account_head_lvl3_info', array('status' => 'Delete'));
+
+            echo 'Record Successfully deleted';
+        }
+         
+
     }
 
 }

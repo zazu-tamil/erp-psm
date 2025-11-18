@@ -44,7 +44,7 @@
                     </div>
 
                     <div class="row">
-                          <div class="form-group col-md-4">
+                        <div class="form-group col-md-4">
                             <label for="srch_vendor_contact_id">Contact Person</label>
                             <div class="input-group">
                                 <?php echo form_dropdown('srch_vendor_contact_id', ['' => 'Select'] + $vendor_contact_opt, set_value('srch_vendor_contact_id'), 'id="srch_vendor_contact_id" class="form-control "'); ?>
@@ -54,7 +54,7 @@
                                 </span>
                             </div>
                         </div>
-                          <div class="form-group col-md-4">
+                        <div class="form-group col-md-4">
                             <label>Enquiry No</label>
                             <input type="text" name="enquiry_no" id="enquiry_no" class="form-control"
                                 placeholder="e.g., TEN-2025-001" value="<?php echo set_value('enquiry_no'); ?>">
@@ -69,11 +69,11 @@
                             <input type="datetime-local" name="opening_date" id="opening_date" class="form-control"
                                 value="<?php echo set_value('opening_date'); ?>">
                         </div> -->
-                       
+
                     </div>
                     <div class="row">
 
-                     <div class="form-group col-md-4">
+                        <div class="form-group col-md-4">
                             <label>Due Date & Time</label>
                             <input type="datetime-local" name="closing_date" id="closing_date" class="form-control"
                                 value="<?php echo set_value('closing_date'); ?>">
@@ -202,7 +202,7 @@
 </div>
 
 
- <div class="modal fade" id="add_vendor_contact_pereson">
+<div class="modal fade" id="add_vendor_contact_pereson">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form method="post" action="" id="frmadd_contact_person" enctype="multipart/form-data">
@@ -220,27 +220,32 @@
                         </div>
                         <div class="form-group col-md-6">
                             <label>Contact Person Name <span class="text-danger">*</span></label>
-                            <input type="text" name="contact_person_name" id="contact_person_name" class="form-control" placeholder="Name" required>
+                            <input type="text" name="contact_person_name" id="contact_person_name" class="form-control"
+                                placeholder="Name" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="form-group col-md-6">
                             <label>Department</label>
-                            <input type="text" name="department" id="contact_department" class="form-control" placeholder="Department">
+                            <input type="text" name="department" id="contact_department" class="form-control"
+                                placeholder="Department">
                         </div>
                         <div class="form-group col-md-6">
                             <label>Designation</label>
-                            <input type="text" name="designation" id="contact_designation" class="form-control" placeholder="Designation">
+                            <input type="text" name="designation" id="contact_designation" class="form-control"
+                                placeholder="Designation">
                         </div>
                     </div>
                     <div class="row">
                         <div class="form-group col-md-4">
                             <label>Mobile</label>
-                            <input type="text" name="mobile" id="contact_mobile" class="form-control" placeholder="Mobile">
+                            <input type="text" name="mobile" id="contact_mobile" class="form-control"
+                                placeholder="Mobile">
                         </div>
                         <div class="form-group col-md-4">
                             <label>Email</label>
-                            <input type="email" name="email" id="contact_email" class="form-control" placeholder="Email">
+                            <input type="email" name="email" id="contact_email" class="form-control"
+                                placeholder="Email">
                         </div>
                         <div class="form-group col-md-4">
                             <label>Status</label><br>
@@ -250,7 +255,8 @@
                     </div>
                     <div class="form-group">
                         <label>Address</label>
-                        <textarea name="address" id="contact_address" class="form-control" rows="3" placeholder="Full Address"></textarea>
+                        <textarea name="address" id="contact_address" class="form-control" rows="3"
+                            placeholder="Full Address"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

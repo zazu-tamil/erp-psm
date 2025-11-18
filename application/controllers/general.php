@@ -65,6 +65,81 @@ class General extends CI_Controller
             }
 
         }
+        if ($table == 'get-account-head-type') {
+            $query = $this->db->query(" 
+                select 
+                a.account_head_id,
+                a.account_head_name 
+                from cb_account_head_info as a
+                where a.type = '" . $rec_id . "' 
+                and a.`status` = 'Active' 
+                order by a.account_head_name asc
+                 
+            ");
+
+            $rec_list = array();
+
+            foreach ($query->result_array() as $row) {
+                $rec_list[] = $row;
+            }
+        }
+        if ($table == 'get-sub-account-head') {
+            $query = $this->db->query(" 
+                select 
+                a.sub_account_head_id,
+                a.sub_account_head_name
+                from cb_sub_account_head_info as a
+                where a.account_head_id = '" . $rec_id . "' 
+                and a.status='Active'
+                order by a.sub_account_head_name asc
+                 
+            ");
+
+            $rec_list = array();
+
+            foreach ($query->result_array() as $row) {
+                $rec_list[] = $row;
+            }
+        }
+
+        if ($table == 'get_project_with_company') {
+            $query = $this->db->query("
+              SELECT
+                    a.tender_enquiry_id,
+                    enquiry_no
+                FROM
+                    tender_enquiry_info AS a
+                LEFT JOIN customer_info AS b
+                ON
+                    b.customer_id = a.customer_id AND b.status = 'Active'
+                WHERE
+                    a.company_id = '" . $rec_id . "'
+                    AND a.status != 'Delete'
+            ");
+
+            $rec_list = $query->result_array();
+            echo json_encode($rec_list);
+            exit;
+        }
+        if ($table == 'get_sub_account_headlvl3') {
+            $query = $this->db->query(" 
+                select 
+                a.sub_account_headlvl3_id as id,
+                a.sub_account_headlvl3_name as val
+                from cb_sub_account_head_lvl3_info as a
+                where a.sub_account_head_id = '" . $rec_id . "' 
+                and a.status='Active'
+                order by a.sub_account_headlvl3_name asc
+                 
+            ");
+
+            $rec_list = array();
+
+            foreach ($query->result_array() as $row) {
+                $rec_list[] = $row;
+            }
+        }
+
         if ($table == 'vendor_contact_info') {
             $query = $this->db->query(" 
                 select 
@@ -187,7 +262,7 @@ class General extends CI_Controller
                 $rec_list = $row;
             }
 
-        } 
+        }
         if ($table == 'customer_info') {
             $query = $this->db->query(" 
                 select 
@@ -202,7 +277,7 @@ class General extends CI_Controller
                 $rec_list = $row;
             }
 
-        } 
+        }
         if ($table == 'currency_info') {
             $query = $this->db->query(" 
                 select 
@@ -217,7 +292,7 @@ class General extends CI_Controller
                 $rec_list = $row;
             }
 
-        } 
+        }
 
         $this->db->close();
 

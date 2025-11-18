@@ -81,7 +81,7 @@
                             <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
                             <td class="text-center"><?php echo $ls['prefix'] . $ls['vno']; ?><br /><i
                                     class="label label-info"><?php echo $ls['voucher_type_name'] ?></i><br><i
-                                    class="label label-success"><?php echo $ls['work_name'] ?></i></td>
+                                    class="label label-success"><?php echo $ls['enquiry_no'] ?></i></td>
                             <td><?php echo date('d-m-Y', strtotime($ls['outward_date'])) ?><br /><?php echo $ls['ac_type'] ?>
                             </td>
                             <td><?php echo $ls['account_head_name'] ?></td>
@@ -95,7 +95,7 @@
                             </td>
 
                             <td class="text-center">
-                                <?php if (($this->session->userdata(SS_PFIX . 'user_type') == "Admin") || (($this->session->userdata(SS_PFIX . 'user_type') != 'Admin') && ($ls['days'] <= EDIT_ALLOW_DAYS) && ($this->session->userdata('cr_edit_flg') == '1'))) { ?>
+                                <?php if (($this->session->userdata(SESS_HD . 'user_type') == "Admin") || (($this->session->userdata(SESS_HD . 'user_type') != 'Admin') && ($ls['days'] <= EDIT_ALLOW_DAYS) && ($this->session->userdata('cr_edit_flg') == '1'))) { ?>
                                     <button data-toggle="modal" data-target="#edit_modal"
                                         value="<?php echo $ls['cash_outward_id'] ?>" class="edit_record btn btn-primary btn-xs"
                                         title="Edit"><i class="fa fa-edit"></i></button>

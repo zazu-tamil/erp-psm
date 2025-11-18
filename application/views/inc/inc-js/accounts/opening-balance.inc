@@ -56,13 +56,14 @@ jQuery(function($) {
 
         if (confirm("Are you sure you want to delete this opening balance?")) {
             $.ajax({
-                url: "<?= site_url('delete-record'); ?>",
+                url: "<?= site_url('accounts/delete_record'); ?>",
                 type: "POST",
                 data: { tbl: 'cb_opening_balance_info_delet', id: id },
                 success: function(d) {
                     alert(d);
                     // Optional: remove row without reload
                     table.row($row).remove().draw(false);
+                     location.reload();
                 },
                 error: function(xhr, status, error) {
                     alert("Error deleting: " + error);

@@ -93,12 +93,12 @@
                                     <label>Type</label>
                                     <div class="radio">
                                         <label>
-                                            <input type="radio" name="type"  value="Inward" checked="true" /> Inward 
+                                            <input type="radio" name="type"  value="Inward" checked="true" /> Inward (Debit)
                                         </label> 
                                     </div>
                                     <div class="radio">
                                         <label>
-                                             <input type="radio" name="type"  value="Outward"  /> Outward
+                                             <input type="radio" name="type"  value="Outward"  /> Outward (Credit)
                                         </label>
                                     </div> 
                                  </div>
@@ -156,12 +156,12 @@
                                     <label>Type</label>
                                     <div class="radio">
                                         <label>
-                                            <input type="radio" name="type"  value="Inward" checked="true" /> Inward 
+                                            <input type="radio" name="type"  value="Inward" checked="true" /> Inward (Debit)
                                         </label> 
                                     </div>
                                     <div class="radio">
                                         <label>
-                                             <input type="radio" name="type"  value="Outward"  /> Outward
+                                             <input type="radio" name="type"  value="Outward"  /> Outward (Credit)
                                         </label>
                                     </div> 
                                  </div>

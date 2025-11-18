@@ -127,6 +127,11 @@ $route['customer-tender-po-list'] = 'tender/customer_tender_po_list';
 $route['customer-tender-po-edit/(:num)'] = 'tender/customer_tender_po_edit/$1';
 
 
+$route['vendor-po-add'] = 'vendor/vendor_po_add'; 
+$route['vendor-po-list'] = 'vendor/vendor_po_list';
+$route['vendor-po-edit/(:num)'] = 'vendor/vendor_po_edit/$1';
+
+
 /*Accounts Routes*/ 
 
 $route['inward-list'] = 'accounts/cash_inward_list'; 

@@ -64,8 +64,7 @@
                         <th>Company / Project</th>
                         <th>Account Head</th>
                         <th>Sub Account Head</th>
-                        <th>Inward From</th>
-                        <th>Amount</th>
+                         <th>Amount</th>
                         <th>Remarks</th>
                         <th colspan="3" class="text-center">Action</th>
                     </tr>
@@ -82,18 +81,15 @@
                                 <?php echo $ls['company_name'] ?><br />
                                 <span class="text-muted">
                                     <?php echo $ls['project_id'] ?>:
-                                    <?php echo $ls['customer_name'] ?>:
-                                    <?php echo ($ls['customer_branch_name'] != '' ? $ls['customer_branch_name'] : '-') ?><br />
-                                    <?php echo $ls['work_name'] ?>
-                                </span>
+                                    <?php echo $ls['enquiry_no'] ?>
+                                 </span>
                             </td>
                             <td><?php echo $ls['account_head_name'] ?></td>
                             <td><?php echo $ls['sub_account_head_name'] ?></td>
-                            <td><?php echo $ls['in_from'] ?></td>
-                            <td><?php echo $ls['amount'] ?></td>
+                             <td><?php echo $ls['amount'] ?></td>
                             <td><?php echo $ls['remarks'] ?></td>
                             <td class="text-center">
-                                <?php if (($this->session->userdata(SS_PFIX . 'user_type') == "Admin") || (($this->session->userdata(SS_PFIX . 'user_type') != 'Admin') && ($ls['days'] <= EDIT_ALLOW_DAYS) && ($this->session->userdata('cr_edit_flg') == '1'))) { ?>
+                                <?php if (($this->session->userdata(SESS_HD . 'user_type') == "Admin") || (($this->session->userdata(SESS_HD . 'user_type') != 'Admin') && ($ls['days'] <= EDIT_ALLOW_DAYS) && ($this->session->userdata('cr_edit_flg') == '1'))) { ?>
                                     <button data-toggle="modal" data-target="#edit_modal"
                                         value="<?php echo $ls['cash_inward_id'] ?>" class="edit_record btn btn-primary btn-xs"
                                         title="Edit"><i class="fa fa-edit"></i></button>
@@ -160,10 +156,7 @@
                                         <label>Sub-Account Head</label>
                                         <?php echo form_dropdown('sub_account_head_id', array('' => 'Select'), set_value('sub_account_head_id'), ' id="sub_account_head_id" class="form-control" required="true"'); ?>
                                     </div>
-                                    <div class="form-group col-md-6">
-                                        <label>Inward From</label>
-                                        <?php echo form_dropdown('sub_account_headlvl3_id', array('' => 'Select'), set_value('sub_account_headlvl3_id'), ' id="sub_account_headlvl3_id" class="form-control" '); ?>
-                                    </div>
+                                   
                                     <div class="form-group col-md-6">
                                         <label>Amount</label>
                                         <input class="form-control text-right" type="number" step="any" name="amount"
@@ -244,10 +237,7 @@
                                         <label>Sub-Account Head</label>
                                         <?php echo form_dropdown('sub_account_head_id', array('' => 'Select'), set_value('sub_account_head_id'), ' id="sub_account_head_id" class="form-control" required="true"'); ?>
                                     </div>
-                                    <div class="form-group col-md-6">
-                                        <label>Inward From</label>
-                                        <?php echo form_dropdown('sub_account_headlvl3_id', array('' => 'Select'), set_value('sub_account_headlvl3_id'), ' id="sub_account_headlvl3_id" class="form-control" '); ?>
-                                    </div>
+                                    
                                     <div class="form-group col-md-6">
                                         <label>Amount</label>
                                         <input class="form-control text-right" type="number" step="any" name="amount"

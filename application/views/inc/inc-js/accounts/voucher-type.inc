@@ -51,12 +51,13 @@ jQuery(function($) {
 
         if(confirm("Are you sure you want to delete this voucher type?")) {
             $.ajax({
-                url: "<?= site_url('delete-record'); ?>",
+                url: "<?= site_url('accounts/delete_record'); ?>",
                 type: "POST",
                 data: { tbl: 'voucher_type_info', id: id },
                 success: function(d) {
                     alert(d);
                     table.row($row).remove().draw(false); // Remove row from DataTable without reload
+                    location.reload();
                 },
                 error: function(xhr, status, error) {
                     alert("Error deleting: " + error);

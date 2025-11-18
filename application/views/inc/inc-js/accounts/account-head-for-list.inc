@@ -185,9 +185,9 @@
 			let id = $(this).val();
 			if (confirm("Are U sure want to delete ??")) {
 				$.ajax({
-					url: "<?php echo site_url('delete-record');?>",
+					url: "<?php echo site_url('accounts/delete_record');?>",
 					type: "post",
-					data: { tbl: "sub_account_head_lvl3_info", id: id },
+					data: { tbl: "cb_sub_account_head_lvl3_info", id: id },
 					success: function (d) {
 						alert(d);
 						location.reload();

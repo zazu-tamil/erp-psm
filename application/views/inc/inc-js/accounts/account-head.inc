@@ -51,7 +51,7 @@ jQuery(function($) {
 
         if (confirm("Are you sure you want to delete this account head?")) {
             $.ajax({
-                url: "<?= site_url('delete-record'); ?>",
+                url: "<?= site_url('accounts/delete_record'); ?>",
                 type: "POST",
                 data: { tbl: 'account_head_info', id: id },
                 success: function(response) {
@@ -59,9 +59,11 @@ jQuery(function($) {
 
                     // Remove row using DataTables API to keep table intact
                     table.row(row).remove().draw(false);
+                    location.reload();
                 },
                 error: function(xhr, status, error) {
                     alert("Error deleting record: " + error);
+                    
                 }
             });
         }

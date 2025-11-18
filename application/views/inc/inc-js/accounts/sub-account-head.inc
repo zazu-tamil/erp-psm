@@ -107,13 +107,14 @@ jQuery(function($) {
 
         if (confirm("Are you sure you want to delete this sub-account head?")) {
             $.ajax({
-                url: "<?= site_url('delete-record'); ?>",
+                url: "<?= site_url('accounts/delete_record'); ?>",
                 type: "POST",
                 data: { tbl: 'sub_account_head_info', id: id },
                 success: function(response) {
                     alert(response);
                     // Remove row using DataTables API
                     table.row(row).remove().draw(false);
+                    location.reload();
                 },
                 error: function(xhr, status, error) {
                     alert("Error deleting record: " + error);
