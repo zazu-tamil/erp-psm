@@ -1,11 +1,80 @@
+<style>
+    .total-section {
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+    }
+    .total-card {
+        background: linear-gradient(135deg, #eafaf3, #dff8ec);
+        border: 2px solid #aee0c0;
+        border-radius: 16px;
+        padding: 18px 28px;
+        min-width: 320px;
+        transition: all 0.3s ease-in-out;
+    }
+    .total-card:hover {
+        background: #e1f7ec;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+    }
+    .total-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .total-icon i {
+        font-size: 1.8rem;
+        background: #d2f0dc;
+        padding: 10px;
+        border-radius: 50%;
+        color: #2e865f;
+    }
+    .total-text .label {
+        font-size: 1.1rem;
+        color: #444;
+        font-weight: 600;
+        margin-right: 6px;
+    }
+    .total-text .value {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #007a4d;
+    }
+    #total_amount {
+        font-weight: 800;
+    }
+ 
+    @media (max-width: 768px) {
+        .total-section {
+            justify-content: center;
+        }
+        .total-card {
+            text-align: center;
+            min-width: 240px;
+            padding: 14px 18px;
+        }
+        .total-icon i {
+            font-size: 1.5rem;
+            padding: 8px;
+        }
+    }
+</style>
+
 <script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
 
 <script>
   $(document).ready(function () {
-    
-    /* ================================================================
-       1. COMPANY CHANGE - Load ALL Customers (no filtering by company)
-       ================================================================ */
+    calculateTotalAmount();
+
+    const existingCompanyId = $("#srch_company_id").val();
+    const existingCustomerId = $("#srch_customer_id").val();
+    const existingEnquiryId = $("#srch_tender_enquiry_id").val();
+    const existingQuotationId = $("#srch_quotation_no").val();
+
+    if (existingCompanyId && existingCustomerId && existingEnquiryId) {
+      loadQuotations(existingCompanyId, existingCustomerId, existingEnquiryId, existingQuotationId);
+    }
+
     $("#srch_company_id").on("change", function () {
       const company_id = $(this).val();
       const $customerDropdown = $("#srch_customer_id");
@@ -13,7 +82,6 @@
       const $quotationDropdown = $("#srch_quotation_no");
       const $container = $("#item_container");
 
-      // Reset dependent dropdowns
       $enquiryDropdown.html('<option value="">Select Enquiry</option>').prop('disabled', true);
       $quotationDropdown.html('<option value="">Select Quotation</option>').prop('disabled', true);
       $container.html('');
@@ -23,7 +91,6 @@
         return;
       }
 
-      // Load ALL customers (not filtered by company)
       $.ajax({
         url: "<?php echo site_url('vendor/get_all_customers'); ?>",
         type: "POST",
@@ -49,10 +116,6 @@
       });
     });
 
-    /* ================================================================
-       2. CUSTOMER CHANGE - Load Tender Enquiries (filtered by company + customer)
-       ================================================================ */
-       
     $("#srch_customer_id").on("change", function () {
       const customer_id = $(this).val();
       const company_id = $("#srch_company_id").val();
@@ -60,7 +123,6 @@
       const $quotationDropdown = $("#srch_quotation_no");
       const $container = $("#item_container");
 
-      // Reset dependent dropdowns and items
       $enquiryDropdown.html('<option value="">Select Enquiry</option>').prop('disabled', true);
       $quotationDropdown.html('<option value="">Select Quotation</option>').prop('disabled', true);
       $container.html('');
@@ -95,54 +157,57 @@
       });
     });
 
-    /* ================================================================
-       3. TENDER ENQUIRY CHANGE - Load Quotations with "Won" status
-       ================================================================ */
     $("#srch_tender_enquiry_id").on("change", function () {
-
       const company_id = $("#srch_company_id").val();
       const customer_id = $("#srch_customer_id").val();
+      const tender_enquiry_id = $(this).val();
+
+      if (!company_id || !customer_id || !tender_enquiry_id) return;
+
+      loadQuotations(company_id, customer_id, tender_enquiry_id, null);
+    });
+
+    function loadQuotations(company_id, customer_id, tender_enquiry_id, preSelectQuotationId) {
       const $quotationDropdown = $("#srch_quotation_no");
-      const $container = $("#item_container");
-
-      // Reset quotation and items
-      $quotationDropdown.html('<option value="">Select Quotation</option>').prop('disabled', true);
-      $container.html('');
-
-      if (!company_id || !customer_id) return;
 
       $.ajax({
         url: "<?php echo site_url('tender/get_quotations_by_customer'); ?>",
         type: "POST",
         data: {
           company_id: company_id,
-          customer_id: customer_id
+          customer_id: customer_id,
+          tender_enquiry_id: tender_enquiry_id
         },
         dataType: "json",
         success: function (res) {
-            console.log(res);
+          $quotationDropdown.html('<option value="">Select Quotation</option>');
+          
           if (res.length > 0) {
             $quotationDropdown.prop('disabled', false);
             $.each(res, function (i, row) {
+              const isSelected = preSelectQuotationId && (row.tender_quotation_id == preSelectQuotationId) ? 'selected' : '';
               $quotationDropdown.append(
                 $('<option></option>')
                   .attr('value', row.tender_quotation_id)
+                  .attr('selected', isSelected)
                   .text(row.display)
               );
             });
+
+            if (preSelectQuotationId) {
+              $quotationDropdown.trigger('change');
+            }
           } else {
             $quotationDropdown.html('<option value="">No quotations with "Won" status found</option>');
+            $quotationDropdown.prop('disabled', true);
           }
         },
-        error: function () {
+        error: function (xhr, status, error) {
           alert('Error loading quotations');
         }
       });
-    });
+    }
 
-    /* ================================================================
-       4. QUOTATION CHANGE - Load Items from Selected Quotation
-       ================================================================ */
     $("#srch_quotation_no").on("change", function () {
       const tender_quotation_id = $(this).val();
       const $container = $("#item_container");
@@ -166,12 +231,22 @@
                 <input type="hidden" name="item_id[]" value="${row.item_id}">
               `;
 
+              let gstOptions = '<option value="">Select</option>';
+              <?php foreach($gst_opt as $gid => $pct): ?>
+                const gstValue = parseFloat('<?= $pct; ?>');
+                const rowGst = parseFloat(row.gst);
+                const isSelected = (gstValue === rowGst) ? 'selected' : '';
+                gstOptions += `<option value="${gstValue}" ${isSelected}><?= $pct; ?>%</option>`;
+              <?php endforeach; ?>
+
+              const initialAmount = parseFloat(row.qty || 0) * parseFloat(row.rate || 0) * (1 + parseFloat(row.gst || 0) / 100);
+
               const itemHtml = `
                 <div class="item-card border p-3 mb-3" style="background-color:#f9f9f9; border-radius:8px;">
                   <h5 class="text-primary mb-3">Item Details ${i + 1}</h5>
                   <div class="row">
                     <div class="col-md-1 d-flex align-items-center justify-content-center">
-                      <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="${i}">
+                      <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="${i}" checked>
                     </div>
 
                     <div class="col-md-3">
@@ -188,7 +263,7 @@
                     <div class="col-md-4">
                       <div class="form-group">
                         <label>Item Description</label>
-                        <textarea name="item_desc[]" class="form-control desc-textarea" rows="3">${row.item_desc || ''}</textarea>
+                        <textarea name="item_desc[]" class="form-control" rows="3">${row.item_desc || ''}</textarea>
                       </div>
                     </div>
 
@@ -218,10 +293,7 @@
                           <div class="form-group">
                             <label>VAT %</label>
                             <select name="gst[]" class="form-control vat-dropdown">
-                              <option value="">Select</option>
-                              <?php foreach($gst_opt as $gid => $pct): ?>
-                                <option value="<?= $pct; ?>"><?= $pct; ?>%</option>
-                              <?php endforeach; ?>
+                              ${gstOptions}
                             </select>
                           </div>
                         </div>
@@ -229,7 +301,7 @@
                         <div class="col-md-12">
                           <div class="form-group">
                             <label>Amount</label>
-                            <input type="number" step="0.01" name="amount[]" class="form-control amount-input" value="0.00" readonly>
+                            <input type="number" step="0.01" name="amount[]" class="form-control amount-input" value="${initialAmount.toFixed(2)}" readonly>
                           </div>
                         </div>
                       </div>
@@ -242,73 +314,17 @@
               $container.append(itemHtml);
             });
 
-            // Add total row
-            $container.append(`
-              <div class="total-wrapper mt-4 mb-4">
-                <div class="total-box shadow-sm">
-                  <h5 class="mb-0">
-                    <i class="fa fa-calculator text-success me-2"></i>
-                    <strong>Total Amount:</strong>
-                    <span class="text-primary">₹ <span id="total_amount">0.00</span></span>
-                  </h5>
-                </div>
-              </div>
-
-              <style>
-                .total-wrapper {
-                  display: flex;
-                  justify-content: flex-end;
-                  align-items: center;
-                  width: 100%;
-                }
-                .total-box {
-                  background: linear-gradient(135deg, #f6fff9, #e8f9f0);
-                  border: 2px solid #b5e0c6;
-                  border-radius: 12px;
-                  padding: 12px 24px;
-                  font-family: "Segoe UI", sans-serif;
-                  font-size: 1.15rem;
-                  color: #333;
-                  min-width: 280px;
-                  text-align: right;
-                  transition: all 0.3s ease-in-out;
-                }
-                .total-box:hover {
-                  background: #e3f7ec;
-                  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-                  transform: translateY(-2px);
-                }
-                .total-box i {
-                  font-size: 1.3rem;
-                  vertical-align: middle;
-                }
-                #total_amount {
-                  font-size: 1.4rem;
-                  font-weight: 700;
-                  margin-left: 5px;
-                }
-                @media (max-width: 768px) {
-                  .total-wrapper { justify-content: center; }
-                  .total-box { text-align: center; min-width: 220px; }
-                }
-              </style>
-            `);
-
-            // Calculate totals on load
             calculateTotalAmount();
           } else {
             $container.html('<div class="alert alert-warning">No items found for this quotation.</div>');
           }
         },
-        error: function () {
+        error: function (xhr, status, error) {
           alert('Error loading quotation items');
         }
       });
     });
 
-    /* ================================================================
-       5. Amount Calculation (Rate / VAT change)
-       ================================================================ */
     $(document).on("input change", ".rate-input, .vat-dropdown", function () {
       const $row = $(this).closest(".item-card");
       const qty = parseFloat($row.find(".qty-input").val()) || 0;
@@ -324,14 +340,16 @@
     function calculateTotalAmount() {
       let total = 0;
       $(".amount-input").each(function () {
-        total += parseFloat($(this).val()) || 0;
+        const value = parseFloat($(this).val()) || 0;
+        total += value;
       });
-      $("#total_amount").text(total.toFixed(2));
+
+      const $total = $("#total_amount");
+      $total.fadeOut(100, function () {
+        $(this).text(total.toFixed(2)).fadeIn(200);
+      });
     }
 
-    /* ================================================================
-       6. Checkbox Change - Add/Remove Hidden Fields
-       ================================================================ */
     $(document).on("change", ".item-check", function () {
       const $card = $(this).closest(".item-card");
       if (!$(this).is(":checked")) {
@@ -346,12 +364,9 @@
     });
   });
 
-  /* ================================================================
-     7. Initialize CKEditor
-     ================================================================ */
   $(function () {
-    CKEDITOR.replace("editor1", {
-      height: 80,
+    CKEDITOR.replace("editor1_edit", {
+      height: 100,
       extraPlugins: "justify,colorbutton,font,table",
       removeButtons: "",
       toolbar: [

@@ -78,7 +78,7 @@
                                 <td><?php echo $row['closing_date'] ? date('d-m-Y H:i', strtotime($row['closing_date'])) : '-'; ?></td>
                                 <td>
                                     <span class="label label-<?php echo $row['status'] == 'Active' ? 'success' : 'danger'; ?>">
-                                        <?php echo htmlspecialchars($row['status']); ?>
+                                        <?php echo htmlspecialchars($row['tender_status']); ?>
                                     </span>
                                 </td>
                                 <td class="text-center">
