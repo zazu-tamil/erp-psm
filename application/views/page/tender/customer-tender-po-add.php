@@ -88,12 +88,12 @@
 
                     <div class="row">
                         <div class="form-group col-md-6">
-                            <label for="remarks">Remarks</label>
+                            <label for="remarks">Notes</label>
                             <textarea name="remarks" class="form-control" id="remarks" placeholder="Enter your remarks" rows="5"></textarea>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>PO Terms & Conditions</label>
+                                <label>Terms & Conditions</label>
                                 <textarea id="editor1" name="terms" class="form-control custom-textarea" placeholder="Enter PO terms" required></textarea>
                             </div>
                         </div>
