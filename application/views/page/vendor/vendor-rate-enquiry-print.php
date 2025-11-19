@@ -369,15 +369,11 @@
                 </div>
                 <div class="info-cell right">
                     <div><span class="info-label">Quotation Date:</span>
-                        <?php echo date('d-m-Y', strtotime($record['quote_date'])); ?></div>
-                    <div><span class="info-label">Quotation No:</span>
-                        <?php echo htmlspecialchars($record['quotation_no'] ?? 'N/A'); ?></div>
+                        <?php echo date('d-m-Y', strtotime($record['enquiry_date'])); ?></div>
+                    <div><span class="info-label">Enquiry No:</span>
+                        <?php echo htmlspecialchars($record['enquiry_no'] ?? 'N/A'); ?></div>
                     <div><span class="info-label">Tender Ref No:</span>
-                        <?php echo htmlspecialchars($record['tender_ref_no'] ?? 'N/A'); ?></div>
-                    <div><span class="info-label">Tender Enquiry No:</span>
                         <?php echo htmlspecialchars($record['tender_enquiry_no'] ?? 'N/A'); ?></div>
-
-
                 </div>
             </div>
         </div>
@@ -401,12 +397,13 @@
                     <?php foreach ($items as $i => $item): ?>
                         <tr>
                             <td class="text-center"><?php echo $i + 1; ?></td>
-                           <td class="text-left">
+                            <td class="text-left">
                                 <div class="item-description">
-                                <?php if (!empty($item['item_desc']) || !empty($item['item_desc'])): ?>
-                                    <div class="item-details">
-                                        <?php echo htmlspecialchars($item['item_desc'] ?: $item['item_desc'] ?: ''); ?></div>
-                                <?php endif; ?>
+                                    <?php if (!empty($item['item_desc']) || !empty($item['item_desc'])): ?>
+                                        <div class="item-details">
+                                            <?php echo htmlspecialchars($item['item_desc'] ?: $item['item_desc'] ?: ''); ?>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                             <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?: $item['item_uom'] ?: '-'); ?>
@@ -439,11 +436,11 @@
 
 
         <!-- Terms & Conditions -->
-        <?php if (!empty($record['terms'])): ?>
-            <div class="terms-section">
+        <?php if (!empty($record['quote_terms'])): ?>
+            <div class="quote_terms-section">
                 <div class="section-title">Terms & Conditions</div>
                 <div class="section-content">
-                    <?php echo $record['terms']; ?>
+                    <?php echo $record['quote_terms']; ?>
                 </div>
             </div>
         <?php endif; ?>
@@ -471,7 +468,10 @@
         <button type="button" class="btn btn-success" onclick="window.print()">
             🖨️ Print Quotation
         </button>
+      
     </div>
+    
+
 
 </body>
 

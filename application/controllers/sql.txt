@@ -81,3 +81,58 @@ ALTER TABLE tender_quotation_info ADD quotation_status VARCHAR(50) NULL DEFAULT 
 
 
  ALTER TABLE `tender_enquiry_info` ADD COLUMN `tender_document` VARCHAR(255) NULL AFTER `tender_name`;
+
+
+
+ CREATE TABLE `vendor_po_info` (
+	`vendor_po_id` INT(11) NOT NULL AUTO_INCREMENT,
+	`company_id` INT(11) NULL DEFAULT NULL,
+	`customer_id` INT(11) NULL DEFAULT NULL,
+	`tender_enquiry_id` INT(11) NULL DEFAULT NULL,
+	`vendor_rate_enquiry_id` INT(11) NULL DEFAULT NULL,
+	`vendor_id` INT(11) NULL DEFAULT NULL,
+	`vendor_contact_person_id` INT(11) NULL DEFAULT NULL,
+	`po_date` DATE NULL DEFAULT NULL,
+	`po_no` VARCHAR(100) NULL DEFAULT NULL,
+	`remarks` TEXT NULL DEFAULT NULL,
+	`handling_charges` DECIMAL(10,2) NULL DEFAULT NULL,
+	`terms` TEXT NULL DEFAULT NULL,
+	`opening_date` DATETIME NULL DEFAULT NULL,
+	`closing_date` DATETIME NULL DEFAULT NULL,
+	`po_status` VARCHAR(50) NULL DEFAULT NULL,
+	`status` VARCHAR(100) NULL DEFAULT NULL,
+	`created_by` INT(11) NULL DEFAULT NULL,
+	`created_date` DATETIME NULL DEFAULT NULL,
+	`updated_by` INT(11) NULL DEFAULT NULL,
+	`updated_date` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`vendor_po_id`)
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1
+;
+
+CREATE TABLE `vendor_po_item_info` (
+	`vendor_po_item_id` INT(11) NOT NULL AUTO_INCREMENT,
+	`vendor_po_id` INT(11) NOT NULL,
+	`vendor_rate_enquiry_item_id` INT(11) NULL DEFAULT NULL,
+	`category_id` INT(11) NULL DEFAULT NULL,
+	`item_id` INT(11) NULL DEFAULT NULL,
+	`item_desc` TEXT NULL DEFAULT NULL,
+	`uom` VARCHAR(50) NULL DEFAULT NULL,
+	`qty` DECIMAL(10,2) NULL DEFAULT NULL,
+	`rate` DECIMAL(10,2) NULL DEFAULT NULL,
+	`gst` DECIMAL(10,2) NULL DEFAULT NULL,
+	`amount` DECIMAL(10,2) NULL DEFAULT NULL,
+	`status` VARCHAR(50) NULL DEFAULT NULL,
+	`created_by` INT(11) NULL DEFAULT NULL,
+	`created_date` DATETIME NULL DEFAULT NULL,
+	`updated_by` INT(11) NULL DEFAULT NULL,
+	`updated_date` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`vendor_po_item_id`)
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1
+;
+

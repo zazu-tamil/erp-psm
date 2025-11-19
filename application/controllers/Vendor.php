@@ -407,7 +407,10 @@ class Vendor extends CI_Controller
             te.enquiry_no AS tender_enquiry_no,
             ci.company_name AS our_company,
             v.address,
-            ci.ltr_header_img
+            ci.ltr_header_img,
+            vrei.enquiry_date,
+            vrei.enquiry_no,
+            ci.quote_terms
         FROM vendor_rate_enquiry_info vrei
         LEFT JOIN customer_info c ON vrei.customer_id = c.customer_id
         LEFT JOIN vendor_info v ON vrei.vendor_id = v.vendor_id
