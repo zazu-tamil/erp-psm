@@ -59,7 +59,7 @@
                             });
                         </script>
                         <div class="form-group col-md-4">
-                            <label>Enquiry No</label>
+                            <label>RFQ No</label>
                             <input type="text" name="enquiry_no" class="form-control" placeholder="e.g., TEN-2025-001"
                                 value="<?php echo set_value('enquiry_no'); ?>">
                         </div>

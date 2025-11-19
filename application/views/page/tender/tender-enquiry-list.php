@@ -55,7 +55,7 @@
                 <thead>
                     <tr>
                         <th class="text-center">S.No</th>
-                        <th>Enquiry No</th>
+                        <th>RFQ No</th>
                         <th>Enquiry Date</th>
                         <th>Company</th>
                         <th>Customer</th>

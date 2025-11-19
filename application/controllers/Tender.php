@@ -877,6 +877,7 @@ public function edit_tender_enquiry($tender_enquiry_id = 0)
             'Open' => 'Open',
             'Quoted' => 'Quoted',
             'Won' => 'Won',
+            'Lost' => 'Lost',
             'On Hold' => 'On Hold',
         ];
 

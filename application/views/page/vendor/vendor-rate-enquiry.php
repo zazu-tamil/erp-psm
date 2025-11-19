@@ -29,7 +29,7 @@
                         </div>
                         <div class="form-group col-md-4">
                             <label for="srch_tender_enquiry_id">Tender Enquiry No</label>
-                            <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select'] + $tender_enquiry_opt, set_value('srch_tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control"'); ?>
+                            <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select Enquiry'] , set_value('srch_tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control"'); ?>
                         </div>
                         <div class="form-group col-md-4">
                             <label for="srch_vendor_id">Vendor Name <span class="text-red">*</span></label>
@@ -64,17 +64,15 @@
                             <input type="date" name="enquiry_date" id="enquiry_date" class="form-control"
                                 value="<?php echo set_value('enquiry_date', date('Y-m-d')); ?>" required>
                         </div>
-                        <!-- <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label>Opening Date & Time</label>
                             <input type="datetime-local" name="opening_date" id="opening_date" class="form-control"
                                 value="<?php echo set_value('opening_date'); ?>">
-                        </div> -->
-
-                    </div>
-                    <div class="row">
+                        </div>
+ 
 
                         <div class="form-group col-md-4">
-                            <label>Due Date & Time</label>
+                            <label>Closing Date & Time</label>
                             <input type="datetime-local" name="closing_date" id="closing_date" class="form-control"
                                 value="<?php echo set_value('closing_date'); ?>">
                         </div>

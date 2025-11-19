@@ -109,7 +109,7 @@
 
                                 <!-- PRINT / VIEW -->
                                 <td class="text-center">
-                                    <a href="<?php echo site_url('vendor-po-print/' . $row['vendor_po_id']); ?>" target="_blank"
+                                    <a href="<?php echo site_url('vendor-po-view/' . $row['vendor_po_id']); ?>" target="_blank"
                                         class="btn btn-info btn-xs" title="Print / View">
                                         <i class="fa fa-print"></i>
                                     </a>

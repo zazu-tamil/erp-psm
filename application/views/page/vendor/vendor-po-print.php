@@ -101,8 +101,8 @@
     <div class="page">
 
         <!-- Company -->
-        <h2><?php echo htmlspecialchars($record['our_company'] ?? 'Our Company'); ?></h2>
-        <p class="text-center"><strong>Tender Quotation</strong></p>
+        <h2><?php echo htmlspecialchars($record['company_name'] ?? 'Our Company'); ?></h2>
+        <p class="text-center"><strong></strong></p>
 
         <!-- Header -->
         <table class="no-border">
@@ -112,7 +112,7 @@
                     <p><?php echo htmlspecialchars($record['customer_name'] ?? 'Customer Name'); ?></p>
                 </td>
                 <td style="width:50%; text-align:right; line-height:1.6;">
-                    <p><strong>Date:</strong> <?php echo date('d-m-Y', strtotime($record['quote_date'])); ?></p>
+                    <p><strong>Date:</strong> <?php echo date('d-m-Y', strtotime($record['po_date'])); ?></p>
                     <p><strong>Quotation No:</strong> <?php echo htmlspecialchars($record['quotation_no'] ?? ''); ?></p>
                     <p><strong>Tender Ref No:</strong>
                         <?php echo htmlspecialchars($record['tender_ref_no'] ?? 'N/A'); ?></p>
@@ -213,14 +213,12 @@
     <!-- Print Button -->
     <div style="text-align:center; margin:30px 0;">
         <button type="button" class="btn btn-primary"
-            onclick="window.location.href='<?= site_url('tender-quotation-list') ?>'">
+            onclick="window.location.href='<?= site_url('vendor-po-list') ?>'">
             <i class="fa fa-arrow-left"></i> Back To List
         </button>
-
-        <button type="button" class="btn btn-default" onclick="window.print()" style="cursor:pointer;">
-            <i class="fa fa-print"></i> Print
+        <button onclick="window.print()" style="cursor:pointer;">
+            Print
         </button>
-
     </div>
 
 </body>

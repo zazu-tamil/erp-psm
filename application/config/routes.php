@@ -130,6 +130,7 @@ $route['customer-tender-po-edit/(:num)'] = 'tender/customer_tender_po_edit/$1';
 $route['vendor-po-add'] = 'vendor/vendor_po_add'; 
 $route['vendor-po-list'] = 'vendor/vendor_po_list';
 $route['vendor-po-edit/(:num)'] = 'vendor/vendor_po_edit/$1';
+$route['vendor-po-view/(:num)'] = 'vendor/vendor_po_view/$1';
 
 
 /*Accounts Routes*/ 

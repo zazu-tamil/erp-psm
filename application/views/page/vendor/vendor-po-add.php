@@ -128,7 +128,7 @@
             </div>
 
             <div class="box-footer text-right">
-                <a href="<?php echo site_url('customer-tender-po-list'); ?>" class="btn btn-default"><i
+                <a href="<?php echo site_url('vendor-po-list'); ?>" class="btn btn-default"><i
                         class="fa fa-arrow-left"></i> Back To List</a>
                 <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
             </div>

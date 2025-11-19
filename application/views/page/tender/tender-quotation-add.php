@@ -59,6 +59,7 @@
                             <label class="radio-inline"><input type="radio" name="quotation_status" value="Open">Open</label>
                             <label class="radio-inline"><input type="radio" name="quotation_status" value="Quoted" > Quoted</label>
                             <label class="radio-inline"><input type="radio" name="quotation_status" value="Won" > Won</label>
+                            <label class="radio-inline"><input type="radio" name="quotation_status" value="Lost" > Lost</label>
                             <label class="radio-inline"><input type="radio" name="quotation_status" value="On Hold" > On Hold</label>
                         </div>
 

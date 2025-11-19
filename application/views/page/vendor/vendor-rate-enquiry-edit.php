@@ -20,11 +20,11 @@
                     <div class="row">
                         <div class="form-group col-md-4">
                             <label for="srch_customer_id">Customer <span class="text-red">*</span></label>
-                            <?php echo form_dropdown('srch_customer_id', ['' => 'Select'] + $customer_opt, $main['customer_id'], 'id="srch_customer_id" class="form-control" required'); ?>
+                            <?php echo form_dropdown('srch_customer_id', ['' => 'Select'] + $customer_opt, $main['customer_id'], 'id="srch_customer_id" class="form-control" required disabled'); ?>
                         </div>
                         <div class="form-group col-md-4">
                             <label for="srch_tender_enquiry_id">Tender Enquiry No</label>
-                            <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select'] + $tender_enquiry_opt, $main['tender_enquiry_id'], 'id="srch_tender_enquiry_id" class="form-control"'); ?>
+                            <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select'] + $tender_enquiry_opt, $main['tender_enquiry_id'], 'id="srch_tender_enquiry_id" class="form-control" disabled'); ?>
                         </div>
                         <div class="form-group col-md-4">
                             <label for="srch_vendor_id">Vendor Name <span class="text-red">*</span></label>
@@ -48,17 +48,17 @@
                         </div>
                         </div>
                         <div class="row">
-                        <!-- <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label>Opening Date & Time</label>
                             <input type="datetime-local" name="opening_date" id="opening_date" class="form-control"
                                 value="<?php echo date('Y-m-d\TH:i', strtotime($main['opening_date'])); ?>">
-                        </div> -->
-                        <div class="form-group col-md-3">
-                            <label>Due Date & Time</label>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Closing Date & Time</label>
                             <input type="datetime-local" name="closing_date" id="closing_date" class="form-control"
                                 value="<?php echo date('Y-m-d\TH:i', strtotime($main['closing_date'])); ?>">
                         </div>
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label>Status</label><br>
                             <label class="radio-inline">
                                 <input type="radio" name="status" value="Active" <?php echo ($main['status'] == 'Active') ? 'checked' : ''; ?>> Active

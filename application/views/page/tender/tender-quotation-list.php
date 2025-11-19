@@ -60,7 +60,7 @@
                     <tr>
                         <th class="text-center">S.No</th>
                         <th>Quotation No</th>
-                        <th>Tender Ref No</th>
+                        <th>Tender RFQ No</th>
                         <th>Tender Enquiry No</th>
                         <th>Quote Date</th>
                         <th>Company</th>
