@@ -87,6 +87,7 @@
                                     'Open' => 'primary',
                                     'Quoted' => 'info',
                                     'Won' => 'success',
+                                    'Lost' => 'danger',
                                     'On Hold' => 'warning',
                                  ];
 
