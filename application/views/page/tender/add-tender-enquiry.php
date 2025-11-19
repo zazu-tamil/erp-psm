@@ -52,18 +52,17 @@
                                 </span>
                             </div>
                         </div>
-                        <script>
-                            $document.ready(function () {
-                                $('#srch_customer_contact_id').trigger('change').val('#srch_customer_id').trigger('change');
 
-                            });
-                        </script>
                         <div class="form-group col-md-4">
                             <label>RFQ No</label>
                             <input type="text" name="enquiry_no" class="form-control" placeholder="e.g., TEN-2025-001"
                                 value="<?php echo set_value('enquiry_no'); ?>">
                         </div>
-
+                        <div class="form-group col-md-4">
+                            <label>Tender Name</label>
+                            <input type="text" name="tender_name" class="form-control" placeholder="tender_name"
+                                value="<?php echo set_value('tender_name'); ?>">
+                        </div>
                         <div class="form-group col-md-4">
                             <label>Enquiry Date</label>
                             <input type="date" name="enquiry_date" class="form-control"
@@ -84,24 +83,25 @@
                             <label>Tender Enquiry Status <span class="text-danger">*</span></label>
                             <?php echo form_dropdown('tender_status', ['' => 'Select'] + $tender_status_opt, set_value('tender_status', 'Active'), 'class="form-control" required'); ?>
                         </div>
+                        <div class="form-group col-md-4">
+                            <label>Tender Document</label>
+                            <input type="file" name="tender_document" id="tender_document" class="form-control">
+                            <small class="text-muted">All file types allowed (Max 10MB)</small>
+                        </div>
 
                         <div class="form-group col-md-4">
-                            <label>Status</label>
-                            <?php echo form_dropdown('status', ['' => 'Select'] + $status_opt, set_value('status', 'Active'), 'class="form-control select2"'); ?>
+                            <label>Status</label> <br>
+                            <div class="radio-inline">
+                                <label>
+                                    <input type="radio" name="status" value="Active" checked="true" /> Active
+                                </label>
+                            </div>
+                            <div class="radio-inline">
+                                <label>
+                                    <input type="radio" name="status" value="InActive" /> InActive
+                                </label>
+                            </div>
                         </div>
-                        
-                        </div>
-                        <div class="row">
-                             <div class="form-group col-md-4">
-                            <label>Tender Name</label>
-                            <input type="text" name="tender_name" class="form-control" placeholder="tender_name"
-                                value="<?php echo set_value('tender_name'); ?>">
-                        </div>
-                        <div class="form-group col-md-4">
-                        <label>Tender Document</label>
-                        <input type="file" name="tender_document" id="tender_document" class="form-control">
-                        <small class="text-muted">All file types allowed (Max 10MB)</small>
-                    </div>
                     </div>
                 </fieldset>
 
@@ -467,7 +467,12 @@
     </div>
 </div>
 
+<script>
+    $document.ready(function () {
+        $('#srch_customer_contact_id').trigger('change').val('#srch_customer_id').trigger('change');
 
+    });
+</script>
 
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>

@@ -12,6 +12,8 @@
     <div class="box box-info">
         <div class="box-header with-border">
             <h3 class="box-title"><i class="fa fa-plus-circle"></i> Add Vendor PO </h3>
+            <a href="<?php echo site_url('vendor-po-list'); ?>" class="btn btn-warning pull-right"><i
+                        class="fa fa-arrow-left"></i> Back To List</a>
         </div>
 
         <form method="post" action="" id="frmadd" enctype="multipart/form-data">
@@ -85,17 +87,16 @@
                         </div> 
 
                         <div class="form-group col-md-3">
-                            <label>PO Status</label><br>
-                            <label class="radio-inline"><input type="radio" name="po_status" value="Open">Open</label>
-                            <label class="radio-inline"><input type="radio" name="po_status" value="In Progress"> In
-                                Progress</label>
-                            <label class="radio-inline"><input type="radio" name="po_status" value="Completed">
-                                Completed</label>
-                            <label class="radio-inline"><input type="radio" name="po_status" value="Cancelled">
-                                Cancelled</label>
+                            <label>PO Status <span style="color:red;">*</span></label><br>
+                            <?php echo form_dropdown('po_status', ['' => 'Select Po Status'] + $tender_status_opt, set_value('po_status'), 'id="po_status" class="form-control" required'); ?> 
                         </div>
 
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-1">
+                            <label>Handling Charges</label><br>
+                            <input type="number" step="0.01" name="handling_charges" id="handling_charges" class="form-control" value="" placeholder="100.00">
+                            
+                        </div>
+                        <div class="form-group col-md-2">
                             <label>Status</label><br>
                             <label class="radio-inline"><input type="radio" name="status" value="Active" checked>
                                 Active</label>
@@ -128,7 +129,7 @@
             </div>
 
             <div class="box-footer text-right">
-                <a href="<?php echo site_url('vendor-po-list'); ?>" class="btn btn-default"><i
+                <a href="<?php echo site_url('vendor-po-list'); ?>" class="btn btn-warning pull-left"><i
                         class="fa fa-arrow-left"></i> Back To List</a>
                 <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
             </div>

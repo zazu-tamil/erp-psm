@@ -12,6 +12,8 @@
     <div class="box box-info">
         <div class="box-header with-border">
             <h3 class="box-title"><i class="fa fa-plus-circle"></i> Add Vendor Rate Enquiry</h3>
+             <a href="<?php echo site_url('vendor-rate-enquiry-list'); ?>" class="btn btn-warning pull-right"><i
+                        class="fa fa-arrow-left"></i> Back To List</a>
         </div>
 
         <form method="post" action="" id="frmadd" enctype="multipart/form-data">
@@ -94,7 +96,7 @@
             </div>
 
             <div class="box-footer text-right">
-                <a href="<?php echo site_url('vendor-rate-enquiry-list'); ?>" class="btn btn-default"><i
+                <a href="<?php echo site_url('vendor-rate-enquiry-list'); ?>" class="btn btn-warning pull-left"><i
                         class="fa fa-arrow-left"></i> Back To List</a>
                 <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
             </div>

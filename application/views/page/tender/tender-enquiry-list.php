@@ -55,27 +55,32 @@
                 <thead>
                     <tr>
                         <th class="text-center">S.No</th>
-                        <th>RFQ No</th>
                         <th>Enquiry Date</th>
-                        <th>Company</th>
+                        <th>Company / RFQ No</th>
                         <th>Customer</th>
                         <th>Opening Date</th>
                         <th>Closing Date</th>
-                        <th>Status</th>
+                        <th>Tender Status</th>
                         <th class="text-center" colspan="2">Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (!empty($record_list)) : ?>
-                        <?php foreach ($record_list as $j => $row) : ?>
+                    <?php if (!empty($record_list)): ?>
+                        <?php foreach ($record_list as $j => $row): ?>
                             <tr>
                                 <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
-                                <td><strong><?php echo htmlspecialchars($row['enquiry_no']); ?></strong></td>
+
                                 <td><?php echo date('d-m-Y', strtotime($row['enquiry_date'])); ?></td>
-                                <td><?php echo htmlspecialchars($row['company_name']); ?></td>
-                                <td><?php echo htmlspecialchars($row['customer_name']); ?></td>
-                                <td><?php echo $row['opening_date'] ? date('d-m-Y H:i', strtotime($row['opening_date'])) : '-'; ?></td>
-                                <td><?php echo $row['closing_date'] ? date('d-m-Y H:i', strtotime($row['closing_date'])) : '-'; ?></td>
+                                <td><strong><?php echo $row['company_name']; ?></strong>
+                                    <br>
+                                    <small
+                                        class="label label-success"><?php echo $row['company_code'] . ' -> ' . $row['company_sno'] . ' -> ' . $row['customer_code'] . ' -> ' . $row['customer_sno'] . ' -> ' . $row['enquiry_no']; ?></small>
+                                </td>
+                                <td><?php echo $row['customer_name']; ?></td>
+                                <td><?php echo $row['opening_date'] ? date('d-m-Y H:i', strtotime($row['opening_date'])) : '-'; ?>
+                                </td>
+                                <td><?php echo $row['closing_date'] ? date('d-m-Y H:i', strtotime($row['closing_date'])) : '-'; ?>
+                                </td>
                                 <?php
                                 $status = $row['tender_status'];
 
@@ -85,7 +90,7 @@
                                     'Won' => 'success',
                                     'Lost' => 'danger',
                                     'On Hold' => 'warning',
-                                 ];
+                                ];
 
                                 $color = isset($badge_colors[$status]) ? $badge_colors[$status] : 'default';
                                 ?>
@@ -95,20 +100,20 @@
                                     </span>
                                 </td>
                                 <td class="text-center">
-                                    <a href="<?php echo site_url('tender-enquiry-edit/' . $row['tender_enquiry_id']); ?>" 
-                                       class="btn btn-primary btn-xs" title="Edit">
+                                    <a href="<?php echo site_url('tender-enquiry-edit/' . $row['tender_enquiry_id']); ?>"
+                                        class="btn btn-primary btn-xs" title="Edit">
                                         <i class="fa fa-edit"></i>
                                     </a>
                                 </td>
                                 <td class="text-center">
-                                    <button value="<?php echo $row['tender_enquiry_id']; ?>" 
-                                            class="del_record btn btn-danger btn-xs" title="Delete">
+                                    <button value="<?php echo $row['tender_enquiry_id']; ?>"
+                                        class="del_record btn btn-danger btn-xs" title="Delete">
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
-                    <?php else : ?>
+                    <?php else: ?>
                         <tr>
                             <td colspan="10" class="text-center text-danger">No records found.</td>
                         </tr>
@@ -129,4 +134,3 @@
 </section>
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
-

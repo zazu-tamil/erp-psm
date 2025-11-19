@@ -30,7 +30,7 @@
 
       // Reset dependent dropdown and items
       $enquiryDropdown
-        .html('<option value="">Select Enquiry</option>')
+        .html('<option value="">All</option>')
         .prop("disabled", true);
       $container.html("");
 

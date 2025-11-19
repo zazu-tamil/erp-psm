@@ -172,7 +172,7 @@
         url: "<?= site_url('vendor/get_vendor_rate_enquiry_list'); ?>",
         type: "POST",
         data: {
-          srch_tender_enquiry_id: tender_id, // ✅ FIXED
+          srch_tender_enquiry_id: tender_id,
         },
         dataType: "json",
         success: function (res) {

@@ -18,22 +18,22 @@
                 <div class="row">
                     <div class="form-group col-md-3">
                         <label for="srch_company_id">Company <span style="color:red;">*</span></label>
-                        <?php echo form_dropdown('srch_company_id', ['' => 'All'] + $company_opt, set_value('srch_company_id' , $srch_company_id), 'id="srch_company_id" class="form-control"'); ?>
+                        <?php echo form_dropdown('srch_company_id', ['' => 'All'] + $company_opt, set_value('srch_company_id', $srch_company_id), 'id="srch_company_id" class="form-control"'); ?>
                     </div>
 
                     <div class="form-group col-md-3">
                         <label for="srch_customer_id">Customer <span style="color:red;">*</span></label>
-                        <?php echo form_dropdown('srch_customer_id', ['' => 'All']+$customer_opt, set_value('srch_customer_id' , $srch_customer_id), 'id="srch_customer_id" class="form-control"'); ?>
+                        <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, set_value('srch_customer_id', $srch_customer_id), 'id="srch_customer_id" class="form-control"'); ?>
                     </div>
 
                     <div class="form-group col-md-3">
                         <label for="srch_tender_enquiry_id">Tender Enquiry No <span style="color:red;">*</span></label>
-                        <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'All'] + $tender_enquiry_opt, set_value('srch_tender_enquiry_id' ,$srch_tender_enquiry_id), 'id="srch_tender_enquiry_id" class="form-control"'); ?>
-                    </div> 
+                        <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'All'] + $tender_enquiry_opt, set_value('srch_tender_enquiry_id', $srch_tender_enquiry_id), 'id="srch_tender_enquiry_id" class="form-control"'); ?>
+                    </div>
 
                     <div class="form-group col-md-3">
                         <label>Status</label>
-                        <?php echo form_dropdown('srch_po_status', $po_status_opt, set_value('srch_po_status', $srch_po_status), 'id="srch_po_status" class="form-control select2"'); ?>
+                        <?php echo form_dropdown('srch_po_status', ['' => 'All'] + $po_status_opt, set_value('srch_po_status', $srch_po_status), 'id="srch_po_status" class="form-control select2"'); ?>
                     </div>
                     <div class="form-group col-md-3 text-left">
                         <br>
@@ -62,14 +62,14 @@
                 <thead>
                     <tr>
                         <th class="text-center">S.No</th>
-                        <th>PO No</th>
-                        <th>Tender Enquiry No</th>
-                        <th>PO Date</th>
+                         <th>PO Date</th>
+                        <th>Company / RFQ No</th>
+                        <th>Po No</th>
                         <th>Customer</th>
                         <th>Vendor</th>
                         <th>Opening Date</th>
                         <th>Closing Date</th>
-                        <th>PO Status</th>
+                        <th>Po Status</th>
                         <th class="text-center" colspan="3">Action</th> <!-- Now 3 columns -->
                     </tr>
                 </thead>
@@ -77,31 +77,32 @@
                     <?php if (!empty($record_list)): ?>
                         <?php foreach ($record_list as $j => $row): ?>
                             <tr>
-                                <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
-                                <td><strong><?php echo htmlspecialchars($row['po_no']); ?></strong></td>
-                                <td><strong><?php echo htmlspecialchars($row['tender_enquiry_no']); ?></strong></td>
+                                <td class="text-center"><?php echo ($j + 1 + $sno); ?></td> 
                                 <td><?php echo date('d-m-Y', strtotime($row['po_date'])); ?></td>
+                                <td><?php echo htmlspecialchars($row['company_name'] ?? '-'); ?> <br><small class="label label-success"><?php echo htmlspecialchars($row['tender_details'] ?? '-'); ?></small></td>
                                 <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
+                                <td><strong><?php echo htmlspecialchars($row['po_no']); ?></strong></td>
                                 <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
                                 <td><?php echo $row['opening_date'] ? date('d-m-Y H:i', strtotime($row['opening_date'])) : '-'; ?>
                                 </td>
                                 <td><?php echo $row['closing_date'] ? date('d-m-Y H:i', strtotime($row['closing_date'])) : '-'; ?>
                                 </td>
+                                <?php
+                                $status = $row['po_status'];
+
+                                $badge_colors = [
+                                    'Open' => 'primary',
+                                    'Quoted' => 'info',
+                                    'Won' => 'success',
+                                    'Lost' => 'danger',
+                                    'On Hold' => 'warning',
+                                ];
+
+                                $color = isset($badge_colors[$status]) ? $badge_colors[$status] : 'default';
+                                ?>
                                 <td>
-                                    <?php
-                                    $badge = 'default';
-                                    if ($row['po_status'] == 'Open') {
-                                        $badge = 'primary';
-                                    } elseif ($row['po_status'] == 'In Progress') {
-                                        $badge = 'warning';
-                                    } elseif ($row['po_status'] == 'Completed') {
-                                        $badge = 'success';
-                                    } elseif ($row['po_status'] == 'Cancelled') {
-                                        $badge = 'danger';
-                                    }
-                                    ?>
-                                    <span class="label label-<?php echo $badge; ?>">
-                                        <?php echo htmlspecialchars($row['po_status']); ?>
+                                    <span class="label label-<?php echo $color; ?>">
+                                        <?php echo $status; ?>
                                     </span>
                                 </td>
 

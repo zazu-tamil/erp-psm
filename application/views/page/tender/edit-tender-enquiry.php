@@ -19,6 +19,7 @@
     <div class="box box-info">
         <div class="box-header with-border">
             <h3 class="box-title">Edit Tender Enquiry</h3>
+             <a href="<?php echo site_url('tender-enquiry-list'); ?>" class="btn btn-warning pull-right"> <i class="fa fa-arrow-left"></i> Back to list</a>
         </div>
 
         <form method="post" action="" id="frmadd" enctype="multipart/form-data">
@@ -43,10 +44,17 @@
                             <?php echo form_dropdown('customer_contact_id', $customer_contact_opt, set_value('srch_customer_contact_id',$main_record['customer_contact_id']), 'id="srch_customer_contact_id" class="form-control select2"
                                 required'); ?>
                         </div>
+
                         <div class="form-group col-md-4">
-                            <label>Enquiry No <span class="text-danger">*</span></label>
+                            <label>Tender Name</label>
+                            <input type="text" name="tender_name" class="form-control" value="<?php echo htmlspecialchars(set_value('tender_name', $main_record['tender_name'])); ?>">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>RFQ No<span class="text-danger">*</span></label>
                             <input type="text" name="enquiry_no" class="form-control" value="<?php echo htmlspecialchars(set_value('enquiry_no', $main_record['enquiry_no'])); ?>" required>
                         </div>
+
+
                         <div class="form-group col-md-4">
                             <label>Company S.No</label>
                             <input type="text" name="company_sno" class="form-control" placeholder="e.g., 001"
@@ -77,38 +85,52 @@
                         </div>
                     
                         <div class="form-group col-md-4">
-                            <label>Status</label>
-                            <?php echo form_dropdown('status', $status_opt, set_value('status', $main_record['status']), 'class="form-control select2"'); ?>
+                            <label>Tender Document</label>
+                            <input type="file" name="tender_document" class="form-control" id="tender_document_input">
+                            <small class="text-muted">All file types allowed (Max 10MB)</small>
+                            
+                            <?php 
+                            $doc_path = $main_record['tender_document'];
+                            if ($doc_path): 
+                                $file_url = site_url($doc_path); // Create URL path
+                                $file_ext = pathinfo($doc_path, PATHINFO_EXTENSION);
+                            ?>
+                                <p class="mt-2">
+                                    <strong>Current File:</strong> 
+                                    <?php if (in_array(strtolower($file_ext), ['jpg', 'jpeg', 'png', 'gif'])): ?>
+                                        <a href="<?php echo $file_url; ?>" target="_blank">
+                                            <img src="<?php echo $file_url; ?>" alt="Tender Document Image" style="max-height: 50px; max-width: 50px; border: 1px solid #ddd; margin-top: 5px;">
+                                        </a>
+                                    <?php else: ?>
+                                        <a href="<?php echo $file_url; ?>" target="_blank" class="text-blue">
+                                            <i class="fa fa-file-text-o"></i> View Document
+                                        </a>
+                                    <?php endif; ?>
+                                </p>
+                            <?php endif; ?>
                         </div>
-                           <div class="form-group col-md-4">
-                            <label>Tender Name</label>
-                            <input type="text" name="tender_name" class="form-control" value="<?php echo htmlspecialchars(set_value('tender_name', $main_record['tender_name'])); ?>">
-                        </div>
-                        <div class="form-group col-md-4">
-                        <label>Tender Document</label>
-                        <input type="file" name="tender_document" class="form-control" id="tender_document_input">
-                        <small class="text-muted">All file types allowed (Max 10MB)</small>
                         
-                        <?php 
-                        $doc_path = $main_record['tender_document'];
-                        if ($doc_path): 
-                            $file_url = site_url($doc_path); // Create URL path
-                            $file_ext = pathinfo($doc_path, PATHINFO_EXTENSION);
-                        ?>
-                            <p class="mt-2">
-                                <strong>Current File:</strong> 
-                                <?php if (in_array(strtolower($file_ext), ['jpg', 'jpeg', 'png', 'gif'])): ?>
-                                    <a href="<?php echo $file_url; ?>" target="_blank">
-                                        <img src="<?php echo $file_url; ?>" alt="Tender Document Image" style="max-height: 50px; max-width: 50px; border: 1px solid #ddd; margin-top: 5px;">
-                                    </a>
-                                <?php else: ?>
-                                    <a href="<?php echo $file_url; ?>" target="_blank" class="text-blue">
-                                        <i class="fa fa-file-text-o"></i> View Document
-                                    </a>
-                                <?php endif; ?>
-                            </p>
-                        <?php endif; ?>
+                    <div class="form-group col-md-4">
+                        <label>Status</label> <br>
+                        <div class="radio-inline">
+                            <label>
+                                <input type="radio" name="status" class="minimal" id="status_active" value="Active"
+                                    <?php echo (set_value('status', $main_record['status']) == 'Active') ? 'checked' : ''; ?>>
+                                Active
+                            </label>
+                        </div>
+
+                        <div class="radio-inline">
+                            <label>
+                                <input type="radio" name="status" class="minimal" id="status_inactive" value="Inactive"
+                                    <?php echo (set_value('status', $main_record['status']) == 'Inactive') ? 'checked' : ''; ?>>
+                                Inactive
+                            </label>
+                        </div>
                     </div>
+
+                       
+
                     </div>
                  
                 </fieldset>
@@ -237,7 +259,7 @@
             </div>
 
             <div class="box-footer text-right">
-                <a href="<?php echo site_url('tender-enquiry-list'); ?>" class="btn btn-default">Back</a>
+                <a href="<?php echo site_url('tender-enquiry-list'); ?>" class="btn btn-warning pull-left">  <i class="fa fa-arrow-left"></i> Back to list</a>
                 <button type="submit" class="btn btn-success">
                     <i class="fa fa-save"></i> Update
                 </button>
