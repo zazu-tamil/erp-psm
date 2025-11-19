@@ -26,7 +26,7 @@
                     </div>
                     <div class="form-group col-md-3">
                         <label>Status</label>
-                        <?php echo form_dropdown('srch_status', $status_opt, set_value('srch_status', $srch_status), 'id="srch_status" class="form-control select2"'); ?>
+                        <?php echo form_dropdown('srch_status', $tender_status_opt, set_value('srch_status', $srch_status), 'id="srch_status" class="form-control select2"'); ?>
                     </div>
                     <div class="form-group col-md-3 text-left">
                         <br>
@@ -76,9 +76,22 @@
                                 <td><?php echo htmlspecialchars($row['customer_name']); ?></td>
                                 <td><?php echo $row['opening_date'] ? date('d-m-Y H:i', strtotime($row['opening_date'])) : '-'; ?></td>
                                 <td><?php echo $row['closing_date'] ? date('d-m-Y H:i', strtotime($row['closing_date'])) : '-'; ?></td>
+                                <?php
+                                $status = $row['tender_status'];
+
+                                $badge_colors = [
+                                    'Open' => 'primary',
+                                    'Quoted' => 'info',
+                                    'Won' => 'success',
+                                    'Lost' => 'danger',
+                                    'On Hold' => 'warning',
+                                 ];
+
+                                $color = isset($badge_colors[$status]) ? $badge_colors[$status] : 'default';
+                                ?>
                                 <td>
-                                    <span class="label label-<?php echo $row['status'] == 'Active' ? 'success' : 'danger'; ?>">
-                                        <?php echo htmlspecialchars($row['tender_status']); ?>
+                                    <span class="label label-<?php echo $color; ?>">
+                                        <?php echo $status; ?>
                                     </span>
                                 </td>
                                 <td class="text-center">

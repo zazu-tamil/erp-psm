@@ -216,7 +216,7 @@ public function add_tender_enquiry()
     }
 
     $data['status_opt'] = ['Active' => 'Active', 'Inactive' => 'Inactive'];
-    $data['tender_status_opt'] = ['' => 'Select Tender Status', 'Open' => 'Open', 'Quoted' => 'Quoted', 'Won' => 'Won', 'On Hold' => 'On Hold'];
+    $data['tender_status_opt'] = ['' => 'Select Tender Status', 'Open' => 'Open', 'Quoted' => 'Quoted', 'Won' => 'Won','Lost' => 'Lost', 'On Hold' => 'On Hold'];
     $this->load->view('page/tender/add-tender-enquiry', $data);
 }
 
@@ -276,7 +276,7 @@ public function add_tender_enquiry()
             $data['srch_status'] = $srch_status = '';
         }
         if (!empty($srch_status) && $srch_status !== 'All') {
-            $where .= " AND a.status = '" . $this->db->escape_str($srch_status) . "'";
+            $where .= " AND a.tender_status = '" . $this->db->escape_str($srch_status) . "'";
         }
 
         // === COUNT TOTAL ===
@@ -363,6 +363,7 @@ public function add_tender_enquiry()
         }
 
         $data['status_opt'] = ['' => 'All', 'Active' => 'Active', 'Inactive' => 'Inactive'];
+           $data['tender_status_opt'] = ['' => 'Select Tender Status', 'Open' => 'Open', 'Quoted' => 'Quoted', 'Won' => 'Won','Lost' => 'Lost', 'On Hold' => 'On Hold'];
 
         $this->load->view('page/tender/tender-enquiry-list', $data);
     }
@@ -617,7 +618,7 @@ public function edit_tender_enquiry($tender_enquiry_id = 0)
     }
 
     $data['status_opt'] = ['' => 'Select Status', 'Active' => 'Active', 'Inactive' => 'Inactive'];
-    $data['tender_status_opt'] = ['' => 'Select Tender Status', 'Open' => 'Open', 'Quoted' => 'Quoted', 'Won' => 'Won', 'On Hold' => 'On Hold'];
+    $data['tender_status_opt'] = ['' => 'Select Tender Status', 'Open' => 'Open', 'Quoted' => 'Quoted', 'Won' => 'Won','Lost' => 'Lost', 'On Hold' => 'On Hold'];
 
     // JSON encode for JavaScript
     $data['category_json'] = json_encode($data['category_opt']);
