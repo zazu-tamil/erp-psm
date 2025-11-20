@@ -36,7 +36,7 @@
                             </div>
                         </div>
                         <div class="form-group col-md-4">
-                            <label></label>
+                            <label>Customer Contact Person </label>
                             <div class="input-group">
                                 <?php
                                 echo form_dropdown(
@@ -108,37 +108,26 @@
                 <!-- Item Details - DIV + GRID -->
                 <fieldset class="mt-4">
                     <legend class="text-light-blue"><i class="fa fa-list"></i> Item Details</legend>
+
                     <div class="row">
+                        <div class="col-md-12 form-group">
+                            <button type="button" class="btn btn-primary" data-toggle="modal"
+                                data-target="#add_category">
+                                <i class="fa fa-tags"></i> Add Category
+                            </button>
 
-                        <div class="col-xs-12 col-sm-3 col-md-1">
-                            <div class="form-group">
-                                <button type="button" class="btn btn-primary btn-block" data-toggle="modal"
-                                    data-target="#add_category">
-                                    <i class="fa fa-tags"></i> Add Category
-                                </button>
-                            </div>
+                            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#add_item">
+                                <i class="fa fa-plus"></i> Add Item
+                            </button>
+
+                            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#add_brand">
+                                <i class="fa fa-plus"></i> Add Brand
+                            </button>
                         </div>
-
-                        <div class="col-xs-12 col-sm-3 col-md-1">
-                            <div class="form-group">
-                                <button type="button" class="btn btn-success btn-block" data-toggle="modal"
-                                    data-target="#add_item">
-                                    <i class="fa fa-plus"></i> Add Item
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="col-xs-12 col-sm-3 col-md-1">
-                            <div class="form-group">
-                                <button type="button" class="btn btn-success btn-block" data-toggle="modal"
-                                    data-target="#add_brand">
-                                    <i class="fa fa-plus"></i> Add Brand
-                                </button>
-                            </div>
-                        </div>
-
                     </div>
+
                     <div class="item-details-container">
+
                         <!-- Header -->
                         <div class="grid-header">
                             <div>Category / Item</div>
@@ -191,7 +180,7 @@
                             <select id="customer_id_two" name="customer_id" class="form-control" required>
                                 <option value="">Select Customer</option>
                                 <?php foreach ($customer_opt as $key => $val) { ?>
-                                    <option value="<?= $key ?>"><?= $val ?></option>
+                                <option value="<?= $key ?>"><?= $val ?></option>
                                 <?php } ?>
                             </select>
 
@@ -244,9 +233,9 @@
     </div>
 </div>
 <style>
-    .text-danger {
-        color: red !important;
-    }
+.text-danger {
+    color: red !important;
+}
 </style>
 
 <div class="modal fade" id="add_customer" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
@@ -530,10 +519,10 @@
 
 
 <script>
-    $document.ready(function () {
-        $('#srch_customer_contact_id').trigger('change').val('#srch_customer_id').trigger('change');
+$document.ready(function() {
+    $('#srch_customer_contact_id').trigger('change').val('#srch_customer_id').trigger('change');
 
-    });
+});
 </script>
 
 
