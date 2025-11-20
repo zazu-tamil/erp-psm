@@ -145,7 +145,7 @@
                                         <label>VAT (%)</label>
                                         <?php echo form_dropdown(
                                             'gst',
-                                            array('' => 'Select gst') + $gst_opt,
+                                            array('' => 'Select VAT') + $gst_opt,
                                             '',
                                             'id="gst" class="form-control" required'
                                         ); ?>
@@ -248,7 +248,7 @@
                                         <label>VAT (%)</label>
                                         <?php echo form_dropdown(
                                             'gst',
-                                            array('' => 'Select gst') + $gst_opt,
+                                            array('' => 'Select VAT') + $gst_opt,
                                             '',
                                             'id="gst" class="form-control" required'
                                         ); ?>
@@ -294,29 +294,3 @@
 </section>
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
-<script>
-    $("#item_image").on("change", function () {
-        var simgFile = this.files[0]; // get file object
-        var simgURL = simgFile ? URL.createObjectURL(simgFile) : '';
-
-        if (simgURL) {
-            $("#item_image_preview").attr("src", simgURL).show();
-        } else {
-            $("#item_image_preview").hide();
-        }
-    });
-
-</script>
-<script>
-    $("#edit_modal #item_image").on("change", function () {
-        var simgFile = this.files[0]; // get file object
-        var simgURL = simgFile ? URL.createObjectURL(simgFile) : '';
-
-        if (simgURL) {
-            $("#edit_modal #item_image_preview").attr("src", simgURL).show();
-        } else {
-            $("#edit_modal #item_image_preview").hide();
-        }
-    });
-
-</script>

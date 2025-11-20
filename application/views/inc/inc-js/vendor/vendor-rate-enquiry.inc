@@ -6,7 +6,7 @@ $(document).ready(function () {
     const vendor_id = $(this).val();
 
     // Auto-set vendor in Add Contact Person modal
-    $("#contact_vendor_id").val(vendor_id);
+         $("#contact_vendor_id").val(vendor_id).trigger("change"); 
 
     // Clear dropdown before loading
     $("#srch_vendor_contact_id").html('<option value="">Select Contact Person</option>');
@@ -25,7 +25,7 @@ $(document).ready(function () {
               );
             });
           } else {
-            $("#srch_vendor_contact_id").html('<option>No contacts found</option>');
+            $("#srch_vendor_contact_id").html('<option>Select Contact Person</option>');
           }
         }
       });
@@ -162,58 +162,63 @@ $(document).ready(function () {
 
   // Handle Add Vendor form submission
   $('input[name="btn_add_vendor"]').on("click", function (e) {
-    e.preventDefault();
+      e.preventDefault();
 
-    var formData = $("#frmadd_Vendor").serialize();
+      var formData = $("#frmadd_Vendor").serialize();
 
-    $.ajax({
-      url: "<?php echo base_url('vendor/ajax_add_master_inline'); ?>",
-      type: "POST",
-      data: formData,
-      dataType: "json",
-      beforeSend: function () {
-        $('input[name="btn_add_vendor"]')
-          .val("Saving...")
-          .prop("disabled", true);
-      },
-      success: function (response) {
-       
+      $.ajax({
+          url: "<?php echo base_url('vendor/ajax_add_master_inline'); ?>",
+          type: "POST",
+          data: formData,
+          dataType: "json",
+          beforeSend: function () {
+              $('input[name="btn_add_vendor"]')
+                  .val("Saving...")
+                  .prop("disabled", true);
+          },
+          success: function (response) {
 
-        if (response.status === "success") {
-          // Add new vendor option dynamically
-          var newOption = new Option(response.name, response.id, true, true);
-          $("#srch_vendor_id").append(newOption).trigger("change");
+              if (response.status === "success") {
 
-          // Reset the form
-          $("#frmadd_Vendor")[0].reset();
+                  // Create two separate options (append removes from original)
+                  var option1 = new Option(response.name, response.id, true, true);
+                  var option2 = new Option(response.name, response.id, true, true);
 
-          // Close the modal
-          $("#add_vendor").modal("hide");
+                  // Add vendor to main search dropdown
+                  $("#srch_vendor_id").append(option1).trigger("change");
 
-           $('#zazualert').html(`
-                    <div class="alert alert-success sticky-notification" role="alert">
-                        <button type="button" class="close" data-dismiss="alert">&times;</button>
-                        <strong>Note:</strong>
-                        <div class="note-content">`+ response.message + `</div>
-                    </div>
-                `);
+                  // Add vendor to contact dropdown
+                  $("#contact_vendor_id").append(option2).trigger("change");
 
+                  // Reset the form
+                  $("#frmadd_Vendor")[0].reset();
 
-          // Success message
-          
-        } else {
-          alert(response.message || "Failed to add vendor.");
-        }
-      },
-      error: function (xhr, status, error) {
-        alert("Error: " + error);
-        console.error(xhr.responseText);
-      },
-      complete: function () {
-        $('input[name="btn_add_vendor"]').val("Save").prop("disabled", false);
-      }
-    });
+                  // Close modal
+                  $("#add_vendor").modal("hide");
+
+                  // Success alert
+                  $('#zazualert').html(`
+                      <div class="alert alert-success sticky-notification" role="alert">
+                          <button type="button" class="close" data-dismiss="alert">&times;</button>
+                          <strong>Note:</strong>
+                          <div class="note-content">${response.message}</div>
+                      </div>
+                  `);
+
+              } else {
+                  alert(response.message || "Failed to add vendor.");
+              }
+          },
+          error: function (xhr, status, error) {
+              alert("Error: " + error);
+              console.error(xhr.responseText);
+          },
+          complete: function () {
+              $('input[name="btn_add_vendor"]').val("Save").prop("disabled", false);
+          }
+      });
   });
+
 
   // Handle Add Contact Person form submission
   $('input[name="btn_add_contact"]').on("click", function (e) {

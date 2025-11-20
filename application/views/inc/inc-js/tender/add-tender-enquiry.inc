@@ -265,10 +265,60 @@
     // Initialize
     addEmptyRow();
 
-    $('input[name="btn_add_customer"]').on("click", function (e) {
+$('input[name="btn_add_customer"]').on("click", function (e) {
+    e.preventDefault();
+
+    var formData = $("#frmadd_Customer").serialize();
+
+    $.ajax({
+        url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
+        type: "POST",
+        data: formData,
+        dataType: "json",
+        beforeSend: function () {
+            $('input[name="btn_add_customer"]')
+                .val("Saving...")
+                .prop("disabled", true);
+        },
+        success: function (response) {
+            console.log(response);
+
+            if (response.status === "success") {
+
+                // Append new option to Customer dropdown
+                $("#srch_customer_id").append(
+                    new Option(response.name, response.id, true, true)
+                ).trigger("change");
+
+                // Append new option to Customer Contact dropdown
+                $("#customer_id_two").append(
+                    new Option(response.name, response.id, true, true)
+                ).trigger("change");
+
+                // Reset form & close modal
+                $("#frmadd_Customer")[0].reset();
+                $("#add_customer").modal("hide");
+
+                alert(response.message);
+            } else {
+                alert("Failed to add customer.");
+            }
+        },
+        error: function (xhr, status, error) {
+            alert("Error: " + error);
+        },
+        complete: function () {
+            $('input[name="btn_add_customer"]')
+                .val("Save")
+                .prop("disabled", false);
+        },
+    });
+});
+
+    $('input[name="btn_add_brand"]').on("click", function (e) {
       e.preventDefault();
 
-      var formData = $("#frmadd_Customer").serializeArray();
+      var formData = $("#frmadd_Brand").serializeArray();
 
       console.log(formData);
 
@@ -278,7 +328,7 @@
         data: formData,
         dataType: "json",
         beforeSend: function () {
-          $('input[name="btn_add_customer"]')
+          $('input[name="btn_add_brand"]')
             .val("Saving...")
             .prop("disabled", true);
         },
@@ -287,18 +337,18 @@
           if (response.status === "success") {
             // Add new option to the dropdown dynamically
             var newOption = new Option(response.name, response.id, true, true);
-            $("#srch_customer_id").append(newOption).trigger("change");
+            $("#brand_id").append(newOption).trigger("change");
 
             // Reset form & close modal
             $("#frmadd")[0].reset();
-            $("#add_customer").modal("hide");
+            $("#add_brand").modal("hide");
 
             // Optional success alert
             //toastr.success(response.message);
             alert(response.message);
           } else {
-            //toastr.error('Failed to add customer.');
-            alert("Failed to add customer.");
+            //toastr.error('Failed to add brand.');
+            alert("Failed to add brand.");
           }
         },
         error: function (xhr, status, error) {
@@ -306,7 +356,7 @@
           alert("Error: " + error);
         },
         complete: function () {
-          $('input[name="btn_add_customer"]')
+          $('input[name="btn_add_brand"]')
             .val("Save")
             .prop("disabled", false);
         },

@@ -2156,6 +2156,24 @@ public function get_quotation_items()
                 'name' => $data['category_name']
             ]);
         }
+        if ($this->input->post('mode') == 'Add Brand') {
+
+            $data = [
+                'brand_name' => $this->input->post('brand_name'),
+                'status' => $this->input->post('status')
+            ];
+
+            $this->db->insert('brand_info', $data);
+            $insert_id = $this->db->insert_id();
+
+            // Return response for JS
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Brand added successfully!',
+                'id' => $insert_id,
+                'name' => $data['brand_name']
+            ]);
+        }
 
 
         if ($this->input->post('mode') == 'Add Item') {

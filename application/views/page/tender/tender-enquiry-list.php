@@ -58,7 +58,7 @@
                         <th>Enquiry Date</th>
                         <th>Company / RFQ No</th>
                         <th>Customer</th>
-                        <th>Opening Date</th>
+                        <!-- <th>Opening Date</th> -->
                         <th>Closing Date</th>
                         <th>Tender Status</th>
                         <th class="text-center" colspan="2">Action</th>
@@ -77,7 +77,7 @@
                                         class="label label-success"><?php echo $row['company_code'] . ' -> ' . $row['company_sno'] . ' -> ' . $row['customer_code'] . ' -> ' . $row['customer_sno'] . ' -> ' . $row['enquiry_no']; ?></small>
                                 </td>
                                 <td><?php echo $row['customer_name']; ?></td>
-                                <td><?php echo $row['opening_date'] ? date('d-m-Y H:i', strtotime($row['opening_date'])) : '-'; ?>
+                                <!-- <td><?php echo $row['opening_date'] ? date('d-m-Y H:i', strtotime($row['opening_date'])) : '-'; ?> -->
                                 </td>
                                 <td><?php echo $row['closing_date'] ? date('d-m-Y H:i', strtotime($row['closing_date'])) : '-'; ?>
                                 </td>

@@ -99,3 +99,29 @@
 		});
 	});
 </script>
+<script>
+    $("#item_image").on("change", function () {
+        var simgFile = this.files[0]; // get file object
+        var simgURL = simgFile ? URL.createObjectURL(simgFile) : '';
+
+        if (simgURL) {
+            $("#item_image_preview").attr("src", simgURL).show();
+        } else {
+            $("#item_image_preview").hide();
+        }
+    });
+
+</script>
+<script>
+    $("#edit_modal #item_image").on("change", function () {
+        var simgFile = this.files[0]; // get file object
+        var simgURL = simgFile ? URL.createObjectURL(simgFile) : '';
+
+        if (simgURL) {
+            $("#edit_modal #item_image_preview").attr("src", simgURL).show();
+        } else {
+            $("#edit_modal #item_image_preview").hide();
+        }
+    });
+
+</script>

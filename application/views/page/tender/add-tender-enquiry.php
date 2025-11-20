@@ -68,11 +68,11 @@
                             <input type="date" name="enquiry_date" class="form-control"
                                 value="<?php echo set_value('enquiry_date', date('Y-m-d')); ?>">
                         </div>
-                        <div class="form-group col-md-4">
+                        <!-- <div class="form-group col-md-4">
                             <label>Opening Date & Time</label>
                             <input type="datetime-local" name="opening_date" class="form-control"
                                 value="<?php echo set_value('opening_date'); ?>">
-                        </div>
+                        </div> -->
                         <div class="form-group col-md-4">
                             <label>Closing Date & Time</label>
                             <input type="datetime-local" name="closing_date" class="form-control"
@@ -119,6 +119,10 @@
                                 <button type="button" class="btn btn-success" data-toggle="modal"
                                     data-target="#add_item">
                                     <i class="fa fa-plus"></i> Add Item
+                                </button>
+                                 <button type="button" class="btn btn-success" data-toggle="modal"
+                                    data-target="#add_brand">
+                                    <i class="fa fa-plus"></i> Add Brand
                                 </button>
                             </div>
 
@@ -394,13 +398,23 @@
                         </div>
 
                         <div class="form-group col-md-6 mb-3">
-                            <label>Brand<span class="text-danger">*</span></label>
-                            <?php echo form_dropdown(
-                                'brand_id',
-                                array('' => 'Select Brand') + $brand_opt,
-                                '',
-                                'id="brand_id" class="form-control" required'
-                            ); ?>
+                            <label>Brand <span class="text-danger">*</span></label>
+
+                            <div class="input-group">
+                                <?php echo form_dropdown(
+                                    'brand_id',
+                                    array('' => 'Select Brand') + $brand_opt,
+                                    '',
+                                    'id="brand_id" class="form-control" required'
+                                ); ?>
+
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-success" data-toggle="modal"
+                                        data-target="#add_brand">
+                                        <i class="fa fa-plus"></i> Add
+                                    </button>
+                                </span>
+                            </div>
                         </div>
 
                         <div class="form-group col-md-6 mb-3">
@@ -466,6 +480,42 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="add_brand" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <form method="post" action="" id="frmadd_Brand" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h3 class="modal-title">Add Brand</h3>
+                    <input type="hidden" name="mode" value="Add Brand" />
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label>Brand Name <span class="text-danger">*</span></label>
+                            <input class="form-control" type="text" name="brand_name" required id="brand_name"
+                                placeholder="Enter your item name">
+                        </div>
+                        <div class="form-group col-md-12 mb-3">
+                            <label>Status</label><br>
+                            <label><input type="radio" name="status" value="Active" checked>
+                                Active</label>&nbsp;&nbsp;&nbsp;
+                            <label><input type="radio" name="status" value="InActive"> InActive</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <input type="submit" name="btn_add_brand" value="Save" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
 <script>
     $document.ready(function () {

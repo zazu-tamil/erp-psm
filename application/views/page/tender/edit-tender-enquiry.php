@@ -71,10 +71,10 @@
                             <label>Enquiry Date</label>
                             <input type="date" name="enquiry_date" class="form-control" value="<?php echo set_value('enquiry_date', $main_record['enquiry_date']); ?>" required>
                         </div>
-                        <div class="form-group col-md-4">
+                        <!-- <div class="form-group col-md-4">
                             <label>Opening Date & Time</label>
                             <input type="datetime-local" name="opening_date" class="form-control" value="<?php echo $main_record['opening_date'] ? date('Y-m-d\TH:i', strtotime($main_record['opening_date'])) : ''; ?>">
-                        </div>
+                        </div> -->
                         <div class="form-group col-md-4">
                             <label>Closing Date & Time</label>
                             <input type="datetime-local" name="closing_date" class="form-control" value="<?php echo $main_record['closing_date'] ? date('Y-m-d\TH:i', strtotime($main_record['closing_date'])) : ''; ?>">
