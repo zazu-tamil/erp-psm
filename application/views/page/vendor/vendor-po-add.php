@@ -61,12 +61,12 @@
                             <input type="text" name="our_po_no" id="our_po_no" class="form-control"
                                 placeholder="e.g., PO-2025-001" value="<?php echo set_value('our_po_no'); ?>">
                         </div> -->
-
+<!-- 
                         <div class="form-group col-md-3">
                             <label>PO No</label>
                             <input type="text" name="po_no" id="po_no" class="form-control"
                                 placeholder="e.g., CUST-PO-2025-001" value="<?php echo set_value('po_no'); ?>">
-                        </div>
+                        </div> -->
 
                         <div class="form-group col-md-3">
                             <label>PO Date</label>
@@ -91,7 +91,7 @@
                             <?php echo form_dropdown('po_status', ['' => 'Select Po Status'] + $tender_status_opt, set_value('po_status'), 'id="po_status" class="form-control" required'); ?> 
                         </div>
 
-                        <div class="form-group col-md-1">
+                        <div class="form-group col-md-3">
                             <label>Handling Charges</label><br>
                             <input type="number" step="0.01" name="handling_charges" id="handling_charges" class="form-control" value="" placeholder="100.00">
                             
