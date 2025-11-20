@@ -136,3 +136,40 @@ ENGINE=InnoDB
 AUTO_INCREMENT=1
 ;
 
+
+ 
+ ---------------------------------
+ 17-11-2025
+
+ ALTER TABLE `tender_enquiry_info`
+	ADD COLUMN `tender_name` VARCHAR(200) NULL DEFAULT NULL AFTER `customer_sno`;
+ 
+---------------------------------------
+
+18-11-2025
+
+ALTER TABLE `tender_enquiry_info`
+	CHANGE COLUMN `enquiry_no` `enquiry_no` INT(5) ZEROFILL NULL DEFAULT NULL AFTER `enquiry_date`,
+	ADD COLUMN `customer_rfq_no` VARCHAR(100) NULL DEFAULT NULL AFTER `customer_sno`;
+
+ALTER TABLE `tender_enquiry_info`
+	CHANGE COLUMN `enquiry_no` `enquiry_no` VARCHAR(100) NULL DEFAULT NULL AFTER `enquiry_date`,
+	DROP COLUMN `customer_rfq_no`;
+
+
+CREATE DEFINER=`zazu`@`%` TRIGGER `tender_enquiry_info_before_insert` BEFORE INSERT ON `tender_enquiry_info` FOR EACH ROW BEGIN
+declare comp_sno , cust_sno , enq_no int default 0;
+select max(a.company_sno) into comp_sno from tender_enquiry_info as a where a.status != 'Delete' and fiscal_year(a.enquiry_date) = fiscal_year(new.enquiry_date) and a.company_id = new.company_id ;
+set new.company_sno = ifnull(comp_sno , 0 ) + 1 ;
+
+select max(a.customer_sno) into cust_sno from tender_enquiry_info as a where a.status != 'Delete' and fiscal_year(a.enquiry_date) = fiscal_year(new.enquiry_date) and a.customer_id = new.customer_id ;
+set new.customer_sno = ifnull(cust_sno , 0 ) + 1 ;
+
+/* select max(a.enquiry_no) into enq_no from tender_enquiry_info as a where a.status != 'Delete' and fiscal_year(a.enquiry_date) = fiscal_year(new.enquiry_date) and a.company_id = new.company_id ;
+set new.enquiry_no = ifnull(enq_no , 0 ) + 1 ;*/
+
+
+END//
+
+
+---------------- Done ------------------------
