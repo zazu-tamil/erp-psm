@@ -56,11 +56,11 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="form-group col-md-4">
+                        <!-- <div class="form-group col-md-4">
                             <label>Enquiry No</label>
                             <input type="text" name="enquiry_no" id="enquiry_no" class="form-control"
                                 placeholder="e.g., TEN-2025-001" value="<?php echo set_value('enquiry_no'); ?>">
-                        </div>
+                        </div> -->
                         <div class="form-group col-md-4">
                             <label>Enquiry Date <span class="text-red">*</span></label>
                             <input type="date" name="enquiry_date" id="enquiry_date" class="form-control"

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Tender Quotation - <?php echo htmlspecialchars($record['quotation_no'] ?? ''); ?></title>
+    <title>Vendor Rate Enquiry - <?php echo htmlspecialchars($record['quotation_no'] ?? ''); ?></title>
     <style>
         * {
             margin: 0;
@@ -364,16 +364,22 @@
                 <div class="info-cell left">
                     <div><span class="info-label">To:</span></div>
                     <div class="customer-name">
-                        <?php echo nl2br($record['address'] ?? 'N/A'); ?>
+                        <?php echo $record['vendor_name']; ?>
                     </div>
+                    <div class="customer-name">
+                        <?php echo nl2br($record['address'] ?? 'N/A'); ?>
+                        <br>
+                         <?php echo $record['vendor_country']; ?>
+                    </div>
+                    
                 </div>
                 <div class="info-cell right">
-                    <div><span class="info-label">Quotation Date:</span>
+                    <div><span class="info-label">Date:</span>
                         <?php echo date('d-m-Y', strtotime($record['enquiry_date'])); ?></div>
                     <!-- <div><span class="info-label">Enquiry No:</span>
                         <?php echo htmlspecialchars($record['enquiry_no'] ?? 'N/A'); ?></div> -->
-                    <div><span class="info-label">Tender Ref No:</span>
-                        <?php echo htmlspecialchars($record['tender_enquiry_no'] ?? 'N/A'); ?></div>
+                    <div><span class="info-label">Enquiry No:</span>
+                        <?php echo htmlspecialchars($record['enquiry_no'] ?? 'N/A'); ?></div>
                 </div>
             </div>
         </div>
@@ -386,9 +392,9 @@
                     <th style="width:30%;">Item Description</th>
                     <th style="width:8%;">UOM</th>
                     <th style="width:8%;">Qty</th>
-                    <th style="width:10%;">Rate</th>
+                    <!-- <th style="width:10%;">Rate</th>
                     <th style="width:9%;">VAT %</th>
-                     <th style="width:12%;">Amount</th>
+                     <th style="width:12%;">Amount</th> -->
                 </tr>
             </thead>
             <tbody>
@@ -408,9 +414,7 @@
                             <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?: $item['item_uom'] ?: '-'); ?>
                             </td>
                             <td class="text-center"><?php echo number_format($item['qty'], 2); ?></td>
-                            <td class="text-right"></td>
-                            <td class="text-center"></td>
-                            <td class="text-right"></td>
+                            
                          </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -460,11 +464,11 @@
     <!-- Action Buttons -->
     <div class="button-container">
         <button type="button" class="btn btn-primary"
-            onclick="window.location.href='<?= site_url('tender-quotation-list') ?>'">
+            onclick="window.location.href='<?= site_url('vendor-rate-enquiry-list') ?>'">
             ← Back To List
         </button>
         <button type="button" class="btn btn-success" onclick="window.print()">
-            🖨️ Print Quotation
+            🖨️ Print
         </button>
       
     </div>

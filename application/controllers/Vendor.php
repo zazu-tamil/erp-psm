@@ -402,6 +402,7 @@ class Vendor extends CI_Controller
             vrei.*,
             c.customer_name,
             v.vendor_name,
+            v.country as vendor_country,
             v.mobile AS vendor_mobile,
             v.address AS vendor_address,
             te.enquiry_no AS tender_enquiry_no,

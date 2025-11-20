@@ -70,7 +70,7 @@
                         <th>Opening Date</th>
                         <th>Closing Date</th>
                         <th>Po Status</th>
-                        <th class="text-center" colspan="3">Action</th> <!-- Now 3 columns -->
+                        <th class="text-center" colspan="3">Action</th>
                     </tr>
                 </thead>
                 <tbody>
