@@ -1072,7 +1072,8 @@ class Vendor extends CI_Controller
                 e.mobile,
                 c.ltr_header_img,
                 e.address,
-                e.vendor_id
+                e.vendor_id,
+                e.country
             FROM vendor_po_info as  a 
             LEFT JOIN customer_info as b on a.customer_id = b.customer_id  and b.status='Active'
             LEFT JOIN company_info as c  on a.company_id = c.company_id and c.status='Active'

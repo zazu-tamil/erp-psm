@@ -32,14 +32,14 @@
             width: 100%;
             max-height: 120px;
             object-fit: contain;
-         }
+        }
 
         .company-title {
             text-align: center;
             font-size: 24pt;
             font-weight: bold;
             color: #1a1a1a;
-             text-transform: uppercase;
+            text-transform: uppercase;
             letter-spacing: 1px;
             border-bottom: 3px solid #0066cc;
             padding-bottom: 10px;
@@ -341,7 +341,8 @@
                 print-color-adjust: exact;
             }
         }
-        .address_info{
+
+        .address_info {
             font-size: 12px;
             color: #666;
         }
@@ -355,22 +356,25 @@
         <?php if (!empty($record['ltr_header_img'])): ?>
             <img src="<?php echo base_url('') . $record['ltr_header_img']; ?>" alt="Company Header" class="header-img">
         <?php endif; ?>
-            <p>&nbsp;</p>
-        
+        <p>&nbsp;</p>
+
         <!-- Customer & Quotation Info -->
         <div class="info-section">
             <div class="info-row">
                 <div class="info-cell left">
                     <div><span class="info-label">To:</span></div>
                     <div class="customer-name">
-                        <?php echo nl2br($record['address'] ?? 'N/A'); ?></div>
+                        <?php echo $record['vendor_name']; ?><br>
+                        <?php echo nl2br($record['address'] ?? 'N/A'); ?><br>
+                        <?php echo nl2br($record['country'] ?? 'N/A'); ?><br>
+                     </div>
                 </div>
                 <div class="info-cell right">
                     <div><span class="info-label">Date:</span>
                         <?php echo date('d-m-Y', strtotime($record['po_date'])); ?></div>
                     <div><span class="info-label">Po No:</span>
                         <?php echo htmlspecialchars($record['po_no'] ?? 'N/A'); ?></div>
-                   
+
 
                 </div>
             </div>
@@ -394,16 +398,9 @@
                 <?php if (!empty($items)): ?>
                     <?php foreach ($items as $i => $item): ?>
                         <tr>
-                            <td class="text-center"><?php echo $i + 1; ?></td>
-                            <td class="text-left">
-                                <div class="item-description">
-                                <?php if (!empty($item['item_desc']) || !empty($item['item_desc'])): ?>
-                                    <div class="item-details">
-                                        <?php echo htmlspecialchars($item['item_desc'] ?: $item['item_desc'] ?: ''); ?></div>
-                                <?php endif; ?>
-                                </div>
-                            </td>
-                            <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?: $item['item_uom'] ?: '-'); ?>
+                            <td class="text-center"><?php echo $i + 1; ?></td> 
+                            <td class="text-center"><?php echo htmlspecialchars($item['item_desc'] ?? '-'); ?>
+                            <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?? '-'); ?>
                             </td>
                             <td class="text-center"><?php echo number_format($item['qty'], 2); ?></td>
                             <td class="text-right"><?php echo number_format($item['rate'], 2); ?></td>
@@ -459,7 +456,7 @@
             </div>
         </div>
 
-         
+
     </div>
 
     <!-- Action Buttons -->
@@ -469,7 +466,7 @@
             ← Back To List
         </button>
         <button type="button" class="btn btn-success" onclick="window.print()">
-            🖨️ Print Quotation
+            🖨️ Print
         </button>
     </div>
 

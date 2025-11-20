@@ -36,14 +36,14 @@
                             </div>
                         </div>
                         <div class="form-group col-md-4">
-                            <label>Customer Contact Person <span class="text-danger">*</span></label>
+                            <label></label>
                             <div class="input-group">
                                 <?php
                                 echo form_dropdown(
                                     'customer_contact_id',
                                     ['' => 'Select Contact Person'],
                                     set_value('customer_contact_id'),
-                                    'id="srch_customer_contact_id" class="form-control" required'
+                                    'id="srch_customer_contact_id" class="form-control" '
                                 );
                                 ?>
                                 <span class="input-group-btn">
@@ -108,25 +108,37 @@
                 <!-- Item Details - DIV + GRID -->
                 <fieldset class="mt-4">
                     <legend class="text-light-blue"><i class="fa fa-list"></i> Item Details</legend>
+                    <div class="row">
 
-                    <div class="item-details-container">
-                        <div class="grid-header">
+                        <div class="col-xs-12 col-sm-3 col-md-1">
                             <div class="form-group">
-                                <button type="button" class="btn btn-primary" data-toggle="modal"
+                                <button type="button" class="btn btn-primary btn-block" data-toggle="modal"
                                     data-target="#add_category">
                                     <i class="fa fa-tags"></i> Add Category
                                 </button>
-                                <button type="button" class="btn btn-success" data-toggle="modal"
+                            </div>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-3 col-md-1">
+                            <div class="form-group">
+                                <button type="button" class="btn btn-success btn-block" data-toggle="modal"
                                     data-target="#add_item">
                                     <i class="fa fa-plus"></i> Add Item
                                 </button>
-                                 <button type="button" class="btn btn-success" data-toggle="modal"
+                            </div>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-3 col-md-1">
+                            <div class="form-group">
+                                <button type="button" class="btn btn-success btn-block" data-toggle="modal"
                                     data-target="#add_brand">
                                     <i class="fa fa-plus"></i> Add Brand
                                 </button>
                             </div>
-
                         </div>
+
+                    </div>
+                    <div class="item-details-container">
                         <!-- Header -->
                         <div class="grid-header">
                             <div>Category / Item</div>
