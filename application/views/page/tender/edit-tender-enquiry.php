@@ -40,9 +40,9 @@
                             <?php echo form_dropdown('customer_id', $customer_opt, set_value('customer_id', $main_record['customer_id']), 'id="srch_customer_id" class="form-control select2" required'); ?>
                         </div>
                         <div class="form-group col-md-4">
-                            <label>Customer Contact Person<span class="text-danger">*</span></label>
+                            <label>Customer Contact Person</label>
                             <?php echo form_dropdown('customer_contact_id', $customer_contact_opt, set_value('srch_customer_contact_id',$main_record['customer_contact_id']), 'id="srch_customer_contact_id" class="form-control select2"
-                                required'); ?>
+                                '); ?>
                         </div>
 
                         <div class="form-group col-md-4">
