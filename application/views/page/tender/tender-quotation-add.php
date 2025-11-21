@@ -36,11 +36,11 @@
                             <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select Enquiry'], set_value('srch_tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" required'); ?>
                         </div>
 
-                        <div class="form-group col-md-3">
+                        <!-- <div class="form-group col-md-3">
                             <label>Quotation No</label>
                             <input type="text" name="quotation_no" id="quotation_no" class="form-control"
                                 placeholder="e.g., TEN-2025-001" value="<?php echo set_value('quotation_no'); ?>">
-                        </div>
+                        </div> -->
 
                         <div class="form-group col-md-3">
                             <label>Tender Ref No</label>

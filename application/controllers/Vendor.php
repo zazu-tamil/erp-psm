@@ -1073,14 +1073,16 @@ class Vendor extends CI_Controller
                 c.ltr_header_img,
                 e.address,
                 e.vendor_id,
-                e.country
+                e.country,
+                f.enquiry_no as vendor_rate_enquiry_no
             FROM vendor_po_info as  a 
             LEFT JOIN customer_info as b on a.customer_id = b.customer_id  and b.status='Active'
             LEFT JOIN company_info as c  on a.company_id = c.company_id and c.status='Active'
             LEFT JOIN tender_enquiry_info as d  on a.tender_enquiry_id = d.tender_enquiry_id and d.status='Active'
             left join vendor_info as e on a.vendor_id = e.vendor_id and e.status='Active'
+            left join vendor_rate_enquiry_info as f on a.vendor_rate_enquiry_id = f.vendor_rate_enquiry_id and f.status='Active'
             WHERE a.status='Active'
-            and a.vendor_po_id = ? 
+            and a.vendor_po_id = ?
         ";
         $query = $this->db->query($sql, [$vendor_po_id]);
         $data['record'] = $query->row_array();

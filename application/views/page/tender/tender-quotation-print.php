@@ -364,20 +364,20 @@
                 <div class="info-cell left">
                     <div><span class="info-label">To:</span></div>
                     <div class="customer-name">
-                        <?php echo nl2br($record['address'] ?? 'N/A'); ?>
+
+                        <strong><?php echo htmlspecialchars($record['customer_name'] ?? 'N/A'); ?></strong><br>
+                        <?php echo nl2br($record['address'] ?? 'N/A'); ?> <br>
+                        <?php echo htmlspecialchars($record['customer_country'] ?? 'N/A'); ?>
+
                     </div>
                 </div>
                 <div class="info-cell right">
-                    <div><span class="info-label">Quotation Date:</span>
+                    <div><span class="info-label">Date:</span>
                         <?php echo date('d-m-Y', strtotime($record['quote_date'])); ?></div>
                     <div><span class="info-label">Quotation No:</span>
-                        <?php echo htmlspecialchars($record['quotation_no'] ?? 'N/A'); ?></div>
-                    <div><span class="info-label">Tender Ref No:</span>
-                        <?php echo htmlspecialchars($record['tender_ref_no'] ?? 'N/A'); ?></div>
-                    <div><span class="info-label">Tender Enquiry No:</span>
-                        <?php echo htmlspecialchars($record['tender_enquiry_no'] ?? 'N/A'); ?></div>
-
-
+                        <?php echo htmlspecialchars($record['tender_quotation_no'] ?? 'N/A'); ?></div>
+                    <!-- <div><span class="info-label">Tender Ref No:</span>
+                        <?php echo htmlspecialchars($record['tender_ref_no'] ?? 'N/A'); ?></div> -->
                 </div>
             </div>
         </div>
@@ -401,12 +401,13 @@
                     <?php foreach ($items as $i => $item): ?>
                         <tr>
                             <td class="text-center"><?php echo $i + 1; ?></td>
-                           <td class="text-left">
+                            <td class="text-left">
                                 <div class="item-description">
-                                <?php if (!empty($item['item_desc']) || !empty($item['item_desc'])): ?>
-                                    <div class="item-details">
-                                        <?php echo htmlspecialchars($item['item_desc'] ?: $item['item_desc'] ?: ''); ?></div>
-                                <?php endif; ?>
+                                    <?php if (!empty($item['item_desc']) || !empty($item['item_desc'])): ?>
+                                        <div class="item-details">
+                                            <?php echo htmlspecialchars($item['item_desc'] ?: $item['item_desc'] ?: ''); ?>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                             <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?: $item['item_uom'] ?: '-'); ?>
@@ -469,7 +470,7 @@
             ← Back To List
         </button>
         <button type="button" class="btn btn-success" onclick="window.print()">
-            🖨️ Print Quotation
+            🖨️ Print
         </button>
     </div>
 

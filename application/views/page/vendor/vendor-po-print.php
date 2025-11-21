@@ -374,6 +374,8 @@
                         <?php echo date('d-m-Y', strtotime($record['po_date'])); ?></div>
                     <div><span class="info-label">Po No:</span>
                         <?php echo htmlspecialchars($record['po_no'] ?? 'N/A'); ?></div>
+                    <div><span class="info-label">Enquiry No:</span>
+                        <?php echo htmlspecialchars($record['vendor_rate_enquiry_no'] ?? 'N/A'); ?></div>
 
 
                 </div>

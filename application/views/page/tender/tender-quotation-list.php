@@ -20,13 +20,15 @@
                         <label>Company</label>
                         <?php echo form_dropdown('srch_company_id', $company_opt, set_value('srch_company_id', $srch_company_id), 'id="srch_company_id" class="form-control select2"'); ?>
                     </div>
-                    <div class="form-group col-md-3">
+                 <div class="form-group col-md-3">
                         <label>Customer</label>
-                        <?php echo form_dropdown('srch_customer_id', $customer_opt, set_value('srch_customer_id', $srch_customer_id), 'id="srch_customer_id" class="form-control select2"'); ?>
+                        <div class="form-group">
+                            <?php echo form_dropdown('srch_customer_id',  ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control" '); ?>
+                        </div>
                     </div>
                     <div class="form-group col-md-3">
-                        <label>Tender Enquiry No</label>
-                        <?php echo form_dropdown('srch_tender_enquiry_id', $tender_enquiry_opt, set_value('srch_tender_enquiry_id', $srch_tender_enquiry_id), 'id="srch_tender_enquiry_id" class="form-control select2"'); ?>
+                        <label for="srch_tender_enquiry_id">Tender RFQ No</label>
+                        <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'All'] + $tender_enquiry_opt, $srch_tender_enquiry_id, 'id="srch_tender_enquiry_id" class="form-control"'); ?>
                     </div>
                     <div class="form-group col-md-3">
                         <label>Quotation Status</label>
@@ -59,13 +61,11 @@
                 <thead>
                     <tr>
                         <th class="text-center">S.No</th>
-                        <th>Quotation No</th>
-                        <th>Tender RFQ No</th>
-                        <th>Tender Enquiry No</th>
-                        <th>Quote Date</th>
-                        <th>Company</th>
+                          <th>Quote Date</th>
+                        <th>Company / RFQ No</th>
                         <th>Customer</th>
-                        <th>Customer Status</th>
+                        <th>Quotation No</th>
+                        <th>Quotation Status</th>
                         <th class="text-center" colspan="3">Action</th>
                     </tr>
                 </thead>
@@ -74,13 +74,12 @@
                         <?php foreach ($record_list as $j => $row): ?>
                             <tr>
                                 <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
-                                <td><strong><?php echo htmlspecialchars($row['quotation_no']); ?></strong></td>
-                                <td><?php echo htmlspecialchars($row['tender_ref_no']); ?></td>
-                                <td><?php echo htmlspecialchars($row['tender_enquiry_no']); ?></td>
-                                <td><?php echo date('d-m-Y', strtotime($row['quote_date'])); ?></td>
-                                <td><?php echo htmlspecialchars($row['company_name']); ?></td>
+                                <td><strong><?php echo htmlspecialchars($row['quote_date']); ?></strong></td>
+                                <td><?php echo $row['company_name']; ?><br>
+                            <span class="label label-success"><?php echo $row['tender_details']; ?></span> </td>
                                 <td><?php echo htmlspecialchars($row['customer_name']); ?></td>
-                                <?php
+                                <td><?php echo htmlspecialchars($row['quotation_no']); ?></td>
+                                 <?php
                                 $status = $row['quotation_status'];
 
                                 $badge_colors = [

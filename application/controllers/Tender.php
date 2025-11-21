@@ -836,12 +836,13 @@ public function edit_tender_enquiry($tender_enquiry_id = 0)
                 b.company_name,
                 a.quotation_status,
                 c.customer_name,
-                d.enquiry_no AS tender_enquiry_no
+                get_tender_info(a.tender_enquiry_id) as tender_details
             FROM tender_quotation_info a
             LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status = 'Active'
             LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
             LEFT JOIN tender_enquiry_info d ON a.tender_enquiry_id = d.tender_enquiry_id AND d.status = 'Active'
-            WHERE a.status != 'Delete' AND $where
+            WHERE a.status != 'Delete' 
+            AND $where  
             ORDER BY a.tender_quotation_id DESC
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
@@ -863,11 +864,36 @@ public function edit_tender_enquiry($tender_enquiry_id = 0)
             $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
         }
 
+        // $data['tender_enquiry_opt'] = ['' => 'All'];
+        // $sql = "
+        //     SELECT tender_enquiry_id,
+        //     enquiry_no FROM tender_enquiry_info
+        //     WHERE status = 'Active'
+        //     ORDER BY enquiry_no
+        // ";
+        // $query = $this->db->query($sql);
+        // foreach ($query->result_array() as $row) {
+        //     $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['enquiry_no'];
+        // }
         $data['tender_enquiry_opt'] = ['' => 'All'];
-        $sql = "SELECT tender_enquiry_id, enquiry_no FROM tender_enquiry_info WHERE status = 'Active' ORDER BY enquiry_no";
-        $query = $this->db->query($sql);
-        foreach ($query->result_array() as $row) {
-            $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['enquiry_no'];
+         if (!empty($srch_customer_id)) {
+            $sql = "
+                SELECT 
+                    a.tender_enquiry_id, 
+                    get_tender_info(a.tender_enquiry_id) as tender_details
+                FROM tender_enquiry_info AS a 
+                WHERE a.status = 'Active' 
+                and a.customer_id= '" . $srch_customer_id . "'
+                ORDER BY a.tender_enquiry_id, a.enquiry_no ASC
+            ";
+
+
+            $query = $this->db->query($sql);
+            $data['tender_enquiry_opt'] = [];
+            foreach ($query->result_array() as $row) {
+                // $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['company_code'] . ' -> ' . $row['company_sno'] . ' -> ' . $row['customer_code'] . ' -> ' . $row['customer_sno'] . ' -> ' . $row['enquiry_no'];
+                $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_details'];
+            }
         }
 
         $data['quotation_status_opt'] = [
@@ -1092,18 +1118,25 @@ public function edit_tender_enquiry($tender_enquiry_id = 0)
 
         // === MAIN RECORD ===
         $sql = "
-            SELECT 
-                tqi.*,
-                c.customer_name,
-                c.address,
-                ci.company_name AS our_company,
-                te.enquiry_no AS tender_enquiry_no,
-                ci.ltr_header_img
-            FROM tender_quotation_info tqi
-            LEFT JOIN customer_info c ON tqi.customer_id = c.customer_id AND c.status = 'Active'
-            LEFT JOIN company_info ci ON tqi.company_id = ci.company_id AND ci.status = 'Active'
-            LEFT JOIN tender_enquiry_info te ON tqi.tender_enquiry_id = te.tender_enquiry_id AND te.status = 'Active'
-            WHERE tqi.tender_quotation_id = ? AND tqi.status != 'Delete'
+         SELECT
+            tqi.*,
+            c.customer_name,
+            c.address,
+            c.country AS customer_country,
+            ci.company_name AS our_company,
+            te.enquiry_no AS tender_enquiry_no,
+            tqi.quotation_no as tender_quotation_no,
+            ci.ltr_header_img
+        FROM
+            tender_quotation_info tqi
+        LEFT JOIN customer_info c ON
+            tqi.customer_id = c.customer_id AND c.status = 'Active'
+        LEFT JOIN company_info ci ON
+            tqi.company_id = ci.company_id AND ci.status = 'Active'
+        LEFT JOIN tender_enquiry_info te ON
+            tqi.tender_enquiry_id = te.tender_enquiry_id AND te.status = 'Active'
+        WHERE
+            tqi.tender_quotation_id = ? AND tqi.status != 'Delete'
         ";
         $query = $this->db->query($sql, [$tender_quotation_id]);
         $data['record'] = $query->row_array();
