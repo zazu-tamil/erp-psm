@@ -111,26 +111,30 @@
 
                     <div class="row">
                         <div class="col-md-12 form-group">
-                            <button type="button" class="btn btn-primary" data-toggle="modal"
+                            <!-- <button type="button" class="btn btn-primary" data-toggle="modal"
                                 data-target="#add_category">
                                 <i class="fa fa-tags"></i> Add Category
-                            </button>
+                            </button> -->
 
                             <button type="button" class="btn btn-info" data-toggle="modal" data-target="#add_item">
                                 <i class="fa fa-plus"></i> Add Item
                             </button>
 
-                            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#add_brand">
+                            <!-- <button type="button" class="btn btn-success" data-toggle="modal" data-target="#add_brand">
                                 <i class="fa fa-plus"></i> Add Brand
-                            </button>
+                            </button> -->
+
+                            
                         </div>
                     </div>
+
+                   
 
                     <div class="item-details-container">
 
                         <!-- Header -->
                         <div class="grid-header">
-                            <div>Category / Item</div>
+                            <div>Search </div>
                             <div>Description</div>
                             <div>UOM</div>
                             <div>Qty</div>
@@ -517,13 +521,13 @@
     </div>
 </div>
 
-
+<!-- 
 <script>
 $document.ready(function() {
     $('#srch_customer_contact_id').trigger('change').val('#srch_customer_id').trigger('change');
 
 });
-</script>
+</script> -->
 
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>

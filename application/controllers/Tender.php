@@ -2264,32 +2264,62 @@ public function get_quotation_items()
 
 
     public function get_tender_enquiries_by_customer()
+    {
+        $company_id = $this->input->post('company_id');
+        $customer_id = $this->input->post('customer_id');
+        
+        $sql = "
+            SELECT 
+                a.tender_enquiry_id,
+                a.enquiry_no,
+                b.company_name,
+                c.customer_name 
+            FROM tender_enquiry_info AS a
+            LEFT JOIN company_info AS b ON a.company_id = b.company_id AND b.status = 'Active'
+            LEFT JOIN customer_info AS c ON a.customer_id = c.customer_id AND c.status = 'Active'
+            WHERE a.company_id = ? AND a.customer_id = ? AND a.status = 'Active'
+            and a.tender_status = 'Won'
+            ORDER BY a.tender_enquiry_id, a.enquiry_no ASC
+        ";
+        $query = $this->db->query($sql, [$company_id, $customer_id]);
+        $result = [];
+        foreach ($query->result_array() as $row) {
+            $result[] = [
+                'tender_enquiry_id' => $row['tender_enquiry_id'],
+                'display' => $row['enquiry_no'] . ' -> ' . $row['company_name'] . ' -> ' . $row['customer_name']
+            ];
+        }
+        echo json_encode($result);
+    }
+
+    public function item_search()
 {
-    $company_id = $this->input->post('company_id');
-    $customer_id = $this->input->post('customer_id');
-    
-    $sql = "
-        SELECT 
-            a.tender_enquiry_id,
-            a.enquiry_no,
-            b.company_name,
-            c.customer_name 
-        FROM tender_enquiry_info AS a
-        LEFT JOIN company_info AS b ON a.company_id = b.company_id AND b.status = 'Active'
-        LEFT JOIN customer_info AS c ON a.customer_id = c.customer_id AND c.status = 'Active'
-        WHERE a.company_id = ? AND a.customer_id = ? AND a.status = 'Active'
-        and a.tender_status = 'Won'
-        ORDER BY a.tender_enquiry_id, a.enquiry_no ASC
-    ";
-    $query = $this->db->query($sql, [$company_id, $customer_id]);
-    $result = [];
-    foreach ($query->result_array() as $row) {
-        $result[] = [
-            'tender_enquiry_id' => $row['tender_enquiry_id'],
-            'display' => $row['enquiry_no'] . ' -> ' . $row['company_name'] . ' -> ' . $row['customer_name']
+    $term = $this->input->post('search');
+
+    $this->db->group_start();
+    $this->db->like('item_name', $term);
+    $this->db->or_like('item_description', $term);
+    $this->db->or_like('item_code', $term);
+    $this->db->group_end();
+
+    $query = $this->db->get('item_info')->result();
+
+    $data = [];
+    foreach ($query as $row) {
+
+        $data[] = [
+            'label' => $row->item_code . ' : ' . $row->item_name . '[ ' . substr($row->item_description,1,100) . ' ]',       // what user sees
+            'value' => $row->item_code . ' : ' . $row->item_name . '[ ' . substr($row->item_description,1,100) . ' ]',        // filled in textbox
+            'desc'  => $row->item_description,
+            'uom'   => $row->uom,
+            'category_id'   => $row->category_id,
+            'id'    => $row->item_id          // optional
         ];
     }
-    echo json_encode($result);
+
+    echo json_encode($data);
 }
+
+
 
 }

@@ -1,3 +1,9 @@
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script> 
+<!-- jQuery UI -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
 <style>
   .text-light-blue {
     color: #3c8dbc !important;
@@ -140,6 +146,12 @@
 </style>
 <script>
   jQuery(function ($) {
+
+    $('#srch_customer_contact_id').trigger('change').val('#srch_customer_id').trigger('change');
+
+  
+
+
     // Company → Customer
     $("#srch_company_id").change(function () {
       const companyId = $(this).val();
@@ -234,36 +246,96 @@
       }
     });
 
+    /*
+        <div class="cat-item-block">
+              <?php echo form_dropdown('category_id[]', ['' => 'Select Category'] + $category_opt, '', 'class="form-control category-select"'); ?>
+              <select name="item_id[]" class="form-control item-select mt-2">
+                  <option value="">Select Item</option>
+              </select>
+          </div>
+      */
+
     // Add Empty Row
     function addEmptyRow() {
       const row = `
-            <div class="item-row">
-                <div class="cat-item-block">
-                    <?php echo form_dropdown('category_id[]', ['' => 'Select Category'] + $category_opt, '', 'class="form-control category-select"'); ?>
-                    <select name="item_id[]" class="form-control item-select mt-2">
-                        <option value="">Select Item</option>
-                    </select>
-                </div>
-                <div class="item-desc-block">
-                    <textarea name="item_desc[]" class="form-control" rows="5" placeholder="Description auto-fills..."></textarea>
-                </div>
-                <div class="uom-block">
-                    <?php echo form_dropdown('uom[]', ['' => '—'] + $uom_opt, '', 'class="form-control"'); ?>
-                </div>
-                <div class="qty-block">
-                    <input type="number" step="0.01" name="qty[]" class="form-control" placeholder="0.00" min="0">
-                </div>
-                <div class="action-block">
-                    <button type="button" class="remove-row">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                </div>
-            </div>`;
-      $("#item_rows").append(row);
-    }
+          <div class="item-row">
+              <div class="cat-item-block">
+                  <input type="text" name="srch_item[]" class="form-control srch_item" autocomplete="off">
+                  <input type="hidden" name="item_id[]" class="form-control item_id">
+                  <input type="hidden" name="category_id[]" class="form-control category_id">
+              </div>
+              <div class="item-desc-block">
+                  <textarea name="item_desc[]" class="form-control" rows="5"></textarea>
+              </div>
+              <div class="uom-block">
+                  <?php echo form_dropdown('uom[]', ['' => '—'] + $uom_opt, '', 'class="form-control"'); ?>
+              </div>
+              <div class="qty-block">
+                  <input type="number" step="0.01" name="qty[]" class="form-control">
+              </div>
+              <div class="action-block">
+                  <button type="button" class="remove-row"><i class="fa fa-trash"></i></button>
+              </div>
+          </div>
+      `;
 
-    // Initialize
-    addEmptyRow();
+      $("#item_rows").append(row);
+
+      // Reapply autocomplete for newly added fields
+      initAutocomplete();
+  }
+
+
+
+   
+
+
+function initAutocomplete() {
+    $(".srch_item").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: "<?php echo base_url('tender/item_search'); ?>",
+                type: "POST",
+                data: { search: request.term },
+                dataType: "json",
+                success: function (data) {
+                    response(data);
+                }
+            });
+        },
+
+        minLength: 1,
+
+        select: function (event, ui) {
+          let row = $(this).closest(".item-row");
+
+          // Fill item name
+          $(this).val(ui.item.value);
+
+          // Auto-fill description
+          row.find('textarea[name="item_desc[]"]').val(ui.item.desc);
+          row.find('input[name="item_id[]"]').val(ui.item.id);
+          row.find('input[name="category_id[]"]').val(ui.item.category_id);
+
+          // Auto-fill UOM
+          row.find('select[name="uom[]"]').val(ui.item.uom);
+
+          return false;
+      }
+
+    });
+}
+
+
+ // Initialize
+     addEmptyRow();
+     initAutocomplete();
+
+
+
+
+
+
 
 $('input[name="btn_add_customer"]').on("click", function (e) {
     e.preventDefault();
@@ -577,6 +649,8 @@ $('input[name="btn_add_customer"]').on("click", function (e) {
       });
     });
   });
+
+  
 </script>
 <style>
   .form-control[name="item_desc[]"] {
