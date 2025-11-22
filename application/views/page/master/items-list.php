@@ -12,8 +12,16 @@
             <form method="post" action="<?php echo site_url('items-list') ?>" id="frmsearch">
                 <div class="row">
                     <div class="form-group col-md-3">
-                        <label>Category</label>
-                        <?php echo form_dropdown('srch_category_id', array('' => 'Select Category') + $category_opt, set_value('srch_category_id'), ' id="srch_category_id" class="form-control"'); ?>
+                        <label>Item Name</label>
+                        <input type="text" name="srch_item_name" id="srch_item_name" class="form-control"
+                            value="<?php echo set_value('srch_item_name', $srch_item_name); ?>"
+                            placeholder="Enter name">
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label>Item Code</label>
+                        <input type="text" name="srch_item_code" id="srch_item_code" class="form-control"
+                            value="<?php echo set_value('srch_item_code', $srch_item_code); ?>"
+                            placeholder="Enter code">
                     </div>
                     <div class="form-group col-md-2 text-left">
                         <br />
@@ -37,10 +45,9 @@
                     <tr>
                         <th class="text-center">S.No</th>
                         <th>Item Name</th>
-                        <th>Category</th>
-                        <th>Brand</th>
-                        <th>UOM</th>
+
                         <th>Item Code</th>
+                        <th>UOM</th>
                         <th>HSN Code</th>
                         <th>VAT</th>
                         <th>Status</th>
@@ -52,10 +59,9 @@
                         <tr>
                             <td class="text-center"><?= ($j + 1) ?></td>
                             <td><?= $ls['item_name'] ?></td>
-                            <td><?= $ls['category_name'] ?></td>
-                            <td><?= $ls['brand_name'] ?></td>
-                            <td><?= $ls['uom'] ?></td>
+
                             <td><?= $ls['item_code'] ?></td>
+                            <td><?= $ls['uom'] ?></td>
                             <td><?= $ls['hsn_code'] ?></td>
                             <td><?= $ls['gst'] ?></td>
                             <td><?= $ls['status'] ?></td>
@@ -90,7 +96,7 @@
                             </div>
                             <div class="modal-body">
                                 <div class="row">
-                                    <div class="form-group col-md-6 mb-3">
+                                    <!-- <div class="form-group col-md-6 mb-3">
                                         <label>Category</label>
                                         <?php echo form_dropdown(
                                             'category_id',
@@ -108,17 +114,17 @@
                                             '',
                                             'id="brand_id" class="form-control" required'
                                         ); ?>
-                                    </div>
+                                    </div> -->
 
                                     <div class="form-group col-md-6 mb-3">
-                                        <label>Item Name</label>
-                                        <input class="form-control" type="text" name="item_name" required id="item_name"
-                                            placeholder="Enter your item name">
+                                        <label>Item Name <span class="text-danger">*</span></label>
+                                        <input class="form-control" type="text" name="item_name" id="item_name"
+                                            placeholder="Enter your item name" required="true">
                                     </div>
                                     <div class="form-group col-md-6 mb-3">
-                                        <label>Item Code</label>
-                                        <input class="form-control" type="text" name="item_code" required id="item_code"
-                                            placeholder="Enter your item code">
+                                        <label>Item Code <span class="text-danger">*</span></label>
+                                        <input class="form-control" type="text" name="item_code" id="item_code"
+                                            placeholder="Enter your item code" required="true">
                                     </div>
                                     <div class="form-group col-md-12 mb-3">
                                         <label>Description</label>
@@ -191,7 +197,7 @@
                             <div class="modal-body">
                                 <div class="row">
 
-                                    <div class="form-group col-md-6 mb-3">
+                                    <!-- <div class="form-group col-md-6 mb-3">
                                         <label>Category</label>
                                         <?php echo form_dropdown(
                                             'category_id',
@@ -209,17 +215,17 @@
                                             '',
                                             'id="brand_id" class="form-control" required'
                                         ); ?>
-                                    </div>
+                                    </div> -->
 
-                                   <div class="form-group col-md-6 mb-3">
-                                        <label>Item Name</label>
-                                        <input class="form-control" type="text" name="item_name" required id="item_name"
-                                            placeholder="Enter your item name">
+                                    <div class="form-group col-md-6 mb-3">
+                                        <label>Item Name <span class="text-danger">*</span></label>
+                                        <input class="form-control" type="text" name="item_name" id="item_name"
+                                            placeholder="Enter your item name" required="true">
                                     </div>
                                     <div class="form-group col-md-6 mb-3">
-                                        <label>Item Code</label>
-                                        <input class="form-control" type="text" name="item_code" required id="item_code"
-                                            placeholder="Enter your item code">
+                                        <label>Item Code <span class="text-danger">*</span></label>
+                                        <input class="form-control" type="text" name="item_code" id="item_code"
+                                            placeholder="Enter your item code" required="true">
                                     </div>
                                     <div class="form-group col-md-12 mb-3">
                                         <label>Description</label>

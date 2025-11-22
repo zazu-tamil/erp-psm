@@ -665,46 +665,57 @@ class Master extends CI_Controller
     }
     public function items_list()
     {
-        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+        // Check if user is logged in
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
             redirect();
+        }
+
         if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin'
-            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
+            $this->session->userdata(SESS_HD . 'level') != 'Admin' &&
+            $this->session->userdata(SESS_HD . 'level') != 'Staff'
         ) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
 
-
         $data['js'] = 'items-list.inc';
         $data['title'] = 'Items List';
         $where = "i.status != 'Delete'";
 
-
-        // Filters (Company, Customer, Project, Vendor)
-        if ($this->input->post('srch_category_id') !== null) {
-            $data['srch_category_id'] = $srch_category_id = $this->input->post('srch_category_id');
-            $this->session->set_userdata('srch_category_id', $srch_category_id);
-        } elseif ($this->session->userdata('srch_category_id')) {
-            $data['srch_category_id'] = $srch_category_id = $this->session->userdata('srch_category_id');
+        if (isset($_POST['srch_item_name'])) {
+            $data['srch_item_name'] = $srch_item_name = $this->input->post('srch_item_name');
+            $this->session->set_userdata('srch_item_name', $srch_item_name);
+        } elseif ($this->session->userdata('srch_item_name')) {
+            $data['srch_item_name'] = $srch_item_name = $this->session->userdata('srch_item_name');
         } else {
-            $data['srch_category_id'] = $srch_category_id = '';
+            $data['srch_item_name'] = $srch_item_name = '';
+        }
+        if (!empty($srch_item_name)) {
+            $where .= " AND (i.item_name  LIKE '%" . $this->db->escape_str($srch_item_name) . "%')";
         }
 
-        if (!empty($srch_category_id)) {
-            $where .= " AND (i.category_id = '" . $this->db->escape_str($srch_category_id) . "')";
+        if (isset($_POST['srch_item_code'])) {
+            $data['srch_item_code'] = $srch_item_code = $this->input->post('srch_item_code');
+            $this->session->set_userdata('srch_item_code', $srch_item_code);
+        } elseif ($this->session->userdata('srch_item_code')) {
+            $data['srch_item_code'] = $srch_item_code = $this->session->userdata('srch_item_code');
+        } else {
+            $data['srch_item_code'] = $srch_item_code = '';
         }
+        if (!empty($srch_item_code)) {
+            $where .= " AND (i.item_code  LIKE '%" . $this->db->escape_str($srch_item_code) . "%')";
+        }
+
+
 
         $data['record_list'] = array();
 
-
-        // ADD Item
+        // ========== ADD ITEM MODE ==========
         if ($this->input->post('mode') == 'Add') {
-
             $item_name = $this->input->post('item_name');
             $item_image = '';
 
-            // 1. Handle file uploads
+            // Configure file upload
             $upload_path = 'Item_doc/';
             if (!is_dir($upload_path)) {
                 mkdir($upload_path, 0777, true);
@@ -716,13 +727,15 @@ class Master extends CI_Controller
 
             $this->load->library('upload', $config);
 
+            // Handle image upload
             if (!empty($_FILES['item_image']['name'])) {
                 if ($this->upload->do_upload('item_image')) {
                     $upload_data = $this->upload->data();
-                    $item_image = $upload_path . $upload_data['file_name']; // Full path saved
+                    $item_image = $upload_path . $upload_data['file_name'];
                 }
             }
 
+            // Insert new item
             $ins = array(
                 'category_id' => $this->input->post('category_id'),
                 'brand_id' => $this->input->post('brand_id'),
@@ -737,16 +750,17 @@ class Master extends CI_Controller
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s')
             );
+
             $this->db->insert('item_info', $ins);
             redirect('items-list');
         }
 
-        // EDIT Item
+        // ========== EDIT ITEM MODE ==========
         if ($this->input->post('mode') == 'Edit') {
             $item_id = $this->input->post('item_id');
             $item_name = $this->input->post('item_name');
 
-            // 1. Handle file uploads
+            // Configure file upload
             $upload_path = 'Item_doc/';
             if (!is_dir($upload_path)) {
                 mkdir($upload_path, 0777, true);
@@ -758,23 +772,19 @@ class Master extends CI_Controller
 
             $this->load->library('upload', $config);
 
-            $item_image = ''; // Initialize
-
+            $item_image = '';
             if (!empty($_FILES['item_image']['name'])) {
-                // Upload new image
                 if ($this->upload->do_upload('item_image')) {
                     $upload_data = $this->upload->data();
-                    $item_image = $upload_path . $upload_data['file_name']; // Full path saved
+                    $item_image = $upload_path . $upload_data['file_name'];
                 }
             } else {
-                // No new image uploaded → keep old image
+                // Keep existing image if no new upload
                 $old = $this->db->get_where('item_info', ['item_id' => $item_id])->row();
                 if ($old && !empty($old->item_image)) {
                     $item_image = $old->item_image;
                 }
             }
-
-            // Prepare update array
             $upd = array(
                 'category_id' => $this->input->post('category_id'),
                 'brand_id' => $this->input->post('brand_id'),
@@ -792,24 +802,19 @@ class Master extends CI_Controller
 
             $this->db->where('item_id', $item_id);
             $this->db->update('item_info', $upd);
-
             redirect('items-list');
         }
-
 
         $this->load->library('pagination');
         $this->db->where('i.status != ', 'Delete');
         $this->db->where($where);
         $this->db->from('item_info as i');
         $data['total_records'] = $cnt = $this->db->count_all_results();
-
         $data['sno'] = $this->uri->segment(2, 0);
-
         $config['base_url'] = trim(site_url('items-list/'), '/' . $this->uri->segment(2, 0));
         $config['total_rows'] = $cnt;
         $config['per_page'] = 50;
         $config['uri_segment'] = 2;
-        //$config['num_links'] = 2; 
         $config['attributes'] = array('class' => 'page-link');
         $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
         $config['full_tag_close'] = '</ul>';
@@ -827,39 +832,31 @@ class Master extends CI_Controller
         $config['last_tag_close'] = '</li>';
         $config['prev_link'] = "Prev";
         $config['next_link'] = "Next";
+
         $this->pagination->initialize($config);
+
+
         $sql = "
-           SELECT
-                i.*,
-                c.category_name,
-                b.brand_name
-            FROM
-                item_info i
-            LEFT JOIN category_info c ON
-                i.category_id = c.category_id
-            LEFT JOIN brand_info b ON
-                i.brand_id = b.brand_id
-            WHERE
-                i.status != 'Delete'
-            and $where
-            ORDER BY
-                i.item_name ASC
-            limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
-         ";
+            SELECT i.* 
+            FROM item_info i 
+            WHERE i.status != 'Delete' 
+                AND $where
+            ORDER BY i.item_name ASC
+            LIMIT " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
+        ";
 
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();
 
-
         $sql = "
-                select 
+            SELECT 
                 a.uom_id,
                 a.uom_name,                
                 a.status
-                from uom_info as a 
-                where status != 'Delete'
-                order by a.status asc , a.uom_name asc 
-         ";
+            FROM uom_info AS a 
+            WHERE status != 'Delete'
+            ORDER BY a.status ASC, a.uom_name ASC 
+        ";
 
         $query = $this->db->query($sql);
         $data['uom_opt'] = array();
@@ -868,38 +865,38 @@ class Master extends CI_Controller
         }
 
 
-
         $sql = "
-                SELECT category_id,
-                category_name FROM
-                category_info WHERE
-                status != 'Delete' 
-                ORDER BY 
-                category_name ASC
-            ";
+            SELECT category_id, category_name 
+            FROM category_info 
+            WHERE status != 'Delete' 
+            ORDER BY category_name ASC
+        ";
+
         $query = $this->db->query($sql);
         $data['category_opt'] = array();
         foreach ($query->result_array() as $row) {
             $data['category_opt'][$row['category_id']] = $row['category_name'];
         }
+
+
         $sql = "
-               select 
-               a.gst_id, 
-               a.gst_percentage 
-            from gst_info as a 
-            where status != 'Delete' 
-            order by a.status asc , a.gst_percentage asc
+            SELECT 
+                a.gst_id, 
+                a.gst_percentage 
+            FROM gst_info AS a 
+            WHERE status != 'Delete' 
+            ORDER BY a.status ASC, a.gst_percentage ASC
         ";
+
         $query = $this->db->query($sql);
         $data['gst_opt'] = array();
         foreach ($query->result_array() as $row) {
             $data['gst_opt'][$row['gst_percentage']] = $row['gst_percentage'];
         }
-
-        // Brands
         $sql = " 
             SELECT brand_id, brand_name 
-            FROM brand_info WHERE status != 'Delete'
+            FROM brand_info 
+            WHERE status != 'Delete'
             ORDER BY brand_name ASC
         ";
 
@@ -909,6 +906,7 @@ class Master extends CI_Controller
             $data['brand_opt'][$row['brand_id']] = $row['brand_name'];
         }
 
+        // ========== LOAD VIEW ==========
         $data['pagination'] = $this->pagination->create_links();
         $this->load->view('page/master/items-list', $data);
     }
@@ -1428,7 +1426,7 @@ class Master extends CI_Controller
 
         if (!in_array($this->session->userdata(SESS_HD . 'level'), ['Admin', 'Staff'])) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
-           
+
         }
 
         $data['js'] = 'currency-list.inc';

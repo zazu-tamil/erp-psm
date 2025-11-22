@@ -12,8 +12,8 @@
 					// Populate modal fields
 					$("#edit_modal #item_id").val(d.item_id);
 					$("#edit_modal #item_name").val(d.item_name);
-					$("#edit_modal #category_id").val(d.category_id).trigger("change");
-					$("#edit_modal #brand_id").val(d.brand_id).trigger("change");
+					//$("#edit_modal #category_id").val(d.category_id).trigger("change");
+					//$("#edit_modal #brand_id").val(d.brand_id).trigger("change");
 					$("#edit_modal #item_description").val(d.item_description);
 					$("#edit_modal #uom").val(d.uom);
 					$("#edit_modal #item_code").val(d.item_code);
