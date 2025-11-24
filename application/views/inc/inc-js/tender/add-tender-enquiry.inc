@@ -1,7 +1,10 @@
 <!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script> 
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <!-- jQuery UI -->
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<link
+  rel="stylesheet"
+  href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
+/>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 
 <style>
@@ -146,11 +149,10 @@
 </style>
 <script>
   jQuery(function ($) {
-
-    $('#srch_customer_contact_id').trigger('change').val('#srch_customer_id').trigger('change');
-
-  
-
+    $("#srch_customer_contact_id")
+      .trigger("change")
+      .val("#srch_customer_id")
+      .trigger("change");
 
     // Company → Customer
     $("#srch_company_id").change(function () {
@@ -283,25 +285,20 @@
 
       // Reapply autocomplete for newly added fields
       initAutocomplete();
-  }
+    }
 
-
-
-   
-
-
-function initAutocomplete() {
-    $(".srch_item").autocomplete({
+    function initAutocomplete() {
+      $(".srch_item").autocomplete({
         source: function (request, response) {
-            $.ajax({
-                url: "<?php echo base_url('tender/item_search'); ?>",
-                type: "POST",
-                data: { search: request.term },
-                dataType: "json",
-                success: function (data) {
-                    response(data);
-                }
-            });
+          $.ajax({
+            url: "<?php echo base_url('tender/item_search'); ?>",
+            type: "POST",
+            data: { search: request.term },
+            dataType: "json",
+            success: function (data) {
+              response(data);
+            },
+          });
         },
 
         minLength: 1,
@@ -321,71 +318,79 @@ function initAutocomplete() {
           row.find('select[name="uom[]"]').val(ui.item.uom);
 
           return false;
+        },
+      });
+    }
+
+    // Initialize
+    addEmptyRow();
+    initAutocomplete();
+
+    $('input[name="btn_add_customer"]').on("click", function (e) {
+      e.preventDefault();
+
+      // ---- REQUIRED FIELD VALIDATION ----
+      let customerName = $.trim($("#customer_name").val());
+      if (customerName === "") {
+        alert("Customer Name is required.");
+        $("#customer_name").focus();
+        return false;
       }
 
-    });
-}
+      let formData = $("#frmadd_Customer").serialize();
 
+      // Disable button
+      $('input[name="btn_add_customer"]')
+        .val("Saving...")
+        .prop("disabled", true);
 
- // Initialize
-     addEmptyRow();
-     initAutocomplete();
-
-
-
-
-
-
-
-$('input[name="btn_add_customer"]').on("click", function (e) {
-    e.preventDefault();
-
-    var formData = $("#frmadd_Customer").serialize();
-
-    $.ajax({
-        url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
+      $.ajax({
+        url: "<?php echo site_url('tender/ajax_add_master_inline'); ?>",
         type: "POST",
         data: formData,
         dataType: "json",
-        beforeSend: function () {
-            $('input[name="btn_add_customer"]')
-                .val("Saving...")
-                .prop("disabled", true);
-        },
+
         success: function (response) {
-            console.log(response);
+          if (response.status === "success") {
+            // Add newly created customer to dropdowns
+            $("#srch_customer_id")
+              .append(new Option(response.name, response.id, true, true))
+              .trigger("change");
 
-            if (response.status === "success") {
+            $("#customer_id_two")
+              .append(new Option(response.name, response.id, true, true))
+              .trigger("change");
 
-                // Append new option to Customer dropdown
-                $("#srch_customer_id").append(
-                    new Option(response.name, response.id, true, true)
-                ).trigger("change");
+            // Reset form
+            $("#frmadd_Customer")[0].reset();
 
-                // Append new option to Customer Contact dropdown
-                $("#customer_id_two").append(
-                    new Option(response.name, response.id, true, true)
-                ).trigger("change");
+            // Auto-close modal smoothly
+            $("#add_customer").find(".close").trigger("click");
 
-                // Reset form & close modal
-                $("#frmadd_Customer")[0].reset();
-                $("#add_customer").modal("hide");
-
-                alert(response.message);
-            } else {
-                alert("Failed to add customer.");
-            }
+            // Success alert
+            $("#zazualert").html(`
+                      <div class="alert alert-success sticky-notification" role="alert">
+                          <button type="button" class="close" data-dismiss="alert">&times;</button>
+                          <strong>Note:</strong>
+                          <div class="note-content">${response.message}</div>
+                      </div>
+                  `);
+          } else {
+            toastr.error(response.message || "Failed to add customer.");
+          }
         },
-        error: function (xhr, status, error) {
-            alert("Error: " + error);
+
+        error: function () {
+          toastr.error("Server error occurred.");
         },
+
         complete: function () {
-            $('input[name="btn_add_customer"]')
-                .val("Save")
-                .prop("disabled", false);
+          $('input[name="btn_add_customer"]')
+            .val("Save")
+            .prop("disabled", false);
         },
+      });
     });
-});
 
     $('input[name="btn_add_brand"]').on("click", function (e) {
       e.preventDefault();
@@ -413,7 +418,7 @@ $('input[name="btn_add_customer"]').on("click", function (e) {
 
             // Reset form & close modal
             $("#frmadd")[0].reset();
-            $("#add_brand").modal("hide");
+            $("#add_customer").find(".close").trigger("click");
 
             // Optional success alert
             //toastr.success(response.message);
@@ -428,14 +433,11 @@ $('input[name="btn_add_customer"]').on("click", function (e) {
           alert("Error: " + error);
         },
         complete: function () {
-          $('input[name="btn_add_brand"]')
-            .val("Save")
-            .prop("disabled", false);
+          $('input[name="btn_add_brand"]').val("Save").prop("disabled", false);
         },
       });
     });
 
-    
     $("#srch_customer_id").on("change", function () {
       let v = $(this).val();
       $("#customer_id_two").val(v); // select same value
@@ -453,50 +455,78 @@ $('input[name="btn_add_customer"]').on("click", function (e) {
     $('input[name="btn_add_customer_contact"]').on("click", function (e) {
       e.preventDefault();
 
+      // Disable button (avoid double save)
+      $('input[name="btn_add_customer_contact"]')
+        .val("Saving...")
+        .prop("disabled", true);
+
       var formData = $("#frmadd_Customer_Contact").serializeArray();
 
-      // ✅ Required field validation ONLY for contact_person_name
+      // Required validation
       var contactName = $('input[name="contact_person_name"]').val().trim();
+      var customer_id = $("#customer_id_two").val(); // FIXED
 
       if (contactName === "") {
         alert("Contact Person Name is required.");
         $('input[name="contact_person_name"]').focus();
-        return false; // Stop the code
+        enableButton();
+        return false;
       }
+
+      if (!customer_id) {
+        alert("Customer Name is required.");
+        $("#customer_id_two").focus();
+        enableButton();
+        return false;
+      }
+
       $.ajax({
         url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
         type: "POST",
         data: formData,
         dataType: "json",
-        beforeSend: function () {
-          $('input[name="btn_add_customer_contact"]')
-            .val("Saving...")
-            .prop("disabled", true);
-        },
+
         success: function (response) {
-          // console.log(response);
-
           if (response.status === "success") {
-            var newOption = new Option(response.name, response.id, true, true);
-            $("#srch_customer_contact_id").append(newOption).trigger("change");
+            // Append newly added contact to dropdown
+            $("#srch_customer_contact_id")
+              .append(new Option(response.name, response.id, true, true))
+              .trigger("change");
 
+            // Reset form
             $("#frmadd_Customer_Contact")[0].reset();
-            $("#add_customer_contact_id").modal("hide");
 
-            alert(response.message);
+            // Auto-close modal using close button (smooth fade)
+            $("#add_customer_contact_id").find(".close").trigger("click");
+
+            // Success alert
+            $("#zazualert").html(`
+                      <div class="alert alert-success sticky-notification" role="alert">
+                          <button type="button" class="close" data-dismiss="alert">&times;</button>
+                          <strong>Note:</strong>
+                          <div class="note-content">${response.message}</div>
+                      </div>
+                  `);
           } else {
             alert("Failed to add contact person.");
           }
         },
+
         error: function (xhr, status, error) {
           alert("Error: " + error);
         },
+
         complete: function () {
-          $('input[name="btn_add_customer_contact"]')
-            .val("Save")
-            .prop("disabled", false);
+          enableButton();
         },
       });
+
+      // Function to restore the button state
+      function enableButton() {
+        $('input[name="btn_add_customer_contact"]')
+          .val("Save")
+          .prop("disabled", false);
+      }
     });
 
     $('input[name="btn_add_category"]').on("click", function (e) {
@@ -562,63 +592,79 @@ $('input[name="btn_add_customer"]').on("click", function (e) {
         },
       });
     });
+
     $('input[name="btn_add_item"]').on("click", function (e) {
       e.preventDefault();
 
-      var formData = $("#frmadd_Item").serialize(); // Item form data
+      // Get values for validation
+      let itemName = $('input[name="item_name"]').val().trim();
+      let itemCode = $('input[name="item_code"]').val().trim();
+
+      // ---- REQUIRED FIELD CHECK ----
+      if (itemName === "") {
+        alert("Item Name is required.");
+        $('input[name="item_name"]').focus();
+        return false;
+      }
+
+      if (itemCode === "") {
+        alert("Item Code is required.");
+        $('input[name="item_code"]').focus();
+        return false;
+      }
+
+      var formData = $("#frmadd_Item").serialize();
+
+      $('input[name="btn_add_item"]').val("Saving...").prop("disabled", true);
 
       $.ajax({
         url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
         type: "POST",
         data: formData,
         dataType: "json",
-        beforeSend: function () {
-          $('input[name="btn_add_item"]')
-            .val("Saving...")
-            .prop("disabled", true);
-        },
-        success: function (response) {
-          console.log(response);
 
+        success: function (response) {
           if (response.status === "success") {
-            // Add new item to all item dropdowns dynamically
+            // Add item in all dropdowns without duplication
             $(".item-select").each(function () {
-              var exists = $(this).find(
-                "option[value='" + response.id + "']"
-              ).length;
-              if (!exists) {
-                var newOption = new Option(
-                  response.name,
-                  response.id,
-                  false,
-                  false
+              if (!$(this).find("option[value='" + response.id + "']").length) {
+                $(this).append(
+                  new Option(response.name, response.id, false, false)
                 );
-                $(this).append(newOption);
               }
             });
 
-            // Select the newly added item in the last row
+            // Auto-select last row item dropdown
             $(".item-row:last .item-select").val(response.id).trigger("change");
 
-            // Reset modal form & close modal
+            // Reset form + auto close modal
             $("#frmadd_Item")[0].reset();
-            $("#add_item").modal("hide");
+            $("#add_item").find(".close").trigger("click");
 
-            // Success message
-            alert(response.message);
-            // toastr.success(response.message);
+            // Success
+            // Success alert
+            $("#zazualert").html(`
+                      <div class="alert alert-success sticky-notification" role="alert">
+                          <button type="button" class="close" data-dismiss="alert">&times;</button>
+                          <strong>Note:</strong>
+                          <div class="note-content">${response.message}</div>
+                      </div>
+                  `);
           } else {
             alert(response.message || "Failed to add item.");
           }
         },
+
         error: function (xhr, status, error) {
           alert("Error: " + error);
         },
+
         complete: function () {
           $('input[name="btn_add_item"]').val("Save").prop("disabled", false);
         },
       });
     });
+
     $("#srch_customer_id").change(function () {
       var customerId = $(this).val();
 
@@ -649,11 +695,21 @@ $('input[name="btn_add_customer"]').on("click", function (e) {
       });
     });
   });
-
-  
 </script>
 <style>
   .form-control[name="item_desc[]"] {
     height: 80px !important;
   }
 </style>
+<script>
+  $("#item_image").on("change", function () {
+    var simgFile = this.files[0]; // get file object
+    var simgURL = simgFile ? URL.createObjectURL(simgFile) : "";
+
+    if (simgURL) {
+      $("#item_image_preview").attr("src", simgURL).show();
+    } else {
+      $("#item_image_preview").hide();
+    }
+  });
+</script>

@@ -180,8 +180,8 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="form-group col-md-6">
-                            <label>Customer <span class="text-danger">*</span></label>
-                            <select id="customer_id_two" name="customer_id" class="form-control" required>
+                            <label>Customer Name<span class="text-danger">*</span></label>
+                            <select id="customer_id_two" name="customer_id" class="form-control" required="true">
                                 <option value="">Select Customer</option>
                                 <?php foreach ($customer_opt as $key => $val) { ?>
                                 <option value="<?= $key ?>"><?= $val ?></option>
@@ -257,7 +257,7 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="form-group col-md-4">
-                            <label>Customer Name</label>
+                            <label>Customer Name <span class="text-danger">*</span></label>
                             <input class="form-control" type="text" name="customer_name" id="customer_name"
                                 placeholder="Customer Name">
                         </div>
@@ -392,7 +392,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="form-group col-md-6 mb-3">
+                        <!-- <div class="form-group col-md-6 mb-3">
                             <label>Category<span class="text-danger">*</span></label>
                             <?php echo form_dropdown(
                                 'category_id',
@@ -420,17 +420,17 @@
                                     </button>
                                 </span>
                             </div>
-                        </div>
+                        </div> -->
 
                         <div class="form-group col-md-6 mb-3">
                             <label>Item Name <span class="text-danger">*</span></label>
-                            <input class="form-control" type="text" name="item_name" required id="item_name"
-                                placeholder="Enter your item name">
+                            <input class="form-control" type="text" name="item_name" id="item_name"
+                                placeholder="Enter your item name" required="true">
                         </div>
                         <div class="form-group col-md-6 mb-3">
                             <label>Item Code<span class="text-danger">*</span></label>
                             <input class="form-control" type="text" name="item_code" id="item_code"
-                                placeholder="Enter your item code">
+                                placeholder="Enter your item code" required="true">
                         </div>
                         <div class="form-group col-md-12 mb-3">
                             <label>Description</label>

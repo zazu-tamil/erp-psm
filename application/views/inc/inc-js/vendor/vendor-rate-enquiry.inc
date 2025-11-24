@@ -180,6 +180,16 @@ $(document).ready(function () {
 
               if (response.status === "success") {
 
+                            // Get values for validation
+                  let vendor_name = $('#vendor_name').val().trim(); 
+
+                  
+                  if (vendor_name === "") {
+                    alert("Vendor Name is required.");
+                    $('#vendor_name').focus();
+                    return false;
+                  }
+
                   // Create two separate options (append removes from original)
                   var option1 = new Option(response.name, response.id, true, true);
                   var option2 = new Option(response.name, response.id, true, true);
