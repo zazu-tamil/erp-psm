@@ -539,7 +539,8 @@ class Tender extends CI_Controller
                     ii.item_code, ' : ', ii.item_name, ' [ ',
                     SUBSTRING(ii.item_description, 1, 100),
                     ' ]'
-                ) AS item_label
+                ) AS item_label1,
+                 ii.item_code AS item_label
             FROM tender_enquiry_item_info tei
             LEFT JOIN item_info ii 
                 ON ii.item_id = tei.item_id 
@@ -2290,7 +2291,8 @@ class Tender extends CI_Controller
 
             $data[] = [
                 'label' => $row->item_code . ' : ' . $row->item_name . '[ ' . substr($row->item_description, 1, 100) . ' ]',       // what user sees
-                'value' => $row->item_code . ' : ' . $row->item_name . '[ ' . substr($row->item_description, 1, 100) . ' ]',        // filled in textbox
+                //'value' => $row->item_code . ' : ' . $row->item_name . '[ ' . substr($row->item_description, 1, 100) . ' ]',        // filled in textbox
+                'value' => $row->item_code ,        // filled in textbox
                 'desc' => $row->item_description,
                 'uom' => $row->uom,
                 'category_id' => $row->category_id,
