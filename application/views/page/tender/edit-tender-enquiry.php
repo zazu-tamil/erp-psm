@@ -11,7 +11,7 @@
     </ol>
 </section>
 <style>
-    .text-danger{
+    .text-danger {
         color: red !important;
     }
 </style>
@@ -19,13 +19,14 @@
     <div class="box box-info">
         <div class="box-header with-border">
             <h3 class="box-title">Edit Tender Enquiry</h3>
-             <a href="<?php echo site_url('tender-enquiry-list'); ?>" class="btn btn-warning pull-right"> <i class="fa fa-arrow-left"></i> Back to list</a>
+            <a href="<?php echo site_url('tender-enquiry-list'); ?>" class="btn btn-warning pull-right"> <i
+                    class="fa fa-arrow-left"></i> Back to list</a>
         </div>
 
         <form method="post" action="" id="frmadd" enctype="multipart/form-data">
             <div class="box-body">
                 <input type="hidden" name="mode" value="Edit" />
-                <input type="hidden" name="tender_enquiry_id" value="<?php echo (int)$tender_enquiry_id; ?>" />
+                <input type="hidden" name="tender_enquiry_id" value="<?php echo (int) $tender_enquiry_id; ?>" />
 
                 <!-- Tender Details -->
                 <fieldset>
@@ -35,23 +36,40 @@
                             <label>Company <span class="text-danger">*</span></label>
                             <?php echo form_dropdown('company_id', $company_opt, set_value('company_id', $main_record['company_id']), 'id="srch_company_id" class="form-control select2" required'); ?>
                         </div>
+
                         <div class="form-group col-md-4">
                             <label>Customer<span class="text-danger">*</span></label>
-                            <?php echo form_dropdown('customer_id', $customer_opt, set_value('customer_id', $main_record['customer_id']), 'id="srch_customer_id" class="form-control select2" required'); ?>
+                            <?php
+                            echo form_dropdown(
+                                'customer_id',
+                                $customer_opt,
+                                set_value('customer_id', $main_record['customer_id']),
+                                'id="srch_customer_id" class="form-control" required'
+                            );
+                            ?>
                         </div>
                         <div class="form-group col-md-4">
-                            <label>Customer Contact Person</label>
-                            <?php echo form_dropdown('customer_contact_id', $customer_contact_opt, set_value('srch_customer_contact_id',$main_record['customer_contact_id']), 'id="srch_customer_contact_id" class="form-control select2"
-                                '); ?>
+                            <label>Customer Contact Name</label>
+                            <?php
+                            echo form_dropdown(
+                                'customer_contact_id',
+                                $customer_contact_opt,
+                                set_value('customer_contact_id', $main_record['customer_contact_id']),
+                                'id="customer_contact_id" class="form-control"'
+                            );
+                            ?>
                         </div>
 
                         <div class="form-group col-md-4">
                             <label>Tender Name</label>
-                            <input type="text" name="tender_name" class="form-control" value="<?php echo htmlspecialchars(set_value('tender_name', $main_record['tender_name'])); ?>">
+                            <input type="text" name="tender_name" class="form-control"
+                                value="<?php echo htmlspecialchars(set_value('tender_name', $main_record['tender_name'])); ?>">
                         </div>
                         <div class="form-group col-md-4">
                             <label>RFQ No<span class="text-danger">*</span></label>
-                            <input type="text" name="enquiry_no" class="form-control" value="<?php echo htmlspecialchars(set_value('enquiry_no', $main_record['enquiry_no'])); ?>" required>
+                            <input type="text" name="enquiry_no" class="form-control"
+                                value="<?php echo htmlspecialchars(set_value('enquiry_no', $main_record['enquiry_no'])); ?>"
+                                required>
                         </div>
 
 
@@ -60,16 +78,17 @@
                             <input type="text" name="company_sno" class="form-control" placeholder="e.g., 001"
                                 value="<?php echo htmlspecialchars(set_value('company_sno', $main_record['company_sno'])); ?>">
                         </div>
-                     
+
                         <div class="form-group col-md-4">
                             <label>Customer S.No</label>
                             <input type="text" name="customer_sno" class="form-control" placeholder="e.g., 001"
                                 value="<?php echo htmlspecialchars(set_value('customer_sno', $main_record['customer_sno'])); ?>">
                         </div>
-                     
+
                         <div class="form-group col-md-4">
                             <label>Enquiry Date</label>
-                            <input type="date" name="enquiry_date" class="form-control" value="<?php echo set_value('enquiry_date', $main_record['enquiry_date']); ?>" required>
+                            <input type="date" name="enquiry_date" class="form-control"
+                                value="<?php echo set_value('enquiry_date', $main_record['enquiry_date']); ?>" required>
                         </div>
                         <!-- <div class="form-group col-md-4">
                             <label>Opening Date & Time</label>
@@ -77,29 +96,31 @@
                         </div> -->
                         <div class="form-group col-md-4">
                             <label>Closing Date & Time</label>
-                            <input type="datetime-local" name="closing_date" class="form-control" value="<?php echo $main_record['closing_date'] ? date('Y-m-d\TH:i', strtotime($main_record['closing_date'])) : ''; ?>">
+                            <input type="datetime-local" name="closing_date" class="form-control"
+                                value="<?php echo $main_record['closing_date'] ? date('Y-m-d\TH:i', strtotime($main_record['closing_date'])) : ''; ?>">
                         </div>
                         <div class="form-group col-md-4">
                             <label>Tender Enquiry Status<span class="text-danger">*</span></label>
-                            <?php echo form_dropdown('tender_status',  $tender_status_opt, set_value('tender_status', $main_record['tender_status']), 'class="form-control" required'); ?>
+                            <?php echo form_dropdown('tender_status', $tender_status_opt, set_value('tender_status', $main_record['tender_status']), 'class="form-control" required'); ?>
                         </div>
-                    
+
                         <div class="form-group col-md-4">
                             <label>Tender Document</label>
                             <input type="file" name="tender_document" class="form-control" id="tender_document_input">
                             <small class="text-muted">All file types allowed (Max 10MB)</small>
-                            
-                            <?php 
+
+                            <?php
                             $doc_path = $main_record['tender_document'];
-                            if ($doc_path): 
+                            if ($doc_path):
                                 $file_url = site_url($doc_path); // Create URL path
                                 $file_ext = pathinfo($doc_path, PATHINFO_EXTENSION);
-                            ?>
+                                ?>
                                 <p class="mt-2">
-                                    <strong>Current File:</strong> 
+                                    <strong>Current File:</strong>
                                     <?php if (in_array(strtolower($file_ext), ['jpg', 'jpeg', 'png', 'gif'])): ?>
                                         <a href="<?php echo $file_url; ?>" target="_blank">
-                                            <img src="<?php echo $file_url; ?>" alt="Tender Document Image" style="max-height: 50px; max-width: 50px; border: 1px solid #ddd; margin-top: 5px;">
+                                            <img src="<?php echo $file_url; ?>" alt="Tender Document Image"
+                                                style="max-height: 50px; max-width: 50px; border: 1px solid #ddd; margin-top: 5px;">
                                         </a>
                                     <?php else: ?>
                                         <a href="<?php echo $file_url; ?>" target="_blank" class="text-blue">
@@ -109,36 +130,37 @@
                                 </p>
                             <?php endif; ?>
                         </div>
-                        
-                    <div class="form-group col-md-4">
-                        <label>Status</label> <br>
-                        <div class="radio-inline">
-                            <label>
-                                <input type="radio" name="status" class="minimal" id="status_active" value="Active"
-                                    <?php echo (set_value('status', $main_record['status']) == 'Active') ? 'checked' : ''; ?>>
-                                Active
-                            </label>
+
+                        <div class="form-group col-md-4">
+                            <label>Status</label> <br>
+                            <div class="radio-inline">
+                                <label>
+                                    <input type="radio" name="status" class="minimal" id="status_active" value="Active"
+                                        <?php echo (set_value('status', $main_record['status']) == 'Active') ? 'checked' : ''; ?>>
+                                    Active
+                                </label>
+                            </div>
+
+                            <div class="radio-inline">
+                                <label>
+                                    <input type="radio" name="status" class="minimal" id="status_inactive"
+                                        value="Inactive" <?php echo (set_value('status', $main_record['status']) == 'Inactive') ? 'checked' : ''; ?>>
+                                    Inactive
+                                </label>
+                            </div>
                         </div>
 
-                        <div class="radio-inline">
-                            <label>
-                                <input type="radio" name="status" class="minimal" id="status_inactive" value="Inactive"
-                                    <?php echo (set_value('status', $main_record['status']) == 'Inactive') ? 'checked' : ''; ?>>
-                                Inactive
-                            </label>
-                        </div>
-                    </div>
 
-                       
 
                     </div>
-                 
+
                 </fieldset>
 
                 <!-- Item Details -->
                 <fieldset class="mt-4">
                     <legend class="text-light-blue">Item Details</legend>
                     <div class="item-details-container">
+
                         <div class="grid-header">
                             <div>Category / Item</div>
                             <div>Description</div>
@@ -146,112 +168,83 @@
                             <div>Qty</div>
                             <div class="text-center">Action</div>
                         </div>
+
+                        <!-- All rows will come inside this wrapper -->
                         <div id="item_rows">
-                            <?php if (!empty($item_list)): ?>
-                                <?php foreach ($item_list as $idx => $item): ?>
-                                    <div class="item-row" 
-                                         data-rec-id="<?php echo (int)$item['tender_enquiry_item_id']; ?>"
-                                         data-category-id="<?php echo (int)$item['category_id']; ?>"
-                                         data-item-id="<?php echo (int)$item['item_id']; ?>"
-                                         data-item-name="<?php echo htmlspecialchars($item['item_name'] ?? ''); ?>"
-                                         data-item-desc="<?php echo htmlspecialchars($item['item_desc'] ?? ''); ?>"
-                                         data-item-uom="<?php echo htmlspecialchars($item['uom'] ?? ''); ?>">
-                                        
+                            <?php if (!empty($item_list)) { ?>
+                                <?php foreach ($item_list as $items) { ?>
+                                    <div class="item-row">
+
                                         <div class="cat-item-block">
-                                            <select name="category_id[]" class="form-control category-select">
-                                                <option value="">Select Category</option>
-                                                <?php foreach ($category_opt as $cat_id => $cat_name): ?>
-                                                    <?php if ($cat_id === '') continue; ?>
-                                                    <option value="<?php echo $cat_id; ?>" 
-                                                            <?php echo ($cat_id == $item['category_id']) ? 'selected' : ''; ?>>
-                                                        <?php echo htmlspecialchars($cat_name); ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                            <select name="item_id[]" class="form-control item-select mt-2">
-                                                <option value="">Select Item</option>
-                                                <?php if (!empty($item['item_id'])): ?>
-                                                    <option value="<?php echo (int)$item['item_id']; ?>" selected>
-                                                        <?php echo htmlspecialchars($item['item_name']); ?>
-                                                    </option>
-                                                <?php endif; ?>
-                                            </select>
+                                            <input type="text" name="srch_item[]" class="form-control srch_item"
+                                                autocomplete="off" placeholder="Search Item"
+                                                value="<?php echo $items['item_label'] ?>">
+                                            <input type="hidden" name="item_id[]" class="item_id"
+                                                value="<?php echo $items['item_id']; ?>">
+                                            <input type="hidden" name="category_id[]" class="category_id"
+                                                value="<?php echo $items['category_id']; ?>">
                                         </div>
 
                                         <div class="item-desc-block">
-                                            <textarea name="item_desc[]" class="form-control" rows="3"><?php echo htmlspecialchars($item['item_desc'] ?? ''); ?></textarea>
+                                            <textarea name="item_desc[]" class="form-control" rows="5"
+                                                placeholder="Description"><?php echo $items['item_desc']; ?></textarea>
                                         </div>
 
                                         <div class="uom-block">
-                                            <select name="uom[]" class="form-control">
-                                                <option value="">—</option>
-                                                <?php foreach ($uom_opt as $uom_val => $uom_name): ?>
-                                                    <option value="<?php echo htmlspecialchars($uom_val); ?>" 
-                                                            <?php echo ($uom_val == $item['uom']) ? 'selected' : ''; ?>>
-                                                        <?php echo htmlspecialchars($uom_name); ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            </select>
+                                            <?php
+                                            echo form_dropdown(
+                                                'uom[]',
+                                                ['' => '—'] + $uom_opt,
+                                                set_value('uom[]', $items['uom']),
+                                                'class="form-control uom_select"'
+                                            );
+                                            ?>
                                         </div>
 
+
                                         <div class="qty-block">
-                                            <input type="number" step="0.01" name="qty[]" class="form-control" 
-                                                   value="<?php echo (float)$item['qty']; ?>" min="0">
+                                            <input type="number" step="0.01" name="qty[]" class="form-control" placeholder="Qty"
+                                                value="<?php echo $items['qty']; ?>">
                                         </div>
 
                                         <div class="action-block">
-                                            <button type="button" class="btn-remove-row">
+                                            <button type="button" class="btn btn-danger remove-row">
                                                 <i class="fa fa-trash"></i>
                                             </button>
                                         </div>
 
-                                        <input type="hidden" name="tender_enquiry_item_id[]" 
-                                               value="<?php echo (int)$item['tender_enquiry_item_id']; ?>">
                                     </div>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <div class="item-row" data-rec-id="0">
+                                <?php } ?>
+                            <?php } else { ?>
+                                <div class="item-row">
                                     <div class="cat-item-block">
-                                        <select name="category_id[]" class="form-control category-select">
-                                            <option value="">Select Category</option>
-                                            <?php foreach ($category_opt as $cat_id => $cat_name): ?>
-                                                <?php if ($cat_id === '') continue; ?>
-                                                <option value="<?php echo $cat_id; ?>">
-                                                    <?php echo htmlspecialchars($cat_name); ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                        <select name="item_id[]" class="form-control item-select mt-2">
-                                            <option value="">Select Item</option>
-                                        </select>
+                                        <input type="text" name="srch_item[]" class="form-control srch_item"
+                                            autocomplete="off">
+                                        <input type="text" name="item_id[]" class="item_id">
+                                        <input type="text" name="category_id[]" class="category_id">
                                     </div>
+
                                     <div class="item-desc-block">
-                                        <textarea name="item_desc[]" class="form-control" rows="3"></textarea>
+                                        <textarea name="item_desc[]" class="form-control" rows="5"></textarea>
                                     </div>
+
                                     <div class="uom-block">
-                                        <select name="uom[]" class="form-control">
-                                            <option value="">—</option>
-                                            <?php foreach ($uom_opt as $uom_val => $uom_name): ?>
-                                                <option value="<?php echo htmlspecialchars($uom_val); ?>">
-                                                    <?php echo htmlspecialchars($uom_name); ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
+                                        <?php echo form_dropdown('uom[]', ['' => '—'] + $uom_opt, '', 'class="form-control uom_select"'); ?>
                                     </div>
+
                                     <div class="qty-block">
-                                        <input type="number" step="0.01" name="qty[]" class="form-control" 
-                                               placeholder="0.00" min="0" value="0">
+                                        <input type="number" step="0.01" name="qty[]" class="form-control">
                                     </div>
+
                                     <div class="action-block">
-                                        <button type="button" class="btn-remove-row">
-                                            <i class="fa fa-trash"></i>
-                                        </button>
+                                        <button type="button" class="remove-row"><i class="fa fa-trash"></i></button>
                                     </div>
-                                    <input type="hidden" name="tender_enquiry_item_id[]" value="0">
                                 </div>
-                            <?php endif; ?>
+                            <?php } ?>
                         </div>
+
                     </div>
+
                     <button type="button" class="btn btn-primary mt-3" id="add_more" style="margin-top: 10px;">
                         <i class="fa fa-plus"></i> Add More Item
                     </button>
@@ -259,7 +252,8 @@
             </div>
 
             <div class="box-footer text-right">
-                <a href="<?php echo site_url('tender-enquiry-list'); ?>" class="btn btn-warning pull-left">  <i class="fa fa-arrow-left"></i> Back to list</a>
+                <a href="<?php echo site_url('tender-enquiry-list'); ?>" class="btn btn-warning pull-left"> <i
+                        class="fa fa-arrow-left"></i> Back to list</a>
                 <button type="submit" class="btn btn-success">
                     <i class="fa fa-save"></i> Update
                 </button>
@@ -269,4 +263,3 @@
 </section>
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
-

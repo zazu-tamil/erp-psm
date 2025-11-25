@@ -51,7 +51,7 @@
         </div>
 
         <div class="box-body table-responsive">
-            <table class="table table-hover table-bordered table-striped">
+            <table class="table table-hover">
                 <thead>
                     <tr>
                         <th class="text-center">S.No</th>

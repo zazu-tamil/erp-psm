@@ -5,7 +5,7 @@
       if (confirm("Are you sure you want to delete this tender quotation?")) {
         const id = $(this).val();
         $.post(
-          "<?php echo site_url('tender/delete_record'); ?>",
+             "<?php echo site_url('delete-record'); ?>",
           {
             tbl: "tender_quotation_info",
             id: id,

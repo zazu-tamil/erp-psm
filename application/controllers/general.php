@@ -314,6 +314,26 @@ class General extends CI_Controller
         $rec_id = $this->input->post('id');
 
 
+        if ($table == 'tender_quotation_info') {
+            $this->db->where('tender_quotation_id', $rec_id);
+            $this->db->update('tender_quotation_info', array('status' => 'Delete'));
+            echo "Record Deleted Successfully";
+        }
+        if ($table == 'customer_tender_po_info') {
+            $this->db->where('tender_po_id', $rec_id);
+            $this->db->update('customer_tender_po_info', array('status' => 'Delete'));
+            echo "Record Deleted Successfully";
+        }
+        if ($table == 'tender_enquiry_info') {
+            $this->db->where('tender_enquiry_id', $rec_id);
+            $this->db->update('tender_enquiry_info', array('status' => 'Delete'));
+            echo "Record Deleted Successfully";
+        }
+        if ($table == 'vendor_po_info') {
+            $this->db->where('vendor_po_id', $rec_id);
+            $this->db->update('vendor_po_info', array('status' => 'Delete'));
+            echo "Record Deleted Successfully";
+        }
         if ($table == 'company_info') {
             $this->db->where('company_id', $rec_id);
             $this->db->update('company_info', array('status' => 'Delete'));

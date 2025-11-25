@@ -11,7 +11,7 @@
       const $container = $("#item_container");
 
       // Reset dependent dropdowns
- 
+
       $quotationDropdown
         .html('<option value="">Select Quotation</option>')
         .prop("disabled", true);
@@ -103,6 +103,24 @@
       });
     });
 
- 
+    $(".del_record").click(function () {
+      if (confirm("Are you sure you want to delete this tender enquiry?")) {
+        const id = $(this).val();
+        //alert(id);
+        $.post(
+          "<?php echo site_url('delete-record'); ?>",
+          {
+            tbl: "vendor_po_info",
+            id: id,
+          },
+          function (res) {
+            alert(res);
+            location.reload();
+          }
+        ).fail(function () {
+          alert("Error deleting record.");
+        });
+      }
+    });
   });
 </script>
