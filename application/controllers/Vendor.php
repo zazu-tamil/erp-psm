@@ -108,6 +108,7 @@ class Vendor extends CI_Controller
         $data['vendor_contact_opt'] = [];
         $data['vendor_opt'] = [];
         $data['country_opt'] = [];
+        $data['vendor_RFQ_opt'] = ['Prepared RFQ' => 'Prepared RFQ', 'RFQ Sent' => 'RFQ Sent', 'Quotation Received' => 'Quotation Received'];
 
         $sql = "
           SELECT
@@ -285,6 +286,7 @@ class Vendor extends CI_Controller
         $data['main'] = $query->row_array();
 
         $data['customer_opt'] = [];
+        $data['vendor_RFQ_opt'] = ['Prepared RFQ' => 'Prepared RFQ', 'RFQ Sent' => 'RFQ Sent', 'Quotation Received' => 'Quotation Received'];
         $data['vendor_contact_opt'] = [];
         $data['vendor_opt'] = [];
         $data['tender_enquiry_opt'] = [];
@@ -2100,7 +2102,9 @@ class Vendor extends CI_Controller
                 t.customer_sno,
                 v.vendor_name,
                 a.tender_enquiry_id,
-                t.enquiry_no AS tender_enquiry_no
+                t.enquiry_no AS tender_enquiry_no,
+                a.status,
+                a.vendor_rate_enquiry_status
             FROM vendor_rate_enquiry_info a
             LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
             LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
