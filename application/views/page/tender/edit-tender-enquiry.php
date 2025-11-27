@@ -162,7 +162,7 @@
                     <div class="item-details-container">
 
                         <div class="grid-header">
-                            <div>Category / Item</div>
+                            <div>Item Search</div>
                             <div>Description</div>
                             <div>UOM</div>
                             <div>Qty</div>

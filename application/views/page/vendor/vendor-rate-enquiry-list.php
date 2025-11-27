@@ -63,7 +63,9 @@
                         <th>Customer</th>
                         <th>Vendor Enquiry No</th>
                         <th>Vendor Name</th>
-                        <th>Opening Date</th>
+                        <th>Enquiry Status </th>
+                        <th>Status </th>
+                        <!-- <th>Opening Date</th> -->
                         <th>Closing Date</th>
                         <th class="text-center" colspan="3">Action</th>
                     </tr>
@@ -82,7 +84,9 @@
                                 <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
                                  <td><?php echo htmlspecialchars($row['enquiry_no']); ?></td>
                                 <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
-                                <td><?php echo $row['opening_date'] ? date('d-m-Y H:i', strtotime($row['opening_date'])) : '-'; ?>
+                                <td><?php echo htmlspecialchars($row['vendor_rate_enquiry_status'] ?? 'Prepared RFQ'); ?></td>
+                                <td><?php echo htmlspecialchars($row['status'] ?? '-'); ?></td>
+                                <!-- <td><?php echo $row['opening_date'] ? date('d-m-Y H:i', strtotime($row['opening_date'])) : '-'; ?> -->
                                 </td>
                                 <td><?php echo $row['closing_date'] ? date('d-m-Y H:i', strtotime($row['closing_date'])) : '-'; ?>
                                 </td>
