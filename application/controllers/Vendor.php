@@ -1288,7 +1288,7 @@ class Vendor extends CI_Controller
         foreach ($query->result_array() as $row) {
             $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
         }
-        $data['quotation_status_opt'] = ['' => 'Select Tender Status', 'Completed' => 'Completed', 'Pending' => 'Pending', 'Rejected' => 'Rejected'];
+        $data['quotation_status_opt'] = ['' => 'Select Tender Status', 'Pending' => 'Pending',  'Completed' => 'Completed','Rejected' => 'Rejected'];
 
         $this->load->view('page/vendor/vendor-quotation-add', $data);
     }
