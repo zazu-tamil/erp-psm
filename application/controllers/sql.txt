@@ -173,3 +173,25 @@ END//
 
 
 ---------------- Done ------------------------
+
+
+ALTER TABLE `vendor_rate_enquiry_info`
+	CHANGE COLUMN `enquiry_no` `enquiry_no` INT(4) ZEROFILL NULL DEFAULT NULL AFTER `enquiry_date`; 
+
+ALTER TABLE `vendor_rate_enquiry_info`
+	ADD COLUMN `company_id` INT(11) NULL DEFAULT NULL AFTER `vendor_rate_enquiry_id`;
+
+
+CREATE TRIGGER `vendor_rate_enquiry_info_before_insert` BEFORE INSERT ON `vendor_rate_enquiry_info` FOR EACH ROW BEGIN
+declare enq_no int default 0;
+select max(a.enquiry_no) into enq_no from vendor_rate_enquiry_info as a where a.status != 'Delete' and fiscal_year(a.enquiry_date) = new.enquiry_date ;
+set new.enquiry_no = ifnull(enq_no , 0) + 1;
+END 
+//
+
+-------------------------------------------------------
+25-11-2025
+ALTER TABLE `vendor_rate_enquiry_info`
+	ADD COLUMN `vendor_rate_enquiry_status` VARCHAR(100) NULL DEFAULT NULL AFTER `status`;
+
+    ------------------------

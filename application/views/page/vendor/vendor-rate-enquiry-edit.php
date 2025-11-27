@@ -51,15 +51,19 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="form-group col-md-4">
+                        <!-- <div class="form-group col-md-4">
                             <label>Opening Date & Time</label>
                             <input type="datetime-local" name="opening_date" id="opening_date" class="form-control"
-                                value="<?php echo date('Y-m-d\TH:i', strtotime($main['opening_date'])); ?>">
-                        </div>
+                                value="<?php //echo date('Y-m-d\TH:i', strtotime($main['opening_date'])); ?>">
+                        </div> -->
                         <div class="form-group col-md-4">
                             <label>Closing Date & Time</label>
                             <input type="datetime-local" name="closing_date" id="closing_date" class="form-control"
                                 value="<?php echo date('Y-m-d\TH:i', strtotime($main['closing_date'])); ?>">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Enquiry Status</label><br>
+                            <?php echo form_dropdown('vendor_rate_enquiry_status', ['' => 'Select'] + $vendor_RFQ_opt, $main['vendor_rate_enquiry_status'], 'id="vendor_rate_enquiry_status" class="form-control"'); ?> 
                         </div>
                         <div class="form-group col-md-4">
                             <label>Status</label><br>
@@ -97,7 +101,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <!-- <div class="col-md-3">
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="form-group">
@@ -114,8 +118,8 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-4">
+                                    </div> -->
+                                    <div class="col-md-7">
                                         <div class="form-group">
                                             <label>Item Description</label>
                                             <textarea name="item_desc[]" class="form-control desc-textarea"
@@ -128,7 +132,7 @@
                                                 <div class="form-group">
                                                     <label>UOM</label>
                                                     <input type="text" name="uom[]" class="form-control"
-                                                        value="<?php echo $row['uom']; ?>" readonly>
+                                                        value="<?php echo $row['uom']; ?>" >
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
@@ -136,17 +140,17 @@
                                                     <label>Quantity</label>
                                                     <input type="number" step="0.01" name="qty[]"
                                                         class="form-control qty-input" value="<?php echo $row['qty']; ?>"
-                                                        readonly>
+                                                    >
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
+                                            <!-- <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label>Rate</label>
                                                     <input type="number" step="0.01" name="rate[]"
                                                         class="form-control rate-input" value="<?php echo $row['rate']; ?>">
                                                 </div>
-                                            </div>
-                                            <div class="col-md-6">
+                                            </div> -->
+                                            <!-- <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label>VAT %</label>
                                                     <select name="gst[]" class="form-control vat-dropdown">
@@ -159,22 +163,22 @@
                                                         <?php endif; ?>
                                                     </select>
                                                 </div>
-                                            </div>
-                                            <div class="col-md-12">
+                                            </div> -->
+                                            <!-- <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Amount (Qty × Rate × VAT %)</label>
                                                     <input type="number" step="0.01" name="amount[]"
                                                         class="form-control amount-input"
                                                         value="<?php echo $row['amount']; ?>" readonly>
                                                 </div>
-                                            </div>
+                                            </div> -->
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
-                    <div class="row mt-3">
+                    <!-- <div class="row mt-3">
                         <div class="col-md-12">
                             <div class="alert alert-info" style="background-color:#f0f8ff; border: 2px solid #007bff;">
                                 <div class="row">
@@ -189,7 +193,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </fieldset>
             </div>
             <div class="box-footer text-right">

@@ -66,17 +66,21 @@
                             <input type="date" name="enquiry_date" id="enquiry_date" class="form-control"
                                 value="<?php echo set_value('enquiry_date', date('Y-m-d')); ?>" required>
                         </div>
-                        <div class="form-group col-md-4">
+                        <!-- <div class="form-group col-md-4">
                             <label>Opening Date & Time</label>
                             <input type="datetime-local" name="opening_date" id="opening_date" class="form-control"
                                 value="<?php echo set_value('opening_date'); ?>">
-                        </div>
+                        </div> -->
  
 
                         <div class="form-group col-md-4">
                             <label>Closing Date & Time</label>
                             <input type="datetime-local" name="closing_date" id="closing_date" class="form-control"
                                 value="<?php echo set_value('closing_date'); ?>">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Enquiry Status</label><br>
+                            <?php echo form_dropdown('vendor_rate_enquiry_status', ['' => 'Select'] + $vendor_RFQ_opt,'', 'id="vendor_rate_enquiry_status" class="form-control"'); ?> 
                         </div>
                         <div class="form-group col-md-4">
                             <label>Status</label><br>
