@@ -58,13 +58,7 @@ $route['dash'] = 'dashboard';
 
 $route['add-tender-enquiry']='tender/add_tender_enquiry';
 $route['tender-enquiry-list'] = 'tender/tender_enquiry_list';
-$route['tender-enquiry-edit/(:num)'] = 'tender/edit_tender_enquiry/$1';
-
-
-$route['vendor-rate-enquiry-list'] = 'vendor/vendor_rate_enquiry_list';
-$route['vendor-rate-enquiry-print/(:num)'] = 'vendor/vendor_rate_enquiry_print/$1';
-
-
+$route['tender-enquiry-edit/(:num)'] = 'tender/edit_tender_enquiry/$1'; 
 $route['tender-quotation-list'] = 'tender/tender_quotation_list';
 $route['tender-quotation-print/(:num)'] = 'tender/tender_quotation_print/$1';
 
@@ -113,6 +107,9 @@ $route['customer-contact-list/edit/(:num)'] = 'master/customer_contact_list/$1';
 
 $route['vendor-rate-enquiry'] = 'vendor/vendor_rate_enquiry';
 $route['vendor-rate-enquiry-edit/(:num)'] = 'vendor/vendor_rate_enquiry_edit/$1';
+$route['vendor-rate-enquiry-list'] = 'vendor/vendor_rate_enquiry_list';
+$route['vendor-rate-enquiry-print/(:num)'] = 'vendor/vendor_rate_enquiry_print/$1';
+
 
 $route['tender-quotation-add'] = 'tender/tender_quotation_add';
 $route['tender-quotation-edit/(:num)'] = 'tender/tender_quotation_edit/$1';
