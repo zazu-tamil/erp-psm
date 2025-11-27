@@ -28,32 +28,32 @@
                     <div class="row">
                         <div class="form-group col-md-4">
                             <label>Company <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_company_id', $company_opt, $header['company_id'], 'id="srch_company_id" class="form-control" required'); ?>
+                            <?php echo form_dropdown('srch_company_id', $company_opt, $header['company_id'], 'id="srch_company_id" class="form-control" required readonly'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
                             <label>Customer <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_customer_id', $customer_opt, $header['customer_id'], 'id="srch_customer_id" class="form-control" required'); ?>
+                            <?php echo form_dropdown('srch_customer_id', $customer_opt, $header['customer_id'], 'id="srch_customer_id" class="form-control" required readonly'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
                             <label>Tender Enquiry No <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_tender_enquiry_id', $tender_enquiry_opt, $header['tender_enquiry_id'], 'id="srch_tender_enquiry_id" class="form-control" required'); ?>
+                            <?php echo form_dropdown('srch_tender_enquiry_id', $tender_enquiry_opt, $header['tender_enquiry_id'], 'id="srch_tender_enquiry_id" class="form-control" required readonly'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
                             <label>Vendor Name <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_vendor_id', $vendor_opt, $header['vendor_id'], 'id="srch_vendor_id" class="form-control" required'); ?>
+                            <?php echo form_dropdown('srch_vendor_id', $vendor_opt, $header['vendor_id'], 'id="srch_vendor_id" class="form-control" required readonly'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
                             <label>Vendor Rate Enquiry No <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_vendor_rate_enquiry_id', $vendor_rate_enquiry_opt, $header['vendor_rate_enquiry_id'], 'id="srch_vendor_rate_enquiry_id" class="form-control" required'); ?>
+                            <?php echo form_dropdown('srch_vendor_rate_enquiry_id', $vendor_rate_enquiry_opt, $header['vendor_rate_enquiry_id'], 'id="srch_vendor_rate_enquiry_id" class="form-control" required readonly'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
                             <label>Contact Person</label>
-                            <?php echo form_dropdown('srch_vendor_contact_person_id', $vendor_contact_opt, $header['vendor_contact_person_id'], 'id="srch_vendor_contact_id" class="form-control"'); ?>
+                            <?php echo form_dropdown('srch_vendor_contact_person_id', $vendor_contact_opt, $header['vendor_contact_person_id'], 'id="srch_vendor_contact_id" class="form-control" readonly'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
@@ -63,10 +63,10 @@
                         </div>
 
                         <div class="form-group col-md-4">
-                            <label>Quotation No</label>
+                            <label>Quotation No <span style="color:red;">*</span></label>
                             <input type="text" name="quote_no" id="quote_no" class="form-control"
                                 value="<?php echo set_value('quote_no', $header['quote_no']); ?>"
-                                placeholder="Enter Quotation No">
+                                placeholder="Enter Quotation No" required="true">
                         </div>
 
                         <div class="form-group col-md-4">

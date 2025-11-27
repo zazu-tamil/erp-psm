@@ -29,6 +29,7 @@ class Vendor extends CI_Controller
                 'opening_date' => $this->input->post('opening_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('opening_date'))) : null,
                 'closing_date' => $this->input->post('closing_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('closing_date'))) : null,
                 'enquiry_no' => $this->input->post('enquiry_no'),
+                'vendor_rate_enquiry_status' => $this->input->post('vendor_rate_enquiry_status'),
                 'status' => $this->input->post('status') ?: 'Active',
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s')
@@ -221,6 +222,7 @@ class Vendor extends CI_Controller
                 'opening_date' => $this->input->post('opening_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('opening_date'))) : null,
                 'closing_date' => $this->input->post('closing_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('closing_date'))) : null,
                 'enquiry_no' => $this->input->post('enquiry_no'),
+                'vendor_rate_enquiry_status' => $this->input->post('vendor_rate_enquiry_status'),
                 'status' => $this->input->post('status') ?: 'Active',
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'updated_date' => date('Y-m-d H:i:s')
@@ -1592,7 +1594,7 @@ class Vendor extends CI_Controller
         $sql = "
             SELECT 
                 vpi.*,
-                CONCAT_WS(' - ', ii.item_name, ii.item_code) AS full_item_name,
+                CONCAT_WS(' - ', ii.item_code) AS full_item_name,
                 ci.category_name,
                 ii.item_name
             FROM vendor_quote_item_info AS vpi
@@ -1988,6 +1990,8 @@ class Vendor extends CI_Controller
                     AND c.status = 'Active'
                 WHERE a.status = 'Active'
                 AND a.vendor_id = '" . $rec_id . "'
+                and a.vendor_rate_enquiry_status = 'Quotation Received'
+                ORDER BY vendor_rate_enquiry_no ASC
             ");
 
             $rec_list = $query->result_array();

@@ -69,14 +69,13 @@
                         </div>
 
                         <div class="form-group col-md-4">
-                            <label>Quotation No</label>
-                            <input type="text" name="quote_no" id="quote_no" class="form-control"
-                                value="<?php echo set_value('quote_no'); ?>" placeholder="Enter Quotation No">
+                            <label>Quotation No <span style="color:red;">*</span></label>
+                            <input type="text" name="quote_no" id="quote_no" class="form-control" placeholder="Enter Quotation No" required="true">
                         </div>
 
                         <div class="form-group col-md-4">
                             <label>Quotation Status <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('quote_status', ['' => 'Select Status'] + $quotation_status_opt, set_value('quote_status'), 'id="quote_status" class="form-control" required'); ?>
+                            <?php echo form_dropdown('quote_status', ['' => 'Select Status'] + $quotation_status_opt, set_value('quote_status'), 'id="quote_status" class="form-control" required="true"'); ?>
                         </div>
 
                         <!-- <div class="form-group col-md-4">

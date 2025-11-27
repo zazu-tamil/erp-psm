@@ -62,8 +62,8 @@
                                 value="<?php echo date('Y-m-d\TH:i', strtotime($main['closing_date'])); ?>">
                         </div>
                         <div class="form-group col-md-4">
-                            <label>Enquiry Status</label><br>
-                            <?php echo form_dropdown('vendor_rate_enquiry_status', ['' => 'Select'] + $vendor_RFQ_opt, $main['vendor_rate_enquiry_status'], 'id="vendor_rate_enquiry_status" class="form-control"'); ?> 
+                             <label>Enquiry Status <span class="text-red">*</span></label><br>
+                            <?php echo form_dropdown('vendor_rate_enquiry_status', ['' => 'Select'] + $vendor_RFQ_opt, $main['vendor_rate_enquiry_status'], 'id="vendor_rate_enquiry_status" class="form-control" required="true"'); ?> 
                         </div>
                         <div class="form-group col-md-4">
                             <label>Status</label><br>
