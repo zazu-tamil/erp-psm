@@ -45,10 +45,11 @@ $current_page = $this->uri->segment(1, 0);
 <li
     class="treeview <?= in_array($current_page, ['vendor-rate-enquiry', 'vendor-rate-enquiry-list', 'vendor-rate-enquiry-edit']) ? 'active' : '' ?>">
     <a href="#">
-        <i class="fa fa-envelope-open"></i>
+        <i class="fa fa-envelope"></i>
         <span>Vendor Enquiry</span>
         <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
     </a>
+
     <ul class="treeview-menu">
 
         <li class="<?= ($current_page === 'vendor-rate-enquiry') ? 'active' : '' ?>">
@@ -60,6 +61,33 @@ $current_page = $this->uri->segment(1, 0);
         <li class="<?= ($current_page === 'vendor-rate-enquiry-list') ? 'active' : '' ?>">
             <a href="<?= site_url('vendor-rate-enquiry-list') ?>">
                 <i class="fa fa-list"></i> Vendor Enquiry List
+            </a>
+        </li>
+
+    </ul>
+</li>
+<!-- Vendor Quotation -->
+<li class="header">Vendor Quotation</li>
+
+<li
+    class="treeview <?= in_array($current_page, ['vendor-quotation-add', 'vendor-quotation-list', 'vendor-quotation-edit']) ? 'active' : '' ?>">
+    <a href="#">
+        <i class="fa fa-file-text-o"></i>
+        <span>Vendor Quotation</span>
+        <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+    </a>
+
+    <ul class="treeview-menu">
+
+        <li class="<?= ($current_page === 'vendor-quotation-add') ? 'active' : '' ?>">
+            <a href="<?= site_url('vendor-quotation-add') ?>">
+                <i class="fa fa-plus-square"></i> Add Vendor Quotation
+            </a>
+        </li>
+
+        <li class="<?= ($current_page === 'vendor-quotation-list') ? 'active' : '' ?>">
+            <a href="<?= site_url('vendor-quotation-list') ?>">
+                <i class="fa fa-list"></i> Vendor Quotation List
             </a>
         </li>
 
@@ -129,7 +157,7 @@ $current_page = $this->uri->segment(1, 0);
 
         <li class="<?= ($current_page === 'customer-tender-po-add') ? 'active' : '' ?>">
             <a href="<?= site_url('customer-tender-po-add') ?>">
-                <i class="fa fa-plus-square"></i> Add Customer Tender PO
+                <i class="fa fa-plus-square"></i><?php echo $title ?>
             </a>
         </li>
 
