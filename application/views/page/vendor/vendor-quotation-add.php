@@ -49,7 +49,11 @@
                         </div>
 
                         <div class="form-group col-md-4">
-                            <label>Vendor Rate Enquiry No <span style="color:red;">*</span></label>
+                            <label>Vendor Rate Enquiry No <span style="color:red;">*</span>  
+                            <span data-toggle="tooltip" title="" class="" data-original-title="Only when Vendor Rate Enquiry Status is Quotation Received then select the Enquiry No. Otherwise leave it blank.">
+                            <i class="text-sm text-info fa fa-info-circle"></i>
+                            </span>    
+                        </label>
                             <?php echo form_dropdown('srch_vendor_rate_enquiry_id', ['' => 'Select Enquiry No'], set_value('srch_vendor_rate_enquiry_id'), 'id="srch_vendor_rate_enquiry_id" class="form-control" required'); ?>
                         </div>
 

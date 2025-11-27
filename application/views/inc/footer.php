@@ -67,6 +67,13 @@
 include_once('inc-js/' . $js);
 //}
 ?>
+<script>
+    $(document).ready(function () {
+        // Initialize tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+ 
+    });
+</script>
 </body>
 </html>
   
