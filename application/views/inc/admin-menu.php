@@ -94,8 +94,7 @@ $current_page = $this->uri->segment(1, 0);
     </ul>
 </li>
 
-
-<!-- Vendor PO -->
+<li class="header">Vendor PO</li>
 <li
     class="treeview <?= in_array($current_page, ['vendor-po-add', 'vendor-po-list', 'vendor-po-view', 'vendor-po-edit']) ? 'active' : '' ?>">
     <a href="#">
