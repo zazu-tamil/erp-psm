@@ -195,3 +195,17 @@ ALTER TABLE `vendor_rate_enquiry_info`
 	ADD COLUMN `vendor_rate_enquiry_status` VARCHAR(100) NULL DEFAULT NULL AFTER `status`;
 
     ------------------------
+27-11-2025
+
+    ALTER TABLE `vendor_po_info`
+	CHANGE COLUMN `closing_date` `delivery_date` DATETIME NULL DEFAULT NULL AFTER `terms`,
+	DROP COLUMN `opening_date`; 
+
+    ALTER TABLE `vendor_quotation_info`
+	ADD COLUMN `transport_charges` DECIMAL(12,2) NULL DEFAULT NULL AFTER `quote_doc_upload`,
+	ADD COLUMN `other_charges` DECIMAL(12,2) NULL DEFAULT NULL AFTER `transport_charges`;
+
+    ALTER TABLE `vendor_po_info`
+	CHANGE COLUMN `handling_charges` `transport_charges` DECIMAL(10,2) NULL DEFAULT NULL AFTER `remarks`,
+	ADD COLUMN `other_charges` DECIMAL(10,2) NULL DEFAULT NULL AFTER `transport_charges`; 
+
