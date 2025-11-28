@@ -23,8 +23,8 @@
                         <th>Currency Name</th>
                         <th>Symbol</th>
                         <th>Country Name</th>
-                        <th>Exchange Rate</th>
-                        <th>Base Currency</th>
+                        <!-- <th>Exchange Rate</th>
+                        <th>Base Currency</th> -->
                         <th>Status</th>
                         <th colspan="2" class="text-center">Action</th>
                     </tr>
@@ -39,8 +39,8 @@
                             <td><?php echo $ls['currency_name'] ?></td>
                             <td><?php echo $ls['symbol'] ?></td>
                             <td><?php echo $ls['country_name'] ?></td>
-                            <td ><?php echo number_format($ls['exchange_rate'], 6) ?></td>
-                            <td><?php echo ($ls['is_base_currency'] == 1) ? 'Yes' : 'No' ?></td>
+                            <!-- <td ><?php echo number_format($ls['exchange_rate'], 6) ?></td>
+                            <td><?php echo ($ls['is_base_currency'] == 1) ? 'Yes' : 'No' ?></td> -->
                             <td><?php echo $ls['status'] ?></td>
                             <td class="text-center">
                                 <button data-toggle="modal" data-target="#edit_modal" value="<?php echo $ls['currency_id'] ?>"
@@ -100,7 +100,7 @@
                                             value="" placeholder="Country Name">
                                     </div>
                                 </div>
-                                <div class="row">
+                                <!-- <div class="row">
                                     <div class="form-group col-md-12">
                                         <label>Exchange Rate</label>
                                         <input class="form-control" type="text" name="exchange_rate" id="exchange_rate"
@@ -122,7 +122,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                </div>
+                                </div> -->
                                 <div class="row">
                                     <div class="form-group col-md-12">
                                         <label>Status</label>
@@ -193,7 +193,7 @@
                                             value="" placeholder="Country Name">
                                     </div>
                                 </div>
-                                <div class="row">
+                                <!-- <div class="row">
                                     <div class="form-group col-md-12">
                                         <label>Exchange Rate</label>
                                         <input class="form-control" type="text" name="exchange_rate" id="exchange_rate"
@@ -215,7 +215,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                </div>
+                                </div> -->
                                 <div class="row">
                                     <div class="form-group col-md-12">
                                         <label>Status</label>

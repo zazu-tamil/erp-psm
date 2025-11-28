@@ -131,7 +131,7 @@
                                 <th style="width:5%;">UOM</th>
                                 <th style="width:10%;">Qty</th>
                                 <th style="width:10%;">Rate</th>
-                                <th style="width:10%;">GST %</th>
+                                <th style="width:10%;">VAT %</th>
                                 <th style="width:10%;">Amount</th>
                             </tr>
                         </thead>

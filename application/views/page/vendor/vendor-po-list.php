@@ -47,7 +47,7 @@
     <!-- List Table -->
     <div class="box box-info">
         <div class="box-header with-border">
-            <a href="<?php echo site_url('vendor-rate-enquiry'); ?>" class="btn btn-success">
+            <a href="<?php echo site_url('vendor-po-add'); ?>" class="btn btn-success">
                 <i class="fa fa-plus-circle"></i> Add New
             </a>
             <div class="box-tools pull-right">
@@ -66,9 +66,7 @@
                         <th>Company / RFQ No</th>
                         <th>Customer</th>
                         <th>Po No</th>
-                        <th>Vendor</th>
-                        <th>Opening Date</th>
-                        <th>Closing Date</th>
+                        <th>Vendor</th> 
                         <th>Po Status</th>
                         <th class="text-center" colspan="3">Action</th>
                     </tr>
@@ -85,19 +83,13 @@
                                 <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
                                 <td><strong><?php echo htmlspecialchars($row['po_no']); ?></strong></td>
                                 <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
-                                <td><?php echo $row['opening_date'] ? date('d-m-Y H:i', strtotime($row['opening_date'])) : '-'; ?>
-                                </td>
-                                <td><?php echo $row['closing_date'] ? date('d-m-Y H:i', strtotime($row['closing_date'])) : '-'; ?>
-                                </td>
+                         
                                 <?php
                                 $status = $row['po_status'];
-
+                             
                                 $badge_colors = [
-                                    'Open' => 'primary',
-                                    'Quoted' => 'info',
-                                    'Won' => 'success',
-                                    'Lost' => 'danger',
-                                    'On Hold' => 'warning',
+                                    'Delivered' => 'success',
+                                    'In Progress' => 'info', 
                                 ];
 
                                 $color = isset($badge_colors[$status]) ? $badge_colors[$status] : 'default';

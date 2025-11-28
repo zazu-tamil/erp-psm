@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Tender Quotation - <?php echo htmlspecialchars($record['quotation_no'] ?? ''); ?></title>
+    <title>Purchase Order - <?php echo htmlspecialchars($record['po_no'] ?? ''); ?></title>
     <style>
         * {
             margin: 0;
@@ -184,24 +184,30 @@
 
         .section {
             margin: 25px 0;
-            padding: 15px;
-            background: #f9f9f9;
-            border-left: 4px solid #0066cc;
-            border-radius: 3px;
+            padding: 18px 20px;
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e2e5e9;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07);
         }
 
         .section-title {
-            font-weight: bold;
-            font-size: 12pt;
-            color: #0066cc;
-            margin-bottom: 10px;
-            text-transform: uppercase;
+            font-weight: 600;
+            font-size: 16px;
+            color: #0d6efd;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #e2e5e9;
+            padding-bottom: 6px;
         }
 
         .section-content {
-            color: #333;
-            line-height: 1.6;
+            color: #444;
+            font-size: 12px;
+            line-height: 1.5;
+            margin-top: 5px;
         }
+
 
         .terms-section {
             margin: 25px 0;
@@ -233,9 +239,9 @@
         }
 
         .signature-company {
-            font-size: 11pt;
+            font-size: 12px;
             color: #666;
-            margin-bottom: 60px;
+            margin-bottom: 29px;
         }
 
         .signature-line {
@@ -312,6 +318,7 @@
                 background: #fff;
                 margin: 0;
                 padding: 0;
+
             }
 
             .page {
@@ -351,126 +358,148 @@
 
 <body>
 
-    <div class="page">
-        <!-- Header Image -->
-        <?php if (!empty($record['ltr_header_img'])): ?>
-            <img src="<?php echo base_url('') . $record['ltr_header_img']; ?>" alt="Company Header" class="header-img">
-        <?php endif; ?>
-        <p>&nbsp;</p>
 
-        <!-- Customer & Quotation Info -->
-        <div class="info-section">
-            <div class="info-row">
-                <div class="info-cell left">
-                    <div><span class="info-label">To:</span></div>
-                    <div class="customer-name">
-                        <?php echo $record['vendor_name']; ?><br>
-                        <?php echo nl2br($record['address'] ?? 'N/A'); ?><br>
-                        <?php echo nl2br($record['country'] ?? 'N/A'); ?><br>
-                     </div>
-                </div>
-                <div class="info-cell right">
-                    <div><span class="info-label">Date:</span>
-                        <?php echo date('d-m-Y', strtotime($record['po_date'])); ?></div>
-                    <div><span class="info-label">Po No:</span>
-                        <?php echo htmlspecialchars($record['po_no'] ?? 'N/A'); ?></div>
-                    <div><span class="info-label">Enquiry No:</span>
-                        <?php echo htmlspecialchars($record['vendor_rate_enquiry_no'] ?? 'N/A'); ?></div>
+    <?php if (!empty($record) && !empty($record['vendor_po_id'])) { ?>
+
+        <div class="page">
+            <!-- Header Image -->
+            <?php if (!empty($record['ltr_header_img'])): ?>
+                <img src="<?php echo base_url('') . $record['ltr_header_img']; ?>" alt="Company Header" class="header-img">
+            <?php endif; ?>
+            <p>&nbsp;</p>
+
+            <!-- Customer & Quotation Info -->
+            <div class="info-section">
+                <div class="info-row">
+                    <div class="info-cell left">
+                        <div><span class="info-label">To:</span></div>
+                        <div class="customer-name">
+                            <?php echo $record['vendor_name']; ?><br>
+                            <?php echo nl2br($record['address'] ?? 'N/A'); ?><br>
+                            <?php echo '[ ' . htmlentities($record['country'] ?? 'N/A') . ']'; ?><br>
+
+                        </div>
+                    </div>
+                    <div class="info-cell right">
+                        <div><span class="info-label">Date:</span>
+                            <?php echo date('d-m-Y', strtotime($record['po_date'])); ?></div>
+                        <div><span class="info-label">Po No:</span>
+                            <?php echo htmlspecialchars($record['po_no'] ?? 'N/A'); ?></div>
+                        <div><span class="info-label">Quotation No:</span>
+                            <?php echo htmlspecialchars($record['quote_no'] ?? 'N/A'); ?></div>
 
 
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Items Table -->
-        <table class="items-table">
-            <thead>
-                <tr>
-                    <th style="width:5%;">S.No</th>
-                    <th style="width:30%;">Item Description</th>
-                    <th style="width:8%;">UOM</th>
-                    <th style="width:8%;">Qty</th>
-                    <th style="width:10%;">Rate</th>
-                    <th style="width:8%;">VAT %</th>
-                    <th style="width:11%;">VAT Amt</th>
-                    <th style="width:12%;">Amount</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (!empty($items)): ?>
-                    <?php foreach ($items as $i => $item): ?>
-                        <tr>
-                            <td class="text-center"><?php echo $i + 1; ?></td> 
-                            <td class="text-center"><?php echo htmlspecialchars($item['item_desc'] ?? '-'); ?>
-                            <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?? '-'); ?>
-                            </td>
-                            <td class="text-center"><?php echo number_format($item['qty'], 2); ?></td>
-                            <td class="text-right"><?php echo number_format($item['rate'], 2); ?></td>
-                            <td class="text-center"><?php echo number_format($item['gst'], 2); ?>%</td>
-                            <td class="text-right"><?php echo number_format($item['gst_amount'], 2); ?></td>
-                            <td class="text-right"><strong><?php echo number_format($item['amount'], 2); ?></strong></td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
+            <!-- Items Table -->
+            <table class="items-table">
+                <thead>
                     <tr>
-                        <td colspan="8" class="text-center" style="padding:20px; color:#999;">No items found</td>
+                        <th style="width:5%;">S.No</th>
+                        <th style="width:30%;">Item Description</th>
+                        <th style="width:8%;">UOM</th>
+                        <th style="width:8%;">Qty</th>
+                        <th style="width:10%;">Rate</th>
+                        <th style="width:8%;">VAT %</th>
+                        <th style="width:11%;">VAT Amt</th>
+                        <th style="width:12%;">Amount</th>
                     </tr>
-                <?php endif; ?>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <th colspan="7" class="text-right">Transport, Packing & Courier</th>
-                    <th class="text-right"><?php echo number_format($record['handling_charges'] ?? 0, 2); ?></th>
-                </tr>
-                <tr class="grand-total">
-                    <th colspan="7" class="text-right">GRAND TOTAL</th>
-                    <th class="text-right"><?php echo number_format($final_total, 2); ?></th>
-                </tr>
-            </tfoot>
-        </table>
+                </thead>
+                <tbody>
+                    <?php if (!empty($items)): ?>
+                        <?php foreach ($items as $i => $item): ?>
+                            <tr>
+                                <td class="text-center"><?php echo $i + 1; ?></td>
+                                <td class="text-center"><?php echo htmlspecialchars($item['item_desc'] ?? '-'); ?>
+                                <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?? '-'); ?>
+                                </td>
+                                <td class="text-center"><?php echo number_format($item['qty'], 2); ?></td>
+                                <td class="text-right"><?php echo number_format($item['rate'], 2); ?></td>
+                                <td class="text-center"><?php echo number_format($item['gst'], 2); ?>%</td>
+                                <td class="text-right"><?php echo number_format($item['gst_amount'], 2); ?></td>
+                                <td class="text-right"><strong><?php echo number_format($item['amount'], 2); ?></strong></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="8" class="text-center" style="padding:20px; color:#999;">No items found</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="7" class="text-right">Transport, Packing & Courier</th>
+                        <th class="text-right"><?php echo number_format($record['transport_charges'] ?? 0, 2); ?></th>
+                    </tr>
+                    <?php if (!empty($record['other_charges'])): ?>
+                        <tr>
+                            <th colspan="7" class="text-right">Other Charges</th>
+                            <th class="text-right"><?php echo number_format($record['other_charges'] ?? 0, 2); ?></th>
+                        </tr>
+                    <?php endif; ?>
+                    <tr class="grand-total">
+                        <th colspan="7" class="text-right">GRAND TOTAL</th>
+                        <th class="text-right"><?php echo number_format($final_total, 2); ?></th>
+                    </tr>
+                </tfoot>
+            </table>
 
-        <!-- Remarks -->
-        <?php if (!empty($record['remarks'])): ?>
-            <div class="section">
-                <div class="section-title">Remarks</div>
-                <div class="section-content"><?php echo nl2br(htmlspecialchars($record['remarks'])); ?></div>
-            </div>
-        <?php endif; ?>
+            <!-- Remarks -->
+            <?php if (!empty($record['remarks'])): ?>
+                <div class="section">
+                    <div class="section-title">Note</div>
+                    <div class="section-content"><?php echo nl2br($record['remarks']); ?></div>
+                </div>
+            <?php endif; ?>
 
-        <!-- Terms & Conditions -->
-        <?php if (!empty($record['terms'])): ?>
-            <div class="terms-section">
-                <div class="section-title">Terms & Conditions</div>
-                <div class="section-content">
-                    <?php echo $record['terms']; ?>
+            <!-- Remarks -->
+            <?php if (!empty($record['remarks'])): ?>
+                <div class="section">
+                    <div class="section-title">Terms & Conditions</div>
+                    <div class="section-content"><?php echo nl2br($record['terms']); ?></div>
+                </div>
+            <?php endif; ?>
+
+
+            <!-- Signature -->
+            <div class="signature-section">
+                <div class="signature-box">
+                    <div class="signature-company">For
+                        <?php echo htmlspecialchars($record['our_company'] ?? $record['company_name'] ?? 'Our Company'); ?>
+                    </div>
+                    <div class="signature-line"></div>
+                    <div class="signature-label">Authorised Signatory</div>
                 </div>
             </div>
-        <?php endif; ?>
 
-        <!-- Signature -->
-        <div class="signature-section">
-            <div class="signature-box">
-                <div class="signature-company">For
-                    <?php echo htmlspecialchars($record['our_company'] ?? $record['company_name'] ?? 'Our Company'); ?>
-                </div>
-                <div class="signature-line"></div>
-                <div class="signature-label">Authorised Signatory</div>
-            </div>
         </div>
 
+        <!-- Action Buttons -->
+        <div class="button-container">
+            <button type="button" class="btn btn-primary"
+                onclick="window.location.href='<?= site_url('vendor-po-list') ?>'">
+                ← Back To List
+            </button>
+            <button type="button" class="btn btn-success" onclick="window.print()">
+                🖨️ Print
+            </button>
+        </div>
 
-    </div>
+    <?php } else { ?>
+        <div class="page">
+            <h2 class="text-center" style="color: #cc0000; margin-top: 100px;">No Record Found</h2>
 
-    <!-- Action Buttons -->
-    <div class="button-container">
-        <button type="button" class="btn btn-primary"
-            onclick="window.location.href='<?= site_url('vendor-po-list') ?>'">
-            ← Back To List
-        </button>
-        <button type="button" class="btn btn-success" onclick="window.print()">
-            🖨️ Print
-        </button>
-    </div>
+            <div class="button-container text-center" style="margin-top: 20px;">
+                <button type="button" class="btn btn-primary"
+                    onclick="window.location.href='<?= site_url('vendor-po-list') ?>'">
+                    ← Back To List
+                </button>
+            </div>
+        </div>
+    <?php } ?>
+
 
 </body>
 

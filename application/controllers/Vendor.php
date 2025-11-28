@@ -488,13 +488,13 @@ class Vendor extends CI_Controller
                 'customer_id' => $this->input->post('srch_customer_id'),
                 'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
                 'vendor_id' => $this->input->post('srch_vendor_id'),
-                'vendor_rate_enquiry_id' => $this->input->post('vendor_rate_enquiry_id'),
+                'vendor_quote_id' => $this->input->post('srch_vendor_quote_id'),
                 'vendor_contact_person_id' => $this->input->post('srch_vendor_contact_person_id'),
                 'po_no' => $this->input->post('po_no'),
                 'po_date' => $this->input->post('po_date'),
-                'opening_date' => $this->input->post('opening_date'),
-                'closing_date' => $this->input->post('closing_date'),
-                'handling_charges' => $this->input->post('handling_charges'),
+                'delivery_date' => $this->input->post('delivery_date'),
+                'transport_charges' => $this->input->post('transport_charges'),
+                'other_charges' => $this->input->post('other_charges'),
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
                 'po_status' => $this->input->post('po_status'),
@@ -570,7 +570,7 @@ class Vendor extends CI_Controller
         $query = $this->db->query($sql);
         $data['gst_opt'] = [];
         foreach ($query->result_array() as $row) {
-            $data['gst_opt'][$row['gst_id']] = $row['gst_percentage'];
+            $data['gst_opt'][$row['gst_percentage']] = $row['gst_percentage'];
         }
 
         $data['vendor_opt'] = [];
@@ -585,18 +585,7 @@ class Vendor extends CI_Controller
             $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
         }
 
-        // $sql = "
-        //     SELECT vendor_contact_id, contact_person_name
-        //     FROM vendor_contact_info
-        //     WHERE status = 'Active' 
-        //     ORDER BY contact_person_name ASC
-        // ";
-        // $query = $this->db->query($sql);
-        // foreach ($query->result_array() as $row) {
-
-        //     $data['vendor_contact_opt'][$row['vendor_contact_id']] = $row['contact_person_name'];
-        // }
-        $data['tender_status_opt'] = ['' => 'Select Tender Status', 'Open' => 'Open', 'Quoted' => 'Quoted', 'Won' => 'Won', 'Lost' => 'Lost', 'On Hold' => 'On Hold'];
+        $data['po_status_opt'] = ['' => 'Select PO Status', 'In Progress' => 'In Progress', 'Delivered' => 'Delivered'];
 
         $this->load->view('page/vendor/vendor-po-add', $data);
     }
@@ -768,14 +757,12 @@ class Vendor extends CI_Controller
             }
         }
 
-        $data['po_status_opt'] = ['' => 'Select Po Status', 'Open' => 'Open', 'Quoted' => 'Quoted', 'Won' => 'Won', 'Lost' => 'Lost', 'On Hold' => 'On Hold'];
+        $data['po_status_opt'] = ['' => 'Select PO Status', 'In Progress' => 'In Progress', 'Delivered' => 'Delivered'];
         // === FETCH RECORDS ===
         $sql = "
              SELECT 
                 a.po_no,
-                a.po_date,
-                a.opening_date,
-                a.closing_date,
+                a.po_date,  
                 a.vendor_po_id,
                 a.status,
                 a.customer_id,
@@ -826,17 +813,17 @@ class Vendor extends CI_Controller
             $this->db->trans_start();
 
             $header = [
-                'company_id' => $this->input->post('srch_company_id'),
+               'company_id' => $this->input->post('srch_company_id'),
                 'customer_id' => $this->input->post('srch_customer_id'),
                 'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
                 'vendor_id' => $this->input->post('srch_vendor_id'),
-                'vendor_rate_enquiry_id' => $this->input->post('vendor_rate_enquiry_id'),
-                'vendor_contact_person_id' => $this->input->post('srch_vendor_contact_person_id') ? $this->input->post('srch_vendor_contact_person_id') : null,
+                'vendor_quote_id' => $this->input->post('srch_vendor_quote_id'),
+                'vendor_contact_person_id' => $this->input->post('srch_vendor_contact_person_id'),
                 'po_no' => $this->input->post('po_no'),
                 'po_date' => $this->input->post('po_date'),
-                'opening_date' => $this->input->post('opening_date'),
-                'closing_date' => $this->input->post('closing_date'),
-                'handling_charges' => $this->input->post('handling_charges'),
+                'delivery_date' => $this->input->post('delivery_date'),
+                'transport_charges' => $this->input->post('transport_charges'),
+                'other_charges' => $this->input->post('other_charges'),
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
                 'po_status' => $this->input->post('po_status'),
@@ -903,15 +890,12 @@ class Vendor extends CI_Controller
         $data['vendor_rate_enquiry_opt'] = ['' => 'Select Enquiry No'];
         $data['vendor_opt'] = ['' => 'Select Vendor'];
         $data['vendor_contact_opt'] = ['' => 'Select'];
-        $data['tender_status_opt'] = ['' => 'Select Tender Status', 'Open' => 'Open', 'Quoted' => 'Quoted', 'Won' => 'Won', 'Lost' => 'Lost', 'On Hold' => 'On Hold'];
+        $data['po_status_opt'] = ['' => 'Select PO Status', 'In Progress' => 'In Progress', 'Delivered' => 'Delivered'];
 
         // ==================== LOAD DATA FOR EDIT ====================
         if (!$vendor_po_id) {
             show_404();
         }
-
-
-        // Items with category & item name
 
         $sql = "
             SELECT 
@@ -922,28 +906,33 @@ class Vendor extends CI_Controller
             ORDER BY vpo.vendor_po_id ASC
         ";
         $query = $this->db->query($sql, [$vendor_po_id]);
-        $data['header'] = $query->row_array();   // ✅ Single row
+        $data['header'] = $query->row_array();
 
         $sql = "
-        SELECT 
-            vpi.*,
-            ci.category_name,
-            ii.item_name
-        FROM vendor_po_item_info vpi
-        LEFT JOIN category_info ci ON vpi.category_id = ci.category_id
-        LEFT JOIN item_info ii ON vpi.item_id = ii.item_id
-        WHERE vpi.vendor_po_id = ? AND vpi.status = 'Active'
-        ORDER BY vpi.vendor_po_item_id ASC
-    ";
+            SELECT 
+                vpi.*,
+                ci.category_name,
+                ii.item_code
+            FROM vendor_po_item_info vpi
+            LEFT JOIN category_info ci ON vpi.category_id = ci.category_id
+            LEFT JOIN item_info ii ON vpi.item_id = ii.item_id
+            WHERE vpi.vendor_po_id = ? AND vpi.status = 'Active'
+            ORDER BY vpi.vendor_po_item_id ASC
+        ";
         $query = $this->db->query($sql, [$vendor_po_id]);
         $data['items'] = $query->result_array();
 
-        // Company dropdown
         $sql = "
-            SELECT company_id, company_name FROM 
-            company_info 
-            WHERE status = 'Active' 
-            ORDER BY company_name ASC
+            SELECT
+                company_id,
+                company_name
+            FROM
+                company_info
+            WHERE
+            STATUS
+                = 'Active'
+            ORDER BY
+                company_name ASC
         ";
         $query = $this->db->query($sql);
         $data['company_opt'] = ['' => 'Select Company'];
@@ -951,103 +940,71 @@ class Vendor extends CI_Controller
             $data['company_opt'][$row['company_id']] = $row['company_name'];
         }
 
+        // Customer Dropdown
+        $sql = "
+            SELECT 
+            customer_id, 
+            customer_name 
+            FROM customer_info 
+            WHERE status = 'Active' 
+            ORDER BY customer_name ASC
+        ";
+        $query = $this->db->query($sql);
         $data['customer_opt'] = ['' => 'Select Customer'];
-        $sql = "
-            SELECT customer_id, customer_name FROM 
-            customer_info 
-            WHERE status = 'Active' 
-            ORDER BY customer_name ASC
-        ";
-        $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
             $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
         }
+
+        // Tender Enquiry
         $sql = "
-            SELECT customer_id, customer_name FROM 
-            customer_info 
-            WHERE status = 'Active' 
-            ORDER BY customer_name ASC
+                SELECT 
+                a.tender_enquiry_id, 
+            get_tender_info(a.tender_enquiry_id) as enquiry_no 
+            FROM tender_enquiry_info as a 
+            WHERE a.status = 'Active' 
+            GROUP BY a.tender_enquiry_id 
+            ORDER BY a.tender_enquiry_id
         ";
         $query = $this->db->query($sql);
-        foreach ($query->result_array() as $row) {
-            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
-        }
-        $sql = "
-            SELECT
-                a.*
-                FROM
-                  tender_enquiry_info  as a 
-                WHERE
-                    a.status = 'Active' 
-                GROUP by a.tender_enquiry_id 
-                ORDER by a.tender_enquiry_id
-        ";
-        $query = $this->db->query($sql);
+        $data['tender_enquiry_opt'] = ['' => 'Select Enquiry'];
         foreach ($query->result_array() as $row) {
             $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['enquiry_no'];
         }
 
-        $sql = "
-            SELECT
-                a.*
-                FROM
-                  vendor_rate_enquiry_info  as a 
-                WHERE
-                    a.status = 'Active' 
-                 ORDER by a.vendor_rate_enquiry_id
-        ";
+        $sql = "SELECT vendor_quote_id, quote_no FROM vendor_quotation_info WHERE status = 'Active' ORDER BY quote_no ASC";
         $query = $this->db->query($sql);
+        $data['vendor_quote_opt'] = ['' => 'Select Enquiry No'];
         foreach ($query->result_array() as $row) {
-            $data['vendor_rate_enquiry_opt'][$row['vendor_rate_enquiry_id']] = $row['enquiry_no'];
-        }
-        $sql = "
-            SELECT
-                a.*
-                FROM
-                  vendor_rate_enquiry_info  as a 
-                WHERE
-                    a.status = 'Active' 
-                 ORDER by a.vendor_rate_enquiry_id
-        ";
-        $query = $this->db->query($sql);
-        foreach ($query->result_array() as $row) {
-            $data['vendor_rate_enquiry_opt'][$row['vendor_rate_enquiry_id']] = $row['enquiry_no'];
+            $data['vendor_quote_opt'][$row['vendor_quote_id']] = $row['quote_no'];
         }
 
-        // GST options
-        $sql = "SELECT gst_percentage FROM gst_info WHERE status = 'Active' ORDER BY gst_percentage ASC";
-        $query = $this->db->query($sql);
-        $data['gst_opt'] = [];
-        foreach ($query->result_array() as $row) {
-            $data['gst_opt'][] = $row['gst_percentage'];
-        }
-
-        // Vendor dropdown
         $sql = "SELECT vendor_id, vendor_name FROM vendor_info WHERE status = 'Active' ORDER BY vendor_name ASC";
         $query = $this->db->query($sql);
-        $data['vendor_opt'] = ['' => 'Select'];
+        $data['vendor_opt'] = ['' => 'Select Vendor'];
         foreach ($query->result_array() as $row) {
             $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
         }
-        // Vendor dropdown
-        $sql = "
-            SELECT vendor_contact_id, contact_person_name 
-            FROM 
-                vendor_contact_info 
-            WHERE status = 'Active' 
-            ORDER BY contact_person_name ASC
-        ";
+
+        $sql = "SELECT vendor_contact_id, contact_person_name FROM vendor_contact_info WHERE status = 'Active' ORDER BY contact_person_name ASC";
         $query = $this->db->query($sql);
-        $data['vendor_contact_opt'] = ['' => 'Select'];
+        $data['vendor_contact_opt'] = ['' => 'Select Contact'];
         foreach ($query->result_array() as $row) {
             $data['vendor_contact_opt'][$row['vendor_contact_id']] = $row['contact_person_name'];
         }
 
+        $sql = "SELECT gst_percentage FROM gst_info WHERE status = 'Active' ORDER BY gst_percentage ASC";
+        $query = $this->db->query($sql);
+        $gst_opt = [];
+        foreach ($query->result_array() as $row) {
+            $gst_opt[$row['gst_percentage']] = $row['gst_percentage'];
+        }
+        $data['gst_opt'] = $gst_opt;
 
+        // Status Options
+        $data['quotation_status_opt'] = ['' => 'Select Tender Status', 'Pending' => 'Pending', 'Confirmed' => 'Confirmed', 'Rejected' => 'Rejected'];
 
-
-
-        $this->load->view('page/vendor/vendor-po-edit', $data); // Create this view (use the one I gave earlier)
+ 
+        $this->load->view('page/vendor/vendor-po-edit', $data);
     }
 
 
@@ -1069,7 +1026,9 @@ class Vendor extends CI_Controller
                 c.company_name,
                 a.po_date,
                 a.po_no,
-                a.handling_charges,
+                a.other_charges,
+                a.transport_charges,
+                a.remarks,
                 a.terms,
                 e.vendor_name,
                 e.address,
@@ -1078,13 +1037,14 @@ class Vendor extends CI_Controller
                 e.address,
                 e.vendor_id,
                 e.country,
-                f.enquiry_no as vendor_rate_enquiry_no
+                f.quote_no,
+                a.vendor_po_id
             FROM vendor_po_info as  a 
             LEFT JOIN customer_info as b on a.customer_id = b.customer_id  and b.status='Active'
             LEFT JOIN company_info as c  on a.company_id = c.company_id and c.status='Active'
             LEFT JOIN tender_enquiry_info as d  on a.tender_enquiry_id = d.tender_enquiry_id and d.status='Active'
-            left join vendor_info as e on a.vendor_id = e.vendor_id and e.status='Active'
-            left join vendor_rate_enquiry_info as f on a.vendor_rate_enquiry_id = f.vendor_rate_enquiry_id and f.status='Active'
+            left join vendor_info as e on a.vendor_id = e.vendor_id and e.status='Active' 
+            left join vendor_quotation_info as f on  a.vendor_quote_id = f.vendor_quote_id and f.`status`='Active'
             WHERE a.status='Active'
             and a.vendor_po_id = ?
         ";
@@ -1145,7 +1105,7 @@ class Vendor extends CI_Controller
         $data['gst_summary'] = $gst_summary;
         $data['grand_total'] = array_sum(array_column($data['items'], 'base_amount'));
         $data['total_gst'] = array_sum(array_column($data['items'], 'gst_amount'));
-        $data['final_total'] = $data['grand_total'] + $data['total_gst'] + $data['record']['handling_charges'];
+        $data['final_total'] = $data['grand_total'] + $data['total_gst'] + $data['record']['other_charges'] + $data['record']['transport_charges'];
 
         $this->load->view('page/vendor/vendor-po-print', $data);
     }
@@ -1290,7 +1250,7 @@ class Vendor extends CI_Controller
         foreach ($query->result_array() as $row) {
             $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
         }
-        $data['quotation_status_opt'] = ['' => 'Select Tender Status', 'Pending' => 'Pending',  'Completed' => 'Completed','Rejected' => 'Rejected'];
+        $data['quotation_status_opt'] = ['' => 'Select Tender Status', 'Pending' => 'Pending', 'Confirmed' => 'Confirmed', 'Rejected' => 'Rejected'];
 
         $this->load->view('page/vendor/vendor-quotation-add', $data);
     }
@@ -1685,7 +1645,7 @@ class Vendor extends CI_Controller
         $data['gst_opt'] = $gst_opt;
 
         // Status Options
-        $data['quotation_status_opt'] = ['' => 'Select Status', 'Completed' => 'Completed', 'Pending' => 'Pending', 'Rejected' => 'Rejected'];
+        $data['quotation_status_opt'] = ['' => 'Select Tender Status', 'Pending' => 'Pending', 'Confirmed' => 'Confirmed', 'Rejected' => 'Rejected'];
 
         $this->load->view('page/vendor/vendor-quotation-edit', $data);
     }
@@ -1731,6 +1691,46 @@ class Vendor extends CI_Controller
         $query = $this->db->query($sql, [$vendor_rate_enquiry_id]);
         echo json_encode($query->result_array());
     }
+    public function get_vendor_quotation_data_load_po()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            echo json_encode(['error' => 'Unauthorized']);
+            return;
+        }
+
+        $srch_vendor_quote_id = $this->input->post('srch_vendor_quote_id');
+
+        if (empty($srch_vendor_quote_id)) {
+            echo json_encode([]);
+            return;
+        }
+
+        $sql = "
+            SELECT
+                a.vendor_quote_item_id,
+                a.vendor_quote_id,
+                a.vendor_rate_enquiry_item_id,
+                a.uom,
+                a.qty,
+                a.item_id,
+                a.item_desc,
+                a.category_id,
+                a.rate,
+                a.gst,
+                a.amount,
+                ii.item_code
+            FROM vendor_quote_item_info a
+            LEFT JOIN category_info ci ON a.category_id = ci.category_id
+            LEFT JOIN item_info ii ON a.item_id = ii.item_id
+            WHERE a.status = 'Active'
+                AND a.vendor_quote_id = ?
+            ORDER BY a.vendor_rate_enquiry_item_id ASC
+        ";
+
+        $query = $this->db->query($sql, [$srch_vendor_quote_id]);
+        echo json_encode($query->result_array());
+    }
+
 
 
     public function get_vendor_list_quotation()
@@ -1992,6 +1992,30 @@ class Vendor extends CI_Controller
                 AND a.vendor_id = '" . $rec_id . "'
                 and a.vendor_rate_enquiry_status = 'Quotation Received'
                 ORDER BY vendor_rate_enquiry_no ASC
+            ");
+
+            $rec_list = $query->result_array();
+            echo json_encode($rec_list);
+            exit;
+        }
+
+        if ($table == 'get-vendor-quotation-load-enquiry-no') {
+
+            $query = $this->db->query("
+                   SELECT
+                    a.vendor_quote_id,
+                    a.quote_no as vendor_quote_no
+                FROM vendor_quotation_info AS a
+                LEFT JOIN vendor_info AS b 
+                    ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                LEFT JOIN vendor_contact_info AS c 
+                    ON a.vendor_contact_person_id = c.vendor_contact_id 
+                    AND c.vendor_id = b.vendor_id 
+                    AND c.status = 'Active'
+                WHERE a.status = 'Active'
+                AND a.vendor_id = '" . $rec_id . "'
+                and a.quote_status = 'Confirmed'
+                ORDER BY a.quote_no ASC
             ");
 
             $rec_list = $query->result_array();

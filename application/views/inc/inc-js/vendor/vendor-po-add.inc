@@ -1,515 +1,341 @@
 <script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
-<script>
-    $(document).ready(function () {
-        // Same calculation functions as Add page
-        function calculateRow($row) {
-            const qty = parseFloat($row.find(".qty-input").val()) || 0;
-            const rate = parseFloat($row.find(".rate-input").val()) || 0;
-            const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
-            const amount = qty * rate * (1 + gst / 100);
-            $row.find(".amount-input").val(amount.toFixed(2));
-        }
-
-        function calculateTotalAmount() {
-            let total = 0;
-            $(".amount-input").each(function () {
-                total += parseFloat($(this).val()) || 0;
-            });
-            $("#total_amount").text(total.toFixed(2));
-        }
-
-        $(document).on("input change", ".rate-input, .vat-dropdown", function () {
-            const $row = $(this).closest(".item-card");
-            calculateRow($row);
-            calculateTotalAmount();
-        });
-
-        // Trigger initial calculation
-        $(".item-card").each(function() {
-            calculateRow($(this));
-        });
-        calculateTotalAmount();
-
-        // CKEditor
-        CKEDITOR.replace('editor1', {
-            height: 80,
-            extraPlugins: "justify,colorbutton,font,table",
-            toolbar: [ /* same as add page */ ]
-        });
-    });
-</script>
-
 <style>
-    /* Same total box style as Add page */
-    .total-wrapper { display: flex; justify-content: flex-end; width: 100%; }
-    .total-box { background: linear-gradient(135deg, #f6fff9, #e8f9f0); border: 2px solid #b5e0c6; border-radius: 12px; padding: 12px 24px; min-width: 280px; text-align: right; }
-    #total_amount { font-size: 1.4rem; font-weight: 700; margin-left: 5px; }
-    @media (max-width: 768px) { .total-wrapper { justify-content: center; } }
+  /* Your existing styles remain unchanged */
+  .text-light-blue {
+    color: #3c8dbc !important;
+  }
+
+  fieldset {
+    border: 1px solid #d2d6de;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
+
+  legend {
+    font-size: 16px;
+    font-weight: bold;
+    width: auto;
+    padding: 0 12px;
+  }
+
+  .total-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin: 20px 0;
+  }
+
+  .total-box {
+    background: linear-gradient(135deg, #f6fff9, #e8f9f0);
+    border: 2px solid #b5e0c6;
+    border-radius: 12px;
+    padding: 12px 24px;
+    min-width: 280px;
+    text-align: right;
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+
+  #total_amount {
+    font-size: 1.5rem;
+    color: #3c8dbc;
+  }
 </style>
-<script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
 
 <script>
   $(document).ready(function () {
-    /* ================================================================
-       1. COMPANY CHANGE - Load ALL Customers (no filtering by company)
-       ================================================================ */
+    // 1. Company → Load Customers
     $("#srch_company_id").on("change", function () {
       const company_id = $(this).val();
-      const $customerDropdown = $("#srch_customer_id");
-      const $enquiryDropdown = $("#srch_tender_enquiry_id");
-      const $quotationDropdown = $("#srch_vendor_rate_enquiry_id");
-      const $container = $("#item_container");
-
-      // Reset dependent dropdowns
-      $enquiryDropdown
-        .html('<option value="">Select Enquiry</option>')
-        .prop("disabled", true);
-      $quotationDropdown
-        .html('<option value="">Select Quotation</option>')
-        .prop("disabled", true);
-      $container.html("");
+      const $customer = $("#srch_customer_id");
+      $customer.html('<option value="">Loading...</option>');
 
       if (!company_id) {
-        $customerDropdown
-          .html('<option value="">Select Customer</option>')
-          .prop("disabled", false);
+        $customer.html('<option value="">Select Customer</option>');
         return;
       }
 
-      // Load ALL customers (not filtered by company)
-      $.ajax({
-        url: "<?php echo site_url('vendor/get_all_customers'); ?>",
-        type: "POST",
-        dataType: "json",
-        success: function (res) {
-          $customerDropdown.html('<option value="">Select Customer</option>');
-          if (res.length > 0) {
-            $.each(res, function (i, row) {
-              $customerDropdown.append(
-                $("<option></option>")
-                  .attr("value", row.customer_id)
-                  .text(row.customer_name)
-              );
-            });
-            $customerDropdown.prop("disabled", false);
-          } else {
-            $customerDropdown.html(
-              '<option value="">No customers found</option>'
+      $.post(
+        "<?php echo site_url('vendor/get_all_customers'); ?>",
+        {},
+        function (res) {
+          $customer.html('<option value="">Select Customer</option>');
+          $.each(res, function (i, row) {
+            $customer.append(
+              `<option value="${row.customer_id}">${row.customer_name}</option>`
             );
-          }
+          });
         },
-        error: function () {
-          alert("Error loading customers");
-        },
-      });
+        "json"
+      );
     });
 
-    /* ================================================================
-       2. CUSTOMER CHANGE - Load Tender Enquiries (filtered by company + customer)
-       ================================================================ */
+    // 2. Customer → Load Tender Enquiries
     $("#srch_customer_id").on("change", function () {
       const customer_id = $(this).val();
       const company_id = $("#srch_company_id").val();
-      const $enquiryDropdown = $("#srch_tender_enquiry_id");
-      const $quotationDropdown = $("#srch_vendor_rate_enquiry_id");
-      const $container = $("#item_container");
+      const $enquiry = $("#srch_tender_enquiry_id");
 
-      // Reset dependent dropdowns and items
-      $enquiryDropdown
-        .html('<option value="">Select Enquiry</option>')
-        .prop("disabled", true);
-      $quotationDropdown
-        .html('<option value="">Select Quotation</option>')
-        .prop("disabled", true);
-      $container.html("");
+      if (!customer_id || !company_id) {
+        $enquiry
+          .html('<option value="">Select Enquiry</option>')
+          .prop("disabled", true);
+        return;
+      }
 
-      if (!customer_id || !company_id) return;
-
-      $.ajax({
-        url: "<?php echo site_url('vendor/get_tender_enquiries_by_customer'); ?>",
-        type: "POST",
-        data: {
+      $.post(
+        "<?php echo site_url('vendor/get_tender_enquiries_by_customer'); ?>",
+        {
           company_id: company_id,
           customer_id: customer_id,
         },
-        dataType: "json",
-        success: function (res) {
+        function (res) {
+          $enquiry.html('<option value="">Select Enquiry</option>');
           if (res.length > 0) {
-            $enquiryDropdown.prop("disabled", false);
             $.each(res, function (i, row) {
-              $enquiryDropdown.append(
-                $("<option></option>")
-                  .attr("value", row.tender_enquiry_id)
-                  .text(row.display)
+              $enquiry.append(
+                `<option value="${row.tender_enquiry_id}">${row.display}</option>`
               );
             });
-          } else {
-            $enquiryDropdown.html(
-              '<option value="">No enquiries found</option>'
-            );
+            $enquiry.prop("disabled", false);
           }
         },
-        error: function () {
-          alert("Error loading enquiries");
-        },
-      });
+        "json"
+      );
     });
 
+    // 3. Tender Enquiry → Load Vendors
     $("#srch_tender_enquiry_id").on("change", function () {
       const tender_id = $(this).val();
-      const $quotationDropdown = $("#srch_vendor_rate_enquiry_id");
-      const $container = $("#item_container");
+      const $vendor = $("#srch_vendor_id");
+      $vendor.html('<option value="">Loading...</option>');
 
-      // Reset
-      $quotationDropdown
-        .html('<option value="">Select Quotation</option>')
-        .prop("disabled", true);
-      $container.html("");
+      if (!tender_id) {
+        $vendor.html('<option value="">Select Vendor</option>');
+        return;
+      }
 
-      if (!tender_id) return;
-
-      $.ajax({
-        url: "<?= site_url('vendor/get_vendor_rate_enquiry_list'); ?>",
-        type: "POST",
-        data: {
+      $.post(
+        "<?php echo site_url('vendor/get_vendor_list_quotation'); ?>",
+        {
           srch_tender_enquiry_id: tender_id,
         },
-        dataType: "json",
-        success: function (res) {
-          console.log(res);
-
+        function (res) {
+          $vendor.html('<option value="">Select Vendor</option>');
           if (res.length > 0) {
-            $quotationDropdown.prop("disabled", false);
-
             $.each(res, function (i, row) {
-              $quotationDropdown.append(
-                $("<option></option>")
-                  .attr("value", row.vendor_rate_enquiry_id)
-                  .text(row.enquiry_no)
+              $vendor.append(
+                `<option value="${row.vendor_id}">${row.vendor_name}</option>`
               );
             });
-          } else {
-            $quotationDropdown.html(
-              '<option value="">No quotations found</option>'
-            );
           }
         },
-        error: function () {
-          alert("Error loading quotations");
-        },
-      });
+        "json"
+      );
     });
 
-    // Load vendor contacts when vendor is selected
+    // 4. Vendor → Load Rate Enquiry Numbers
     $("#srch_vendor_id").on("change", function () {
       const vendor_id = $(this).val();
+      const $enquiry = $("#srch_vendor_quote_id");
+      const $contact = $("#srch_vendor_contact_id");
 
-      // Auto-set vendor in Add Contact Person modal
-      $("#contact_vendor_id").val(vendor_id);
+      $enquiry.html('<option value="">Select Enquiry No</option>');
+      $contact.html('<option value="">Select Contact</option>');
 
-      // Clear dropdown before loading
-      $("#srch_vendor_contact_id").html(
-        '<option value="">Select Contact Person</option>'
-      );
+      if (!vendor_id) return;
 
-      if (vendor_id) {
-        $.ajax({
-          url: '<?php echo site_url("vendor/get_data"); ?>',
-          type: "POST",
-          data: { tbl: "get-vendor-contacts", id: vendor_id },
-          dataType: "json",
-          success: function (res) {
-            if (res.length > 0) {
-              $.each(res, function (i, contact) {
-                $("#srch_vendor_contact_id").append(
-                  `<option value="${contact.vendor_contact_id}">${contact.contact_person_name}</option>`
-                );
-              });
-            } else {
-              $("#srch_vendor_contact_id").html(
-                "<option>No contacts found</option>"
-              );
-            }
-          },
-        });
-      }
-    });
-
-    $("#srch_vendor_rate_enquiry_id").on("change", function () {
-      const vendor_rate_enquiry_id = $(this).val();
-      const $container = $("#item_container");
-      $container.html("");
-
-      if (!vendor_rate_enquiry_id) return;
-
-      $.ajax({
-        url: "<?php echo site_url('vendor/get_vendor_rate_enquiry'); ?>",
-        type: "POST",
-        data: {
-          vendor_rate_enquiry_id: vendor_rate_enquiry_id,
+      // Load Rate Enquiry Nos
+      $.post(
+        "<?php echo site_url('vendor/get_data'); ?>",
+        {
+          tbl: "get-vendor-quotation-load-enquiry-no",
+          id: vendor_id,
         },
-        dataType: "json",
-        success: function (res) {
+        function (res) {
           if (res.length > 0) {
             $.each(res, function (i, row) {
-              const hiddenFields = `
-                <input type="hidden" name="vendor_rate_enquiry_item_id[]" value="${row.vendor_rate_enquiry_item_id}">
-                <input type="hidden" name="category_id[]" value="${row.category_id}">
-                <input type="hidden" name="item_id[]" value="${row.item_id}">
-              `;
-
-              const itemHtml = `
-                <div class="item-card border p-3 mb-3" style="background-color:#f9f9f9; border-radius:8px;">
-                  <h5 class="text-primary mb-3">Item Details ${i + 1}</h5>
-                  <div class="row">
-                    <div class="col-md-1 d-flex align-items-center justify-content-center">
-                      <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="${i}">
-                    </div>
-
-                    <div class="col-md-3">
-                      <div class="form-group">
-                        <label>Category Name</label>
-                        <input type="text" class="form-control" value="${
-                          row.category_name || ""
-                        }" readonly>
-                      </div>
-                      <div class="form-group">
-                        <label>Item Name</label>
-                        <input type="text" class="form-control" value="${
-                          row.item_name || ""
-                        }" readonly>
-                      </div>
-                    </div>
-
-                    <div class="col-md-4">
-                      <div class="form-group">
-                        <label>Item Description</label>
-                        <textarea name="item_desc[]" class="form-control desc-textarea" rows="3">${
-                          row.item_desc || ""
-                        }</textarea>
-                      </div>
-                    </div>
-
-                    <div class="col-md-4">
-                      <div class="row">
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label>UOM</label>
-                            <input type="text" name="uom[]" class="form-control" value="${
-                              row.uom || ""
-                            }" readonly>
-                          </div>
-                        </div>
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label>Quantity</label>
-                            <input type="number" step="0.01" name="qty[]" class="form-control qty-input" value="${
-                              row.qty || 0
-                            }" readonly>
-                          </div>
-                        </div>
-
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label>Rate</label>
-                            <input type="number" step="0.01" name="rate[]" class="form-control rate-input" value="${
-                              row.rate || 0
-                            }">
-                          </div>
-                        </div>
-
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label>VAT %</label>
-                            <select name="gst[]" class="form-control vat-dropdown">
-                              <option value="">Select</option>
-                              <?php foreach($gst_opt as $gid => $pct): ?>
-                                <option value="<?= $pct; ?>"><?= $pct; ?>%</option>
-                              <?php endforeach; ?>
-                            </select>
-                          </div>
-                        </div>
-
-                        <div class="col-md-12">
-                          <div class="form-group">
-                            <label>Amount</label>
-                            <input type="number" step="0.01" name="amount[]" class="form-control amount-input" value="0.00" readonly>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  ${hiddenFields}
-                </div>
-              `;
-              $container.append(itemHtml);
+              $enquiry.append(
+                `<option value="${row.vendor_quote_id}">${row.vendor_quote_no}</option>`
+              );
             });
-
-            // Add total row
-            $container.append(`
-              <div class="total-wrapper mt-4 mb-4">
-                <div class="total-box shadow-sm">
-                  <h5 class="mb-0">
-                    <i class="fa fa-calculator text-success me-2"></i>
-                    <strong>Total Amount:</strong>
-                    <span class="text-primary">₹ <span id="total_amount">0.00</span></span>
-                  </h5>
-                </div>
-              </div>
-
-              <style>
-                .total-wrapper {
-                  display: flex;
-                  justify-content: flex-end;
-                  align-items: center;
-                  width: 100%;
-                }
-                .total-box {
-                  background: linear-gradient(135deg, #f6fff9, #e8f9f0);
-                  border: 2px solid #b5e0c6;
-                  border-radius: 12px;
-                  padding: 12px 24px;
-                  font-family: "Segoe UI", sans-serif;
-                  font-size: 1.15rem;
-                  color: #333;
-                  min-width: 280px;
-                  text-align: right;
-                  transition: all 0.3s ease-in-out;
-                }
-                .total-box:hover {
-                  background: #e3f7ec;
-                  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-                  transform: translateY(-2px);
-                }
-                .total-box i {
-                  font-size: 1.3rem;
-                  vertical-align: middle;
-                }
-                #total_amount {
-                  font-size: 1.4rem;
-                  font-weight: 700;
-                  margin-left: 5px;
-                }
-                @media (max-width: 768px) {
-                  .total-wrapper { justify-content: center; }
-                  .total-box { text-align: center; min-width: 220px; }
-                }
-              </style>
-            `);
-
-            // Calculate totals on load
-            calculateTotalAmount();
-          } else {
-            $container.html(
-              '<div class="alert alert-warning">No items found for this quotation.</div>'
-            );
           }
         },
-        error: function () {
-          alert("Error loading quotation items");
-        },
-      });
-    });
+        "json"
+      );
 
-    /* ================================================================
-       5. Amount Calculation (Rate / VAT change)
-       ================================================================ */
-    $(document).on("input change", ".rate-input, .vat-dropdown", function () {
-      const $row = $(this).closest(".item-card");
+      // Load Contact Persons
+      $.post(
+        "<?php echo site_url('vendor/get_data'); ?>",
+        {
+          tbl: "get-vendor-contacts",
+          id: vendor_id,
+        },
+        function (res) {
+          if (res.length > 0) {
+            $.each(res, function (i, row) {
+              $contact.append(
+                `<option value="${row.vendor_contact_id}">${row.contact_person_name}</option>`
+              );
+            });
+          }
+        },
+        "json"
+      );
+    });
+  });
+
+  // CKEditor
+  window.onload = function () {
+    CKEDITOR.replace("editor1", { height: 120 });
+    CKEDITOR.replace("editor2", { height: 120 });
+  };
+</script>
+<script>
+  $("#srch_vendor_quote_id").on("change", function () {
+    const srch_vendor_quote_id = $(this).val();
+    const $container = $("#item_container");
+    $container.html("");
+
+    if (!srch_vendor_quote_id) return;
+
+    $.ajax({
+      url: "<?php echo site_url('vendor/get_vendor_quotation_data_load_po'); ?>",
+      type: "POST",
+      data: { srch_vendor_quote_id },
+      dataType: "json",
+
+      success: function (res) {
+        if (!res || res.length === 0) {
+          $container.html(`
+                  <tr>
+                    <td colspan="10" class="text-center text-danger">
+                      No items found for this quotation.
+                    </td>
+                  </tr>
+                `);
+          return;
+        }
+
+        $.each(res, function (i, row) {
+          // GST DROPDOWN ---- IMPORTANT FIX
+          const gstDropdown = `
+                    <?php
+                        echo form_dropdown(
+                            'gst[]',
+                            ['' => 'Select VAT'] + $gst_opt,
+                            '',
+                            'class="form-control vat-dropdown gst-select"'
+                        );
+                    ?>
+                `;
+
+          // MAIN ROW HTML
+          const rowHtml = `
+                  <tr class="item-row">
+
+                    <td>
+                      <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="${i}">
+                    </td>
+
+                    <td>
+                      <input type="text" name="srch_item[]" class="form-control"
+                             value="${row.item_code || ""}" readonly>
+
+                      <input type="hidden" name="vendor_rate_enquiry_item_id[]" value="${
+                          row.vendor_rate_enquiry_item_id
+                        }">
+                             <input type="hidden" name="item_id[]" class="item_id" value="${
+                               row.item_id
+                             }">
+                             <input type="hidden" name="category_id[]" class="category_id" value="${
+                               row.category_id
+                             }">
+                    </td>
+
+                    <td>
+                      <textarea name="item_desc[]" class="form-control" rows="2" readonly>${
+                        row.item_desc || ""
+                      }</textarea>
+                    </td>
+
+                    <td>
+                      <input type="text" name="uom[]" class="form-control"
+                             value="${row.uom || ""}" readonly>
+                    </td>
+
+                    <td>
+                      <input type="number" step="0.01" name="qty[]"
+                             class="form-control qty-input"
+                             value="${row.qty}" readonly>
+                    </td>
+
+                    <td>
+                      <input type="number" step="0.01" name="rate[]"
+                             class="form-control rate-input"
+                             value="${row.rate || ""}">
+                    </td>
+
+                    <td class="gst-cell">${gstDropdown}</td>
+
+                    <td>
+                      <input type="number" name="amount[]" class="form-control amount-input"
+                             value="${row.amount || "0.00"}" readonly>
+                    </td>
+
+                  </tr>
+                `;
+
+          const $row = $(rowHtml);
+
+          // Set GST value from DB
+          $row.find(".gst-select").val(row.gst || "");
+
+          $container.append($row);
+        });
+      },
+
+      error: function () {
+        alert("Error loading quotation items");
+      },
+    });
+  });
+</script>
+
+<script>
+  // Recalculate amount on qty, rate, or GST change
+  $(document).on(
+    "input change",
+    ".rate-input, .vat-dropdown, .qty-input",
+    function () {
+      const $row = $(this).closest("tr.item-row");
+
       const qty = parseFloat($row.find(".qty-input").val()) || 0;
       const rate = parseFloat($row.find(".rate-input").val()) || 0;
       const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
 
-      const amount = qty * rate * (1 + gst / 100);
+      // Amount = qty * rate
+      let amount = qty * rate;
+
+      // GST added only if gst selected
+      if (gst > 0) {
+        amount = amount + (amount * gst) / 100;
+      }
+
       $row.find(".amount-input").val(amount.toFixed(2));
 
       calculateTotalAmount();
-    });
-
-    function calculateTotalAmount() {
-      let total = 0;
-      $(".amount-input").each(function () {
-        total += parseFloat($(this).val()) || 0;
-      });
-      $("#total_amount").text(total.toFixed(2));
     }
+  );
 
-    /* ================================================================
-       6. Checkbox Change - Add/Remove Hidden Fields
-       ================================================================ */
-    $(document).on("change", ".item-check", function () {
-      const $card = $(this).closest(".item-card");
-      if (!$(this).is(":checked")) {
-        $card
-          .find(
-            "input[type=hidden][name^='tender_quotation_item_id'], " +
-              "input[type=hidden][name^='category_id'], " +
-              "input[type=hidden][name^='item_id']"
-          )
-          .remove();
-      }
-    });
-  });
+  // Calculate full total of all item rows
+  function calculateTotalAmount() {
+    let total = 0;
 
-  /* ================================================================
-     7. Initialize CKEditor
-     ================================================================ */
-  $(function () {
-    CKEDITOR.replace("editor1", {
-      height: 80,
-      extraPlugins: "justify,colorbutton,font,table",
-      removeButtons: "",
-      toolbar: [
-        {
-          name: "clipboard",
-          items: [
-            "Cut",
-            "Copy",
-            "Paste",
-            "PasteText",
-            "PasteFromWord",
-            "-",
-            "Undo",
-            "Redo",
-          ],
-        },
-        {
-          name: "basicstyles",
-          items: [
-            "Bold",
-            "Italic",
-            "Underline",
-            "Strike",
-            "RemoveFormat",
-            "CopyFormatting",
-          ],
-        },
-        {
-          name: "paragraph",
-          items: [
-            "NumberedList",
-            "BulletedList",
-            "-",
-            "Outdent",
-            "Indent",
-            "-",
-            "Blockquote",
-            "JustifyLeft",
-            "JustifyCenter",
-            "JustifyRight",
-            "JustifyBlock",
-          ],
-        },
-        { name: "links", items: ["Link", "Unlink", "Anchor"] },
-        {
-          name: "insert",
-          items: ["Image", "Table", "HorizontalRule", "SpecialChar"],
-        },
-        { name: "styles", items: ["Format", "Font", "FontSize"] },
-        { name: "colors", items: ["TextColor", "BGColor"] },
-        { name: "tools", items: ["Maximize", "ShowBlocks"] },
-      ],
+    $(".amount-input").each(function () {
+      total += parseFloat($(this).val()) || 0;
     });
-  });
+
+    $("#total_amount").text(total.toFixed(2));
+  }
 </script>

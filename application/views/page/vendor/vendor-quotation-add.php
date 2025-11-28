@@ -7,7 +7,7 @@
 <section class="content-header">
     <h1><?php echo htmlspecialchars($title); ?></h1>
     <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-file-text"></i> Tender</a></li>
+        <li><a href="#"><i class="fa fa-file-text"></i> Vendor</a></li>
         <li class="active">Add <?php echo htmlspecialchars($title); ?></li>
     </ol>
 </section>
@@ -101,14 +101,14 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Remarks</label>
+                                <label>Notes</label>
                                 <textarea id="editor1" name="remarks" class="form-control"
-                                    placeholder="Enter remarks"><?php echo set_value('remarks'); ?></textarea>
+                                    placeholder="Enter notes"><?php echo set_value('remarks'); ?></textarea>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Terms & Conditions</label>
+                                <label>Terms & Conditions</label>   
                                 <textarea id="editor2" name="terms" class="form-control"
                                     placeholder="Enter terms"><?php echo set_value('terms'); ?></textarea>
                             </div>

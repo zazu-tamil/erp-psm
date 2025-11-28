@@ -87,7 +87,7 @@
                                 $status = isset($row['quote_status']) ? $row['quote_status'] : '';
 
                                 $badge_colors = [
-                                    'Completed' => 'success',
+                                    'Confirmed' => 'success',
                                     'Pending'   => 'warning',
                                     'Rejected'  => 'danger'
                                 ];
