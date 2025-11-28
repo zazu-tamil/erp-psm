@@ -11,7 +11,7 @@
 <section class="content">
     <div class="box box-info">
         <div class="box-header with-border">
-            <h3 class="box-title"><i class="fa fa-pencil"></i> Edit Customer Tender PO</h3>
+            <h3 class="box-title"><i class="fa fa-pencil"></i> Edit Tender PO</h3>
         </div>
 
         <form method="post" action="" id="frmedit" enctype="multipart/form-data">

@@ -1400,7 +1400,7 @@ class Tender extends CI_Controller
         }
 
         $data['js'] = 'tender/customer-tender-po-add.inc';
-        $data['title'] = 'Customer Tender PO';
+        $data['title'] = 'Tender PO';
 
         if ($this->input->post('mode') == 'Add') {
             $this->db->trans_start();
@@ -1466,7 +1466,7 @@ class Tender extends CI_Controller
             if ($this->db->trans_status() === FALSE) {
                 $this->session->set_flashdata('error', 'Error saving data. Please try again.');
             } else {
-                $this->session->set_flashdata('success', 'Customer Tender PO saved successfully.');
+                $this->session->set_flashdata('success', 'Tender PO saved successfully.');
             }
             redirect('customer-tender-po-list/');
         }
@@ -1500,7 +1500,7 @@ class Tender extends CI_Controller
             exit;
         }
         $data['js'] = 'tender/customer-tender-po-edit.inc';
-        $data['title'] = 'Edit Customer Tender PO';
+        $data['title'] = 'Edit Tender PO';
 
         if ($this->input->post('mode') == 'Edit') {
             $this->db->trans_start();
@@ -1595,7 +1595,7 @@ class Tender extends CI_Controller
             if ($this->db->trans_status() === FALSE) {
                 $this->session->set_flashdata('error', 'Error updating data. Please try again.');
             } else {
-                $this->session->set_flashdata('success', 'Customer Tender PO updated successfully.');
+                $this->session->set_flashdata('success', ' Tender PO updated successfully.');
             }
             redirect('customer-tender-po-list');
         }
@@ -1735,7 +1735,7 @@ class Tender extends CI_Controller
         $data = array();
         $data['js'] = 'tender/customer-tender-po-list.inc';
         $data['s_url'] = 'customer-tender-po-list';
-        $data['title'] = 'Customer Tender PO List';
+        $data['title'] = ' Tender PO List';
 
         // === FILTERS ===
         $where = "1";
@@ -1937,7 +1937,7 @@ class Tender extends CI_Controller
                 tq.quotation_no,
                 tq.quote_date,
                 te.enquiry_no,
-                CONCAT(tq.quotation_no, ' - ', te.enquiry_no) as display
+                tq.quotation_no as display
             FROM tender_quotation_info tq
             LEFT JOIN tender_enquiry_info te ON tq.tender_enquiry_id = te.tender_enquiry_id
             WHERE tq.company_id = ?
@@ -2253,7 +2253,7 @@ class Tender extends CI_Controller
         $sql = "
             SELECT 
                 a.tender_enquiry_id,
-                a.enquiry_no,
+                get_tender_info(a.tender_enquiry_id) AS tender_details,
                 b.company_name,
                 c.customer_name 
             FROM tender_enquiry_info AS a
@@ -2268,7 +2268,7 @@ class Tender extends CI_Controller
         foreach ($query->result_array() as $row) {
             $result[] = [
                 'tender_enquiry_id' => $row['tender_enquiry_id'],
-                'display' => $row['enquiry_no'] . ' -> ' . $row['company_name'] . ' -> ' . $row['customer_name']
+                'display' => $row['tender_details']
             ];
         }
         echo json_encode($result);

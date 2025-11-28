@@ -15,17 +15,28 @@
 <section class="content">
     <div class="box box-info">
         <div class="box-header with-border">
-            <h3 class="box-title"><i class="fa fa-plus-circle"></i> Add Vendor PO</h3>
+            <h3 class="box-title">
+                <i class="fa fa-plus-circle"></i> Add Vendor PO
+            </h3>
+
+
             <a href="<?php echo site_url('vendor-po-list'); ?>" class="btn btn-warning pull-right">
                 <i class="fa fa-arrow-left"></i> Back To List
             </a>
         </div>
 
+
         <form method="post" action="" id="frmadd" enctype="multipart/form-data">
             <div class="box-body">
                 <input type="hidden" name="mode" value="Add" />
                 <fieldset class="tender-inward">
-                    <legend class="text-light-blue"><i class="fa fa-file-text-o"></i> Po Details</legend>
+                    <legend class="text-light-blue">
+                        <i class="fa fa-file-text-o"></i> PO Details
+                        &nbsp;&nbsp;&nbsp;
+                        <small style="color:red !important;">
+                            PO can be generated only when the Vendor Quotation status is <strong>Confirmed</strong>.
+                        </small>
+                    </legend>
 
                     <div class="row">
                         <div class="form-group col-md-4">

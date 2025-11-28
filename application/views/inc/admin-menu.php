@@ -84,20 +84,20 @@ $current_page = $this->uri->segment(1, 0);
         <li
             class="treeview <?= in_array($current_page, ['customer-tender-po-add', 'customer-tender-po-list', 'customer-tender-po-edit']) ? 'active' : '' ?>">
             <a href="#">
-                <i class="fa fa-briefcase"></i> Customer Tender PO
+                <i class="fa fa-briefcase"></i> Tender PO
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
             </a>
 
             <ul class="treeview-menu">
                 <li class="<?= ($current_page === 'customer-tender-po-add') ? 'active' : '' ?>">
                     <a href="<?= site_url('customer-tender-po-add') ?>">
-                        <i class="fa fa-plus-square"></i> <?= $title ?>
+                        <i class="fa fa-plus-square"></i> Tender PO
                     </a>
                 </li>
 
                 <li class="<?= ($current_page === 'customer-tender-po-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('customer-tender-po-list') ?>">
-                        <i class="fa fa-list"></i> Customer Tender PO List
+                        <i class="fa fa-list"></i> Tender PO List
                     </a>
                 </li>
             </ul>
