@@ -111,7 +111,7 @@
                     <div class="row">
                         <div class="form-group col-md-6">
                             <label for="remarks">Remarks</label>
-                            <textarea name="remarks" class="form-control" id="remarks" rows="7"
+                            <textarea name="remarks" class="form-control" id="editor2_edit_modal" rows="7"
                                 placeholder="Enter your remarks"><?php echo htmlspecialchars($header['remarks']); ?></textarea>
                         </div>
                         <div class="col-md-6">

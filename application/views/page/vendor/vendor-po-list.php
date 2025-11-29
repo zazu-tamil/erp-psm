@@ -16,6 +16,18 @@
         <div class="box-body">
             <form method="post" action="" id="frmsearch">
                 <div class="row">
+                     <div class="form-group col-md-3">
+                        <label for="srch_from_date">From Date</label>
+                        <input type="date" name="srch_from_date" id="srch_from_date" class="form-control"
+                            value="<?php echo set_value('srch_from_date', $srch_from_date); ?>">
+                    </div>
+
+                    <div class="form-group col-md-3">
+                        <label for="srch_to_date">To Date</label>
+                        <input type="date" name="srch_to_date" id="srch_to_date" class="form-control"
+                            value="<?php echo set_value('srch_to_date', $srch_to_date); ?>">
+                    </div>
+
                     <div class="form-group col-md-3">
                         <label for="srch_company_id">Company <span style="color:red;">*</span></label>
                         <?php echo form_dropdown('srch_company_id', ['' => 'All'] + $company_opt, set_value('srch_company_id', $srch_company_id), 'id="srch_company_id" class="form-control"'); ?>

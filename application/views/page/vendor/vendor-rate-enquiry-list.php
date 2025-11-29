@@ -17,18 +17,32 @@
             <form method="post" action="" id="frmsearch">
                 <div class="row">
                     <div class="form-group col-md-3">
+                        <label for="srch_from_date">From Date</label>
+                        <input type="date" name="srch_from_date" id="srch_from_date" class="form-control"
+                            value="<?php echo set_value('srch_from_date', $srch_from_date); ?>">
+                    </div>
+
+                    <div class="form-group col-md-3">
+                        <label for="srch_to_date">To Date</label>
+                        <input type="date" name="srch_to_date" id="srch_to_date" class="form-control"
+                            value="<?php echo set_value('srch_to_date', $srch_to_date); ?>">
+                    </div>
+
+                    <div class="form-group col-md-3">
                         <label>Customer</label>
                         <div class="form-group">
-                            <?php echo form_dropdown('srch_customer_id',  ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control" '); ?>
+                            <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control" '); ?>
                         </div>
                     </div>
                     <div class="form-group col-md-3">
                         <label for="srch_tender_enquiry_id">Tender RFQ No</label>
                         <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'All'] + $tender_enquiry_opt, $srch_tender_enquiry_id, 'id="srch_tender_enquiry_id" class="form-control"'); ?>
-                    </div>
-                    <div class="form-group col-md-3">
+                    </div> 
+                </div>
+                <div class="row">
+                     <div class="form-group col-md-3">
                         <label>Vendor</label>
-                        <?php echo form_dropdown('srch_vendor_id',  ['' => 'All'] + $vendor_opt, $srch_vendor_id, 'id="srch_vendor_id" class="form-control select2" style="width:100%"'); ?>
+                        <?php echo form_dropdown('srch_vendor_id', ['' => 'All'] + $vendor_opt, $srch_vendor_id, 'id="srch_vendor_id" class="form-control select2" style="width:100%"'); ?>
                     </div>
 
                     <div class="form-group col-md-3 text-left">
@@ -74,15 +88,15 @@
                     <?php if (!empty($record_list)): ?>
                         <?php foreach ($record_list as $j => $row): ?>
                             <tr>
-                                <td class="text-center"><?php echo ($j + 1 + $sno); ?></td> 
+                                <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
                                 <td><?php echo date('d-m-Y', strtotime($row['enquiry_date'])); ?></td>
                                 <td><strong><?php echo $row['company_name']; ?></strong>
                                     <br>
                                     <small
-                                        class="label label-success"><?php echo $row['company_code'] . ' -> ' . $row['company_sno'] . ' -> ' . $row['customer_code'] . ' -> ' . $row['customer_sno'] . ' -> ' . $row['tender_enquiry_no']; ?></small>
+                                        class="label label-success"><?php echo  $row['tender_details']; ?></small>
                                 </td>
                                 <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
-                                 <td><?php echo htmlspecialchars($row['enquiry_no']); ?></td>
+                                <td><?php echo htmlspecialchars($row['enquiry_no']); ?></td>
                                 <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['vendor_rate_enquiry_status'] ?? 'Prepared RFQ'); ?></td>
                                 <td><?php echo htmlspecialchars($row['status'] ?? '-'); ?></td>

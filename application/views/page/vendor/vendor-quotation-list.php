@@ -17,6 +17,17 @@
             <form method="post" action="" id="frmsearch">
                 <div class="row">
                     <div class="form-group col-md-3">
+                        <label for="srch_from_date">From Date</label>
+                        <input type="date" name="srch_from_date" id="srch_from_date" class="form-control"
+                            value="<?php echo set_value('srch_from_date', $srch_from_date); ?>">
+                    </div>
+
+                    <div class="form-group col-md-3">
+                        <label for="srch_to_date">To Date</label>
+                        <input type="date" name="srch_to_date" id="srch_to_date" class="form-control"
+                            value="<?php echo set_value('srch_to_date', $srch_to_date); ?>">
+                    </div>
+                    <div class="form-group col-md-3">
                         <label for="srch_company_id">Company <span style="color:red;">*</span></label>
                         <?php echo form_dropdown('srch_company_id', ['' => 'All'] + $company_opt, set_value('srch_company_id', $srch_company_id), 'id="srch_company_id" class="form-control"'); ?>
                     </div>
@@ -66,7 +77,7 @@
                         <th>Company / RFQ No</th>
                         <th>Customer</th>
                         <th>Vendor Name</th>
-                        <th>Quotation No</th>                      
+                        <th>Quotation No</th>
                         <th>Po Status</th>
                         <th class="text-center" colspan="3">Action</th>
                     </tr>
@@ -80,16 +91,16 @@
                                 <td><?php echo htmlspecialchars($row['company_name'] ?? '-'); ?> <br><small
                                         class="label label-success"><?php echo htmlspecialchars($row['tender_enquery_no'] ?? '-'); ?></small>
                                 </td>
-                                <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td> 
+                                <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
-                                <td><?php echo htmlspecialchars($row['quote_no'] ?? '-'); ?></td>                              
+                                <td><?php echo htmlspecialchars($row['quote_no'] ?? '-'); ?></td>
                                 <?php
                                 $status = isset($row['quote_status']) ? $row['quote_status'] : '';
 
                                 $badge_colors = [
                                     'Confirmed' => 'success',
-                                    'Pending'   => 'warning',
-                                    'Rejected'  => 'danger'
+                                    'Pending' => 'warning',
+                                    'Rejected' => 'danger'
                                 ];
 
                                 $color = isset($badge_colors[$status]) ? $badge_colors[$status] : 'secondary';
@@ -98,7 +109,7 @@
                                     <span class="label label-<?php echo $color; ?>">
                                         <?php echo $status != '' ? $status : 'N/A'; ?>
                                     </span>
-                                </td> 
+                                </td>
                                 <!-- EDIT -->
                                 <td class="text-center">
                                     <a href="<?php echo site_url('vendor-quotation-edit/' . $row['vendor_quote_id']); ?>"
@@ -108,8 +119,8 @@
                                 </td>
                                 <!-- DELETE -->
                                 <td class="text-center">
-                                    <button value="<?php echo $row['vendor_quote_id']; ?>" class="del_record btn btn-danger btn-xs"
-                                        title="Delete">
+                                    <button value="<?php echo $row['vendor_quote_id']; ?>"
+                                        class="del_record btn btn-danger btn-xs" title="Delete">
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </td>

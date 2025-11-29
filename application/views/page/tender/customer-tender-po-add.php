@@ -89,7 +89,7 @@
                     <div class="row">
                         <div class="form-group col-md-6">
                             <label for="remarks">Notes</label>
-                            <textarea name="remarks" class="form-control" id="remarks" placeholder="Enter your remarks" rows="5"></textarea>
+                            <textarea name="remarks" class="form-control" id="editor2" placeholder="Enter your remarks" rows="5"></textarea>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">

@@ -18,6 +18,17 @@
             <form method="post" action="" id="frmsearch">
                 <div class="row">
                     <div class="form-group col-md-3">
+                        <label for="srch_from_date">From Date</label>
+                        <input type="date" name="srch_from_date" id="srch_from_date" class="form-control"
+                            value="<?php echo set_value('srch_from_date', $srch_from_date); ?>">
+                    </div>
+
+                    <div class="form-group col-md-3">
+                        <label for="srch_to_date">To Date</label>
+                        <input type="date" name="srch_to_date" id="srch_to_date" class="form-control"
+                            value="<?php echo set_value('srch_to_date', $srch_to_date); ?>">
+                    </div>
+                    <div class="form-group col-md-3">
                         <label>Company</label>
                         <?php echo form_dropdown('srch_company_id', $company_opt, set_value('srch_company_id', $srch_company_id), 'id="srch_company_id" class="form-control select2"'); ?>
                     </div>
@@ -25,21 +36,25 @@
                         <label>Customer</label>
                         <?php echo form_dropdown('srch_customer_id', $customer_opt, set_value('srch_customer_id', $srch_customer_id), 'id="srch_customer_id" class="form-control select2"'); ?>
                     </div>
-                     <div class="form-group col-md-3">
+                    <div class="form-group col-md-3">
                         <label>Tender Enquiry No</label>
                         <?php echo form_dropdown('srch_tender_enquiry_id', $tender_enquiry_opt, set_value('srch_tender_enquiry_id', $srch_tender_enquiry_id), 'id="srch_tender_enquiry_id" class="form-control select2"'); ?>
                     </div>
-                   <div class="form-group col-md-3">
-    <label>Quotation No</label>
-    <?php echo form_dropdown('srch_tender_quotation_id', $tender_quotation_opt, set_value('srch_tender_quotation_id', $srch_tender_quotation_id), 'id="srch_tender_quotation_id" class="form-control select2" style="width:100%"'); ?>
-</div>
+                    <div class="form-group col-md-3">
+                        <label>Quotation No</label>
+                        <?php echo form_dropdown('srch_tender_quotation_id', $tender_quotation_opt, set_value('srch_tender_quotation_id', $srch_tender_quotation_id), 'id="srch_tender_quotation_id" class="form-control select2" style="width:100%"'); ?>
+                    </div>
+                </div>
+                <div class="row">
                     <div class="form-group col-md-3">
                         <label>PO Status</label>
                         <?php echo form_dropdown('srch_po_status', $po_status_opt, set_value('srch_po_status', $srch_po_status), 'id="srch_po_status" class="form-control"'); ?>
                     </div>
                     <div class="form-group col-md-3">
                         <label>&nbsp;</label>
-                        <button type="submit" class="btn btn-success form-control"><i class="fa fa-search"></i> Show</button>
+                        <br>
+                        <button type="submit" class="btn btn-success"><i class="fa fa-search"></i>
+                            Show</button>
                     </div>
                 </div>
             </form>
@@ -53,7 +68,8 @@
                 <i class="fa fa-plus-circle"></i> Add New PO
             </a>
             <div class="box-tools pull-right">
-                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i
+                        class="fa fa-minus"></i></button>
             </div>
         </div>
 
@@ -62,13 +78,15 @@
                 <thead>
                     <tr>
                         <th class="text-center">S.No</th>
-                        <th>Our PO No</th>
-                        <th>Customer PO No</th>
+                       
+                        <th>PO Date</th>
+                         <th>Our PO No</th>
                         <th>Company</th>
                         <th>Customer</th>
                         <th>Tender Enquiry</th>
                         <th>Quotation No</th>
-                        <th>PO Date</th>
+                        
+                        <th>Customer PO No</th>
                         <th>Delivery Date</th>
                         <th>PO Status</th>
                         <th class="text-center" colspan="3">Action</th>
@@ -79,14 +97,16 @@
                         <?php foreach ($record_list as $j => $row): ?>
                             <tr>
                                 <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
-                                <td><strong><?php echo htmlspecialchars($row['our_po_no'] ?? '-'); ?></strong></td>
+                                 <td><?php echo $row['po_date'] ? date('d-m-Y', strtotime($row['po_date'])) : '-'; ?></td>
+                                
                                 <td><?php echo htmlspecialchars($row['customer_po_no'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['company_name'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['enquiry_no'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['quotation_no'] ?? '-'); ?></td>
-                                <td><?php echo $row['po_date'] ? date('d-m-Y', strtotime($row['po_date'])) : '-'; ?></td>
-                                <td><?php echo $row['delivery_date'] ? date('d-m-Y', strtotime($row['delivery_date'])) : '-'; ?></td>
+                               <td><strong><?php echo htmlspecialchars($row['our_po_no'] ?? '-'); ?></strong></td>
+                                <td><?php echo $row['delivery_date'] ? date('d-m-Y', strtotime($row['delivery_date'])) : '-'; ?>
+                                </td>
                                 <?php
                                 $po_status = $row['po_status'];
 
@@ -123,8 +143,8 @@
 
                                 <!-- DELETE -->
                                 <td class="text-center">
-                                    <button value="<?php echo $row['tender_po_id']; ?>"
-                                        class="del_po btn btn-danger btn-xs" title="Delete">
+                                    <button value="<?php echo $row['tender_po_id']; ?>" class="del_po btn btn-danger btn-xs"
+                                        title="Delete">
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </td>

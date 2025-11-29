@@ -606,6 +606,20 @@ class Vendor extends CI_Controller
         // echo '</pre>';
         $where = "1 = 1";
 
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $this->session->set_userdata('srch_from_date', $this->input->post('srch_from_date'));
+            $this->session->set_userdata('srch_to_date', $this->input->post('srch_to_date'));
+        } elseif ($this->session->userdata('srch_from_date')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_to_date');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = date('Y-m-d');
+            $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
+        }
+
+
         // Customer Filter
         if ($this->input->post('srch_company_id') !== null) {
             $data['srch_company_id'] = $srch_company_id = $this->input->post('srch_company_id');
@@ -658,9 +672,11 @@ class Vendor extends CI_Controller
             $where .= " AND a.po_status = '" . $this->db->escape_str($srch_po_status) . "'";
         }
 
-        $sql_count = "SELECT COUNT(*) as total FROM vendor_po_info a WHERE a.status != 'Delete' AND $where";
-        $query_count = $this->db->query($sql_count);
-        $data['total_records'] = $query_count->row()->total;
+        $this->db->from('vendor_po_info a'); 
+        $this->db->where('a.status !=', 'Delete'); 
+        $this->db->where($where);
+        $this->db->where("DATE(a.po_date) BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'");
+        $data['total_records'] = $this->db->count_all_results();
 
         // === PAGINATION ===
         $data['sno'] = $this->uri->segment(2, 0);
@@ -781,6 +797,7 @@ class Vendor extends CI_Controller
             LEFT JOIN tender_enquiry_info t ON a.tender_enquiry_id = t.tender_enquiry_id AND t.status != 'Delete'
             left join company_info as ci on t.company_id = ci.company_id and ci.status = 'Active'
             WHERE a.status != 'Delete' AND $where
+            AND a.po_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "' 
             ORDER BY a.vendor_po_id DESC
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
@@ -813,7 +830,7 @@ class Vendor extends CI_Controller
             $this->db->trans_start();
 
             $header = [
-               'company_id' => $this->input->post('srch_company_id'),
+                'company_id' => $this->input->post('srch_company_id'),
                 'customer_id' => $this->input->post('srch_customer_id'),
                 'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
                 'vendor_id' => $this->input->post('srch_vendor_id'),
@@ -1003,7 +1020,7 @@ class Vendor extends CI_Controller
         // Status Options
         $data['quotation_status_opt'] = ['' => 'Select Tender Status', 'Pending' => 'Pending', 'Confirmed' => 'Confirmed', 'Rejected' => 'Rejected'];
 
- 
+
         $this->load->view('page/vendor/vendor-po-edit', $data);
     }
 
@@ -1271,6 +1288,20 @@ class Vendor extends CI_Controller
         // echo '</pre>';
         $where = "1 = 1";
 
+        
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $this->session->set_userdata('srch_from_date', $this->input->post('srch_from_date'));
+            $this->session->set_userdata('srch_to_date', $this->input->post('srch_to_date'));
+        } elseif ($this->session->userdata('srch_from_date')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_to_date');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = date('Y-m-d');
+            $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
+        }
+
         // Customer Filter
         if ($this->input->post('srch_company_id') !== null) {
             $data['srch_company_id'] = $srch_company_id = $this->input->post('srch_company_id');
@@ -1323,9 +1354,13 @@ class Vendor extends CI_Controller
             $where .= " AND a.quote_status = '" . $this->db->escape_str($srch_quotation_status) . "'";
         }
 
-        $sql_count = "SELECT COUNT(*) as total FROM vendor_quotation_info a WHERE a.status != 'Delete' AND $where";
-        $query_count = $this->db->query($sql_count);
-        $data['total_records'] = $query_count->row()->total;
+        
+        $this->db->from('vendor_quotation_info a'); 
+        $this->db->where('a.status !=', 'Delete'); 
+        $this->db->where($where);
+        $this->db->where("DATE(a.quote_date) BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'");
+        $data['total_records'] = $this->db->count_all_results();
+       
 
         // === PAGINATION ===
         $data['sno'] = $this->uri->segment(2, 0);
@@ -1420,6 +1455,7 @@ class Vendor extends CI_Controller
             left join vendor_info as e on a.vendor_id = e.vendor_id and e.`status`='Active'
             where a.`status`='Active'
             AND $where
+           AND a.quote_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "' 
             order by a.vendor_quote_id desc 
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
@@ -2040,7 +2076,18 @@ class Vendor extends CI_Controller
 
         // === FILTERS ===
         $where = "1 = 1";
-
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $this->session->set_userdata('srch_from_date', $this->input->post('srch_from_date'));
+            $this->session->set_userdata('srch_to_date', $this->input->post('srch_to_date'));
+        } elseif ($this->session->userdata('srch_from_date')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_to_date');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = date('Y-m-d');
+            $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
+        }
         // Customer Filter
         if ($this->input->post('srch_customer_id') !== null) {
             $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
@@ -2080,10 +2127,12 @@ class Vendor extends CI_Controller
             $where .= " AND a.vendor_id = '" . $this->db->escape_str($srch_vendor_id) . "'";
         }
 
-        // === COUNT TOTAL ===
-        $sql_count = "SELECT COUNT(*) as total FROM vendor_rate_enquiry_info a WHERE a.status != 'Delete' AND $where";
-        $query_count = $this->db->query($sql_count);
-        $data['total_records'] = $query_count->row()->total;
+          
+        $this->db->from('vendor_rate_enquiry_info a'); 
+        $this->db->where('a.status !=', 'Delete'); 
+        $this->db->where($where);
+        $this->db->where("DATE(a.enquiry_date) BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'");
+        $data['total_records'] = $this->db->count_all_results();
 
         // === PAGINATION ===
         $data['sno'] = $this->uri->segment(2, 0);
@@ -2130,7 +2179,7 @@ class Vendor extends CI_Controller
                 t.customer_sno,
                 v.vendor_name,
                 a.tender_enquiry_id,
-                t.enquiry_no AS tender_enquiry_no,
+                get_tender_info(a.tender_enquiry_id) as tender_details,
                 a.status,
                 a.vendor_rate_enquiry_status
             FROM vendor_rate_enquiry_info a
@@ -2139,6 +2188,7 @@ class Vendor extends CI_Controller
             LEFT JOIN tender_enquiry_info t ON a.tender_enquiry_id = t.tender_enquiry_id AND t.status != 'Delete'
             left join company_info com  on t.company_id = com.company_id and com.`status`='Active'
             WHERE a.status != 'Delete' 
+            AND a.enquiry_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "' 
             AND $where
             ORDER BY a.vendor_rate_enquiry_id DESC
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];

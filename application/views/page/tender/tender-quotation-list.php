@@ -17,13 +17,24 @@
             <form method="post" action="" id="frmsearch">
                 <div class="row">
                     <div class="form-group col-md-3">
+                        <label for="srch_from_date">From Date</label>
+                        <input type="date" name="srch_from_date" id="srch_from_date" class="form-control"
+                            value="<?php echo set_value('srch_from_date', $srch_from_date); ?>">
+                    </div>
+
+                    <div class="form-group col-md-3">
+                        <label for="srch_to_date">To Date</label>
+                        <input type="date" name="srch_to_date" id="srch_to_date" class="form-control"
+                            value="<?php echo set_value('srch_to_date', $srch_to_date); ?>">
+                    </div>
+                    <div class="form-group col-md-3">
                         <label>Company</label>
                         <?php echo form_dropdown('srch_company_id', $company_opt, set_value('srch_company_id', $srch_company_id), 'id="srch_company_id" class="form-control select2"'); ?>
                     </div>
-                 <div class="form-group col-md-3">
+                    <div class="form-group col-md-3">
                         <label>Customer</label>
                         <div class="form-group">
-                            <?php echo form_dropdown('srch_customer_id',  ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control" '); ?>
+                            <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control" '); ?>
                         </div>
                     </div>
                     <div class="form-group col-md-3">
@@ -61,7 +72,7 @@
                 <thead>
                     <tr>
                         <th class="text-center">S.No</th>
-                          <th>Quote Date</th>
+                        <th>Quote Date</th>
                         <th>Company / RFQ No</th>
                         <th>Customer</th>
                         <th>Quotation No</th>
@@ -74,12 +85,13 @@
                         <?php foreach ($record_list as $j => $row): ?>
                             <tr>
                                 <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
-                                <td><strong><?php echo htmlspecialchars($row['quote_date']); ?></strong></td>
+                                <td><strong><?php echo date('d-m-Y', strtotime($row['quote_date'])); ?></strong></td>
                                 <td><?php echo $row['company_name']; ?><br>
-                            <span class="label label-success"><?php echo $row['tender_details']; ?></span> </td>
+                                    <span class="label label-success"><?php echo $row['tender_details']; ?></span>
+                                </td>
                                 <td><?php echo htmlspecialchars($row['customer_name']); ?></td>
                                 <td><?php echo htmlspecialchars($row['quotation_no']); ?></td>
-                                 <?php
+                                <?php
                                 $status = $row['quotation_status'];
 
                                 $badge_colors = [
@@ -88,7 +100,7 @@
                                     'Won' => 'success',
                                     'Lost' => 'danger',
                                     'On Hold' => 'warning',
-                                 ];
+                                ];
 
                                 $color = isset($badge_colors[$status]) ? $badge_colors[$status] : 'default';
                                 ?>

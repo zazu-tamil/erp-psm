@@ -1,66 +1,65 @@
+<script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
 <style>
+  .total-section {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+  }
+  .total-card {
+    background: linear-gradient(135deg, #eafaf3, #dff8ec);
+    border: 2px solid #aee0c0;
+    border-radius: 16px;
+    padding: 18px 28px;
+    min-width: 320px;
+    transition: all 0.3s ease-in-out;
+  }
+  .total-card:hover {
+    background: #e1f7ec;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  }
+  .total-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .total-icon i {
+    font-size: 1.8rem;
+    background: #d2f0dc;
+    padding: 10px;
+    border-radius: 50%;
+    color: #2e865f;
+  }
+  .total-text .label {
+    font-size: 1.1rem;
+    color: #444;
+    font-weight: 600;
+    margin-right: 6px;
+  }
+  .total-text .value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #007a4d;
+  }
+  #total_amount {
+    font-weight: 800;
+  }
+
+  @media (max-width: 768px) {
     .total-section {
-        display: flex;
-        justify-content: flex-end;
-        width: 100%;
+      justify-content: center;
     }
     .total-card {
-        background: linear-gradient(135deg, #eafaf3, #dff8ec);
-        border: 2px solid #aee0c0;
-        border-radius: 16px;
-        padding: 18px 28px;
-        min-width: 320px;
-        transition: all 0.3s ease-in-out;
-    }
-    .total-card:hover {
-        background: #e1f7ec;
-        transform: translateY(-3px);
-        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
-    }
-    .total-content {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+      text-align: center;
+      min-width: 240px;
+      padding: 14px 18px;
     }
     .total-icon i {
-        font-size: 1.8rem;
-        background: #d2f0dc;
-        padding: 10px;
-        border-radius: 50%;
-        color: #2e865f;
+      font-size: 1.5rem;
+      padding: 8px;
     }
-    .total-text .label {
-        font-size: 1.1rem;
-        color: #444;
-        font-weight: 600;
-        margin-right: 6px;
-    }
-    .total-text .value {
-        font-size: 1.6rem;
-        font-weight: 700;
-        color: #007a4d;
-    }
-    #total_amount {
-        font-weight: 800;
-    }
- 
-    @media (max-width: 768px) {
-        .total-section {
-            justify-content: center;
-        }
-        .total-card {
-            text-align: center;
-            min-width: 240px;
-            padding: 14px 18px;
-        }
-        .total-icon i {
-            font-size: 1.5rem;
-            padding: 8px;
-        }
-    }
+  }
 </style>
-
-<script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
 
 <script>
   $(document).ready(function () {
@@ -132,9 +131,9 @@
       $.ajax({
         url: "<?php echo site_url('tender/get_tender_enquiries_by_customer'); ?>",
         type: "POST",
-        data: { 
+        data: {
           company_id: company_id,
-          customer_id: customer_id 
+          customer_id: customer_id
         },
         dataType: "json",
         success: function (res) {
@@ -181,7 +180,7 @@
         dataType: "json",
         success: function (res) {
           $quotationDropdown.html('<option value="">Select Quotation</option>');
-          
+
           if (res.length > 0) {
             $quotationDropdown.prop('disabled', false);
             $.each(res, function (i, row) {
@@ -206,194 +205,72 @@
           alert('Error loading quotations');
         }
       });
-    }
+    } 
+  
+  });
+ 
+</script>
+<script>
+$(document).ready(function () {
 
-    $("#srch_quotation_no").on("change", function () {
-      const tender_quotation_id = $(this).val();
-      const $container = $("#item_container");
-      $container.html("");
+    if (typeof CKEDITOR !== 'undefined') {
 
-      if (!tender_quotation_id) return;
-
-      $.ajax({
-        url: "<?php echo site_url('tender/get_quotation_items'); ?>",
-        type: "POST",
-        data: {
-          tender_quotation_id: tender_quotation_id
-        },
-        dataType: "json",
-        success: function (res) {
-          if (res.length > 0) {
-            $.each(res, function (i, row) {
-              const hiddenFields = `
-                <input type="hidden" name="tender_quotation_item_id[]" value="${row.tender_quotation_item_id}">
-                <input type="hidden" name="category_id[]" value="${row.category_id}">
-                <input type="hidden" name="item_id[]" value="${row.item_id}">
-              `;
-
-              let gstOptions = '<option value="">Select</option>';
-              <?php foreach($gst_opt as $gid => $pct): ?>
-                const gstValue = parseFloat('<?= $pct; ?>');
-                const rowGst = parseFloat(row.gst);
-                const isSelected = (gstValue === rowGst) ? 'selected' : '';
-                gstOptions += `<option value="${gstValue}" ${isSelected}><?= $pct; ?>%</option>`;
-              <?php endforeach; ?>
-
-              const initialAmount = parseFloat(row.qty || 0) * parseFloat(row.rate || 0) * (1 + parseFloat(row.gst || 0) / 100);
-
-              const itemHtml = `
-                <div class="item-card border p-3 mb-3" style="background-color:#f9f9f9; border-radius:8px;">
-                  <h5 class="text-primary mb-3">Item Details ${i + 1}</h5>
-                  <div class="row">
-                    <div class="col-md-1 d-flex align-items-center justify-content-center">
-                      <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="${i}" checked>
-                    </div>
-
-                    <div class="col-md-3">
-                      <div class="form-group">
-                        <label>Category Name</label>
-                        <input type="text" class="form-control" value="${row.category_name || ''}" readonly>
-                      </div>
-                      <div class="form-group">
-                        <label>Item Name</label>
-                        <input type="text" class="form-control" value="${row.item_name || ''}" readonly>
-                      </div>
-                    </div>
-
-                    <div class="col-md-4">
-                      <div class="form-group">
-                        <label>Item Description</label>
-                        <textarea name="item_desc[]" class="form-control" rows="3">${row.item_desc || ''}</textarea>
-                      </div>
-                    </div>
-
-                    <div class="col-md-4">
-                      <div class="row">
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label>UOM</label>
-                            <input type="text" name="uom[]" class="form-control" value="${row.uom || ''}" readonly>
-                          </div>
-                        </div>
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label>Quantity</label>
-                            <input type="number" step="0.01" name="qty[]" class="form-control qty-input" value="${row.qty || 0}" readonly>
-                          </div>
-                        </div>
-
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label>Rate</label>
-                            <input type="number" step="0.01" name="rate[]" class="form-control rate-input" value="${row.rate || 0}">
-                          </div>
-                        </div>
-
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label>VAT %</label>
-                            <select name="gst[]" class="form-control vat-dropdown">
-                              ${gstOptions}
-                            </select>
-                          </div>
-                        </div>
-
-                        <div class="col-md-12">
-                          <div class="form-group">
-                            <label>Amount</label>
-                            <input type="number" step="0.01" name="amount[]" class="form-control amount-input" value="${initialAmount.toFixed(2)}" readonly>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  ${hiddenFields}
-                </div>
-              `;
-              $container.append(itemHtml);
+        if ($("#editor1").length) {
+            CKEDITOR.replace('editor1', {
+                height: 120,
+                extraPlugins: 'justify,colorbutton,font,table',
             });
-
-            calculateTotalAmount();
-          } else {
-            $container.html('<div class="alert alert-warning">No items found for this quotation.</div>');
-          }
-        },
-        error: function (xhr, status, error) {
-          alert('Error loading quotation items');
         }
-      });
-    });
 
-    $(document).on("input change", ".rate-input, .vat-dropdown", function () {
-      const $row = $(this).closest(".item-card");
-      const qty = parseFloat($row.find(".qty-input").val()) || 0;
-      const rate = parseFloat($row.find(".rate-input").val()) || 0;
-      const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
+        if ($("#editor2").length) {
+            CKEDITOR.replace('editor2', {
+                height: 120,
+                extraPlugins: 'justify,colorbutton,font,table',
+            });
+        }
 
-      const amount = qty * rate * (1 + gst / 100);
-      $row.find(".amount-input").val(amount.toFixed(2));
-
-      calculateTotalAmount();
-    });
-
-    function calculateTotalAmount() {
-      let total = 0;
-      $(".amount-input").each(function () {
-        const value = parseFloat($(this).val()) || 0;
-        total += value;
-      });
-
-      const $total = $("#total_amount");
-      $total.fadeOut(100, function () {
-        $(this).text(total.toFixed(2)).fadeIn(200);
-      });
+    } else {
+        console.error("CKEditor not loaded. Check file path.");
     }
 
-    $(document).on("change", ".item-check", function () {
-      const $card = $(this).closest(".item-card");
-      if (!$(this).is(":checked")) {
-        $card
-          .find(
-            "input[type=hidden][name^='tender_quotation_item_id'], " +
-              "input[type=hidden][name^='category_id'], " +
-              "input[type=hidden][name^='item_id']"
-          )
-          .remove();
-      }
-    });
-  });
+});
+</script>
+<script>
+$(document).ready(function () {
 
-  $(function () {
-    CKEDITOR.replace("editor1_edit", {
-      height: 100,
-      extraPlugins: "justify,colorbutton,font,table",
-      removeButtons: "",
-      toolbar: [
-        {
-          name: "clipboard",
-          items: ["Cut", "Copy", "Paste", "PasteText", "PasteFromWord", "-", "Undo", "Redo"],
-        },
-        {
-          name: "basicstyles",
-          items: ["Bold", "Italic", "Underline", "Strike", "RemoveFormat", "CopyFormatting"],
-        },
-        {
-          name: "paragraph",
-          items: [
-            "NumberedList", "BulletedList", "-", "Outdent", "Indent", "-",
-            "Blockquote", "JustifyLeft", "JustifyCenter", "JustifyRight", "JustifyBlock",
-          ],
-        },
-        { name: "links", items: ["Link", "Unlink", "Anchor"] },
-        {
-          name: "insert",
-          items: ["Image", "Table", "HorizontalRule", "SpecialChar"],
-        },
-        { name: "styles", items: ["Format", "Font", "FontSize"] },
-        { name: "colors", items: ["TextColor", "BGColor"] },
-        { name: "tools", items: ["Maximize", "ShowBlocks"] },
-      ],
+    function calculateItemAmount(card) {
+
+        let qty   = parseFloat(card.find(".qty-input").val())   || 0;
+        let rate  = parseFloat(card.find(".rate-input").val())  || 0;
+        let gst   = parseFloat(card.find(".vat-dropdown").val()) || 0;
+
+        let base_amount = qty * rate;
+        let gst_amount  = (base_amount * gst) / 100;
+        let total       = base_amount + gst_amount;
+
+        card.find(".amount-input").val(total.toFixed(2));
+    }
+
+    function calculateTotal() {
+        let total = 0;
+        $(".amount-input").each(function () {
+            total += parseFloat($(this).val()) || 0;
+        });
+        $("#total_amount").text(total.toFixed(2));
+    }
+
+    // Trigger recalculation on Rate or GST change
+    $(document).on("input change", ".rate-input, .vat-dropdown", function () {
+        let card = $(this).closest(".item-card");
+        calculateItemAmount(card);
+        calculateTotal();
     });
-  });
+
+    // Initial calculation on page load
+    $(".item-card").each(function () {
+        calculateItemAmount($(this));
+    });
+    calculateTotal();
+
+});
 </script>
