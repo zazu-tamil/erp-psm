@@ -155,7 +155,7 @@
                                         <!-- Category + Item -->
                                         <div class="col-md-3"> 
                                             <div class="form-group">
-                                                <label>Item</label>
+                                                <label>Item Code</label>
                                                 <input type="text" class="form-control" 
                                                     value="<?php echo htmlspecialchars($row['item_code']); ?>" readonly>
                                             </div>

@@ -1,4 +1,4 @@
-<?php include_once(VIEWPATH . 'inc/header.php'); 
+<?php include_once(VIEWPATH . 'inc/header.php');
 // echo '<pre>';
 // print_r($_FILES);
 // echo '</pre>'; 
@@ -7,25 +7,33 @@
 <section class="content-header">
     <h1><?php echo htmlspecialchars($title); ?></h1>
     <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-file-text"></i> Vendor</a></li>
-        <li class="active">Add <?php echo htmlspecialchars($title); ?></li>
+        <li><a href="#"><i class="fa fa-file-text"></i>Vendor</a></li>
+        <li class="active"> <?php echo htmlspecialchars($title); ?></li>
     </ol>
 </section>
 
 <section class="content">
     <div class="box box-info">
         <div class="box-header with-border">
-            <h3 class="box-title"><i class="fa fa-plus-circle"></i> Add Vendor Quotation</h3>
-            <a href="<?php echo site_url('vendor-quotation-list'); ?>" class="btn btn-warning pull-right">
+            <h3 class="box-title">
+                <i class="fa fa-plus-circle"></i> Add Vendor Inward
+            </h3>
+
+
+            <a href="<?php echo site_url('vendor-pur-inward-list'); ?>" class="btn btn-warning pull-right">
                 <i class="fa fa-arrow-left"></i> Back To List
             </a>
         </div>
+
 
         <form method="post" action="" id="frmadd" enctype="multipart/form-data">
             <div class="box-body">
                 <input type="hidden" name="mode" value="Add" />
                 <fieldset class="tender-inward">
-                    <legend class="text-light-blue"><i class="fa fa-file-text-o"></i> Quotation Details</legend>
+                    <legend class="text-light-blue">
+                        <i class="fa fa-file-text-o"></i> Inward Details
+                             
+                    </legend>
 
                     <div class="row">
                         <div class="form-group col-md-4">
@@ -49,12 +57,13 @@
                         </div>
 
                         <div class="form-group col-md-4">
-                            <label>Vendor Rate Enquiry No <span style="color:red;">*</span>  
-                            <span data-toggle="tooltip" title="" class="" data-original-title="Only when Vendor Rate Enquiry Status is Quotation Received then select the Enquiry No. Otherwise leave it blank.">
-                            <i class="text-sm text-info fa fa-info-circle"></i>
-                            </span>    
-                        </label>
-                            <?php echo form_dropdown('srch_vendor_rate_enquiry_id', ['' => 'Select Enquiry No'], set_value('srch_vendor_rate_enquiry_id'), 'id="srch_vendor_rate_enquiry_id" class="form-control" required'); ?>
+                            <label>Vendor PO No <span style="color:red;">*</span>
+                                <span data-toggle="tooltip" title="" class=""
+                                    data-original-title="Only when Vendor PO Status is Confirmed then select the PO No. Otherwise leave it blank.">
+                                    <i class="text-sm text-info fa fa-info-circle"></i>
+                                </span>
+                            </label>
+                            <?php echo form_dropdown('srch_vendor_po_id', ['' => 'Select PO No'], set_value('srch_vendor_po_id'), 'id="srch_vendor_po_id" class="form-control" required'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
@@ -63,33 +72,34 @@
                         </div>
 
                         <div class="form-group col-md-4">
-                            <label>Quotation Date</label>
-                            <input type="date" name="quote_date" id="quote_date" class="form-control"
-                                value="<?php echo set_value('quote_date', date('Y-m-d')); ?>">
-                        </div>
+                            <label>Inward Date</label>
+                            <input type="date" name="inward_date" id="inward_date" class="form-control"
+                                value="<?php echo set_value('inward_date', date('Y-m-d')); ?>" required="true">
+                        </div>  
 
                         <div class="form-group col-md-4">
-                            <label>Quotation No <span style="color:red;">*</span></label>
-                            <input type="text" name="quote_no" id="quote_no" class="form-control" placeholder="Enter Quotation No" required="true">
-                        </div>
-
-                        <div class="form-group col-md-4">
-                            <label>Quotation Status <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('quote_status', ['' => 'Select Status'] + $quotation_status_opt, set_value('quote_status'), 'id="quote_status" class="form-control" required="true"'); ?>
-                        </div>
-
-                        <!-- <div class="form-group col-md-4">
-                            <label>Handling Charges</label>
-                            <input type="number" step="0.01" name="handling_charges" id="handling_charges"
-                                class="form-control" value="<?php echo set_value('handling_charges'); ?>"
-                                placeholder="0.00">
-                        </div> -->
-                        <!-- image upload  only--->
-                        <div class="form-group col-md-4">
+                            <label>Inward No </label>
+                            <input type="text" name="inward_no" id="inward_no" class="form-control"
+                                placeholder="Enter Inward No" required="true">
+                        </div>  
+                          <div class="form-group col-md-4">
                             <label>Upload Quotation Document</label>
-                            <input type="file" name="quote_doc_upload" id="quote_doc_upload"
+                            <input type="file" name="dc_upload" id="dc_upload"
                                 class="form-control" >
                         </div>
+                        <div class="form-group col-md-4">
+                            <label>Transport Charges</label>
+                            <input type="number" step="0.01" name="transport_charges" id="transport_charges"
+                                class="form-control" value="<?php echo set_value('transport_charges'); ?>"
+                                placeholder="0.00">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Other Charges</label>
+                            <input type="number" step="0.01" name="other_charges" id="other_charges"
+                                class="form-control" value="<?php echo set_value('other_charges'); ?>"
+                                placeholder="0.00">
+                        </div>
+
 
                         <div class="form-group col-md-4">
                             <label>Status</label><br>
@@ -98,22 +108,16 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
+                    <div class="row"> 
+                        <div class="col-md-12">
                             <div class="form-group">
-                                <label>Notes</label>
-                                <textarea id="editor1" name="remarks" class="form-control"
-                                    placeholder="Enter notes"><?php echo set_value('remarks'); ?></textarea>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Terms & Conditions</label>   
-                                <textarea id="editor2" name="terms" class="form-control"
-                                    placeholder="Enter terms"><?php echo set_value('terms'); ?></textarea>
+                                <label>Remarks</label>
+                                <textarea id="editor2" name="remarks" class="form-control"
+                                    placeholder="Enter remarks"><?php echo set_value('remarks'); ?></textarea>
                             </div>
                         </div>
                     </div>
+
                 </fieldset>
 
                 <fieldset class="mt-4">
@@ -121,7 +125,7 @@
                     <table class="table table-bordered table-sm">
                         <thead>
                             <tr>
-                                <th style="width:5%;">✔</th> 
+                                <th style="width:5%;">✔</th>
                                 <th style="width:20%;">Item Code</th>
                                 <th style="width:30%;">Description</th>
                                 <th style="width:5%;">UOM</th>
@@ -129,7 +133,7 @@
                                 <th style="width:10%;">Rate</th>
                                 <th style="width:10%;">VAT %</th>
                                 <th style="width:10%;">Amount</th>
-                             </tr>
+                            </tr>
                         </thead>
                         <tbody id="item_container"></tbody>
                     </table>
@@ -138,7 +142,7 @@
             </div>
 
             <div class="box-footer text-right">
-                <a href="<?php echo site_url('vendor-quotation-list'); ?>" class="btn btn-warning pull-left">
+                <a href="<?php echo site_url('vendor-pur-inward-list'); ?>" class="btn btn-warning pull-left">
                     <i class="fa fa-arrow-left"></i> Back To List
                 </a>
                 <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save</button>

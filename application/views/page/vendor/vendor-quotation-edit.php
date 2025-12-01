@@ -126,7 +126,7 @@
                         <thead>
                             <tr>
                                 <th style="width:5%;">Select</th>
-                                <th style="width:20%;">Item</th>
+                                <th style="width:20%;">Item Code</th>
                                 <th style="width:30%;">Description</th>
                                 <th style="width:5%;">UOM</th>
                                 <th style="width:10%;">Qty</th>

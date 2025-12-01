@@ -100,7 +100,7 @@
                                             value="" placeholder="Country Name">
                                     </div>
                                 </div>
-                                <!-- <div class="row">
+                                <div class="row">
                                     <div class="form-group col-md-12">
                                         <label>Exchange Rate</label>
                                         <input class="form-control" type="text" name="exchange_rate" id="exchange_rate"
@@ -122,7 +122,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                </div> -->
+                                </div>
                                 <div class="row">
                                     <div class="form-group col-md-12">
                                         <label>Status</label>
@@ -193,7 +193,7 @@
                                             value="" placeholder="Country Name">
                                     </div>
                                 </div>
-                                <!-- <div class="row">
+                                <div class="row">
                                     <div class="form-group col-md-12">
                                         <label>Exchange Rate</label>
                                         <input class="form-control" type="text" name="exchange_rate" id="exchange_rate"
@@ -215,7 +215,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                </div> -->
+                                </div>
                                 <div class="row">
                                     <div class="form-group col-md-12">
                                         <label>Status</label>

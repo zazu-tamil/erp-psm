@@ -140,7 +140,7 @@
 
                                         <div class="col-md-3"> 
                                             <div class="form-group">
-                                                <label>Item Name</label>
+                                                <label>Item Code</label>
                                                 <input type="text" class="form-control"
                                                     value="<?php echo htmlspecialchars($row['item_code']); ?>" readonly>
                                             </div>

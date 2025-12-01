@@ -115,4 +115,19 @@
     </div>
 </section>
 
-<?php include_once(VIEWPATH . 'inc/footer.php'); ?>
+<?php include_once(VIEWPATH . 'inc/footer.php'); 
+
+
+
+/*
+ <div class="col-md-3">
+                     <div class="form-group">
+                        <label>Category Name</label>
+                        <input type="text" class="form-control" value="${row.category_name || ''}" readonly>
+                      </div>
+                      <div class="form-group">
+                        <label>Item Name</label>
+                        <input type="text" class="form-control" value="${row.item_name || ''}" readonly>
+                      </div>
+                    </div>*/
+?>

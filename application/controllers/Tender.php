@@ -2044,6 +2044,7 @@ class Tender extends CI_Controller
                 ci.category_name,
                 ii.item_name,
                 tqi.item_desc,
+                ii.item_code,
                 tqi.uom,
                 tqi.qty,
                 tqi.rate,

@@ -122,7 +122,10 @@ $current_page = $this->uri->segment(1, 0);
         'vendor-po-add',
         'vendor-po-list',
         'vendor-po-view',
-        'vendor-po-edit'
+        'vendor-po-edit',
+        'vendor-pur-inward-add',
+        'vendor-pur-inward-list',
+        'vendor-pur-inward-edit'
     ]) ? 'active' : '' ?>">
 
     <a href="#">
@@ -186,6 +189,22 @@ $current_page = $this->uri->segment(1, 0);
                 </li>
                 <li class="<?= ($current_page === 'vendor-po-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('vendor-po-list') ?>"><i class="fa fa-list"></i> Vendor PO List</a>
+                </li>
+            </ul>
+        </li>
+        <!-- Vendor PO -->
+        <li
+            class="treeview <?= in_array($current_page, ['vendor-pur-inward-add', 'vendor-pur-inward-list',  'vendor-pur-inward-edit']) ? 'active' : '' ?>">
+            <a href="#">
+                <i class="fa fa-files-o"></i> Vendor Inward
+                <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+            </a>
+            <ul class="treeview-menu">
+                <li class="<?= ($current_page === 'vendor-pur-inward-add') ? 'active' : '' ?>">
+                    <a href="<?= site_url('vendor-pur-inward-add') ?>"><i class="fa fa-plus-square"></i> Add Vendor Inward</a>
+                </li>
+                <li class="<?= ($current_page === 'vendor-pur-inward-list') ? 'active' : '' ?>">
+                    <a href="<?= site_url('vendor-pur-inward-list') ?>"><i class="fa fa-list"></i> Vendor Inward List</a>
                 </li>
             </ul>
         </li>

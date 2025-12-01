@@ -134,6 +134,11 @@ $route['vendor-po-list'] = 'vendor/vendor_po_list';
 $route['vendor-po-edit/(:num)'] = 'vendor/vendor_po_edit/$1';
 $route['vendor-po-view/(:num)'] = 'vendor/vendor_po_view/$1';
 
+$route['vendor-pur-inward-add'] = 'vendor/vendor_pur_inward_add'; 
+$route['vendor-pur-inward-list'] = 'vendor/vendor_pur_inward_list';
+$route['vendor-pur-inward-edit/(:num)'] = 'vendor/vendor_pur_inward_edit/$1'; 
+
+
 
 /*Accounts Routes*/ 
 

@@ -24,7 +24,7 @@
         <form method="post" action="" id="frmadd" enctype="multipart/form-data">
             <div class="box-body">
                 <input type="hidden" name="mode" value="Edit" />
-                <input type="hidden" name="vendor_po_id" value="<?php echo $header['vendor_po_id']; ?>" />
+                <input type="hidden" name="vendor_pur_inward_id" value="<?php echo $header['vendor_pur_inward_id']; ?>" />
                 <fieldset class="tender-inward">
                     <legend class="text-light-blue"><i class="fa fa-file-text-o"></i> Po Details</legend>
 
@@ -54,42 +54,46 @@
                         </div>
 
                         <div class="form-group col-md-4">
-                            <label>Vendor Quotation No <span style="color:red;">*</span>
+                            <label>Vendor PO No <span style="color:red;">*</span>
                                 <span data-toggle="tooltip" title="" class=""
-                                    data-original-title="Only when Vendor Quotation Status is Confirmed then select the Quotation No. Otherwise leave it blank.">
+                                    data-original-title="Only when Vendor PO Status is Confirmed then select the PO No. Otherwise leave it blank.">
                                     <i class="text-sm text-info fa fa-info-circle"></i>
                                 </span>
                             </label>
-                            <?php echo form_dropdown('srch_vendor_quote_id', ['' => 'Select Enquiry No']  + $vendor_quote_opt, set_value('srch_vendor_quote_id', $header['vendor_quote_id']), 'id="srch_vendor_quote_id" class="form-control" required disabled'); ?>
-                            <input type="hidden" name="srch_vendor_quote_id" id="srch_vendor_quote_id" value="<?php echo  $header['vendor_quote_id']; ?>">
+                            <?php echo form_dropdown('srch_vendor_po_id', ['' => 'Select PO No'] + $vendor_po_opt, set_value('srch_vendor_po_id' , $header['vendor_po_id']), 'id="srch_vendor_po_id" class="form-control" required disabled'); ?>
+                            <input type="hidden" name="srch_vendor_po_id" id="srch_vendor_po_id" value="<?php echo  $header['vendor_po_id']; ?>">
                         </div>
-
                         <div class="form-group col-md-4">
                             <label>Contact Person</label>
                             <?php echo form_dropdown('srch_vendor_contact_person_id', ['' => 'Select Contact'] + $vendor_contact_opt, set_value('srch_vendor_contact_person_id', $header['vendor_contact_person_id']), 'id="srch_vendor_contact_id" class="form-control"'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
-                            <label>PO Date</label>
-                            <input type="date" name="po_date" id="po_date" class="form-control"
-                                value="<?php echo set_value('po_date', $header['po_date']); ?>">
+                            <label>Inward Date</label>
+                            <input type="date" name="inward_date" id="inward_date" class="form-control"
+                                value="<?php echo set_value('inward_date', $header['inward_date']); ?>">
                         </div>
 
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="delivery_date">Delivery Date</label>
-                             <input type="date" name="delivery_date" id="delivery_date" class="form-control"
-                                value="<?php echo set_value('delivery_date', date('Y-m-d', strtotime($header['delivery_date']))); ?>">
+                       <div class="form-group col-md-4">
+                            <label>Upload Quotation Document</label>
 
-                                    
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="dc_upload" name="dc_upload">
+
+                                <?php if (!empty($header['dc_upload'])): ?>
+                                    <span class="input-group-btn">
+                                        <a href="<?php echo base_url($header['dc_upload']); ?>" 
+                                        target="_blank"
+                                        class="btn btn-info"
+                                        style="margin-left:5px;">
+                                            View Document
+                                        </a>
+                                    </span>
+                                <?php endif; ?>
                             </div>
                         </div>
 
-                        <div class="form-group col-md-4">
-                            <label>PO Status <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('po_status', ['' => 'Select Status'] + $po_status_opt, set_value('po_status', $header['po_status']), 'id="po_status" class="form-control" required="true"'); ?>
-                        </div>
-
+   
                         <div class="form-group col-md-4">
                             <label>Transport Charges</label>
                             <input type="number" step="0.01" name="transport_charges" id="transport_charges"
@@ -104,9 +108,9 @@
                         </div>
                         <!-- Po Number -->
                          <div class="form-group col-md-2">
-                            <label>Po Number <span style="color:red;">*</span></label>
-                            <input type="text" name="po_no" id="po_no" class="form-control" placeholder="Enter PO Number"
-                                value="<?php echo set_value('po_no', $header['po_no']); ?>" required="true">
+                            <label>Inward Number <span style="color:red;">*</span></label>
+                            <input type="text" name="inward_no" id="inward_no" class="form-control" placeholder="Enter Inward Number"
+                                value="<?php echo set_value('inward_no', $header['inward_no']); ?>" required="true">
                          </div>
                         <div class="form-group col-md-2">
                             <label>Status</label><br>
@@ -115,20 +119,13 @@
                         </div>
                     </div> 
                     <div class="row">
-                      <div class="col-md-6">
+                      <div class="col-md-12">
                             <div class="form-group">
                                 <label>Notes</label>
                                 <textarea id="editor1" name="remarks" class="form-control"
                                     placeholder="Enter notes"><?php echo set_value('remarks', $header['remarks']); ?></textarea>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Terms & Conditions</label>
-                                <textarea id="editor2" name="terms" class="form-control"
-                                    placeholder="Enter terms"><?php echo set_value('terms', $header['terms']); ?></textarea>
-                            </div>
-                        </div>
+                        </div> 
                     </div>
 
 
@@ -163,8 +160,8 @@
                                             <input type="text" class="form-control"
                                                 value="<?php echo htmlspecialchars($item['item_code']); ?>" readonly>
 
-                                            <input type="hidden" name="vendor_rate_enquiry_item_id[<?php echo $index; ?>]"
-                                                value="<?php echo $item['vendor_rate_enquiry_item_id']; ?>">
+                                            <input type="hidden" name="vendor_po_item_id[<?php echo $index; ?>]"
+                                                value="<?php echo $item['vendor_po_item_id']; ?>">
                                             <input type="hidden" name="category_id[<?php echo $index; ?>]"
                                                 value="<?php echo $item['category_id']; ?>">
                                             <input type="hidden" name="item_id[<?php echo $index; ?>]"
@@ -217,7 +214,7 @@
             </div>
 
             <div class="box-footer text-right">
-                <a href="<?php echo site_url('vendor-po-list'); ?>" class="btn btn-warning pull-left">
+                <a href="<?php echo site_url('vendor-pur-inward-list'); ?>" class="btn btn-warning pull-left">
                     <i class="fa fa-arrow-left"></i> Back To List
                 </a>
                 <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save</button>

@@ -174,14 +174,10 @@
                       <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="${i}">
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-md-3"> 
                       <div class="form-group">
-                        <label>Category Name</label>
-                        <input type="text" class="form-control" value="${row.category_name || ''}" readonly>
-                      </div>
-                      <div class="form-group">
-                        <label>Item Name</label>
-                        <input type="text" class="form-control" value="${row.item_name || ''}" readonly>
+                        <label>Item Code</label>
+                        <input type="text" class="form-control" value="${row.item_code || ''}" readonly>
                       </div>
                     </div>
 
