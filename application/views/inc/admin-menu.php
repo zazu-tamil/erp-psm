@@ -46,7 +46,10 @@ $current_page = $this->uri->segment(1, 0);
         'tender-quotation-edit',
         'customer-tender-po-add',
         'customer-tender-po-list',
-        'customer-tender-po-edit'
+        'customer-tender-po-edit',
+        'tender-invoice-add',
+        'tender-invoice-list',
+        'tender-po-invoice-edit'
     ]) ? 'active' : '' ?>">
 
     <a href="#">
@@ -98,6 +101,27 @@ $current_page = $this->uri->segment(1, 0);
                 <li class="<?= ($current_page === 'customer-tender-po-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('customer-tender-po-list') ?>">
                         <i class="fa fa-list"></i> Tender PO List
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li
+            class="treeview <?= in_array($current_page, ['tender-invoice-add', 'tender-invoice-list', 'tender-po-invoice-edit']) ? 'active' : '' ?>">
+            <a href="#">
+                <i class="fa fa-briefcase"></i> Tender Invoice
+                <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+            </a>
+
+            <ul class="treeview-menu">
+                <li class="<?= ($current_page === 'tender-invoice-add') ? 'active' : '' ?>">
+                    <a href="<?= site_url('tender-invoice-add') ?>">
+                        <i class="fa fa-plus-square"></i> Tender Invoice
+                    </a>
+                </li>
+
+                <li class="<?= ($current_page === 'tender-invoice-list') ? 'active' : '' ?>">
+                    <a href="<?= site_url('tender-invoice-list') ?>">
+                        <i class="fa fa-list"></i> Tender Invoice List
                     </a>
                 </li>
             </ul>
