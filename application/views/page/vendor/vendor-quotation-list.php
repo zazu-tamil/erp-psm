@@ -78,7 +78,7 @@
                         <th>Customer</th>
                         <th>Vendor Name</th>
                         <th>Quotation No</th>
-                        <th>Po Status</th>
+                        <th>Quotation Status</th>
                         <th class="text-center" colspan="3">Action</th>
                     </tr>
                 </thead>
@@ -110,6 +110,13 @@
                                         <?php echo $status != '' ? $status : 'N/A'; ?>
                                     </span>
                                 </td>
+                                <!-- PRINT -->
+                                    <td class="text-center">
+                                        <a href="<?php echo site_url('vendor-quotation-print/' . $row['vendor_quote_id']); ?>"
+                                            class="btn btn-success btn-xs" title="Print" target="_blank">
+                                            <i class="fa fa-print"></i>
+                                        </a>
+                                    </td>
                                 <!-- EDIT -->
                                 <td class="text-center">
                                     <a href="<?php echo site_url('vendor-quotation-edit/' . $row['vendor_quote_id']); ?>"

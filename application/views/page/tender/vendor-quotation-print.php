@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Tender Quotation - <?php echo htmlspecialchars($record['quotation_no'] ?? ''); ?></title>
+    <title>Vendor Quotation - <?php echo htmlspecialchars($record['quotation_no'] ?? ''); ?></title>
     <style>
         * {
             margin: 0;
@@ -367,7 +367,7 @@
 
                         <strong><?php echo htmlspecialchars($record['customer_name'] ?? 'N/A'); ?></strong><br>
                         <?php echo nl2br($record['address'] ?? 'N/A'); ?> <br>
-                        <?php echo htmlspecialchars('[ '.$record['customer_country'] .' ]'?? 'N/A'); ?>
+                        <?php echo htmlspecialchars($record['customer_country'] ?? 'N/A'); ?>
 
                     </div>
                 </div>
@@ -405,7 +405,7 @@
                                 <div class="item-description">
                                     <?php if (!empty($item['item_desc']) || !empty($item['item_desc'])): ?>
                                          <div class="item-details">
-                                           <?php echo htmlspecialchars($item['item_code'] ?: $item['item_code'] ?: ''); ?>
+                                            <small>Item Code :</small><?php echo htmlspecialchars($item['item_code'] ?: $item['item_code'] ?: ''); ?>
                                         </div>
                                         <div class="item-details">
                                             <?php echo htmlspecialchars($item['item_desc'] ?: $item['item_desc'] ?: ''); ?>

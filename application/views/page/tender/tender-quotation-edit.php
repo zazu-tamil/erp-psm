@@ -138,16 +138,11 @@
                                                 value="<?php echo $i; ?>" checked>
                                         </div>
 
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label>Category Name</label>
-                                                <input type="text" class="form-control"
-                                                    value="<?php echo htmlspecialchars($row['category_id']); ?>" readonly>
-                                            </div>
+                                        <div class="col-md-3"> 
                                             <div class="form-group">
                                                 <label>Item Name</label>
                                                 <input type="text" class="form-control"
-                                                    value="<?php echo htmlspecialchars($row['item_id']); ?>" readonly>
+                                                    value="<?php echo htmlspecialchars($row['item_code']); ?>" readonly>
                                             </div>
                                         </div>
 

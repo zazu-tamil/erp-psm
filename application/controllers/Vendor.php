@@ -1686,7 +1686,100 @@ class Vendor extends CI_Controller
         $this->load->view('page/vendor/vendor-quotation-edit', $data);
     }
 
+        public function vendor_quotation_print($vendor_quote_id = 0)
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
 
+        if (!$vendor_quote_id) {
+            show_404();
+        }
+
+        // === MAIN RECORD ===
+        $sql = "
+         SELECT
+           vqi.*,
+             v.vendor_name,
+             v.address as vendor_address,
+            v.country AS vendor_country,
+            ci.company_name AS our_company,
+           	vqi.quote_no,
+            ci.ltr_header_img
+        FROM
+            vendor_quotation_info vqi
+        LEFT JOIN customer_info c ON
+           vqi.customer_id = c.customer_id AND c.status = 'Active'
+        LEFT JOIN company_info ci ON
+           vqi.company_id = ci.company_id AND ci.status = 'Active'
+        LEFT JOIN tender_enquiry_info te ON
+           vqi.tender_enquiry_id = te.tender_enquiry_id AND te.status = 'Active'
+        LEFT JOIN vendor_info as v on vqi.vendor_id = v.vendor_id and v.status='Active'
+        WHERE
+           vqi.vendor_quote_id = ? AND vqi.status != 'Delete'
+        ";
+        $query = $this->db->query($sql, [$vendor_quote_id]);
+        $data['record'] = $query->row_array();
+
+        if (!$data['record']) {
+            show_404();
+        }
+
+        // === ITEMS WITH RATE CALCULATION ===
+        $sql = "
+            SELECT 
+                vqi.*,
+                item.item_code,
+                cat.category_name,
+                item.item_name,
+                item.item_description,
+                item.uom AS item_uom
+            FROM vendor_quote_item_info vqi
+            LEFT JOIN category_info cat ON vqi.category_id = cat.category_id
+            LEFT JOIN item_info item ON vqi.item_id = item.item_id
+            WHERE vqi.vendor_quote_id = ? 
+            AND vqi.status IN ('Active', 'Inactive')
+            ORDER BY vqi.vendor_quote_item_id
+        ";
+        $query = $this->db->query($sql, [$vendor_quote_id]);
+        $items = $query->result_array();
+
+        $data['items'] = [];
+        $gst_summary = [];
+
+        foreach ($items as $item) {
+            $qty = floatval($item['qty']);
+            $gst = floatval($item['gst']);
+            $amount = floatval($item['amount']);
+            $rate = floatval($item['rate']);
+
+
+            // === GST Amount ===
+            $gst_amount = $amount - ($qty * $rate);
+
+            // === Store in item ===
+            $item['rate'] = $rate;
+            $item['gst_amount'] = $gst_amount;
+            $item['base_amount'] = $qty * $rate;
+
+            $data['items'][] = $item;
+
+            // === GST Summary ===
+            $gst_key = number_format($gst, 2);
+            if (!isset($gst_summary[$gst_key])) {
+                $gst_summary[$gst_key] = ['gst' => $gst, 'base' => 0, 'gst_amount' => 0];
+            }
+            $gst_summary[$gst_key]['base'] += $qty * $rate;
+            $gst_summary[$gst_key]['gst_amount'] += $gst_amount;
+        }
+
+        $data['gst_summary'] = $gst_summary;
+        $data['grand_total'] = array_sum(array_column($data['items'], 'base_amount'));
+        $data['total_gst'] = array_sum(array_column($data['items'], 'gst_amount'));
+        $data['final_total'] = $data['grand_total'] + $data['total_gst'];
+
+        $this->load->view('page/vendor/vendor-quotation-print', $data);
+    }
     public function get_vendor_quotation_rate_enquiry()
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in')) {
@@ -1966,6 +2059,7 @@ class Vendor extends CI_Controller
                     d.category_name,
                     c.item_id,
                     c.item_name,
+                    c.item_code,
                     a.item_desc,
                     a.uom,
                     a.qty,

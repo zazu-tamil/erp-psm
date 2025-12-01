@@ -365,9 +365,9 @@
                     <div><span class="info-label">To:</span></div>
                     <div class="customer-name">
 
-                        <strong><?php echo htmlspecialchars($record['customer_name'] ?? 'N/A'); ?></strong><br>
-                        <?php echo nl2br($record['address'] ?? 'N/A'); ?> <br>
-                        <?php echo htmlspecialchars('[ '.$record['customer_country'] .' ]'?? 'N/A'); ?>
+                        <strong><?php echo htmlspecialchars($record['vendor_name'] ?? 'N/A'); ?></strong><br>
+                        <?php echo nl2br($record['vendor_address'] ?? 'N/A'); ?> <br>
+                        <?php echo htmlspecialchars('[ '.$record['vendor_country'] .' ]'.' ' ?? 'N/A'); ?>
 
                     </div>
                 </div>
@@ -375,9 +375,8 @@
                     <div><span class="info-label">Date:</span>
                         <?php echo date('d-m-Y', strtotime($record['quote_date'])); ?></div>
                     <div><span class="info-label">Quotation No:</span>
-                        <?php echo htmlspecialchars($record['tender_quotation_no'] ?? 'N/A'); ?></div>
-                    <!-- <div><span class="info-label">Tender Ref No:</span>
-                        <?php echo htmlspecialchars($record['tender_ref_no'] ?? 'N/A'); ?></div> -->
+                        <?php echo htmlspecialchars($record['quote_no'] ?? 'N/A'); ?></div>
+                   
                 </div>
             </div>
         </div>
@@ -404,9 +403,9 @@
                             <td class="text-left">
                                 <div class="item-description">
                                     <?php if (!empty($item['item_desc']) || !empty($item['item_desc'])): ?>
-                                         <div class="item-details">
-                                           <?php echo htmlspecialchars($item['item_code'] ?: $item['item_code'] ?: ''); ?>
-                                        </div>
+                                         <!-- <div class="item-details">
+                                            <small>Item Code :</small><?php echo htmlspecialchars($item['item_code'] ?: $item['item_code'] ?: ''); ?>
+                                        </div> -->
                                         <div class="item-details">
                                             <?php echo htmlspecialchars($item['item_desc'] ?: $item['item_desc'] ?: ''); ?>
                                         </div>

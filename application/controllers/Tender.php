@@ -1146,7 +1146,20 @@ class Tender extends CI_Controller
 
         /* ---- Load existing record for edit ---- */
         $data['header'] = $this->db->where('tender_quotation_id', $tender_quotation_id)->get('tender_quotation_info')->row_array();
-        $data['items'] = $this->db->where('tender_quotation_id', $tender_quotation_id)->get('tender_quotation_item_info')->result_array();
+        $sql = "
+            SELECT
+                tqi.*,
+                ii.item_code
+            FROM
+                tender_quotation_item_info tqi
+            LEFT JOIN item_info ii ON
+                tqi.item_id = ii.item_id AND ii.status = 'Active'
+            WHERE
+                tqi.tender_quotation_id = ? AND tqi.status != 'Delete'
+        ";
+        $query = $this->db->query($sql, [$tender_quotation_id]);
+        $data['items'] = $query->result_array();  // FIXED: row_array() → result_array()
+
 
         $data['pagination'] = $this->pagination->create_links();
         $this->load->view('page/tender/tender-quotation-edit', $data);
@@ -1199,6 +1212,7 @@ class Tender extends CI_Controller
             cat.category_name,
             item.item_name,
             item.item_description,
+            item.item_code,
             item.uom AS item_uom
         FROM tender_quotation_item_info tqii
         LEFT JOIN category_info cat ON tqii.category_id = cat.category_id
@@ -1751,7 +1765,7 @@ class Tender extends CI_Controller
                 'default_rate' => $qi['default_rate'],
                 'default_gst' => $qi['default_gst'],
                 'default_amount' => $qi['default_amount'],
-                 // Saved overrides (if exists)
+                // Saved overrides (if exists)
                 'saved' => $is_saved,
                 'tender_po_item_id' => $is_saved ? $saved_map[$tqi_id]['tender_po_item_id'] : null,
                 'rate' => $is_saved ? $saved_map[$tqi_id]['rate'] : $qi['default_rate'],

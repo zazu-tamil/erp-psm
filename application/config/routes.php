@@ -127,6 +127,7 @@ $route['customer-tender-po-edit/(:num)'] = 'tender/customer_tender_po_edit/$1';
 $route['vendor-quotation-add'] = 'vendor/vendor_quotation_add';
 $route['vendor-quotation-list'] = 'vendor/vendor_quotation_list';
 $route['vendor-quotation-edit/(:num)'] = 'vendor/vendor_quotation_edit/$1';
+$route['vendor-quotation-print/(:num)'] = 'vendor/vendor_quotation_print/$1';
 
 $route['vendor-po-add'] = 'vendor/vendor_po_add'; 
 $route['vendor-po-list'] = 'vendor/vendor_po_list';
