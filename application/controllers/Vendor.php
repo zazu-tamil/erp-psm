@@ -1390,6 +1390,8 @@ class Vendor extends CI_Controller
         $this->pagination->initialize($config);
         $data['pagination'] = $this->pagination->create_links();
 
+         $data['vendor_opt'] = [];
+
 
         $sql = "
             SELECT company_id, company_name 
@@ -1448,7 +1450,7 @@ class Vendor extends CI_Controller
 
 
             $query = $this->db->query($sql);
-            $data['vendor_opt'] = [];
+           
             foreach ($query->result_array() as $row) {
                 $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
             }

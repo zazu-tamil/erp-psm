@@ -209,3 +209,19 @@ ALTER TABLE `vendor_rate_enquiry_info`
 	CHANGE COLUMN `handling_charges` `transport_charges` DECIMAL(10,2) NULL DEFAULT NULL AFTER `remarks`,
 	ADD COLUMN `other_charges` DECIMAL(10,2) NULL DEFAULT NULL AFTER `transport_charges`; 
 
+
+
+ ---------------------------------------------------------------
+ 28-11-2025
+
+ ALTER TABLE `vendor_po_info`
+	CHANGE COLUMN `po_no` `po_no` INT(4) ZEROFILL NULL DEFAULT NULL AFTER `po_date`;
+
+CREATE TRIGGER `vendor_po_info_before_insert` BEFORE INSERT ON `vendor_po_info` FOR EACH ROW BEGIN
+declare v_po int default 0;
+select max(b.po_no) into v_po from vendor_po_info as b where b.status != 'Delete' and fiscal_year(b.po_date) = fiscal_year(new.po_date) and b.company_id = new.company_id;
+set new.po_no = ifnull(v_po , 0) + 1 ;
+
+END//
+
+
