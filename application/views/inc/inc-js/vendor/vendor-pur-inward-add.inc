@@ -217,25 +217,13 @@
           return;
         }
 
-        $.each(res, function (i, row) {
-          // GST DROPDOWN ---- IMPORTANT FIX
-          const gstDropdown = `
-                    <?php
-                        echo form_dropdown(
-                            'gst[]',
-                            ['' => 'Select VAT'] + $gst_opt,
-                            '',
-                            'class="form-control vat-dropdown gst-select"'
-                        );
-                    ?>
-                `;
-
-          // MAIN ROW HTML
+        $.each(res, function (i, row) { 
           const rowHtml = `
                   <tr class="item-row">
 
                     <td>
                       <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="${i}">
+                      <small class="badge badge-secondary">Item ${i + 1}</small>
                     </td>
 
                     <td>
@@ -267,29 +255,12 @@
                     <td>
                       <input type="number" step="0.01" name="qty[]"
                              class="form-control qty-input"
-                             value="${row.qty}" readonly>
-                    </td>
-
-                    <td>
-                      <input type="number" step="0.01" name="rate[]"
-                             class="form-control rate-input"
-                             value="${row.rate || ""}">
-                    </td>
-
-                    <td class="gst-cell">${gstDropdown}</td>
-
-                    <td>
-                      <input type="number" name="amount[]" class="form-control amount-input"
-                             value="${row.amount || "0.00"}" readonly>
-                    </td>
-
+                             value="${row.qty}" >
+                    </td> 
                   </tr>
                 `;
 
-          const $row = $(rowHtml);
-
-          // Set GST value from DB
-          $row.find(".gst-select").val(row.gst || "");
+          const $row = $(rowHtml); 
 
           $container.append($row);
         });

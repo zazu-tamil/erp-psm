@@ -1129,7 +1129,7 @@ class Tender extends CI_Controller
         ";
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
-            $data['gst_opt'][$row['gst_id']] = $row['gst_percentage'];
+            $data['gst_opt'][$row['gst_percentage']] = $row['gst_percentage'];
         }
 
         $sql = "

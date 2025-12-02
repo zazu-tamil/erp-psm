@@ -32,7 +32,7 @@
                 <fieldset class="tender-inward">
                     <legend class="text-light-blue">
                         <i class="fa fa-file-text-o"></i> Inward Details
-                             
+
                     </legend>
 
                     <div class="row">
@@ -75,32 +75,17 @@
                             <label>Inward Date</label>
                             <input type="date" name="inward_date" id="inward_date" class="form-control"
                                 value="<?php echo set_value('inward_date', date('Y-m-d')); ?>" required="true">
-                        </div>  
+                        </div>
 
                         <div class="form-group col-md-4">
                             <label>Inward No </label>
                             <input type="text" name="inward_no" id="inward_no" class="form-control"
                                 placeholder="Enter Inward No" required="true">
-                        </div>  
-                          <div class="form-group col-md-4">
+                        </div>
+                        <div class="form-group col-md-4">
                             <label>Upload Quotation Document</label>
-                            <input type="file" name="dc_upload" id="dc_upload"
-                                class="form-control" >
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label>Transport Charges</label>
-                            <input type="number" step="0.01" name="transport_charges" id="transport_charges"
-                                class="form-control" value="<?php echo set_value('transport_charges'); ?>"
-                                placeholder="0.00">
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label>Other Charges</label>
-                            <input type="number" step="0.01" name="other_charges" id="other_charges"
-                                class="form-control" value="<?php echo set_value('other_charges'); ?>"
-                                placeholder="0.00">
-                        </div>
-
-
+                            <input type="file" name="dc_upload" id="dc_upload" class="form-control">
+                        </div> 
                         <div class="form-group col-md-4">
                             <label>Status</label><br>
                             <label class="radio-inline"><input type="radio" name="status" value="Active" <?php echo set_radio('status', 'Active', TRUE); ?>> Active</label>
@@ -108,7 +93,7 @@
                         </div>
                     </div>
 
-                    <div class="row"> 
+                    <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label>Remarks</label>
@@ -130,10 +115,7 @@
                                 <th style="width:30%;">Description</th>
                                 <th style="width:5%;">UOM</th>
                                 <th style="width:10%;">Qty</th>
-                                <th style="width:10%;">Rate</th>
-                                <th style="width:10%;">VAT %</th>
-                                <th style="width:10%;">Amount</th>
-                            </tr>
+                             </tr>
                         </thead>
                         <tbody id="item_container"></tbody>
                     </table>

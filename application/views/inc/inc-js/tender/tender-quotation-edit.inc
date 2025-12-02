@@ -2,39 +2,59 @@
 
 <script>
   $(document).ready(function () {
-    // Calculate totals on load
+    // Recalculate everything on load
     calculateTotalAmount();
 
-    // Trigger calculation on quantity, rate, or VAT change
+    // Trigger calculation on quantity, rate, VAT change
     $(document).on(
       "input change",
-      ".qty-input, .rate-input, .vat-dropdown",
+      ".qty-input, .rate-input, .vat-dropdown, .item-check",
       function () {
         const $row = $(this).closest(".item-card");
-        const qty = parseFloat($row.find(".qty-input").val()) || 0;
-        const rate = parseFloat($row.find(".rate-input").val()) || 0;
-        const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
-        const amount = qty * rate * (1 + gst / 100);
-        $row.find(".amount-input").val(amount.toFixed(2));
+
+        // Only calculate row if checked
+        if ($row.find(".item-check").is(":checked")) {
+          updateRowAmount($row);
+        } else {
+          $row.find(".amount-input").val("0.00"); // unchecked = 0 amount
+        }
+
         calculateTotalAmount();
       }
     );
 
-    // Function to calculate and update total amount
+    // --- Function: Update Amount for a Row ---
+    function updateRowAmount($row) {
+      const qty = parseFloat($row.find(".qty-input").val()) || 0;
+      const rate = parseFloat($row.find(".rate-input").val()) || 0;
+      const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
+      //alert(gst);
+      const amount = (qty * rate) + (qty * rate * gst) / 100;
+
+      $row.find(".amount-input").val(amount.toFixed(2));
+    }
+
+    // --- Function: Total Calculation ---
     function calculateTotalAmount() {
       let total = 0;
-      $(".amount-input").each(function () {
-        total += parseFloat($(this).val()) || 0;
+
+      $(".item-card").each(function () {
+        const $row = $(this);
+
+        if ($row.find(".item-check").is(":checked")) {
+          total += parseFloat($row.find(".amount-input").val()) || 0;
+        }
       });
 
-      const $total = $("#total_amount");
-      $total.fadeOut(100, function () {
-        $(this).text(total.toFixed(2)).fadeIn(200);
-      });
+      $("#total_amount")
+        .fadeOut(100, function () {
+          $(this).text(total.toFixed(2));
+        })
+        .fadeIn(200);
     }
   });
+
   $(function () {
-    
     CKEDITOR.replace("editor1_edit_modal", {
       height: 100,
       extraPlugins: "justify,colorbutton,font,table",

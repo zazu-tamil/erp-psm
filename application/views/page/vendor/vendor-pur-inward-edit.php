@@ -94,19 +94,7 @@
                         </div>
 
    
-                        <div class="form-group col-md-4">
-                            <label>Transport Charges</label>
-                            <input type="number" step="0.01" name="transport_charges" id="transport_charges"
-                                class="form-control" value="<?php echo set_value('transport_charges', $header['transport_charges']); ?>"
-                                placeholder="0.00">
-                        </div> 
-                        <div class="form-group col-md-4">
-                            <label>Other Charges</label>
-                            <input type="number" step="0.01" name="other_charges" id="other_charges"
-                                class="form-control" value="<?php echo set_value('other_charges', $header['other_charges']); ?>"
-                                placeholder="0.00">
-                        </div>
-                        <!-- Po Number -->
+                         
                          <div class="form-group col-md-2">
                             <label>Inward Number <span style="color:red;">*</span></label>
                             <input type="text" name="inward_no" id="inward_no" class="form-control" placeholder="Enter Inward Number"
@@ -140,10 +128,7 @@
                                 <th style="width:20%;">Item Code</th>
                                 <th style="width:30%;">Description</th>
                                 <th style="width:5%;">UOM</th>
-                                <th style="width:10%;">Qty</th>
-                                <th style="width:10%;">Rate</th>
-                                <th style="width:10%;">VAT %</th>
-                                <th style="width:10%;">Amount</th>
+                                <th style="width:10%;">Qty</th> 
                             </tr>
                         </thead>
                         <tbody id="item_container">
@@ -153,7 +138,7 @@
                                     <tr class="item-row">
                                         <td>
                                             <input type="checkbox" class="form-check-input item-check" name="selected_items[]"
-                                                value="<?php echo $index; ?>" checked>
+                                                value="<?php echo $index; ?>" checked> <small class="badge badge-secondary">Item<?php echo $index + 1; ?></small>
                                         </td>
 
                                         <td>
@@ -180,30 +165,8 @@
 
                                         <td>
                                             <input type="number" step="0.01" name="qty[<?php echo $index; ?>]"
-                                                class="form-control qty-input" value="<?php echo $item['qty']; ?>" readonly>
-                                        </td>
-
-                                        <td>
-                                            <input type="number" step="0.01" name="rate[<?php echo $index; ?>]"
-                                                class="form-control rate-input" value="<?php echo $item['rate']; ?>">
-                                        </td>
-
-                                        <td>
-                                            <select name="gst[<?php echo $index; ?>]" class="form-control gst-select">
-                                                <option value="">Select</option>
-                                                <?php foreach ($gst_opt as $gst_val): ?>
-                                                    <option value="<?php echo $gst_val; ?>" <?= ($item['gst'] == $gst_val) ? 'selected' : ''; ?>>
-                                                        <?= $gst_val; ?>%
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                        </td>
-
-                                        <td>
-                                            <input type="number" step="0.01" name="amount[<?php echo $index; ?>]"
-                                                class="form-control amount-input" value="<?php echo $item['amount']; ?>"
-                                                readonly>
-                                        </td>
+                                                class="form-control qty-input" value="<?php echo $item['qty']; ?>">
+                                        </td> 
 
                                     </tr>
                                     <?php $index++; endforeach; ?>

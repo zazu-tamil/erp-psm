@@ -188,7 +188,7 @@
                                                         <?php
                                                         echo form_dropdown(
                                                             'gst[]',
-                                                            $gst_opt,
+                                                            ['' => 'Select VAT']+$gst_opt,
                                                             set_value('gst[]', isset($row['gst']) ? $row['gst'] : ''),
                                                             'class="form-control vat-dropdown"'
                                                         );
