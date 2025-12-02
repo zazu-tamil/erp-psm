@@ -59,8 +59,6 @@ $route['dash'] = 'dashboard';
 $route['add-tender-enquiry']='tender/add_tender_enquiry';
 $route['tender-enquiry-list'] = 'tender/tender_enquiry_list';
 $route['tender-enquiry-edit/(:num)'] = 'tender/edit_tender_enquiry/$1'; 
-$route['tender-quotation-list'] = 'tender/tender_quotation_list';
-$route['tender-quotation-print/(:num)'] = 'tender/tender_quotation_print/$1';
 
 $route['change-password'] = 'login/change_password';
 $route['dash'] = 'dashboard'; 
@@ -113,9 +111,20 @@ $route['vendor-rate-enquiry-print/(:num)'] = 'vendor/vendor_rate_enquiry_print/$
 
 $route['tender-quotation-add'] = 'tender/tender_quotation_add';
 $route['tender-quotation-edit/(:num)'] = 'tender/tender_quotation_edit/$1';
+$route['tender-quotation-list'] = 'tender/tender_quotation_list';
+$route['tender-quotation-print/(:num)'] = 'tender/tender_quotation_print/$1';
+
+
+$route['tender-dc-add'] = 'tender/tender_dc_add';
+$route['tender-dc-edit/(:num)'] = 'tender/tender_dc_edit/$1';
+$route['tender-dc-list'] = 'tender/tender_dc_list';
+$route['tender-dc-print/(:num)'] = 'tender/tender_dc_print/$1';
+
 
 $route['tender-quotation-po'] = 'tender/tender_quotation_po';
 $route['tender-quotation-po/(:num)'] = 'tender/tender_quotation_po/$1';
+
+
 
 $route['customer-tender-po-add'] = 'tender/customer_tender_po_add';
 $route['tender/get_quotations_by_customer'] = 'tender/get_quotations_by_customer';

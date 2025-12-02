@@ -40,7 +40,7 @@ $current_page = $this->uri->segment(1, 0);
 </li>
 
 <li class="treeview 
-    <?= in_array($current_page, [ 
+    <?= in_array($current_page, [
         'tender-quotation-add',
         'tender-quotation-list',
         'tender-quotation-edit',
@@ -49,7 +49,10 @@ $current_page = $this->uri->segment(1, 0);
         'customer-tender-po-edit',
         'tender-invoice-add',
         'tender-invoice-list',
-        'tender-po-invoice-edit'
+        'tender-po-invoice-edit',
+        'tender-dc-add',
+        'tender-dc-list',
+        'tender-dc-edit'        
     ]) ? 'active' : '' ?>">
 
     <a href="#">
@@ -122,6 +125,28 @@ $current_page = $this->uri->segment(1, 0);
                 <li class="<?= ($current_page === 'tender-invoice-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('tender-invoice-list') ?>">
                         <i class="fa fa-list"></i> Tender Invoice List
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <li
+            class="treeview <?= in_array($current_page, ['tender-dc-add', 'tender-dc-list', 'tender-dc-edit']) ? 'active' : '' ?>">
+            <a href="#">
+                <i class="fa fa-briefcase"></i> Tender DC
+                <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+            </a>
+
+            <ul class="treeview-menu">
+                <li class="<?= ($current_page === 'tender-dc-add') ? 'active' : '' ?>">
+                    <a href="<?= site_url('tender-dc-add') ?>">
+                        <i class="fa fa-plus-square"></i> Tender DC
+                    </a>
+                </li>
+
+                <li class="<?= ($current_page === 'tender-dc-list') ? 'active' : '' ?>">
+                    <a href="<?= site_url('tender-dc-list') ?>">
+                        <i class="fa fa-list"></i> Tender DC List
                     </a>
                 </li>
             </ul>
@@ -218,17 +243,19 @@ $current_page = $this->uri->segment(1, 0);
         </li>
         <!-- Vendor PO -->
         <li
-            class="treeview <?= in_array($current_page, ['vendor-pur-inward-add', 'vendor-pur-inward-list',  'vendor-pur-inward-edit']) ? 'active' : '' ?>">
+            class="treeview <?= in_array($current_page, ['vendor-pur-inward-add', 'vendor-pur-inward-list', 'vendor-pur-inward-edit']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-files-o"></i> Vendor Inward
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
             </a>
             <ul class="treeview-menu">
                 <li class="<?= ($current_page === 'vendor-pur-inward-add') ? 'active' : '' ?>">
-                    <a href="<?= site_url('vendor-pur-inward-add') ?>"><i class="fa fa-plus-square"></i> Add Vendor Inward</a>
+                    <a href="<?= site_url('vendor-pur-inward-add') ?>"><i class="fa fa-plus-square"></i> Add Vendor
+                        Inward</a>
                 </li>
                 <li class="<?= ($current_page === 'vendor-pur-inward-list') ? 'active' : '' ?>">
-                    <a href="<?= site_url('vendor-pur-inward-list') ?>"><i class="fa fa-list"></i> Vendor Inward List</a>
+                    <a href="<?= site_url('vendor-pur-inward-list') ?>"><i class="fa fa-list"></i> Vendor Inward
+                        List</a>
                 </li>
             </ul>
         </li>
