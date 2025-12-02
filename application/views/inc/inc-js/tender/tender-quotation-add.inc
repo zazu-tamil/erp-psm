@@ -259,7 +259,7 @@
       const rate = parseFloat($row.find(".rate-input").val()) || 0;
       const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
 
-      const amount = qty * rate * (1 + gst / 100);
+      const amount = (qty * rate) + ((qty * rate) * gst / 100);
       $row.find(".amount-input").val(amount.toFixed(2));
 
       calculateTotalAmount();
