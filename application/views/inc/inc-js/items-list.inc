@@ -45,7 +45,7 @@
     $(".del_record").click(function () {
       if (confirm("Are you sure you want to delete this tender enquiry?")) {
         const id = $(this).val();
-		//alert(id);
+        //alert(id);
         $.post(
           "<?php echo site_url('delete-record'); ?>",
           {

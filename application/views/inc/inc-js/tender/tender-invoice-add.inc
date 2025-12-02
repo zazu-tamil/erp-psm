@@ -165,7 +165,7 @@
           if (res.length > 0) {
             $.each(res, function (i, row) {
               const hiddenFields = `
-                <input type="hidden" name="tender_quotation_item_id[]" value="${row.tender_quotation_item_id}">
+                <input type="hidden" name="tender_po_item_id[]" value="${row.tender_po_item_id}">
                 <input type="hidden" name="category_id[]" value="${row.category_id}">
                 <input type="hidden" name="item_id[]" value="${row.item_id}">
               `;

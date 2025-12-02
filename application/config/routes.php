@@ -141,6 +141,7 @@ $route['vendor-pur-inward-edit/(:num)'] = 'vendor/vendor_pur_inward_edit/$1';
 $route['tender-invoice-add'] = 'tender/tender_invoice_add'; 
 $route['tender-invoice-list'] = 'tender/tender_po_invoice_list';
 $route['tender-po-invoice-edit/(:num)'] = 'tender/tender_po_invoice_edit/$1'; 
+$route['tender-po-invoice-print/(:num)'] = 'tender/tender_po_invoice_print/$1'; 
 
 /*Accounts Routes*/ 
 

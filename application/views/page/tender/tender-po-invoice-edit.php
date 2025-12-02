@@ -1,4 +1,9 @@
-<?php include_once(VIEWPATH . 'inc/header.php'); ?>
+<?php include_once(VIEWPATH . 'inc/header.php'); 
+
+// echo '<pre>';
+// print_r($item_list);
+// echo '</pre>';
+?>
 
 <section class="content-header">
     <h1><?php echo htmlspecialchars($title); ?></h1>
@@ -51,12 +56,18 @@
                                 set_value('srch_tender_po_id' , $header['tender_po_id']),
                                 'id="srch_tender_po_id" class="form-control" required'
                             ); ?>
+                            <input type="hidden" name="tender_po_id" id="tender_po_id" value="<?php echo $header['tender_po_id']; ?>">
                         </div> 
 
                         <div class="form-group col-md-3">
                             <label>Invoice Date</label>
                             <input type="date" name="invoice_date" id="invoice_date" class="form-control"
-                                value="<?php echo set_value('invoice_date', date('Y-m-d', strtotime($header['invoice_date']))); ?>">
+                                value="<?php echo set_value('invoice_date', date('Y-m-d', strtotime($header['invoice_date']))); ?>" >
+                        </div> 
+                        <div class="form-group col-md-3">
+                            <label>Invoice No</label>
+                            <input type="text" name="invoice_no" id="invoice_no" class="form-control"
+                                value="<?php echo set_value('invoice_no', $header['invoice_no']); ?>" placeholder="Enter your invoice date">
                         </div> 
                        
                         <div class="form-group col-md-3">
@@ -78,7 +89,7 @@
                         <div class="form-group col-md-6">
                             <label for="remarks">Notes</label>
                             <textarea name="remarks" class="form-control" id="editor2" placeholder="Enter your remarks"
-                                rows="5"><?php echo set_value('remarks', $header['remarks']); ?></textarea>
+                                rows="5"><?php echo nl2br($header['remarks']); ?></textarea>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
@@ -106,13 +117,14 @@
                             </tr>
                         </thead>
                         <tbody id="item_container">
-                            <?php if (!empty($merged_items)): ?>
+                            <?php if (!empty($item_list)): ?>
                                 <?php $index = 0;
-                                foreach ($merged_items as $item): ?>
+                                foreach ($item_list as $item): ?>
                                     <tr class="item-row">
                                         <td>
                                             <input type="checkbox" class="form-check-input item-check" name="selected_items[]"
                                                 value="<?php echo $index; ?>" checked>
+                                                <input type="hidden" name="tender_enq_invoice_item_id[<?php echo $index; ?>]" value="<?php echo $item['tender_enq_invoice_item_id']; ?>">
                                         </td>
 
                                         <td>
@@ -170,6 +182,20 @@
                         </tbody>
                     </table>
                 </fieldset>
+                 <!-- Total Section -->
+                    <div class="total-section mt-5 mb-4">
+                        <div class="total-card shadow-lg">
+                            <div class="total-content d-flex align-items-center justify-content-between">
+                                <div class="total-icon">
+                                    <i class="fa fa-calculator text-success"></i>
+                                </div>
+                                <div class="total-text text-end">
+                                    <span class="label">Total Amount:</span>
+                                    <span class="value">₹ <span id="total_amount">0.00</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
             </div>
 
             <div class="box-footer text-right">

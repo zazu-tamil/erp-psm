@@ -113,5 +113,25 @@
         "json"
       );
     });
+
+    $(".del_record").click(function () {
+      if (confirm("Are you sure you want to delete this tender enquiry?")) {
+        const id = $(this).val();
+        //alert(id);
+        $.post(
+          "<?php echo site_url('delete-record'); ?>",
+          {
+            tbl: "vendor_pur_inward_info",
+            id: id,
+          },
+          function (res) {
+            alert(res);
+            location.reload();
+          }
+        ).fail(function () {
+          alert("Error deleting record.");
+        });
+      }
+    });
   });
 </script>

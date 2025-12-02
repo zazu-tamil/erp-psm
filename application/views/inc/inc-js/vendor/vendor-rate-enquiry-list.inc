@@ -23,6 +23,7 @@
         });
       }
     });
+    
     $("#srch_customer_id").on("change", function () {
       const customer_id = $(this).val();
       const $enquiryDropdown = $("#srch_tender_enquiry_id");

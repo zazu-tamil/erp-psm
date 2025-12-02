@@ -1780,212 +1780,6 @@ class Tender extends CI_Controller
 
         $this->load->view('page/tender/customer-tender-po-edit', $data);
     }
-    public function tender_po_invoice_edit($tender_enq_invoice_id = null)
-    {
-        if (!$this->session->userdata(SESS_HD . 'logged_in'))
-            redirect();
-        if ($this->session->userdata(SESS_HD . 'level') != 'Admin' && $this->session->userdata(SESS_HD . 'level') != 'Staff') {
-            echo "<h3 style='color:red;'>Permission Denied</h3>";
-            exit;
-        }
-        $data['js'] = 'tender/customer-tender-po-edit.inc';
-        $data['title'] = 'Edit Tender PO';
-        if ($this->input->post('mode') == 'Edit') {
-            $this->db->trans_start();
-
-            /* ---- 1. UPDATE Header record ---- */
-            $header = [
-                'company_id' => $this->input->post('srch_company_id'),
-                'customer_id' => $this->input->post('srch_customer_id'),
-                'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
-                'tender_quotation_id' => $this->input->post('tender_quotation_id'),
-                'our_po_no' => $this->input->post('our_po_no'),
-                'customer_po_no' => $this->input->post('customer_po_no'),
-                'po_date' => $this->input->post('po_date'),
-                'po_received_date' => $this->input->post('po_received_date'),
-                'delivery_date' => $this->input->post('delivery_date'),
-                'remarks' => $this->input->post('remarks'),
-                'terms' => $this->input->post('terms'),
-                'po_status' => $this->input->post('po_status'),
-                'status' => $this->input->post('status'),
-                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
-                'updated_date' => date('Y-m-d H:i:s')
-            ];
-            $this->db->where('tender_enq_invoice_id', $tender_enq_invoice_id);
-            $this->db->update('customer_tender_po_info', $header);
-
-            /* ---- 2. Handle Items (Insert/Update/Delete) ---- */
-            $selected_idxs = $this->input->post('selected_items') ?? [];
-            $po_item_ids_to_keep = [];
-
-            // Preload all tender_quotation_item_ids posted (may be sparse due to checkboxes)
-            $tender_quotation_item_ids = $this->input->post('tender_quotation_item_id') ?: [];
-            $category_ids = $this->input->post('category_id') ?: [];
-            $item_ids = $this->input->post('item_id') ?: [];
-            $item_descs = $this->input->post('item_desc') ?: [];
-            $uoms = $this->input->post('uom') ?: [];
-            $qtys = $this->input->post('qty') ?: [];
-            $rates = $this->input->post('rate') ?: [];
-            $gsts = $this->input->post('gst') ?: [];
-            $amounts = $this->input->post('amount') ?: [];
-
-            foreach ($selected_idxs as $idx) {
-                // Get existing PO item ID if it exists (from hidden field)
-                $existing_po_item_id = $this->input->post('tender_po_item_id_' . $idx);
-
-                if ($existing_po_item_id) {
-                    // UPDATE existing item
-                    $item_data = [
-                        'rate' => $rates[$idx] ?? 0,
-                        'gst' => $gsts[$idx] ?? 0,
-                        'amount' => $amounts[$idx] ?? 0,
-                        'item_desc' => $item_descs[$idx] ?? '',
-                        'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
-                        'updated_date' => date('Y-m-d H:i:s')
-                    ];
-                    $this->db->where('tender_enq_invoice_item_id', $existing_po_item_id);
-                    $this->db->update('tender_enq_invoice_item_info', $item_data);
-                    $po_item_ids_to_keep[] = $existing_po_item_id;
-                } else {
-                    // INSERT new item
-                    $item_data = [
-                        'tender_enq_invoice_id' => $tender_enq_invoice_id,
-                        'tender_quotation_item_id' => $tender_quotation_item_ids[$idx] ?? 0,
-                        'category_id' => $category_ids[$idx] ?? 0,
-                        'item_id' => $item_ids[$idx] ?? 0,
-                        'item_desc' => $item_descs[$idx] ?? '',
-                        'uom' => $uoms[$idx] ?? '',
-                        'qty' => $qtys[$idx] ?? 0,
-                        'rate' => $rates[$idx] ?? 0,
-                        'gst' => $gsts[$idx] ?? 0,
-                        'amount' => $amounts[$idx] ?? 0,
-                        'po_itm_status' => 'Pending',
-                        'status' => 'Active',
-                        'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
-                        'created_date' => date('Y-m-d H:i:s')
-                    ];
-                    $this->db->insert('tender_enq_invoice_item_info', $item_data);
-                    $new_id = $this->db->insert_id();
-                    $po_item_ids_to_keep[] = $new_id;
-                }
-            }
-
-            // Soft-delete deselected items
-            $this->db->where('tender_enq_invoice_id', $tender_enq_invoice_id);
-            if (!empty($po_item_ids_to_keep)) {
-                $this->db->where_not_in('tender_po_item_id', $po_item_ids_to_keep);
-            }
-            $this->db->where('status !=', 'Delete');
-            $this->db->update('tender_enq_invoice_item_info', ['status' => 'Delete']);
-
-            $this->db->trans_complete();
-
-            if ($this->db->trans_status() === FALSE) {
-                $this->session->set_flashdata('error', 'Error updating data. Please try again.');
-            } else {
-                $this->session->set_flashdata('success', ' Tender PO updated successfully.');
-            }
-            redirect('tender-po-invoice-edit/');
-        }
-
-        // ———————— Load dropdown options ————————
-        $sql = "SELECT company_id, company_name FROM company_info WHERE status = 'Active' ORDER BY company_name ASC";
-        $query = $this->db->query($sql);
-        $data['company_opt'] = array('' => 'Select');
-        foreach ($query->result_array() as $row) {
-            $data['company_opt'][$row['company_id']] = $row['company_name'];
-        }
-
-        $sql = "
-            SELECT customer_id, 
-            customer_name FROM 
-            customer_info 
-            WHERE status = 'Active' 
-            ORDER BY customer_name ASC
-        ";
-        $query = $this->db->query($sql);
-        $data['customer_opt'] = array('' => 'Select');
-        foreach ($query->result_array() as $row) {
-            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
-        }
-
-        $sql = "
-            SELECT customer_id, 
-            customer_name FROM 
-            customer_info 
-            WHERE status = 'Active' 
-            ORDER BY customer_name ASC
-        ";
-        $query = $this->db->query($sql);
-        $data['customer_opt'] = array('' => 'Select');
-        foreach ($query->result_array() as $row) {
-            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
-        }
-        $sql = "
-           SELECT 
-                a.tender_po_id,
-                a.customer_po_no
-            FROM 
-                customer_tender_po_info a
-            LEFT JOIN tender_enquiry_info b 
-                ON a.tender_enquiry_id = b.tender_enquiry_id AND b.status='Active'
-            LEFT JOIN company_info c 
-                ON a.company_id = c.company_id AND c.status='Active'
-            LEFT JOIN customer_info d 
-                ON a.customer_id = d.customer_id AND d.status='Active'
-            WHERE 
-                a.status='Active' 
-            ORDER BY 
-                a.tender_po_id DESC
-        ";
-        $query = $this->db->query($sql);
-        $data['tender_po_opt'] = array('' => 'Select');
-        foreach ($query->result_array() as $row) {
-            $data['tender_po_opt'][$row['tender_po_id']] = $row['customer_po_no'];
-        }
-
-        $sql = "
-            SELECT 
-                a.tender_enquiry_id,
-                get_tender_info(a.tender_enquiry_id) AS tender_details,
-                b.company_name,
-                c.customer_name 
-            FROM tender_enquiry_info AS a 
-            LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status='Active' 
-            LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status='Active' 
-            WHERE a.status = 'Active'
-              and a.tender_status = 'Won' 
-            ORDER BY a.tender_enquiry_id, tender_details ASC";
-        $query = $this->db->query($sql);
-        $data['tender_enquiry_opt'] = array('' => 'Select');
-        foreach ($query->result_array() as $row) {
-            $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_details'];
-        }
-
-        $sql = "SELECT gst_id, gst_percentage FROM gst_info WHERE status = 'Active' ORDER BY gst_percentage ASC";
-        $query = $this->db->query($sql);
-        $data['gst_opt'] = [];
-        foreach ($query->result_array() as $row) {
-            $data['gst_opt'][$row['gst_id']] = $row['gst_percentage'];
-        }
-
-        // ———————— Load header ————————
-        $data['header'] = $this->db
-            ->where('tender_enq_invoice_id', $tender_enq_invoice_id)
-            ->where('status !=', 'Delete')
-            ->get('tender_enq_invoice_info')
-            ->row_array();
-
-        if (!$data['header']) {
-            show_error('PO not found', 404);
-        }
-
-
-
-
-
-        $this->load->view('page/tender/tender-po-invoice-edit', $data);
-    }
 
     public function customer_tender_po_list()
     {
@@ -2458,6 +2252,337 @@ class Tender extends CI_Controller
             $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['enquiry_no'] . ' → ' . $row['company_name'] . ' → ' . $row['customer_name'];
         }
         $this->load->view('page/tender/tender-po-invoice-list', $data);
+    }
+
+
+    public function tender_po_invoice_edit($tender_enq_invoice_id = null)
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        if ($this->session->userdata(SESS_HD . 'level') != 'Admin' && $this->session->userdata(SESS_HD . 'level') != 'Staff') {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+        $data['js'] = 'tender/tender-po-invoice-edit.inc';
+        $data['title'] = 'Edit Tender PO Invoice';
+
+        if ($this->input->post('mode') == 'Edit') {
+
+            $this->db->trans_start();
+
+            /* ----------------- 1. UPDATE HEADER ----------------- */
+            $header = [
+                'company_id' => $this->input->post('srch_company_id'),
+                'customer_id' => $this->input->post('srch_customer_id'),
+                'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
+                'tender_po_id' => $this->input->post('srch_tender_po_id'),
+                'invoice_no' => $this->input->post('invoice_no'),
+                'invoice_date' => $this->input->post('invoice_date'),
+                'invoice_status' => $this->input->post('invoice_status'),
+                'terms' => $this->input->post('terms'),
+                'remarks' => $this->input->post('remarks'),
+                'status' => $this->input->post('status'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s'),
+            ];
+
+            $tender_enq_invoice_id = $this->input->post('tender_enq_invoice_id');
+
+            $this->db->where('tender_enq_invoice_id', $tender_enq_invoice_id);
+            $this->db->update('tender_enq_invoice_info', $header);
+
+
+            /* ----------------- 2. UPDATE ONLY ITEM ROWS ----------------- */
+            $selected_items = $this->input->post('selected_items') ?? [];
+            $item_ids_arr = $this->input->post('tender_enq_invoice_item_id') ?? [];
+
+            if (!empty($selected_items)) {
+
+                $tender_po_item_id = $this->input->post('tender_po_item_id') ?? [];
+                $category_id = $this->input->post('category_id') ?? [];
+                $item_id = $this->input->post('item_id') ?? [];
+                $item_desc = $this->input->post('item_desc') ?? [];
+                $uom = $this->input->post('uom') ?? [];
+                $qty = $this->input->post('qty') ?? [];
+                $rate = $this->input->post('rate') ?? [];
+                $gst = $this->input->post('gst') ?? [];
+                $amount = $this->input->post('amount') ?? [];
+
+                foreach ($selected_items as $idx) {
+
+                    $item_data = [
+                        'tender_enq_invoice_id' => $tender_enq_invoice_id,
+                        'tender_po_item_id' => $tender_po_item_id[$idx] ?? 0,
+                        'category_id' => $category_id[$idx] ?? 0,
+                        'item_id' => $item_id[$idx] ?? 0,
+                        'item_desc' => $item_desc[$idx] ?? '',
+                        'uom' => $uom[$idx] ?? '',
+                        'qty' => $qty[$idx] ?? 0,
+                        'rate' => $rate[$idx] ?? 0,
+                        'gst' => $gst[$idx] ?? 0,
+                        'amount' => $amount[$idx] ?? 0,
+                        'status' => 'Active',
+                        'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                        'updated_date' => date('Y-m-d H:i:s'),
+                    ];
+
+                    /* --- IMPORTANT: update using row-wise item ID --- */
+                    $this->db->where('tender_enq_invoice_item_id', $item_ids_arr[$idx]);
+                    $this->db->update('tender_enq_invoice_item_info', $item_data);
+                }
+            }
+
+            /* ----------------- COMPLETE TRANSACTION ----------------- */
+            $this->db->trans_complete();
+
+            if ($this->db->trans_status() === FALSE) {
+                $this->session->set_flashdata('error', 'Error updating Vendor Inward.');
+            } else {
+                $this->session->set_flashdata('success', 'Vendor Inward updated successfully.');
+            }
+
+            redirect('tender-invoice-list/');
+        }
+
+
+
+        $this->load->library('pagination');
+
+        $this->db->where('status != ', 'Delete');
+        $this->db->from('vendor_rate_enquiry_info');
+        $data['total_records'] = $cnt = $this->db->count_all_results();
+
+        $data['sno'] = $this->uri->segment(2, 0);
+
+        $config['base_url'] = trim(site_url('tender-quotation-list') . '/' . $this->uri->segment(2, 0));
+        $config['total_rows'] = $cnt;
+        $config['per_page'] = 50;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '<span class="sr-only">(current)</span></a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = "Prev";
+        $config['next_link'] = "Next";
+        $this->pagination->initialize($config);
+
+        $data['company_opt'] = [];
+        $data['customer_opt'] = [];
+        $data['vendor_opt'] = [];
+        $data['tender_enquiry_opt'] = [];
+        $data['gst_opt'] = [];
+
+        $sql = "
+            SELECT vendor_id,vendor_name 
+            FROM vendor_info 
+            WHERE status = 'Active' 
+            ORDER BY vendor_name ASC";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+        }
+
+        $sql = "
+            SELECT customer_id,customer_name
+            FROM customer_info
+            WHERE status = 'Active' 
+            ORDER BY customer_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
+        $sql = "
+            SELECT company_id,company_name
+            FROM company_info
+            WHERE status = 'Active' 
+            ORDER BY company_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['company_opt'][$row['company_id']] = $row['company_name'];
+        }
+
+        $sql = "
+            SELECT 
+            a.tender_enquiry_id, 
+            get_tender_info(a.tender_enquiry_id) tender_details
+            FROM tender_enquiry_info AS a 
+            LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status='Active' 
+            LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status='Active' 
+            WHERE a.status = 'Active'
+            and a.tender_status = 'Won' 
+            ORDER BY a.tender_enquiry_id ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_details'];
+        }
+
+        $sql = "
+            SELECT gst_id, gst_percentage
+            FROM gst_info 
+            WHERE status = 'Active'
+            ORDER BY gst_percentage ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['gst_opt'][$row['gst_id']] = $row['gst_percentage'];
+        }
+
+        $sql = "
+              SELECT 
+                a.tender_po_id,
+                a.customer_po_no
+            FROM 
+                customer_tender_po_info a
+            LEFT JOIN tender_enquiry_info b 
+                ON a.tender_enquiry_id = b.tender_enquiry_id AND b.status='Active'
+            LEFT JOIN company_info c 
+                ON a.company_id = c.company_id AND c.status='Active'
+            LEFT JOIN customer_info d 
+                ON a.customer_id = d.customer_id AND d.status='Active'
+            WHERE 
+                a.status='Active'
+               
+            ORDER BY 
+                a.tender_po_id DESC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['tender_po_opt'][$row['tender_po_id']] = $row['customer_po_no'];
+        }
+        /* ---- Load existing record for edit ---- */
+        $data['header'] = $this->db->where('tender_enq_invoice_id ', $tender_enq_invoice_id)->get('tender_enq_invoice_info')->row_array();
+        $data['item_list'] = [];
+
+        $sql = "
+            SELECT 
+                a.*, 
+                b.*
+            FROM tender_enq_invoice_item_info AS a
+            LEFT JOIN item_info AS b 
+                ON a.item_id = b.item_id AND b.status = 'Active'
+            WHERE 
+                a.status = 'Active'
+                AND a.tender_enq_invoice_id = ?
+        ";
+
+        $query = $this->db->query($sql, [$tender_enq_invoice_id]);
+        $data['item_list'] = $query->result_array();
+
+
+        $data['pagination'] = $this->pagination->create_links();
+        $this->load->view('page/tender/tender-po-invoice-edit', $data);
+    }
+
+    public function tender_po_invoice_print($tender_enq_invoice_id = 0)
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        if (!$tender_enq_invoice_id) {
+            show_404();
+        }
+
+        // === MAIN RECORD ===
+        $sql = "
+         SELECT
+            tei.*,
+            c.customer_name,
+            c.address,
+            c.country AS customer_country,
+            ci.company_name AS our_company,
+            te.enquiry_no AS tender_enquiry_no,
+            tei.invoice_no,
+            ci.ltr_header_img
+        FROM
+            tender_enq_invoice_info as  tei
+        LEFT JOIN customer_info c ON
+            tei.customer_id = c.customer_id AND c.status = 'Active'
+        LEFT JOIN company_info ci ON
+            tei.company_id = ci.company_id AND ci.status = 'Active'
+        LEFT JOIN tender_enquiry_info te ON
+            tei.tender_enquiry_id = te.tender_enquiry_id AND te.status = 'Active'
+        WHERE
+            tei.tender_enq_invoice_id = ? AND tei.status != 'Delete'
+        ";
+        $query = $this->db->query($sql, [$tender_enq_invoice_id]);
+        $data['record'] = $query->row_array();
+
+        if (!$data['record']) {
+            show_404();
+        }
+
+        // === ITEMS WITH RATE CALCULATION ===
+        $sql = "
+        SELECT 
+            teni.*,
+            cat.category_name,
+            item.item_name,
+            item.item_description,
+            item.item_code,
+            item.uom AS item_uom
+        FROM tender_enq_invoice_item_info as teni
+        LEFT JOIN category_info cat ON teni.category_id = cat.category_id
+        LEFT JOIN item_info item ON teni.item_id = item.item_id
+        WHERE teni.tender_enq_invoice_id = ?
+          AND teni.status='Active'
+        ORDER BY teni.tender_enq_invoice_item_id
+    ";
+        $query = $this->db->query($sql, [$tender_enq_invoice_id]);
+        $items = $query->result_array();
+
+        $data['items'] = [];
+        $gst_summary = [];
+
+        foreach ($items as $item) {
+            $qty = floatval($item['qty']);
+            $gst = floatval($item['gst']);
+            $amount = floatval($item['amount']);
+            $rate = floatval($item['rate']);
+
+
+            // === GST Amount ===
+            $gst_amount = $amount - ($qty * $rate);
+
+            // === Store in item ===
+            $item['rate'] = $rate;
+            $item['gst_amount'] = $gst_amount;
+            $item['base_amount'] = $qty * $rate;
+
+            $data['items'][] = $item;
+
+            // === GST Summary ===
+            $gst_key = number_format($gst, 2);
+            if (!isset($gst_summary[$gst_key])) {
+                $gst_summary[$gst_key] = ['gst' => $gst, 'base' => 0, 'gst_amount' => 0];
+            }
+            $gst_summary[$gst_key]['base'] += $qty * $rate;
+            $gst_summary[$gst_key]['gst_amount'] += $gst_amount;
+        }
+
+        $data['gst_summary'] = $gst_summary;
+        $data['grand_total'] = array_sum(array_column($data['items'], 'base_amount'));
+        $data['total_gst'] = array_sum(array_column($data['items'], 'gst_amount'));
+        $data['final_total'] = $data['grand_total'] + $data['total_gst'];
+
+        $this->load->view('page/tender/tender-po-invoice-print', $data);
     }
 
     public function get_tender_invoice_po_no_load()
