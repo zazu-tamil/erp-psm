@@ -36,14 +36,14 @@
 
                     <div class="form-group col-md-3">
                         <label for="srch_customer_id">Customer <span style="color:red;">*</span></label>
-                        <?php echo form_dropdown('srch_customer_id', ['' => 'All'], set_value('srch_customer_id'), 'id="srch_customer_id" class="form-control" '); ?>
+                        <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, set_value('srch_customer_id'), 'id="srch_customer_id" class="form-control" '); ?>
                     </div>
 
                     <div class="form-group col-md-3">
                         <label for="srch_tender_enquiry_id">Tender Enquiry No <span style="color:red;">*</span></label>
                         <?php echo form_dropdown(
                             'srch_tender_enquiry_id',
-                            ['' => 'All'],
+                            ['' => 'All'] + $tender_enquiry_opt,
                             set_value('srch_tender_enquiry_id'),
                             'id="srch_tender_enquiry_id" class="form-control"'
                         ); ?>
@@ -53,7 +53,7 @@
                         <label for="srch_tender_po_id">Tender PO No <span style="color:red;">*</span></label>
                         <?php echo form_dropdown(
                             'srch_tender_po_id',
-                            ['' => 'All'],
+                            ['' => 'All'] + $tender_po_opt,
                             set_value('srch_tender_po_id'),
                             'id="srch_tender_po_id" class="form-control"'
                         ); ?>

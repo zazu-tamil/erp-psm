@@ -43,7 +43,7 @@
 
                         <div class="form-group col-md-3">
                             <label for="tender_quotation_id">Quotation No</label>
-                            <?php echo form_dropdown('tender_quotation_id', ['' => 'Select Quotation'], set_value('tender_quotation_id', $header['tender_quotation_id']), 'id="tender_quotation_id" class="form-control"'); ?>
+                            <?php echo form_dropdown('tender_quotation_id', ['' => 'Select Quotation'] + $quotation_opt, set_value('tender_quotation_id', $header['tender_quotation_id']), 'id="srch_quotation_no" class="form-control"'); ?>
                             <input type="hidden" name="tender_quotation_id" id="tender_quotation_id" value="<?php echo htmlspecialchars($header['tender_quotation_id']); ?>">
                         </div>
 
@@ -51,6 +51,12 @@
                             <label>Customer PO No</label>
                             <input type="text" name="customer_po_no" id="customer_po_no" class="form-control"
                                 value="<?php echo htmlspecialchars($header['customer_po_no']); ?>"
+                                placeholder="e.g., CUST-PO-2025-001">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Our PO No</label>
+                            <input type="text" name="our_po_no" id="our_po_no" class="form-control"
+                                value="<?php echo htmlspecialchars($header['our_po_no']); ?>"
                                 placeholder="e.g., CUST-PO-2025-001">
                         </div>
 

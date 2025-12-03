@@ -113,8 +113,8 @@
 
                                 <!-- PRINT / VIEW -->
                                 <td class="text-center">
-                                    <a href="<?php echo site_url('tender-dc-view/' . $row['tender_dc_id']); ?>" target="_blank"
-                                        class="btn btn-info btn-xs" title="Print / View">
+                                    <a href="<?php echo site_url('tender-dc-print/' . $row['tender_dc_id']); ?>" target="_blank"
+                                        class="btn btn-info btn-xs" title="Print">
                                         <i class="fa fa-print"></i>
                                     </a>
                                 </td>

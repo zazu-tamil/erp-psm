@@ -99,12 +99,12 @@
                                 <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
                                  <td><?php echo $row['po_date'] ? date('d-m-Y', strtotime($row['po_date'])) : '-'; ?></td>
                                 
-                                <td><?php echo htmlspecialchars($row['customer_po_no'] ?? '-'); ?></td>
+                                <td><?php echo htmlspecialchars($row['our_po_no'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['company_name'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['enquiry_no'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['quotation_no'] ?? '-'); ?></td>
-                               <td><strong><?php echo htmlspecialchars($row['our_po_no'] ?? '-'); ?></strong></td>
+                               <td><strong><?php echo htmlspecialchars($row['customer_po_no'] ?? '-'); ?></strong></td>
                                 <td><?php echo $row['delivery_date'] ? date('d-m-Y', strtotime($row['delivery_date'])) : '-'; ?>
                                 </td>
                                 <?php

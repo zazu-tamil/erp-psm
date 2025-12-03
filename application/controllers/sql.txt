@@ -225,3 +225,7 @@ set new.po_no = ifnull(v_po , 0) + 1 ;
 END//
 
 
+--------------------------------------------------------------------------------
+03-12-2025
+
+ALTER TABLE `tender_dc_item_info` ADD `item_desc` TEXT NULL AFTER `item_id`;

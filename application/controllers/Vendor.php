@@ -600,10 +600,7 @@ class Vendor extends CI_Controller
         $data['js'] = 'vendor/vendor-po-list.inc';
         $data['s_url'] = 'vendor-po-list';
         $data['title'] = 'Vendor PO List';
-
-        // echo '<pre>';
-        // print_r($_POST);
-        // echo '</pre>';
+ 
         $where = "1 = 1";
 
         if (isset($_POST['srch_from_date'])) {

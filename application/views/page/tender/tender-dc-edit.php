@@ -1,10 +1,7 @@
 <?php include_once(VIEWPATH . 'inc/header.php');
-
-
-echo '<pre>';
-print_r($header);
-echo '</pre>';
-
+// echo '<pre>';
+// print_r($items);
+// echo '</pre>';
 ?>
 
 
@@ -26,6 +23,7 @@ echo '</pre>';
         <form method="post" action="" id="frmadd" enctype="multipart/form-data">
             <div class="box-body">
                 <input type="hidden" name="mode" value="Edit" />
+                <input type="hidden" name="tender_dc_id" value="<?php echo $header['tender_dc_id']; ?>" />
 
                 <fieldset class="tender-inward">
                     <legend class="text-light-blue">
@@ -33,8 +31,6 @@ echo '</pre>';
                     </legend>
 
                     <div class="row">
-
-                        <!-- Company -->
                         <div class="form-group col-md-4">
                             <label for="srch_company_id">Company <span style="color:red;">*</span></label>
                             <?php
@@ -46,8 +42,6 @@ echo '</pre>';
                             );
                             ?>
                         </div>
-
-                        <!-- Customer -->
                         <div class="form-group col-md-4">
                             <label for="srch_customer_id">Customer <span style="color:red;">*</span></label>
                             <?php
@@ -59,8 +53,6 @@ echo '</pre>';
                             );
                             ?>
                         </div>
-
-                        <!-- Tender Enquiry -->
                         <div class="form-group col-md-4">
                             <label for="srch_tender_enquiry_id">Tender Enquiry No <span
                                     style="color:red;">*</span></label>
@@ -73,8 +65,6 @@ echo '</pre>';
                             );
                             ?>
                         </div>
-
-                        <!-- DC Date -->
                         <div class="form-group col-md-4">
                             <label>DC Date</label>
                             <input type="date" name="dc_date" id="dc_date" class="form-control"
@@ -87,8 +77,6 @@ echo '</pre>';
                                 value="<?php echo set_value('dc_no', $header['dc_no']); ?>">
 
                         </div>
-
-                        <!-- Status -->
                         <div class="form-group col-md-3">
                             <label>Status</label><br>
 
@@ -107,22 +95,18 @@ echo '</pre>';
                     </div>
 
                     <div class="row">
-
-                        <!-- Remarks -->
                         <div class="form-group col-md-6">
-                            <label for="remarks">Remarks</label>
+                            <label for="remarks">Note:</label>
                             <textarea name="remarks" class="form-control" id="editor2" placeholder="Enter your remarks"
                                 rows="8"><?php
-                                echo nl2br($header['remarks']);
+                                echo $header['remarks'];
                                 ?></textarea>
                         </div>
-
-                        <!-- Terms -->
                         <div class="form-group col-md-6">
                             <label>Quotation Terms</label>
                             <textarea id="editor1" name="terms" class="form-control custom-textarea" required
                                 placeholder="Enter quotation terms"><?php
-                                echo nl2br($header['terms']);
+                                echo $header['terms'];
                                 ?></textarea>
                         </div>
 
@@ -146,45 +130,60 @@ echo '</pre>';
                             </thead>
                             <tbody id="item_container">
                                 <?php foreach ($items as $i => $row) { ?>
-                                    
+                                    <tr>
+
+
+                                        <input type="hidden" name="tender_dc_item_id[<?= $i ?>]"
+                                            value="<?= $row['tender_dc_item_id']; ?>">
+
+                                        <input type="hidden" name="vendor_pur_inward_id[<?= $i ?>]"
+                                            value="<?= $row['vendor_pur_inward_id']; ?>">
+
+                                        <input type="hidden" name="vendor_pur_inward_item_id[<?= $i ?>]"
+                                            value="<?= $row['vendor_pur_inward_item_id']; ?>">
+
+                                        <input type="hidden" name="category_id[<?= $i ?>]"
+                                            value="<?= $row['category_id']; ?>">
+
+                                        <input type="hidden" name="item_id[<?= $i ?>]" value="<?= $row['item_id']; ?>">
+
+
+
+                                        <td>
+                                            <input type="checkbox" class="form-check-input item-check"
+                                                name="selected_items[]" value="<?= $i ?>" <?= ($row['chk'] == 1) ? 'checked' : ''; ?>>
+                                        </td>
+
+
+                                        <td>
+                                            <?= $row['vendor_name']; ?><br>
+                                            <?= date('d-m-Y', strtotime($row['dc_date'])); ?><br>
+                                            <?= $row['dc_no']; ?>
+                                        </td>
+                                        <td>
+                                            <input type="text" value="<?= $row['item_code']; ?>" class="form-control mb-2"
+                                                readonly>
+
+                                            <textarea name="item_desc[<?= $i ?>]" class="form-control desc-textarea"
+                                                rows="2"><?= $row['item_desc']; ?></textarea>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="uom[<?= $i ?>]" class="form-control mb-2"
+                                                value="<?= $row['uom']; ?>" readonly>
+
+                                            <input type="number" name="avail_qty[<?= $i ?>]" step="0.01"
+                                                class="form-control" value="<?= $row['avail_qty']; ?>" readonly>
+                                        </td>
+                                        <td>
+                                            <label class="form-label">Enter Delivery Qty</label>
+                                            <input type="number" name="dc_qty[<?= $i ?>]" step="0.01"
+                                                class="form-control dc_qty-input" value="<?= $row['dc_qty']; ?>">
+                                        </td>
+
+                                    </tr>
                                 <?php } ?>
-                                <tr>
-
-                                    <td>
-                                        <input type="checkbox" class="form-check-input item-check"
-                                            name="selected_items[]" value="${i}" ${checkboxChecked}>
-                                        <small></small>
-                                    </td>
-
-                                    <td>
-                                        ${row.vendor_name}<br>
-                                        ${formattedDate}<br>
-                                        ${row.inward_no}
-                                    </td>
-
-                                    <td>
-                                        <input type="text" value="${row.item_code}" class="form-control mb-2" readonly>
-                                        <textarea name="item_desc[]" class="form-control desc-textarea"
-                                            rows="2">${row.item_desc}</textarea>
-                                    </td>
-
-                                    <td>
-                                        <input type="text" name="uom[]" class="form-control mb-2" value="${row.uom}"
-                                            readonly>
-                                        <input type="number" name="avail_qty[]" step="0.01" class="form-control"
-                                            value="${row.avail_qty}" readonly>
-                                    </td>
-
-                                    <td>
-                                        <label class="form-label">Enter Delivery Qty</label>
-                                        <input type="number" name="dc_qty[]" step="0.01"
-                                            class="form-control dc_qty-input" value="${dcQtyValue}">
-                                    </td>
-
-                                    ${hiddenFields}
-
-                                </tr>
                             </tbody>
+
                         </table>
                     </div>
                 </fieldset>
