@@ -2834,7 +2834,7 @@ class Vendor extends CI_Controller
                         AND c.status = 'Active'
                     WHERE a.status = 'Active'
                     AND a.vendor_id =  '" . $rec_id . "'
-                    ORDER BY a.po_no ASC
+                    ORDER BY a.po_no desc
             ");
 
             $rec_list = $query->result_array();
@@ -3064,7 +3064,7 @@ class Vendor extends CI_Controller
         WHERE a.status = 'Active' 
         AND a.customer_id = ?
         AND a.company_id = ?
-        ORDER BY a.tender_enquiry_id ASC
+        ORDER BY a.tender_enquiry_id desc
     ";
 
         // FIX: Correct parameter order
@@ -3111,5 +3111,630 @@ class Vendor extends CI_Controller
         }
 
         echo json_encode($result);
+    }
+
+
+    public function vendor_purchase_bill_add()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        if (
+            $this->session->userdata(SESS_HD . 'level') != 'Admin' &&
+            $this->session->userdata(SESS_HD . 'level') != 'Staff'
+        ) {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+        $data['js'] = 'vendor/vendor-purchase-bill-add.inc';
+        $data['title'] = 'Add Vendor Purchase Bill Entry';
+
+        if ($this->input->post('mode') == 'Add') {
+            // echo "<pre>";
+            // print_r($_POST);
+            // echo "</pre>";
+
+            $this->db->trans_start();
+
+
+            // 1. Handle file uploads
+            $upload_path = 'vendor-pur-invoice-documents/';
+            if (!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, true);
+            }
+
+            $config['upload_path'] = $upload_path;
+            $config['allowed_types'] = 'jpg|jpeg|png';
+            $config['max_size'] = 2048;
+
+            $this->load->library('upload', $config);
+
+            $dc_upload = '';
+
+
+            if (!empty($_FILES['dc_upload']['name'])) {
+                if ($this->upload->do_upload('dc_upload')) {
+                    $dc_upload = $this->upload->data('file_name');
+                }
+            }
+
+
+            $header = [
+                'company_id' => $this->input->post('srch_company_id'),
+                'customer_id' => $this->input->post('srch_customer_id'),
+                'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
+                'vendor_id' => $this->input->post('srch_vendor_id'),
+                'vendor_po_id' => $this->input->post('srch_vendor_po_id'),
+                'vendor_contact_person_id' => $this->input->post('srch_vendor_contact_person_id'),
+                'invoice_date' => $this->input->post('invoice_date'),
+                'invoice_no' => $this->input->post('invoice_no'), 
+                'vat_payer_purchase_grp' => $this->input->post('vat_payer_purchase_grp'), 
+                'declaration_no' => $this->input->post('declaration_no'), 
+                'declaration_date' => $this->input->post('declaration_date'), 
+                'remarks' => $this->input->post('remarks'),
+                'purchase_bill_upload' => 'vendor-pur-invoice-documents/' . $dc_upload,
+                'status' => $this->input->post('status'),
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_date' => date('Y-m-d H:i:s'),
+            ];
+
+            $this->db->insert('vendor_purchase_invoice_info', $header);
+            $vendor_purchase_invoice_id = $this->db->insert_id();
+            $selected_items = $this->input->post('selected_items') ?? [];
+
+            if (!empty($selected_items)) {
+
+                $vendor_po_item_id = $this->input->post('vendor_po_item_id') ?? [];
+                $category_id = $this->input->post('category_id') ?? [];
+                $item_id = $this->input->post('item_id') ?? [];
+                $item_desc = $this->input->post('item_desc') ?? [];
+                $uom = $this->input->post('uom') ?? [];
+                $qty = $this->input->post('qty') ?? [];
+                $rate = $this->input->post('rate') ?? [];
+                $gst = $this->input->post('gst') ?? [];
+                $amount = $this->input->post('amount') ?? [];
+
+                foreach ($selected_items as $idx) {
+
+                    $item = [
+                        'vendor_purchase_invoice_id' => $vendor_purchase_invoice_id,
+                        'vendor_po_item_id' => $vendor_po_item_id[$idx] ?? 0,
+                        'category_id' => $category_id[$idx] ?? 0,
+                        'item_id' => $item_id[$idx] ?? 0,
+                        'item_desc' => $item_desc[$idx] ?? '',
+                        'uom' => $uom[$idx] ?? '',
+                        'qty' => $qty[$idx] ?? 0,
+                        'rate' => $rate[$idx] ?? 0,
+                        'gst' => $gst[$idx] ?? 0,
+                        'amount' => $amount[$idx] ?? 0,
+                        'status' => 'Active',
+                        'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                        'created_date' => date('Y-m-d H:i:s'),
+                        'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                        'updated_date' => date('Y-m-d H:i:s'),
+                    ];
+
+                    $this->db->insert('vendor_purchase_invoice_item_info', $item);
+                }
+            }
+
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE) {
+                $this->session->set_flashdata('error', 'Error saving Vendor Bill. Please try again.');
+            } else {
+                $this->session->set_flashdata('success', 'Vendor Invoice saved successfully.');
+
+            }
+
+            redirect('vendor-purchase-bill-list');
+        }
+
+        $sql = "
+            SELECT company_id, company_name 
+            FROM company_info 
+            WHERE status = 'Active' 
+            ORDER BY company_name ASC";
+        $query = $this->db->query($sql);
+        $data['company_opt'] = [];
+        foreach ($query->result_array() as $row) {
+            $data['company_opt'][$row['company_id']] = $row['company_name'];
+        }
+
+        $sql = "
+            SELECT gst_id, gst_percentage 
+            FROM gst_info 
+            WHERE status = 'Active' 
+            ORDER BY gst_percentage ASC";
+        $query = $this->db->query($sql);
+        $data['gst_opt'] = [];
+        foreach ($query->result_array() as $row) {
+            $data['gst_opt'][$row['gst_percentage']] = $row['gst_percentage'];
+        }
+
+        $data['vendor_opt'] = [];
+        $data['vat_payer_purchase_opt'] = [
+                                        '' => 'Select VAT Payer Purchase Category', 
+                                        'Standard Rated Domestic Purchases at 5% (Line 8 of the VAT Return)' => 'Standard Rated Domestic Purchases at 5% (Line 8 of the VAT Return)',
+                                        'Standard Rated Domestic Purchases at 10% (Line 8 of the VAT Return)' => 'Standard Rated Domestic Purchases at 10% (Line 8 of the VAT Return)',
+                                        'Import subject to VAT paid at customs (Line 9 of the VAT Return)' => 'Import subject to VAT paid at customs (Line 9 of the VAT Return)',
+                                        'Imports subject to deferral at customs (Line 10 of the VAT Return)' => 'Imports subject to deferral at customs (Line 10 of the VAT Return)', 
+                                        'Import subject to VAT accounted for through reverse charge mechanism at 5% (Line 11 of the VAT Return)' => 'Import subject to VAT accounted for through reverse charge mechanism at 5% (Line 11 of the VAT Return)',
+                                        'Import subject to VAT accounted for through reverse charge mechanism at 10% (Line 11 of the VAT Return)' => 'Import subject to VAT accounted for through reverse charge mechanism at 10% (Line 11 of the VAT Return)',
+                                        'Purchases subject to domestic reverse charge mechanism (Line 12 of the VAT Return)' => 'Purchases subject to domestic reverse charge mechanism (Line 12 of the VAT Return)',
+                                        'Purchases from non-register taxpayers, zero-rated/ exempt purchases (Line 13 of the VAT Return)' => 'Purchases from non-register taxpayers, zero-rated/ exempt purchases (Line 13 of the VAT Return)',
+                                    ];
+        
+        $data['vendor_contact_opt'] = [];
+        $sql = "
+            SELECT vendor_id,vendor_name 
+            FROM vendor_info 
+            WHERE status = 'Active' 
+            ORDER BY vendor_name ASC";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+        }
+
+
+
+        $this->load->view('page/vendor/vendor-purchase-bill-add', $data);
+    }
+
+    public function vendor_purchase_bill_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data = array();
+        $data['js'] = 'vendor/vendor-purchase-bill-list.inc';
+        $data['s_url'] = 'vendor-purchase-bill-list';
+        $data['title'] = 'Vendor Purchase Invoice List';
+
+        // echo '<pre>';
+        // print_r($_POST);
+        // echo '</pre>';
+        $where = "1 = 1";
+
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $this->session->set_userdata('srch_from_date', $this->input->post('srch_from_date'));
+            $this->session->set_userdata('srch_to_date', $this->input->post('srch_to_date'));
+        } elseif ($this->session->userdata('srch_from_date')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_to_date');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = date('Y-m-01');
+            $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
+        }
+
+
+        // Customer Filter
+        if ($this->input->post('srch_company_id') !== null) {
+            $data['srch_company_id'] = $srch_company_id = $this->input->post('srch_company_id');
+            $this->session->set_userdata('srch_company_id', $srch_company_id);
+        } elseif ($this->session->userdata('srch_company_id')) {
+            $data['srch_company_id'] = $srch_company_id = $this->session->userdata('srch_company_id');
+        } else {
+            $data['srch_company_id'] = $srch_company_id = '';
+        }
+
+        if (!empty($srch_company_id)) {
+            $where .= " AND a.company_id = '" . $this->db->escape_str($srch_company_id) . "'";
+        }
+        if ($this->input->post('srch_customer_id') !== null) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
+            $this->session->set_userdata('srch_customer_id', $srch_customer_id);
+        } elseif ($this->session->userdata('srch_customer_id')) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->session->userdata('srch_customer_id');
+        } else {
+            $data['srch_customer_id'] = $srch_customer_id = '';
+        }
+
+        if (!empty($srch_customer_id)) {
+            $where .= " AND a.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
+        }
+
+        // Vendor Filter
+        if ($this->input->post('srch_tender_enquiry_id') !== null) {
+            $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = $this->input->post('srch_tender_enquiry_id');
+            $this->session->set_userdata('srch_tender_enquiry_id', $srch_tender_enquiry_id);
+        } elseif ($this->session->userdata('srch_tender_enquiry_id')) {
+            $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = $this->session->userdata('srch_tender_enquiry_id');
+        } else {
+            $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = '';
+        }
+        if (!empty($srch_tender_enquiry_id)) {
+            $where .= " AND a.tender_enquiry_id = '" . $this->db->escape_str($srch_tender_enquiry_id) . "'";
+        }
+
+        // Vendor Filter
+        if ($this->input->post('srch_vendor_id') !== null) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->input->post('srch_vendor_id');
+            $this->session->set_userdata('srch_vendor_id', $srch_vendor_id);
+        } elseif ($this->session->userdata('srch_vendor_id')) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->session->userdata('srch_vendor_id');
+        } else {
+            $data['srch_vendor_id'] = $srch_vendor_id = '';
+        }
+        if (!empty($srch_vendor_id)) {
+            $where .= " AND a.vendor_id = '" . $this->db->escape_str($srch_vendor_id) . "'";
+        }
+
+
+        $this->db->from('vendor_purchase_invoice_info a');
+        $this->db->where('a.status !=', 'Delete');
+        $this->db->where($where);
+        $this->db->where("DATE(a.invoice_date) BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'");
+        $data['total_records'] = $this->db->count_all_results();
+
+        // === PAGINATION ===
+        $data['sno'] = $this->uri->segment(2, 0);
+        $this->load->library('pagination');
+
+        $config['base_url'] = trim(site_url($data['s_url']), '/' . $this->uri->segment(2, 0));
+        $config['total_rows'] = $data['total_records'];
+        $config['per_page'] = 25;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = ['class' => 'page-link'];
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '</a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = 'Prev';
+        $config['next_link'] = 'Next';
+
+        $this->pagination->initialize($config);
+        $data['pagination'] = $this->pagination->create_links();
+
+         $data['vendor_opt'] = [];
+
+
+        $sql = "
+            SELECT company_id, company_name 
+            FROM company_info 
+            WHERE status = 'Active' 
+            ORDER BY company_name ASC";
+        $query = $this->db->query($sql);
+        $data['company_opt'] = [];
+        foreach ($query->result_array() as $row) {
+            $data['company_opt'][$row['company_id']] = $row['company_name'];
+        }
+        $sql = "
+            SELECT  customer_id, customer_name
+            FROM customer_info 
+            WHERE status = 'Active' 
+            ORDER BY customer_name ASC";
+        $query = $this->db->query($sql);
+        $data['customer_opt'] = [];
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+        $data['tender_enquiry_opt'] = [];
+        if (!empty($srch_customer_id || $srch_tender_enquiry_id)) {
+
+            $sql = "
+                SELECT 
+                    a.tender_enquiry_id, 
+                    get_tender_info(a.tender_enquiry_id) as tender_details
+                FROM tender_enquiry_info AS a 
+                WHERE a.status = 'Active' 
+                and a.customer_id= '" . $srch_customer_id . "'
+                ORDER BY a.tender_enquiry_id desc
+            ";
+
+
+            $query = $this->db->query($sql);
+            $data['tender_enquiry_opt'] = [];
+            foreach ($query->result_array() as $row) {
+                $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_details'];
+            }
+        }
+        if (!empty($srch_customer_id || $srch_tender_enquiry_id || $srch_tender_enquiry_id)) {
+
+            $sql = "
+                SELECT 
+                    d.vendor_id,
+                    d.vendor_name
+                FROM  vendor_po_info AS a
+                left join company_info as b on a.company_id = b.company_id and b.`status`='Active'
+                left join customer_info as c on a.customer_id = c.customer_id and c.`status`='Active'
+                left join vendor_info as d on a.vendor_id = d.vendor_id and d.status='Active'
+                where a.`status`='Active'
+                and a.tender_enquiry_id= '" . $srch_tender_enquiry_id . "'
+                group by d.vendor_id ASC 
+            ";
+
+
+            $query = $this->db->query($sql);
+           
+            foreach ($query->result_array() as $row) {
+                $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+            }
+        }
+
+        $data['po_status_opt'] = ['' => 'Select PO Status', 'In Progress' => 'In Progress', 'Delivered' => 'Delivered'];
+        // === FETCH RECORDS ===
+        $sql = "
+            SELECT 
+                a.invoice_no, 
+                a.vendor_purchase_invoice_id ,
+                a.status,
+                a.customer_id,
+                a.vendor_id, 
+                a.invoice_date,
+                c.customer_name,
+                v.vendor_name,
+                a.company_id,
+                a.customer_id, 
+                ci.company_name,
+                get_tender_info(a.tender_enquiry_id) as tender_details
+            FROM vendor_purchase_invoice_info as  a
+            LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
+            LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
+            LEFT JOIN tender_enquiry_info t ON a.tender_enquiry_id = t.tender_enquiry_id AND t.status != 'Delete'
+            left join company_info as ci on t.company_id = ci.company_id and ci.status = 'Active'
+            WHERE a.status != 'Delete' AND $where
+            AND a.invoice_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "' 
+            ORDER BY a.vendor_purchase_invoice_id  DESC
+            LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
+
+        $query = $this->db->query($sql);
+        $data['record_list'] = $query->result_array();
+
+
+
+        $this->load->view('page/vendor/vendor-purchase-bill-list', $data);
+    }
+
+    public function vendor_purchase_bill_edit($vendor_pur_inward_id = 0)
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        if (
+            $this->session->userdata(SESS_HD . 'level') != 'Admin' &&
+            $this->session->userdata(SESS_HD . 'level') != 'Staff'
+        ) {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+        $data['js'] = 'vendor/vendor-purchase-bill-edit.inc';
+        $data['title'] = ' Edit Vendor Purchase Invoice';
+
+        // ==================== UPDATE ====================
+        if ($this->input->post('mode') == 'Edit') {
+
+            $this->db->trans_start();
+
+            // === 1. File Upload Settings ===
+            $upload_folder = 'vendor-pur-invoice-documents/';         
+            $upload_path = FCPATH . $upload_folder;                 
+
+            // Create directory if not exists
+            if (!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, true);
+            }
+
+            $config = [
+                'upload_path' => $upload_path,
+                'allowed_types' => 'jpg|jpeg|png|pdf|doc|docx',
+                'max_size' => 4096,
+                'encrypt_name' => TRUE,
+            ];
+
+            $this->load->library('upload', $config);
+
+            // === 2. Header Data ===
+            $header = [
+                'company_id' => $this->input->post('srch_company_id'),
+                'customer_id' => $this->input->post('srch_customer_id'),
+                'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
+                'vendor_id' => $this->input->post('srch_vendor_id'),
+                'vendor_po_id' => $this->input->post('srch_vendor_po_id'),
+                'vendor_contact_person_id' => $this->input->post('srch_vendor_contact_person_id'),
+                'invoice_date' => $this->input->post('invoice_date'),
+                'invoice_no' => $this->input->post('invoice_no'), 
+                'vat_payer_purchase_grp' => $this->input->post('vat_payer_purchase_grp'), 
+                'declaration_no' => $this->input->post('declaration_no'), 
+                'declaration_date' => $this->input->post('declaration_date'),  
+                'remarks' => $this->input->post('remarks'),
+                'status' => $this->input->post('status'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s'),
+            ];
+
+            // === 3. Upload File ===
+            if (!empty($_FILES['dc_upload']['name'])) {
+
+                if ($this->upload->do_upload('dc_upload')) {
+
+                    $fileData = $this->upload->data();
+
+                    // Store relative path in DB
+                    $header['dc_upload'] = $upload_folder . $fileData['file_name'];
+
+                } else {
+                    // Upload error handling
+                    $this->session->set_flashdata('error', 'Upload Failed: ' . $this->upload->display_errors());
+                    redirect('vendor-pur-inward-list/');
+                }
+            }
+
+            // === 4. UPDATE Header ===
+            $vendor_pur_inward_id = $this->input->post('vendor_pur_inward_id');
+
+            $this->db->where('vendor_pur_inward_id', $vendor_pur_inward_id);
+            $this->db->update('vendor_pur_inward_info', $header);
+
+            // === 5. DELETE Old Items ===
+            $this->db->where('vendor_pur_inward_id', $vendor_pur_inward_id);
+            $this->db->delete('vendor_pur_inward_item_info');
+
+            // === 6. INSERT New Items ===
+            $selected_items = $this->input->post('selected_items') ?? [];
+
+            if (!empty($selected_items)) {
+
+                $vendor_po_item_id = $this->input->post('vendor_po_item_id') ?? [];
+                $category_id = $this->input->post('category_id') ?? [];
+                $item_id = $this->input->post('item_id') ?? [];
+                $item_desc = $this->input->post('item_desc') ?? [];
+                $uom = $this->input->post('uom') ?? [];
+                $qty = $this->input->post('qty') ?? [];
+                $rate = $this->input->post('rate') ?? [];
+                $gst = $this->input->post('gst') ?? [];
+                $amount = $this->input->post('amount') ?? [];
+
+                foreach ($selected_items as $idx) {
+
+                    $item = [
+                        'vendor_pur_inward_id' => $vendor_pur_inward_id,
+                        'vendor_po_item_id' => $vendor_po_item_id[$idx] ?? 0,
+                        'category_id' => $category_id[$idx] ?? 0,
+                        'item_id' => $item_id[$idx] ?? 0,
+                        'item_desc' => $item_desc[$idx] ?? '',
+                        'uom' => $uom[$idx] ?? '',
+                        'qty' => $qty[$idx] ?? 0,
+                        'rate' => $rate[$idx] ?? 0,
+                        'gst' => $gst[$idx] ?? 0,
+                        'amount' => $amount[$idx] ?? 0,
+                        'status' => 'Active',
+                        'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                        'created_date' => date('Y-m-d H:i:s'),
+                    ];
+
+                    $this->db->insert('vendor_pur_inward_item_info', $item);
+                }
+            }
+
+            // === 7. FINISH TRANSACTION ===
+            $this->db->trans_complete();
+
+            if ($this->db->trans_status() === FALSE) {
+                $this->session->set_flashdata('error', 'Error updating Vendor Inward.');
+            } else {
+                $this->session->set_flashdata('success', 'Vendor Inward updated successfully.');
+            }
+
+            redirect('vendor-pur-inward-list/');
+        }
+
+        if (!$vendor_pur_inward_id)
+            show_404();
+
+        $sql = "
+            SELECT * FROM vendor_pur_inward_info
+            WHERE vendor_pur_inward_id = ? AND status = 'Active'
+        ";
+        $data['header'] = $this->db->query($sql, [$vendor_pur_inward_id])->row_array();
+
+        $sql = "
+            SELECT 
+                vpi.*,
+                ci.category_name,
+                ii.item_code
+            FROM vendor_pur_inward_item_info vpi
+            LEFT JOIN category_info ci ON vpi.category_id = ci.category_id
+            LEFT JOIN item_info ii ON vpi.item_id = ii.item_id
+            WHERE vpi.vendor_pur_inward_id = ? AND vpi.status = 'Active'
+            ORDER BY vpi.vendor_pur_inward_item_id ASC
+        ";
+        $data['items'] = $this->db->query($sql, [$vendor_pur_inward_id])->result_array();
+
+        $sql = "
+            SELECT
+                company_id,
+                company_name
+            FROM
+                company_info
+            WHERE
+            STATUS
+                = 'Active'
+            ORDER BY
+                company_name ASC
+        ";
+        $query = $this->db->query($sql);
+        $data['company_opt'] = ['' => 'Select Company'];
+        foreach ($query->result_array() as $row) {
+            $data['company_opt'][$row['company_id']] = $row['company_name'];
+        }
+
+        // Customer Dropdown
+        $sql = "
+            SELECT 
+            customer_id, 
+            customer_name 
+            FROM customer_info 
+            WHERE status = 'Active' 
+            ORDER BY customer_name ASC
+        ";
+        $query = $this->db->query($sql);
+        $data['customer_opt'] = ['' => 'Select Customer'];
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
+        // Tender Enquiry
+        $sql = "
+                SELECT 
+                a.tender_enquiry_id, 
+            get_tender_info(a.tender_enquiry_id) as enquiry_no 
+            FROM tender_enquiry_info as a 
+            WHERE a.status = 'Active' 
+            GROUP BY a.tender_enquiry_id 
+            ORDER BY a.tender_enquiry_id
+        ";
+        $query = $this->db->query($sql);
+        $data['tender_enquiry_opt'] = ['' => 'Select Enquiry'];
+        foreach ($query->result_array() as $row) {
+            $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['enquiry_no'];
+        }
+
+        $sql = "SELECT vendor_po_id, po_no FROM vendor_po_info WHERE status = 'Active' ORDER BY po_no ASC";
+        $query = $this->db->query($sql);
+        $data['vendor_po_opt'] = ['' => 'Select Enquiry No'];
+        foreach ($query->result_array() as $row) {
+            $data['vendor_po_opt'][$row['vendor_po_id']] = $row['po_no'];
+        }
+
+        $sql = "SELECT vendor_id, vendor_name FROM vendor_info WHERE status = 'Active' ORDER BY vendor_name ASC";
+        $query = $this->db->query($sql);
+        $data['vendor_opt'] = ['' => 'Select Vendor'];
+        foreach ($query->result_array() as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+        }
+
+        $sql = "SELECT vendor_contact_id, contact_person_name FROM vendor_contact_info WHERE status = 'Active' ORDER BY contact_person_name ASC";
+        $query = $this->db->query($sql);
+        $data['vendor_contact_opt'] = ['' => 'Select Contact'];
+        foreach ($query->result_array() as $row) {
+            $data['vendor_contact_opt'][$row['vendor_contact_id']] = $row['contact_person_name'];
+        }
+
+        $sql = "SELECT gst_percentage FROM gst_info WHERE status = 'Active' ORDER BY gst_percentage ASC";
+        $query = $this->db->query($sql);
+        $gst_opt = [];
+        foreach ($query->result_array() as $row) {
+            $gst_opt[$row['gst_percentage']] = $row['gst_percentage'];
+        }
+        $data['gst_opt'] = $gst_opt;
+
+
+
+
+        $this->load->view('page/vendor/vendor-pur-inward-edit', $data);
     }
 }

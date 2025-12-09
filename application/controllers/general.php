@@ -314,6 +314,11 @@ class General extends CI_Controller
         $rec_id = $this->input->post('id');
 
 
+        if ($table == 'vendor_purchase_invoice_info') {
+             $this->db->where('vendor_purchase_invoice_id ', $rec_id);
+            $this->db->update('vendor_purchase_invoice_info', array('status' => 'Delete'));
+            echo "Record Deleted Successfully";
+        }
         if ($table == 'tender_enq_invoice_info') {
             $this->db->where('tender_enq_invoice_id ', $rec_id);
             $this->db->update('tender_enq_invoice_info', array('status' => 'Delete'));

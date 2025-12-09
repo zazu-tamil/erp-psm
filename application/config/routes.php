@@ -147,6 +147,15 @@ $route['vendor-pur-inward-add'] = 'vendor/vendor_pur_inward_add';
 $route['vendor-pur-inward-list'] = 'vendor/vendor_pur_inward_list';
 $route['vendor-pur-inward-edit/(:num)'] = 'vendor/vendor_pur_inward_edit/$1'; 
 
+$route['vendor-purchase-bill-add'] = 'vendor/vendor_purchase_bill_add'; 
+$route['vendor-purchase-bill-add/(:num)'] = 'vendor/vendor_purchase_bill_add/$1'; 
+
+$route['vendor-purchase-bill-edit'] = 'vendor/vendor_purchase_bill_edit'; 
+$route['vendor-purchase-bill-edit/(:num)'] = 'vendor/vendor_purchase_bill_edit/$1'; 
+
+$route['vendor-purchase-bill-list'] = 'vendor/vendor_purchase_bill_list'; 
+$route['vendor-purchase-bill-list/(:num)'] = 'vendor/vendor_purchase_bill_list/$1'; 
+
 $route['tender-invoice-add'] = 'tender/tender_invoice_add'; 
 $route['tender-invoice-list'] = 'tender/tender_po_invoice_list';
 $route['tender-po-invoice-edit/(:num)'] = 'tender/tender_po_invoice_edit/$1'; 

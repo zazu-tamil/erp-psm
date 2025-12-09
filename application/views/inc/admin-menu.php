@@ -261,6 +261,24 @@ $current_page = $this->uri->segment(1, 0);
             </ul>
         </li>
 
+         <li
+            class="treeview <?= in_array($current_page, ['vendor-purchase-bill-add']) ? 'active' : '' ?>">
+            <a href="#">
+                <i class="fa fa-files-o"></i> Vendor Invoice/Bill
+                <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+            </a>
+            <ul class="treeview-menu">
+                <li class="<?= ($current_page === 'vendor-purchase-bill-add') ? 'active' : '' ?>">
+                    <a href="<?= site_url('vendor-purchase-bill-add') ?>"><i class="fa fa-plus-square"></i> Add Vendor
+                        Bill Entry</a>
+                </li>
+                <li class="<?= ($current_page === 'vendor-pur-inward-list') ? 'active' : '' ?>">
+                    <a href="<?= site_url('vendor-purchase-bill-list') ?>"><i class="fa fa-list"></i> Vendor Bill
+                        List</a>
+                </li>
+            </ul>
+        </li>
+
     </ul>
 </li>
 
