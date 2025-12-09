@@ -110,7 +110,7 @@
                     <legend class="text-light-blue"><i class="fa fa-list"></i> Item Details</legend>
 
                     <div class="row">
-                        <div class="col-md-12 form-group">
+                        <div class="col-md-3 form-group">
                             <!-- <button type="button" class="btn btn-primary" data-toggle="modal"
                                 data-target="#add_category">
                                 <i class="fa fa-tags"></i> Add Category
@@ -124,11 +124,23 @@
                                 <i class="fa fa-plus"></i> Add Brand
                             </button> -->
 
-                            
+
                         </div>
+                        <div class="col-md-5 form-group ">
+                            <label for="">Download Sample Excel File To Import</label><br>
+                            <a href="<?php echo base_url('asset/tender-enquiry-items-sample.xlsx'); ?>"
+                                class="btn btn-warning" download>
+                                <i class="fa fa-download" ></i> Download Sample Excel File To Import
+                            </a>
+                        </div>
+                        <div class="col-md-4 form-group ">
+                            <label for="excelFile">Choose Excel File to Import</label>
+                            <input type="file" class="form-control" id="excelFile" accept=".xls,.xlsx" placeholder="Choose Excel File to Import">
+                        </div>
+                        
                     </div>
 
-                   
+
 
                     <div class="item-details-container">
 

@@ -6,6 +6,9 @@
   href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
 />
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+
 
 <style>
   .text-light-blue {
@@ -149,6 +152,64 @@
 </style>
 <script>
   jQuery(function ($) {
+
+    const rowTemplate = `
+    <div class="item-row">
+        <div class="cat-item-block">
+            <input type="text" name="srch_item[]" class="form-control srch_item">
+            <input type="hidden" name="item_id[]" class="item_id">
+            <input type="hidden" name="category_id[]" class="category_id">
+        </div>
+        <div class="item-desc-block">
+            <textarea name="item_desc[]" class="form-control item_desc" rows="5"></textarea>
+        </div>
+        <div class="uom-block">
+            <select name="uom[]" class="form-control uom">
+                <option value="">—</option>
+                <?php foreach($uom_opt as $key=>$val){ echo '<option value="'.$key.'">'.$val.'</option>'; } ?>
+            </select>
+        </div>
+        <div class="qty-block">
+            <input type="number" step="0.01" name="qty[]" class="form-control qty">
+        </div>
+        <div class="action-block">
+            <button type="button" class="remove-row"><i class="fa fa-trash"></i></button>
+        </div>
+    </div>`;
+ 
+$("#excelFile").on("change", function(e) { 
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        const workbook = XLSX.read(e.target.result, { type: "binary" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet);  // JSON with headers
+
+        $("#item_rows").empty(); // Clear previous rows
+
+        rows.forEach(function(r) {
+            let newRow = $(rowTemplate);
+            //alert(r.item_desc);
+            newRow.find(".srch_item").val(r.item_code);
+            newRow.find(".item_desc").val(r.item_desc);
+            newRow.find(".uom").val(r.uom); // Should match option value
+            newRow.find(".qty").val(r.qty);
+
+            // If your Excel contains item_id / category_id columns:
+            if (r.item_id) newRow.find(".item_id").val(r.item_id);
+            if (r.category_id) newRow.find(".category_id").val(r.category_id);
+
+            $("#item_rows").append(newRow);
+        });
+    };
+
+    reader.readAsBinaryString(file);
+}); 
+
+
+
+
     $("#srch_customer_contact_id")
       .trigger("change")
       .val("#srch_customer_id")

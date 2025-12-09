@@ -109,6 +109,27 @@ $current_page = $this->uri->segment(1, 0);
             </ul>
         </li>
         <li
+            class="treeview <?= in_array($current_page, ['tender-dc-add', 'tender-dc-list', 'tender-dc-edit']) ? 'active' : '' ?>">
+            <a href="#">
+                <i class="fa fa-briefcase"></i> Tender DC
+                <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+            </a>
+
+            <ul class="treeview-menu">
+                <li class="<?= ($current_page === 'tender-dc-add') ? 'active' : '' ?>">
+                    <a href="<?= site_url('tender-dc-add') ?>">
+                        <i class="fa fa-plus-square"></i> Tender DC
+                    </a>
+                </li>
+
+                <li class="<?= ($current_page === 'tender-dc-list') ? 'active' : '' ?>">
+                    <a href="<?= site_url('tender-dc-list') ?>">
+                        <i class="fa fa-list"></i> Tender DC List
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li
             class="treeview <?= in_array($current_page, ['tender-invoice-add', 'tender-invoice-list', 'tender-po-invoice-edit']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-briefcase"></i> Tender Invoice
@@ -130,27 +151,7 @@ $current_page = $this->uri->segment(1, 0);
             </ul>
         </li>
 
-        <li
-            class="treeview <?= in_array($current_page, ['tender-dc-add', 'tender-dc-list', 'tender-dc-edit']) ? 'active' : '' ?>">
-            <a href="#">
-                <i class="fa fa-briefcase"></i> Tender DC
-                <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
-            </a>
-
-            <ul class="treeview-menu">
-                <li class="<?= ($current_page === 'tender-dc-add') ? 'active' : '' ?>">
-                    <a href="<?= site_url('tender-dc-add') ?>">
-                        <i class="fa fa-plus-square"></i> Tender DC
-                    </a>
-                </li>
-
-                <li class="<?= ($current_page === 'tender-dc-list') ? 'active' : '' ?>">
-                    <a href="<?= site_url('tender-dc-list') ?>">
-                        <i class="fa fa-list"></i> Tender DC List
-                    </a>
-                </li>
-            </ul>
-        </li>
+        
 
     </ul>
 </li>

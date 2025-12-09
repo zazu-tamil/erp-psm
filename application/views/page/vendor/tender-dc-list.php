@@ -71,10 +71,11 @@
                 <thead>
                     <tr>
                         <th class="text-center">S.No</th>
-                        <th>Dc Date</th>
+                        <th>DC Date</th>
+                        <th>DC No</th>
                         <th>Company / RFQ No</th>
                         <th>Customer</th>
-                        <th>Po No</th>
+                        
                         <!-- <th>Vendor</th>  -->
                         <th>Status</th>
                         <th class="text-center" colspan="3">Action</th>
@@ -86,11 +87,12 @@
                             <tr>
                                 <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
                                 <td><?php echo date('d-m-Y', strtotime($row['dc_date'])); ?></td>
+                                <td><strong><?php echo htmlspecialchars($row['dc_no']); ?></strong></td>
                                 <td><?php echo htmlspecialchars($row['company_name'] ?? '-'); ?> <br><small
                                         class="label label-success"><?php echo htmlspecialchars($row['tender_details'] ?? '-'); ?></small>
                                 </td>
                                 <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
-                                <td><strong><?php echo htmlspecialchars($row['dc_no']); ?></strong></td>
+                                
                                 <!-- <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td> -->
                          
                                 <?php

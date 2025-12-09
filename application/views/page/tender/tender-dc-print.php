@@ -252,15 +252,15 @@
             <div class="info-block">
                 <strong>Bill To:</strong><br>
                 <strong>M/S:</strong> <?php echo $record['customer_name']; ?><br>
-                <strong>Address:</strong> <?php echo nl2br($record['customer_address']); ?>
+                <strong>Address:</strong> <br> <?php echo nl2br($record['customer_address']); ?>
             </div>
 
             <div class="info-block">
-                <div><span class="label">Challan No:</span> <?php echo $record['dc_no']; ?></div>
+                <div><span class="label">DC No:</span> <?php echo $record['dc_no']; ?></div>
                 <div><span class="label">Date:</span> <?php echo date('d-m-Y', strtotime($record['dc_date'])); ?></div>
-                <div><span class="label">Place of Supply:</span> Gujarat (24)</div>
+                <!-- <div><span class="label">Place of Supply:</span> Gujarat (24)</div>
                 <div><span class="label">Phone:</span> 9814556613</div>
-                <div><span class="label">GSTIN:</span> 24AAACC1206D1ZG</div>
+                <div><span class="label">GSTIN:</span> 24AAACC1206D1ZG</div> -->
 
             </div>
         </div>
@@ -320,11 +320,15 @@
             }
         </style>
         <!-- Footer -->
-        <div class="footer">
-            <div class="signature-box">
-                <span class="span_sing"> <?php echo nl2br($record['company_name']); ?></span><br>
-                <div style="text-align: center;"> Authorised Signatory</div>
-            </div>
+        <div class="foote1r">
+            <table style="width:100%; height:100px; margin-top:50px; border:none;">
+                <tr>
+                    <td><span class="span_sing1"> Goods Received By</span></td>
+                    <td><span class="span_sing1"> Seal & Signatare</span></td>
+                </tr>
+                </table>
+             
+             
         </div>
     </div>
 
