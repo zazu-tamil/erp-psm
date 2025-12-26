@@ -56,7 +56,8 @@ $route['translate_uri_dashes'] = FALSE;
 $route['logout'] = 'login/logout'; 
 $route['dash'] = 'dashboard'; 
 
-$route['add-tender-enquiry']='tender/add_tender_enquiry';
+//$route['add-tender-enquiry']='tender/add_tender_enquiry';
+$route['add-tender-enquiry']='tender/add_tender_enquiry_v2';
 $route['tender-enquiry-list'] = 'tender/tender_enquiry_list';
 $route['tender-enquiry-edit/(:num)'] = 'tender/edit_tender_enquiry/$1'; 
 
@@ -105,19 +106,24 @@ $route['customer-contact-list/edit/(:num)'] = 'master/customer_contact_list/$1';
 
 $route['vendor-rate-enquiry'] = 'vendor/vendor_rate_enquiry';
 $route['vendor-rate-enquiry-edit/(:num)'] = 'vendor/vendor_rate_enquiry_edit/$1';
+
 $route['vendor-rate-enquiry-list'] = 'vendor/vendor_rate_enquiry_list';
+$route['vendor-rate-enquiry-list/(:num)'] = 'vendor/vendor_rate_enquiry_list/$1';
+
 $route['vendor-rate-enquiry-print/(:num)'] = 'vendor/vendor_rate_enquiry_print/$1';
 
 
 $route['tender-quotation-add'] = 'tender/tender_quotation_add';
 $route['tender-quotation-edit/(:num)'] = 'tender/tender_quotation_edit/$1';
 $route['tender-quotation-list'] = 'tender/tender_quotation_list';
+$route['tender-quotation-list/(:num)'] = 'tender/tender_quotation_list/$1';
 $route['tender-quotation-print/(:num)'] = 'tender/tender_quotation_print/$1';
 
 
 $route['tender-dc-add'] = 'tender/tender_dc_add';
 $route['tender-dc-edit/(:num)'] = 'tender/tender_dc_edit/$1';
 $route['tender-dc-list'] = 'tender/tender_dc_list';
+$route['tender-dc-list/(:num)'] = 'tender/tender_dc_list/$1';
 $route['tender-dc-print/(:num)'] = 'tender/tender_dc_print/$1';
 
 
@@ -130,21 +136,27 @@ $route['customer-tender-po-add'] = 'tender/customer_tender_po_add';
 $route['tender/get_quotations_by_customer'] = 'tender/get_quotations_by_customer';
 $route['tender/get_quotation_items'] = 'tender/get_quotation_items';
 $route['customer-tender-po-list'] = 'tender/customer_tender_po_list';
+$route['customer-tender-po-list/(:num)'] = 'tender/customer_tender_po_list/$1';
 $route['customer-tender-po-edit/(:num)'] = 'tender/customer_tender_po_edit/$1';
 
 
 $route['vendor-quotation-add'] = 'vendor/vendor_quotation_add';
+
 $route['vendor-quotation-list'] = 'vendor/vendor_quotation_list';
+$route['vendor-quotation-list/(:num)'] = 'vendor/vendor_quotation_list/$1';
+
 $route['vendor-quotation-edit/(:num)'] = 'vendor/vendor_quotation_edit/$1';
 $route['vendor-quotation-print/(:num)'] = 'vendor/vendor_quotation_print/$1';
 
 $route['vendor-po-add'] = 'vendor/vendor_po_add'; 
 $route['vendor-po-list'] = 'vendor/vendor_po_list';
+$route['vendor-po-list/(:num)'] = 'vendor/vendor_po_list/$1';
 $route['vendor-po-edit/(:num)'] = 'vendor/vendor_po_edit/$1';
 $route['vendor-po-view/(:num)'] = 'vendor/vendor_po_view/$1';
 
 $route['vendor-pur-inward-add'] = 'vendor/vendor_pur_inward_add'; 
 $route['vendor-pur-inward-list'] = 'vendor/vendor_pur_inward_list';
+$route['vendor-pur-inward-list/(:num)'] = 'vendor/vendor_pur_inward_list/$1';
 $route['vendor-pur-inward-edit/(:num)'] = 'vendor/vendor_pur_inward_edit/$1'; 
 
 $route['vendor-purchase-bill-add'] = 'vendor/vendor_purchase_bill_add'; 
@@ -158,6 +170,7 @@ $route['vendor-purchase-bill-list/(:num)'] = 'vendor/vendor_purchase_bill_list/$
 
 $route['tender-invoice-add'] = 'tender/tender_invoice_add'; 
 $route['tender-invoice-list'] = 'tender/tender_po_invoice_list';
+$route['tender-invoice-list/(:num)'] = 'tender/tender_po_invoice_list/$1';
 $route['tender-po-invoice-edit/(:num)'] = 'tender/tender_po_invoice_edit/$1'; 
 $route['tender-po-invoice-print/(:num)'] = 'tender/tender_po_invoice_print/$1'; 
 

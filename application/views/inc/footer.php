@@ -17,22 +17,7 @@
 </footer>
 </div>
 
-<!-- WhatsApp Floating Button 
-<div id="whatsapp-fixed-button">
-    <a href="https://api.whatsapp.com/send?phone=YOUR_NUMBER" target="_blank">
-        <img src="<?php echo base_url('asset/images/mobile.png') ?>" alt="WhatsApp"
-            style="width:48px;height:48px;" />
-    </a>
-</div>-->
-
-
-
-
-<div id="whatsapp-fixed-button-right" class="hidden">
-    <!-- Remove the <a> tag and use a clickable <img> with an id -->
-    <img src="<?php echo base_url('asset/images/mobile.png') ?>" alt="WhatsApp"
-        style="width:48px;height:48px;cursor:pointer;" id="openWhatsappModal" />
-</div>
+ 
 
 
 <!-- jQuery 3 -->
@@ -71,6 +56,10 @@ include_once('inc-js/' . $js);
     $(document).ready(function () {
         // Initialize tooltips
         $('[data-toggle="tooltip"]').tooltip();
+
+        setTimeout(function() {
+            $(".auto-hide").fadeOut("slow");
+        }, 2000);
  
     });
 </script>

@@ -307,7 +307,7 @@
   // Recalculate amount on qty, rate, or GST change
   $(document).on(
     "input change",
-    ".rate-input, .vat-dropdown, .qty-input",
+    ".rate-input, .vat-dropdown, .qty-input, #transport_charges , #other_charges",
     function () {
       const $row = $(this).closest("tr.item-row");
 
@@ -337,6 +337,11 @@
       total += parseFloat($(this).val()) || 0;
     });
 
+    total += parseFloat($('#transport_charges').val()) || 0;
+    total += parseFloat($('#other_charges').val()) || 0;
+
     $("#total_amount").text(total.toFixed(2));
   }
+
+  calculateTotalAmount();
 </script>

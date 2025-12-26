@@ -1,4 +1,6 @@
 <script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
+<link  rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <style>
   /* Your existing styles remain unchanged */
   .text-light-blue {
@@ -44,8 +46,94 @@
 
 <script>
   $(document).ready(function () {
+
+
+    $(".srch_enq_id").autocomplete({
+        source: function (request, response) {
+          $.ajax({
+            url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
+            type: "POST",
+            data: { search: request.term },
+            dataType: "json",
+            success: function (data) {
+              //console.log(data);
+              response(data);
+            },
+          });
+        },
+
+        minLength: 1,
+         
+        select: function (event, ui) {
+           console.log(ui);
+            $("#srch_company_id").val(ui.item.company_id);
+            $("#srch_customer_id").val(ui.item.customer_id).change();
+            //$("#srch_tender_enquiry_id").val(ui.item.tender_enquiry_id); 
+            load_tender_enq(ui.item.tender_enquiry_id); 
+        }, 
+      });
+
+
+      function load_tender_enq(t_enq_id = '') {
+
+      const customer_id = $("#srch_customer_id").val(); // <-- IMPORTANT
+      const company_id  = $("#srch_company_id").val();
+      const $enquiryDropdown = $("#srch_tender_enquiry_id");
+      const $container = $("#item_container");  
+
+      // Reset
+      $enquiryDropdown
+          .html('<option value="">Select Enquiry</option>')
+          .prop('disabled', true);
+
+       
+      $container.html('');
+
+      if (!customer_id || !company_id) return;
+
+      $.ajax({
+          url: "<?php echo site_url('vendor/get_tender_enquiries_by_customer'); ?>",
+          type: "POST",
+          data: { 
+              company_id: company_id,
+              customer_id: customer_id 
+          },
+          dataType: "json",
+          success: function (res) {
+
+              if (res.length > 0) {
+                  $enquiryDropdown.prop('disabled', false);
+
+                  $.each(res, function (i, row) {
+                      $enquiryDropdown.append(
+                          $('<option>', {
+                              value: row.tender_enquiry_id,
+                              text: row.display
+                          })
+                      );
+                  });
+
+                  // ✅ SET SELECTED VALUE HERE
+                  if (t_enq_id) {
+                      $enquiryDropdown.val(t_enq_id).trigger('change');
+                  }
+
+              } else {
+                  $enquiryDropdown.html('<option value="">No enquiries found</option>');
+              }
+          },
+          error: function () {
+              alert('Error loading enquiries');
+          }
+      });
+    }   
+       
+    $("#srch_customer_id").on("change", function () {
+      load_tender_enq('');
+     });   
+
     // 1. Company → Load Customers
-    $("#srch_company_id").on("change", function () {
+   /* $("#srch_company_id").on("change", function () {
       const company_id = $(this).val();
       const $customer = $("#srch_customer_id");
       $customer.html('<option value="">Loading...</option>');
@@ -102,7 +190,7 @@
         },
         "json"
       );
-    });
+    }); */
 
     // 3. Tender Enquiry → Load Vendors
     $("#srch_tender_enquiry_id").on("change", function () {

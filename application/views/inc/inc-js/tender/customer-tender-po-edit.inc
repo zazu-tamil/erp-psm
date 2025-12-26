@@ -1,5 +1,48 @@
 <script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script> 
+ <style>
+    .total-wrapper {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      width: 100%;
+    }
+    .total-box {
+      background: linear-gradient(135deg, #f6fff9, #e8f9f0);
+      border: 2px solid #b5e0c6;
+      border-radius: 12px;
+      padding: 12px 24px;
+      font-family: "Segoe UI", sans-serif;
+      font-size: 1.15rem;
+      color: #333;
+      min-width: 280px;
+      text-align: right;
+      transition: all 0.3s ease-in-out;
+    }
+    .total-box:hover {
+      background: #e3f7ec;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+    .total-box i {
+      font-size: 1.3rem;
+      vertical-align: middle;
+    }
+    #total_amount {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-left: 5px;
+    }
+    @media (max-width: 768px) {
+      .total-wrapper { justify-content: center; }
+      .total-box { text-align: center; min-width: 220px; }
+    }
 
+    .readonly-select {
+        pointer-events: none;
+        background-color: #e9ecef;
+    }
+  </style>
 <script>
   $(document).ready(function () {
     
@@ -140,6 +183,138 @@
       });
     });
 
+
+    function exportJSONToXLSX(data, fileName = "export.xlsx") {
+
+        // Convert JSON to worksheet
+        const worksheet = XLSX.utils.json_to_sheet(data);
+
+        // Create workbook
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+        // Export XLSX
+        XLSX.writeFile(workbook, fileName);
+    }
+
+    $(document).on("click", "#btnExport", function () {
+      let jsonData = <?php  echo json_encode($merged_items); ?>;
+      exportJSONToXLSX(jsonData, $(this).val() +".xlsx");
+    });
+
+    const itemHtml = `
+                <div class="item-card border p-3 mb-3" style="background-color:#f9f9f9; border-radius:8px;">
+                  <h5 class="text-primary mb-3">Item Details <span class="cnt"></span></h5>
+                  <div class="row">
+                    <div class="col-md-1 d-flex align-items-center justify-content-center">
+                      <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="" checked>
+                       <input type="hidden" name="tender_po_item_id[]" class="form-control tender_po_item_id" value="">
+                      <input type="hidden" name="tender_quotation_item_id[]" class="form-control tender_quotation_item_id" value="">
+                    </div>
+
+                    <div class="col-md-3"> 
+                      <div class="form-group">
+                        <label>Item Code</label>
+                        <input type="text" class="form-control item_code" name="item_code[]" value="" readonly>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <label>Item Description</label>
+                        <textarea name="item_desc[]" class="form-control desc-textarea" rows="3"></textarea>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label>UOM</label>
+                            <input type="text" name="uom[]" class="form-control uom" value="" readonly>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label>Quantity</label>
+                            <input type="number" step="0.01" name="qty[]" class="form-control qty-input" value="" readonly>
+                          </div>
+                        </div>
+
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label>Rate</label>
+                            <input type="number" step="0.01" name="rate[]" class="form-control rate-input" value="">
+                          </div>
+                        </div>
+
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label>VAT %</label>
+                            <input type="number" step="0.01" name="gst[]" class="form-control vat-dropdown" value=""> 
+                          </div>
+                        </div>
+
+                        <div class="col-md-12">
+                          <div class="form-group">
+                            <label>Amount</label>
+                            <input type="number" step="0.01" name="amount[]" class="form-control amount-input" value="0.00" readonly>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+ 
+                </div>
+              `;
+
+
+    $("#excelFile").on("change", function (e) {
+
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+
+            const workbook = XLSX.read(e.target.result, { type: "binary" });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+            // JSON with headers
+            const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+            console.log(rows);
+
+            $("#item_container").empty();
+            let i = 0;
+            rows.forEach(function (r) {
+                
+                let newRow = $(itemHtml);
+
+                newRow.find(".cnt").html((i+1));
+                newRow.find(".item-check").val(i);
+                newRow.find(".tender_quotation_item_id").val(r.tender_quotation_item_id);
+                newRow.find(".tender_po_item_id").val(r.tender_po_item_id); 
+                newRow.find(".item_code").val(r.item_code);
+                newRow.find(".desc-textarea").val(r.item_desc);
+                newRow.find(".uom").val(r.uom);
+                newRow.find(".qty-input").val(r.qty);
+                newRow.find(".vat-dropdown").val(r.vat);
+                newRow.find(".rate-input").val(r.rate);
+                newRow.find(".amount-input").val(r.amount); 
+
+                $("#item_container").append(newRow);
+
+                newRow.find(".rate-input").change();
+                  
+                i++;
+            });
+        };
+        
+        reader.readAsBinaryString(file);
+    });
+
     /* ================================================================
        4. QUOTATION CHANGE - Load Items from Selected Quotation
        ================================================================ */
@@ -161,9 +336,7 @@
           if (res.length > 0) {
             $.each(res, function (i, row) {
               const hiddenFields = `
-                <input type="hidden" name="tender_quotation_item_id[]" value="${row.tender_quotation_item_id}">
-                <input type="hidden" name="category_id[]" value="${row.category_id}">
-                <input type="hidden" name="item_id[]" value="${row.item_id}">
+                <input type="hidden" name="tender_quotation_item_id[]" value="${row.tender_quotation_item_id}"> 
               `;
 
               const itemHtml = `
@@ -250,44 +423,7 @@
                 </div>
               </div>
 
-              <style>
-                .total-wrapper {
-                  display: flex;
-                  justify-content: flex-end;
-                  align-items: center;
-                  width: 100%;
-                }
-                .total-box {
-                  background: linear-gradient(135deg, #f6fff9, #e8f9f0);
-                  border: 2px solid #b5e0c6;
-                  border-radius: 12px;
-                  padding: 12px 24px;
-                  font-family: "Segoe UI", sans-serif;
-                  font-size: 1.15rem;
-                  color: #333;
-                  min-width: 280px;
-                  text-align: right;
-                  transition: all 0.3s ease-in-out;
-                }
-                .total-box:hover {
-                  background: #e3f7ec;
-                  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-                  transform: translateY(-2px);
-                }
-                .total-box i {
-                  font-size: 1.3rem;
-                  vertical-align: middle;
-                }
-                #total_amount {
-                  font-size: 1.4rem;
-                  font-weight: 700;
-                  margin-left: 5px;
-                }
-                @media (max-width: 768px) {
-                  .total-wrapper { justify-content: center; }
-                  .total-box { text-align: center; min-width: 220px; }
-                }
-              </style>
+             
             `);
 
             // Calculate totals on load
@@ -317,13 +453,17 @@
       calculateTotalAmount();
     });
 
-    function calculateTotalAmount() {
+    function calculateTotalAmount() {  
       let total = 0;
       $(".amount-input").each(function () {
         total += parseFloat($(this).val()) || 0;
       });
       $("#total_amount").text(total.toFixed(2));
     }
+
+    calculateTotalAmount();
+
+     
 
     /* ================================================================
        6. Checkbox Change - Add/Remove Hidden Fields
