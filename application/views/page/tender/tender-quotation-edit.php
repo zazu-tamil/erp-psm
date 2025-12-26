@@ -18,6 +18,8 @@
     <div class="box box-info">
         <div class="box-header with-border">
             <h3 class="box-title"><i class="fa fa-pencil"></i> Edit Tender Quotation</h3>
+            <div class="pull-right"><a href="<?php echo site_url('tender-quotation-list'); ?>" class="btn btn-default"><i
+                        class="fa fa-arrow-left"></i> Back To List</a></div>
         </div>
 
         <form method="post" action="" id="frmedit" enctype="multipart/form-data">
@@ -62,50 +64,50 @@
                                 value="<?php echo htmlspecialchars($header['quote_date']); ?>">
                         </div>
 
-                       <div class="form-group col-md-3">
-                        <label>Quotation Status</label><br>
+                        <div class="form-group col-md-3">
+                            <label>Quotation Status</label><br>
 
-                        <label class="radio-inline">
-                            <input type="radio" name="quotation_status" value="Open"
-                                <?php echo ($header['quotation_status'] == 'Open') ? 'checked' : ''; ?>>
-                            Open
-                        </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="quotation_status" value="Open"
+                                    <?php echo ($header['quotation_status'] == 'Open') ? 'checked' : ''; ?>>
+                                Open
+                            </label>
 
-                        <label class="radio-inline">
-                            <input type="radio" name="quotation_status" value="Quoted"
-                                <?php echo ($header['quotation_status'] == 'Quoted') ? 'checked' : ''; ?>>
-                            Quoted
-                        </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="quotation_status" value="Quoted"
+                                    <?php echo ($header['quotation_status'] == 'Quoted') ? 'checked' : ''; ?>>
+                                Quoted
+                            </label>
 
-                        <label class="radio-inline">
-                            <input type="radio" name="quotation_status" value="Won"
-                                <?php echo ($header['quotation_status'] == 'Won') ? 'checked' : ''; ?>>
-                            Won
-                        </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="quotation_status" value="Won"
+                                    <?php echo ($header['quotation_status'] == 'Won') ? 'checked' : ''; ?>>
+                                Won
+                            </label>
 
-                        <label class="radio-inline">
-                            <input type="radio" name="quotation_status" value="On Hold"
-                                <?php echo ($header['quotation_status'] == 'On Hold') ? 'checked' : ''; ?>>
-                            On Hold
-                        </label>
-                    </div>
+                            <label class="radio-inline">
+                                <input type="radio" name="quotation_status" value="On Hold"
+                                    <?php echo ($header['quotation_status'] == 'On Hold') ? 'checked' : ''; ?>>
+                                On Hold
+                            </label>
+                        </div>
 
 
-                    <div class="form-group col-md-3">
-                        <label>Status</label><br>
+                        <div class="form-group col-md-3">
+                            <label>Status</label><br>
 
-                        <label class="radio-inline">
-                            <input type="radio" name="status" value="Active"
-                                <?php echo ($header['status'] == 'Active') ? 'checked' : ''; ?>>
-                            Active
-                        </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="status" value="Active"
+                                    <?php echo ($header['status'] == 'Active') ? 'checked' : ''; ?>>
+                                Active
+                            </label>
 
-                        <label class="radio-inline">
-                            <input type="radio" name="status" value="Inactive"
-                                <?php echo ($header['status'] == 'Inactive') ? 'checked' : ''; ?>>
-                            Inactive
-                        </label>
-                    </div>
+                            <label class="radio-inline">
+                                <input type="radio" name="status" value="Inactive"
+                                    <?php echo ($header['status'] == 'Inactive') ? 'checked' : ''; ?>>
+                                Inactive
+                            </label>
+                        </div>
 
                     </div>
                     <div class="row">
@@ -127,98 +129,105 @@
 
                 <fieldset class="mt-4">
                     <legend class="text-light-blue"><i class="fa fa-list"></i> Item Details</legend>
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                                <label for="btnExport">Click Here - Export as Excel File</label> <br>
+                                <button id="btnExport" type="button" class="btn btn-success" value="<?php echo htmlspecialchars($header['quotation_no']); ?>">Export Excel & Download</button>
+                        </div>
+                        <div class="col-md-4 form-group ">
+                            <label for="excelFile">Choose Excel File to Import</label>
+                            <input type="file" class="form-control" id="excelFile" accept=".xls,.xlsx"
+                                placeholder="Choose Excel File to Import">
+                        </div> 
+                        <div class="col-md-4 form-group ">
+                        <i class="text-red">Note: <br>Don't change <b class="text-info">[ tender_quotation_item_id , tender_enquiry_item_id ] </b> column its software referance Ids in excel file Whlie importing</i>
+                        </div>     
+                    </div>
+
                     <div id="item_container">
                         <?php if (!empty($items)): ?>
-                            <?php foreach ($items as $i => $row): ?>
-                                <div class="item-card border p-3 mb-3" style="background-color:#f9f9f9; border-radius:8px;">
-                                    <h5 class="text-primary mb-3">Item Details <?php echo $i + 1; ?></h5>
+                        <?php foreach ($items as $i => $row): ?>
+                        <div class="item-card border p-3 mb-3" style="background-color:#f9f9f9; border-radius:8px;">
+                            <h5 class="text-primary mb-3">Item Details <?php echo $i + 1; ?></h5>
+                            <div class="row">
+                                <div class="col-md-1 d-flex align-items-center justify-content-center">
+                                    <input type="checkbox" class="form-check-input item-check" name="selected_items[]"
+                                        value="<?php echo $i; ?>" checked>
+                                         <input type="hidden" name="tender_quotation_item_id[]" class="tender_quotation_item_id" value="<?php echo htmlspecialchars($row['tender_quotation_item_id']); ?>">
+                                         <input type="hidden" name="tender_enquiry_item_id[]" class="tender_enquiry_item_id" value="<?php echo htmlspecialchars($row['tender_enquiry_item_id']); ?>">
+                                        
+                                </div>
+
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Item Code</label>
+                                        <input type="text" class="form-control" name="item_code[]" value="<?php echo htmlspecialchars($row['item_code']); ?>" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label>Item Description</label>
+                                        <textarea name="item_desc[]" class="form-control desc-textarea"
+                                            rows="3"><?php echo htmlspecialchars($row['item_desc']); ?></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
                                     <div class="row">
-                                        <div class="col-md-1 d-flex align-items-center justify-content-center">
-                                            <input type="checkbox" class="form-check-input item-check" name="selected_items[]"
-                                                value="<?php echo $i; ?>" checked>
-                                        </div>
-
-                                        <div class="col-md-3"> 
+                                        <div class="col-md-6">
                                             <div class="form-group">
-                                                <label>Item Code</label>
-                                                <input type="text" class="form-control"
-                                                    value="<?php echo htmlspecialchars($row['item_code']); ?>" readonly>
+                                                <label>UOM</label>
+                                                <input type="text" name="uom[]" class="form-control"
+                                                    value="<?php echo htmlspecialchars($row['uom']); ?>" readonly>
                                             </div>
                                         </div>
 
-                                        <div class="col-md-4">
+                                        <div class="col-md-6">
                                             <div class="form-group">
-                                                <label>Item Description</label>
-                                                <textarea name="item_desc[]" class="form-control desc-textarea"
-                                                    rows="3"><?php echo htmlspecialchars($row['item_desc']); ?></textarea>
+                                                <label>Quantity</label>
+                                                <input type="number" step="0.01" name="qty[]"
+                                                    class="form-control qty-input"
+                                                    value="<?php echo htmlspecialchars($row['qty']); ?>" readonly>
                                             </div>
                                         </div>
 
-                                        <div class="col-md-4">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>UOM</label>
-                                                        <input type="text" name="uom[]" class="form-control"
-                                                            value="<?php echo htmlspecialchars($row['uom']); ?>" readonly>
-                                                    </div>
-                                                </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Rate</label>
+                                                <input type="number" step="0.01" name="rate[]"
+                                                    class="form-control rate-input"
+                                                    value="<?php echo htmlspecialchars($row['rate']); ?>">
+                                            </div>
+                                        </div>
 
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Quantity</label>
-                                                        <input type="number" step="0.01" name="qty[]"
-                                                            class="form-control qty-input"
-                                                            value="<?php echo htmlspecialchars($row['qty']); ?>" readonly>
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Rate</label>
-                                                        <input type="number" step="0.01" name="rate[]"
-                                                            class="form-control rate-input"
-                                                            value="<?php echo htmlspecialchars($row['rate']); ?>">
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>VAT %</label>
-                                                        <?php
-                                                        echo form_dropdown(
-                                                            'gst[]',
-                                                            ['' => 'Select VAT']+$gst_opt,
-                                                            set_value('gst[]', isset($row['gst']) ? $row['gst'] : ''),
-                                                            'class="form-control vat-dropdown"'
-                                                        );
-                                                        ?>
-                                                    </div>
-                                                </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>VAT %</label>
+                                               <input type="text" name="gst[]" class="form-control vat-dropdown" value="<?php echo htmlspecialchars($row['vat']); ?>" >
+                                                 
+                                            </div>
+                                        </div>
 
 
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <label>Amount</label>
-                                                        <input type="number" step="0.01" name="amount[]"
-                                                            class="form-control amount-input"
-                                                            value="<?php echo htmlspecialchars($row['amount']); ?>" readonly>
-                                                    </div>
-                                                </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Amount</label>
+                                                <input type="number" step="0.01" name="amount[]"
+                                                    class="form-control amount-input"
+                                                    value="<?php echo htmlspecialchars($row['amount']); ?>" readonly>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <input type="hidden" name="tender_enquiry_item_id[]"
-                                        value="<?php echo htmlspecialchars($row['tender_enquiry_item_id']); ?>">
-                                    <input type="hidden" name="category_id[]"
-                                        value="<?php echo htmlspecialchars($row['category_id']); ?>">
-                                    <input type="hidden" name="item_id[]"
-                                        value="<?php echo htmlspecialchars($row['item_id']); ?>">
                                 </div>
-                            <?php endforeach; ?>
+                            </div>
+
+                           
+                             
+                        </div>
+                        <?php endforeach; ?>
                         <?php else: ?>
-                            <div class="alert alert-warning">No items found for this quotation.</div>
+                        <div class="alert alert-warning">No items found for this quotation.</div>
                         <?php endif; ?>
                     </div>
 
@@ -232,7 +241,7 @@
                                 </div>
                                 <div class="total-text text-end">
                                     <span class="label">Total Amount:</span>
-                                    <span class="value">₹ <span id="total_amount">0.00</span></span>
+                                    <span class="value">BHD <span id="total_amount">0.00</span></span>
                                 </div>
                             </div>
                         </div>
@@ -240,10 +249,12 @@
                 </fieldset>
             </div>
 
-            <div class="box-footer text-right">
-                <a href="<?php echo site_url('tender-quotation-list'); ?>" class="btn btn-default"><i
-                        class="fa fa-arrow-left"></i> Back To List</a>
-                <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Update</button>
+            <div class="box-footer">
+                <div class="row">
+                    <div class="col-md-6"><a href="<?php echo site_url('tender-quotation-list'); ?>" class="btn btn-default"><i
+                        class="fa fa-arrow-left"></i> Back To List</a></div>
+                    <div class="col-md-6 text-right"><button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Update</button></div>
+                </div> 
             </div>
         </form>
     </div>

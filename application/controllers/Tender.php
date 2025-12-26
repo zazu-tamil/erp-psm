@@ -12,6 +12,189 @@ class Tender extends CI_Controller
 // CONTROLLER: add_tender_enquiry() function
 // ============================================
 
+    public function add_tender_enquiry_v2()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        $data = array();
+        $data['js'] = 'tender/add-tender-enquiry-v2.inc';
+        $data['title'] = 'Tender Enquiry';
+
+        $srch_company_id = $this->input->post('company_id');
+        $srch_customer_id = $this->input->post('customer_id');
+
+        // Handle Add Tender Enquiry with Items
+        if ($this->input->post('mode') == 'Add') {
+
+            $this->db->trans_start();
+
+            // Handle File Upload
+            $tender_document = '';
+
+            // Only process if file is uploaded
+            if (!empty($_FILES['tender_document']['name'])) {
+                $upload_path = FCPATH . 'tender-documents/' . COMPANY . '/';
+
+                // Check if folder exists, if not create it
+                if (!is_dir($upload_path)) {
+                    mkdir($upload_path, 0777, true);
+                }
+
+                $config['upload_path'] = $upload_path;
+                $config['file_name'] = "TENDER_" . date('YmdHis');
+                $config['allowed_types'] = '*'; // Allow all file types
+                $config['max_size'] = 10240; // 10MB in KB
+
+                $this->load->library('upload', $config);
+
+                if ($this->upload->do_upload('tender_document')) {
+                    $file_array = $this->upload->data();
+                    $tender_document = 'tender-documents/' . COMPANY . '/' . $file_array['file_name'];
+                } else {
+                    // Get upload error for debugging
+                    $error = $this->upload->display_errors();
+                    echo "<pre>Upload Error: " . $error . "</pre>";
+                    $tender_document = '';
+                }
+            }
+
+            $insert_data = array(
+                'company_id' => $srch_company_id,
+                'enquiry_date' => $this->input->post('enquiry_date'),
+                'enquiry_no' => $this->input->post('enquiry_no'),
+                'customer_contact_id' => $this->input->post('customer_contact_id'),
+                'tender_status' => $this->input->post('tender_status'),
+                'customer_id' => $srch_customer_id,
+                'opening_date' => $this->input->post('opening_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('opening_date'))) : null,
+                'closing_date' => $this->input->post('closing_date') ? date('Y-m-d H:i:s', strtotime($this->input->post('closing_date'))) : null,
+                'status' => $this->input->post('status') ?: 'Active',
+                'tender_name' => $this->input->post('tender_name'),
+                'tender_document' => $tender_document,
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_date' => date('Y-m-d H:i:s'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            );
+
+
+
+            $this->db->insert('tender_enquiry_info', $insert_data);
+            $tender_enquiry_id = $this->db->insert_id();
+
+            $category_ids = $this->input->post('category_id');
+            $item_codes = $this->input->post('item_code');
+            $item_descs = $this->input->post('item_desc');
+            $uoms = $this->input->post('uom');
+            $qtys = $this->input->post('qty');
+
+            if (!empty($item_descs)) {
+                //foreach ($item_ids as $index => $item_id) {
+                foreach ($item_descs as $index => $item_desc) {
+                    if (!empty($item_desc)) {
+                        $insert_item_data = array(
+                            'tender_enquiry_id' => $tender_enquiry_id,
+                           // 'category_id' => $category_ids[$index] ?? 0,
+                          //  'item_id' => $item_ids[$index] ?? 0,
+                            'item_code' => $item_codes[$index] ?? '',
+                            'item_desc' => $item_desc ?? '',
+                            'uom' => $uoms[$index] ?? '',
+                            'qty' => $qtys[$index] ?? 0.00,
+                            'status' => 'Active',
+                            'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                            'created_date' => date('Y-m-d H:i:s'),
+                            'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                            'updated_date' => date('Y-m-d H:i:s')
+                        );
+                        $this->db->insert('tender_enquiry_item_info', $insert_item_data);
+                    }
+                }
+            }
+
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE) {
+                $this->session->set_flashdata('error', 'Error saving data. Please try again.');
+            } else {
+                $this->session->set_flashdata('success', 'Tender Enquiry saved successfully.');
+            }
+
+            // Comment this out for debugging, uncomment after testing
+            redirect('tender-enquiry-list');
+
+        }
+
+        // Populate dropdowns
+        $data['company_opt'] = [];
+        $data['customer_opt'] = [];
+        
+
+        // Companies
+        $query = $this->db->query("
+        SELECT 
+        company_id, 
+        company_name 
+        FROM company_info 
+        WHERE status = 'Active' 
+        ORDER BY company_name");
+        foreach ($query->result_array() as $row) {
+            $data['company_opt'][$row['company_id']] = $row['company_name'];
+        }
+
+        // Customers
+        $query = $this->db->query("
+        SELECT 
+        customer_id, 
+        customer_name 
+        FROM customer_info 
+        WHERE status = 'Active' 
+        ORDER BY customer_name");
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
+        
+
+        $sql = "
+        SELECT
+            a.country_id,
+            a.country_name
+        FROM
+            country_info AS a
+        WHERE
+            a.status != 'Delete'
+        ORDER BY
+            a.country_name ASC
+     ";
+
+        $query = $this->db->query($sql);
+        $data['country_opt'] = array();
+        foreach ($query->result_array() as $row) {
+            $data['country_opt'][$row['country_name']] = $row['country_name'];
+        }
+
+        $sql = "
+           select 
+           a.gst_id, 
+           a.gst_percentage 
+        from gst_info as a 
+        where status != 'Delete' 
+        order by a.status asc , a.gst_percentage asc
+    ";
+        $query = $this->db->query($sql);
+        $data['gst_opt'] = array();
+        foreach ($query->result_array() as $row) {
+            $data['gst_opt'][$row['gst_percentage']] = $row['gst_percentage'];
+        }
+
+    
+        
+        $data['tender_status_opt'] = ['' => 'Select Tender Status', 'Open' => 'Open', 'Quoted' => 'Quoted', 'Won' => 'Won', 'Lost' => 'Lost', 'On Hold' => 'On Hold']; 
+
+
+        $this->load->view('page/tender/add-tender-enquiry-v2', $data);
+    }
+
+
     public function add_tender_enquiry()
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
@@ -86,14 +269,15 @@ class Tender extends CI_Controller
             $uoms = $this->input->post('uom');
             $qtys = $this->input->post('qty');
 
-            if (!empty($item_ids)) {
-                foreach ($item_ids as $index => $item_id) {
-                    if (!empty($item_id)) {
+            if (!empty($item_descs)) {
+                //foreach ($item_ids as $index => $item_id) {
+                foreach ($item_descs as $index => $item_desc) {
+                    if (!empty($item_desc)) {
                         $insert_item_data = array(
                             'tender_enquiry_id' => $tender_enquiry_id,
                             'category_id' => $category_ids[$index] ?? 0,
-                            'item_id' => $item_id,
-                            'item_desc' => $item_descs[$index] ?? '',
+                            'item_id' => $item_ids[$index] ?? 0,
+                            'item_desc' => $item_desc ?? '',
                             'uom' => $uoms[$index] ?? '',
                             'qty' => $qtys[$index] ?? 0.00,
                             'status' => 'Active',
@@ -215,9 +399,17 @@ class Tender extends CI_Controller
             $data['brand_opt'][$row['brand_id']] = $row['brand_name'];
         }
         $data['tender_status_opt'] = ['' => 'Select Tender Status', 'Open' => 'Open', 'Quoted' => 'Quoted', 'Won' => 'Won', 'Lost' => 'Lost', 'On Hold' => 'On Hold'];
+
+
+
+
+
+
+
+
+
         $this->load->view('page/tender/add-tender-enquiry', $data);
     }
-
 
 
 
@@ -249,7 +441,7 @@ class Tender extends CI_Controller
             $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_from_date');
             $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_to_date');
         } else {
-            $data['srch_from_date'] = $srch_from_date = date('Y-m-d');
+            $data['srch_from_date'] = $srch_from_date = date('Y-m-01');
             $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
         }
 
@@ -481,24 +673,24 @@ class Tender extends CI_Controller
             }
 
             // Get posted data
-            $cat_ids = $this->input->post('category_id') ?: [];
-            $item_ids = $this->input->post('item_id') ?: [];
-            $desc = $this->input->post('item_desc') ?: [];
+           // $cat_ids = $this->input->post('category_id') ?: [];
+            $item_codes = $this->input->post('item_code') ?: [];
+            $descs = $this->input->post('item_desc') ?: [];
             $uom = $this->input->post('uom') ?: [];
             $qty = $this->input->post('qty') ?: [];
             $rec_ids = $this->input->post('tender_enquiry_item_id') ?: [];
 
             $processed = [];
 
-            foreach ($item_ids as $i => $itm) {
-                if (empty($itm))
+            foreach ($descs as $i => $desc) {
+                if (empty($desc))
                     continue;
 
                 $row = [
                     'tender_enquiry_id' => $tender_enquiry_id,
-                    'category_id' => isset($cat_ids[$i]) ? $cat_ids[$i] : 0,
-                    'item_id' => $itm,
-                    'item_desc' => isset($desc[$i]) ? $desc[$i] : '',
+                    //'category_id' => isset($cat_ids[$i]) ? $cat_ids[$i] : 0,
+                    'item_code' => isset($item_codes[$i]) ? $item_codes[$i] : 0,
+                    'item_desc' => $desc,
                     'uom' => isset($uom[$i]) ? $uom[$i] : '',
                     'qty' => isset($qty[$i]) ? $qty[$i] : 0,
                     'status' => 'Active',
@@ -537,7 +729,8 @@ class Tender extends CI_Controller
                 $this->db->trans_commit();
                 $this->session->set_flashdata('success', 'Tender Enquiry updated successfully.');
             }
-            redirect('tender-enquiry-list');
+            //redirect('tender-enquiry-list');
+            redirect('tender-enquiry-edit/'. $tender_enquiry_id);
         }
         $sql = "SELECT * FROM tender_enquiry_info WHERE tender_enquiry_id = ? AND status != 'Deleted'";
         $q = $this->db->query($sql, [$tender_enquiry_id]);
@@ -550,24 +743,11 @@ class Tender extends CI_Controller
 
         $sql = "
           SELECT 
-                tei.*,
-                ii.item_name,
-                ii.item_description,
-                ii.item_code,
-                ii.uom AS item_uom,
-                CONCAT(
-                    ii.item_code, ' : ', ii.item_name, ' [ ',
-                    SUBSTRING(ii.item_description, 1, 100),
-                    ' ]'
-                ) AS item_label1,
-                 ii.item_code AS item_label
-            FROM tender_enquiry_item_info tei
-            LEFT JOIN item_info ii 
-                ON ii.item_id = tei.item_id 
-                AND ii.status = 'Active'
-            WHERE tei.tender_enquiry_id = ?
-            AND tei.status = 'Active'
-            ORDER BY tei.tender_enquiry_item_id ASC;
+            a.* 
+            FROM tender_enquiry_item_info a 
+            WHERE a.tender_enquiry_id = ?
+            AND a.status = 'Active'
+            ORDER BY a.tender_enquiry_item_id ASC;
 
         ";
         $q = $this->db->query($sql, [$tender_enquiry_id]);
@@ -692,6 +872,7 @@ class Tender extends CI_Controller
                 $tender_enquiry_item_ids = $this->input->post('tender_enquiry_item_id') ?? [];
                 $category_ids = $this->input->post('category_id') ?? [];
                 $item_ids = $this->input->post('item_id') ?? [];
+                $item_codes = $this->input->post('item_code') ?? [];
                 $item_descs = $this->input->post('item_desc') ?? [];
                 $uoms = $this->input->post('uom') ?? [];
                 $qtys = $this->input->post('qty') ?? [];
@@ -705,6 +886,7 @@ class Tender extends CI_Controller
                         'tender_enquiry_item_id' => $tender_enquiry_item_ids[$idx] ?? 0,
                         'category_id' => $category_ids[$idx] ?? 0,
                         'item_id' => $item_ids[$idx] ?? 0,
+                        'item_code' => $item_codes[$idx] ?? '',
                         'item_desc' => $item_descs[$idx] ?? '',
                         'uom' => $uoms[$idx] ?? '',
                         'qty' => $qtys[$idx] ?? 0,
@@ -726,7 +908,7 @@ class Tender extends CI_Controller
             } else {
                 $this->session->set_flashdata('success', 'Tender Quotation saved successfully.');
             }
-            redirect('tender-quotation-list/');
+            redirect('tender-quotation-edit/' . $tender_quotation_id);
         }
 
         // Get all companies
@@ -737,13 +919,25 @@ class Tender extends CI_Controller
             $data['company_opt'][$row['company_id']] = $row['company_name'];
         }
 
-        // Get GST options
-        $sql = "SELECT gst_id, gst_percentage FROM gst_info WHERE status = 'Active' ORDER BY gst_percentage ASC";
-        $query = $this->db->query($sql);
-        $data['gst_opt'] = [];
+        // Customers
+        $query = $this->db->query("
+        SELECT 
+        customer_id, 
+        customer_name 
+        FROM customer_info 
+        WHERE status = 'Active' 
+        ORDER BY customer_name");
         foreach ($query->result_array() as $row) {
-            $data['gst_opt'][$row['gst_id']] = $row['gst_percentage'];
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
         }
+
+        // // Get GST options
+        // $sql = "SELECT gst_id, gst_percentage FROM gst_info WHERE status = 'Active' ORDER BY gst_percentage ASC";
+        // $query = $this->db->query($sql);
+        // $data['gst_opt'] = [];
+        // foreach ($query->result_array() as $row) {
+        //     $data['gst_opt'][$row['gst_id']] = $row['gst_percentage'];
+        // }
 
         $this->load->view('page/tender/tender-quotation-add', $data);
     }
@@ -967,6 +1161,10 @@ class Tender extends CI_Controller
 
         if ($this->input->post('mode') == 'Edit') {
             $this->db->trans_start();
+            /* echo "<pre>";
+            print_r($_POST); 
+            echo "</pre>";
+            exit; */
 
             /* ---- 1. Header record ------------------------------------------------ */
             $header = [
@@ -987,16 +1185,17 @@ class Tender extends CI_Controller
             $this->db->update('tender_quotation_info', $header);
 
             /* ---- 2. DELETE old items and insert new ------------------------------ */
-            $this->db->where('tender_quotation_id', $tender_quotation_id);
-            $this->db->delete('tender_quotation_item_info');
+            // $this->db->where('tender_quotation_id', $tender_quotation_id);
+            // $this->db->delete('tender_quotation_item_info');
 
             $selected_idxs = $this->input->post('selected_items') ?? [];   // array of "i" values
 
             if (!empty($selected_idxs)) {
                 // All arrays are posted with the SAME order as the rows
+                $tender_quotation_item_ids = $this->input->post('tender_quotation_item_id') ?? [];
                 $tender_enquiry_item_ids = $this->input->post('tender_enquiry_item_id') ?? [];
-                $category_ids = $this->input->post('category_id') ?? [];
-                $item_ids = $this->input->post('item_id') ?? [];
+                 
+                $item_codes = $this->input->post('item_code') ?? [];
                 $item_descs = $this->input->post('item_desc') ?? [];
                 $uoms = $this->input->post('uom') ?? [];
                 $qtys = $this->input->post('qty') ?? [];
@@ -1005,11 +1204,12 @@ class Tender extends CI_Controller
                 $amounts = $this->input->post('amount') ?? [];
 
                 foreach ($selected_idxs as $idx) {
+                  //if($tender_quotation_item_ids[$idx]){  
                     $item_data = [
                         'tender_quotation_id' => $tender_quotation_id,
                         'tender_enquiry_item_id' => $tender_enquiry_item_ids[$idx] ?? 0,
-                        'category_id' => $category_ids[$idx] ?? 0,
-                        'item_id' => $item_ids[$idx] ?? 0,
+                       // 'category_id' => $category_ids[$idx] ?? 0,
+                        'item_code' => $item_codes[$idx] ?? 0,
                         'item_desc' => $item_descs[$idx] ?? '',
                         'uom' => $uoms[$idx] ?? '',
                         'qty' => $qtys[$idx] ?? 0,
@@ -1020,7 +1220,27 @@ class Tender extends CI_Controller
                         'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                         'created_date' => date('Y-m-d H:i:s')
                     ];
-                    $this->db->insert('tender_quotation_item_info', $item_data);
+
+                    if (!empty($tender_quotation_item_ids[$idx]) && $tender_quotation_item_ids[$idx] > 0) {
+                        // UPDATE existing item
+                        $this->db->where('tender_quotation_item_id', $tender_quotation_item_ids[$idx])
+                            ->update('tender_quotation_item_info', $item_data);
+
+                    } else {
+                        // INSERT new item
+                        $item_data['created_by'] = $this->session->userdata(SESS_HD . 'user_id');
+                        $item_data['created_date'] = date('Y-m-d H:i:s');
+
+                        $this->db->insert('tender_quotation_item_info', $item_data);
+                    }
+                    $miss_item_ids[] = $tender_quotation_item_ids[$idx];
+                     
+                }
+                // DELETE items which are not in the selected list
+                if (!empty($miss_item_ids)) {  
+                    $this->db->where('tender_quotation_id', $tender_quotation_id);
+                    $this->db->where_not_in('tender_quotation_item_id', $miss_item_ids);
+                    $this->db->update('tender_quotation_item_info', ['status' => 'Deleted' , 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'), 'updated_date' => date('Y-m-d H:i:s')]);
                 }
             }
 
@@ -1031,7 +1251,7 @@ class Tender extends CI_Controller
             } else {
                 $this->session->set_flashdata('success', 'Tender Quotation updated successfully.');
             }
-            redirect('tender-quotation-list');
+            redirect('tender-quotation-edit/' . $tender_quotation_id);
         }
 
         $this->load->library('pagination');
@@ -1146,14 +1366,21 @@ class Tender extends CI_Controller
         $data['header'] = $this->db->where('tender_quotation_id', $tender_quotation_id)->get('tender_quotation_info')->row_array();
         $sql = "
             SELECT
-                tqi.*,
-                ii.item_code
+                a.tender_quotation_item_id as tender_quotation_item_id,
+                a.tender_enquiry_item_id as tender_enquiry_item_id,
+                a.item_code,
+                a.item_desc,
+                a.uom,
+                a.qty,
+                a.rate,
+                a.gst as vat, 
+                a.amount
             FROM
-                tender_quotation_item_info tqi
-            LEFT JOIN item_info ii ON
-                tqi.item_id = ii.item_id AND ii.status = 'Active'
+                tender_quotation_item_info a 
             WHERE
-                tqi.tender_quotation_id = ? AND tqi.status != 'Delete'
+                a.tender_quotation_id = ? 
+                AND a.status = 'Active'
+                order by a.tender_quotation_item_id 
         ";
         $query = $this->db->query($sql, [$tender_quotation_id]);
         $data['items'] = $query->result_array();  // FIXED: row_array() → result_array()
@@ -1483,8 +1710,8 @@ class Tender extends CI_Controller
 
             if (!empty($selected_idxs)) {
                 $tender_quotation_item_ids = $this->input->post('tender_quotation_item_id') ?? [];
-                $category_ids = $this->input->post('category_id') ?? [];
-                $item_ids = $this->input->post('item_id') ?? [];
+                 
+                $item_codes = $this->input->post('item_code') ?? [];
                 $item_descs = $this->input->post('item_desc') ?? [];
                 $uoms = $this->input->post('uom') ?? [];
                 $qtys = $this->input->post('qty') ?? [];
@@ -1495,9 +1722,8 @@ class Tender extends CI_Controller
                 foreach ($selected_idxs as $idx) {
                     $item_data = [
                         'tender_po_id' => $tender_po_id,
-                        'tender_quotation_item_id' => $tender_quotation_item_ids[$idx] ?? 0,
-                        'category_id' => $category_ids[$idx] ?? 0,
-                        'item_id' => $item_ids[$idx] ?? 0,
+                        'tender_quotation_item_id' => $tender_quotation_item_ids[$idx] ?? 0, 
+                        'item_code' => $item_codes[$idx] ?? '',
                         'item_desc' => $item_descs[$idx] ?? '',
                         'uom' => $uoms[$idx] ?? '',
                         'qty' => $qtys[$idx] ?? 0,
@@ -1520,7 +1746,7 @@ class Tender extends CI_Controller
             } else {
                 $this->session->set_flashdata('success', 'Tender PO saved successfully.');
             }
-            redirect('customer-tender-po-list/');
+            redirect('customer-tender-po-edit/' . $tender_po_id);
         }
 
         // Get all companies
@@ -1529,6 +1755,18 @@ class Tender extends CI_Controller
         $data['company_opt'] = [];
         foreach ($query->result_array() as $row) {
             $data['company_opt'][$row['company_id']] = $row['company_name'];
+        }
+
+        // Customers
+        $query = $this->db->query("
+        SELECT 
+        customer_id, 
+        customer_name 
+        FROM customer_info 
+        WHERE status = 'Active' 
+        ORDER BY customer_name");
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
         }
 
         // Get GST options
@@ -1584,8 +1822,10 @@ class Tender extends CI_Controller
 
             // Preload all tender_quotation_item_ids posted (may be sparse due to checkboxes)
             $tender_quotation_item_ids = $this->input->post('tender_quotation_item_id') ?: [];
-            $category_ids = $this->input->post('category_id') ?: [];
-            $item_ids = $this->input->post('item_id') ?: [];
+            $tender_po_item_ids = $this->input->post('tender_po_item_id') ?: [];
+           // $category_ids = $this->input->post('category_id') ?: [];
+           // $item_ids = $this->input->post('item_id') ?: [];
+            $item_codes = $this->input->post('item_code') ?: [];
             $item_descs = $this->input->post('item_desc') ?: [];
             $uoms = $this->input->post('uom') ?: [];
             $qtys = $this->input->post('qty') ?: [];
@@ -1595,11 +1835,13 @@ class Tender extends CI_Controller
 
             foreach ($selected_idxs as $idx) {
                 // Get existing PO item ID if it exists (from hidden field)
-                $existing_po_item_id = $this->input->post('tender_po_item_id_' . $idx);
+                $existing_po_item_id =  $tender_po_item_ids[$idx];
 
                 if ($existing_po_item_id) {
                     // UPDATE existing item
                     $item_data = [
+                        'item_code' => $item_codes[$idx] ?? 0,
+                        'item_desc' => $item_descs[$idx] ?? '',
                         'rate' => $rates[$idx] ?? 0,
                         'gst' => $gsts[$idx] ?? 0,
                         'amount' => $amounts[$idx] ?? 0,
@@ -1614,9 +1856,8 @@ class Tender extends CI_Controller
                     // INSERT new item
                     $item_data = [
                         'tender_po_id' => $tender_po_id,
-                        'tender_quotation_item_id' => $tender_quotation_item_ids[$idx] ?? 0,
-                        'category_id' => $category_ids[$idx] ?? 0,
-                        'item_id' => $item_ids[$idx] ?? 0,
+                        'tender_quotation_item_id' => $tender_quotation_item_ids[$idx] ?? 0, 
+                        'item_code' => $item_codes[$idx] ?? 0,
                         'item_desc' => $item_descs[$idx] ?? '',
                         'uom' => $uoms[$idx] ?? '',
                         'qty' => $qtys[$idx] ?? 0,
@@ -1626,7 +1867,9 @@ class Tender extends CI_Controller
                         'po_itm_status' => 'Pending',
                         'status' => 'Active',
                         'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
-                        'created_date' => date('Y-m-d H:i:s')
+                        'created_date' => date('Y-m-d H:i:s'),
+                        'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                        'updated_date' => date('Y-m-d H:i:s')
                     ];
                     $this->db->insert('tender_po_item_info', $item_data);
                     $new_id = $this->db->insert_id();
@@ -1649,7 +1892,7 @@ class Tender extends CI_Controller
             } else {
                 $this->session->set_flashdata('success', ' Tender PO updated successfully.');
             }
-            redirect('customer-tender-po-list');
+            redirect('customer-tender-po-edit/' . $tender_po_id);
         }
 
         // ———————— Load dropdown options ————————
@@ -1728,72 +1971,25 @@ class Tender extends CI_Controller
         $quotation_items = [];
         if ($tender_quotation_id) {
             $sql = "SELECT 
-                    tqi.tender_quotation_item_id,
-                    tqi.category_id,
-                    ci.category_name,
-                    tqi.item_id,
-                    ii.item_name,
-                    tqi.item_desc,
-                    ii.item_code,
-                    tqi.uom,
-                    tqi.qty,
-                    tqi.rate AS default_rate,
-                    tqi.gst AS default_gst,
-                    tqi.amount AS default_amount
-                FROM tender_quotation_item_info tqi
-                LEFT JOIN category_info ci ON tqi.category_id = ci.category_id
-                LEFT JOIN item_info ii ON tqi.item_id = ii.item_id
-                WHERE tqi.tender_quotation_id = ? AND tqi.status = 'Active'
-                ORDER BY tqi.tender_quotation_item_id ASC";
-            $query = $this->db->query($sql, [$tender_quotation_id]);
+                    a.tender_po_item_id,
+                    a.tender_quotation_item_id,  
+                    a.item_code,
+                    a.item_desc,
+                    a.uom,
+                    a.qty,
+                    a.rate,
+                    a.gst as vat,
+                    a.amount
+                FROM tender_po_item_info a 
+                WHERE a.tender_po_id = ? AND a.status = 'Active'
+                ORDER BY a.tender_po_item_id ASC";
+            $query = $this->db->query($sql, [$tender_po_id]);
             $quotation_items = $query->result_array();
+
+             $data['merged_items']  = $quotation_items;
         }
 
-        // Fetch already saved items for this PO
-        $saved_items = $this->db
-            ->where('tender_po_id', $tender_po_id)
-            ->where('status !=', 'Delete')
-            ->get('tender_po_item_info')
-            ->result_array();
-
-        // Build map: tender_quotation_item_id → saved item data
-        $saved_map = [];
-        foreach ($saved_items as $item) {
-            $saved_map[$item['tender_quotation_item_id']] = $item;
-        }
-
-        // Merge: For each quotation item, attach saved data (if exists)
-        $data['merged_items'] = [];
-        foreach ($quotation_items as $qi) {
-            $tqi_id = $qi['tender_quotation_item_id'];
-            $is_saved = isset($saved_map[$tqi_id]);
-
-            $merged = [
-                // Quotation defaults
-                'tender_quotation_item_id' => $qi['tender_quotation_item_id'],
-                'category_id' => $qi['category_id'],
-                'category_name' => $qi['category_name'],
-                'item_id' => $qi['item_id'],
-                'item_name' => $qi['item_name'],
-                'item_code' => $qi['item_code'],
-                'item_desc' => $is_saved ? $saved_map[$tqi_id]['item_desc'] : $qi['item_desc'],
-                'uom' => $qi['uom'],
-                'qty' => $qi['qty'],
-                'default_rate' => $qi['default_rate'],
-                'default_gst' => $qi['default_gst'],
-                'default_amount' => $qi['default_amount'],
-                // Saved overrides (if exists)
-                'saved' => $is_saved,
-                'tender_po_item_id' => $is_saved ? $saved_map[$tqi_id]['tender_po_item_id'] : null,
-                'rate' => $is_saved ? $saved_map[$tqi_id]['rate'] : $qi['default_rate'],
-                'gst' => $is_saved ? $saved_map[$tqi_id]['gst'] : $qi['default_gst'],
-                'amount' => $is_saved ? $saved_map[$tqi_id]['amount'] : $qi['default_amount'],
-            ];
-            $data['merged_items'][] = $merged;
-        }
-
-        // Optional: Also include items in PO not from this quotation (legacy), but usually not needed.
-        // You may skip unless multi-quotation POs are allowed.
+       
 
         $this->load->view('page/tender/customer-tender-po-edit', $data);
     }
@@ -2086,6 +2282,18 @@ class Tender extends CI_Controller
         $data['company_opt'] = [];
         foreach ($query->result_array() as $row) {
             $data['company_opt'][$row['company_id']] = $row['company_name'];
+        }
+
+         // Customers
+        $query = $this->db->query("
+        SELECT 
+        customer_id, 
+        customer_name 
+        FROM customer_info 
+        WHERE status = 'Active' 
+        ORDER BY customer_name");
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
         }
 
         // Get GST options
@@ -2704,6 +2912,18 @@ class Tender extends CI_Controller
             $data['company_opt'][$row['company_id']] = $row['company_name'];
         }
 
+         // Customers
+        $query = $this->db->query("
+        SELECT 
+        customer_id, 
+        customer_name 
+        FROM customer_info 
+        WHERE status = 'Active' 
+        ORDER BY customer_name");
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
         // Get GST options
         $sql = "SELECT gst_id, gst_percentage FROM gst_info WHERE status = 'Active' ORDER BY gst_percentage ASC";
         $query = $this->db->query($sql);
@@ -3291,23 +3511,17 @@ class Tender extends CI_Controller
 
         $sql = "
             SELECT 
-                tqi.tender_quotation_item_id,
-                tqi.category_id,
-                tqi.item_id,
-                ci.category_name,
-                ii.item_name,
+                tqi.tender_quotation_item_id, 
                 tqi.item_desc,
-                ii.item_code,
+                tqi.item_code,
                 tqi.uom,
                 tqi.qty,
                 tqi.rate,
-                tqi.gst,
+                tqi.gst as vat,
                 tqi.amount
-            FROM tender_quotation_item_info tqi
-            LEFT JOIN category_info ci ON tqi.category_id = ci.category_id
-            LEFT JOIN item_info ii ON tqi.item_id = ii.item_id
+            FROM tender_quotation_item_info tqi 
             WHERE tqi.tender_quotation_id = ?
-                AND tqi.status = 'Active'
+            AND tqi.status = 'Active'
             ORDER BY tqi.tender_quotation_item_id ASC";
 
         $query = $this->db->query($sql, [$tender_quotation_id]);
@@ -3628,7 +3842,7 @@ class Tender extends CI_Controller
             LEFT JOIN customer_info AS c ON a.customer_id = c.customer_id AND c.status = 'Active'
             WHERE a.company_id = ? AND a.customer_id = ? AND a.status = 'Active'
             and a.tender_status = 'Won'
-            ORDER BY a.tender_enquiry_id, a.enquiry_no ASC
+            ORDER BY a.tender_enquiry_id desc, a.enquiry_no ASC
         ";
         $query = $this->db->query($sql, [$company_id, $customer_id]);
         $result = [];
@@ -3641,7 +3855,7 @@ class Tender extends CI_Controller
         echo json_encode($result);
     }
 
-    public function item_search()
+    public function item_search_old()
     {
         $term = $this->input->post('search');
 
@@ -3669,6 +3883,271 @@ class Tender extends CI_Controller
 
         echo json_encode($data);
     }
+
+
+    public function item_search()
+    {
+        $term = $this->input->post('search');
+
+
+        $sql = "
+           
+            select 
+            p.* 
+            from 
+            (
+                (
+                select 
+                'Customer PO' as tbl,
+                a.po_date as po_date,
+                b.item_code,
+                b.item_desc,
+                b.uom 
+                from customer_tender_po_info as a
+                left join tender_po_item_info as b on b.tender_po_id = a.tender_po_id 
+                where a.`status` = 'Active'
+                and b.`status` = 'Active'
+                and ( b.item_code like '%" . $this->db->escape_like_str($term) . "%' or b.item_desc like '%" . $this->db->escape_like_str($term) . "%' )
+                order by b.item_code asc , a.po_date  desc
+                )  union all (
+                select 
+                'Vendor PO' as tbl,
+                q.po_date as po_date,
+                w.item_code,
+                w.item_desc,
+                w.uom 
+                from vendor_po_info as q 
+                left join vendor_po_item_info as w on w.vendor_po_id = q.vendor_po_id
+                where q.`status` = 'Active'
+                and w.`status` = 'Active'
+                and ( w.item_code like '%" . $this->db->escape_like_str($term) . "%' or w.item_desc like '%" . $this->db->escape_like_str($term) . "%' )
+                order by w.item_code , q.po_date desc
+                )
+            ) as p
+            order by p.tbl , p.item_code , p.po_date desc 
+        ";
+
+        $query = $this->db->query($sql);
+
+        $result = [];
+        
+        /* $template = '<div class="text-md" style="border:1px solid #ddd; padding:2px; margin-bottom:2px;">
+                        <span class="label label-info">W0001</span>
+                        <span class="label label-warning">TBL</span> 
+                        <span class="label label-success">Date</span> 
+                        <br>
+                        <p class="text-info">Desc</p>
+                    </div>'; */
+          foreach ($query->result() as $row) {
+            $result[] = [
+                'label' => $row->item_code . ' : [ ' . substr($row->item_desc, 1, 100) . ' ]',       // what user sees
+                /*'label1' => '<div id="ctnt_srch" class="text-md" style="border:1px solid #ddd; padding:2px; margin-bottom:2px;">
+                                    <span class="label label-info">'. $row->item_code .'</span>
+                                    <span class="label label-warning">'. $row->tbl .'</span> 
+                                    <span class="label label-success">'. $row->po_date .'</span> 
+                                    <br>
+                                    <p class="text-info">'. $row->item_desc .'</p>
+                                </div>',    */   // what user sees 
+                'value' => $row->item_code,        // filled in textbox
+                'desc' => $row->item_desc,
+                'uom' => $row->uom,
+                'category_id' => '0',
+                'id' => '0'         // optional
+            ];
+        }  
+        echo json_encode($result);
+
+
+         
+    }
+
+    public function item_search_v2()
+    {
+        $term = $this->input->post('search');
+        $srch_typ = $this->input->post('srch_typ');
+
+        if($srch_typ == 'desc') {
+        $sql = "
+           
+            select 
+            p.* 
+            from 
+            (
+                (
+                select 
+                'Customer PO' as tbl,
+                a.po_date as po_date,
+                b.item_code,
+                b.item_desc,
+                b.uom 
+                from customer_tender_po_info as a
+                left join tender_po_item_info as b on b.tender_po_id = a.tender_po_id 
+                where a.`status` = 'Active'
+                and b.`status` = 'Active'
+                and ( b.item_code like '%" . $this->db->escape_like_str($term) . "%' )
+                order by b.item_code asc , a.po_date  desc
+                )  union all (
+                select 
+                'Vendor PO' as tbl,
+                q.po_date as po_date,
+                w.item_code,
+                w.item_desc,
+                w.uom 
+                from vendor_po_info as q 
+                left join vendor_po_item_info as w on w.vendor_po_id = q.vendor_po_id
+                where q.`status` = 'Active'
+                and w.`status` = 'Active'
+                and ( w.item_desc like '%" . $this->db->escape_like_str($term) . "%' )
+                order by w.item_code , q.po_date desc
+                ) union all (
+                select 
+                'Tender Enquiry' as tbl,
+                a.enquiry_date as po_date,
+                b.item_code,
+                b.item_desc,
+                b.uom 
+                from tender_enquiry_info as a
+                left join tender_enquiry_item_info as b on b.tender_enquiry_id = a.tender_enquiry_id
+                where a.`status` = 'Active'
+                and b.`status` = 'Active'
+                and (  b.item_desc like '%" . $this->db->escape_like_str($term) . "%' )
+                order by b.item_code asc,  a.enquiry_date desc 
+                ) union all (
+                select 
+                'Tender Quotation' as tbl,
+                a.quote_date as po_date,
+                b.item_code,
+                b.item_desc,
+                b.uom 
+                from tender_quotation_info as a
+                left join tender_quotation_item_info as b on b.tender_quotation_id = a.tender_quotation_id
+                where a.`status` = 'Active'
+                and b.`status` = 'Active'
+                and ( b.item_desc like '%" . $this->db->escape_like_str($term) . "%' )
+                order by b.item_code asc,  a.quote_date  desc 
+                )
+            ) as p
+            order by p.tbl , p.item_code , p.po_date desc 
+        ";
+        } else {   
+            
+            $sql = "
+           
+            select 
+            p.* 
+            from 
+            (
+                (
+                select 
+                'Customer PO' as tbl,
+                a.po_date as po_date,
+                b.item_code,
+                b.item_desc,
+                b.uom 
+                from customer_tender_po_info as a
+                left join tender_po_item_info as b on b.tender_po_id = a.tender_po_id 
+                where a.`status` = 'Active'
+                and b.`status` = 'Active'
+                and ( b.item_code like '%" . $this->db->escape_like_str($term) . "%')
+                order by b.item_code asc , a.po_date  desc
+                )  union all (
+                select 
+                'Vendor PO' as tbl,
+                q.po_date as po_date,
+                w.item_code,
+                w.item_desc,
+                w.uom 
+                from vendor_po_info as q 
+                left join vendor_po_item_info as w on w.vendor_po_id = q.vendor_po_id
+                where q.`status` = 'Active'
+                and w.`status` = 'Active'
+                and ( w.item_code like '%" . $this->db->escape_like_str($term) . "%' )
+                order by w.item_code , q.po_date desc
+                ) union all (
+                select 
+                'Tender Enquiry' as tbl,
+                a.enquiry_date as po_date,
+                b.item_code,
+                b.item_desc,
+                b.uom 
+                from tender_enquiry_info as a
+                left join tender_enquiry_item_info as b on b.tender_enquiry_id = a.tender_enquiry_id
+                where a.`status` = 'Active'
+                and b.`status` = 'Active'
+                and ( b.item_code like '%" . $this->db->escape_like_str($term) . "%' )
+                order by b.item_code asc,  a.enquiry_date desc 
+                ) union all (
+                select 
+                'Tender Quotation' as tbl,
+                a.quote_date as po_date,
+                b.item_code,
+                b.item_desc,
+                b.uom 
+                from tender_quotation_info as a
+                left join tender_quotation_item_info as b on b.tender_quotation_id = a.tender_quotation_id
+                where a.`status` = 'Active'
+                and b.`status` = 'Active'
+                and ( b.item_code like '%" . $this->db->escape_like_str($term) . "%' )
+                order by b.item_code asc,  a.quote_date  desc 
+                )
+            ) as p
+            order by p.tbl , p.item_code , p.po_date desc 
+        ";
+        }
+
+        $query = $this->db->query($sql);
+
+        $result = [];
+        $result = $query->result_array(); 
+
+        echo json_encode($result);
+
+
+         
+    }
+
+    public function tender_enquiry_id_search()
+    {
+        $term = $this->input->post('search');
+
+
+        $sql = "      
+            SELECT 
+            concat(a.tender_enquiry_id , ' || ', ifnull(b.company_code,'') , ' || ', ifnull(a.company_sno,'') ,  ' || ' , ifnull(c.customer_code,'') ,  ' || ' , ifnull(a.customer_sno,''),  ' || ' , ifnull(a.enquiry_no,'')) as tender_ref,
+            concat(ifnull(b.company_code,'') , '/', ifnull(a.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(a.customer_sno,''),  '/' , ifnull(a.enquiry_no,'')) as enq1,
+            concat(ifnull(b.company_code,'') , '/', ifnull(a.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(a.customer_sno,''),  '/' , DATE_FORMAT(a.enquiry_date,'%Y') ) as enq,
+            a.company_id,
+            a.customer_id,
+            a.tender_enquiry_id,
+            a.enquiry_no
+            FROM tender_enquiry_info AS a
+            LEFT JOIN company_info AS b ON a.company_id = b.company_id AND b.status = 'Active'
+            LEFT JOIN customer_info AS c ON a.customer_id = c.customer_id AND c.status = 'Active'
+            WHERE  a.`status` = 'Active' 
+            having enq like '%" . $this->db->escape_like_str($term) . "%'
+            ORDER BY a.tender_enquiry_id, a.enquiry_no ASC  
+        ";
+        //and a.enquiry_no like '%" . $this->db->escape_like_str($term) . "%'
+
+        $query = $this->db->query($sql);
+
+        $result = []; 
+       
+          foreach ($query->result() as $row) {
+            $result[] = [
+                'label' => $row->enq  ,       // what user sees 
+                'value' =>   $row->enq . ' [ ' . $row->enquiry_no . ' ]',        // filled in textbox
+                'company_id' => $row->company_id,
+                'customer_id' => $row->customer_id,
+                'tender_enquiry_id' => $row->tender_enquiry_id
+            ];
+        }  
+        echo json_encode($result);
+
+
+         
+    }
+
 
 
 

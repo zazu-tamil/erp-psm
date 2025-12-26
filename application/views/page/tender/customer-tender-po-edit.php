@@ -38,12 +38,12 @@
 
                         <div class="form-group col-md-3">
                             <label for="srch_tender_enquiry_id">Tender Enquiry No</label>
-                            <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select'] + $tender_enquiry_opt, set_value('srch_tender_enquiry_id', $header['tender_enquiry_id']), 'id="srch_tender_enquiry_id" class="form-control"'); ?>
+                            <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select'] + $tender_enquiry_opt, set_value('srch_tender_enquiry_id', $header['tender_enquiry_id']), 'id="srch_tender_enquiry_id" class="form-control readonly-select" '); ?>
                         </div>
 
                         <div class="form-group col-md-3">
                             <label for="tender_quotation_id">Quotation No</label>
-                            <?php echo form_dropdown('tender_quotation_id', ['' => 'Select Quotation'] + $quotation_opt, set_value('tender_quotation_id', $header['tender_quotation_id']), 'id="srch_quotation_no" class="form-control"'); ?>
+                            <?php echo form_dropdown('tender_quotation_id', ['' => 'Select Quotation'] + $quotation_opt, set_value('tender_quotation_id', $header['tender_quotation_id']), 'id="srch_quotation_no" class="form-control readonly-select" '); ?>
                             <input type="hidden" name="tender_quotation_id" id="tender_quotation_id" value="<?php echo htmlspecialchars($header['tender_quotation_id']); ?>">
                         </div>
 
@@ -135,6 +135,21 @@
                 <fieldset class="mt-4">
                     <legend class="text-light-blue"><i class="fa fa-list"></i> Item Details</legend>
 
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                                <label for="btnExport">Click Here - Export as Excel File</label> <br>
+                                <button id="btnExport" type="button" class="btn btn-success" value="Tender-PO-<?php echo htmlspecialchars($header['customer_po_no']); ?>">Export Excel & Download</button>
+                        </div>
+                        <div class="col-md-4 form-group ">
+                            <label for="excelFile">Choose Excel File to Import</label>
+                            <input type="file" class="form-control" id="excelFile" accept=".xls,.xlsx"
+                                placeholder="Choose Excel File to Import">
+                        </div> 
+                        <div class="col-md-4 form-group ">
+                        <i class="text-red">Note: <br>Don't change <b class="text-info">[ tender_po_item_id , tender_quotation_item_id ] </b> column its software referance Ids in excel file Whlie importing</i>
+                        </div>     
+                    </div>
+
                     <div id="item_container">
                         <?php if (!empty($merged_items)): ?>
                             <?php foreach ($merged_items as $i => $row): ?>
@@ -142,11 +157,7 @@
 
                                     <h5 class="text-primary mb-3">
                                         Item <?php echo $i + 1; ?>
-                                        <?php if ($row['saved']): ?> 
-                                            <span class="badge bg-success">Saved</span>
-                                        <?php else: ?>
-                                            <span class="badge bg-warning">New</span>
-                                        <?php endif; ?>
+                                        
                                     </h5>
 
                                     <div class="row">
@@ -155,15 +166,17 @@
                                         <div class="col-md-1 d-flex align-items-center justify-content-center">
                                             <input type="checkbox" class="form-check-input item-check" 
                                                 name="selected_items[]" value="<?php echo $i; ?>"
-                                                <?php echo $row['saved'] ? 'checked' : ''; ?>>
+                                                checked >
+                                                 <input type="hidden" name="tender_quotation_item_id[]" value="<?php echo $row['tender_quotation_item_id']; ?>"> 
+                                                <input type="hidden" name="tender_po_item_id[]>"  value="<?php echo $row['tender_po_item_id']; ?>"> 
+
                                         </div>
 
                                         <!-- Category + Item -->
                                         <div class="col-md-3"> 
                                             <div class="form-group">
                                                 <label>Item Code</label>
-                                                <input type="text" class="form-control" 
-                                                    value="<?php echo htmlspecialchars($row['item_code']); ?>" readonly>
+                                                <input type="text" class="form-control item_code" name="item_code[]" value="<?php echo htmlspecialchars($row['item_code']); ?>" readonly>
                                             </div>
                                         </div>
 
@@ -171,7 +184,7 @@
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label>Item Description</label>
-                                                <textarea name="item_desc[]" class="form-control" rows="3"><?php echo htmlspecialchars($row['item_desc']); ?></textarea>
+                                                <textarea name="item_desc[]" class="form-control item_desc" rows="3"><?php echo htmlspecialchars($row['item_desc']); ?></textarea>
                                             </div>
                                         </div>
 
@@ -182,7 +195,7 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label>UOM</label>
-                                                        <input type="text" name="uom[]" class="form-control"
+                                                        <input type="text" name="uom[]" class="form-control uom"
                                                             value="<?php echo htmlspecialchars($row['uom']); ?>" readonly>
                                                     </div>
                                                 </div>
@@ -206,15 +219,8 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label>VAT %</label>
-                                                        <select name="gst[]" class="form-control vat-dropdown">
-                                                            <option value="">Select</option>
-                                                            <?php foreach($gst_opt as $gid => $pct): ?>
-                                                                <option value="<?= $pct; ?>" 
-                                                                    <?php echo (abs($row['gst'] - $pct) < 0.01) ? 'selected' : ''; ?>>
-                                                                    <?= $pct; ?>%
-                                                                </option>
-                                                            <?php endforeach; ?>
-                                                        </select>
+                                                        <input type="number" step="0.01" name="gst[]" class="form-control vat-dropdown" value="<?php echo $row['vat']; ?>">
+                                                       
                                                     </div>
                                                 </div>
 
@@ -230,17 +236,8 @@
                                         </div> <!-- col-md-4 -->
 
                                     </div> <!-- row -->
-
-                                    <!-- Hidden fields -->
-                                    <input type="hidden" name="tender_quotation_item_id[]" value="<?php echo $row['tender_quotation_item_id']; ?>">
-                                    <input type="hidden" name="category_id[]" value="<?php echo $row['category_id']; ?>">
-                                    <input type="hidden" name="item_id[]" value="<?php echo $row['item_id']; ?>">
-
-                                    <?php if ($row['saved'] && $row['tender_po_item_id']): ?>
-                                        <input type="hidden" name="tender_po_item_id_<?php echo $i; ?>" 
-                                            value="<?php echo $row['tender_po_item_id']; ?>">
-                                    <?php endif; ?>
-
+ 
+                                   
                                 </div> <!-- item-card -->
                             <?php endforeach; ?>
 
@@ -250,17 +247,14 @@
                     </div>
 
                     <!-- Total Section -->
-                    <div class="total-section mt-5 mb-4">
-                        <div class="total-card shadow-lg">
-                            <div class="total-content d-flex align-items-center justify-content-between">
-                                <div class="total-icon">
-                                    <i class="fa fa-calculator text-success"></i>
-                                </div>
-                                <div class="total-text text-end">
-                                    <span class="label">Total Amount:</span>
-                                    <span class="value">₹ <span id="total_amount">0.00</span></span>
-                                </div>
-                            </div>
+                     
+                   <div class="total-wrapper mt-4 mb-4">
+                        <div class="total-box shadow-sm">
+                            <h5 class="mb-0">
+                                <i class="fa fa-calculator text-success me-2"></i>
+                                <strong>Total Amount:</strong>
+                                <span class="text-primary"><span id="total_amount">0.00</span></span>
+                            </h5>
                         </div>
                     </div>
 

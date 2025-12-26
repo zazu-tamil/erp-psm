@@ -9,6 +9,16 @@
 </section>
 
 <section class="content">
+    <?php if ($this->session->flashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible auto-hide">
+            <?php echo $this->session->flashdata('success'); ?>
+        </div>
+    <?php endif; ?>
+    <?php if ($this->session->flashdata('error')): ?>
+        <div class="alert alert-danger alert-dismissible auto-hide">
+            <?php echo $this->session->flashdata('error'); ?>
+        </div>
+    <?php endif; ?>
     <div class="box box-info">
         <div class="box-header with-border">
             <h3 class="box-title"><i class="fa fa-edit"></i> Edit Vendor Quotation</h3>
@@ -28,32 +38,32 @@
                     <div class="row">
                         <div class="form-group col-md-4">
                             <label>Company <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_company_id', $company_opt, $header['company_id'], 'id="srch_company_id" class="form-control" required readonly'); ?>
+                            <?php echo form_dropdown('srch_company_id', $company_opt, $header['company_id'], 'id="srch_company_id" class="form-control readonly-select" required'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
                             <label>Customer <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_customer_id', $customer_opt, $header['customer_id'], 'id="srch_customer_id" class="form-control" required readonly'); ?>
+                            <?php echo form_dropdown('srch_customer_id', $customer_opt, $header['customer_id'], 'id="srch_customer_id" class="form-control readonly-select" required readonly'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
                             <label>Tender Enquiry No <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_tender_enquiry_id', $tender_enquiry_opt, $header['tender_enquiry_id'], 'id="srch_tender_enquiry_id" class="form-control" required readonly'); ?>
+                            <?php echo form_dropdown('srch_tender_enquiry_id', $tender_enquiry_opt, $header['tender_enquiry_id'], 'id="srch_tender_enquiry_id" class="form-control readonly-selects" required readonly'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
                             <label>Vendor Name <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_vendor_id', $vendor_opt, $header['vendor_id'], 'id="srch_vendor_id" class="form-control" required readonly'); ?>
+                            <?php echo form_dropdown('srch_vendor_id', $vendor_opt, $header['vendor_id'], 'id="srch_vendor_id" class="form-control readonly-select" required readonly'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
                             <label>Vendor Rate Enquiry No <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_vendor_rate_enquiry_id', $vendor_rate_enquiry_opt, $header['vendor_rate_enquiry_id'], 'id="srch_vendor_rate_enquiry_id" class="form-control" required readonly'); ?>
+                            <?php echo form_dropdown('srch_vendor_rate_enquiry_id', $vendor_rate_enquiry_opt, $header['vendor_rate_enquiry_id'], 'id="srch_vendor_rate_enquiry_id" class="form-control readonly-select" required readonly'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
                             <label>Contact Person</label>
-                            <?php echo form_dropdown('srch_vendor_contact_person_id', $vendor_contact_opt, $header['vendor_contact_person_id'], 'id="srch_vendor_contact_id" class="form-control" readonly'); ?>
+                            <?php echo form_dropdown('srch_vendor_contact_person_id', $vendor_contact_opt, $header['vendor_contact_person_id'], 'id="srch_vendor_contact_id" class="form-control readonly-select" readonly'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
@@ -82,10 +92,10 @@
                                 <span class="input-group-btn">
                                     <span class="btn btn-info btn-file">
                                         <?php if (!empty($header['quote_doc_upload'])): ?>
-                                            <a href="<?php echo base_url($header['quote_doc_upload']); ?>" target="_blank"
-                                                style="margin-top:6px; color:#fff;">
-                                                View Document
-                                            </a>
+                                        <a href="<?php echo base_url($header['quote_doc_upload']); ?>" target="_blank"
+                                            style="margin-top:6px; color:#fff;">
+                                            View Document
+                                        </a>
                                         <?php endif; ?>
                                     </span>
                                 </span>
@@ -97,8 +107,10 @@
 
                         <div class="form-group col-md-4">
                             <label>Status</label><br>
-                            <label class="radio-inline"><input type="radio" name="status" value="Active" <?php echo ($header['status'] == 'Active') ? 'checked' : ''; ?>> Active</label>
-                            <label class="radio-inline"><input type="radio" name="status" value="Inactive" <?php echo ($header['status'] == 'Inactive') ? 'checked' : ''; ?>> Inactive</label>
+                            <label class="radio-inline"><input type="radio" name="status" value="Active"
+                                    <?php echo ($header['status'] == 'Active') ? 'checked' : ''; ?>> Active</label>
+                            <label class="radio-inline"><input type="radio" name="status" value="Inactive"
+                                    <?php echo ($header['status'] == 'Inactive') ? 'checked' : ''; ?>> Inactive</label>
                         </div>
                     </div>
 
@@ -122,82 +134,86 @@
 
                 <fieldset class="mt-4">
                     <legend class="text-light-blue"><i class="fa fa-list"></i> Item Details</legend>
+
+                    <div class="cls_export"
+                        style="border:2px solid green; padding:10px; margin-bottom:15px; border-radius:10px; ">
+                        <div class="row">
+                            <div class="col-md-4 form-group">
+                                <label for="btnExport">Click Here - Export as Excel File</label> <br>
+                                <button id="btnExport" type="button" class="btn btn-success" value="Vendor-quote-<?php echo $header['quote_no']; ?>" >Export
+                                    Excel & Download</button>
+                            </div>
+                            <div class="col-md-4 form-group ">
+                                <label for="excelFile">Choose Excel File to Import</label>
+                                <input type="file" class="form-control" id="excelFile" accept=".xls,.xlsx"
+                                    placeholder="Choose Excel File to Import">
+                            </div>
+
+                        </div>
+                    </div>
                     <table class="table table-bordered table-sm">
                         <thead>
                             <tr>
-                                <th style="width:5%;">Select</th>
-                                <th style="width:20%;">Item Code</th>
+                                <th style="width:5%;">✔</th>
+                                <th style="width:5%;">Item Code</th>
                                 <th style="width:30%;">Description</th>
-                                <th style="width:5%;">UOM</th>
-                                <th style="width:10%;">Qty</th>
-                                <th style="width:10%;">Rate</th>
-                                <th style="width:10%;">VAT %</th>
-                                <th style="width:10%;">Amount</th>
+                                <th style="width:15%;" class="text-right">UOM & QTY</th>
+                                <th style="width:5%;" class="text-right">Rate</th>
+                                <th style="width:5%;" class="text-right">VAT %</th>
+                                <th style="width:10%;" class="text-right">Amount</th>
                             </tr>
                         </thead>
                         <tbody id="item_container">
                             <?php if (!empty($items)): ?>
-                                <?php $index = 0;
+                            <?php $index = 0;
                                 foreach ($items as $item): ?>
-                                    <tr class="item-row">
-                                        <td>
-                                            <input type="checkbox" class="form-check-input item-check" name="selected_items[]"
-                                                value="<?php echo $index; ?>" checked>
-                                        </td>
+                            <tr class="item-row">
+                                <td>
+                                    <input type="checkbox" class="form-check-input item-check" name="selected_items[]"
+                                        value="<?php echo $index; ?>" checked>
+                                    <input type="hidden" name="vendor_rate_enquiry_item_id[<?php echo $index; ?>]" value="<?php echo $item['vendor_rate_enquiry_item_id']; ?>">
+                                    <input type="hidden" name="vendor_quote_item_id[<?php echo $index; ?>]" value="<?php echo $item['vendor_quote_item_id']; ?>">
+                                </td>
 
-                                        <td>
-                                            <input type="text" class="form-control"
-                                                value="<?php echo htmlspecialchars($item['full_item_name']); ?>" readonly>
+                                <td>
+                                    <input type="text" class="form-control item_code" name="item_code[<?php echo $index; ?>]"  value="<?php echo htmlspecialchars($item['item_code']); ?>">
+                                </td>
+                                <td>
+                                    <textarea name="item_desc[<?php echo $index; ?>]" class="form-control" rows="2"  ><?php echo htmlspecialchars($item['item_desc']); ?></textarea>
+                                </td>
 
-                                            <input type="hidden" name="vendor_rate_enquiry_item_id[<?php echo $index; ?>]"
-                                                value="<?php echo $item['vendor_rate_enquiry_item_id']; ?>">
-                                            <input type="hidden" name="category_id[<?php echo $index; ?>]"
-                                                value="<?php echo $item['category_id']; ?>">
-                                            <input type="hidden" name="item_id[<?php echo $index; ?>]"
-                                                value="<?php echo $item['item_id']; ?>">
-                                        </td>
+                                <td>
+                                    <input type="text" name="uom[<?php echo $index; ?>]" class="form-control uom" value="<?php echo $item['uom']; ?>" >
+                                    <br>
+                                    <input type="number" step="0.01" name="qty[<?php echo $index; ?>]"  class="form-control qty" value="<?php echo $item['qty']; ?>" >
+                                </td>
 
-                                        <td>
-                                            <textarea name="item_desc[<?php echo $index; ?>]" class="form-control" rows="2"
-                                                readonly><?php echo htmlspecialchars($item['item_desc']); ?></textarea>
-                                        </td>
+                                <td>
+                                    <input type="number" step="0.01" name="rate[<?php echo $index; ?>]" class="form-control rate" value="<?php echo $item['rate']; ?>">
+                                </td>
 
-                                        <td>
-                                            <input type="text" name="uom[<?php echo $index; ?>]" class="form-control"
-                                                value="<?php echo $item['uom']; ?>" readonly>
-                                        </td>
+                                <td>
+                                    <input type="number" step="0.01" name="gst[<?php echo $index; ?>]" class="form-control gst" value="<?php echo $item['vat']; ?>">
+                                   
+                                </td>
 
-                                        <td>
-                                            <input type="number" step="0.01" name="qty[<?php echo $index; ?>]"
-                                                class="form-control qty-input" value="<?php echo $item['qty']; ?>" readonly>
-                                        </td>
+                                <td>
+                                    <input type="number" step="0.01" name="amount[<?php echo $index; ?>]" class="form-control amount" value="<?php echo $item['amount']; ?>"
+                                        readonly>
+                                </td>
 
-                                        <td>
-                                            <input type="number" step="0.01" name="rate[<?php echo $index; ?>]"
-                                                class="form-control rate-input" value="<?php echo $item['rate']; ?>">
-                                        </td>
-
-                                        <td>
-                                            <select name="gst[<?php echo $index; ?>]" class="form-control gst-select">
-                                                <option value="">Select</option>
-                                                <?php foreach ($gst_opt as $gst_val): ?>
-                                                    <option value="<?php echo $gst_val; ?>" <?= ($item['gst'] == $gst_val) ? 'selected' : ''; ?>>
-                                                        <?= $gst_val; ?>%
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                        </td>
-
-                                        <td>
-                                            <input type="number" step="0.01" name="amount[<?php echo $index; ?>]"
-                                                class="form-control amount-input" value="<?php echo $item['amount']; ?>"
-                                                readonly>
-                                        </td>
-
-                                    </tr>
-                                    <?php $index++; endforeach; ?>
+                            </tr>
+                            <?php $index++; endforeach; ?>
                             <?php endif; ?>
                         </tbody>
+                        <thead>
+                            <tr>
+                                <th colspan="6" class="text-right">Total</th>
+                                <th class="text-right">
+                                    <span class="value"> <span id="total_amount">0.00</span></span>
+                                </th>
+                            </tr>
+                        </thead>
                     </table>
                 </fieldset>
             </div>

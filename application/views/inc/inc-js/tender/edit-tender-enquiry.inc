@@ -6,6 +6,7 @@
   href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
 />
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
   .text-light-blue {
@@ -171,481 +172,143 @@
               `<option value="${c.customer_id}">${c.customer_name}</option>`
             );
           });
-          $("#item_rows").empty();
-          addEmptyRow();
+           
         },
         "json"
       );
     });
 
-    // Category → Item
-    $(document).on("change", ".category-select", function () {
-      const catId = $(this).val();
-      const $row = $(this).closest(".item-row");
-      const $item = $row.find(".item-select");
-
-      if (!catId) {
-        $item.html('<option value="">Select Item</option>');
-        return;
-      }
-
-      $.post(
-        "<?php echo site_url('tender/get_data'); ?>",
-        {
-          tbl: "get-category-item-list",
-          id: catId,
-        },
-        function (data) {
-          $item.html('<option value="">Select Item</option>');
-          $.each(data, function (i, item) {
-            $item.append(
-              `<option value="${item.item_id}">${item.item_name}</option>`
-            );
-          });
-        },
-        "json"
-      );
-    });
-
-    // Item → UOM + Description
-    $(document).on("change", ".item-select", function () {
-      const itemId = $(this).val();
-      const $row = $(this).closest(".item-row");
-      const $desc = $row.find('textarea[name="item_desc[]"]');
-      const $uom = $row.find('select[name="uom[]"]');
-
-      if (!itemId) {
-        $desc.val("");
-        $uom.val("");
-        return;
-      }
-
-      $.post(
-        "<?php echo site_url('tender/get_data'); ?>",
-        {
-          tbl: "get-uom-desc-from-item",
-          id: itemId,
-        },
-        function (data) {
-          if (data && data[0]) {
-            $desc.val(data[0].item_description || "");
-            $uom.val(data[0].uom || "");
-          }
-        },
-        "json"
-      );
-    });
-
-    // Initialize Autocomplete for the first row
-    initAutocomplete();
-
-    // Add More Button Click
-    $("#add_more").on("click", function () {
-      addEmptyRow();
-    });
-
+  
     // Remove Row
     $(document).on("click", ".remove-row", function () {
-      if ($(".item-row").length > 1) {
+      if ($(".item-row").length > 0) {
         $(this).closest(".item-row").remove();
       } else {
         alert("At least one item is required.");
       }
     });
 
-    // Add Empty Row
-    function addEmptyRow() {
-      let row = `
-        <div class="item-row">
+    
 
-            <div class="cat-item-block">
-                <input type="text" name="srch_item[]" class="form-control srch_item" autocomplete="off" placeholder="Search Item">
-                <input type="hidden" name="item_id[]" class="item_id">
-                <input type="hidden" name="category_id[]" class="category_id">
-            </div>
 
-            <div class="item-desc-block">
-                <textarea name="item_desc[]" class="form-control" rows="5" placeholder="Description"></textarea>
-            </div>
+    $(document).on("keyup", "#item_search_modal", function () {
+        let searchText = $(this).val().trim();
 
-            <div class="uom-block">
-                <?php echo form_dropdown('uom[]', ['' => '—'] + $uom_opt, '', 'class="form-control uom_select"'); ?>
-            </div>
-
-            <div class="qty-block">
-                <input type="number" step="0.01" name="qty[]" class="form-control" placeholder="Qty">
-            </div>
-
-            <div class="action-block">
-                <button type="button" class="btn btn-danger remove-row">
-                    <i class="fa fa-trash"></i>
-                </button>
-            </div>
-
-        </div>
-    `;
-
-      $("#item_rows").append(row);
-      initAutocomplete();
-    }
-
-    // Autocomplete Initialization
-    function initAutocomplete() {
-      $(".srch_item").autocomplete({
-        source: function (request, response) {
           $.ajax({
-            url: "<?php echo base_url('tender/item_search'); ?>",
-            type: "POST",
-            data: { search: request.term },
-            dataType: "json",
-            success: function (data) {
-              response(data);
-            },
+              url: "<?php echo base_url('tender/item_search_v2'); ?>",
+              type: "POST",
+              data: { search: searchText },
+              dataType: "json",
+              success: function (data) {
+
+                  let tbody = $("#item_search_table_modal tbody");
+                  tbody.empty(); // clear table
+
+                  if (data.length === 0) {
+                      tbody.append(`<tr><td colspan="5" class="text-center">No Records Found</td></tr>`);
+                      return;
+                  }
+
+                  $.each(data, function (i, item) {
+                      tbody.append(`
+                          <tr>
+                              <td>${item.item_code}</td>
+                              <td>${item.item_desc}</td>
+                              <td>${item.uom}</td>
+                              <td>${item.tbl}</td>
+                              <td>${item.po_date}</td>
+                              <td>
+                                  <button type="button" class="btn btn-success btn-sm select_item_btn"
+                                      data-item='${JSON.stringify(item)}'>
+                                      Select
+                                  </button>
+                              </td>
+                          </tr>
+                      `);
+                  });
+              }
           });
-        },
-
-        minLength: 1,
-
-        select: function (event, ui) {
-          let row = $(this).closest(".item-row");
-
-          $(this).val(ui.item.value);
-          row.find('textarea[name="item_desc[]"]').val(ui.item.desc);
-          row.find(".item_id").val(ui.item.id);
-          row.find(".category_id").val(ui.item.category_id);
-          row.find(".uom_select").val(ui.item.uom);
-
-          return false;
-        },
-      });
-    }
-
-    $('input[name="btn_add_customer"]').on("click", function (e) {
-      e.preventDefault();
-
-      // ---- REQUIRED FIELD VALIDATION ----
-      let customerName = $.trim($("#customer_name").val());
-      if (customerName === "") {
-        alert("Customer Name is required.");
-        $("#customer_name").focus();
-        return false;
-      }
-
-      let formData = $("#frmadd_Customer").serialize();
-
-      // Disable button
-      $('input[name="btn_add_customer"]')
-        .val("Saving...")
-        .prop("disabled", true);
-
-      $.ajax({
-        url: "<?php echo site_url('tender/ajax_add_master_inline'); ?>",
-        type: "POST",
-        data: formData,
-        dataType: "json",
-
-        success: function (response) {
-          if (response.status === "success") {
-            // Add newly created customer to dropdowns
-            $("#srch_customer_id")
-              .append(new Option(response.name, response.id, true, true))
-              .trigger("change");
-
-            $("#customer_id_two")
-              .append(new Option(response.name, response.id, true, true))
-              .trigger("change");
-
-            // Reset form
-            $("#frmadd_Customer")[0].reset();
-
-            // Auto-close modal smoothly
-            $("#add_customer").find(".close").trigger("click");
-
-            // Success alert
-            $("#zazualert").html(`
-                      <div class="alert alert-success sticky-notification" role="alert">
-                          <button type="button" class="close" data-dismiss="alert">&times;</button>
-                          <strong>Note:</strong>
-                          <div class="note-content">${response.message}</div>
-                      </div>
-                  `);
-          } else {
-            toastr.error(response.message || "Failed to add customer.");
-          }
-        },
-
-        error: function () {
-          toastr.error("Server error occurred.");
-        },
-
-        complete: function () {
-          $('input[name="btn_add_customer"]')
-            .val("Save")
-            .prop("disabled", false);
-        },
-      });
-    });
-
-    $('input[name="btn_add_brand"]').on("click", function (e) {
-      e.preventDefault();
-
-      var formData = $("#frmadd_Brand").serializeArray();
-
-      console.log(formData);
-
-      $.ajax({
-        url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
-        type: "POST",
-        data: formData,
-        dataType: "json",
-        beforeSend: function () {
-          $('input[name="btn_add_brand"]')
-            .val("Saving...")
-            .prop("disabled", true);
-        },
-        success: function (response) {
-          console.log(response);
-          if (response.status === "success") {
-            // Add new option to the dropdown dynamically
-            var newOption = new Option(response.name, response.id, true, true);
-            $("#brand_id").append(newOption).trigger("change");
-
-            // Reset form & close modal
-            $("#frmadd")[0].reset();
-            $("#add_customer").find(".close").trigger("click");
-
-            // Optional success alert
-            //toastr.success(response.message);
-            alert(response.message);
-          } else {
-            //toastr.error('Failed to add brand.');
-            alert("Failed to add brand.");
-          }
-        },
-        error: function (xhr, status, error) {
-          //toastr.error('Error: ' + error);
-          alert("Error: " + error);
-        },
-        complete: function () {
-          $('input[name="btn_add_brand"]').val("Save").prop("disabled", false);
-        },
-      });
-    });
-
- 
-
-    $('input[name="btn_add_customer_contact"]').on("click", function (e) {
-      e.preventDefault();
-
-      // Disable button (avoid double save)
-      $('input[name="btn_add_customer_contact"]')
-        .val("Saving...")
-        .prop("disabled", true);
-
-      var formData = $("#frmadd_Customer_Contact").serializeArray();
-
-      // Required validation
-      var contactName = $('input[name="contact_person_name"]').val().trim();
-      var customer_id = $("#customer_id_two").val(); // FIXED
-
-      if (contactName === "") {
-        alert("Contact Person Name is required.");
-        $('input[name="contact_person_name"]').focus();
-        enableButton();
-        return false;
-      }
-
-      if (!customer_id) {
-        alert("Customer Name is required.");
-        $("#customer_id_two").focus();
-        enableButton();
-        return false;
-      }
-
-      $.ajax({
-        url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
-        type: "POST",
-        data: formData,
-        dataType: "json",
-
-        success: function (response) {
-          if (response.status === "success") {
-            // Append newly added contact to dropdown
-            $("#srch_customer_contact_id")
-              .append(new Option(response.name, response.id, true, true))
-              .trigger("change");
-
-            // Reset form
-            $("#frmadd_Customer_Contact")[0].reset();
-
-            // Auto-close modal using close button (smooth fade)
-            $("#add_customer_contact_id").find(".close").trigger("click");
-
-            // Success alert
-            $("#zazualert").html(`
-                      <div class="alert alert-success sticky-notification" role="alert">
-                          <button type="button" class="close" data-dismiss="alert">&times;</button>
-                          <strong>Note:</strong>
-                          <div class="note-content">${response.message}</div>
-                      </div>
-                  `);
-          } else {
-            alert("Failed to add contact person.");
-          }
-        },
-
-        error: function (xhr, status, error) {
-          alert("Error: " + error);
-        },
-
-        complete: function () {
-          enableButton();
-        },
       });
 
-      // Function to restore the button state
-      function enableButton() {
-        $('input[name="btn_add_customer_contact"]')
-          .val("Save")
-          .prop("disabled", false);
-      }
-    });
+      $(document).on("click", ".select_item_btn", function () {
 
-    $('input[name="btn_add_category"]').on("click", function (e) {
-      e.preventDefault();
+            let item = $(this).data("item");
 
-      var formData = $("#frmadd_Category").serialize(); // simpler & cleaner
+            let row = `
 
-      $.ajax({
-        url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
-        type: "POST",
-        data: formData,
-        dataType: "json",
-        beforeSend: function () {
-          $('input[name="btn_add_category"]')
-            .val("Saving...")
-            .prop("disabled", true);
-        },
-        success: function (response) {
-          console.log(response);
+                <div class="item-row">
+                    <div class="cat-item-block"> 
+                        <input type="text" name="item_code[]" class="form-control item_code" value="${item.item_code}"> 
+                         
+                    </div>
+                    <div class="item-desc-block">
+                        <textarea name="item_desc[]" class="form-control" rows="5">${item.item_desc}</textarea>
+                    </div>
+                    <div class="uom-block"> 
+                         <input type="text"  name="uom[]" class="form-control" value="${item.uom}">
+                    </div>
+                    <div class="qty-block">
+                        <input type="number" step="0.01" name="qty[]" class="form-control" value="1">
+                    </div>
+                    <div class="action-block">
+                        <button type="button" class="remove-row"><i class="fa fa-trash"></i></button>
+                    </div>
+                </div> 
+            `;
 
-          if (response.status === "success") {
-            // Add new category to all dropdowns dynamically
-            $(".category-select").each(function () {
-              var exists = $(this).find(
-                "option[value='" + response.id + "']"
-              ).length;
-              if (!exists) {
-                var newOption = new Option(
-                  response.name,
-                  response.id,
-                  false,
-                  false
-                );
-                $(this).append(newOption);
-              }
-            });
+            $("#item_rows").append(row);
 
-            // Select the newly added category in the last row
-            $(".item-row:last .category-select")
-              .val(response.id)
-              .trigger("change");
+            $('#select_item_modal .btn_cancel').click();
+            //$("#select_item_modal").modal("hide");
+        });
 
-            $("#add_item .category-select").val(response.id).trigger("change");
 
-            // Reset modal form & close modal
-            $("#frmadd_Category")[0].reset();
-            $("#add_category").modal("hide");
 
-            // Success message
-            alert(response.message);
-            // toastr.success(response.message);
-          } else {
-            alert(response.message || "Failed to add category.");
-          }
-        },
-        error: function (xhr, status, error) {
-          alert("Error: " + error);
-        },
-        complete: function () {
-          $('input[name="btn_add_category"]')
-            .val("Save")
-            .prop("disabled", false);
-        },
-      });
-    });
+        const rowTemplate = `
+        <div class="item-row">
+            <div class="cat-item-block">
+                <input type="text" name="item_code[]" class="form-control item_code"> 
+            </div>
+            <div class="item-desc-block">
+                <textarea name="item_desc[]" class="form-control item_desc" rows="5"></textarea>
+            </div>
+            <div class="uom-block">
+                <input type="text" name="uom[]" class="form-control uom">
+            </div>
+            <div class="qty-block">
+                <input type="number" step="0.01" name="qty[]" class="form-control qty">
+            </div>
+            <div class="action-block">
+                <button type="button" class="remove-row"><i class="fa fa-trash"></i></button>
+            </div>
+        </div>`;
+    
+        $("#excelFile").on("change", function(e) { 
+            const file = e.target.files[0];
+            const reader = new FileReader();
 
-    $('input[name="btn_add_item"]').on("click", function (e) {
-      e.preventDefault();
+            reader.onload = function(e) {
+                const workbook = XLSX.read(e.target.result, { type: "binary" });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(sheet);  // JSON with headers
 
-      // Get values for validation
-      let itemName = $('input[name="item_name"]').val().trim();
-      let itemCode = $('input[name="item_code"]').val().trim();
+                $("#item_rows").empty(); // Clear previous rows
 
-      // ---- REQUIRED FIELD CHECK ----
-      if (itemName === "") {
-        alert("Item Name is required.");
-        $('input[name="item_name"]').focus();
-        return false;
-      }
+                rows.forEach(function(r) {
+                    let newRow = $(rowTemplate);
+                    //alert(r.item_desc);
+                    newRow.find(".item_code").val(r.item_code);
+                    newRow.find(".item_desc").val(r.item_desc);
+                    newRow.find(".uom").val(r.uom); // Should match option value
+                    newRow.find(".qty").val(r.qty); 
 
-      if (itemCode === "") {
-        alert("Item Code is required.");
-        $('input[name="item_code"]').focus();
-        return false;
-      }
+                    $("#item_rows").append(newRow);
+                });
+            };
 
-      var formData = $("#frmadd_Item").serialize();
+            reader.readAsBinaryString(file);
+        }); 
 
-      $('input[name="btn_add_item"]').val("Saving...").prop("disabled", true);
-
-      $.ajax({
-        url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
-        type: "POST",
-        data: formData,
-        dataType: "json",
-
-        success: function (response) {
-          if (response.status === "success") {
-            // Add item in all dropdowns without duplication
-            $(".item-select").each(function () {
-              if (!$(this).find("option[value='" + response.id + "']").length) {
-                $(this).append(
-                  new Option(response.name, response.id, false, false)
-                );
-              }
-            });
-
-            // Auto-select last row item dropdown
-            $(".item-row:last .item-select").val(response.id).trigger("change");
-
-            // Reset form + auto close modal
-            $("#frmadd_Item")[0].reset();
-            $("#add_item").find(".close").trigger("click");
-
-            // Success
-            // Success alert
-            $("#zazualert").html(`
-                      <div class="alert alert-success sticky-notification" role="alert">
-                          <button type="button" class="close" data-dismiss="alert">&times;</button>
-                          <strong>Note:</strong>
-                          <div class="note-content">${response.message}</div>
-                      </div>
-                  `);
-          } else {
-            alert(response.message || "Failed to add item.");
-          }
-        },
-
-        error: function (xhr, status, error) {
-          alert("Error: " + error);
-        },
-
-        complete: function () {
-          $('input[name="btn_add_item"]').val("Save").prop("disabled", false);
-        },
-      });
-    });
 
  
   });

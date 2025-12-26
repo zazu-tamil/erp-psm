@@ -21,7 +21,14 @@
                 <input type="hidden" name="mode" value="Add" />
                 <fieldset class="tender-inward">
                     <legend class="text-light-blue"><i class="fa fa-file-text-o"></i>Vendor Rate Enquiry</legend>
-
+                    <div style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
+                        <div class="row">
+                            <div class="col-md-4 form-group">
+                                <label for="srch_enq_id">Search Enquiry No</label>
+                                <input type="text" name="srch_enq_id" class="form-control srch_enq_id" value="" placeholder="Search Enquiry No" />
+                            </div>
+                        </div> 
+                    </div>
                     <div class="row">
                         <div class="form-group col-md-4">
                             <label>Customer <span class="text-red">*</span></label>
@@ -31,7 +38,7 @@
                         </div>
                         <div class="form-group col-md-4">
                             <label for="srch_tender_enquiry_id">Tender Enquiry No</label>
-                            <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select Enquiry'] , set_value('srch_tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control"'); ?>
+                            <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select Enquiry']  , set_value('srch_tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control"'); ?>
                         </div>
                         <div class="form-group col-md-4">
                             <label for="srch_vendor_id">Vendor Name <span class="text-red">*</span></label>
@@ -95,6 +102,21 @@
 
                 <fieldset class="mt-4">
                     <legend class="text-light-blue"><i class="fa fa-list"></i> Item Details</legend>
+                    <div class="row cls_export ">
+                        <div class="col-md-4 form-group">
+                            <label for="btnExport">Click Here - Export as Excel File</label> <br>
+                            <button id="btnExport" type="button" class="btn btn-success" value="" data-xls="">Export
+                                Excel & Download</button>
+                        </div>
+                        <div class="col-md-4 form-group ">
+                            <label for="excelFile">Choose Excel File to Import</label>
+                            <input type="file" class="form-control" id="excelFile" accept=".xls,.xlsx"
+                                placeholder="Choose Excel File to Import">
+                        </div>
+                         
+                    </div>
+
+
                     <div id="item_container"></div>
                 </fieldset>
             </div>

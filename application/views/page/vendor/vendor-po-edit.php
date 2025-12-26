@@ -140,10 +140,9 @@
                         <thead>
                             <tr>
                                 <th style="width:5%;">Select</th>
-                                <th style="width:20%;">Item Code</th>
+                                <th style="width:10%;">Item Code</th>
                                 <th style="width:30%;">Description</th>
-                                <th style="width:5%;">UOM</th>
-                                <th style="width:10%;">Qty</th>
+                                <th style="width:10%;">UOM & Qty</th> 
                                 <th style="width:10%;">Rate</th>
                                 <th style="width:10%;">VAT %</th>
                                 <th style="width:10%;">Amount</th>
@@ -160,46 +159,35 @@
                                         </td>
 
                                         <td>
-                                            <input type="text" class="form-control"
+                                            <input type="text" class="form-control item_code-input" name="item_code[<?php echo $index; ?>]"
                                                 value="<?php echo htmlspecialchars($item['item_code']); ?>" readonly>
 
                                             <input type="hidden" name="vendor_rate_enquiry_item_id[<?php echo $index; ?>]"
                                                 value="<?php echo $item['vendor_rate_enquiry_item_id']; ?>">
-                                            <input type="hidden" name="category_id[<?php echo $index; ?>]"
-                                                value="<?php echo $item['category_id']; ?>">
-                                            <input type="hidden" name="item_id[<?php echo $index; ?>]"
-                                                value="<?php echo $item['item_id']; ?>">
+                                                <input type="hidden" name="vendor_po_item_id[<?php echo $index; ?>]"
+                                                value="<?php echo $item['vendor_po_item_id']; ?>">
+                                            
                                         </td>
 
                                         <td>
                                             <textarea name="item_desc[<?php echo $index; ?>]" class="form-control" rows="2"
-                                                readonly><?php echo htmlspecialchars($item['item_desc']); ?></textarea>
+                                                ><?php echo htmlspecialchars($item['item_desc']); ?></textarea>
                                         </td>
 
                                         <td>
                                             <input type="text" name="uom[<?php echo $index; ?>]" class="form-control"
-                                                value="<?php echo $item['uom']; ?>" readonly>
-                                        </td>
-
-                                        <td>
+                                                value="<?php echo $item['uom']; ?>" >
+                                            <br>
                                             <input type="number" step="0.01" name="qty[<?php echo $index; ?>]"
-                                                class="form-control qty-input" value="<?php echo $item['qty']; ?>" readonly>
+                                                class="form-control qty-input" value="<?php echo $item['qty']; ?>" >
                                         </td>
 
                                         <td>
-                                            <input type="number" step="0.01" name="rate[<?php echo $index; ?>]"
-                                                class="form-control rate-input" value="<?php echo $item['rate']; ?>">
+                                            <input type="number" step="0.01" name="rate[<?php echo $index; ?>]"  class="form-control rate-input" value="<?php echo $item['rate']; ?>">
                                         </td>
 
                                         <td>
-                                            <select name="gst[<?php echo $index; ?>]" class="form-control gst-select">
-                                                <option value="">Select</option>
-                                                <?php foreach ($gst_opt as $gst_val): ?>
-                                                    <option value="<?php echo $gst_val; ?>" <?= ($item['gst'] == $gst_val) ? 'selected' : ''; ?>>
-                                                        <?= $gst_val; ?>%
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            </select>
+                                            <input type="number" step="0.01" name="gst[<?php echo $index; ?>]"  class="form-control vat" value="<?php echo $item['vat']; ?>">
                                         </td>
 
                                         <td>
@@ -212,6 +200,14 @@
                                     <?php $index++; endforeach; ?>
                             <?php endif; ?>
                         </tbody>
+                         <thead>
+                            <tr>
+                                <th colspan="6" class="text-right">Total</th>
+                                <th class="text-right">
+                                    <span class="value"> <span id="total_amount">0.00</span></span>
+                                </th>
+                            </tr>
+                        </thead>
                     </table>
                 </fieldset>
             </div>

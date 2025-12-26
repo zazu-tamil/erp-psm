@@ -111,12 +111,12 @@
                                     </span>
                                 </td>
                                 <!-- PRINT -->
-                                    <td class="text-center">
+                                    <!-- <td class="text-center">
                                         <a href="<?php echo site_url('vendor-quotation-print/' . $row['vendor_quote_id']); ?>"
                                             class="btn btn-success btn-xs" title="Print" target="_blank">
                                             <i class="fa fa-print"></i>
                                         </a>
-                                    </td>
+                                    </td> -->
                                 <!-- EDIT -->
                                 <td class="text-center">
                                     <a href="<?php echo site_url('vendor-quotation-edit/' . $row['vendor_quote_id']); ?>"

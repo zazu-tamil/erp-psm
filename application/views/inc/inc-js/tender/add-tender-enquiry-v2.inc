@@ -156,18 +156,13 @@
     const rowTemplate = `
     <div class="item-row">
         <div class="cat-item-block">
-            <input type="text" name="srch_item[]" class="form-control srch_item">
-            <input type="hidden" name="item_id[]" class="item_id">
-            <input type="hidden" name="category_id[]" class="category_id">
+            <input type="text" name="item_code[]" class="form-control item_code"> 
         </div>
         <div class="item-desc-block">
             <textarea name="item_desc[]" class="form-control item_desc" rows="5"></textarea>
         </div>
         <div class="uom-block">
-            <select name="uom[]" class="form-control uom">
-                <option value="">—</option>
-                <?php foreach($uom_opt as $key=>$val){ echo '<option value="'.$key.'">'.$val.'</option>'; } ?>
-            </select>
+             <input type="text" name="uom[]" class="form-control uom">
         </div>
         <div class="qty-block">
             <input type="number" step="0.01" name="qty[]" class="form-control qty">
@@ -177,35 +172,31 @@
         </div>
     </div>`;
  
-$("#excelFile").on("change", function(e) { 
-    const file = e.target.files[0];
-    const reader = new FileReader();
+    $("#excelFile").on("change", function(e) { 
+        const file = e.target.files[0];
+        const reader = new FileReader();
 
-    reader.onload = function(e) {
-        const workbook = XLSX.read(e.target.result, { type: "binary" });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(sheet);  // JSON with headers
+        reader.onload = function(e) {
+            const workbook = XLSX.read(e.target.result, { type: "binary" });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(sheet);  // JSON with headers
 
-        $("#item_rows").empty(); // Clear previous rows
+            $("#item_rows").empty(); // Clear previous rows
 
-        rows.forEach(function(r) {
-            let newRow = $(rowTemplate);
-            //alert(r.item_desc);
-            newRow.find(".srch_item").val(r.item_code);
-            newRow.find(".item_desc").val(r.item_desc);
-            newRow.find(".uom").val(r.uom); // Should match option value
-            newRow.find(".qty").val(r.qty);
+            rows.forEach(function(r) {
+                let newRow = $(rowTemplate);
+                //alert(r.item_desc);
+                newRow.find(".item_code").val(r.item_code);
+                newRow.find(".item_desc").val(r.item_desc);
+                newRow.find(".uom").val(r.uom); // Should match option value
+                newRow.find(".qty").val(r.qty); 
 
-            // If your Excel contains item_id / category_id columns:
-            if (r.item_id) newRow.find(".item_id").val(r.item_id);
-            if (r.category_id) newRow.find(".category_id").val(r.category_id);
+                $("#item_rows").append(newRow);
+            });
+        };
 
-            $("#item_rows").append(newRow);
-        });
-    };
-
-    reader.readAsBinaryString(file);
-}); 
+        reader.readAsBinaryString(file);
+    }); 
 
 
 
@@ -232,163 +223,30 @@ $("#excelFile").on("change", function(e) {
               `<option value="${c.customer_id}">${c.customer_name}</option>`
             );
           });
-          $("#item_rows").empty();
-          addEmptyRow();
+          $("#item_rows").empty(); 
         },
         "json"
       );
     });
 
-    // Category → Item
-    $(document).on("change", ".category-select", function () {
-      const catId = $(this).val();
-      const $row = $(this).closest(".item-row");
-      const $item = $row.find(".item-select");
-
-      if (!catId) {
-        $item.html('<option value="">Select Item</option>');
-        return;
-      }
-
-      $.post(
-        "<?php echo site_url('tender/get_data'); ?>",
-        {
-          tbl: "get-category-item-list",
-          id: catId,
-        },
-        function (data) {
-          $item.html('<option value="">Select Item</option>');
-          $.each(data, function (i, item) {
-            $item.append(
-              `<option value="${item.item_id}">${item.item_name}</option>`
-            );
-          });
-        },
-        "json"
-      );
-    });
-
-    // Item → UOM + Description
-    $(document).on("change", ".item-select", function () {
-      const itemId = $(this).val();
-      const $row = $(this).closest(".item-row");
-      const $desc = $row.find('textarea[name="item_desc[]"]');
-      const $uom = $row.find('select[name="uom[]"]');
-
-      if (!itemId) {
-        $desc.val("");
-        $uom.val("");
-        return;
-      }
-
-      $.post(
-        "<?php echo site_url('tender/get_data'); ?>",
-        {
-          tbl: "get-uom-desc-from-item",
-          id: itemId,
-        },
-        function (data) {
-          if (data && data[0]) {
-            $desc.val(data[0].item_description || "");
-            $uom.val(data[0].uom || "");
-          }
-        },
-        "json"
-      );
-    });
-
-    // Add Row
-    $("#add_more").click(addEmptyRow);
+    
+ 
+     
 
     // Remove Row
     $(document).on("click", ".remove-row", function () {
-      if ($("#item_rows .item-row").length > 1) {
+      if ($("#item_rows .item-row").length > 0) {
         $(this).closest(".item-row").remove();
       } else {
         alert("At least one item is required.");
       }
     });
 
-    /*
-        <div class="cat-item-block">
-              <?php echo form_dropdown('category_id[]', ['' => 'Select Category'] + $category_opt, '', 'class="form-control category-select"'); ?>
-              <select name="item_id[]" class="form-control item-select mt-2">
-                  <option value="">Select Item</option>
-              </select>
-          </div>
-      */
+    
 
-    // Add Empty Row
-    function addEmptyRow() {
-      const row = `
-          <div class="item-row">
-              <div class="cat-item-block">
-                  <input type="text" name="srch_item[]" class="form-control srch_item" autocomplete="off">
-                  <input type="hidden" name="item_id[]" class="form-control item_id">
-                  <input type="hidden" name="category_id[]" class="form-control category_id">
-                  <button type="button" class="btn btn-link" data-toggle="modal"
-                                        data-target="#select_item_modal"><i class="fa fa-search"></i></button>
-              </div>
-              <div class="item-desc-block">
-                  <textarea name="item_desc[]" class="form-control" rows="5"></textarea>
-              </div>
-              <div class="uom-block">
-                  <?php echo form_dropdown('uom[]', ['' => '—'] + $uom_opt, '', 'class="form-control"'); ?>
-              </div>
-              <div class="qty-block">
-                  <input type="number" step="0.01" name="qty[]" class="form-control">
-              </div>
-              <div class="action-block">
-                  <button type="button" class="remove-row"><i class="fa fa-trash"></i></button>
-              </div>
-          </div>
-      `;
-
-      $("#item_rows").append(row);
-
-      // Reapply autocomplete for newly added fields
-      initAutocomplete();
-    }
-
-    function initAutocomplete() {
-      $(".srch_item").autocomplete({
-        source: function (request, response) {
-          $.ajax({
-            url: "<?php echo base_url('tender/item_search'); ?>",
-            type: "POST",
-            data: { search: request.term },
-            dataType: "json",
-            success: function (data) {
-              //console.log(data);
-              response(data);
-            },
-          });
-        },
-
-        minLength: 1,
-
-        select: function (event, ui) {
-          let row = $(this).closest(".item-row");
-
-          // Fill item name
-          $(this).val(ui.item.value);
-
-          // Auto-fill description
-          row.find('textarea[name="item_desc[]"]').val(ui.item.desc);
-          row.find('input[name="item_id[]"]').val(ui.item.id);
-          row.find('input[name="category_id[]"]').val(ui.item.category_id);
-
-          // Auto-fill UOM
-          row.find('select[name="uom[]"]').val(ui.item.uom);
-
-          return false;
-        },
-      });
-    }
-
-    // Initialize
-    addEmptyRow();
-    initAutocomplete();
+    
+ 
+ 
 
     $('input[name="btn_add_customer"]').on("click", function (e) {
       e.preventDefault();
@@ -456,51 +314,7 @@ $("#excelFile").on("change", function(e) {
       });
     });
 
-    $('input[name="btn_add_brand"]').on("click", function (e) {
-      e.preventDefault();
-
-      var formData = $("#frmadd_Brand").serializeArray();
-
-      console.log(formData);
-
-      $.ajax({
-        url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
-        type: "POST",
-        data: formData,
-        dataType: "json",
-        beforeSend: function () {
-          $('input[name="btn_add_brand"]')
-            .val("Saving...")
-            .prop("disabled", true);
-        },
-        success: function (response) {
-          console.log(response);
-          if (response.status === "success") {
-            // Add new option to the dropdown dynamically
-            var newOption = new Option(response.name, response.id, true, true);
-            $("#brand_id").append(newOption).trigger("change");
-
-            // Reset form & close modal
-            $("#frmadd")[0].reset();
-            $("#add_customer").find(".close").trigger("click");
-
-            // Optional success alert
-            //toastr.success(response.message);
-            alert(response.message);
-          } else {
-            //toastr.error('Failed to add brand.');
-            alert("Failed to add brand.");
-          }
-        },
-        error: function (xhr, status, error) {
-          //toastr.error('Error: ' + error);
-          alert("Error: " + error);
-        },
-        complete: function () {
-          $('input[name="btn_add_brand"]').val("Save").prop("disabled", false);
-        },
-      });
-    });
+     
 
     $("#srch_customer_id").on("change", function () {
       let v = $(this).val();
@@ -593,142 +407,9 @@ $("#excelFile").on("change", function(e) {
       }
     });
 
-    $('input[name="btn_add_category"]').on("click", function (e) {
-      e.preventDefault();
+   
 
-      var formData = $("#frmadd_Category").serialize(); // simpler & cleaner
-
-      $.ajax({
-        url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
-        type: "POST",
-        data: formData,
-        dataType: "json",
-        beforeSend: function () {
-          $('input[name="btn_add_category"]')
-            .val("Saving...")
-            .prop("disabled", true);
-        },
-        success: function (response) {
-          console.log(response);
-
-          if (response.status === "success") {
-            // Add new category to all dropdowns dynamically
-            $(".category-select").each(function () {
-              var exists = $(this).find(
-                "option[value='" + response.id + "']"
-              ).length;
-              if (!exists) {
-                var newOption = new Option(
-                  response.name,
-                  response.id,
-                  false,
-                  false
-                );
-                $(this).append(newOption);
-              }
-            });
-
-            // Select the newly added category in the last row
-            $(".item-row:last .category-select")
-              .val(response.id)
-              .trigger("change");
-
-            $("#add_item .category-select").val(response.id).trigger("change");
-
-            // Reset modal form & close modal
-            $("#frmadd_Category")[0].reset();
-            $("#add_category").modal("hide");
-
-            // Success message
-            alert(response.message);
-            // toastr.success(response.message);
-          } else {
-            alert(response.message || "Failed to add category.");
-          }
-        },
-        error: function (xhr, status, error) {
-          alert("Error: " + error);
-        },
-        complete: function () {
-          $('input[name="btn_add_category"]')
-            .val("Save")
-            .prop("disabled", false);
-        },
-      });
-    });
-
-    $('input[name="btn_add_item"]').on("click", function (e) {
-      e.preventDefault();
-
-      // Get values for validation
-      let itemName = $('input[name="item_name"]').val().trim();
-      let itemCode = $('input[name="item_code"]').val().trim();
-
-      // ---- REQUIRED FIELD CHECK ----
-      if (itemName === "") {
-        alert("Item Name is required.");
-        $('input[name="item_name"]').focus();
-        return false;
-      }
-
-      if (itemCode === "") {
-        alert("Item Code is required.");
-        $('input[name="item_code"]').focus();
-        return false;
-      }
-
-      var formData = $("#frmadd_Item").serialize();
-
-      $('input[name="btn_add_item"]').val("Saving...").prop("disabled", true);
-
-      $.ajax({
-        url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
-        type: "POST",
-        data: formData,
-        dataType: "json",
-
-        success: function (response) {
-          if (response.status === "success") {
-            // Add item in all dropdowns without duplication
-            $(".item-select").each(function () {
-              if (!$(this).find("option[value='" + response.id + "']").length) {
-                $(this).append(
-                  new Option(response.name, response.id, false, false)
-                );
-              }
-            });
-
-            // Auto-select last row item dropdown
-            $(".item-row:last .item-select").val(response.id).trigger("change");
-
-            // Reset form + auto close modal
-            $("#frmadd_Item")[0].reset();
-            $("#add_item").find(".close").trigger("click");
-
-            // Success
-            // Success alert
-            $("#zazualert").html(`
-                      <div class="alert alert-success sticky-notification" role="alert">
-                          <button type="button" class="close" data-dismiss="alert">&times;</button>
-                          <strong>Note:</strong>
-                          <div class="note-content">${response.message}</div>
-                      </div>
-                  `);
-          } else {
-            alert(response.message || "Failed to add item.");
-          }
-        },
-
-        error: function (xhr, status, error) {
-          alert("Error: " + error);
-        },
-
-        complete: function () {
-          $('input[name="btn_add_item"]').val("Save").prop("disabled", false);
-        },
-      });
-    });
-
+     
     $("#srch_customer_id").change(function () {
       var customerId = $(this).val();
 
@@ -760,13 +441,13 @@ $("#excelFile").on("change", function(e) {
     });
 
 
-      $(document).on("keyup", "#item_search_modal", function () {
+    $(document).on("keyup", "#item_search_modal", function () {
         let searchText = $(this).val().trim();
 
           $.ajax({
               url: "<?php echo base_url('tender/item_search_v2'); ?>",
               type: "POST",
-              data: { search: searchText },
+              data: { search: searchText , srch_typ : 'code'},
               dataType: "json",
               success: function (data) {
 
@@ -799,7 +480,45 @@ $("#excelFile").on("change", function(e) {
           });
       });
 
-      
+
+      $(document).on("keyup", "#item_desc_modal", function () {
+        let searchText = $(this).val().trim();
+
+          $.ajax({
+              url: "<?php echo base_url('tender/item_search_v2'); ?>",
+              type: "POST",
+              data: { search: searchText , srch_typ : 'desc' },
+              dataType: "json",
+              success: function (data) {
+
+                  let tbody = $("#item_search_table_modal tbody");
+                  tbody.empty(); // clear table
+
+                  if (data.length === 0) {
+                      tbody.append(`<tr><td colspan="5" class="text-center">No Records Found</td></tr>`);
+                      return;
+                  }
+
+                  $.each(data, function (i, item) {
+                      tbody.append(`
+                          <tr>
+                              <td>${item.item_code}</td>
+                              <td>${item.item_desc}</td>
+                              <td>${item.uom}</td>
+                              <td>${item.tbl}</td>
+                              <td>${item.po_date}</td>
+                              <td>
+                                  <button type="button" class="btn btn-success btn-sm select_item_btn"
+                                      data-item='${JSON.stringify(item)}'>
+                                      Select
+                                  </button>
+                              </td>
+                          </tr>
+                      `);
+                  });
+              }
+          });
+      });
 
       $(document).on("click", ".select_item_btn", function () {
 
@@ -809,7 +528,7 @@ $("#excelFile").on("change", function(e) {
 
                 <div class="item-row">
                     <div class="cat-item-block"> 
-                        <input type="hidden" name="item_code[]" class="form-control item_code" value="${item.item_code}"> 
+                        <input type="text" name="item_code[]" class="form-control item_code" value="${item.item_code}"> 
                         <button type="button" class="btn btn-link" data-toggle="modal"
                                               data-target="#select_item_modal"><i class="fa fa-search"></i></button>
                     </div>

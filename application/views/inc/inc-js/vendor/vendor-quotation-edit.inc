@@ -1,9 +1,15 @@
 <script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script> 
 <style>
   /* Your existing styles remain unchanged */
   .text-light-blue {
     color: #3c8dbc !important;
   }
+
+    .readonly-select {
+        pointer-events: none;
+        background-color: #e9ecef;
+    }
 
   fieldset {
     border: 1px solid #d2d6de;
@@ -185,6 +191,114 @@
     });
   });
 
+
+   function exportJSONToXLSX(data, fileName = "export.xlsx") {
+
+        // Convert JSON to worksheet
+        const worksheet = XLSX.utils.json_to_sheet(data);
+
+        // Create workbook
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+        // Export XLSX
+        XLSX.writeFile(workbook, fileName);
+    }
+
+    $(document).on("click", "#btnExport", function () {
+      let jsonData = <?php  echo json_encode($items); ?>;
+      exportJSONToXLSX(jsonData, $(this).val() +".xlsx");
+    });
+
+
+    const rowHtml = `
+                    <tr class="item-row"> 
+                        <td>
+                             <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="" checked>
+                        </td> 
+                       
+                        <td> 
+                             <input type="text" name="item_code[]" class="form-control item_code" value="" >                            
+                             <input type="hidden" name="vendor_quote_item_id[]" class="vendor_quote_item_id" value="">
+                             <input type="hidden" name="vendor_rate_enquiry_item_id[]" class="vendor_rate_enquiry_item_id" value="">
+                             
+                        </td>
+
+                        <td>
+                            <textarea name="item_desc[]" class="form-control item_desc" rows="2" ></textarea>
+                        </td>
+
+                        <td>
+                            <input type="text" name="uom[]" class="form-control uom" value="" readonly>
+                            <br>
+                            <input type="number" step="0.01" name="qty[]" class="form-control qty" value="">
+                        </td>
+
+                        <td>
+                            <input type="number" step="0.01" name="rate[]" class="form-control rate">
+                        </td>
+
+                        <td>
+                            <input type="number" step="0.01" name="gst[]" class="form-control vat">
+                        </td>
+
+                        <td>
+                            <input type="number" name="amount[]" class="form-control amount" value="0.00" readonly>
+                        </td> 
+                       
+                       
+                    </tr>
+                `;
+
+    $("#excelFile").on("change", function (e) {
+
+          const file = e.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+
+          reader.onload = function (e) {
+
+              const workbook = XLSX.read(e.target.result, { type: "binary" });
+              const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+              // JSON with headers
+              const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+              console.log(rows);
+
+              $("#item_container").empty();
+              let i = 0;
+              rows.forEach(function (r) {
+                  
+                  let newRow = $(rowHtml); 
+
+                  newRow.find(".cnt").html((i+1));
+                  newRow.find(".item-check").val(i); 
+                  newRow.find(".vendor_quote_item_id").val(r.vendor_quote_item_id); 
+                  newRow.find(".vendor_rate_enquiry_item_id").val(r.vendor_rate_enquiry_item_id); 
+                  newRow.find(".item_code").val(r.item_code);
+                  newRow.find(".item_desc").val(r.item_desc);
+                  newRow.find(".uom").val(r.uom);
+                  newRow.find(".qty").val(r.qty); 
+                  newRow.find(".rate").val(r.rate); 
+                  newRow.find(".vat").val(r.vat); 
+                  newRow.find(".amount").val(r.amount);   
+
+                  $("#item_container").append(newRow); 
+                  
+                  i++;
+              }); 
+
+              $(".qty, .rate, .vat").trigger("input");
+           
+          };
+
+          reader.readAsBinaryString(file);
+      }); 
+
+
+
   // CKEditor
   window.onload = function () {
     CKEDITOR.replace("editor1", { height: 120 });
@@ -286,41 +400,41 @@
 <script>
 $(document).ready(function () {
 
-    // Recalculate amount on qty, rate or GST change
-    $(document).on("input change", ".rate-input, .qty-input, .gst-select", function () {
-        const $row = $(this).closest("tr.item-row");
+    // Recalculate amount on qty, rate, or GST change
+  $(document).on("input change", ".rate, .vat, .qty", function () {
+      const $row = $(this).closest("tr.item-row");
 
-        const qty = parseFloat($row.find(".qty-input").val()) || 0;
-        const rate = parseFloat($row.find(".rate-input").val()) || 0;
-        const gst = parseFloat($row.find(".gst-select").val()) || 0;
+      const qty  = parseFloat($row.find(".qty").val()) || 0;
+      const rate = parseFloat($row.find(".rate").val()) || 0;
+      const gst  = parseFloat($row.find(".vat").val()) || 0;
 
-        // Base amount
-        let amount = qty * rate;
+      // Amount = qty * rate
+      let amount = qty * rate;
 
-        // Add GST
-        amount += (amount * gst) / 100;
+      // GST added only if gst selected
+      if (gst > 0) {
+          amount = amount + (amount * gst / 100);
+      }
 
-        // Update row amount
-        $row.find(".amount-input").val(amount.toFixed(2));
+      $row.find(".amount").val(amount.toFixed(2));
 
-        calculateTotalAmount();
-    });
+      calculateTotalAmount();
+  });
 
-    // Total calculation
-    function calculateTotalAmount() {
-        let total = 0;
 
-        $(".amount-input").each(function () {
-            total += parseFloat($(this).val()) || 0;
-        });
+  // Calculate full total of all item rows
+  function calculateTotalAmount() {
+      let total = 0;
 
-        $("#total_amount").text(total.toFixed(2));
-    }
+      $(".item-check:checked").each(function () {
+          let row = $(this).closest("tr");
+          total += parseFloat(row.find(".amount").val()) || 0;
+      });
 
-    // ► Recalculate all amounts on page load (important!)
-    $(".item-row").each(function () {
-        $(this).find(".rate-input").trigger("change");
-    });
+      $("#total_amount").text(total.toFixed(2));
+  }
+
+  calculateTotalAmount();
 
 });
 </script>
