@@ -31,12 +31,12 @@
 
                     <div class="form-group col-md-3">
                         <label for="srch_company_id">Company <span style="color:red;">*</span></label>
-                        <?php echo form_dropdown('srch_company_id', ['' => 'All'] + $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control"'); ?>
+                        <?php echo form_dropdown('srch_company_id', ['' => 'All'] + $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control select2"'); ?>
                     </div>
 
                     <div class="form-group col-md-3">
                         <label for="srch_customer_id">Customer <span style="color:red;">*</span></label>
-                        <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, set_value('srch_customer_id'), 'id="srch_customer_id" class="form-control" '); ?>
+                        <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, set_value('srch_customer_id'), 'id="srch_customer_id" class="form-control select2" '); ?>
                     </div>
 
                     <div class="form-group col-md-3">
@@ -45,7 +45,7 @@
                             'srch_tender_enquiry_id',
                             ['' => 'All'] + $tender_enquiry_opt,
                             set_value('srch_tender_enquiry_id'),
-                            'id="srch_tender_enquiry_id" class="form-control"'
+                            'id="srch_tender_enquiry_id" class="form-control select2"'
                         ); ?>
                     </div>
 
@@ -55,7 +55,7 @@
                             'srch_tender_po_id',
                             ['' => 'All'] + $tender_po_opt,
                             set_value('srch_tender_po_id'),
-                            'id="srch_tender_po_id" class="form-control"'
+                            'id="srch_tender_po_id" class="form-control select2"'
                         ); ?>
                     </div>
                     <div class="form-group col-md-3 text-left">

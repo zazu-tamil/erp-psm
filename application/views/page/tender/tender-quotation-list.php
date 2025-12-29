@@ -34,12 +34,12 @@
                     <div class="form-group col-md-3">
                         <label>Customer</label>
                         <div class="form-group">
-                            <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control" '); ?>
+                            <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control select2" '); ?>
                         </div>
                     </div>
                     <div class="form-group col-md-3">
                         <label for="srch_tender_enquiry_id">Tender RFQ No</label>
-                        <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'All'] + $tender_enquiry_opt, $srch_tender_enquiry_id, 'id="srch_tender_enquiry_id" class="form-control"'); ?>
+                        <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'All'] + $tender_enquiry_opt, $srch_tender_enquiry_id, 'id="srch_tender_enquiry_id" class="form-control select2"'); ?>
                     </div>
                     <div class="form-group col-md-3">
                         <label>Quotation Status</label>

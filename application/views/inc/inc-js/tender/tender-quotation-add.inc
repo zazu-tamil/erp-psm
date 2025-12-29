@@ -382,13 +382,13 @@
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>UOM</label>
-                            <input type="text" name="uom[]" class="form-control" value="${row.uom}" readonly>
+                            <input type="text" name="uom[]" class="form-control" value="${row.uom}">
                           </div>
                         </div>
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>Quantity</label>
-                            <input type="number" step="0.01" name="qty[]" class="form-control qty-input" value="${row.qty}" readonly>
+                            <input type="number" step="0.01" name="qty[]" class="form-control qty-input" value="${row.qty}" >
                           </div>
                         </div>
 
@@ -401,8 +401,9 @@
 
                         <div class="col-md-6">
                           <div class="form-group">
-                            <label>VAT %</label>
-                            <input type="number" step="0.01" name="gst[]" class="form-control vat-dropdown" value="${row.gst ?? 0}"> 
+                            <label>VAT %</label> 
+                            <!----<input type="number" step="0.01" name="gst[]" class="form-control vat-dropdown" value="${row.gst ?? 0}"> -->
+                             <input type="number" step="0.01" name="gst[]" class="form-control vat-dropdown" value="10.00"> 
                           </div>
                         </div>
 

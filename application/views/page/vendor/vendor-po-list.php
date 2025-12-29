@@ -30,22 +30,22 @@
 
                     <div class="form-group col-md-3">
                         <label for="srch_company_id">Company <span style="color:red;">*</span></label>
-                        <?php echo form_dropdown('srch_company_id', ['' => 'All'] + $company_opt, set_value('srch_company_id', $srch_company_id), 'id="srch_company_id" class="form-control"'); ?>
+                        <?php echo form_dropdown('srch_company_id', ['' => 'All'] + $company_opt, set_value('srch_company_id', $srch_company_id), 'id="srch_company_id" class="form-control select2"'); ?>
                     </div>
 
                     <div class="form-group col-md-3">
                         <label for="srch_customer_id">Customer <span style="color:red;">*</span></label>
-                        <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, set_value('srch_customer_id', $srch_customer_id), 'id="srch_customer_id" class="form-control"'); ?>
+                        <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, set_value('srch_customer_id', $srch_customer_id), 'id="srch_customer_id" class="form-control select2"'); ?>
                     </div>
 
                     <div class="form-group col-md-3">
                         <label for="srch_tender_enquiry_id">Tender Enquiry No <span style="color:red;">*</span></label>
-                        <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'All'] + $tender_enquiry_opt, set_value('srch_tender_enquiry_id', $srch_tender_enquiry_id), 'id="srch_tender_enquiry_id" class="form-control"'); ?>
+                        <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'All'] + $tender_enquiry_opt, set_value('srch_tender_enquiry_id', $srch_tender_enquiry_id), 'id="srch_tender_enquiry_id" class="form-control select2"'); ?>
                     </div>
 
                     <div class="form-group col-md-3">
                         <label>Status</label>
-                        <?php echo form_dropdown('srch_po_status', ['' => 'All'] + $po_status_opt, set_value('srch_po_status', $srch_po_status), 'id="srch_po_status" class="form-control select2"'); ?>
+                        <?php echo form_dropdown('srch_po_status', ['' => 'All'] + $po_status_opt, set_value('srch_po_status', $srch_po_status), 'id="srch_po_status" class="form-control"'); ?>
                     </div>
                     <div class="form-group col-md-3 text-left">
                         <br>

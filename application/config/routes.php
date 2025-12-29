@@ -60,7 +60,8 @@ $route['dash'] = 'dashboard';
 $route['add-tender-enquiry']='tender/add_tender_enquiry_v2';
 $route['tender-enquiry-list'] = 'tender/tender_enquiry_list';
 $route['tender-enquiry-edit/(:num)'] = 'tender/edit_tender_enquiry/$1'; 
-
+ $route['tender-enquiry-list/(:num)'] = 'tender/tender_enquiry_list/$1';
+ 
 $route['change-password'] = 'login/change_password';
 $route['dash'] = 'dashboard'; 
 $route['get-data'] = 'general/get_data';

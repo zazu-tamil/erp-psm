@@ -23,13 +23,15 @@
 
                 <fieldset class="tender-inward">
                     <legend class="text-light-blue"><i class="fa fa-file-text-o"></i> Tender Quotation</legend>
-                    <div style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
+                    <div
+                        style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
                         <div class="row">
                             <div class="col-md-4 form-group">
                                 <label for="srch_enq_id">Search Enquiry No</label>
-                                <input type="text" name="srch_enq_id" class="form-control srch_enq_id" value="" placeholder="Search Enquiry No" />
+                                <input type="text" name="srch_enq_id" class="form-control srch_enq_id" value=""
+                                    placeholder="Search Enquiry No" />
                             </div>
-                        </div> 
+                        </div>
                     </div>
 
                     <div class="row">
@@ -88,11 +90,29 @@
                             <label class="radio-inline"><input type="radio" name="status" value="Inactive">
                                 Inactive</label>
                         </div>
+                        <div class="form-group col-md-3">
+                            <label for="transport_charges">Transport Charges</label>
+                            <input type="number" step="0.01" name="transport_charges" id="transport_charges"
+                                class="form-control" placeholder="Enter transport charges"
+                                value="<?php echo set_value('transport_charges', '0.00'); ?>">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="other_charges">Other Charges</label>
+                            <input type="number" step="0.01" name="other_charges" id="other_charges"
+                                class="form-control" placeholder="Enter other charges"
+                                value="<?php echo set_value('other_charges', '0.00'); ?>">
+                        </div>
+
+                        <div class="form-group col-md-3">
+                            <label for="currency_id">Currency Symbol <span style="color:red;">*</span></label>
+                            <?php echo form_dropdown('currency_id', ['' => 'Select Currency'] + $currency_opt, set_value('currency_id'), 'id="currency_id" class="form-control" required '); ?>
+                        </div>
+
                     </div>
 
                     <div class="row">
                         <div class="form-group col-md-6">
-                            <label for="remarks">Remarks</label>
+                            <label for="remarks">Note</label>
                             <textarea name="remarks" class="form-control" id="editor2" placeholder="Enter your remarks"
                                 rows="8"></textarea>
                         </div>

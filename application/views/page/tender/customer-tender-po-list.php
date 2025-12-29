@@ -30,25 +30,25 @@
                     </div>
                     <div class="form-group col-md-3">
                         <label>Company</label>
-                        <?php echo form_dropdown('srch_company_id', $company_opt, set_value('srch_company_id', $srch_company_id), 'id="srch_company_id" class="form-control select2"'); ?>
+                        <?php echo form_dropdown('srch_company_id', ['' => 'All'] + $company_opt, set_value('srch_company_id', $srch_company_id), 'id="srch_company_id" class="form-control select2"'); ?>
                     </div>
                     <div class="form-group col-md-3">
                         <label>Customer</label>
-                        <?php echo form_dropdown('srch_customer_id', $customer_opt, set_value('srch_customer_id', $srch_customer_id), 'id="srch_customer_id" class="form-control select2"'); ?>
+                        <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, set_value('srch_customer_id', $srch_customer_id), 'id="srch_customer_id" class="form-control select2"'); ?>
                     </div>
                     <div class="form-group col-md-3">
                         <label>Tender Enquiry No</label>
-                        <?php echo form_dropdown('srch_tender_enquiry_id', $tender_enquiry_opt, set_value('srch_tender_enquiry_id', $srch_tender_enquiry_id), 'id="srch_tender_enquiry_id" class="form-control select2"'); ?>
+                        <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'All'] + $tender_enquiry_opt, set_value('srch_tender_enquiry_id', $srch_tender_enquiry_id), 'id="srch_tender_enquiry_id" class="form-control select2"'); ?>
                     </div>
                     <div class="form-group col-md-3">
                         <label>Quotation No</label>
-                        <?php echo form_dropdown('srch_tender_quotation_id', $tender_quotation_opt, set_value('srch_tender_quotation_id', $srch_tender_quotation_id), 'id="srch_tender_quotation_id" class="form-control select2" style="width:100%"'); ?>
+                        <?php echo form_dropdown('srch_tender_quotation_id', ['' => 'All'] + $tender_quotation_opt, set_value('srch_tender_quotation_id', $srch_tender_quotation_id), 'id="srch_tender_quotation_id" class="form-control select2" style="width:100%"'); ?>
                     </div>
                 </div>
                 <div class="row">
                     <div class="form-group col-md-3">
                         <label>PO Status</label>
-                        <?php echo form_dropdown('srch_po_status', $po_status_opt, set_value('srch_po_status', $srch_po_status), 'id="srch_po_status" class="form-control"'); ?>
+                        <?php echo form_dropdown('srch_po_status', ['' => 'All'] + $po_status_opt, set_value('srch_po_status', $srch_po_status), 'id="srch_po_status" class="form-control"'); ?>
                     </div>
                     <div class="form-group col-md-3">
                         <label>&nbsp;</label>
@@ -78,14 +78,14 @@
                 <thead>
                     <tr>
                         <th class="text-center">S.No</th>
-                       
+
                         <th>PO Date</th>
-                         <th>Our PO No</th>
+                        <th>Our PO No</th>
                         <th>Company</th>
                         <th>Customer</th>
                         <th>Tender Enquiry</th>
                         <th>Quotation No</th>
-                        
+
                         <th>Customer PO No</th>
                         <th>Delivery Date</th>
                         <th>PO Status</th>
@@ -97,14 +97,14 @@
                         <?php foreach ($record_list as $j => $row): ?>
                             <tr>
                                 <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
-                                 <td><?php echo $row['po_date'] ? date('d-m-Y', strtotime($row['po_date'])) : '-'; ?></td>
-                                
+                                <td><?php echo $row['po_date'] ? date('d-m-Y', strtotime($row['po_date'])) : '-'; ?></td>
+
                                 <td><?php echo htmlspecialchars($row['our_po_no'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['company_name'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['enquiry_no'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['quotation_no'] ?? '-'); ?></td>
-                               <td><strong><?php echo htmlspecialchars($row['customer_po_no'] ?? '-'); ?></strong></td>
+                                <td><strong><?php echo htmlspecialchars($row['customer_po_no'] ?? '-'); ?></strong></td>
                                 <td><?php echo $row['delivery_date'] ? date('d-m-Y', strtotime($row['delivery_date'])) : '-'; ?>
                                 </td>
                                 <?php

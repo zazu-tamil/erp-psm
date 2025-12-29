@@ -444,6 +444,15 @@
 
 
         <!-- Terms & Conditions -->
+        <?php if (!empty($record['remarks'])): ?>
+            <div class="terms-section">
+                <div class="section-title">Note</div>
+                <div class="section-content">
+                    <?php echo $record['remarks']; ?>
+                </div>
+            </div>
+        <?php endif; ?>
+        <!-- Terms & Conditions -->
         <?php if (!empty($record['terms'])): ?>
             <div class="terms-section">
                 <div class="section-title">Terms & Conditions</div>

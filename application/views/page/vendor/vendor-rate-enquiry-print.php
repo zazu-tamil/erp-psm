@@ -347,6 +347,8 @@
             color: #666;
         }
     </style>
+    <!-- <script src="https://rawgit.com/Snack-X/excelexport.js/master/excelexport.js"></script> -->
+ 
 </head>
 
 <body>
@@ -369,9 +371,9 @@
                     <div class="customer-name">
                         <?php echo nl2br($record['address'] ?? 'N/A'); ?>
                         <br>
-                         <?php echo $record['vendor_country']; ?>
+                        <?php echo $record['vendor_country']; ?>
                     </div>
-                    
+
                 </div>
                 <div class="info-cell right">
                     <div><span class="info-label">Date:</span>
@@ -384,56 +386,49 @@
             </div>
         </div>
 
-        <!-- Items Table -->
-        <table class="items-table">
+        <table id="content-table" class="items-table content-table">
+
             <thead>
                 <tr>
                     <th style="width:5%;">S.No</th>
                     <th style="width:30%;">Item Description</th>
                     <th style="width:8%;">UOM</th>
                     <th style="width:8%;">Qty</th>
-                    <!-- <th style="width:10%;">Rate</th>
-                    <th style="width:9%;">VAT %</th>
-                     <th style="width:12%;">Amount</th> -->
                 </tr>
             </thead>
             <tbody>
                 <?php if (!empty($items)): ?>
                     <?php foreach ($items as $i => $item): ?>
                         <tr>
-                            <td class="text-center"><?php echo $i + 1; ?></td>
+                            <td class="text-center"><?= $i + 1; ?></td>
+
                             <td class="text-left">
-                                <div class="item-description">
-                                    <?php if (!empty($item['item_desc']) || !empty($item['item_desc'])): ?>
-                                        <div class="item-details">
-                                            <?php echo htmlspecialchars($item['item_desc'] ?: $item['item_desc'] ?: ''); ?>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
+                                <?php if (!empty($item['item_desc'])): ?>
+                                    <?= htmlspecialchars($item['item_desc']); ?>
+                                <?php else: ?>
+                                    -
+                                <?php endif; ?>
                             </td>
-                            <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?: $item['item_uom'] ?: '-'); ?>
+
+                            <td class="text-center">
+                                <?= htmlspecialchars($item['uom'] ?? $item['item_uom'] ?? '-'); ?>
                             </td>
-                            <td class="text-center"><?php echo number_format($item['qty'], 2); ?></td>
-                            
-                         </tr>
+
+                            <td class="text-center">
+                                <?= number_format($item['qty'] ?? 0, 2); ?>
+                            </td>
+                        </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="8" class="text-center" style="padding:20px; color:#999;">No items found</td>
+                        <td colspan="4" class="text-center" style="padding:20px;color:#999;">
+                            No items found
+                        </td>
                     </tr>
                 <?php endif; ?>
             </tbody>
-            <tfoot>
-                <!-- <tr>
-                    <th colspan="7" class="text-right">Transport, Packing & Courier</th>
-                    <th class="text-right"><?php echo number_format($record['handling_charges'] ?? 0, 2); ?></th>
-                </tr> -->
-                <!-- <tr class="grand-total">
-                    <th colspan="7" class="text-right">GRAND TOTAL</th>
-                    <th class="text-right"><?php echo number_format($final_total, 2); ?></th>
-                </tr> -->
-            </tfoot>
         </table>
+
 
 
 
@@ -470,10 +465,29 @@
         <button type="button" class="btn btn-success" onclick="window.print()">
             🖨️ Print
         </button>
-      
-    </div>
-    
+        <button id="exportExcel" class="btn btn-success">
+            Export to Excel
+        </button>
 
+    </div>
+    <script>
+        document.getElementById("exportExcel").addEventListener("click", function () {
+
+            var table = document.getElementById("content-table");
+            var html = table.outerHTML;
+
+            // Excel MIME type
+            var uri = 'data:application/vnd.ms-excel;charset=utf-8,' + encodeURIComponent(html);
+
+            var link = document.createElement("a");
+            link.href = uri;
+            link.download = "items.xls";
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    </script>
 
 </body>
 

@@ -229,3 +229,8 @@ END//
 03-12-2025
 
 ALTER TABLE `tender_dc_item_info` ADD `item_desc` TEXT NULL AFTER `item_id`;
+
+
+03-12-2025
+ALTER TABLE `tender_quotation_info` ADD `currency_id` INT(11) NULL AFTER `other_charges`;
+ 

@@ -31,15 +31,20 @@
                     <div class="form-group col-md-3">
                         <label>Customer</label>
                         <div class="form-group">
-                            <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control" '); ?>
+                            <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control select2" '); ?>
                         </div>
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="srch_tender_enquiry_id">Tender RFQ No</label>
-                        <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'All'] + $tender_enquiry_opt, $srch_tender_enquiry_id, 'id="srch_tender_enquiry_id" class="form-control"'); ?>
+                        <label>Customer Code</label>
+                        <?php echo form_dropdown('srch_customer_code', ['' => 'Select Customer Code'] + $customer_code_opt, set_value('srch_customer_code', $srch_customer_code), 'id="srch_customer_code" class="form-control select2" style:"width:100%"'); ?>
                     </div>
                 </div>
                 <div class="row">
+                    <div class="form-group col-md-3">
+                        <label for="srch_tender_enquiry_id">Tender RFQ No</label>
+                        <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'All'] + $tender_enquiry_opt, $srch_tender_enquiry_id, 'id="srch_tender_enquiry_id" class="form-control select2"'); ?>
+                    </div>
+
                     <div class="form-group col-md-3">
                         <label>Vendor</label>
                         <?php echo form_dropdown('srch_vendor_id', ['' => 'All'] + $vendor_opt, $srch_vendor_id, 'id="srch_vendor_id" class="form-control select2" style="width:100%"'); ?>
@@ -75,6 +80,7 @@
                         <th>Enquiry Date</th>
                         <th>Company / RFQ No</th>
                         <th>Customer</th>
+                        <th>Customer Code</th>
                         <th>Vendor Enquiry No</th>
                         <th>Vendor Name</th>
                         <th>Enquiry Status </th>
@@ -86,49 +92,49 @@
                 </thead>
                 <tbody>
                     <?php if (!empty($record_list)): ?>
-                    <?php foreach ($record_list as $j => $row): ?>
-                    <tr>
-                        <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
-                        <td><?php echo date('d-m-Y', strtotime($row['enquiry_date'])); ?></td>
-                        <td><strong><?php echo $row['company_name']; ?></strong>
-                            <br>
-                            <small class="label label-success"><?php echo  $row['tender_details']; ?></small>
-                        </td>
-                        <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
-                        <td><?php echo htmlspecialchars($row['enquiry_no']); ?></td>
-                        <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
-                        <td><?php echo htmlspecialchars($row['vendor_rate_enquiry_status'] ?? 'Prepared RFQ'); ?></td>
-                        <td><?php echo htmlspecialchars($row['status'] ?? '-'); ?></td>
-                        <!-- <td><?php echo $row['opening_date'] ? date('d-m-Y H:i', strtotime($row['opening_date'])) : '-'; ?> -->
-                        </td>
-                        <td><?php echo $row['closing_date'] ? date('d-m-Y H:i', strtotime($row['closing_date'])) : '-'; ?>
-                        </td>
+                        <?php foreach ($record_list as $j => $row): ?>
+                            <tr>
+                                <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
+                                <td><?php echo date('d-m-Y', strtotime($row['enquiry_date'])); ?></td>
+                                <td><strong><?php echo $row['company_name']; ?></strong>
+                                    <br>
+                                    <small class="label label-success"><?php echo $row['tender_details']; ?></small>
+                                </td>
+                                <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
+                                <td><?php echo htmlspecialchars($row['enquiry_no']); ?></td>
+                                <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
+                                <td><?php echo htmlspecialchars($row['vendor_rate_enquiry_status'] ?? 'Prepared RFQ'); ?></td>
+                                <td><?php echo htmlspecialchars($row['status'] ?? '-'); ?></td>
+                                <!-- <td><?php echo $row['opening_date'] ? date('d-m-Y H:i', strtotime($row['opening_date'])) : '-'; ?> -->
+                                </td>
+                                <td><?php echo $row['closing_date'] ? date('d-m-Y H:i', strtotime($row['closing_date'])) : '-'; ?>
+                                </td>
 
 
-                        <td class="text-center">
-                            <a href="<?php echo site_url('vendor-rate-enquiry-print/' . $row['vendor_rate_enquiry_id']); ?>"
-                                target="_blank" class="btn btn-info btn-xs" title="Print / View">
-                                <i class="fa fa-print"></i>
-                            </a>
-                        </td>
-                        <td class="text-center">
-                            <a href="<?php echo site_url('vendor-rate-enquiry-edit/' . $row['vendor_rate_enquiry_id']); ?>"
-                                class="btn btn-primary btn-xs" title="Edit">
-                                <i class="fa fa-edit"></i>
-                            </a>
-                        </td>
-                        <td class="text-center">
-                            <button value="<?php echo $row['vendor_rate_enquiry_id']; ?>"
-                                class="del_record btn btn-danger btn-xs" title="Delete">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
+                                <td class="text-center">
+                                    <a href="<?php echo site_url('vendor-rate-enquiry-print/' . $row['vendor_rate_enquiry_id']); ?>"
+                                        target="_blank" class="btn btn-info btn-xs" title="Print / View">
+                                        <i class="fa fa-print"></i>
+                                    </a>
+                                </td>
+                                <td class="text-center">
+                                    <a href="<?php echo site_url('vendor-rate-enquiry-edit/' . $row['vendor_rate_enquiry_id']); ?>"
+                                        class="btn btn-primary btn-xs" title="Edit">
+                                        <i class="fa fa-edit"></i>
+                                    </a>
+                                </td>
+                                <td class="text-center">
+                                    <button value="<?php echo $row['vendor_rate_enquiry_id']; ?>"
+                                        class="del_record btn btn-danger btn-xs" title="Delete">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
                     <?php else: ?>
-                    <tr>
-                        <td colspan="12" class="text-center text-danger">No records found.</td>
-                    </tr>
+                        <tr>
+                            <td colspan="12" class="text-center text-danger">No records found.</td>
+                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -148,68 +154,68 @@
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
 
 <script>
-jQuery(function($) {
-    // Initialize Select2 for better UI
-    $('.select2').select2();
+    jQuery(function ($) {
+        // Initialize Select2 for better UI
+        $('.select2').select2();
 
-    // Delete Confirmation
-    $(".del_record").click(function() {
-        if (confirm(
+        // Delete Confirmation
+        $(".del_record").click(function () {
+            if (confirm(
                 "Are you sure you want to mark this vendor rate enquiry as DELETED?\n\nIt will no longer appear in active lists."
-                )) {
-            const id = $(this).val();
-            $.post("<?php echo site_url('vendor/delete_record'); ?>", {
-                tbl: "vendor_rate_enquiry_info",
-                id: id,
-            }, function(res) {
-                alert(res);
-                location.reload();
-            }).fail(function() {
-                alert("Error processing request.");
-            });
-        }
-    });
-
-    // Load Tender Enquiries when Customer changes
-    $("#srch_customer_id").on("change", function() {
-        const customer_id = $(this).val();
-        const $enquiryDropdown = $("#srch_tender_enquiry_id");
-
-        if (!customer_id) {
-            $enquiryDropdown.html('<option value="">All</option>');
-            return;
-        }
-
-        $.ajax({
-            url: "<?php echo site_url('vendor/get_vendor_rate_enquiries_by_customer'); ?>",
-            type: "POST",
-            data: {
-                customer_id: customer_id
-            },
-            dataType: "json",
-            success: function(res) {
-                $enquiryDropdown.html('<option value="">All</option>');
-                if (res.length > 0) {
-                    $.each(res, function(i, row) {
-                        $enquiryDropdown.append(
-                            $("<option></option>").attr("value", row
-                                .tender_enquiry_id).text(row.display)
-                        );
-                    });
-                }
-            },
-            error: function() {
-                alert("Error loading enquiries");
+            )) {
+                const id = $(this).val();
+                $.post("<?php echo site_url('vendor/delete_record'); ?>", {
+                    tbl: "vendor_rate_enquiry_info",
+                    id: id,
+                }, function (res) {
+                    alert(res);
+                    location.reload();
+                }).fail(function () {
+                    alert("Error processing request.");
+                });
             }
         });
-    });
 
-    // Trigger change on page load if customer already selected
-    <?php if (!empty($srch_customer_id)): ?>
-    $("#srch_customer_id").trigger('change');
-    <?php if (!empty($srch_tender_enquiry_id)): ?>
-    $("#srch_tender_enquiry_id").val("<?php echo $srch_tender_enquiry_id; ?>");
-    <?php endif; ?>
-    <?php endif; ?>
-});
+        // Load Tender Enquiries when Customer changes
+        $("#srch_customer_id").on("change", function () {
+            const customer_id = $(this).val();
+            const $enquiryDropdown = $("#srch_tender_enquiry_id");
+
+            if (!customer_id) {
+                $enquiryDropdown.html('<option value="">All</option>');
+                return;
+            }
+
+            $.ajax({
+                url: "<?php echo site_url('vendor/get_vendor_rate_enquiries_by_customer'); ?>",
+                type: "POST",
+                data: {
+                    customer_id: customer_id
+                },
+                dataType: "json",
+                success: function (res) {
+                    $enquiryDropdown.html('<option value="">All</option>');
+                    if (res.length > 0) {
+                        $.each(res, function (i, row) {
+                            $enquiryDropdown.append(
+                                $("<option></option>").attr("value", row
+                                    .tender_enquiry_id).text(row.display)
+                            );
+                        });
+                    }
+                },
+                error: function () {
+                    alert("Error loading enquiries");
+                }
+            });
+        });
+
+        // Trigger change on page load if customer already selected
+        <?php if (!empty($srch_customer_id)): ?>
+            $("#srch_customer_id").trigger('change');
+            <?php if (!empty($srch_tender_enquiry_id)): ?>
+                $("#srch_tender_enquiry_id").val("<?php echo $srch_tender_enquiry_id; ?>");
+            <?php endif; ?>
+        <?php endif; ?>
+    });
 </script>

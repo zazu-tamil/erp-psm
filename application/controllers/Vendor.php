@@ -40,9 +40,9 @@ class Vendor extends CI_Controller
             $selected_items = $this->input->post('selected_items');
             $tender_enquiry_item_id = $this->input->post('tender_enquiry_item_id');
             //$category_ids = $this->input->post('category_id');
-           // $item_ids = $this->input->post('item_id');
+            // $item_ids = $this->input->post('item_id');
             $item_codes = $this->input->post('item_code');
-            $item_descs = $this->input->post('item_desc'); 
+            $item_descs = $this->input->post('item_desc');
             $uoms = $this->input->post('uom');
             $qtys = $this->input->post('qty');
 
@@ -51,7 +51,7 @@ class Vendor extends CI_Controller
                     if (!empty($item_descs[$index])) {
                         $insert_item_data = array(
                             'vendor_rate_enquiry_id' => $vendor_rate_enquiry_id,
-                            'tender_enquiry_item_id' => $tender_enquiry_item_id[$index] ?? 0, 
+                            'tender_enquiry_item_id' => $tender_enquiry_item_id[$index] ?? 0,
                             'item_code' => $item_codes[$index],
                             'item_desc' => $item_descs[$index] ?? '',
                             'uom' => $uoms[$index] ?? '',
@@ -240,22 +240,22 @@ class Vendor extends CI_Controller
                 // All arrays are posted with the SAME order as the rows
                 $vendor_rate_enquiry_item_ids = $this->input->post('vendor_rate_enquiry_item_id') ?? [];
                 $tender_enquiry_item_ids = $this->input->post('tender_enquiry_item_id') ?? [];
-                 
+
                 $item_codes = $this->input->post('item_code') ?? [];
                 $item_descs = $this->input->post('item_desc') ?? [];
                 $uoms = $this->input->post('uom') ?? [];
-                $qtys = $this->input->post('qty') ?? []; 
+                $qtys = $this->input->post('qty') ?? [];
 
                 foreach ($selected_idxs as $idx) {
-                  //if($tender_quotation_item_ids[$idx]){  
+                    //if($tender_quotation_item_ids[$idx]){  
                     $item_data = [
                         'vendor_rate_enquiry_id' => $id,
                         'tender_enquiry_item_id' => $tender_enquiry_item_ids[$idx] ?? 0,
-                       // 'category_id' => $category_ids[$idx] ?? 0,
+                        // 'category_id' => $category_ids[$idx] ?? 0,
                         'item_code' => $item_codes[$idx] ?? 0,
                         'item_desc' => $item_descs[$idx] ?? '',
                         'uom' => $uoms[$idx] ?? '',
-                        'qty' => $qtys[$idx] ?? 0, 
+                        'qty' => $qtys[$idx] ?? 0,
                         'status' => 'Active',
                         'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                         'updated_date' => date('Y-m-d H:i:s')
@@ -273,7 +273,7 @@ class Vendor extends CI_Controller
 
                         $this->db->insert('vendor_rate_enquiry_item_info', $item_data);
                     }
-                     
+
                 }
             }
 
@@ -319,7 +319,7 @@ class Vendor extends CI_Controller
             } else {
                 $this->session->set_flashdata('success', 'Vendor Rate Enquiry updated successfully.');
             }
-            redirect('vendor-rate-enquiry-edit/'. $id);
+            redirect('vendor-rate-enquiry-edit/' . $id);
         }
 
         // Load main record
@@ -442,6 +442,8 @@ class Vendor extends CI_Controller
         if (!$this->session->userdata(SESS_HD . 'logged_in')) {
             redirect();
         }
+
+         $data['title'] = 'Vendor Rate Enquiry Print';
 
         if (!$vendor_rate_enquiry_id) {
             show_404();
@@ -571,7 +573,7 @@ class Vendor extends CI_Controller
                     $item = [
                         'vendor_po_id' => $vendor_po_id,
                         'vendor_rate_enquiry_item_id' => $vendor_rate_enquiry_item_id[$idx] ?? 0,
-                       // 'category_id' => $category_id[$idx] ?? 0,
+                        // 'category_id' => $category_id[$idx] ?? 0,
                         'item_code' => $item_codes[$idx] ?? 0,
                         'item_desc' => $item_desc[$idx] ?? '',
                         'uom' => $uom[$idx] ?? '',
@@ -611,7 +613,7 @@ class Vendor extends CI_Controller
             $data['company_opt'][$row['company_id']] = $row['company_name'];
         }
 
-         // Customers
+        // Customers
         $query = $this->db->query("
         SELECT 
         customer_id, 
@@ -661,7 +663,7 @@ class Vendor extends CI_Controller
         $data['js'] = 'vendor/vendor-po-list.inc';
         $data['s_url'] = 'vendor-po-list';
         $data['title'] = 'Vendor PO List';
- 
+
         $where = "1 = 1";
 
         if (isset($_POST['srch_from_date'])) {
@@ -923,7 +925,7 @@ class Vendor extends CI_Controller
                 // All arrays are posted with the SAME order as the rows
                 $vendor_po_item_ids = $this->input->post('vendor_po_item_id') ?? [];
                 $vendor_rate_enquiry_item_ids = $this->input->post('vendor_rate_enquiry_item_id') ?? [];
-                 
+
                 $item_codes = $this->input->post('item_code') ?? [];
                 $item_descs = $this->input->post('item_desc') ?? [];
                 $uoms = $this->input->post('uom') ?? [];
@@ -933,11 +935,11 @@ class Vendor extends CI_Controller
                 $amounts = $this->input->post('amount') ?? [];
 
                 foreach ($selected_idxs as $idx) {
-                  //if($tender_quotation_item_ids[$idx]){  
+                    //if($tender_quotation_item_ids[$idx]){  
                     $item_data = [
                         'vendor_po_id' => $vendor_po_id,
                         'vendor_rate_enquiry_item_id' => $vendor_rate_enquiry_item_ids[$idx] ?? 0,
-                       // 'category_id' => $category_ids[$idx] ?? 0,
+                        // 'category_id' => $category_ids[$idx] ?? 0,
                         'item_code' => $item_codes[$idx] ?? 0,
                         'item_desc' => $item_descs[$idx] ?? '',
                         'uom' => $uoms[$idx] ?? '',
@@ -963,13 +965,13 @@ class Vendor extends CI_Controller
                         $this->db->insert('vendor_po_item_info', $item_data);
                     }
                     $miss_item_ids[] = $vendor_po_item_ids[$idx];
-                     
+
                 }
                 // DELETE items which are not in the selected list
-                if (!empty($miss_item_ids)) {  
+                if (!empty($miss_item_ids)) {
                     $this->db->where('vendor_po_item_id', $vendor_po_item_ids[$idx]);
                     $this->db->where_not_in('vendor_po_item_id', $miss_item_ids);
-                    $this->db->update('vendor_po_item_info', ['status' => 'Deleted' , 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'), 'updated_date' => date('Y-m-d H:i:s')]);
+                    $this->db->update('vendor_po_item_info', ['status' => 'Deleted', 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'), 'updated_date' => date('Y-m-d H:i:s')]);
                 }
             }
 
@@ -1011,7 +1013,7 @@ class Vendor extends CI_Controller
             } else {
                 $this->session->set_flashdata('success', 'Vendor PO updated successfully.');
             }
-            redirect('vendor-po-edit/'. $vendor_po_id);
+            redirect('vendor-po-edit/' . $vendor_po_id);
         }
         // Load dependent dropdowns (same AJAX will refill others)
         $data['customer_opt'] = ['' => 'Select Customer'];
@@ -1517,7 +1519,7 @@ class Vendor extends CI_Controller
         $this->pagination->initialize($config);
         $data['pagination'] = $this->pagination->create_links();
 
-         $data['vendor_opt'] = [];
+        $data['vendor_opt'] = [];
 
 
         $sql = "
@@ -1577,7 +1579,7 @@ class Vendor extends CI_Controller
 
 
             $query = $this->db->query($sql);
-           
+
             foreach ($query->result_array() as $row) {
                 $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
             }
@@ -1639,8 +1641,8 @@ class Vendor extends CI_Controller
             $this->db->trans_start();
 
             // === 1. File Upload Settings ===
-            $upload_folder = 'vendor-pur-inward-documents/';         
-            $upload_path = FCPATH . $upload_folder;                 
+            $upload_folder = 'vendor-pur-inward-documents/';
+            $upload_path = FCPATH . $upload_folder;
 
             // Create directory if not exists
             if (!is_dir($upload_path)) {
@@ -1937,8 +1939,8 @@ class Vendor extends CI_Controller
                     $item = [
                         'vendor_quote_id' => $vendor_quote_id,
                         'vendor_rate_enquiry_item_id' => $vendor_rate_enquiry_item_id[$idx] ?? 0,
-                      //  'category_id' => $category_id[$idx] ?? 0,
-                     //   'item_id' => $item_id[$idx] ?? 0,
+                        //  'category_id' => $category_id[$idx] ?? 0,
+                        //   'item_id' => $item_id[$idx] ?? 0,
                         'item_code' => $item_codes[$idx] ?? '',
                         'item_desc' => $item_desc[$idx] ?? '',
                         'uom' => $uom[$idx] ?? '',
@@ -1976,7 +1978,7 @@ class Vendor extends CI_Controller
             $data['company_opt'][$row['company_id']] = $row['company_name'];
         }
 
-         // Customers
+        // Customers
         $query = $this->db->query("
         SELECT 
         customer_id, 
@@ -2284,32 +2286,32 @@ class Vendor extends CI_Controller
             // Re-insert only selected (checked) items
             $selected_idxs = $this->input->post('selected_items') ?? [];
 
-           /* if (!empty($selected_items)) {
-                foreach ($selected_items as $idx) {
-                    $item = [
-                        'vendor_quote_id' => $vendor_quote_id,
-                        'vendor_rate_enquiry_item_id' => $this->input->post("vendor_rate_enquiry_item_id")[$idx] ?? 0,
-                        'category_id' => $this->input->post("category_id")[$idx] ?? 0,
-                        'item_id' => $this->input->post("item_id")[$idx] ?? 0,
-                        'item_desc' => $this->input->post("item_desc")[$idx] ?? '',
-                        'uom' => $this->input->post("uom")[$idx] ?? '',
-                        'qty' => $this->input->post("qty")[$idx] ?? 0,
-                        'rate' => $this->input->post("rate")[$idx] ?? 0,
-                        'gst' => $this->input->post("gst")[$idx] ?? 0,
-                        'amount' => $this->input->post("amount")[$idx] ?? 0,
-                        'status' => 'Active',
-                        'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
-                        'updated_date' => date('Y-m-d H:i:s'),
-                    ];
-                    $this->db->insert('vendor_quote_item_info', $item);
-                }
-            }*/
+            /* if (!empty($selected_items)) {
+                 foreach ($selected_items as $idx) {
+                     $item = [
+                         'vendor_quote_id' => $vendor_quote_id,
+                         'vendor_rate_enquiry_item_id' => $this->input->post("vendor_rate_enquiry_item_id")[$idx] ?? 0,
+                         'category_id' => $this->input->post("category_id")[$idx] ?? 0,
+                         'item_id' => $this->input->post("item_id")[$idx] ?? 0,
+                         'item_desc' => $this->input->post("item_desc")[$idx] ?? '',
+                         'uom' => $this->input->post("uom")[$idx] ?? '',
+                         'qty' => $this->input->post("qty")[$idx] ?? 0,
+                         'rate' => $this->input->post("rate")[$idx] ?? 0,
+                         'gst' => $this->input->post("gst")[$idx] ?? 0,
+                         'amount' => $this->input->post("amount")[$idx] ?? 0,
+                         'status' => 'Active',
+                         'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                         'updated_date' => date('Y-m-d H:i:s'),
+                     ];
+                     $this->db->insert('vendor_quote_item_info', $item);
+                 }
+             }*/
 
             if (!empty($selected_idxs)) {
                 // All arrays are posted with the SAME order as the rows
                 $vendor_quote_item_ids = $this->input->post('vendor_quote_item_id') ?? [];
                 $vendor_rate_enquiry_item_ids = $this->input->post('vendor_rate_enquiry_item_id') ?? [];
-                 
+
                 $item_codes = $this->input->post('item_code') ?? [];
                 $item_descs = $this->input->post('item_desc') ?? [];
                 $uoms = $this->input->post('uom') ?? [];
@@ -2319,11 +2321,11 @@ class Vendor extends CI_Controller
                 $amounts = $this->input->post('amount') ?? [];
 
                 foreach ($selected_idxs as $idx) {
-                  //if($tender_quotation_item_ids[$idx]){  
+                    //if($tender_quotation_item_ids[$idx]){  
                     $item_data = [
                         'vendor_quote_id' => $vendor_quote_id,
                         'vendor_rate_enquiry_item_id' => $vendor_rate_enquiry_item_ids[$idx] ?? 0,
-                       // 'category_id' => $category_ids[$idx] ?? 0,
+                        // 'category_id' => $category_ids[$idx] ?? 0,
                         'item_code' => $item_codes[$idx] ?? 0,
                         'item_desc' => $item_descs[$idx] ?? '',
                         'uom' => $uoms[$idx] ?? '',
@@ -2349,15 +2351,15 @@ class Vendor extends CI_Controller
                         $this->db->insert('vendor_quote_item_info', $item_data);
                     }
                     $miss_item_ids[] = $vendor_quote_item_ids[$idx];
-                     
+
                 }
                 // DELETE items which are not in the selected list
-                if (!empty($miss_item_ids)) {  
+                if (!empty($miss_item_ids)) {
                     $this->db->where('vendor_quote_id', $vendor_quote_id);
                     $this->db->where_not_in('vendor_quote_item_id', $miss_item_ids);
-                    $this->db->update('vendor_quote_item_info', ['status' => 'Deleted' , 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'), 'updated_date' => date('Y-m-d H:i:s')]);
+                    $this->db->update('vendor_quote_item_info', ['status' => 'Deleted', 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'), 'updated_date' => date('Y-m-d H:i:s')]);
                 }
-            }    
+            }
 
             $this->db->trans_complete();
 
@@ -3109,6 +3111,19 @@ class Vendor extends CI_Controller
             $where .= " AND a.tender_enquiry_id = '" . $this->db->escape_str($srch_tender_enquiry_id) . "'";
         }
 
+        // Customer |Code Filter
+        if ($this->input->post('srch_customer_code') !== null) {
+            $data['srch_customer_code'] = $srch_customer_code = $this->input->post('srch_customer_code');
+            $this->session->set_userdata('srch_customer_code', $srch_customer_code);
+        } elseif ($this->session->userdata('srch_customer_code')) {
+            $data['srch_customer_code'] = $srch_customer_code = $this->session->userdata('srch_customer_code');
+        } else {
+            $data['srch_customer_code'] = $srch_customer_code = '';
+        }
+        if (!empty($srch_customer_code)) {
+            $where .= " AND c.customer_code = '" . $this->db->escape_str($srch_customer_code) . "'";
+        }
+
         // Vendor Filter
         if ($this->input->post('srch_vendor_id') !== null) {
             $data['srch_vendor_id'] = $srch_vendor_id = $this->input->post('srch_vendor_id');
@@ -3124,6 +3139,12 @@ class Vendor extends CI_Controller
 
 
         $this->db->from('vendor_rate_enquiry_info a');
+        $this->db->join(
+            'customer_info c',
+            "a.customer_id = c.customer_id AND c.status = 'Active'",
+            'left'
+        );
+
         $this->db->where('a.status !=', 'Delete');
         $this->db->where($where);
         $this->db->where("DATE(a.enquiry_date) BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'");
@@ -3199,6 +3220,21 @@ class Vendor extends CI_Controller
             $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
         }
 
+        $sql = "
+            SELECT 
+            a.customer_id,
+            b.customer_code
+            FROM vendor_rate_enquiry_info as a 
+            left join customer_info as b on a.customer_id = b.customer_id and b.`status`='Active'
+            WHERE a.status = 'Active' 
+            group by b.customer_id
+            ORDER BY b.customer_id desc
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['customer_code_opt'][$row['customer_code']] = $row['customer_code'];
+        }
+
         $data['vendor_opt'] = ['' => 'All'];
         $sql = "SELECT vendor_id, vendor_name FROM vendor_info WHERE status = 'Active' ORDER BY vendor_name";
         $query = $this->db->query($sql);
@@ -3227,6 +3263,8 @@ class Vendor extends CI_Controller
                 $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_details'];
             }
         }
+
+
 
         $this->load->view('page/vendor/vendor-rate-enquiry-list', $data);
     }
@@ -3379,10 +3417,10 @@ class Vendor extends CI_Controller
                 'vendor_po_id' => $this->input->post('srch_vendor_po_id'),
                 'vendor_contact_person_id' => $this->input->post('srch_vendor_contact_person_id'),
                 'invoice_date' => $this->input->post('invoice_date'),
-                'invoice_no' => $this->input->post('invoice_no'), 
-                'vat_payer_purchase_grp' => $this->input->post('vat_payer_purchase_grp'), 
-                'declaration_no' => $this->input->post('declaration_no'), 
-                'declaration_date' => $this->input->post('declaration_date'), 
+                'invoice_no' => $this->input->post('invoice_no'),
+                'vat_payer_purchase_grp' => $this->input->post('vat_payer_purchase_grp'),
+                'declaration_no' => $this->input->post('declaration_no'),
+                'declaration_date' => $this->input->post('declaration_date'),
                 'remarks' => $this->input->post('remarks'),
                 'purchase_bill_upload' => 'vendor-pur-invoice-documents/' . $dc_upload,
                 'status' => $this->input->post('status'),
@@ -3477,17 +3515,17 @@ class Vendor extends CI_Controller
 
         $data['vendor_opt'] = [];
         $data['vat_payer_purchase_opt'] = [
-                                        '' => 'Select VAT Payer Purchase Category', 
-                                        'Standard Rated Domestic Purchases at 5% (Line 8 of the VAT Return)' => 'Standard Rated Domestic Purchases at 5% (Line 8 of the VAT Return)',
-                                        'Standard Rated Domestic Purchases at 10% (Line 8 of the VAT Return)' => 'Standard Rated Domestic Purchases at 10% (Line 8 of the VAT Return)',
-                                        'Import subject to VAT paid at customs (Line 9 of the VAT Return)' => 'Import subject to VAT paid at customs (Line 9 of the VAT Return)',
-                                        'Imports subject to deferral at customs (Line 10 of the VAT Return)' => 'Imports subject to deferral at customs (Line 10 of the VAT Return)', 
-                                        'Import subject to VAT accounted for through reverse charge mechanism at 5% (Line 11 of the VAT Return)' => 'Import subject to VAT accounted for through reverse charge mechanism at 5% (Line 11 of the VAT Return)',
-                                        'Import subject to VAT accounted for through reverse charge mechanism at 10% (Line 11 of the VAT Return)' => 'Import subject to VAT accounted for through reverse charge mechanism at 10% (Line 11 of the VAT Return)',
-                                        'Purchases subject to domestic reverse charge mechanism (Line 12 of the VAT Return)' => 'Purchases subject to domestic reverse charge mechanism (Line 12 of the VAT Return)',
-                                        'Purchases from non-register taxpayers, zero-rated/ exempt purchases (Line 13 of the VAT Return)' => 'Purchases from non-register taxpayers, zero-rated/ exempt purchases (Line 13 of the VAT Return)',
-                                    ];
-        
+            '' => 'Select VAT Payer Purchase Category',
+            'Standard Rated Domestic Purchases at 5% (Line 8 of the VAT Return)' => 'Standard Rated Domestic Purchases at 5% (Line 8 of the VAT Return)',
+            'Standard Rated Domestic Purchases at 10% (Line 8 of the VAT Return)' => 'Standard Rated Domestic Purchases at 10% (Line 8 of the VAT Return)',
+            'Import subject to VAT paid at customs (Line 9 of the VAT Return)' => 'Import subject to VAT paid at customs (Line 9 of the VAT Return)',
+            'Imports subject to deferral at customs (Line 10 of the VAT Return)' => 'Imports subject to deferral at customs (Line 10 of the VAT Return)',
+            'Import subject to VAT accounted for through reverse charge mechanism at 5% (Line 11 of the VAT Return)' => 'Import subject to VAT accounted for through reverse charge mechanism at 5% (Line 11 of the VAT Return)',
+            'Import subject to VAT accounted for through reverse charge mechanism at 10% (Line 11 of the VAT Return)' => 'Import subject to VAT accounted for through reverse charge mechanism at 10% (Line 11 of the VAT Return)',
+            'Purchases subject to domestic reverse charge mechanism (Line 12 of the VAT Return)' => 'Purchases subject to domestic reverse charge mechanism (Line 12 of the VAT Return)',
+            'Purchases from non-register taxpayers, zero-rated/ exempt purchases (Line 13 of the VAT Return)' => 'Purchases from non-register taxpayers, zero-rated/ exempt purchases (Line 13 of the VAT Return)',
+        ];
+
         $data['vendor_contact_opt'] = [];
         $sql = "
             SELECT vendor_id,vendor_name 
@@ -3622,7 +3660,7 @@ class Vendor extends CI_Controller
         $this->pagination->initialize($config);
         $data['pagination'] = $this->pagination->create_links();
 
-         $data['vendor_opt'] = [];
+        $data['vendor_opt'] = [];
 
 
         $sql = "
@@ -3682,7 +3720,7 @@ class Vendor extends CI_Controller
 
 
             $query = $this->db->query($sql);
-           
+
             foreach ($query->result_array() as $row) {
                 $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
             }
@@ -3744,8 +3782,8 @@ class Vendor extends CI_Controller
             $this->db->trans_start();
 
             // === 1. File Upload Settings ===
-            $upload_folder = 'vendor-pur-invoice-documents/';         
-            $upload_path = FCPATH . $upload_folder;                 
+            $upload_folder = 'vendor-pur-invoice-documents/';
+            $upload_path = FCPATH . $upload_folder;
 
             // Create directory if not exists
             if (!is_dir($upload_path)) {
@@ -3770,10 +3808,10 @@ class Vendor extends CI_Controller
                 'vendor_po_id' => $this->input->post('srch_vendor_po_id'),
                 'vendor_contact_person_id' => $this->input->post('srch_vendor_contact_person_id'),
                 'invoice_date' => $this->input->post('invoice_date'),
-                'invoice_no' => $this->input->post('invoice_no'), 
-                'vat_payer_purchase_grp' => $this->input->post('vat_payer_purchase_grp'), 
-                'declaration_no' => $this->input->post('declaration_no'), 
-                'declaration_date' => $this->input->post('declaration_date'),  
+                'invoice_no' => $this->input->post('invoice_no'),
+                'vat_payer_purchase_grp' => $this->input->post('vat_payer_purchase_grp'),
+                'declaration_no' => $this->input->post('declaration_no'),
+                'declaration_date' => $this->input->post('declaration_date'),
                 'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),

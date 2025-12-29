@@ -1,4 +1,8 @@
-<?php include_once(VIEWPATH . 'inc/header.php'); ?>
+<?php include_once(VIEWPATH . 'inc/header.php');
+// echo '<pre>';
+// print_r($_POST);
+// echo '</pre>';
+?>
 <section class="content-header">
     <h1><?php echo htmlspecialchars($title); ?></h1>
     <ol class="breadcrumb">
@@ -29,20 +33,37 @@
                     </div>
                     <div class="form-group col-md-3">
                         <label>Company</label>
-                        <?php echo form_dropdown('srch_company_id', $company_opt, set_value('srch_company_id', $srch_company_id), 'id="srch_company_id" class="form-control select2"'); ?>
+                        <?php echo form_dropdown('srch_company_id', $company_opt, set_value('srch_company_id', $srch_company_id), 'id="srch_company_id" class="form-control "'); ?>
                     </div>
                     <div class="form-group col-md-3">
                         <label>Customer</label>
-                        <?php echo form_dropdown('srch_customer_id', $customer_opt, set_value('srch_customer_id', $srch_customer_id), 'id="srch_customer_id" class="form-control select2"'); ?>
+                        <?php echo form_dropdown('srch_customer_id', $customer_opt, set_value('srch_customer_id', $srch_customer_id), 'id="srch_customer_id" class="form-control select2" style:"width:100%"'); ?>
                     </div>
                     <div class="form-group col-md-3">
+                        <label>Customer Contact Person</label> 
+                        <?php
+                        echo form_dropdown(
+                            'srch_customer_contact_id',
+                            ['' => 'All'] + $customer_contact_opt,
+                            set_value('srch_customer_contact_id' , $srch_customer_contact_id),
+                            'id="srch_srch_customer_contact_id" class="form-control" '
+                        );
+                        ?> 
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label>Customer Code</label>
+                        <?php echo form_dropdown('srch_customer_code',  ['' => 'All']+$customer_code_opt, set_value('srch_customer_code', $srch_customer_code), 'id="srch_customer_code" class="form-control select2" style:"width:100%"'); ?>
+                    </div>
+
+                    <div class="form-group col-md-3">
                         <label>Status</label>
-                        <?php echo form_dropdown('srch_status', $tender_status_opt, set_value('srch_status', $srch_status), 'id="srch_status" class="form-control select2"'); ?>
+                        <?php echo form_dropdown('srch_status', $tender_status_opt, set_value('srch_status', $srch_status), 'id="srch_status" class="form-control"'); ?>
                     </div>
                     <div class="form-group col-md-3 text-left">
                         <br>
                         <button type="submit" class="btn btn-success"><i class="fa fa-search"></i> Show</button>
                     </div>
+
                 </div>
             </form>
         </div>
@@ -69,7 +90,9 @@
                         <th>Enquiry Date</th>
                         <th>Company / RFQ No</th>
                         <th>Customer</th>
-                        <!-- <th>Opening Date</th> -->
+                        <th>Customer Code</th>
+                        <th>Customer Contact Name</th>
+                        <th>RFQ No</th>
                         <th>Closing Date</th>
                         <th>Tender Status</th>
                         <th class="text-center" colspan="2">Action</th>
@@ -84,12 +107,12 @@
                                 <td><?php echo date('d-m-Y', strtotime($row['enquiry_date'])); ?></td>
                                 <td><strong><?php echo $row['company_name']; ?></strong>
                                     <br>
-                                    <small
-                                        class="label label-success"><?php echo $row['tender_details']; ?></small>
+                                    <small class="label label-success"><?php echo $row['tender_details']; ?></small>
                                 </td>
                                 <td><?php echo $row['customer_name']; ?></td>
-                                <!-- <td><?php echo $row['opening_date'] ? date('d-m-Y H:i', strtotime($row['opening_date'])) : '-'; ?> -->
-                                </td>
+                                <td><?php echo $row['customer_code']; ?></td>
+                                <td><?php echo $row['contact_person_name']; ?></td>
+                                <td><?php echo $row['enquiry_no']; ?></td>
                                 <td><?php echo $row['closing_date'] ? date('d-m-Y H:i', strtotime($row['closing_date'])) : '-'; ?>
                                 </td>
                                 <?php
@@ -143,5 +166,6 @@
         </div>
     </div>
 </section>
+
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>

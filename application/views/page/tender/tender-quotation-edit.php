@@ -107,12 +107,32 @@
                                     <?php echo ($header['status'] == 'Inactive') ? 'checked' : ''; ?>>
                                 Inactive
                             </label>
-                        </div>
+                        </div> 
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            <label for="transport_charges">Transport Charges</label>
+                           <input type="number" step="0.01" name="transport_charges" id="transport_charges"
+                                class="form-control"
+                                placeholder="Enter transport charges"
+                                value="<?php echo $header['transport_charges']; ?>">
 
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="other_charges">Other Charges</label>
+                            <input type="number" step="0.01" name="other_charges" id="other_charges"
+                                class="form-control" placeholder="Enter other charges"
+                                value="<?php echo number_format($header['other_charges'], 2); ?>">
+                                
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="currency_id">Currency Symbol <span style="color:red;">*</span></label>
+                            <?php echo form_dropdown('currency_id', ['' => 'Select Currency'] + $currency_opt, set_value('currency_id' , $header['currency_id']), 'id="currency_id" class="form-control" required '); ?>
+                        </div>
                     </div>
                     <div class="row">
                         <div class="form-group col-md-6">
-                            <label for="remarks">Remarks</label>
+                            <label for="remarks">Note</label>
                             <textarea name="remarks" class="form-control" id="editor2_edit_modal" rows="7"
                                 placeholder="Enter your remarks"><?php echo htmlspecialchars($header['remarks']); ?></textarea>
                         </div>
@@ -179,7 +199,7 @@
                                             <div class="form-group">
                                                 <label>UOM</label>
                                                 <input type="text" name="uom[]" class="form-control"
-                                                    value="<?php echo htmlspecialchars($row['uom']); ?>" readonly>
+                                                    value="<?php echo htmlspecialchars($row['uom']); ?>">
                                             </div>
                                         </div>
 
@@ -188,7 +208,7 @@
                                                 <label>Quantity</label>
                                                 <input type="number" step="0.01" name="qty[]"
                                                     class="form-control qty-input"
-                                                    value="<?php echo htmlspecialchars($row['qty']); ?>" readonly>
+                                                    value="<?php echo htmlspecialchars($row['qty']); ?>">
                                             </div>
                                         </div>
 
