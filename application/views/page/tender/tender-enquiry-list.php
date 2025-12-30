@@ -91,7 +91,7 @@
                         <th>Enquiry Date</th>
                         <th>Company Refrerence No</th>
                         <th>Customer</th>
-                        <th>Customer Code</th>
+                        <!-- <th>Customer Code</th> -->
                         <th>Customer Contact Name</th>
                         <th>RFQ No</th>
                         <th>Closing Date</th>
@@ -111,7 +111,7 @@
                                     <small class="label label-success"><?php echo $row['tender_details']; ?></small>
                                 </td>
                                 <td><?php echo $row['customer_name']; ?></td>
-                                <td><?php echo $row['customer_code']; ?></td>
+                                <!-- <td><?php echo $row['customer_code']; ?></td> -->
                                 <td><?php echo $row['contact_person_name']; ?></td>
                                 <td><?php echo $row['enquiry_no']; ?></td>
                                 <td><?php echo $row['closing_date'] ? date('d-m-Y H:i', strtotime($row['closing_date'])) : '-'; ?>
