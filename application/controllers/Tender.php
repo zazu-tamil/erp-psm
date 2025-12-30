@@ -501,6 +501,18 @@ class Tender extends CI_Controller
         if (!empty($srch_customer_contact_id)) {
             $where .= " AND a.customer_contact_id = '" . $this->db->escape_str($srch_customer_contact_id) . "'";
         }
+        // Customer Contact Filter
+        if ($this->input->post('srch_tender_enquiry_id') !== null) {
+            $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = $this->input->post('srch_tender_enquiry_id');
+            $this->session->set_userdata('srch_tender_enquiry_id', $srch_tender_enquiry_id);
+        } elseif ($this->session->userdata('srch_tender_enquiry_id')) {
+            $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = $this->session->userdata('srch_tender_enquiry_id');
+        } else {
+            $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = '';
+        }
+        if (!empty($srch_tender_enquiry_id)) {
+            $where .= " AND a.tender_enquiry_id = '" . $this->db->escape_str($srch_tender_enquiry_id) . "'";
+        }
 
 
         // Status Filter
@@ -599,6 +611,24 @@ class Tender extends CI_Controller
 
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();
+
+        $sql = "SELECT 
+                a.tender_enquiry_id,
+                get_tender_info(a.tender_enquiry_id) AS tender_details,
+                b.company_name,
+                c.customer_name 
+            FROM tender_enquiry_info AS a 
+            LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status='Active' 
+            LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status='Active' 
+            WHERE a.status = 'Active'
+              and a.tender_status = 'Won' 
+            ORDER BY a.tender_enquiry_id, tender_details ASC";
+        $query = $this->db->query($sql);
+        $data['tender_enquiry_opt'] = array('' => 'Select');
+        foreach ($query->result_array() as $row) {
+            $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_details'];
+        }
+
 
         // === DROPDOWNS ===
         $data['company_opt'] = ['' => 'All'];
@@ -1191,6 +1221,8 @@ class Tender extends CI_Controller
 
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();
+
+
 
         // === DROPDOWNS ===
         $data['company_opt'] = ['' => 'All'];

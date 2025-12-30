@@ -51,8 +51,8 @@
                         ?> 
                     </div>
                     <div class="form-group col-md-3">
-                        <label>Customer Code</label>
-                        <?php echo form_dropdown('srch_customer_code',  ['' => 'All']+$customer_code_opt, set_value('srch_customer_code', $srch_customer_code), 'id="srch_customer_code" class="form-control select2" style:"width:100%"'); ?>
+                        <label for="srch_tender_enquiry_id">RFQ No</label>
+                        <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'All'] + $tender_enquiry_opt, $srch_tender_enquiry_id, 'id="srch_tender_enquiry_id" class="form-control select2"'); ?>
                     </div>
 
                     <div class="form-group col-md-3">
