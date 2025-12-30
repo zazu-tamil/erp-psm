@@ -76,7 +76,7 @@
 
   $("#srch_customer_id").on("change", function () {
     const customer_id = $(this).val();
-    const $enquiryDropdown = $("#srch_tender_enquiry_id");
+    const $enquiryDropdown = $("#srch_customer_rfq_id");
     const $container = $("#item_container");
 
     // Reset dependent dropdown and items
@@ -88,7 +88,7 @@
     if (!customer_id) return;
 
     $.ajax({
-      url: "<?php echo site_url('tender/get_vendor_rate_enquiries_by_customer'); ?>",
+      url: "<?php echo site_url('tender/get_tender_enquiries_by_customer_rfq'); ?>",
       type: "POST",
       data: {
         customer_id: customer_id,

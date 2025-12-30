@@ -502,16 +502,16 @@ class Tender extends CI_Controller
             $where .= " AND a.customer_contact_id = '" . $this->db->escape_str($srch_customer_contact_id) . "'";
         }
         // Customer Contact Filter
-        if ($this->input->post('srch_tender_enquiry_id') !== null) {
-            $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = $this->input->post('srch_tender_enquiry_id');
-            $this->session->set_userdata('srch_tender_enquiry_id', $srch_tender_enquiry_id);
-        } elseif ($this->session->userdata('srch_tender_enquiry_id')) {
-            $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = $this->session->userdata('srch_tender_enquiry_id');
+        if ($this->input->post('srch_customer_rfq_id') !== null) {
+            $data['srch_customer_rfq_id'] = $srch_customer_rfq_id = $this->input->post('srch_customer_rfq_id');
+            $this->session->set_userdata('srch_customer_rfq_id', $srch_customer_rfq_id);
+        } elseif ($this->session->userdata('srch_customer_rfq_id')) {
+            $data['srch_customer_rfq_id'] = $srch_customer_rfq_id = $this->session->userdata('srch_customer_rfq_id');
         } else {
-            $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = '';
+            $data['srch_customer_rfq_id'] = $srch_customer_rfq_id = '';
         }
-        if (!empty($srch_tender_enquiry_id)) {
-            $where .= " AND a.tender_enquiry_id = '" . $this->db->escape_str($srch_tender_enquiry_id) . "'";
+        if (!empty($srch_customer_rfq_id)) {
+            $where .= " AND a.tender_enquiry_id = '" . $this->db->escape_str($srch_customer_rfq_id) . "'";
         }
 
 
@@ -611,22 +611,24 @@ class Tender extends CI_Controller
 
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();
-
-        $sql = "SELECT 
+        $data['customer_rfq_opt'] = [];
+        if (!empty($srch_customer_id)) {
+            $sql = "SELECT 
                 a.tender_enquiry_id,
-                get_tender_info(a.tender_enquiry_id) AS tender_details,
+                a.enquiry_no AS customer_rfq,
                 b.company_name,
                 c.customer_name 
             FROM tender_enquiry_info AS a 
             LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status='Active' 
             LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status='Active' 
-            WHERE a.status = 'Active'
-              and a.tender_status = 'Won' 
-            ORDER BY a.tender_enquiry_id, tender_details ASC";
-        $query = $this->db->query($sql);
-        $data['tender_enquiry_opt'] = array('' => 'Select');
-        foreach ($query->result_array() as $row) {
-            $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_details'];
+            WHERE a.status = 'Active' 
+            and a.customer_id = '" . $srch_customer_id . "'
+            ORDER BY a.tender_enquiry_id, customer_rfq ASC";
+            $query = $this->db->query($sql);
+            $data['customer_rfq_opt'] = array('' => 'Select');
+            foreach ($query->result_array() as $row) {
+                $data['customer_rfq_opt'][$row['tender_enquiry_id']] = $row['customer_rfq'];
+            }
         }
 
 
@@ -4303,18 +4305,22 @@ class Tender extends CI_Controller
     }
 
 
-    public function get_vendor_rate_enquiries_by_customer()
+    public function get_tender_enquiries_by_customer_rfq()
     {
         $customer_id = $this->input->post('customer_id');
 
         $sql = "
-            SELECT 
-                a.tender_enquiry_id, 
-                get_tender_info(a.tender_enquiry_id) AS tender_details
+           SELECT 
+                a.tender_enquiry_id,
+                a.enquiry_no AS customer_rfq,
+                b.company_name,
+                c.customer_name 
             FROM tender_enquiry_info AS a 
+            LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status='Active' 
+            LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status='Active' 
             WHERE a.status = 'Active' 
-            AND a.customer_id = ?
-            ORDER BY a.tender_enquiry_id desc
+            and a.customer_id =  ?
+            ORDER BY a.tender_enquiry_id, customer_rfq ASC
         ";
 
         // FIX: Correct parameter order
@@ -4325,7 +4331,7 @@ class Tender extends CI_Controller
         foreach ($query->result_array() as $row) {
             $result[] = [
                 "tender_enquiry_id" => $row['tender_enquiry_id'],
-                "display" => $row['tender_details']
+                "display" => $row['customer_rfq']
             ];
         }
 

@@ -42,8 +42,8 @@
                         </div>
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="srch_tender_enquiry_id">Tender RFQ No</label>
-                        <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'All'] + $tender_enquiry_opt, $srch_tender_enquiry_id, 'id="srch_tender_enquiry_id" class="form-control select2"'); ?>
+                        <label for="srch_customer_rfq_id">Tender RFQ No</label>
+                        <?php echo form_dropdown('srch_customer_rfq_id', ['' => 'All'] + $customer_rfq_opt, $srch_customer_rfq_id, 'id="srch_customer_rfq_id" class="form-control select2"'); ?>
                     </div>
                     <div class="form-group col-md-3">
                         <label>Customer Contact Person</label> 
@@ -89,7 +89,7 @@
                     <tr>
                         <th class="text-center">S.No</th>
                         <th>Enquiry Date</th>
-                        <th>Company / RFQ No</th>
+                        <th>Company Refrerence No</th>
                         <th>Customer</th>
                         <th>Customer Code</th>
                         <th>Customer Contact Name</th>
