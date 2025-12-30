@@ -4303,6 +4303,33 @@ class Tender extends CI_Controller
     }
 
 
+    public function get_vendor_rate_enquiries_by_customer()
+    {
+        $customer_id = $this->input->post('customer_id');
 
+        $sql = "
+            SELECT 
+                a.tender_enquiry_id, 
+                get_tender_info(a.tender_enquiry_id) AS tender_details
+            FROM tender_enquiry_info AS a 
+            WHERE a.status = 'Active' 
+            AND a.customer_id = ?
+            ORDER BY a.tender_enquiry_id desc
+        ";
+
+        // FIX: Correct parameter order
+        $query = $this->db->query($sql, [$customer_id]);
+
+        $result = [];
+
+        foreach ($query->result_array() as $row) {
+            $result[] = [
+                "tender_enquiry_id" => $row['tender_enquiry_id'],
+                "display" => $row['tender_details']
+            ];
+        }
+
+        echo json_encode($result);
+    }
 
 }
