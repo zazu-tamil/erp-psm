@@ -106,18 +106,19 @@
                 </fieldset>
 
                 <!-- Item Details - DIV + GRID -->
-                <fieldset class="mt-4"> 
-                    
+                <fieldset class="mt-4">
+
                     <legend class="text-light-blue"><i class="fa fa-list"></i> Item Details</legend>
 
                     <div class="row">
                         <div class="col-md-3 form-group">
-                        
+
                             <label for="">Search Item & Load Item</label> <br>
-                            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#select_item_modal">
+                            <button type="button" class="btn btn-info" data-toggle="modal"
+                                data-target="#select_item_modal">
                                 <i class="fa fa-search"></i> Search Item & Load Item
                             </button>
- 
+
 
                         </div>
                         <div class="col-md-5 form-group ">
@@ -131,7 +132,7 @@
                             <label for="excelFile">Choose Excel File to Import</label>
                             <input type="file" class="form-control" id="excelFile" accept=".xls,.xlsx"
                                 placeholder="Choose Excel File to Import">
-                        </div> 
+                        </div>
                     </div>
 
 
@@ -149,10 +150,20 @@
 
                         <!-- Dynamic Rows -->
                         <div id="item_rows"></div>
+                        <div id="item_rows_add">
+                            
+                        </div>
+
+                        <button type="button" class="btn btn-primary" id="add_more_added" style="margin-top:10px;">
+                            <i class="fa fa-plus"></i> Add More Item
+                        </button>
+
                     </div>
- 
+
+
                 </fieldset>
             </div>
+
 
             <div class="box-footer text-right">
                 <a href="<?php echo site_url('tender-enquiry-list'); ?>" class="btn btn-default">
@@ -187,7 +198,7 @@
                             <select id="customer_id_two" name="customer_id" class="form-control" required="true">
                                 <option value="">Select Customer</option>
                                 <?php foreach ($customer_opt as $key => $val) { ?>
-                                <option value="<?= $key ?>"><?= $val ?></option>
+                                    <option value="<?= $key ?>"><?= $val ?></option>
                                 <?php } ?>
                             </select>
 
@@ -240,9 +251,9 @@
     </div>
 </div>
 <style>
-.text-danger {
-    color: red !important;
-}
+    .text-danger {
+        color: red !important;
+    }
 </style>
 
 <div class="modal fade" id="add_customer" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
@@ -382,13 +393,13 @@
         </div>
     </div>
 </div>
- 
- 
+
+
 
 <div class="modal fade" id="select_item_modal" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <form method="post" action="" id="frm_item_modal" >
+            <form method="post" action="" id="frm_item_modal">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -397,10 +408,11 @@
                     <input type="hidden" name="mode" value="Select items" />
                 </div>
                 <div class="modal-body">
-                     <div class="row">
+                    <div class="row">
                         <div class="col-md-6">
                             <label for="item_search_modal">Search Item Code</label>
-                            <input type="text" id="item_search_modal" class="form-control" placeholder="Search Item Code">
+                            <input type="text" id="item_search_modal" class="form-control"
+                                placeholder="Search Item Code">
                         </div>
                         <div class="col-md-6">
                             <label for="item_desc_modal">Search Item Desc</label>
@@ -409,14 +421,14 @@
                     </div>
                     <table class="table table-bordered  table-striped mt-3" id="item_search_table_modal">
                         <thead>
-                        <tr>
-                            <th>Item Code</th>
-                            <th width="50%">Item Desc</th>
-                            <th>UOM</th>
-                            <th>Table</th>
-                            <th>Date</th>
-                            <th>Select</th>
-                        </tr>
+                            <tr>
+                                <th>Item Code</th>
+                                <th width="50%">Item Desc</th>
+                                <th>UOM</th>
+                                <th>Table</th>
+                                <th>Date</th>
+                                <th>Select</th>
+                            </tr>
                         </thead>
                         <tbody></tbody>
                     </table>
@@ -430,7 +442,7 @@
     </div>
 </div>
 
- 
+
 
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
