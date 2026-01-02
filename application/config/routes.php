@@ -217,3 +217,15 @@ $route['voucher-type-list'] = 'accounts/voucher_type_list';
 $route['voucher-type-list/(:num)'] = 'accounts/voucher_type_list/$1';
 
 
+//Adit Routes
+$route['account-group-list'] = 'adit/account_group_list';
+$route['account-group-list/(:num)'] = 'adit/account_group_list/$1';
+
+$route['ledger-accounts-list'] = 'adit/ledger_accounts_list';
+$route['ledger-accounts-list/(:num)'] = 'adit/ledger_accounts_list/$1';
+
+$route['vouchers-list'] = 'adit/vouchers_list';
+$route['vouchers-list/(:num)'] = 'adit/vouchers_list/$1';
+
+$route['voucher-entries-list'] = 'adit/voucher_entries_list';
+$route['voucher-entries-list/(:num)'] = 'adit/voucher_entries_list/$1';

@@ -52,7 +52,7 @@ $current_page = $this->uri->segment(1, 0);
         'tender-po-invoice-edit',
         'tender-dc-add',
         'tender-dc-list',
-        'tender-dc-edit'        
+        'tender-dc-edit'
     ]) ? 'active' : '' ?>">
 
     <a href="#">
@@ -151,7 +151,7 @@ $current_page = $this->uri->segment(1, 0);
             </ul>
         </li>
 
-        
+
 
     </ul>
 </li>
@@ -261,8 +261,7 @@ $current_page = $this->uri->segment(1, 0);
             </ul>
         </li>
 
-         <li
-            class="treeview <?= in_array($current_page, ['vendor-purchase-bill-add']) ? 'active' : '' ?>">
+        <li class="treeview <?= in_array($current_page, ['vendor-purchase-bill-add']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-files-o"></i> Vendor Invoice/Bill
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
@@ -304,6 +303,55 @@ $current_page = $this->uri->segment(1, 0);
         <li class="<?= ($current_page === 'outward-list') ? 'active' : '' ?>">
             <a href="<?= site_url('outward-list') ?>">
                 <i class="fa fa-list-ul"></i> Outward Entery
+            </a>
+        </li>
+
+    </ul>
+</li>
+<li class="header">ADIT</li>
+
+<li class="treeview <?= in_array($this->uri->segment(1), [
+    'account-group-list',
+    'ledger-accounts-list',
+    'vouchers-list',
+    'voucher-entries-list'
+]) ? 'active' : '' ?>">
+
+    <a href="#">
+        <i class="fa fa-database"></i>
+        <span>ADIT</span>
+        <span class="pull-right-container">
+            <i class="fa fa-angle-left pull-right"></i>
+        </span>
+    </a>
+
+    <ul class="treeview-menu">
+
+        <!-- Account Groups -->
+        <li class="<?= ($this->uri->segment(1) == 'account-group-list') ? 'active' : '' ?>">
+            <a href="<?= site_url('account-group-list') ?>">
+                <i class="fa fa-sitemap"></i> Account Groups
+            </a>
+        </li>
+
+        <!-- Ledger Accounts -->
+        <li class="<?= ($this->uri->segment(1) == 'ledger-accounts-list') ? 'active' : '' ?>">
+            <a href="<?= site_url('ledger-accounts-list') ?>">
+                <i class="fa fa-book"></i> Ledger Accounts
+            </a>
+        </li>
+
+        <!-- Vouchers -->
+        <li class="<?= ($this->uri->segment(1) == 'vouchers-list') ? 'active' : '' ?>">
+            <a href="<?= site_url('vouchers-list') ?>">
+                <i class="fa fa-file-text"></i> Vouchers
+            </a>
+        </li>
+
+        <!-- Voucher Entries -->
+        <li class="<?= ($this->uri->segment(1) == 'voucher-entries-list') ? 'active' : '' ?>">
+            <a href="<?= site_url('voucher-entries-list') ?>">
+                <i class="fa fa-pencil-square-o"></i> Voucher Entries
             </a>
         </li>
 
