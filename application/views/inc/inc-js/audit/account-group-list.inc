@@ -6,7 +6,7 @@
       //alert(id);
       if (confirm("Are you sure you want to delete?")) {
         $.ajax({
-          url: "<?php echo site_url('adit/delete_record');?>",
+          url: "<?php echo site_url('audit/delete_record');?>",
           type: "post",
           data: { tbl: "account_groups", id: id },
           success: function (d) {
@@ -33,7 +33,7 @@
 
   function load_nature(nature, selected_id = 0, modal_id) {
     $.ajax({
-      url: "<?php echo site_url('adit/get_data'); ?>",
+      url: "<?php echo site_url('audit/get_data'); ?>",
       type: "POST",
       data: {
         tbl: "account_groups_parent_list",
@@ -61,7 +61,7 @@
     let id = $(this).val(); // group_id
 
     $.ajax({
-      url: "<?php echo site_url('adit/get_data'); ?>",
+      url: "<?php echo site_url('audit/get_data'); ?>",
       type: "POST",
       data: {
         tbl: "account_groups",

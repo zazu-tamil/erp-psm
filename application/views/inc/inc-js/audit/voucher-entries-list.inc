@@ -4,7 +4,7 @@
       let id = $(this).val();
 
       $.ajax({
-        url: "<?php echo site_url('adit/get_data'); ?>",
+        url: "<?php echo site_url('audit/get_data'); ?>",
         type: "post",
         data: { tbl: "vouchers_entries_list", id: id },
         dataType: "json",
@@ -48,7 +48,7 @@
       let id = $(this).val();
       if (confirm("Are you sure you want to delete?")) {
         $.ajax({
-          url: "<?php echo site_url('adit/delete_record'); ?>",
+          url: "<?php echo site_url('audit/delete_record'); ?>",
           type: "post",
           data: { tbl: "vouchers_entries_list", id: id },
           success: function (d) {

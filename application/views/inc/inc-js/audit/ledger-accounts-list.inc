@@ -4,9 +4,9 @@
     jQuery(function ($) {
         $(document).on("click", ".edit_record", function () {
             let id = $(this).val();
-            alert(id);
+           // alert(id);
             $.ajax({
-                url: "<?php echo site_url('adit/get_data'); ?>",
+                url: "<?php echo site_url('audit/get_data'); ?>",
                 type: "post",
                 data: { tbl: "ledger_accounts", id: id },
                 dataType: "json",
@@ -38,7 +38,7 @@
             let id = $(this).val();
             if (confirm("Are you sure you want to delete?")) {
                 $.ajax({
-                    url: "<?php echo site_url('adit/delete_record'); ?>",
+                    url: "<?php echo site_url('audit/delete_record'); ?>",
                     type: "post",
                     data: { tbl: "ledger_accounts", id: id },
                     success: function (d) {

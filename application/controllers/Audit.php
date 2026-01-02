@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Adit extends CI_Controller
+class Audit extends CI_Controller
 {
     public function account_group_list()
     {
@@ -9,7 +9,7 @@ class Adit extends CI_Controller
             redirect();
 
         $data['title'] = 'Account Group List';
-        $data['js'] = 'adit/account-group-list.inc';
+        $data['js'] = 'audit/account-group-list.inc';
 
         /* ================= ADD ================= */
         if ($this->input->post('mode') == 'Add') {
@@ -156,7 +156,7 @@ class Adit extends CI_Controller
 
         $data['pagination'] = $this->pagination->create_links();
 
-        $this->load->view('page/adit/account-group-list', $data);
+        $this->load->view('page/audit/account-group-list', $data);
     }
 
     public function ledger_accounts_list()
@@ -168,7 +168,7 @@ class Adit extends CI_Controller
 
         // ---------------- BASIC VIEW DATA ----------------
         $data['title'] = 'Ledger Accounts List';
-        $data['js'] = 'adit/ledger-accounts-list.inc';
+        $data['js'] = 'audit/ledger-accounts-list.inc';
 
         // ---------------- ADD LEDGER ----------------
         if ($this->input->post('mode') == 'Add') {
@@ -336,7 +336,7 @@ class Adit extends CI_Controller
         $data['total_records'] = $total_rows;
 
         // ---------- LOAD VIEW ----------
-        $this->load->view('page/adit/ledger-accounts-list', $data);
+        $this->load->view('page/audit/ledger-accounts-list', $data);
     }
 
     public function vouchers_list()
@@ -348,7 +348,7 @@ class Adit extends CI_Controller
 
         // ---------------- BASIC VIEW DATA ----------------
         $data['title'] = 'Vouchers List';
-        $data['js'] = 'adit/vouchers-list.inc';
+        $data['js'] = 'audit/vouchers-list.inc';
 
         // ---------------- ADD LEDGER ----------------
         if ($this->input->post('mode') == 'Add') {
@@ -510,7 +510,7 @@ class Adit extends CI_Controller
         $data['total_records'] = $total_rows;
 
         // ---------- LOAD VIEW ----------
-        $this->load->view('page/adit/vouchers-list', $data);
+        $this->load->view('page/audit/vouchers-list', $data);
     }
     public function voucher_entries_list()
     {
@@ -521,7 +521,7 @@ class Adit extends CI_Controller
 
         // ---------------- BASIC VIEW DATA ----------------
         $data['title'] = 'Voucher Entries List';
-        $data['js'] = 'adit/voucher-entries-list.inc';
+        $data['js'] = 'audit/voucher-entries-list.inc';
 
         // ---------------- ADD LEDGER ----------------
         if ($this->input->post('mode') == 'Add') {
@@ -697,7 +697,7 @@ class Adit extends CI_Controller
         $data['total_records'] = $total_rows;
 
         // ---------- LOAD VIEW ----------
-        $this->load->view('page/adit/voucher-entries-list', $data);
+        $this->load->view('page/audit/voucher-entries-list', $data);
     }
     public function get_data()
     {
