@@ -319,7 +319,7 @@ $current_page = $this->uri->segment(1, 0);
 
     <a href="#">
         <i class="fa fa-database"></i>
-        <span>ADIT</span>
+        <span>AUDIT</span>
         <span class="pull-right-container">
             <i class="fa fa-angle-left pull-right"></i>
         </span>
