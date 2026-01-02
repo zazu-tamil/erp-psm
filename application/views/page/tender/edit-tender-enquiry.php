@@ -215,7 +215,7 @@
                                         placeholder="Description"><?php echo $items['item_desc']; ?></textarea>
                                 </div>
 
-                                <div class="uom-block">
+                                <!-- <div class="uom-block">
                                     <?php
                                             echo form_dropdown(
                                                 'uom[]',
@@ -224,9 +224,12 @@
                                                 'class="form-control uom_select"'
                                             );
                                             ?>
-                                </div>
+                                </div> -->
 
-
+                                
+                                <div class="uom-block">  
+                                    <input type="text" name="uom[]" id="uom[]" class="form-control" value="<?php echo $items['uom']; ?>">
+                                </div> 
                                 <div class="qty-block">
                                     <input type="number" step="0.01" name="qty[]" class="form-control" placeholder="Qty"
                                         value="<?php echo $items['qty']; ?>">
