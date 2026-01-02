@@ -31,14 +31,13 @@
                     <tr>
                         <th>S.No</th>
                         <th>Customer Name</th>
-                        <th>Contact Name</th>
-                        <th>Address</th>
+                        <th>Customer Code</th>
+                        <th>Country</th>
                         <th>CRNO</th>
                         <th>Mobile</th>
                         <th>Email</th>
-                        <th class="text-center">Map Loqation</th>
-                        <th>Status</th>
-                        <th colspan="2" class="text-center">Action</th>
+                         <th class="text-center">Edit</th>
+                        <th class="text-center">Delete</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -48,8 +47,8 @@
                             <td><?php echo $ls['customer_name'] ?><br />
                                 <i class="badge"><?php echo $ls['gst'] ?></i>
                             </td>
-                            <td><?php echo $ls['contact_name']; ?></td>
-                            <td><?php echo $ls['address']; ?></td>
+                            <td><?php echo $ls['customer_code']; ?></td>
+                            <td><?php echo $ls['country']; ?></td>
                             <td><?php echo $ls['crno']; ?></td>
                             <td>
                                 <a href="tel:<?php echo $ls['mobile']; ?>"
@@ -58,18 +57,8 @@
                                     rel="noopener noreferrer"><?php echo $ls['mobile_alt']; ?></a>
                             </td>
                             <td><a href="<?php echo $ls['email'] ?>"><?php echo $ls['email']; ?></a></td>
-                            <td class="text-center">
-                                <?php if (!empty($ls['google_map_location'])): ?>
-                                    <a href="<?php echo $ls['google_map_location']; ?>" target="_blank"
-                                        class="btn btn-xs btn-info" title="View Location">
-                                        <i class="fa fa-map-marker"></i>
-                                    </a>
-                                <?php else: ?>
-                                    <span class="text-muted"><i class="fa fa-map-marker text-gray"></i></span>
-                                <?php endif; ?>
-                            </td>
-                            <td><?php echo $ls['status']; ?></td>
-
+                            
+ 
                             <td>
                                 <button data-toggle="modal" data-target="#edit_modal"
                                     value="<?php echo $ls['customer_id']; ?>" class="edit_record btn btn-primary btn-xs"
@@ -357,16 +346,7 @@
 
 
         </div>
-        <div class="box-footer">
-            <div class="form-group col-sm-6">
-                <label>Total Records : <?php echo $total_records; ?></label>
-            </div>
-            <div class="form-group col-sm-6">
-                <?php echo $pagination; ?>
-            </div>
-        </div>
-
-
+        
 
     </div>
 </section>

@@ -58,7 +58,7 @@
                             <td class="text-center"><?php echo ($j + 1); ?></td>
                             <td><?php echo $ls['group_name'] ?></td>
                             <td><?php echo $ls['nature'] ?></td>
-                            <td><?php echo $ls['parent_group'] ?></td>
+                            <td><?php echo $ls['group_name'] ?></td>
                             <td><?php echo $ls['sequence'] ?></td>
 
                             <td class="text-center">

@@ -115,3 +115,43 @@
     });
   });
 </script>
+ 
+
+<!-- Font Awesome -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+/>
+
+<!-- jQuery UI -->
+<link
+  rel="stylesheet"
+  href="https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css"
+/>
+<script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+
+<!-- DataTables -->
+<link
+  rel="stylesheet"
+  href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"
+/>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    if ($.fn.DataTable.isDataTable("#customer_list")) {
+      $("#customer_list").DataTable().clear().destroy();
+    }
+
+    $("#customer_list").DataTable({
+      paging: true,
+      lengthChange: true,
+      searching: true,
+      ordering: true,
+      info: true,
+      autoWidth: false,
+      pageLength: 10,
+      order: [[0, "asc"]],
+    });
+  });
+</script>

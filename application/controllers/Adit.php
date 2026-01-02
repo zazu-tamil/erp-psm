@@ -8,13 +8,10 @@ class Adit extends CI_Controller
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        /*if($this->session->userdata('m_is_admin') != USER_ADMIN) 
-        {
-            echo "<h3 style='color:red;'>Permission Denied</h3>"; exit;
-        }  */
         $data['title'] = 'Account Group List';
         $data['js'] = 'adit/account-group-list.inc';
 
+        /* ================= ADD ================= */
         if ($this->input->post('mode') == 'Add') {
             $ins = array(
                 'group_name' => $this->input->post('group_name'),
@@ -22,15 +19,12 @@ class Adit extends CI_Controller
                 'parent_group' => $this->input->post('parent_group'),
                 'sequence' => $this->input->post('sequence'),
                 'status' => $this->input->post('status'),
-
             );
-
-            //print_r($ins); exit;
-
             $this->db->insert('account_groups', $ins);
             redirect('account-group-list');
         }
 
+        /* ================= EDIT ================= */
         if ($this->input->post('mode') == 'Edit') {
             $upd = array(
                 'group_name' => $this->input->post('group_name'),
@@ -39,17 +33,14 @@ class Adit extends CI_Controller
                 'sequence' => $this->input->post('sequence'),
                 'status' => $this->input->post('status'),
             );
-
             $this->db->where('group_id', $this->input->post('group_id'));
             $this->db->update('account_groups', $upd);
-
             redirect('account-group-list');
         }
 
+        /* ================= FILTERS ================= */
+        $where = "a.status = 'Active'";
 
-        // === FILTERS ===
-        $where = "1 = 1";
-        // Company Filter
         if ($this->input->post('srch_group_id') !== null) {
             $data['srch_group_id'] = $srch_group_id = $this->input->post('srch_group_id');
             $this->session->set_userdata('srch_group_id', $srch_group_id);
@@ -58,6 +49,7 @@ class Adit extends CI_Controller
         } else {
             $data['srch_group_id'] = $srch_group_id = '';
         }
+
         if (!empty($srch_group_id)) {
             $where .= " AND a.group_id = '" . $this->db->escape_str($srch_group_id) . "'";
         }
@@ -70,25 +62,32 @@ class Adit extends CI_Controller
         } else {
             $data['srch_nature'] = $srch_nature = '';
         }
+
         if (!empty($srch_nature)) {
             $where .= " AND a.nature = '" . $this->db->escape_str($srch_nature) . "'";
         }
 
-
-
+        /* ================= PAGINATION ================= */
         $this->load->library('pagination');
-        $this->db->from('account_groups as a');
-        $this->db->where('a.status', 'Active');
-        $this->db->where($where);
-        $data['total_records'] = $cnt = $this->db->count_all_results();
 
-        $data['sno'] = $this->uri->segment(2);
+        $offset = ($this->uri->segment(2)) ? $this->uri->segment(2) : 0;
+
+        $sql_cnt = "
+            SELECT COUNT(DISTINCT a.group_id) AS cnt
+            FROM account_groups AS a
+            LEFT JOIN account_groups AS b 
+                ON a.group_id = b.parent_group 
+                AND b.status = 'Active'
+            WHERE $where
+        ";
+
+        $cnt = $this->db->query($sql_cnt)->row()->cnt;
+        $data['total_records'] = $cnt;
 
         $config['base_url'] = site_url('account-group-list/');
         $config['total_rows'] = $cnt;
         $config['per_page'] = 15;
         $config['uri_segment'] = 2;
-        //$config['num_links'] = 2; 
         $config['attributes'] = array('class' => 'page-link');
         $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
         $config['full_tag_close'] = '</ul>';
@@ -106,25 +105,36 @@ class Adit extends CI_Controller
         $config['last_tag_close'] = '</li>';
         $config['prev_link'] = "Prev";
         $config['next_link'] = "Next";
+
         $this->pagination->initialize($config);
 
+        /* ================= DATA QUERY ================= */
         $sql = "
-               select 
-                a.*
-               from account_groups as a
-               where a.status = 'Active'    
-                AND $where 
-               order by a.group_id desc
-               limit " . $config['per_page'] . "
-        ";
+        SELECT
+            a.*
+        FROM
+            account_groups AS a
+        LEFT JOIN account_groups AS b 
+            ON a.group_id = b.parent_group 
+            AND b.status = 'Active'
+        WHERE
+            $where
+        GROUP BY
+            a.group_id
+        ORDER BY
+            a.group_id DESC
+        LIMIT " . $config['per_page'] . " OFFSET " . $offset . "
+    ";
 
         $query = $this->db->query($sql);
 
         $data['record_list'] = array();
-
         foreach ($query->result_array() as $row) {
             $data['record_list'][] = $row;
         }
+
+        /* ================= EXTRA DATA ================= */
+        $data['sno'] = $offset + 1;
 
         $data['group_opt'] = array('' => 'All');
         $sql = "SELECT group_id, group_name FROM account_groups WHERE status = 'Active'";
@@ -132,16 +142,23 @@ class Adit extends CI_Controller
         foreach ($query->result_array() as $row) {
             $data['group_opt'][$row['group_id']] = $row['group_name'];
         }
-        //enum('Asset', 'Liability', 'Income', 'Expense')
-        $data['nature_opt'] = array('' => 'All', 'Asset' => 'Asset', 'Liability' => 'Liability', 'Income' => 'Income', 'Expense' => 'Expense');
+
+        $data['nature_opt'] = array(
+            '' => 'All',
+            'Asset' => 'Asset',
+            'Liability' => 'Liability',
+            'Income' => 'Income',
+            'Expense' => 'Expense'
+        );
 
         $this->db->order_by('sequence', 'ASC');
         $data['groups'] = $this->db->get('account_groups')->result();
 
-
         $data['pagination'] = $this->pagination->create_links();
+
         $this->load->view('page/adit/account-group-list', $data);
     }
+
     public function ledger_accounts_list()
     {
         // ---------------- AUTH CHECK ----------------
