@@ -20,7 +20,7 @@
                         <?php echo form_dropdown('srch_group_id', ['' => 'All'] + $group_opt, set_value('srch_group_id', $srch_group_id), 'id="srch_group_id" class="form-control"'); ?>
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="srch_group_id">Ledger Account <span style="color:red;">*</span></label>
+                        <label for="srch_ledger_account">Ledger Account <span style="color:red;">*</span></label>
                         <?php echo form_dropdown('srch_ledger_account', ['' => 'All'] + $ledger_opt, set_value('srch_ledger_account', $srch_ledger_account), 'id="srch_ledger_account" class="form-control"'); ?>
                     </div>
 
@@ -258,3 +258,26 @@
 </section>
 <!-- /.content -->
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
+<script>
+    $("#srch_group_id").change(function () {
+        const group_id = $(this).val();
+        $.post(
+            "<?php echo site_url('adit/get_data'); ?>",
+            {
+                tbl: "group_ledger_list_load",
+                id: group_id,
+            },
+            function (data) {
+                console.log(data);
+                const $cust = $("#srch_ledger_account");
+                $cust.empty().append('<option value="">Select Ledger</option>');
+                $.each(data, function (i, c) {
+                    $cust.append(
+                        `<option value="${c.ledger_id}">${c.ledger_name}</option>`
+                    );
+                });
+            },
+            "json"
+        );
+    });
+</script>

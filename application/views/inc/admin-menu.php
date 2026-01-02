@@ -308,7 +308,7 @@ $current_page = $this->uri->segment(1, 0);
 
     </ul>
 </li>
-<li class="header">ADIT</li>
+<li class="header">AUDIT</li>
 
 <li class="treeview <?= in_array($this->uri->segment(1), [
     'account-group-list',

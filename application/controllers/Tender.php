@@ -467,7 +467,7 @@ class Tender extends CI_Controller
         } elseif ($this->session->userdata('srch_customer_id')) {
             $srch_customer_id = $this->session->userdata('srch_customer_id');
         } else {
-            $srch_customer_id = '2';
+            $srch_customer_id = '';
         }
 
         $data['srch_customer_id'] = $srch_customer_id;

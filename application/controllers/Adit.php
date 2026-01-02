@@ -301,6 +301,7 @@ class Adit extends CI_Controller
             SELECT  ledger_id, ledger_name
             FROM ledger_accounts  
             WHERE status = 'Active' 
+            and group_id = '" . $this->db->escape_str($srch_group_id) . "'
             ORDER BY ledger_id desc";
         $query = $this->db->query($sql);
         $data['ledger_opt'] = [];
@@ -559,7 +560,7 @@ class Adit extends CI_Controller
         }
         if (!empty($srch_voucher_narration_id)) {
             $where .= " AND a.voucher_id = '" . $this->db->escape_str($srch_voucher_narration_id) . "'";
-        } 
+        }
         if ($this->input->post('srch_ledger_account_id') !== null) {
             $data['srch_ledger_account_id'] = $srch_ledger_account_id = $this->input->post('srch_ledger_account_id');
             $this->session->set_userdata('srch_ledger_account_id', $srch_ledger_account_id);
@@ -570,7 +571,7 @@ class Adit extends CI_Controller
         }
         if (!empty($srch_ledger_account_id)) {
             $where .= " AND a.ledger_id = '" . $this->db->escape_str($srch_ledger_account_id) . "'";
-        } 
+        }
 
 
         $this->load->library('pagination');
@@ -632,10 +633,17 @@ class Adit extends CI_Controller
 
         $data['ledger_accounts_list_opt'] = ['' => 'All'];
         $sql = "
-            SELECT ledger_id, ledger_name
-            FROM ledger_accounts 
-            WHERE status = 'Active' 
-            ORDER BY ledger_id desc";
+                SELECT
+                a.voucher_id,
+                b.ledger_id,
+                b.ledger_name
+
+                FROM voucher_entries as a 
+                LEFT JOIN ledger_accounts as b on a.ledger_id = b.ledger_id and b.status='Active'
+                WHERE a.status='Active'
+                and a.voucher_id = '" . $this->db->escape_str($srch_voucher_narration_id) . "'
+
+             ";
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
             $data['ledger_accounts_list_opt'][$row['ledger_id']] = $row['ledger_name'];
@@ -760,7 +768,54 @@ class Adit extends CI_Controller
             echo json_encode($query->row_array());
             return;
         }
+        /*if ($table == 'group_ledger_list_load') {
 
+            $sql = "
+               SELECT
+                a.ledger_id,
+                a.ledger_name
+                FROM
+                    ledger_accounts as a 
+                    JOIN account_groups as b on a.group_id = b.group_id and b.status='Active'
+                WHERE a.status='Active'
+                and a.group_id =  ?          
+            ";
+
+            $query = $this->db->query($sql, [$rec_id]);
+
+        }*/
+
+        if ($table == 'group_ledger_list_load') {
+            $query = $this->db->query("
+                SELECT
+                a.group_id,
+                a.ledger_id,
+                a.ledger_name
+                FROM
+                    ledger_accounts as a 
+                    JOIN account_groups as b on a.group_id = b.group_id and b.status='Active'
+                WHERE a.status='Active'
+                and a.group_id =  ?    
+            ", [$rec_id]);
+            $rec_list = $query->result_array();
+        }
+        if ($table == 'voucher_ledger_list_load') {
+            $query = $this->db->query("
+               SELECT
+                a.voucher_id,
+                b.ledger_id,
+                b.ledger_name
+
+                FROM voucher_entries as a 
+                LEFT JOIN ledger_accounts as b on a.ledger_id = b.ledger_id and b.status='Active'
+                WHERE a.status='Active'
+                and a.voucher_id = ?
+
+            ", [$rec_id]);
+            $rec_list = $query->result_array();
+        }
+        header('Content-Type: application/json');
+        echo json_encode($rec_list);
 
     }
 

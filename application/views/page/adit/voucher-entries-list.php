@@ -74,8 +74,8 @@
                                 <i class="label label-info"><?php echo $ls['voucher_type'] ?></i>
                             </td>
                             <td><?php echo $ls['ledger_name'] ?></td>
-                            <td><?php echo $ls['debit'] ?></td>
-                            <td><?php echo $ls['credit'] ?></td>
+                            <td><?php echo number_format($ls['debit'], 2) ?></td>
+                            <td><?php echo number_format($ls['credit'], 2) ?></td>
 
                             <td class="text-center">
                                 <button data-toggle="modal" data-target="#edit_modal" value="<?php echo $ls['entry_id'] ?>"
@@ -137,16 +137,23 @@
                                         );
                                         ?>
                                     </div>
+                                    <div class="form-group col-md-12">
+                                        <label for="payment_type">Payment Type</label>
+                                        <select name="payment_type" id="payment_type" class="form-control">
+                                            <option value="Debit">Debit</option>
+                                            <option value="Credit">Credit</option>
+                                        </select>
+                                    </div>
 
                                     <!-- Debit -->
-                                    <div class="form-group col-md-6">
+                                    <div class="form-group col-md-12" id="debit_div">
                                         <label>Debit</label>
                                         <input type="number" step="0.01" name="debit" class="form-control" id="debit"
                                             placeholder="0.00">
                                     </div>
 
                                     <!-- Credit -->
-                                    <div class="form-group col-md-6">
+                                    <div class="form-group col-md-12" id="credit_div">
                                         <label>Credit</label>
                                         <input type="number" step="0.01" name="credit" class="form-control" id="credit"
                                             placeholder="0.00">
@@ -222,15 +229,23 @@
                                         ?>
                                     </div>
 
+                                    <div class="form-group col-md-12">
+                                        <label for="payment_type">Payment Type</label>
+                                        <select name="payment_type" id="payment_type" class="form-control">
+                                            <option value="Debit">Debit</option>
+                                            <option value="Credit">Credit</option>
+                                        </select>
+                                    </div>
+
                                     <!-- Debit -->
-                                    <div class="form-group col-md-6">
+                                    <div class="form-group col-md-12" id="debit_div">
                                         <label>Debit</label>
                                         <input type="number" step="0.01" name="debit" class="form-control" id="debit"
                                             placeholder="0.00">
                                     </div>
 
                                     <!-- Credit -->
-                                    <div class="form-group col-md-6">
+                                    <div class="form-group col-md-12" id="credit_div">
                                         <label>Credit</label>
                                         <input type="number" step="0.01" name="credit" class="form-control" id="credit"
                                             placeholder="0.00">
@@ -273,3 +288,26 @@
 </section>
 <!-- /.content -->
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
+<script>
+    $("#srch_voucher_narration_id").change(function () {
+        const group_id = $(this).val();
+        $.post(
+            "<?php echo site_url('adit/get_data'); ?>",
+            {
+                tbl: "voucher_ledger_list_load",
+                id: group_id,
+            },
+            function (data) {
+                console.log(data);
+                const $cust = $("#srch_ledger_account_id");
+                $cust.empty().append('<option value="">Select Ledger</option>');
+                $.each(data, function (i, c) {
+                    $cust.append(
+                        `<option value="${c.ledger_id}">${c.ledger_name}</option>`
+                    );
+                });
+            },
+            "json"
+        );
+    });
+</script>
