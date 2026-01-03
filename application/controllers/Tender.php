@@ -119,7 +119,8 @@ class Tender extends CI_Controller
             }
 
             // Comment this out for debugging, uncomment after testing
-            redirect('tender-enquiry-list');
+            //redirect('tender-enquiry-list');
+            redirect('tender-enquiry-edit/' . $tender_enquiry_id);
 
         }
 
@@ -514,6 +515,22 @@ class Tender extends CI_Controller
             $where .= " AND a.tender_enquiry_id = '" . $this->db->escape_str($srch_customer_rfq_id) . "'";
         }
 
+         // Enquiry Filter
+
+         $having = "";
+        if ($this->input->post('srch_enquiry_no') !== null) {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->input->post('srch_enquiry_no');
+            $this->session->set_userdata('srch_enquiry_no', $srch_enquiry_no);
+        } elseif ($this->session->userdata('srch_enquiry_no')) {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->session->userdata('srch_enquiry_no');
+        } else {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = '';
+        }
+        if (!empty($srch_enquiry_no)) {
+            $where .= " or ( concat(ifnull(b.company_code,'') , '/', ifnull(a.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(a.customer_sno,''),  '/' , DATE_FORMAT(a.enquiry_date,'%Y') ) like '%" . $this->db->escape_str($srch_enquiry_no) . "%' ) ";
+        }
+
+
 
         // Status Filter
         if ($this->input->post('srch_status') !== null) {
@@ -585,6 +602,8 @@ class Tender extends CI_Controller
         $data['pagination'] = $this->pagination->create_links();
 
         // === FETCH RECORDS ===
+
+        // get_tender_info(a.tender_enquiry_id) as tender_details
         $sql = "
            SELECT 
                 a.*, 
@@ -595,7 +614,8 @@ class Tender extends CI_Controller
                 a.customer_contact_id,
                 d.contact_person_name,
                 a.enquiry_no,
-                get_tender_info(a.tender_enquiry_id) as tender_details
+                concat(ifnull(b.company_code,'') , '/', ifnull(a.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(a.customer_sno,''),  '/' , DATE_FORMAT(a.enquiry_date,'%Y') ) as tender_details
+               
             FROM tender_enquiry_info AS a
             LEFT JOIN company_info AS b 
                 ON a.company_id = b.company_id AND b.status = 'Active'
@@ -605,7 +625,8 @@ class Tender extends CI_Controller
                 ON a.customer_contact_id = d.customer_contact_id AND d.status = 'Active'
             WHERE a.status != 'Delete' 
             AND a.enquiry_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "' 
-            AND $where
+            AND $where            
+            $having
             ORDER BY a.tender_enquiry_id DESC
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
@@ -4292,7 +4313,8 @@ class Tender extends CI_Controller
         foreach ($query->result() as $row) {
             $result[] = [
                 'label' => $row->enq,       // what user sees 
-                'value' => $row->enq . ' [ ' . $row->enquiry_no . ' ]',        // filled in textbox
+                //'value' => $row->enq . ' [ ' . $row->enquiry_no . ' ]',        // filled in textbox
+                'value' => $row->enq,        // filled in textbox
                 'company_id' => $row->company_id,
                 'customer_id' => $row->customer_id,
                 'tender_enquiry_id' => $row->tender_enquiry_id
