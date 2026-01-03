@@ -229,3 +229,8 @@ $route['vouchers-list/(:num)'] = 'audit/vouchers_list/$1';
 
 $route['voucher-entries-list'] = 'audit/voucher_entries_list';
 $route['voucher-entries-list/(:num)'] = 'audit/voucher_entries_list/$1';
+
+//trial balance report routes
+$route['trial-balance-list'] = 'audit/trial_balance_list';
+$route['profit-loss-report'] = 'audit/profit_loss_report';
+ 

@@ -115,14 +115,20 @@
                                     <!-- Voucher Type -->
                                     <div class="form-group col-md-12">
                                         <label>Voucher</label>
-                                        <?php
-                                        echo form_dropdown(
-                                            'voucher_id',
-                                            $voucher_list_opt,
-                                            '',
-                                            'class="form-control" id="voucher_id" required'
-                                        );
-                                        ?>
+                                        <div class="input-group">
+                                            <?php
+                                            echo form_dropdown(
+                                                'voucher_id',
+                                                ['' => 'Select Voucher'] + $voucher_list_opt,
+                                                set_value('voucher_id'),
+                                                'id="srch_voucher_id" class="form-control" '
+                                            );
+                                            ?>
+                                            <span class="input-group-btn">
+                                                <button type="button" class="btn btn-info" data-toggle="modal"
+                                                    data-target="#add_voucher_id">Add New</button>
+                                            </span>
+                                        </div>
                                     </div>
 
                                     <!-- Ledger -->
@@ -273,6 +279,71 @@
                 </div>
             </div>
 
+            <div class="modal fade" id="add_voucher_id" role="dialog" aria-labelledby="scrollmodalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <form method="post" action="" id="frmadd_voucher" enctype="multipart/form-data">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                <h3 class="modal-title">Add Voucher</h3>
+                                <input type="hidden" name="mode" value="Add Voucher" />
+                            </div>
+
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label>Voucher Date</label>
+                                        <input type="date" name="voucher_date" class="form-control" id="voucher_date"
+                                            required value="<?php echo date('Y-m-d'); ?>">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Voucher Type</label>
+                                        <select name="voucher_type" class="form-control" id="voucher_type">
+                                            <option value="Journal">Journal</option>
+                                            <option value="Payment">Payment</option>
+                                            <option value="Receipt">Receipt</option>
+                                            <option value="Contra">Contra</option>
+                                            <option value="Sales">Sales</option>
+                                            <option value="Purchase">Purchase</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-12">
+                                        <label>Narration</label>
+                                        <textarea name="narration" class="form-control" rows="5"
+                                            placeholder="Enter your narration" id="narration"></textarea>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label>Status</label>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="status" value="Active" checked="true" />
+                                                Active
+                                            </label>
+                                        </div>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="status" value="InActive" /> InActive
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <input type="submit" name="btn_add_voucher" value="Save" class="btn btn-primary" />
+
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
         </div>
         <div class="box-footer">
             <div class="form-group col-sm-6">
@@ -309,5 +380,65 @@
             },
             "json"
         );
+    });
+
+    $(document).on("submit", "#frmadd_voucher", function (e) {
+        e.preventDefault();
+
+        let btn = $('input[name="btn_add_voucher"]');
+        btn.val("Saving...").prop("disabled", true);
+
+        let formData = $(this).serialize();
+
+        let voucher_date = $('#voucher_date').val().trim();
+        if (voucher_date === "") {
+            alert("Voucher Date is required.");
+            $('#voucher_date').focus();
+            enableButton();
+            return false;
+        }
+
+        $.ajax({
+            url: "<?php echo site_url('audit/ajax_add_master_inline'); ?>",
+            type: "POST",
+            data: formData,
+            dataType: "json",
+            success: function (response) {
+                if (response.status === "success") {
+
+                    // Append new one voucher to dropdown
+                    $("#srch_voucher_id")
+                        .append(new Option(response.name, response.id, true, true));
+                    // Append new two voucher to dropdown
+                    $("#srch_voucher_narration_id")
+                        .append(new Option(response.name, response.id, true, true));
+                    // Reset form
+                    $("#frmadd_voucher")[0].reset();
+
+                    // Close modal
+                    $("#add_voucher_id").modal("hide");
+
+                    // Success message
+                    $("#zazualert").html(`
+                    <div class="alert alert-success">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        ${response.message}
+                    </div>
+                `);
+                } else {
+                    alert("Failed to add voucher");
+                }
+            },
+            error: function (xhr) {
+                alert("Server Error");
+            },
+            complete: function () {
+                enableButton();
+            }
+        });
+
+        function enableButton() {
+            btn.val("Save").prop("disabled", false);
+        }
     });
 </script>

@@ -699,6 +699,203 @@ class Audit extends CI_Controller
         // ---------- LOAD VIEW ----------
         $this->load->view('page/audit/voucher-entries-list', $data);
     }
+    public function trial_balance_list()
+    {
+        // ---------- AUTH ----------
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data['title'] = 'Trial Balance';
+        $data['js'] = 'audit/trial-balance.inc';
+
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $this->session->set_userdata('srch_from_date', $this->input->post('srch_from_date'));
+            $this->session->set_userdata('srch_to_date', $this->input->post('srch_to_date'));
+        } elseif ($this->session->userdata('srch_from_date')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_to_date');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = date('Y-m-d');
+            $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
+        }
+
+
+        $sql = "
+            SELECT 
+                g.group_name,
+                g.sequence AS group_seq,
+                l.ledger_name,
+
+                /* Closing Debit */
+                CASE 
+                    WHEN (
+                        IFNULL(SUM(e.debit),0)
+                    - IFNULL(SUM(e.credit),0)
+                    + IF(l.opening_type='Debit', l.opening_balance, -l.opening_balance)
+                    ) > 0
+                    THEN (
+                        IFNULL(SUM(e.debit),0)
+                    - IFNULL(SUM(e.credit),0)
+                    + IF(l.opening_type='Debit', l.opening_balance, -l.opening_balance)
+                    )
+                    ELSE 0
+                END AS closing_debit,
+
+                /* Closing Credit */
+                CASE 
+                    WHEN (
+                        IFNULL(SUM(e.debit),0)
+                    - IFNULL(SUM(e.credit),0)
+                    + IF(l.opening_type='Debit', l.opening_balance, -l.opening_balance)
+                    ) < 0
+                    THEN ABS(
+                        IFNULL(SUM(e.debit),0)
+                    - IFNULL(SUM(e.credit),0)
+                    + IF(l.opening_type='Debit', l.opening_balance, -l.opening_balance)
+                    )
+                    ELSE 0
+                END AS closing_credit,
+                v.voucher_date
+
+            FROM ledger_accounts l
+            JOIN account_groups g 
+                ON g.group_id = l.group_id
+                AND g.status = 'Active'
+
+            LEFT JOIN voucher_entries e 
+                ON e.ledger_id = l.ledger_id
+                AND e.status = 'Active'
+
+            LEFT JOIN vouchers v 
+                ON v.voucher_id = e.voucher_id
+                AND v.status = 'Active' 
+            WHERE l.status = 'Active'
+            AND v.voucher_date BETWEEN '" . $srch_from_date . "' AND '" . $srch_to_date . "'
+
+            GROUP BY l.ledger_id
+            ORDER BY g.sequence, l.ledger_name;
+
+        ";
+
+
+        $query = $this->db->query($sql);
+        $data['record_list'] = $query->result_array();
+
+        /* ---------- TOTALS ---------- */
+        $data['total_debit'] = 0;
+        $data['total_credit'] = 0;
+
+        foreach ($data['record_list'] as $row) {
+            $data['total_debit'] += $row['closing_debit'];
+            $data['total_credit'] += $row['closing_credit'];
+        }
+
+        /* ---------- LOAD VIEW ---------- */
+        $this->load->view('page/audit/trial-balance', $data);
+    }
+    public function profit_loss_report()
+    {
+        // ---------- AUTH ----------
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data['title'] = 'Profit Loss Report';
+        $data['js'] = 'audit/profit-loss-report.inc';
+
+        // ---------- DATE FILTERS ----------
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $this->session->set_userdata('srch_from_date', $this->input->post('srch_from_date'));
+            $this->session->set_userdata('srch_to_date', $this->input->post('srch_to_date'));
+        } elseif ($this->session->userdata('srch_from_date')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_to_date');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = date('Y-m-d');
+            $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
+        } 
+       
+        $sql = "
+            SELECT
+                g.nature,
+                g.group_name,
+                g.sequence AS group_seq,
+                l.ledger_id,
+                l.ledger_name,
+                l.opening_balance,
+                l.opening_type,
+
+                -- Calculate net amount: (Debit - Credit + Opening)
+                (
+                    IFNULL(SUM(e.debit), 0)
+                    - IFNULL(SUM(e.credit), 0)
+                    + CASE 
+                        WHEN l.opening_type = 'Debit' THEN l.opening_balance
+                        WHEN l.opening_type = 'Credit' THEN -l.opening_balance
+                        ELSE 0
+                    END
+                ) AS net_amount
+
+            FROM ledger_accounts l
+
+            INNER JOIN account_groups g
+                ON g.group_id = l.group_id
+                AND g.status = 'Active'
+                AND g.nature IN ('Income', 'Expense')
+
+            LEFT JOIN voucher_entries e
+                ON e.ledger_id = l.ledger_id
+                AND e.status = 'Active'
+
+            LEFT JOIN vouchers v
+                ON v.voucher_id = e.voucher_id
+                AND v.status = 'Active' 
+            WHERE l.status = 'Active'
+            AND v.voucher_date BETWEEN ? AND ?
+            GROUP BY 
+                l.ledger_id,
+                g.nature,
+                g.group_name,
+                g.sequence,
+                l.ledger_name,
+                l.opening_balance,
+                l.opening_type
+
+            HAVING ABS(net_amount) > 0.01
+
+            ORDER BY 
+                g.nature DESC,
+                g.sequence,
+                l.ledger_name
+        ";
+
+        // Use query binding for security
+        $query = $this->db->query($sql, [$srch_from_date, $srch_to_date]);
+        $data['record_list'] = $query->result_array();
+
+        // ---------- CALCULATE TOTALS ----------
+        $data['total_income'] = 0;
+        $data['total_expense'] = 0;
+
+        foreach ($data['record_list'] as $row) {
+            if ($row['nature'] == 'Income') {
+                $data['total_income'] += abs($row['net_amount']);
+            } elseif ($row['nature'] == 'Expense') {
+                $data['total_expense'] += abs($row['net_amount']);
+            }
+        }
+
+        $data['net_profit'] = $data['total_income'] - $data['total_expense'];
+
+        // ---------- LOAD VIEW ----------
+        $this->load->view('page/audit/profit-loss-report', $data);
+    }
+
     public function get_data()
     {
         $table = $this->input->post('tbl');
@@ -834,6 +1031,29 @@ class Audit extends CI_Controller
         header('Content-Type: application/json');
         echo json_encode($rec_list);
 
+    }
+    public function ajax_add_master_inline()
+    {
+        if ($this->input->post('mode') == 'Add Voucher') {
+
+            $data = [
+                'voucher_date' => $this->input->post('voucher_date'),
+                'voucher_type' => $this->input->post('voucher_type'),
+                'narration' => $this->input->post('narration'),
+                'status' => $this->input->post('status')
+            ];
+
+            $this->db->insert('vouchers', $data);
+            $insert_id = $this->db->insert_id();
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Voucher added successfully!',
+                'id' => $insert_id,
+                'name' => $data['voucher_type'] . ' [ ' . $data['narration'] . ' ]',
+            ]);
+            exit;
+        }
     }
 
     public function delete_record()

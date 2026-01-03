@@ -314,8 +314,11 @@ $current_page = $this->uri->segment(1, 0);
     'account-group-list',
     'ledger-accounts-list',
     'vouchers-list',
-    'voucher-entries-list'
+    'voucher-entries-list',
+    'trial-balance-list',
+    'profit-loss-report'
 ]) ? 'active' : '' ?>">
+
 
     <a href="#">
         <i class="fa fa-database"></i>
@@ -352,6 +355,20 @@ $current_page = $this->uri->segment(1, 0);
         <li class="<?= ($this->uri->segment(1) == 'voucher-entries-list') ? 'active' : '' ?>">
             <a href="<?= site_url('voucher-entries-list') ?>">
                 <i class="fa fa-pencil-square-o"></i> Voucher Entries
+            </a>
+        </li>
+
+        <!-- Trial Balance -->
+        <li class="<?= ($this->uri->segment(1) == 'trial-balance-list') ? 'active' : '' ?>">
+            <a href="<?= site_url('trial-balance-list') ?>">
+                <i class="fa fa-balance-scale"></i> Trial Balance
+            </a>
+        </li>
+
+        <!-- Profit & Loss -->
+        <li class="<?= ($this->uri->segment(1) == 'profit-loss-report') ? 'active' : '' ?>">
+            <a href="<?= site_url('profit-loss-report') ?>">
+                <i class="fa fa-line-chart"></i> Profit &amp; Loss
             </a>
         </li>
 
