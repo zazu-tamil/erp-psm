@@ -516,8 +516,7 @@ class Tender extends CI_Controller
         }
 
          // Enquiry Filter
-
-         $having = "";
+ 
         if ($this->input->post('srch_enquiry_no') !== null) {
             $data['srch_enquiry_no'] = $srch_enquiry_no = $this->input->post('srch_enquiry_no');
             $this->session->set_userdata('srch_enquiry_no', $srch_enquiry_no);
@@ -560,14 +559,18 @@ class Tender extends CI_Controller
             'left'
         );
 
+        //echo $where;
+
         $this->db->where('a.status !=', 'Delete');
-        $this->db->where($where);
+       
 
         $this->db->where("DATE(a.enquiry_date) BETWEEN '" .
             $this->db->escape_str($srch_from_date) .
             "' AND '" .
             $this->db->escape_str($srch_to_date) .
             "'");
+
+             $this->db->where($where);
 
         $data['total_records'] = $this->db->count_all_results();
 
@@ -625,8 +628,7 @@ class Tender extends CI_Controller
                 ON a.customer_contact_id = d.customer_contact_id AND d.status = 'Active'
             WHERE a.status != 'Delete' 
             AND a.enquiry_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "' 
-            AND $where            
-            $having
+            AND $where    
             ORDER BY a.tender_enquiry_id DESC
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
@@ -4302,7 +4304,7 @@ class Tender extends CI_Controller
             LEFT JOIN customer_info AS c ON a.customer_id = c.customer_id AND c.status = 'Active'
             WHERE  a.`status` = 'Active' 
             having enq like '%" . $this->db->escape_like_str($term) . "%'
-            ORDER BY a.tender_enquiry_id, a.enquiry_no ASC  
+            ORDER BY a.tender_enquiry_id desc, a.enquiry_no ASC  
         ";
         //and a.enquiry_no like '%" . $this->db->escape_like_str($term) . "%'
 

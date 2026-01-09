@@ -367,6 +367,8 @@
 
           $container.append($row);
         });
+
+        calculateTotalAmount();
       },
 
       error: function () {
@@ -448,10 +450,12 @@
 
       // Amount = qty * rate
       let amount = qty * rate;
+      let vat_amt = 0;
 
       // GST added only if gst selected
       if (gst > 0) {
         amount = amount + (amount * gst) / 100;
+        vat_amt =  (amount * gst) / 100;
       }
 
       $row.find(".amount-input").val(amount.toFixed(2));

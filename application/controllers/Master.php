@@ -948,6 +948,25 @@ class Master extends CI_Controller
                 'created_date' => date('Y-m-d H:i:s'),
             );
             $this->db->insert('vendor_info', $ins);
+            $vendor_id = $this->db->insert_id();
+
+            /* Create Ledger Account */
+            $ins1 = array(
+                'group_id' => SUNDRY_CREDITORS, // Sundry Creditors
+                'ledger_name' => $this->input->post('vendor_name'),
+                'opening_balance' => 0,
+                'opening_type' => 'Credit',
+                'ref_tbl' => 'Vendor',
+                'ref_id' =>  $vendor_id, 
+                'status' => $this->input->post('status'), 
+            );
+            $this->db->insert('ledger_accounts', $ins1); 
+
+            $ledger_id = $this->db->insert_id();
+
+            $this->db->where('vendor_id', $vendor_id);
+            $this->db->update('vendor_info', array('ledger_id' => $ledger_id));
+
             redirect('vendor-list/');
         }
         if ($this->input->post('mode') == 'Edit') {
@@ -1075,6 +1094,26 @@ class Master extends CI_Controller
                 'created_date' => date('Y-m-d H:i:s'),
             );
             $this->db->insert('customer_info', $ins);
+
+            $customer_id = $this->db->insert_id();
+
+            /* Create Ledger Account */
+            $ins1 = array(
+                'group_id' => SUNDRY_DEBTORS, // Sundry Debtors
+                'ledger_name' => $this->input->post('customer_name'),
+                'opening_balance' => 0,
+                'opening_type' => 'Debit',
+                'ref_tbl' => 'Customer',
+                'ref_id' =>  $customer_id, 
+                'status' => $this->input->post('status'), 
+            );
+            $this->db->insert('ledger_accounts', $ins1); 
+
+            $ledger_id = $this->db->insert_id();
+
+            $this->db->where('customer_id', $customer_id);
+            $this->db->update('customer_info', array('ledger_id' => $ledger_id));
+ 
             redirect('customer-list/');
         }
         if ($this->input->post('mode') == 'Edit') {

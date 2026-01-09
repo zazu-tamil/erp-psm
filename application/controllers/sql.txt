@@ -237,3 +237,95 @@ ALTER TABLE `tender_quotation_info` ADD `currency_id` INT(11) NULL AFTER `other_
  31-12-2025
  ALTER TABLE `account_groups` ADD `status` VARCHAR(50) NOT NULL DEFAULT 'Active' AFTER `sequence`;
 ALTER TABLE `vouchers` ADD `status` VARCHAR(50) NOT NULL DEFAULT 'Active' AFTER `narration`;
+
+--------------------------------------------------------------------------------------
+06-01-2025
+
+ALTER TABLE `ledger_accounts`
+	ADD COLUMN `vendor_id` INT NULL AFTER `opening_type`;
+//
+ALTER TABLE `ledger_accounts`
+	CHANGE COLUMN `vendor_id` `ref_id` INT(11) NULL DEFAULT NULL AFTER `opening_type`;
+//
+
+ALTER TABLE `ledger_accounts`
+	ADD COLUMN `ref_tbl` VARCHAR(100) NULL DEFAULT NULL AFTER `opening_type`;
+//
+
+ALTER TABLE `customer_info`
+	ADD COLUMN `ledger_id` INT NULL AFTER `status`;
+//
+
+ALTER TABLE `customer_info`
+	CHANGE COLUMN `ledger_id` `ledger_id` INT(11) NULL DEFAULT NULL AFTER `google_map_location`;
+//
+
+CREATE TRIGGER `customer_info_before_update` BEFORE UPDATE ON `customer_info` FOR EACH ROW BEGIN
+
+    DECLARE newLedgerId INT;
+    declare DEBTORS int default 0;
+
+    -- Case 1: Ledger missing → Create it
+    IF OLD.ledger_id IS NULL THEN
+    
+    	  select a.setting_value into DEBTORS from app_settings as a where a.setting_key = 'SUNDRY_DEBTORS';
+
+        INSERT INTO ledger_accounts
+            (group_id, ledger_name, opening_balance, opening_type, ref_tbl, ref_id, status)
+        VALUES
+            (DEBTORS, NEW.customer_name, 0, 'Debit', 'customer_info', OLD.customer_id, 'Active');
+
+        SET newLedgerId = LAST_INSERT_ID();
+        SET NEW.ledger_id = newLedgerId;
+
+    -- Case 2: Ledger exists and name changed → Update ledger name
+    ELSEIF NEW.customer_name <> OLD.customer_name THEN
+
+        UPDATE ledger_accounts
+        SET ledger_name = NEW.customer_name
+        WHERE ledger_id = OLD.ledger_id;
+
+    END IF;
+
+END//
+
+
+ALTER TABLE `vendor_info`
+	ADD COLUMN `ledger_id` INT NULL DEFAULT NULL AFTER `google_map_location`;
+//
+
+
+ALTER TABLE `vendor_purchase_invoice_item_info`
+	CHANGE COLUMN `rate` `rate` DECIMAL(10,3) NULL DEFAULT NULL AFTER `qty`,
+	CHANGE COLUMN `amount` `amount` DECIMAL(10,3) NULL DEFAULT NULL AFTER `gst`;
+//	
+
+
+ALTER TABLE `vendor_po_item_info`
+	CHANGE COLUMN `rate` `rate` DECIMAL(10,3) NULL DEFAULT NULL AFTER `qty`,
+	CHANGE COLUMN `amount` `amount` DECIMAL(10,3) NULL DEFAULT NULL AFTER `gst`; 
+
+//	
+ 
+
+
+ALTER TABLE vendor_purchase_invoice_info 
+ADD total_amount DECIMAL(14,3) NOT NULL AFTER invoice_no;
+//
+ALTER TABLE `vendor_purchase_invoice_info`
+	ALTER `total_amount` DROP DEFAULT;
+ALTER TABLE `vendor_purchase_invoice_info`
+	ADD COLUMN `tax_amount` DECIMAL(14,3) NULL AFTER `invoice_no`,
+	CHANGE COLUMN `total_amount` `total_amount` DECIMAL(14,3) NULL AFTER `tax_amount`;
+//
+
+
+
+ ALTER TABLE `vendor_purchase_invoice_info`
+	ADD COLUMN `voucher_id` VARCHAR(100) NULL DEFAULT NULL AFTER `purchase_bill_upload`;
+//
+
+
+
+
+
