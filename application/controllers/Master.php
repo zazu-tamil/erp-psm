@@ -957,10 +957,10 @@ class Master extends CI_Controller
                 'opening_balance' => 0,
                 'opening_type' => 'Credit',
                 'ref_tbl' => 'Vendor',
-                'ref_id' =>  $vendor_id, 
-                'status' => $this->input->post('status'), 
+                'ref_id' => $vendor_id,
+                'status' => $this->input->post('status'),
             );
-            $this->db->insert('ledger_accounts', $ins1); 
+            $this->db->insert('ledger_accounts', $ins1);
 
             $ledger_id = $this->db->insert_id();
 
@@ -1104,16 +1104,16 @@ class Master extends CI_Controller
                 'opening_balance' => 0,
                 'opening_type' => 'Debit',
                 'ref_tbl' => 'Customer',
-                'ref_id' =>  $customer_id, 
-                'status' => $this->input->post('status'), 
+                'ref_id' => $customer_id,
+                'status' => $this->input->post('status'),
             );
-            $this->db->insert('ledger_accounts', $ins1); 
+            $this->db->insert('ledger_accounts', $ins1);
 
             $ledger_id = $this->db->insert_id();
 
             $this->db->where('customer_id', $customer_id);
             $this->db->update('customer_info', array('ledger_id' => $ledger_id));
- 
+
             redirect('customer-list/');
         }
         if ($this->input->post('mode') == 'Edit') {
@@ -1142,7 +1142,7 @@ class Master extends CI_Controller
             redirect('customer-list/');
         }
 
-       
+
         $sql = "
           SELECT
                 a.country_id,
@@ -1172,7 +1172,7 @@ class Master extends CI_Controller
 
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();
- 
+
 
         $this->load->view('page/master/customer-list', $data);
     }
@@ -1517,4 +1517,94 @@ class Master extends CI_Controller
 
         $this->load->view('page/master/currency-list', $data);
     }
+    public function settings_list()
+    {
+        // Check if user is logged in
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        if (
+            $this->session->userdata(SESS_HD . 'level') != 'Admin' &&
+            $this->session->userdata(SESS_HD . 'level') != 'Staff'
+        ) {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+        $data['js'] = 'settings-list.inc';
+        $data['title'] = 'Settings';
+
+
+
+
+        $data['record_list'] = array();
+
+
+        // ========== EDIT ITEM MODE ==========
+        if ($this->input->post('mode') == 'Update') {
+            $setting_key = $this->input->post('setting_key');
+
+            $upd = array(
+
+                'setting_value' => $this->input->post('setting_value'),
+                'status' => $this->input->post('status')
+              
+            );
+
+            $this->db->where('setting_key', $setting_key);
+            $this->db->update('app_settings', $upd);
+            redirect('settings');
+        }
+
+        $this->load->library('pagination');
+        $this->db->where('a.status != ', 'Delete');
+        $this->db->from('app_settings as a');
+        $data['total_records'] = $cnt = $this->db->count_all_results();
+        $data['sno'] = $this->uri->segment(2, 0);
+        $config['base_url'] = trim(site_url('settings/'), '/' . $this->uri->segment(2, 0));
+        $config['total_rows'] = $cnt;
+        $config['per_page'] = 50;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '<span class="sr-only">(current)</span></a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = "Prev";
+        $config['next_link'] = "Next";
+
+        $this->pagination->initialize($config);
+
+
+        $sql = "
+            SELECT
+                a.setting_key,
+                a.setting_value,
+                status
+            FROM app_settings as a
+            WHERE a.status != 'Delete'
+            ORDER BY a.setting_key asc 
+            LIMIT " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
+        ";
+
+        $query = $this->db->query($sql);
+        $data['record_list'] = $query->result_array();
+
+
+        // ========== LOAD VIEW ==========
+        $data['pagination'] = $this->pagination->create_links();
+        $this->load->view('page/master/settings-list', $data);
+    }
 }
+

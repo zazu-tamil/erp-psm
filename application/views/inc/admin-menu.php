@@ -1,6 +1,6 @@
 <?php
 // Define master menu pages
-$g_master = ['company-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list', 'customer-list', 'customer-contact-list', 'vendor-contact-list', 'currency-list', 'account-head-list', 'sub-account-head-list', 'account-head-for-list', 'voucher-type-list', 'opening-balance-list'];
+$g_master = ['company-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list', 'customer-list', 'customer-contact-list', 'vendor-contact-list', 'currency-list', 'account-head-list', 'sub-account-head-list', 'account-head-for-list', 'voucher-type-list', 'opening-balance-list','settings'];
 
 // Get current page
 $current_page = $this->uri->segment(1, 0);
@@ -288,7 +288,7 @@ $vendor_m_grp = [
 
 
 
-
+<?php /*
 <li class="header">Acounts Book Info</li>
 
 <li class="treeview <?= in_array($current_page, ['inward-list', 'outward-list']) ? 'active' : '' ?>">
@@ -313,6 +313,7 @@ $vendor_m_grp = [
 
     </ul>
 </li>
+*/?>
 <li class="header">AUDIT</li>
 
 <li class="treeview <?= in_array($this->uri->segment(1), [
@@ -380,7 +381,7 @@ $vendor_m_grp = [
     </ul>
 </li>
 
-
+<?php /*
 <li class="header">Reports</li>
 <li
     class="treeview <?= in_array($this->uri->segment(1), ['cash-ledger', 'cash-in-statement', 'cash-out-statement', 'inward-summary', 'outward-summary', 'na-cash-in-statement', 'na-cash-out-statement']) ? 'active' : '' ?>">
@@ -439,7 +440,7 @@ $vendor_m_grp = [
 
     </ul>
 </li>
-
+*/?>
 <!-- Master Section -->
 <li class="header">Master</li>
 
@@ -454,7 +455,7 @@ $vendor_m_grp = [
 
         <!-- General -->
         <li
-            class="treeview <?= in_array($current_page, ['category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'currency-list']) ? 'active' : '' ?>">
+            class="treeview <?= in_array($current_page, ['category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'currency-list','settings']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-cog"></i> General
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
@@ -469,7 +470,7 @@ $vendor_m_grp = [
                     <a href="<?= site_url('brand-list') ?>"><i class="fa fa-industry"></i> Brand List</a>
                 </li> -->
 
-                <li class="<?= ($current_page === 'items-list') ? 'active' : '' ?>">
+                <!-- <li class="<?= ($current_page === 'items-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('items-list') ?>"><i class="fa fa-cubes"></i> Items List</a>
                 </li>
 
@@ -479,11 +480,15 @@ $vendor_m_grp = [
 
                 <li class="<?= ($current_page === 'gst-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('gst-list') ?>"><i class="fa fa-percent"></i> VAT List</a>
-                </li>
+                </li> -->
 
                 <li class="<?= ($current_page === 'currency-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('currency-list') ?>"><i class="fa fa-money"></i> Currency List</a>
                 </li>
+                <li class="<?= ($current_page === 'settings') ? 'active' : '' ?>">
+                    <a href="<?= site_url('settings') ?>"><i class="fa fa-cogs"></i> Settings</a>
+                </li>
+                
             </ul>
         </li>
 
@@ -542,7 +547,7 @@ $vendor_m_grp = [
                 </li>
             </ul>
         </li>
-
+<?php /*
         <li
             class="treeview <?= in_array($current_page, ['account-head-list', 'sub-account-head-list', 'account-head-for-list', 'voucher-type-list', 'opening-balance-list']) ? 'active' : '' ?>">
             <a href="#">
@@ -574,6 +579,6 @@ $vendor_m_grp = [
                 </li>
             </ul>
         </li>
-
+*/?>
     </ul>
 </li>

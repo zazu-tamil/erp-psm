@@ -326,6 +326,5 @@ ALTER TABLE `vendor_purchase_invoice_info`
 //
 
 
-
-
-
+ 
+ALTER TABLE `app_settings` ADD `status` VARCHAR(50) NULL DEFAULT 'Active' AFTER `setting_value`;

@@ -42,7 +42,7 @@
       dataType: "json",
       success: function (data) {
         const $parent = $(modal_id + " #parent_group");
-        $parent.empty().append('<option value="">Select Parent Group</option>');
+        $parent.empty().append('<option value="">Parent</option>');
 
         $.each(data, function (i, c) {
           let selected = c.group_id == selected_id ? "selected" : "";
@@ -97,7 +97,7 @@
     } else {
       $("#edit_modal #parent_group")
         .empty()
-        .append('<option value="">Select Parent Group</option>');
+        .append('<option value="">Parent</option>');
     }
   });
 </script>

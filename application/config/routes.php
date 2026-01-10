@@ -97,6 +97,8 @@ $route['user-list/(:num)'] = 'master/user_list/$1';
 $route['vendor-list'] = 'master/vendor_list';
 $route['vendor-list/(:num)'] = 'master/vendor_list/$1';
 
+
+
 $route['vendor-contact-list'] = 'master/vendor_contact_list';
 $route['vendor-contact-list/edit/(:num)'] = 'master/vendor_contact_list/$1';
 
@@ -230,7 +232,17 @@ $route['vouchers-list/(:num)'] = 'audit/vouchers_list/$1';
 $route['voucher-entries-list'] = 'audit/voucher_entries_list';
 $route['voucher-entries-list/(:num)'] = 'audit/voucher_entries_list/$1';
 
+$route['ledger-transactions-report'] = 'audit/ledger_transactions_report';
+$route['ledger-transactions-report/(:num)'] = 'audit/ledger_transactions_report/$1';
+
+
+
 //trial balance report routes
 $route['trial-balance-list'] = 'audit/trial_balance_list';
 $route['profit-loss-report'] = 'audit/profit_loss_report';
  
+//setting 
+
+$route['settings'] = 'master/settings_list';
+$route['settings/(:num)'] = 'master/settings_list/$1';
+
