@@ -20,13 +20,15 @@
                 <fieldset class="tender-inward">
                     <legend class="text-light-blue"><i class="fa fa-file-text-o"></i> Invoice Details</legend>
 
-                    <div style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
+                    <div
+                        style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
                         <div class="row">
                             <div class="col-md-4 form-group">
                                 <label for="srch_enq_id">Search Enquiry No</label>
-                                <input type="text" name="srch_enq_id" class="form-control srch_enq_id" value="" placeholder="Search Enquiry No" />
+                                <input type="text" name="srch_enq_id" class="form-control srch_enq_id" value=""
+                                    placeholder="Search Enquiry No" />
                             </div>
-                        </div> 
+                        </div>
                     </div>
 
                     <div class="row">
@@ -59,18 +61,20 @@
                                 set_value('srch_tender_po_id'),
                                 'id="srch_tender_po_id" class="form-control" required'
                             ); ?>
-                        </div> 
+                        </div>
 
                         <div class="form-group col-md-3">
                             <label>Invoice Date</label>
                             <input type="date" name="invoice_date" id="invoice_date" class="form-control"
                                 value="<?php echo set_value('invoice_date', date('Y-m-d')); ?>">
-                        </div> 
-                       
+                        </div>
+
                         <div class="form-group col-md-3">
                             <label>Invoice Status</label><br>
-                            <label class="radio-inline"><input type="radio" name="invoice_status" value="Pending" checked>Pending</label> 
-                            <label class="radio-inline"><input type="radio" name="invoice_status" value="Payment Paid" >Payment Paid</label>
+                            <label class="radio-inline"><input type="radio" name="invoice_status" value="Pending"
+                                    checked>Pending</label>
+                            <label class="radio-inline"><input type="radio" name="invoice_status"
+                                    value="Payment Paid">Payment Paid</label>
                         </div>
 
                         <div class="form-group col-md-3">
@@ -99,10 +103,39 @@
 
                 </fieldset>
 
-                <fieldset class="mt-4">
-                    <legend class="text-light-blue"><i class="fa fa-list"></i> Item Details</legend>
-                    <div id="item_container"></div>
-                </fieldset>
+                <div class="row">
+                    <div class="col-md-12">
+                        <fieldset class="mt-4">
+                            <legend class="text-light-blue"><i class="fa fa-list"></i> Item Details</legend>
+                            <table class="table table-bordered table-sm table-responsive">
+                                <thead>
+                                    <tr>
+                                        <th style="width:5%;">✔</th>
+                                        <th style="width:10%;">Item Code</th>
+                                        <th style="width:40%;">Description</th>
+                                        <th style="width:10%;">UOM & Qty</th>
+                                        <th style="width:10%;">Rate</th>
+                                        <th style="width:10%;">VAT %</th>
+                                        <th style="width:10%;">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="item_container"></tbody>
+                            </table>
+
+                            <div class="tot_amt text-right">
+                                <label>Total Bill Amount</label>
+                                <div id="total_amount_display">0.00</div>
+                                <input type="hidden" name="total_amount" id="total_amount">
+
+                                <label>Total GST</label>
+                                <div id="total_gst_amount_display">0.00</div>
+                                <input type="hidden" name="total_gst_amount" id="total_gst_amount">
+                            </div>
+
+
+                        </fieldset>
+                    </div>
+                </div>
             </div>
 
             <div class="box-footer text-right">
@@ -114,19 +147,5 @@
     </div>
 </section>
 
-<?php include_once(VIEWPATH . 'inc/footer.php');
+<?php include_once(VIEWPATH . 'inc/footer.php'); ?>
 
-
-
-/*
- <div class="col-md-3">
-                     <div class="form-group">
-                        <label>Category Name</label>
-                        <input type="text" class="form-control" value="${row.category_name || ''}" readonly>
-                      </div>
-                      <div class="form-group">
-                        <label>Item Name</label>
-                        <input type="text" class="form-control" value="${row.item_name || ''}" readonly>
-                      </div>
-                    </div>*/
-?>

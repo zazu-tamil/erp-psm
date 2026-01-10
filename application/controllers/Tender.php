@@ -2404,6 +2404,8 @@ class Tender extends CI_Controller
                 'invoice_status' => $this->input->post('invoice_status'),
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
+                'total_amount' => $this->input->post('total_amount'),
+                'tax_amount' => $this->input->post('total_gst_amount'),
                 'status' => 'Active',
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s')
@@ -3656,13 +3658,8 @@ class Tender extends CI_Controller
 
         $sql = "
            SELECT 
-                tpo.*,
-                ii.item_code,
-                ii.item_id,
-                ci.category_id
-            FROM tender_po_item_info AS tpo
-            LEFT JOIN category_info AS ci ON tpo.category_id = ci.category_id
-            LEFT JOIN item_info AS ii ON tpo.item_id = ii.item_id
+                tpo.* 
+            FROM tender_po_item_info AS tpo 
             WHERE 
                 tpo.tender_po_id = ?
                 AND tpo.status = 'Active'
@@ -3674,6 +3671,8 @@ class Tender extends CI_Controller
         $result = $query->result_array();
         echo json_encode($result);
     }
+
+
     public function get_quotation_items()
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in')) {

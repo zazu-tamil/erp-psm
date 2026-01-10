@@ -1,99 +1,98 @@
 <script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
 
-<link  rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+<link
+  rel="stylesheet"
+  href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
+/>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 
 <script>
   $(document).ready(function () {
-
     $(".srch_enq_id").autocomplete({
-        source: function (request, response) {
-          $.ajax({
-            url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
-            type: "POST",
-            data: { search: request.term },
-            dataType: "json",
-            success: function (data) {
-              //console.log(data);
-              response(data);
-            },
-          });
-        },
+      source: function (request, response) {
+        $.ajax({
+          url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
+          type: "POST",
+          data: { search: request.term },
+          dataType: "json",
+          success: function (data) {
+            //console.log(data);
+            response(data);
+          },
+        });
+      },
 
-        minLength: 1,
-         
-        select: function (event, ui) {
-           console.log(ui);
-            $("#srch_company_id").val(ui.item.company_id);
-            $("#srch_customer_id").val(ui.item.customer_id).change();
-            //$("#srch_tender_enquiry_id").val(ui.item.tender_enquiry_id); 
-            load_tender_enq(ui.item.tender_enquiry_id); 
-        }, 
-      });
+      minLength: 1,
 
-    function load_tender_enq(t_enq_id = '') {
+      select: function (event, ui) {
+        console.log(ui);
+        $("#srch_company_id").val(ui.item.company_id);
+        $("#srch_customer_id").val(ui.item.customer_id).change();
+        //$("#srch_tender_enquiry_id").val(ui.item.tender_enquiry_id);
+        load_tender_enq(ui.item.tender_enquiry_id);
+      },
+    });
 
+    function load_tender_enq(t_enq_id = "") {
       const customer_id = $("#srch_customer_id").val(); // <-- IMPORTANT
-      const company_id  = $("#srch_company_id").val();
+      const company_id = $("#srch_company_id").val();
       const $enquiryDropdown = $("#srch_tender_enquiry_id");
-      const $container = $("#item_container");  
+      const $container = $("#item_container");
 
       // Reset
       $enquiryDropdown
-          .html('<option value="">Select Enquiry</option>')
-          .prop('disabled', true);
+        .html('<option value="">Select Enquiry</option>')
+        .prop("disabled", true);
 
-       
-      $container.html('');
+      $container.html("");
 
       if (!customer_id || !company_id) return;
 
       $.ajax({
-          url: "<?php echo site_url('vendor/get_tender_enquiries_by_customer'); ?>",
-          type: "POST",
-          data: { 
-              company_id: company_id,
-              customer_id: customer_id 
-          },
-          dataType: "json",
-          success: function (res) {
+        url: "<?php echo site_url('vendor/get_tender_enquiries_by_customer'); ?>",
+        type: "POST",
+        data: {
+          company_id: company_id,
+          customer_id: customer_id,
+        },
+        dataType: "json",
+        success: function (res) {
+          if (res.length > 0) {
+            $enquiryDropdown.prop("disabled", false);
 
-              if (res.length > 0) {
-                  $enquiryDropdown.prop('disabled', false);
+            $.each(res, function (i, row) {
+              $enquiryDropdown.append(
+                $("<option>", {
+                  value: row.tender_enquiry_id,
+                  text: row.display,
+                })
+              );
+            });
 
-                  $.each(res, function (i, row) {
-                      $enquiryDropdown.append(
-                          $('<option>', {
-                              value: row.tender_enquiry_id,
-                              text: row.display
-                          })
-                      );
-                  });
-
-                  // ✅ SET SELECTED VALUE HERE
-                  if (t_enq_id) {
-                      $enquiryDropdown.val(t_enq_id).trigger('change');
-                  }
-
-              } else {
-                  $enquiryDropdown.html('<option value="">No enquiries found</option>');
-              }
-          },
-          error: function () {
-              alert('Error loading enquiries');
+            // ✅ SET SELECTED VALUE HERE
+            if (t_enq_id) {
+              $enquiryDropdown.val(t_enq_id).trigger("change");
+            }
+          } else {
+            $enquiryDropdown.html(
+              '<option value="">No enquiries found</option>'
+            );
           }
+        },
+        error: function () {
+          alert("Error loading enquiries");
+        },
       });
-    }   
-       
-    $("#srch_customer_id").on("change", function () {
-      load_tender_enq('');
-     });   
+    }
 
+    $("#srch_customer_id").on("change", function () {
+      load_tender_enq("");
+    });
 
     /* ================================================================
        1. COMPANY CHANGE - Load ALL Customers (no filtering by company)
        ================================================================ */
-   /* $("#srch_company_id").on("change", function () {
+    /* $("#srch_company_id").on("change", function () {
       const company_id = $(this).val();
       const $customerDropdown = $("#srch_customer_id");
       const $enquiryDropdown = $("#srch_tender_enquiry_id");
@@ -197,252 +196,37 @@
     });
 
     $("#srch_tender_enquiry_id").on("change", function () {
+      const tender_enquiry_id = $(this).val();
+      const $po = $("#srch_tender_po_id");
 
-        const tender_enquiry_id = $(this).val();
-        const $po = $("#srch_tender_po_id");
+      $po.html('<option value="">Loading...</option>');
 
-        $po.html('<option value="">Loading...</option>');
-
-        if (!tender_enquiry_id) {
-            $po.html('<option value="">Select Tender PO</option>');
-            return;
-        }
-
-        $.ajax({
-            url: "<?= site_url('tender/get_tender_invoice_po_no_load'); ?>",
-            type: "POST",
-            data: { srch_tender_enquiry_id: tender_enquiry_id },
-            dataType: "json",
-            success: function (res) {
-                console.log(res);
-
-                let html = '<option value="">Select Tender PO</option>';
-
-                if (res.length > 0) {
-                    $.each(res, function (i, row) {
-                        html += `<option value="${row.tender_po_id}">${row.customer_po_no}</option>`;
-                    });
-                } else {
-                    html = '<option value="">No PO Found</option>';
-                }
-
-                $po.html(html);
-            }
-        });
-
-    });
-
-    /* ================================================================
-       4. QUOTATION CHANGE - Load Items from Selected Quotation
-       ================================================================ */
-    $("#srch_tender_po_id").on("change", function () {
-      const tender_po_id = $(this).val();
-      const $container = $("#item_container");
-      $container.html("");
-
-      if (!tender_po_id) return;
+      if (!tender_enquiry_id) {
+        $po.html('<option value="">Select Tender PO</option>');
+        return;
+      }
 
       $.ajax({
-        url: "<?php echo site_url('tender/get_tender_po_invoice_load_items'); ?>",
+        url: "<?= site_url('tender/get_tender_invoice_po_no_load'); ?>",
         type: "POST",
-        data: {
-          tender_po_id: tender_po_id,
-        },
+        data: { srch_tender_enquiry_id: tender_enquiry_id },
         dataType: "json",
         success: function (res) {
+          console.log(res);
+
+          let html = '<option value="">Select Tender PO</option>';
+
           if (res.length > 0) {
             $.each(res, function (i, row) {
-              const hiddenFields = `
-                <input type="hidden" name="tender_po_item_id[]" value="${row.tender_po_item_id}">
-                <input type="hidden" name="category_id[]" value="${row.category_id}">
-                <input type="hidden" name="item_id[]" value="${row.item_id}">
-              `;
-
-              const itemHtml = `
-                <div class="item-card border p-3 mb-3" style="background-color:#f9f9f9; border-radius:8px;">
-                  <h5 class="text-primary mb-3">Item Details ${i + 1}</h5>
-                  <div class="row">
-                    <div class="col-md-1 d-flex align-items-center justify-content-center">
-                      <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="${i}">
-                    </div>
-
-                    <div class="col-md-3"> 
-                      <div class="form-group">
-                        <label>Item Code</label>
-                        <input type="text" class="form-control" value="${
-                          row.item_code || ""
-                        }" readonly>
-                      </div>
-                    </div>
-
-                    <div class="col-md-4">
-                      <div class="form-group">
-                        <label>Item Description</label>
-                        <textarea name="item_desc[]" class="form-control desc-textarea" rows="3">${
-                          row.item_desc || ""
-                        }</textarea>
-                      </div>
-                    </div>
-
-                    <div class="col-md-4">
-                      <div class="row">
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label>UOM</label>
-                            <input type="text" name="uom[]" class="form-control" value="${
-                              row.uom || ""
-                            }" readonly>
-                          </div>
-                        </div>
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label>Quantity</label>
-                            <input type="number" step="0.01" name="qty[]" class="form-control qty-input" value="${
-                              row.qty || 0
-                            }" readonly>
-                          </div>
-                        </div>
-
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label>Rate</label>
-                            <input type="number" step="0.01" name="rate[]" class="form-control rate-input" value="${
-                              row.rate || 0
-                            }">
-                          </div>
-                        </div>
-
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label>VAT %</label>
-                            <select name="gst[]" class="form-control vat-dropdown">
-                              <option value="">Select</option>
-                              <?php foreach($gst_opt as $gid => $pct): ?>
-                                <option value="<?= $pct; ?>"><?= $pct; ?>%</option>
-                              <?php endforeach; ?>
-                            </select>
-                          </div>
-                        </div>
-
-                        <div class="col-md-12">
-                          <div class="form-group">
-                            <label>Amount</label>
-                            <input type="number" step="0.01" name="amount[]" class="form-control amount-input" value="0.00" readonly>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  ${hiddenFields}
-                </div>
-              `;
-              $container.append(itemHtml);
+              html += `<option value="${row.tender_po_id}">${row.customer_po_no}</option>`;
             });
-
-            // Add total row
-            $container.append(`
-              <div class="total-wrapper mt-4 mb-4">
-                <div class="total-box shadow-sm">
-                  <h5 class="mb-0">
-                    <i class="fa fa-calculator text-success me-2"></i>
-                    <strong>Total Amount:</strong>
-                    <span class="text-primary">₹ <span id="total_amount">0.00</span></span>
-                  </h5>
-                </div>
-              </div>
-
-              <style>
-                .total-wrapper {
-                  display: flex;
-                  justify-content: flex-end;
-                  align-items: center;
-                  width: 100%;
-                }
-                .total-box {
-                  background: linear-gradient(135deg, #f6fff9, #e8f9f0);
-                  border: 2px solid #b5e0c6;
-                  border-radius: 12px;
-                  padding: 12px 24px;
-                  font-family: "Segoe UI", sans-serif;
-                  font-size: 1.15rem;
-                  color: #333;
-                  min-width: 280px;
-                  text-align: right;
-                  transition: all 0.3s ease-in-out;
-                }
-                .total-box:hover {
-                  background: #e3f7ec;
-                  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-                  transform: translateY(-2px);
-                }
-                .total-box i {
-                  font-size: 1.3rem;
-                  vertical-align: middle;
-                }
-                #total_amount {
-                  font-size: 1.4rem;
-                  font-weight: 700;
-                  margin-left: 5px;
-                }
-                @media (max-width: 768px) {
-                  .total-wrapper { justify-content: center; }
-                  .total-box { text-align: center; min-width: 220px; }
-                }
-              </style>
-            `);
-
-            // Calculate totals on load
-            calculateTotalAmount();
           } else {
-            $container.html(
-              '<div class="alert alert-warning">No items found for this quotation.</div>'
-            );
+            html = '<option value="">No PO Found</option>';
           }
-        },
-        error: function () {
-          alert("Error loading quotation items");
+
+          $po.html(html);
         },
       });
-    });
-
-    /* ================================================================
-       5. Amount Calculation (Rate / VAT change)
-       ================================================================ */
-    $(document).on("input change", ".rate-input, .vat-dropdown", function () {
-      const $row = $(this).closest(".item-card");
-      const qty = parseFloat($row.find(".qty-input").val()) || 0;
-      const rate = parseFloat($row.find(".rate-input").val()) || 0;
-      const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
-
-      const amount = qty * rate * (1 + gst / 100);
-      $row.find(".amount-input").val(amount.toFixed(2));
-
-      calculateTotalAmount();
-    });
-
-    function calculateTotalAmount() {
-      let total = 0;
-      $(".amount-input").each(function () {
-        total += parseFloat($(this).val()) || 0;
-      });
-      $("#total_amount").text(total.toFixed(2));
-    }
-
-    /* ================================================================
-       6. Checkbox Change - Add/Remove Hidden Fields
-       ================================================================ */
-    $(document).on("change", ".item-check", function () {
-      const $card = $(this).closest(".item-card");
-      if (!$(this).is(":checked")) {
-        $card
-          .find(
-            "input[type=hidden][name^='tender_quotation_item_id'], " +
-              "input[type=hidden][name^='category_id'], " +
-              "input[type=hidden][name^='item_id']"
-          )
-          .remove();
-      }
     });
   });
 
@@ -556,6 +340,180 @@
         { name: "colors", items: ["TextColor", "BGColor"] },
         { name: "tools", items: ["Maximize", "ShowBlocks"] },
       ],
+    });
+  });
+</script>
+<script>
+  $(document).ready(function () {
+    $("#srch_tender_po_id").on("change", function () {
+      const tender_po_id = $(this).val();
+      const $container = $("#item_container");
+      $container.empty();
+
+      if (!tender_po_id) return;
+
+      $.ajax({
+        url: "<?php echo site_url('tender/get_tender_po_invoice_load_items'); ?>",
+        type: "POST",
+        data: { tender_po_id: tender_po_id },
+        dataType: "json",
+
+        success: function (res) {
+          if (!res || res.length === 0) {
+            $container.html(`
+                        <tr>
+                            <td colspan="7" class="text-center text-danger">
+                                No items found
+                            </td>
+                        </tr>
+                    `);
+            return;
+          }
+
+          $.each(res, function (i, row) {
+            const html = `
+                    <tr class="item-row">
+
+                        <td>
+                            <input type="checkbox"
+                                   class="item-check"
+                                   name="selected_items[]"
+                                   value="${i}"
+                                   checked>
+                        </td>
+
+                        <td>
+                            <input type="text" class="form-control"
+                                   value="${row.item_code || ""}" readonly>
+
+                            <input type="hidden"
+                                   name="tender_po_item_id[]"
+                                   value="${row.tender_po_item_id}">
+                        </td>
+
+                        <td>
+                            <textarea class="form-control" rows="2"
+                                      name="item_desc[]" readonly>${
+                                        row.item_desc || ""
+                                      }</textarea>
+                        </td>
+
+                        <td>
+                            <input type="text" class="form-control"
+                                   name="uom[]" value="${
+                                     row.uom || ""
+                                   }" readonly>
+
+                            <input type="number"
+                                   name="qty[]"
+                                   class="form-control qty-input"
+                                   value="${row.qty}" readonly>
+                        </td>
+
+                        <td>
+                            <input type="number"
+                                   name="rate[]"
+                                   class="form-control rate-input"
+                                   value="${row.rate}">
+                        </td>
+
+                        <td>
+                            <input type="number"
+                                   name="gst[]"
+                                   class="form-control gst-input"
+                                   value="${row.gst}">
+                            <input type="hidden"
+                                   name="gst_amount[]"
+                                   class="gst-amount-input">
+                        </td>
+
+                        <td>
+                            <input type="number"
+                                   name="amount[]"
+                                   class="form-control amount-input"
+                                   readonly>
+                        </td>
+                    </tr>
+                    `;
+
+            const $row = $(html);
+            $container.append($row);
+            calculateRow($row);
+          });
+
+          calculateTotals();
+        },
+
+        error: function () {
+          alert("Error loading items");
+        },
+      });
+    });
+
+    /* ===============================
+       RECALCULATE ON CHANGE
+    =============================== */
+    $(document).on(
+      "input change",
+      ".rate-input, .gst-input, .item-check",
+      function () {
+        const $row = $(this).closest(".item-row");
+        calculateRow($row);
+        calculateTotals();
+      }
+    );
+
+    /* ===============================
+       ROW CALCULATION
+    =============================== */
+    function calculateRow($row) {
+      if (!$row.find(".item-check").is(":checked")) {
+        $row.find(".gst-amount-input").val("0.00");
+        $row.find(".amount-input").val("0.00");
+        return;
+      }
+
+      const qty = parseFloat($row.find(".qty-input").val()) || 0;
+      const rate = parseFloat($row.find(".rate-input").val()) || 0;
+      const gst = parseFloat($row.find(".gst-input").val()) || 0;
+
+      const base = qty * rate;
+      const gst_amt = (base * gst) / 100;
+      const total = base + gst_amt;
+
+      $row.find(".gst-amount-input").val(gst_amt.toFixed(2));
+      $row.find(".amount-input").val(total.toFixed(2));
+    }
+
+    /* ===============================
+       TOTAL CALCULATION
+    =============================== */
+    function calculateTotals() {
+      let total_amount = 0;
+      let total_gst = 0;
+
+      $(".item-row").each(function () {
+        if ($(this).find(".item-check").is(":checked")) {
+          total_amount += parseFloat($(this).find(".amount-input").val()) || 0;
+          total_gst += parseFloat($(this).find(".gst-amount-input").val()) || 0;
+        }
+      });
+
+      $("#total_amount_display").text(total_amount.toFixed(2));
+      $("#total_amount").val(total_amount.toFixed(2));
+
+      $("#total_gst_amount_display").text(total_gst.toFixed(2));
+      $("#total_gst_amount").val(total_gst.toFixed(2));
+    }
+
+    /* ===============================
+       FORM VALIDATION
+    =============================== */
+    $("form").on("submit", function () {
+      if ($(".item-check:checked").length === 0) {
+        alert("Please select at least one item");
+        return false;
+      }
     });
   });
 </script>

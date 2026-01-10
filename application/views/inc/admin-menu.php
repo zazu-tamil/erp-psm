@@ -174,6 +174,7 @@ $vendor_m_grp = [
     'vendor-pur-inward-edit',
     'vendor-purchase-bill-add',
     'vendor-purchase-bill-list',
+    'vendor-purchase-bill-edit'
 ];
 ?>
 
@@ -266,7 +267,7 @@ $vendor_m_grp = [
             </ul>
         </li>
 
-        <li class="treeview <?= in_array($current_page, ['vendor-purchase-bill-add', 'vendor-purchase-bill-list']) ? 'active' : '' ?>">
+        <li class="treeview <?= in_array($current_page, ['vendor-purchase-bill-add', 'vendor-purchase-bill-list','vendor-purchase-bill-edit']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-files-o"></i> Vendor Invoice/Bill
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>

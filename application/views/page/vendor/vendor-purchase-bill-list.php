@@ -96,12 +96,12 @@
                                 <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
                           
                                 <!-- EDIT -->
-                                <!-- <td class="text-center">
+                                <td class="text-center">
                                     <a href="<?php echo site_url('vendor-purchase-bill-edit/' . $row['vendor_purchase_invoice_id']); ?>"
                                         class="btn btn-primary btn-xs" title="Edit">
                                         <i class="fa fa-edit"></i>
                                     </a>
-                                </td> -->
+                                </td>
                                 <!-- DELETE -->
                                 <td class="text-center">
                                     <button value="<?php echo $row['vendor_purchase_invoice_id']; ?>" class="del_record btn btn-danger btn-xs"

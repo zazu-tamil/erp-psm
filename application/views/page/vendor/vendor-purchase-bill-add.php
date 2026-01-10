@@ -142,21 +142,28 @@
                                 <thead>
                                     <tr>
                                         <th style="width:5%;">✔</th>
-                                        <th style="width:5%;">Item Code</th>
-                                        <th style="width:30%;">Description</th>
-                                        <th style="width:5%;">UOM</th>
-                                        <th style="width:10%;">Qty</th>
+                                        <th style="width:10%;">Item Code</th>
+                                        <th style="width:40%;">Description</th>
+                                        <th style="width:10%;">UOM & Qty</th>
                                         <th style="width:10%;">Rate</th>
-                                        <th style="width:10%;">VAT</th>
+                                        <th style="width:10%;">VAT %</th>
                                         <th style="width:10%;">Amount</th>
                                     </tr>
                                 </thead>
                                 <tbody id="item_container"></tbody>
                             </table>
+
                             <div class="tot_amt text-right">
-                                <label for="">Total Bill Amount</label>
-                                <div id="total_amount">0</div>
+                                <label>Total Bill Amount</label>
+                                <div id="total_amount_display">0.00</div>
+                                <input type="hidden" name="total_amount" id="total_amount">
+
+                                <label>Total GST</label>
+                                <div id="total_gst_amount_display">0.00</div>
+                                <input type="hidden" name="total_gst_amount" id="total_gst_amount">
                             </div>
+
+                           
                         </fieldset>
                     </div>
                 </div>
@@ -177,3 +184,4 @@
 
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
+

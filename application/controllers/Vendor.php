@@ -443,7 +443,7 @@ class Vendor extends CI_Controller
             redirect();
         }
 
-         $data['title'] = 'Vendor Rate Enquiry Print';
+        $data['title'] = 'Vendor Rate Enquiry Print';
 
         if (!$vendor_rate_enquiry_id) {
             show_404();
@@ -2676,13 +2676,12 @@ class Vendor extends CI_Controller
                 a.item_id,
                 a.item_desc,
                 a.category_id,
+                a.item_code,
                 a.rate,
                 a.gst,
-                a.amount,
-                ii.item_code
-            FROM  vendor_po_item_info a
-            LEFT JOIN category_info ci ON a.category_id = ci.category_id
-            LEFT JOIN item_info ii ON a.item_id = ii.item_id
+                a.amount
+               
+            FROM  vendor_po_item_info a 
             WHERE a.status = 'Active'
                 AND a.vendor_po_id = ?
             ORDER BY a.vendor_rate_enquiry_item_id ASC
@@ -3399,12 +3398,12 @@ class Vendor extends CI_Controller
 
             $this->load->library('upload', $config);
 
-            $dc_upload = '';
+            $purchase_bill_upload = '';
 
 
-            if (!empty($_FILES['dc_upload']['name'])) {
-                if ($this->upload->do_upload('dc_upload')) {
-                    $dc_upload = $this->upload->data('file_name');
+            if (!empty($_FILES['purchase_bill_upload']['name'])) {
+                if ($this->upload->do_upload('purchase_bill_upload')) {
+                    $purchase_bill_upload = $this->upload->data('file_name');
                 }
             }
 
@@ -3421,8 +3420,10 @@ class Vendor extends CI_Controller
                 'vat_payer_purchase_grp' => $this->input->post('vat_payer_purchase_grp'),
                 'declaration_no' => $this->input->post('declaration_no'),
                 'declaration_date' => $this->input->post('declaration_date'),
+                'tax_amount' => $this->input->post('total_gst_amount'),
+                'total_amount' => $this->input->post('total_amount'),
                 'remarks' => $this->input->post('remarks'),
-                'purchase_bill_upload' => 'vendor-pur-invoice-documents/' . $dc_upload,
+                'purchase_bill_upload' => 'vendor-pur-invoice-documents/' . $purchase_bill_upload,
                 'status' => $this->input->post('status'),
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s'),
@@ -3445,7 +3446,6 @@ class Vendor extends CI_Controller
                 $amount = $this->input->post('amount') ?? [];
 
                 foreach ($selected_items as $idx) {
-
                     $item = [
                         'vendor_purchase_invoice_id' => $vendor_purchase_invoice_id,
                         'vendor_po_item_id' => $vendor_po_item_id[$idx] ?? 0,
@@ -3463,7 +3463,6 @@ class Vendor extends CI_Controller
                         'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                         'updated_date' => date('Y-m-d H:i:s'),
                     ];
-
                     $this->db->insert('vendor_purchase_invoice_item_info', $item);
                 }
             }
@@ -3760,7 +3759,8 @@ class Vendor extends CI_Controller
         $this->load->view('page/vendor/vendor-purchase-bill-list', $data);
     }
 
-    public function vendor_purchase_bill_edit($vendor_pur_inward_id = 0)
+
+    public function vendor_purchase_bill_edit($vendor_purchase_invoice_id = 0)
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
@@ -3812,6 +3812,8 @@ class Vendor extends CI_Controller
                 'vat_payer_purchase_grp' => $this->input->post('vat_payer_purchase_grp'),
                 'declaration_no' => $this->input->post('declaration_no'),
                 'declaration_date' => $this->input->post('declaration_date'),
+                'tax_amount' => $this->input->post('tax_amount'),
+                'total_amount' => $this->input->post('total_amount'),
                 'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
@@ -3819,166 +3821,253 @@ class Vendor extends CI_Controller
             ];
 
             // === 3. Upload File ===
-            if (!empty($_FILES['dc_upload']['name'])) {
+            if (!empty($_FILES['purchase_bill_upload']['name'])) {
 
-                if ($this->upload->do_upload('dc_upload')) {
+                if ($this->upload->do_upload('purchase_bill_upload')) {
 
                     $fileData = $this->upload->data();
 
                     // Store relative path in DB
-                    $header['dc_upload'] = $upload_folder . $fileData['file_name'];
+                    $header['purchase_bill_upload'] = $upload_folder . $fileData['file_name'];
 
                 } else {
                     // Upload error handling
                     $this->session->set_flashdata('error', 'Upload Failed: ' . $this->upload->display_errors());
-                    redirect('vendor-pur-inward-list/');
+                    redirect('vendor-purchase-bill-list/');
                 }
             }
 
             // === 4. UPDATE Header ===
-            $vendor_pur_inward_id = $this->input->post('vendor_pur_inward_id');
+            $vendor_purchase_invoice_id = $this->input->post('vendor_purchase_invoice_id');
 
-            $this->db->where('vendor_pur_inward_id', $vendor_pur_inward_id);
-            $this->db->update('vendor_pur_inward_info', $header);
+            $this->db->where('vendor_purchase_invoice_id', $vendor_purchase_invoice_id);
+            $this->db->update('vendor_purchase_invoice_info', $header);
 
-            // === 5. DELETE Old Items ===
-            $this->db->where('vendor_pur_inward_id', $vendor_pur_inward_id);
-            $this->db->delete('vendor_pur_inward_item_info');
-
-            // === 6. INSERT New Items ===
+            // === 5. Delete unselected items ===
             $selected_items = $this->input->post('selected_items') ?? [];
+            $vendor_purchase_invoice_item_id = $this->input->post('vendor_purchase_invoice_item_id') ?? [];
 
-            if (!empty($selected_items)) {
-
-                $vendor_po_item_id = $this->input->post('vendor_po_item_id') ?? [];
-                $category_id = $this->input->post('category_id') ?? [];
-                $item_id = $this->input->post('item_id') ?? [];
-                $item_desc = $this->input->post('item_desc') ?? [];
-                $uom = $this->input->post('uom') ?? [];
-                $qty = $this->input->post('qty') ?? [];
-                $rate = $this->input->post('rate') ?? [];
-                $gst = $this->input->post('gst') ?? [];
-                $amount = $this->input->post('amount') ?? [];
-
-                foreach ($selected_items as $idx) {
-
-                    $item = [
-                        'vendor_pur_inward_id' => $vendor_pur_inward_id,
-                        'vendor_po_item_id' => $vendor_po_item_id[$idx] ?? 0,
-                        'category_id' => $category_id[$idx] ?? 0,
-                        'item_id' => $item_id[$idx] ?? 0,
-                        'item_desc' => $item_desc[$idx] ?? '',
-                        'uom' => $uom[$idx] ?? '',
-                        'qty' => $qty[$idx] ?? 0,
-                        'rate' => $rate[$idx] ?? 0,
-                        'gst' => $gst[$idx] ?? 0,
-                        'amount' => $amount[$idx] ?? 0,
-                        'status' => 'Active',
-                        'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
-                        'created_date' => date('Y-m-d H:i:s'),
-                    ];
-
-                    $this->db->insert('vendor_pur_inward_item_info', $item);
+            // Get all existing item IDs for this invoice
+            $existing_items = [];
+            foreach ($vendor_purchase_invoice_item_id as $idx => $item_id) {
+                if (!empty($item_id)) {
+                    $existing_items[] = $item_id;
                 }
             }
 
-            // === 7. FINISH TRANSACTION ===
+            // Delete items that are not in selected_items
+            $items_to_delete = [];
+            foreach ($vendor_purchase_invoice_item_id as $idx => $item_id) {
+                if (!empty($item_id) && !in_array($idx, $selected_items)) {
+                    $items_to_delete[] = $item_id;
+                }
+            }
+
+            if (!empty($items_to_delete)) {
+                $this->db->where_in('vendor_purchase_invoice_item_id', $items_to_delete);
+                $this->db->update('vendor_purchase_invoice_item_info', [
+                    'status' => 'Inactive',
+                    'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                    'updated_date' => date('Y-m-d H:i:s')
+                ]);
+            }
+
+            // === 6. Process Selected Items ===
+            $vendor_po_item_id = $this->input->post('vendor_po_item_id') ?? [];
+            $category_id = $this->input->post('category_id') ?? [];
+            $item_id = $this->input->post('item_id') ?? [];
+            $item_desc = $this->input->post('item_desc') ?? [];
+            $uom = $this->input->post('uom') ?? [];
+            $item_code = $this->input->post('item_code') ?? [];
+            $qty = $this->input->post('qty') ?? [];
+            $rate = $this->input->post('rate') ?? [];
+            $gst = $this->input->post('gst') ?? [];
+            $amount = $this->input->post('amount') ?? [];
+
+            foreach ($selected_items as $idx) {
+
+                $itemData = [
+                    'vendor_purchase_invoice_id' => $vendor_purchase_invoice_id,
+                    'vendor_po_item_id' => $vendor_po_item_id[$idx] ?? 0,
+                    'category_id' => $category_id[$idx] ?? 0,
+                    'item_id' => $item_id[$idx] ?? 0,
+                    'item_desc' => $item_desc[$idx] ?? '',
+                    'item_code' => $item_code[$idx] ?? '',
+                    'uom' => $uom[$idx] ?? '',
+                    'qty' => $qty[$idx] ?? 0,
+                    'rate' => $rate[$idx] ?? 0,
+                    'gst' => $gst[$idx] ?? 0,
+                    'amount' => $amount[$idx] ?? 0,
+                    'status' => 'Active',
+                    'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                    'updated_date' => date('Y-m-d H:i:s'),
+                ];
+
+                if (!empty($vendor_purchase_invoice_item_id[$idx])) {
+
+                    $this->db->where(
+                        'vendor_purchase_invoice_item_id',
+                        $vendor_purchase_invoice_item_id[$idx]
+                    );
+                    $this->db->update('vendor_purchase_invoice_item_info', $itemData);
+
+                } else {
+
+                    $itemData['created_by'] = $this->session->userdata(SESS_HD . 'user_id');
+                    $itemData['created_date'] = date('Y-m-d H:i:s');
+
+                    $this->db->insert('vendor_purchase_invoice_item_info', $itemData);
+                }
+            }
+
             $this->db->trans_complete();
 
             if ($this->db->trans_status() === FALSE) {
-                $this->session->set_flashdata('error', 'Error updating Vendor Inward.');
+                $this->session->set_flashdata('error', 'Error updating Vendor Purchase Bill.');
             } else {
-                $this->session->set_flashdata('success', 'Vendor Inward updated successfully.');
+                $this->session->set_flashdata('success', 'Vendor Purchase Bill updated successfully.');
             }
 
-            redirect('vendor-pur-inward-list/');
+            redirect('vendor-purchase-bill-list/');
         }
 
-        if (!$vendor_pur_inward_id)
+        if (!$vendor_purchase_invoice_id)
             show_404();
 
+        // === Fetch Header Data ===
         $sql = "
-            SELECT * FROM vendor_pur_inward_info
-            WHERE vendor_pur_inward_id = ? AND status = 'Active'
-        ";
-        $data['header'] = $this->db->query($sql, [$vendor_pur_inward_id])->row_array();
+        SELECT * FROM vendor_purchase_invoice_info
+        WHERE vendor_purchase_invoice_id = ? AND status = 'Active'
+    ";
+        $data['header'] = $this->db->query($sql, [$vendor_purchase_invoice_id])->row_array();
+
+        if (empty($data['header'])) {
+            show_404();
+        }
+
+        // === Fetch Saved Items (Already in Invoice) ===
+        $sql = "
+        SELECT
+            a.vendor_purchase_invoice_item_id,
+            a.vendor_po_item_id,
+            a.category_id,
+            a.item_id,
+            a.item_desc,
+            a.item_code,
+            a.uom,
+            a.qty,
+            a.rate,
+            a.gst,
+            a.amount
+        FROM vendor_purchase_invoice_item_info as a
+        WHERE a.status='Active'
+        AND a.vendor_purchase_invoice_id = ?
+    ";
+        $data['saved_items'] = $this->db->query($sql, [$vendor_purchase_invoice_id])->result_array();
+
+        // === Fetch ALL Available Items from Vendor PO (for selection) ===
+        $vendor_po_id = $data['header']['vendor_po_id'];
+        $company_id = $data['header']['company_id'];
+        $customer_id = $data['header']['customer_id'];
+        $tender_enquiry_id = $data['header']['tender_enquiry_id'];
 
         $sql = "
-            SELECT 
-                vpi.*,
-                ci.category_name,
-                ii.item_code
-            FROM vendor_pur_inward_item_info vpi
-            LEFT JOIN category_info ci ON vpi.category_id = ci.category_id
-            LEFT JOIN item_info ii ON vpi.item_id = ii.item_id
-            WHERE vpi.vendor_pur_inward_id = ? AND vpi.status = 'Active'
-            ORDER BY vpi.vendor_pur_inward_item_id ASC
-        ";
-        $data['items'] = $this->db->query($sql, [$vendor_pur_inward_id])->result_array();
+        SELECT
+            a.vendor_po_id, 
+            b.company_id,
+            b.customer_id,
+            b.tender_enquiry_id,
+            a.uom,
+            a.qty,
+            a.vendor_po_item_id,
+            a.item_id,
+            a.item_desc,
+            a.category_id,
+            a.item_code,
+            a.rate,
+            a.gst,
+            a.amount  
+        FROM vendor_po_item_info as a
+        LEFT JOIN vendor_po_info as b ON a.vendor_po_id = b.vendor_po_id AND b.status='Active'
+        WHERE a.status='Active'
+        AND b.company_id = ?
+        AND b.customer_id = ?
+        AND b.tender_enquiry_id = ?
+        AND a.vendor_po_id = ?
+    ";
+        $data['all_po_items'] = $this->db->query($sql, [
+            $company_id,
+            $customer_id,
+            $tender_enquiry_id,
+            $vendor_po_id
+        ])->result_array();
 
+        // === Create lookup array for saved items ===
+        $saved_item_ids = [];
+        foreach ($data['saved_items'] as $saved) {
+            $saved_item_ids[$saved['vendor_po_item_id']] = $saved;
+        }
+        $data['saved_item_ids'] = $saved_item_ids;
+
+        // === Fetch Options ===
         $sql = "
-            SELECT
-                company_id,
-                company_name
-            FROM
-                company_info
-            WHERE
-            STATUS
-                = 'Active'
-            ORDER BY
-                company_name ASC
-        ";
+        SELECT company_id, company_name 
+        FROM company_info 
+        WHERE status = 'Active' 
+        ORDER BY company_name ASC";
         $query = $this->db->query($sql);
-        $data['company_opt'] = ['' => 'Select Company'];
+        $data['company_opt'] = [];
         foreach ($query->result_array() as $row) {
             $data['company_opt'][$row['company_id']] = $row['company_name'];
         }
 
-        // Customer Dropdown
-        $sql = "
-            SELECT 
-            customer_id, 
-            customer_name 
-            FROM customer_info 
-            WHERE status = 'Active' 
-            ORDER BY customer_name ASC
-        ";
-        $query = $this->db->query($sql);
-        $data['customer_opt'] = ['' => 'Select Customer'];
+        // Customers
+        $query = $this->db->query("
+        SELECT customer_id, customer_name 
+        FROM customer_info 
+        WHERE status = 'Active' 
+        ORDER BY customer_name");
+        $data['customer_opt'] = [];
         foreach ($query->result_array() as $row) {
             $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
         }
 
-        // Tender Enquiry
         $sql = "
-                SELECT 
-                a.tender_enquiry_id, 
-            get_tender_info(a.tender_enquiry_id) as enquiry_no 
-            FROM tender_enquiry_info as a 
-            WHERE a.status = 'Active' 
-            GROUP BY a.tender_enquiry_id 
-            ORDER BY a.tender_enquiry_id
-        ";
+        SELECT gst_id, gst_percentage 
+        FROM gst_info 
+        WHERE status = 'Active' 
+        ORDER BY gst_percentage ASC";
         $query = $this->db->query($sql);
-        $data['tender_enquiry_opt'] = ['' => 'Select Enquiry'];
+        $data['gst_opt'] = [];
         foreach ($query->result_array() as $row) {
-            $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['enquiry_no'];
+            $data['gst_opt'][$row['gst_percentage']] = $row['gst_percentage'];
         }
 
-        $sql = "SELECT vendor_po_id, po_no FROM vendor_po_info WHERE status = 'Active' ORDER BY po_no ASC";
-        $query = $this->db->query($sql);
-        $data['vendor_po_opt'] = ['' => 'Select Enquiry No'];
-        foreach ($query->result_array() as $row) {
-            $data['vendor_po_opt'][$row['vendor_po_id']] = $row['po_no'];
-        }
+        $data['vendor_opt'] = [];
+        $data['vat_payer_purchase_opt'] = [
+            '' => 'Select VAT Payer Purchase Category',
+            'Standard Rated Domestic Purchases at 5% (Line 8 of the VAT Return)' => 'Standard Rated Domestic Purchases at 5% (Line 8 of the VAT Return)',
+            'Standard Rated Domestic Purchases at 10% (Line 8 of the VAT Return)' => 'Standard Rated Domestic Purchases at 10% (Line 8 of the VAT Return)',
+            'Import subject to VAT paid at customs (Line 9 of the VAT Return)' => 'Import subject to VAT paid at customs (Line 9 of the VAT Return)',
+            'Imports subject to deferral at customs (Line 10 of the VAT Return)' => 'Imports subject to deferral at customs (Line 10 of the VAT Return)',
+            'Import subject to VAT accounted for through reverse charge mechanism at 5% (Line 11 of the VAT Return)' => 'Import subject to VAT accounted for through reverse charge mechanism at 5% (Line 11 of the VAT Return)',
+            'Import subject to VAT accounted for through reverse charge mechanism at 10% (Line 11 of the VAT Return)' => 'Import subject to VAT accounted for through reverse charge mechanism at 10% (Line 11 of the VAT Return)',
+            'Purchases subject to domestic reverse charge mechanism (Line 12 of the VAT Return)' => 'Purchases subject to domestic reverse charge mechanism (Line 12 of the VAT Return)',
+            'Purchases from non-register taxpayers, zero-rated/ exempt purchases (Line 13 of the VAT Return)' => 'Purchases from non-register taxpayers, zero-rated/ exempt purchases (Line 13 of the VAT Return)',
+        ];
 
-        $sql = "SELECT vendor_id, vendor_name FROM vendor_info WHERE status = 'Active' ORDER BY vendor_name ASC";
+     
+        $sql = "
+        SELECT vendor_id, vendor_name 
+        FROM vendor_info 
+        WHERE status = 'Active' 
+        ORDER BY vendor_name ASC";
         $query = $this->db->query($sql);
-        $data['vendor_opt'] = ['' => 'Select Vendor'];
         foreach ($query->result_array() as $row) {
             $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
         }
 
+        $data['vendor_contact_opt'] = [];
         $sql = "SELECT vendor_contact_id, contact_person_name FROM vendor_contact_info WHERE status = 'Active' ORDER BY contact_person_name ASC";
         $query = $this->db->query($sql);
         $data['vendor_contact_opt'] = ['' => 'Select Contact'];
@@ -3986,17 +4075,30 @@ class Vendor extends CI_Controller
             $data['vendor_contact_opt'][$row['vendor_contact_id']] = $row['contact_person_name'];
         }
 
-        $sql = "SELECT gst_percentage FROM gst_info WHERE status = 'Active' ORDER BY gst_percentage ASC";
+         $sql = "
+                SELECT 
+                    a.tender_enquiry_id, 
+                    get_tender_info(a.tender_enquiry_id) as tender_details
+                FROM tender_enquiry_info AS a 
+                WHERE a.status = 'Active' 
+                 ORDER BY a.tender_enquiry_id, a.enquiry_no ASC
+            ";
+
+
         $query = $this->db->query($sql);
-        $gst_opt = [];
+        $data['tender_enquiry_opt'] = [];
         foreach ($query->result_array() as $row) {
-            $gst_opt[$row['gst_percentage']] = $row['gst_percentage'];
+            // $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['company_code'] . ' -> ' . $row['company_sno'] . ' -> ' . $row['customer_code'] . ' -> ' . $row['customer_sno'] . ' -> ' . $row['enquiry_no'];
+            $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_details'];
         }
-        $data['gst_opt'] = $gst_opt;
 
+         $sql = "SELECT vendor_po_id, po_no FROM vendor_po_info WHERE status = 'Active' ORDER BY po_no ASC";
+        $query = $this->db->query($sql);
+        $data['vendor_po_opt'] = ['' => 'Select Enquiry No'];
+        foreach ($query->result_array() as $row) {
+            $data['vendor_po_opt'][$row['vendor_po_id']] = $row['po_no'];
+        }
 
-
-
-        $this->load->view('page/vendor/vendor-pur-inward-edit', $data);
+        $this->load->view('page/vendor/vendor-purchase-bill-edit', $data);
     }
 }
