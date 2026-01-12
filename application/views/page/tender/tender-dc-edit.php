@@ -121,7 +121,7 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th style="width: 5%;">Check</th>
+                                    <th style="width: 5%;">✔</th>
                                     <th style="width: 10%;">Vendor / Inward No</th>
                                     <th style="width: 60%;">Item Code / Item Description</th>
                                     <th style="width: 10%;">UOM / Available Qty</th>

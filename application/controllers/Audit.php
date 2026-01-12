@@ -578,6 +578,7 @@ class Audit extends CI_Controller
         if (!empty($srch_voucher_narration_id)) {
             $where .= " AND a.voucher_id = '" . $this->db->escape_str($srch_voucher_narration_id) . "'";
         }
+
         if ($this->input->post('srch_ledger_account_id') !== null) {
             $data['srch_ledger_account_id'] = $srch_ledger_account_id = $this->input->post('srch_ledger_account_id');
             $this->session->set_userdata('srch_ledger_account_id', $srch_ledger_account_id);
@@ -637,34 +638,74 @@ class Audit extends CI_Controller
         // ---------- SERIAL NUMBER ----------
         $data['sno'] = $offset + 1;
 
-        $data['voucher_list_opt'] = ['' => 'All'];
-        $sql = "
-            SELECT voucher_id, voucher_type, narration
-            FROM vouchers 
-            WHERE status = 'Active' 
-            ORDER BY voucher_id desc";
-        $query = $this->db->query($sql);
-        foreach ($query->result_array() as $row) {
-            $data['voucher_list_opt'][$row['voucher_id']] = $row['narration'] . ' [ ' . $row['voucher_type'] . ' ]';
-        }
+
 
         $data['ledger_accounts_list_opt'] = ['' => 'All'];
-        $sql = "
-                SELECT
-                a.voucher_id,
-                b.ledger_id,
-                b.ledger_name
 
-                FROM voucher_entries as a 
-                LEFT JOIN ledger_accounts as b on a.ledger_id = b.ledger_id and b.status='Active'
-                WHERE a.status='Active'
-                and a.voucher_id = '" . $this->db->escape_str($srch_voucher_narration_id) . "'
-
+        if (!empty($srch_voucher_narration_id)) {
+            $sql = "
+               SELECT
+                    a.voucher_id,
+                    b.ledger_id,
+                    b.ledger_name
+                FROM
+                    voucher_entries AS a
+                LEFT JOIN ledger_accounts AS b
+                ON
+                    a.ledger_id = b.ledger_id AND b.status = 'Active'
+                    
+                WHERE
+                    a.status = 'Active'
+                AND   a.voucher_id='" . $this->db->escape_str($srch_voucher_narration_id) . "'
+ 
              ";
-        $query = $this->db->query($sql);
-        foreach ($query->result_array() as $row) {
-            $data['ledger_accounts_list_opt'][$row['ledger_id']] = $row['ledger_name'];
+            $query = $this->db->query($sql);
+            foreach ($query->result_array() as $row) {
+                $data['ledger_accounts_list_opt'][$row['ledger_id']] = $row['ledger_name'];
+            }
         }
+
+        //voucher type option  'Payment','Receipt','Journal','Contra','Sales','Purchase'
+
+
+
+        $data['voucher_list_opt'] = ['' => 'All'];
+        $data['voucher_type'] = $this->input->post('voucher_type');
+
+        /* Voucher Type Dropdown */
+        $data['voucher_type_opt'] = [
+            '' => 'Select Voucher Type',
+            'Payment' => 'Payment',
+            'Receipt' => 'Receipt',
+            'Journal' => 'Journal',
+            'Contra' => 'Contra',
+            'Sales' => 'Sales',
+            'Purchase' => 'Purchase'
+        ];
+
+        /* Initialize voucher list dropdown */
+        $data['voucher_list_opt'] = ['' => 'Select Voucher'];
+
+        /* Load vouchers based on voucher type */
+        if (!empty($data['voucher_type'])) {
+
+            $sql = "
+                SELECT 
+                    a.voucher_id,
+                    a.voucher_type,
+                    a.narration
+                FROM vouchers AS a
+                WHERE a.status = 'Active'
+                AND a.voucher_type = ?
+            ";
+
+            $query = $this->db->query($sql, [$data['voucher_type']]);
+
+            foreach ($query->result_array() as $row) {
+                $data['voucher_list_opt'][$row['voucher_id']] = $row['narration'];
+            }
+        }
+
 
         $sql = "
             SELECT
@@ -723,7 +764,7 @@ class Audit extends CI_Controller
         }
 
 
-        $sql = "
+      echo  $sql = "
             SELECT 
                 g.group_name,
                 g.sequence AS group_seq,
@@ -818,8 +859,8 @@ class Audit extends CI_Controller
         } else {
             $data['srch_from_date'] = $srch_from_date = date('Y-m-d');
             $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
-        } 
-       
+        }
+
         $sql = "
             SELECT
                 g.nature,
@@ -895,6 +936,168 @@ class Audit extends CI_Controller
         // ---------- LOAD VIEW ----------
         $this->load->view('page/audit/profit-loss-report', $data);
     }
+
+    public function ledger_transactions_report()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data['title'] = 'Ledger Transactions Report';
+        $data['js'] = 'audit/ledger-transactions-report.inc';
+
+        // Date Filter
+        if ($this->input->post('srch_from_date')) {
+            $srch_from_date = $this->input->post('srch_from_date');
+            $srch_to_date = $this->input->post('srch_to_date');
+
+            $this->session->set_userdata('srch_from_date', $srch_from_date);
+            $this->session->set_userdata('srch_to_date', $srch_to_date);
+        } elseif ($this->session->userdata('srch_from_date')) {
+            $srch_from_date = $this->session->userdata('srch_from_date');
+            $srch_to_date = $this->session->userdata('srch_to_date');
+        } else {
+            $srch_from_date = date('Y-m-01');
+            $srch_to_date = date('Y-m-d');
+        }
+
+        $data['srch_from_date'] = $srch_from_date;
+        $data['srch_to_date'] = $srch_to_date;
+
+        // Ledger Filter
+        if ($this->input->post('srch_ledger_id')) {
+            $srch_ledger_id = $this->input->post('srch_ledger_id');
+            $this->session->set_userdata('srch_ledger_id', $srch_ledger_id);
+        } else {
+            $srch_ledger_id = $this->session->userdata('srch_ledger_id');
+        }
+
+        $data['srch_ledger_id'] = $srch_ledger_id;
+
+        // Load ledger options for dropdown
+        $data['ledger_opt'] = array('' => '-- Select Ledger --');
+        $sql = "SELECT ledger_id, ledger_name
+            FROM ledger_accounts  
+            WHERE status = 'Active' 
+            ORDER BY ledger_name ASC";
+        $query = $this->db->query($sql);
+
+        foreach ($query->result_array() as $row) {
+            $data['ledger_opt'][$row['ledger_id']] = $row['ledger_name'];
+        }
+
+        // If no ledger selected, show empty report
+        if (empty($srch_ledger_id)) {
+            $data['ledger_rows'] = [];
+            $data['total_debit'] = '0.00';
+            $data['total_credit'] = '0.00';
+            $data['ledger_name'] = '';
+            $this->load->view('page/audit/ledger-transactions-report', $data);
+            return;
+        }
+
+        // ================= OPENING BALANCE =================
+        $opening_sql = "
+        SELECT 
+            la.ledger_name,
+            la.opening_type,
+            CASE 
+                WHEN la.opening_type = 'Debit' 
+                    THEN la.opening_balance 
+                        + IFNULL(SUM(ve.debit), 0) 
+                        - IFNULL(SUM(ve.credit), 0)
+                ELSE 
+                    la.opening_balance 
+                        + IFNULL(SUM(ve.credit), 0) 
+                        - IFNULL(SUM(ve.debit), 0)
+            END AS opening_balance
+        FROM ledger_accounts la
+        LEFT JOIN voucher_entries ve ON la.ledger_id = ve.ledger_id
+        LEFT JOIN vouchers v ON ve.voucher_id = v.voucher_id
+            AND v.voucher_date < ?
+            AND v.status = 'Active'
+        WHERE la.ledger_id = ?
+        GROUP BY la.ledger_id, la.ledger_name, la.opening_type, la.opening_balance
+    ";
+
+        $opening_row = $this->db->query($opening_sql, array($srch_from_date, $srch_ledger_id))->row_array();
+        $opening_balance = $opening_row ? $opening_row['opening_balance'] : 0;
+        $data['ledger_name'] = $opening_row ? $opening_row['ledger_name'] : '';
+
+        // ================= TRANSACTIONS =================
+        $txn_sql = "
+        SELECT 
+            v.voucher_date,
+            v.voucher_type,
+            v.voucher_id,
+            CONCAT(
+                UPPER(LEFT(v.voucher_type, 1)),
+                'V-', LPAD(v.voucher_id, 3, '0')
+            ) AS voucher_no,
+            ve.debit,
+            ve.credit
+        FROM voucher_entries ve
+        JOIN vouchers v ON ve.voucher_id = v.voucher_id
+        WHERE ve.ledger_id = ?
+        AND v.voucher_date BETWEEN ? AND ?
+        AND ve.status = 'Active'
+        AND v.status = 'Active'
+        ORDER BY v.voucher_date ASC, v.voucher_id ASC
+    ";
+
+        $txn_rows = $this->db->query($txn_sql, array($srch_ledger_id, $srch_from_date, $srch_to_date))->result_array();
+
+        // ================= BUILD LEDGER ROWS =================
+        $ledger_rows = [];
+
+        // Opening Balance Row
+        $ledger_rows[] = [
+            'voucher_date' => '',
+            'voucher_no' => '',
+            'type' => 'Opening Balance',
+            'debit' => '',
+            'credit' => '',
+            'balance' => number_format(abs($opening_balance), 2) . ' ' . ($opening_balance >= 0 ? 'Dr' : 'Cr')
+        ];
+
+        $running_balance = $opening_balance;
+        $total_debit = 0;
+        $total_credit = 0;
+
+        foreach ($txn_rows as $row) {
+            $running_balance += $row['debit'];
+            $running_balance -= $row['credit'];
+
+            $total_debit += $row['debit'];
+            $total_credit += $row['credit'];
+
+            $ledger_rows[] = [
+                'voucher_date' => date('d-m-Y', strtotime($row['voucher_date'])),
+                'voucher_no' => $row['voucher_no'],
+                'type' => $row['voucher_type'],
+                'debit' => $row['debit'] > 0 ? number_format($row['debit'], 2) : '',
+                'credit' => $row['credit'] > 0 ? number_format($row['credit'], 2) : '',
+                'balance' => number_format(abs($running_balance), 2) . ' ' . ($running_balance >= 0 ? 'Dr' : 'Cr')
+            ];
+        }
+
+        // Closing Balance Row
+        $ledger_rows[] = [
+            'voucher_date' => '',
+            'voucher_no' => '',
+            'type' => 'Closing Balance',
+            'debit' => '',
+            'credit' => '',
+            'balance' => number_format(abs($running_balance), 2) . ' ' . ($running_balance >= 0 ? 'Dr' : 'Cr')
+        ];
+
+        $data['ledger_rows'] = $ledger_rows;
+        $data['total_debit'] = number_format($total_debit, 2);
+        $data['total_credit'] = number_format($total_credit, 2);
+
+        $this->load->view('page/audit/ledger-transactions-report', $data);
+    }
+
 
     public function get_data()
     {
@@ -1013,6 +1216,7 @@ class Audit extends CI_Controller
             ", [$rec_id]);
             $rec_list = $query->result_array();
         }
+
         if ($table == 'voucher_ledger_list_load') {
             $query = $this->db->query("
                SELECT
@@ -1028,6 +1232,22 @@ class Audit extends CI_Controller
             ", [$rec_id]);
             $rec_list = $query->result_array();
         }
+
+        if ($table == 'voucher_type_narration_load') {
+            $query = $this->db->query("
+               select
+                a.voucher_id,
+                a.narration
+                from vouchers as a 
+                where a.`status`='Active'
+                and a.voucher_type= ?
+
+            ", [$rec_id]);
+            $rec_list = $query->result_array();
+        }
+
+
+
         header('Content-Type: application/json');
         echo json_encode($rec_list);
 
@@ -1050,7 +1270,7 @@ class Audit extends CI_Controller
                 'status' => 'success',
                 'message' => 'Voucher added successfully!',
                 'id' => $insert_id,
-                'name' => $data['voucher_type'] . ' [ ' . $data['narration'] . ' ]',
+                'name' => $data['narration']
             ]);
             exit;
         }

@@ -2901,11 +2901,9 @@ class Tender extends CI_Controller
 
         $sql = "
             SELECT 
-                a.*, 
-                b.*
+                a.* 
             FROM tender_enq_invoice_item_info AS a
-            LEFT JOIN item_info AS b 
-                ON a.item_id = b.item_id AND b.status = 'Active'
+            
             WHERE 
                 a.status = 'Active'
                 AND a.tender_enq_invoice_id = ?

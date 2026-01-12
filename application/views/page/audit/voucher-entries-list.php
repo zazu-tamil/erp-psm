@@ -28,9 +28,29 @@
                     </div>
 
                     <div class="form-group col-md-3">
-                        <label>Select Voucher</label>
-                        <?php echo form_dropdown('srch_voucher_narration_id', $voucher_list_opt, set_value('srch_voucher_narration_id', $srch_voucher_narration_id), 'id="srch_voucher_narration_id" class="form-control"'); ?>
+                        <label for="voucher_type">Voucher Type</label>
+                        <?php
+                        echo form_dropdown(
+                            'voucher_type',
+                            $voucher_type_opt,
+                            set_value('voucher_type', $voucher_type),
+                            'class="form-control" id="voucher_type" required'
+                        );
+                        ?>
                     </div>
+
+                    <div class="form-group col-md-3">
+                        <label>Select Voucher</label>
+                        <?php
+                        echo form_dropdown(
+                            'srch_voucher_narration_id',
+                            $voucher_list_opt ?? ['' => '-- Select Voucher --'],
+                            $srch_voucher_narration_id ?? '',
+                            'id="srch_voucher_narration_id" class="form-control"'
+                        );
+                        ?>
+                    </div>
+
                     <div class="form-group col-md-3">
                         <label>Select Ledger Account</label>
                         <?php echo form_dropdown('srch_ledger_account_id', $ledger_accounts_list_opt, set_value('srch_ledger_account_id', $srch_ledger_account_id), 'id="srch_ledger_account_id" class="form-control"'); ?>
@@ -112,6 +132,18 @@
                             <div class="modal-body">
                                 <div class="row">
 
+                                    <div class="form-group col-md-12">
+                                        <label for="voucher_type">Voucher Type</label>
+                                        <?php
+                                        echo form_dropdown(
+                                            'voucher_type',
+                                            $voucher_type_opt,
+                                            $voucher_type ?? '',
+                                            'class="form-control" id="voucher_type" required'
+                                        );
+                                        ?>
+                                    </div>
+
                                     <!-- Voucher Type -->
                                     <div class="form-group col-md-12">
                                         <label>Voucher</label>
@@ -119,7 +151,7 @@
                                             <?php
                                             echo form_dropdown(
                                                 'voucher_id',
-                                                ['' => 'Select Voucher'] + $voucher_list_opt,
+                                                ['' => 'Select Voucher'],
                                                 set_value('voucher_id'),
                                                 'id="srch_voucher_id" class="form-control" '
                                             );
@@ -130,8 +162,6 @@
                                             </span>
                                         </div>
                                     </div>
-
-                                    <!-- Ledger -->
                                     <div class="form-group col-md-12">
                                         <label>Ledger</label>
                                         <?php
@@ -189,8 +219,8 @@
                     </div>
                 </div>
             </div>
-
-
+                
+          
 
             <div class="modal fade" id="edit_modal" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-md" role="document">
@@ -279,7 +309,7 @@
                 </div>
             </div>
 
-            <div class="modal fade" id="add_voucher_id" role="dialog" aria-labelledby="scrollmodalLabel"
+            <div class="modal fade" id="add_voucher_id" class="add_voucher_modal" role="dialog" aria-labelledby="scrollmodalLabel"
                 aria-hidden="true">
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
@@ -360,10 +390,62 @@
 <!-- /.content -->
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
 <script>
+$(document).ready(function () {
+    var voucherType = $("#add_modal #voucher_type").val(); // source
+    $(".add_voucher_modal #voucher_type").val(voucherType).trigger('change'); // target
+});
+</script>
+
+
+<script>
+
+    $("#add_modal #voucher_type").change(function () {
+        const voucher_type = $(this).val();
+        $.post(
+            "<?php echo site_url('audit/get_data'); ?>",
+            {
+                tbl: "voucher_type_narration_load",
+                id: voucher_type,
+            },
+            function (data) {
+                console.log(data);
+                const $cust = $("#add_modal #srch_voucher_id");
+                $cust.empty().append('<option value="">Select Narration</option>');
+                $.each(data, function (i, c) {
+                    $cust.append(
+                        `<option value="${c.voucher_id}">${c.narration}</option>`
+                    );
+                });
+            },
+            "json"
+        );
+    });
+
+    $("#voucher_type").change(function () {
+        const voucher_type = $(this).val();
+        $.post(
+            "<?php echo site_url('audit/get_data'); ?>",
+            {
+                tbl: "voucher_type_narration_load",
+                id: voucher_type,
+            },
+            function (data) {
+                console.log(data);
+                const $cust = $("#srch_voucher_narration_id");
+                $cust.empty().append('<option value="">Select Narration</option>');
+                $.each(data, function (i, c) {
+                    $cust.append(
+                        `<option value="${c.voucher_id}">${c.narration}</option>`
+                    );
+                });
+            },
+            "json"
+        );
+    });
     $("#srch_voucher_narration_id").change(function () {
         const group_id = $(this).val();
         $.post(
-            "<?php echo site_url('adit/get_data'); ?>",
+            "<?php echo site_url('audit/get_data'); ?>",
             {
                 tbl: "voucher_ledger_list_load",
                 id: group_id,

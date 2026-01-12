@@ -325,6 +325,7 @@ ALTER TABLE `vendor_purchase_invoice_info`
 	ADD COLUMN `voucher_id` VARCHAR(100) NULL DEFAULT NULL AFTER `purchase_bill_upload`;
 //
 
-
+10-01-2026
  
 ALTER TABLE `app_settings` ADD `status` VARCHAR(50) NULL DEFAULT 'Active' AFTER `setting_value`;
+ALTER TABLE `tender_enq_invoice_item_info` ADD `item_code` TEXT NULL AFTER `item_id`;
