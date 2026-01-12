@@ -764,7 +764,7 @@ class Audit extends CI_Controller
         }
 
 
-      echo  $sql = "
+        echo $sql = "
             SELECT 
                 g.group_name,
                 g.sequence AS group_seq,
@@ -986,114 +986,66 @@ class Audit extends CI_Controller
             $data['ledger_opt'][$row['ledger_id']] = $row['ledger_name'];
         }
 
-        // If no ledger selected, show empty report
-        if (empty($srch_ledger_id)) {
-            $data['ledger_rows'] = [];
-            $data['total_debit'] = '0.00';
-            $data['total_credit'] = '0.00';
-            $data['ledger_name'] = '';
-            $this->load->view('page/audit/ledger-transactions-report', $data);
-            return;
-        }
 
-        // ================= OPENING BALANCE =================
-        $opening_sql = "
-        SELECT 
-            la.ledger_name,
-            la.opening_type,
-            CASE 
-                WHEN la.opening_type = 'Debit' 
-                    THEN la.opening_balance 
-                        + IFNULL(SUM(ve.debit), 0) 
-                        - IFNULL(SUM(ve.credit), 0)
-                ELSE 
-                    la.opening_balance 
-                        + IFNULL(SUM(ve.credit), 0) 
-                        - IFNULL(SUM(ve.debit), 0)
-            END AS opening_balance
-        FROM ledger_accounts la
-        LEFT JOIN voucher_entries ve ON la.ledger_id = ve.ledger_id
-        LEFT JOIN vouchers v ON ve.voucher_id = v.voucher_id
-            AND v.voucher_date < ?
+        $sql = "
+           SELECT *,
+                CASE 
+                    WHEN opr >= 0 THEN CONCAT(ABS(opr), ' Dr')
+                    ELSE CONCAT(ABS(opr), ' Cr')
+                END AS opening_bal
+            FROM (
+                SELECT 
+                    la.opening_balance,
+                    la.opening_type, 
+                    IFNULL(SUM(ve.debit), 0)  AS total_debit,
+                    IFNULL(SUM(ve.credit), 0) AS total_credit,
+                    CASE la.opening_type
+                        WHEN 'Debit' THEN 
+                            la.opening_balance 
+                            + IFNULL(SUM(ve.debit),0) 
+                            - IFNULL(SUM(ve.credit),0)
+                        WHEN 'Credit' THEN 
+                            la.opening_balance 
+                            + IFNULL(SUM(ve.credit),0) 
+                            - IFNULL(SUM(ve.debit),0)
+                    END AS opr
+                FROM ledger_accounts la
+                LEFT JOIN voucher_entries ve 
+                    ON la.ledger_id = ve.ledger_id
+                LEFT JOIN vouchers v 
+                    ON ve.voucher_id = v.voucher_id
+                    AND v.status = 'Active' 
+                WHERE la.status = 'Active'
+                and la.ledger_id = '{$srch_ledger_id}'
+                AND v.voucher_date < '{$srch_from_date}'
+                GROUP BY la.ledger_id
+            ) t; 
+        ";
+        $query = $this->db->query($sql);
+        $data['ledger_list'] = $query->row_array(); // single row
+
+
+
+
+        $sql = "
+            SELECT 
+                v.voucher_date,
+                v.voucher_id,
+                v.voucher_type,
+                v.narration,
+                ve.debit,
+                ve.credit
+            FROM voucher_entries ve
+            JOIN vouchers v ON v.voucher_id = ve.voucher_id
+            WHERE ve.status = 'Active'
+            AND ve.ledger_id = '{$srch_ledger_id}'
+            AND v.voucher_date BETWEEN  '{$srch_from_date}' AND   '{$srch_to_date}'
             AND v.status = 'Active'
-        WHERE la.ledger_id = ?
-        GROUP BY la.ledger_id, la.ledger_name, la.opening_type, la.opening_balance
-    ";
+            ORDER BY v.voucher_date, v.voucher_id;
+        ";
+        $query = $this->db->query($sql);
+        $data['ledger_transactions'] = $query->result_array();
 
-        $opening_row = $this->db->query($opening_sql, array($srch_from_date, $srch_ledger_id))->row_array();
-        $opening_balance = $opening_row ? $opening_row['opening_balance'] : 0;
-        $data['ledger_name'] = $opening_row ? $opening_row['ledger_name'] : '';
-
-        // ================= TRANSACTIONS =================
-        $txn_sql = "
-        SELECT 
-            v.voucher_date,
-            v.voucher_type,
-            v.voucher_id,
-            CONCAT(
-                UPPER(LEFT(v.voucher_type, 1)),
-                'V-', LPAD(v.voucher_id, 3, '0')
-            ) AS voucher_no,
-            ve.debit,
-            ve.credit
-        FROM voucher_entries ve
-        JOIN vouchers v ON ve.voucher_id = v.voucher_id
-        WHERE ve.ledger_id = ?
-        AND v.voucher_date BETWEEN ? AND ?
-        AND ve.status = 'Active'
-        AND v.status = 'Active'
-        ORDER BY v.voucher_date ASC, v.voucher_id ASC
-    ";
-
-        $txn_rows = $this->db->query($txn_sql, array($srch_ledger_id, $srch_from_date, $srch_to_date))->result_array();
-
-        // ================= BUILD LEDGER ROWS =================
-        $ledger_rows = [];
-
-        // Opening Balance Row
-        $ledger_rows[] = [
-            'voucher_date' => '',
-            'voucher_no' => '',
-            'type' => 'Opening Balance',
-            'debit' => '',
-            'credit' => '',
-            'balance' => number_format(abs($opening_balance), 2) . ' ' . ($opening_balance >= 0 ? 'Dr' : 'Cr')
-        ];
-
-        $running_balance = $opening_balance;
-        $total_debit = 0;
-        $total_credit = 0;
-
-        foreach ($txn_rows as $row) {
-            $running_balance += $row['debit'];
-            $running_balance -= $row['credit'];
-
-            $total_debit += $row['debit'];
-            $total_credit += $row['credit'];
-
-            $ledger_rows[] = [
-                'voucher_date' => date('d-m-Y', strtotime($row['voucher_date'])),
-                'voucher_no' => $row['voucher_no'],
-                'type' => $row['voucher_type'],
-                'debit' => $row['debit'] > 0 ? number_format($row['debit'], 2) : '',
-                'credit' => $row['credit'] > 0 ? number_format($row['credit'], 2) : '',
-                'balance' => number_format(abs($running_balance), 2) . ' ' . ($running_balance >= 0 ? 'Dr' : 'Cr')
-            ];
-        }
-
-        // Closing Balance Row
-        $ledger_rows[] = [
-            'voucher_date' => '',
-            'voucher_no' => '',
-            'type' => 'Closing Balance',
-            'debit' => '',
-            'credit' => '',
-            'balance' => number_format(abs($running_balance), 2) . ' ' . ($running_balance >= 0 ? 'Dr' : 'Cr')
-        ];
-
-        $data['ledger_rows'] = $ledger_rows;
-        $data['total_debit'] = number_format($total_debit, 2);
-        $data['total_credit'] = number_format($total_credit, 2);
 
         $this->load->view('page/audit/ledger-transactions-report', $data);
     }

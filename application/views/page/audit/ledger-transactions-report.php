@@ -58,19 +58,17 @@
             </form>
         </div>
     </div>
-
     <!-- ================= REPORT ================= -->
     <?php if (!empty($srch_ledger_id)): ?>
+
+
 
         <!-- PRINT HEADER -->
         <div class="print-header text-center">
             <h2 class="company-name">AL HILLO TRADING CO W.L.L</h2>
             <h3 class="report-title">LEDGER TRANSACTIONS REPORT</h3>
 
-            <?php if (!empty($ledger_name)): ?>
-                <p><strong>Ledger:</strong> <?php echo htmlspecialchars($ledger_name); ?></p>
-            <?php endif; ?>
-
+            <p><strong>Ledger:</strong> <?php echo htmlspecialchars($ledger_name); ?></p>
             <p>
                 <strong>Period:</strong>
                 <?php echo date('d M Y', strtotime($srch_from_date)); ?>
@@ -79,11 +77,26 @@
             </p>
         </div>
 
+        <?php
+        // ================= OPENING BALANCE =================
+        $opening_amount = 0;
+
+        if (!empty($ledger_list['opening_bal'])) {
+            preg_match('/([\d\.]+)\s*(Dr|Cr)/', $ledger_list['opening_bal'], $m);
+            $opening_amount = ($m[2] == 'Dr') ? $m[1] : -$m[1];
+        }
+
+        $running_balance = $opening_amount;
+        $total_debit = 0;
+        $total_credit = 0;
+        ?>
+
         <div class="box box-success">
             <div class="box-header with-border">
                 <h3 class="box-title">Ledger Transactions</h3>
             </div>
-            <div class="box-body"> 
+
+            <div class="box-body">
                 <table class="table table-bordered table-striped ledger-table">
                     <thead>
                         <tr class="bg-gray">
@@ -97,44 +110,71 @@
                     </thead>
 
                     <tbody>
-                        <?php if (!empty($ledger_rows)): ?>
-                            <?php foreach ($ledger_rows as $row): ?>
-                                <tr>
-                                    <td><?php echo $row['voucher_date']; ?></td>
-                                    <td><?php echo $row['voucher_no']; ?></td>
-                                    <td><?php echo $row['type']; ?></td>
-                                    <td class="text-right"><?php echo $row['debit']; ?></td>
-                                    <td class="text-right"><?php echo $row['credit']; ?></td>
-                                    <td class="text-right">
-                                        <strong><?php echo $row['balance']; ?></strong>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
+                        <!-- OPENING BALANCE -->
+                        <tr class="bg-info">
+                            <td colspan="5"><strong>Opening Balance</strong></td>
+                            <td class="text-right">
+                                    <strong>
+                                    <?php echo !empty($ledger_list['opening_bal']) ? $ledger_list['opening_bal'] : '0 Dr'; ?>
+                                </strong>
+                            </td>
+                        </tr>
+
+                        <!-- TRANSACTIONS -->
+                        <?php foreach ($ledger_transactions as $row): ?>
+                            <?php
+                            $running_balance += $row['debit'];
+                            $running_balance -= $row['credit'];
+
+                            $total_debit += $row['debit'];
+                            $total_credit += $row['credit'];
+
+                            if ($running_balance >= 0) {
+                                $bal_display = number_format($running_balance, 3) . ' Dr';
+                            } else {
+                                $bal_display = number_format(abs($running_balance), 3) . ' Cr';
+                            }
+                            ?>
                             <tr>
-                                <td colspan="6" class="text-center text-muted">
-                                    No transactions found for the selected period
-                                </td>
+                                <td><?php echo date('d-m-Y', strtotime($row['voucher_date'])); ?></td>
+                                <td><?php echo $row['narration']; ?></td>
+                                <td><?php echo $row['voucher_type']; ?></td>
+                                <td class="text-right"><?php echo number_format($row['debit'], 3); ?></td>
+                                <td class="text-right"><?php echo number_format($row['credit'], 3); ?></td>
+                                <td class="text-right"><?php echo $bal_display; ?></td>
                             </tr>
-                        <?php endif; ?>
+                        <?php endforeach; ?>
+
+                        <!-- TOTALS -->
+                        <tr class="bg-warning">
+                            <td colspan="3"><strong>Total</strong></td>
+                            <td class="text-right"><strong><?php echo number_format($total_debit, 3); ?></strong></td>
+                            <td class="text-right"><strong><?php echo number_format($total_credit, 3); ?></strong></td>
+                            <td></td>
+                        </tr>
+
+                        <!-- CLOSING BALANCE -->
+                        <tr class="bg-success">
+                            <td colspan="5"><strong>Closing Balance</strong></td>
+                            <td class="text-right">
+                                <strong>
+                                    <?php
+                                    if ($running_balance >= 0)
+                                        echo number_format($running_balance, 3) . ' Dr';
+                                    else
+                                        echo number_format(abs($running_balance), 3) . ' Cr';
+                                    ?>
+                                </strong>
+                            </td>
+                        </tr>
                     </tbody>
-
-                    <?php if (!empty($ledger_rows)): ?>
-                        <tfoot>
-                            <tr>
-                                <th colspan="3" class="text-right">TOTAL</th>
-                                <th class="text-right"><?php echo $total_debit; ?></th>
-                                <th class="text-right"><?php echo $total_credit; ?></th>
-                                <th></th>
-                            </tr>
-                        </tfoot>
-                    <?php endif; ?>
                 </table>
-
             </div>
         </div>
 
+
     <?php else: ?>
+
         <div class="box box-warning">
             <div class="box-body text-center text-muted" style="padding:40px;">
                 <i class="fa fa-info-circle fa-3x"></i>
@@ -143,7 +183,9 @@
                 </p>
             </div>
         </div>
+
     <?php endif; ?>
+
 
 </section>
 
