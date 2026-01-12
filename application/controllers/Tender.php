@@ -2325,8 +2325,7 @@ class Tender extends CI_Controller
 
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();
-
-        // === DROPDOWNS ===
+         // === DROPDOWNS ===
         $data['company_opt'] = ['' => 'All'];
         $sql = "SELECT company_id, company_name FROM company_info WHERE status = 'Active' ORDER BY company_name";
         $query = $this->db->query($sql);
@@ -2617,7 +2616,7 @@ class Tender extends CI_Controller
 
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();
-
+        $data['tender_enquiry_opt'] = ['' => 'All'];
         // === DROPDOWNS ===
         $sql = "
             SELECT customer_id,customer_name
@@ -3746,7 +3745,7 @@ class Tender extends CI_Controller
                 from tender_dc_info as d 
                 left join  tender_dc_item_info as d1 on d.tender_dc_id = d1.tender_dc_id and d1.status = 'Active'
                 where d.status = 'Active'
-                and d.tender_enquiry_id = '17'
+                and d.tender_enquiry_id =  '" . $rec_id . "'
                 group by d1.vendor_pur_inward_id, d1.vendor_pur_inward_item_id, d1.category_id, d1.item_id 
                 ) as c on c.tender_enquiry_id = a.tender_enquiry_id and c.vendor_pur_inward_id = b.vendor_pur_inward_id and c.vendor_pur_inward_item_id = b.vendor_pur_inward_item_id
                 left join vendor_info as ven on a.vendor_id = ven.vendor_id and a.status='Active'
