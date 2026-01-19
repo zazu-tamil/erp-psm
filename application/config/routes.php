@@ -218,6 +218,9 @@ $route['company-bank-list/(:num)'] = 'accounts/company_bank_list/$1';
 $route['voucher-type-list'] = 'accounts/voucher_type_list';
 $route['voucher-type-list/(:num)'] = 'accounts/voucher_type_list/$1';
 
+$route['receipt-list'] = 'tender/receipt_list';
+$route['receipt-list/(:num)'] = 'tender/receipt_list/$1';
+
 
 //audit Routes
 $route['account-group-list'] = 'audit/account_group_list';

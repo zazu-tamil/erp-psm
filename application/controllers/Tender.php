@@ -4358,4 +4358,222 @@ class Tender extends CI_Controller
         echo json_encode($result);
     }
 
+    public function receipt_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data['js'] = 'tender/receipt-list.inc';
+
+        /* ===================== ADD ===================== */
+        if ($this->input->post('mode') == 'Add') {
+            $customer_id = (int) $this->input->post('customer_id');
+            $payment_mode = $this->input->post('payment_mode');
+
+            $customer_ledger_id = 0;
+            if (!empty($customer_id)) {
+                $row = $this->db
+                    ->select('ledger_id')
+                    ->from('customer_info')
+                    ->where('customer_id', $customer_id)
+                    ->where('status', 'Active')
+                    ->get()
+                    ->row_array();
+                $customer_ledger_id = !empty($row['ledger_id']) ? (int) $row['ledger_id'] : 0;
+            }
+
+            $bank_ledger_id = null;
+            if ($payment_mode === 'Bank') {
+                $bank_ledger_id = (int) $this->input->post('bank_ledger_id');
+                if ($bank_ledger_id <= 0) {
+                    $bank_ledger_id = null;
+                }
+            }
+
+            $created_by = $this->session->userdata('cr_user_id');
+            if (empty($created_by)) {
+                $created_by = $this->session->userdata(SESS_HD . 'user_id');
+            }
+
+            $ins = array(
+                'receipt_no' => $this->input->post('receipt_no'),
+                'receipt_date' => $this->input->post('receipt_date'),
+                'customer_id' => $customer_id,
+                'customer_ledger_id' => $customer_ledger_id,
+                'payment_mode' => $payment_mode,
+                'bank_ledger_id' => $bank_ledger_id,
+                'amount' => $this->input->post('amount'),
+                'narration' => $this->input->post('narration'),
+                'status' => 'Active',
+                'voucher_id' => (int) $this->input->post('voucher_id'),
+                'created_by' => !empty($created_by) ? (int) $created_by : null,
+                'created_date' => date('Y-m-d H:i:s'),
+            );
+
+            $this->db->insert('receipt_info', $ins);
+            redirect('receipt-list');
+        }
+
+        // ---------------- FILTERS ----------------
+        $where = "1 = 1";
+
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $this->session->set_userdata('receipt_srch_from_date', $srch_from_date);
+            $this->session->set_userdata('receipt_srch_to_date', $srch_to_date);
+        } elseif ($this->session->userdata('receipt_srch_from_date')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('receipt_srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('receipt_srch_to_date');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = date('Y-m-') . '01';
+            $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
+        }
+
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $where .= " AND a.receipt_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'";
+        }
+
+        if ($this->input->post('srch_customer_id') !== null) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
+            $this->session->set_userdata('receipt_srch_customer_id', $srch_customer_id);
+        } elseif ($this->session->userdata('receipt_srch_customer_id')) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->session->userdata('receipt_srch_customer_id');
+        } else {
+            $data['srch_customer_id'] = $srch_customer_id = '';
+        }
+        if (!empty($srch_customer_id)) {
+            $where .= " AND a.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
+        }
+
+        if ($this->input->post('srch_payment_mode') !== null) {
+            $data['srch_payment_mode'] = $srch_payment_mode = $this->input->post('srch_payment_mode');
+            $this->session->set_userdata('receipt_srch_payment_mode', $srch_payment_mode);
+        } elseif ($this->session->userdata('receipt_srch_payment_mode')) {
+            $data['srch_payment_mode'] = $srch_payment_mode = $this->session->userdata('receipt_srch_payment_mode');
+        } else {
+            $data['srch_payment_mode'] = $srch_payment_mode = '';
+        }
+        if (!empty($srch_payment_mode)) {
+            $where .= " AND a.payment_mode = '" . $this->db->escape_str($srch_payment_mode) . "'";
+        }
+
+        if ($this->input->post('srch_status') !== null) {
+            $data['srch_status'] = $srch_status = $this->input->post('srch_status');
+            $this->session->set_userdata('receipt_srch_status', $srch_status);
+        } elseif ($this->session->userdata('receipt_srch_status')) {
+            $data['srch_status'] = $srch_status = $this->session->userdata('receipt_srch_status');
+        } else {
+            $data['srch_status'] = $srch_status = '';
+        }
+        if (!empty($srch_status)) {
+            $where .= " AND a.status = '" . $this->db->escape_str($srch_status) . "'";
+        }
+
+        // ---------------- PAGINATION ----------------
+        $this->load->library('pagination');
+
+        $this->db->from('receipt_info as a');
+        $this->db->where($where);
+        $data['total_records'] = $cnt = $this->db->count_all_results();
+
+        $data['sno'] = $this->uri->segment(2, 0);
+
+        $config['base_url'] = trim(site_url('receipt-list/'), '/' . $this->uri->segment(2, 0));
+        $config['total_rows'] = $cnt;
+        $config['per_page'] = 25;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '<span class="sr-only">(current)</span></a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = "Prev";
+        $config['next_link'] = "Next";
+        $this->pagination->initialize($config);
+
+        // ---------------- DATA ----------------
+        $sql = "
+            SELECT
+                a.*,
+                c.customer_name,
+                cl.ledger_name AS customer_ledger_name,
+                bl.ledger_name AS bank_ledger_name,
+                v.voucher_date,
+                v.voucher_type,
+                v.narration AS voucher_narration
+            FROM receipt_info AS a
+            LEFT JOIN customer_info AS c 
+                ON c.customer_id = a.customer_id
+                AND c.status = 'Active'
+            LEFT JOIN ledger_accounts AS cl 
+                ON cl.ledger_id = a.customer_ledger_id
+                AND cl.status = 'Active'
+            LEFT JOIN ledger_accounts AS bl
+                ON bl.ledger_id = a.bank_ledger_id
+                AND bl.status = 'Active'
+            LEFT JOIN vouchers AS v
+                ON v.voucher_id = a.voucher_id
+                AND v.status = 'Active'
+            WHERE $where
+            ORDER BY a.receipt_date DESC, a.receipt_id DESC
+            LIMIT " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "
+        ";
+
+        $query = $this->db->query($sql);
+        $data['record_list'] = $query->result_array();
+
+        // ---------------- DROPDOWNS ----------------
+        $data['customer_opt'] = array('' => 'All');
+        $sql = "SELECT customer_id, customer_name FROM customer_info WHERE status = 'Active' ORDER BY customer_name ASC";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
+        $data['payment_mode_opt'] = array('' => 'All', 'Cash' => 'Cash', 'Bank' => 'Bank');
+        $data['status_opt'] = array('' => 'All', 'Active' => 'Active', 'Cancelled' => 'Cancelled');
+
+        // ---------------- ADD MODAL DROPDOWNS ----------------
+        $data['customer_add_opt'] = array('' => 'Select');
+        $sql = "SELECT customer_id, customer_name FROM customer_info WHERE status = 'Active' ORDER BY customer_name ASC";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['customer_add_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
+        $data['bank_ledger_opt'] = array('' => 'Select');
+        $sql = "SELECT ledger_id, ledger_name FROM ledger_accounts WHERE status = 'Active' ORDER BY ledger_name ASC";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['bank_ledger_opt'][$row['ledger_id']] = $row['ledger_name'];
+        }
+
+        $data['voucher_opt'] = array('' => 'Select');
+        $sql = "SELECT voucher_id, narration FROM vouchers WHERE status = 'Active' ORDER BY voucher_id DESC LIMIT 500";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $label = $row['voucher_id'];
+            if (!empty($row['narration'])) {
+                $label .= " - " . $row['narration'];
+            }
+            $data['voucher_opt'][$row['voucher_id']] = $label;
+        }
+
+        $data['pagination'] = $this->pagination->create_links();
+
+        $this->load->view('page/tender/receipt-list', $data);
+    }
+
 }
