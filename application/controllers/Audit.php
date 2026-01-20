@@ -341,40 +341,116 @@ class Audit extends CI_Controller
 
     public function vouchers_list()
     {
-        // ---------------- AUTH CHECK ----------------
         if (!$this->session->userdata(SESS_HD . 'logged_in')) {
             redirect();
         }
 
-        // ---------------- BASIC VIEW DATA ----------------
         $data['title'] = 'Vouchers List';
         $data['js'] = 'audit/vouchers-list.inc';
 
-        // ---------------- ADD LEDGER ----------------
-        if ($this->input->post('mode') == 'Add') {
-            $ins = array(
+        if ($this->input->post('mode') == 'Add Voucher') {
+
+            $this->db->trans_begin();
+            $ins = [
                 'voucher_date' => $this->input->post('voucher_date'),
                 'voucher_type' => $this->input->post('voucher_type'),
                 'narration' => $this->input->post('narration'),
                 'status' => $this->input->post('status'),
                 'created_at' => date('Y-m-d H:i:s'),
-            );
+            ];
 
             $this->db->insert('vouchers', $ins);
+            $voucher_id = $this->db->insert_id();
+
+
+            $ledger_ids = $this->input->post('ledger_id') ?? [];
+            $debits = $this->input->post('debit') ?? [];
+            $credits = $this->input->post('credit') ?? [];
+
+            if (!empty($ledger_ids)) {
+
+                foreach ($ledger_ids as $i => $ledger_id) {
+                    if (empty($ledger_id)) {
+                        continue;
+                    }
+
+                    $entry = [
+                        'voucher_id' => $voucher_id,
+                        'ledger_id' => $ledger_id,
+                        'debit' => $debits[$i] ?? 0,
+                        'credit' => $credits[$i] ?? 0,
+                        'status' => 'Active'
+                    ];
+
+                    $this->db->insert('voucher_entries', $entry);
+                }
+            }
+
+
+            if ($this->db->trans_status() === FALSE) {
+                $this->db->trans_rollback();
+                $this->session->set_flashdata('error', 'Voucher not saved!');
+            } else {
+                $this->db->trans_commit();
+                $this->session->set_flashdata('success', 'Voucher saved successfully!');
+            }
+
             redirect('vouchers-list');
         }
 
-        // ---------------- EDIT LEDGER ----------------
-        if ($this->input->post('mode') == 'Edit') {
-            $upd = array(
+
+        if ($this->input->post('mode') == 'Edit Voucher') {
+
+            $this->db->trans_begin();
+
+            $voucher_id = $this->input->post('voucher_id');
+
+            $upd = [
                 'voucher_date' => $this->input->post('voucher_date'),
                 'voucher_type' => $this->input->post('voucher_type'),
                 'narration' => $this->input->post('narration'),
                 'status' => $this->input->post('status'),
-            );
+            ];
 
-            $this->db->where('voucher_id', $this->input->post('voucher_id'));
+            $this->db->where('voucher_id', $voucher_id);
             $this->db->update('vouchers', $upd);
+
+            $entry_ids = $this->input->post('entry_id') ?? [];
+            $ledger_ids = $this->input->post('ledger_id') ?? [];
+            $debits = $this->input->post('debit') ?? [];
+            $credits = $this->input->post('credit') ?? [];
+
+
+            foreach ($ledger_ids as $i => $ledger_id) {
+
+                if (empty($ledger_id))
+                    continue;
+
+                $entry = [
+                    'voucher_id' => $voucher_id,
+                    'ledger_id' => $ledger_id,
+                    'debit' => $debits[$i] ?? 0,
+                    'credit' => $credits[$i] ?? 0,
+                    'status' => 'Active'
+                ];
+
+                if (!empty($entry_ids[$i])) {
+
+                    $this->db->where('entry_id', $entry_ids[$i]);
+                    $this->db->update('voucher_entries', $entry);
+                } else {
+
+                    $this->db->insert('voucher_entries', $entry);
+                }
+            }
+
+            if ($this->db->trans_status() === FALSE) {
+                $this->db->trans_rollback();
+                $this->session->set_flashdata('error', 'Voucher update failed!');
+            } else {
+                $this->db->trans_commit();
+                $this->session->set_flashdata('success', 'Voucher updated successfully!');
+            }
 
             redirect('vouchers-list');
         }
@@ -419,8 +495,6 @@ class Audit extends CI_Controller
         }
 
 
-
-
         $this->load->library('pagination');
         $this->db->from('vouchers as a');
         $this->db->where('a.status', 'Active');
@@ -428,42 +502,32 @@ class Audit extends CI_Controller
         $this->db->where($where);
         $total_rows = $this->db->count_all_results();
 
-
         $config['base_url'] = base_url('vouchers-list/');
         $config['total_rows'] = $total_rows;
-        $config['per_page'] = 25;
+        $config['per_page'] = 15;
         $config['uri_segment'] = 2;
-
 
         $config['attributes'] = ['class' => 'page-link'];
         $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
         $config['full_tag_close'] = '</ul>';
-
         $config['num_tag_open'] = '<li class="page-item">';
         $config['num_tag_close'] = '</li>';
-
         $config['cur_tag_open'] = '<li class="page-item active"><a class="page-link" href="#">';
         $config['cur_tag_close'] = '</a></li>';
-
         $config['prev_tag_open'] = '<li class="page-item">';
         $config['prev_tag_close'] = '</li>';
         $config['next_tag_open'] = '<li class="page-item">';
         $config['next_tag_close'] = '</li>';
-
         $config['first_tag_open'] = '<li class="page-item">';
         $config['first_tag_close'] = '</li>';
         $config['last_tag_open'] = '<li class="page-item">';
         $config['last_tag_close'] = '</li>';
-
         $config['prev_link'] = 'Prev';
         $config['next_link'] = 'Next';
 
-        // Initialize pagination
         $this->pagination->initialize($config);
 
         $offset = ($this->uri->segment(2)) ? (int) $this->uri->segment(2) : 0;
-
-        // ---------- SERIAL NUMBER ----------
         $data['sno'] = $offset + 1;
 
 
@@ -476,8 +540,8 @@ class Audit extends CI_Controller
                 a.status
             FROM vouchers AS a 
             WHERE a.status = 'Active'
-            and a.voucher_date BETWEEN '" . $srch_from_date . "' AND  '" . $srch_to_date . "'
-            and $where
+            AND a.voucher_date BETWEEN '" . $srch_from_date . "' AND  '" . $srch_to_date . "'
+            AND $where
             ORDER BY a.voucher_id DESC
             LIMIT {$offset}, {$config['per_page']}
         ";
@@ -485,33 +549,70 @@ class Audit extends CI_Controller
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();
 
+
         $data['voucher_narration_opt'] = ['' => 'All'];
         $sql = "
-            SELECT 
-                a.voucher_id, 
-                a.narration,
-                a.status
+            SELECT DISTINCT a.narration
             FROM vouchers AS a 
             WHERE a.status = 'Active'
-            ORDER BY a.voucher_id DESC 
+            ORDER BY a.narration ASC 
         ";
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
             $data['voucher_narration_opt'][$row['narration']] = $row['narration'];
         }
+        $data['ledger_accounts_list_opt'] = ['' => 'Select Ledger Account'];
+        $sql = "
+            SELECT 
+                b.ledger_id,
+                b.ledger_name
+            FROM ledger_accounts AS b 
+            WHERE b.status = 'Active'
+            ORDER BY b.ledger_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['ledger_accounts_list_opt'][$row['ledger_id']] = $row['ledger_name'];
+        }
 
 
-
-        //'Payment','Receipt','Journal','Contra','Sales','Purchase'
-        $data['voucher_type_opt'] = array('' => 'All', 'Payment' => 'Payment', 'Receipt' => 'Receipt', 'Journal' => 'Journal', 'Contra' => 'Contra', 'Sales' => 'Sales', 'Purchase' => 'Purchase');
-
+        $data['voucher_type_opt'] = array(
+            '' => 'All',
+            'Payment' => 'Payment',
+            'Receipt' => 'Receipt',
+            'Journal' => 'Journal',
+            'Contra' => 'Contra',
+            'Sales' => 'Sales',
+            'Purchase' => 'Purchase'
+        );
 
         $data['pagination'] = $this->pagination->create_links();
         $data['total_records'] = $total_rows;
 
-        // ---------- LOAD VIEW ----------
         $this->load->view('page/audit/vouchers-list', $data);
     }
+
+    public function get_voucher()
+    {
+        $voucher_id = $this->input->post('voucher_id');
+
+        $voucher = $this->db->get_where('vouchers', [
+            'voucher_id' => $voucher_id,
+            'status !=' => 'Delete'
+        ])->row();
+
+        $entries = $this->db->get_where('voucher_entries', [
+            'voucher_id' => $voucher_id,
+            'status' => 'Active'
+        ])->result();
+
+        echo json_encode([
+            'status' => 'success',
+            'voucher' => $voucher,
+            'entries' => $entries
+        ]);
+    }
+
     public function voucher_entries_list()
     {
         // ---------------- AUTH CHECK ----------------
@@ -535,6 +636,7 @@ class Audit extends CI_Controller
 
             $this->db->insert('voucher_entries', $ins);
             redirect('voucher-entries-list');
+
         }
 
         // ---------------- EDIT LEDGER ----------------
@@ -1108,20 +1210,31 @@ class Audit extends CI_Controller
             return;
         }
         if ($table == 'vouchers_list') {
-
             $sql = "
                 SELECT
-                 a.*
-                FROM vouchers as a 
-                WHERE a.status='Active'
-                and a.voucher_id= ?                
+                    a.voucher_id,
+                    b.entry_id,
+                    b.ledger_id,
+                    a.voucher_date, 
+                    a.voucher_type,
+                    a.narration,
+                    b.debit,
+                    b.credit,
+                    a.status
+                FROM vouchers AS a
+                LEFT JOIN voucher_entries AS b ON a.voucher_id = b.voucher_id
+                WHERE a.status = 'Active' 
+                AND a.voucher_id = ?
+                ORDER BY b.entry_id ASC
             ";
 
             $query = $this->db->query($sql, [$rec_id]);
 
-            echo json_encode($query->row());
+            // Return all entries as array
+            echo json_encode($query->result_array());
             return;
         }
+
         if ($table == 'vouchers_entries_list') {
 
             $sql = "
@@ -1259,7 +1372,12 @@ class Audit extends CI_Controller
         if ($table == 'vouchers_entries_list') {
             $this->db->where('entry_id', $rec_id);
             $this->db->update('voucher_entries', array('status' => 'Delete'));
-            echo "Record Deleted Successfully";
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Entry deleted successfully'
+            ]);
+
         }
+        
     }
 }
