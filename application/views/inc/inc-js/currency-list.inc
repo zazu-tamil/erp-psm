@@ -9,6 +9,7 @@
         dataType: "json",
         success: function (d) {
           $("#edit_modal #currency_id").val(d.currency_id);
+          $("#edit_modal #decimal_point").val(d.decimal_point);
           $("#edit_modal #currency_name").val(d.currency_name);
           $("#edit_modal #symbol").val(d.symbol);
           $("#edit_modal #country_name").val(d.country_name);

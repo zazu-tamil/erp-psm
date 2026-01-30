@@ -249,3 +249,6 @@ $route['profit-loss-report'] = 'audit/profit_loss_report';
 $route['settings'] = 'master/settings_list';
 $route['settings/(:num)'] = 'master/settings_list/$1';
 
+$route['country-list'] = 'master/country_list';
+$route['country-list/(:num)'] = 'master/country_list/$1';
+

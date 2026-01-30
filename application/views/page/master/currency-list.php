@@ -23,8 +23,7 @@
                         <th>Currency Name</th>
                         <th>Symbol</th>
                         <th>Country Name</th>
-                        <!-- <th>Exchange Rate</th>
-                        <th>Base Currency</th> -->
+                        <th>Decimal Piint</th>
                         <th>Status</th>
                         <th colspan="2" class="text-center">Action</th>
                     </tr>
@@ -39,13 +38,14 @@
                             <td><?php echo $ls['currency_name'] ?></td>
                             <td><?php echo $ls['symbol'] ?></td>
                             <td><?php echo $ls['country_name'] ?></td>
-                            <!-- <td ><?php echo number_format($ls['exchange_rate'], 6) ?></td>
-                            <td><?php echo ($ls['is_base_currency'] == 1) ? 'Yes' : 'No' ?></td> -->
+                            <!-- decimal point bASED -->
+                            <td><?php echo $ls['decimal_point'] ?></td>
+
                             <td><?php echo $ls['status'] ?></td>
                             <td class="text-center">
-                                <button data-toggle="modal" data-target="#edit_modal" value="<?php echo $ls['currency_id'] ?>"
-                                    class="edit_record btn btn-primary btn-xs" title="Edit"><i
-                                        class="fa fa-edit"></i></button>
+                                <button data-toggle="modal" data-target="#edit_modal"
+                                    value="<?php echo $ls['currency_id'] ?>" class="edit_record btn btn-primary btn-xs"
+                                    title="Edit"><i class="fa fa-edit"></i></button>
                             </td>
                             <td class="text-center">
                                 <button value="<?php echo $ls['currency_id'] ?>" class="del_record btn btn-danger btn-xs"
@@ -73,73 +73,77 @@
                             </div>
                             <div class="modal-body">
                                 <div class="row">
-                                    <div class="form-group col-md-12">
+
+                                    <div class="form-group col-md-6">
                                         <label>Currency Code</label>
-                                        <input class="form-control" type="text" name="currency_code" id="currency_code"
-                                            value="" placeholder="Currency Code" required="true">
+                                        <input type="text" class="form-control" name="currency_code" id="currency_code"
+                                            placeholder="Currency Code" required>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="form-group col-md-12">
+
+                                    <div class="form-group col-md-6">
                                         <label>Currency Name</label>
-                                        <input class="form-control" type="text" name="currency_name" id="currency_name"
-                                            value="" placeholder="Currency Name" required="true">
+                                        <input type="text" class="form-control" name="currency_name" id="currency_name"
+                                            placeholder="Currency Name" required>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="form-group col-md-12">
+
+                                    <div class="form-group col-md-6">
                                         <label>Symbol</label>
-                                        <input class="form-control" type="text" name="symbol" id="symbol"
-                                            value="" placeholder="Symbol">
+                                        <input type="text" class="form-control" name="symbol" id="symbol"
+                                            placeholder="Symbol">
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="form-group col-md-12">
+
+                                    <div class="form-group col-md-6">
                                         <label>Country Name</label>
-                                        <input class="form-control" type="text" name="country_name" id="country_name"
-                                            value="" placeholder="Country Name">
+                                        <input type="text" class="form-control" name="country_name" id="country_name"
+                                            placeholder="Country Name">
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="form-group col-md-12">
+
+                                    <div class="form-group col-md-6">
                                         <label>Exchange Rate</label>
-                                        <input class="form-control" type="text" name="exchange_rate" id="exchange_rate"
-                                            value="" placeholder="Exchange Rate" required="true">
+                                        <input type="number" class="form-control" name="exchange_rate"
+                                            id="exchange_rate" placeholder="Exchange Rate" step="0.0001" required>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="form-group col-md-12">
+                                    <div class="form-group col-md-6">
+                                        <label>Decimal Point</label>
+                                        <input type="number" class="form-control" name="decimal_point"
+                                            id="decimal_point" placeholder="Decimal Point" step="0.000" required>
+                                    </div>
+
+                                    <div class="form-group col-md-6">
                                         <label>Is Base Currency</label>
                                         <div class="radio">
                                             <label>
-                                                <input type="radio" name="is_base_currency" value="1" />
+                                                <input type="radio" name="is_base_currency" value="1">
                                                 Yes
                                             </label>
                                         </div>
                                         <div class="radio">
                                             <label>
-                                                <input type="radio" name="is_base_currency" value="0" checked="true" /> No
+                                                <input type="radio" name="is_base_currency" value="0" checked>
+                                                No
                                             </label>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="form-group col-md-12">
+
+                                    <div class="form-group col-md-6">
                                         <label>Status</label>
                                         <div class="radio">
                                             <label>
-                                                <input type="radio" name="status" value="Active" checked="true" />
+                                                <input type="radio" name="status" value="Active" checked>
                                                 Active
                                             </label>
                                         </div>
                                         <div class="radio">
                                             <label>
-                                                <input type="radio" name="status" value="Inactive" /> Inactive
+                                                <input type="radio" name="status" value="Inactive">
+                                                Inactive
                                             </label>
                                         </div>
                                     </div>
+
                                 </div>
                             </div>
+
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                                 <input type="submit" name="Save" value="Save" class="btn btn-primary" />
@@ -166,71 +170,74 @@
                             </div>
                             <div class="modal-body">
                                 <div class="row">
-                                    <div class="form-group col-md-12">
+
+                                    <div class="form-group col-md-6">
                                         <label>Currency Code</label>
-                                        <input class="form-control" type="text" name="currency_code" id="currency_code"
-                                            value="" placeholder="Currency Code" required="true">
+                                        <input type="text" class="form-control" name="currency_code" id="currency_code"
+                                            placeholder="Currency Code" required>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="form-group col-md-12">
+
+                                    <div class="form-group col-md-6">
                                         <label>Currency Name</label>
-                                        <input class="form-control" type="text" name="currency_name" id="currency_name"
-                                            value="" placeholder="Currency Name" required="true">
+                                        <input type="text" class="form-control" name="currency_name" id="currency_name"
+                                            placeholder="Currency Name" required>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="form-group col-md-12">
+
+                                    <div class="form-group col-md-6">
                                         <label>Symbol</label>
-                                        <input class="form-control" type="text" name="symbol" id="symbol"
-                                            value="" placeholder="Symbol">
+                                        <input type="text" class="form-control" name="symbol" id="symbol"
+                                            placeholder="Symbol">
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="form-group col-md-12">
+
+                                    <div class="form-group col-md-6">
                                         <label>Country Name</label>
-                                        <input class="form-control" type="text" name="country_name" id="country_name"
-                                            value="" placeholder="Country Name">
+                                        <input type="text" class="form-control" name="country_name" id="country_name"
+                                            placeholder="Country Name">
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="form-group col-md-12">
+
+                                    <div class="form-group col-md-6">
                                         <label>Exchange Rate</label>
-                                        <input class="form-control" type="text" name="exchange_rate" id="exchange_rate"
-                                            value="" placeholder="Exchange Rate" required="true">
+                                        <input type="number" class="form-control" name="exchange_rate"
+                                            id="exchange_rate" placeholder="Exchange Rate" step="0.0001" required>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="form-group col-md-12">
+                                    <div class="form-group col-md-6">
+                                        <label>Decimal Point</label>
+                                        <input type="number" class="form-control" name="decimal_point"
+                                            id="decimal_point" placeholder="Decimal Point" step="0.000" required>
+                                    </div>
+
+                                    <div class="form-group col-md-6">
                                         <label>Is Base Currency</label>
                                         <div class="radio">
                                             <label>
-                                                <input type="radio" name="is_base_currency" value="1" />
+                                                <input type="radio" name="is_base_currency" value="1">
                                                 Yes
                                             </label>
                                         </div>
                                         <div class="radio">
                                             <label>
-                                                <input type="radio" name="is_base_currency" value="0" checked="true" /> No
+                                                <input type="radio" name="is_base_currency" value="0" checked>
+                                                No
                                             </label>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="form-group col-md-12">
+
+                                    <div class="form-group col-md-6">
                                         <label>Status</label>
                                         <div class="radio">
                                             <label>
-                                                <input type="radio" name="status" value="Active" checked="true" />
+                                                <input type="radio" name="status" value="Active" checked>
                                                 Active
                                             </label>
                                         </div>
                                         <div class="radio">
                                             <label>
-                                                <input type="radio" name="status" value="Inactive" /> Inactive
+                                                <input type="radio" name="status" value="Inactive">
+                                                Inactive
                                             </label>
                                         </div>
                                     </div>
+
                                 </div>
                             </div>
                             <div class="modal-footer">

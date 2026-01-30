@@ -1452,6 +1452,7 @@ class Master extends CI_Controller
                 'symbol' => $this->input->post('symbol'),
                 'country_name' => $this->input->post('country_name'),
                 'exchange_rate' => $this->input->post('exchange_rate'),
+                'decimal_point' => $this->input->post('decimal_point'),
                 'is_base_currency' => $this->input->post('is_base_currency') ?: 0,
                 'status' => $this->input->post('status')
             ];
@@ -1466,6 +1467,7 @@ class Master extends CI_Controller
                 'currency_name' => $this->input->post('currency_name'),
                 'symbol' => $this->input->post('symbol'),
                 'country_name' => $this->input->post('country_name'),
+                'decimal_point' => $this->input->post('decimal_point'),
                 'exchange_rate' => $this->input->post('exchange_rate'),
                 'is_base_currency' => $this->input->post('is_base_currency') ?: 0,
                 'status' => $this->input->post('status')
@@ -1549,7 +1551,7 @@ class Master extends CI_Controller
 
                 'setting_value' => $this->input->post('setting_value'),
                 'status' => $this->input->post('status')
-              
+
             );
 
             $this->db->where('setting_key', $setting_key);
@@ -1605,6 +1607,100 @@ class Master extends CI_Controller
         // ========== LOAD VIEW ==========
         $data['pagination'] = $this->pagination->create_links();
         $this->load->view('page/master/settings-list', $data);
+    }
+
+    public function country_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        if (
+            $this->session->userdata(SESS_HD . 'level') != 'Admin'
+            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
+        ) {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+
+        $data['js'] = 'country-list.inc';
+
+
+        if ($this->input->post('mode') == 'Add') {
+            $ins = array(
+                'country_name' => $this->input->post('country_name'),
+                'status' => $this->input->post('status')
+            );
+
+            $this->db->insert('country_info', $ins);
+            redirect('country-list/');
+        }
+
+        if ($this->input->post('mode') == 'Edit') {
+            $upd = array(
+                'country_name' => $this->input->post('country_name'),
+                'status' => $this->input->post('status')
+            );
+
+            $this->db->where('country_id', $this->input->post('country_id'));
+            $this->db->update('country_info', $upd);
+
+            redirect('country-list/');
+        }
+
+
+        $this->load->library('pagination');
+
+        $this->db->where('status != ', 'Delete');
+        $this->db->from('country_info');
+        $data['total_records'] = $cnt = $this->db->count_all_results();
+
+        $data['sno'] = $this->uri->segment(2, 0);
+
+        $config['base_url'] = trim(site_url('country-list/'), '/' . $this->uri->segment(2, 0));
+        $config['total_rows'] = $cnt;
+        $config['per_page'] = 10;
+        $config['uri_segment'] = 2;
+         $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '<span class="sr-only">(current)</span></a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = "Prev";
+        $config['next_link'] = "Next";
+        $this->pagination->initialize($config);
+
+        $sql = "
+            SELECT *
+            FROM country_info
+            WHERE status != 'Delete'
+            order by country_name desc
+            limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
+        ";
+
+        $data['record_list'] = array();
+
+        $query = $this->db->query($sql);
+
+        foreach ($query->result_array() as $row) {
+            $data['record_list'][] = $row;
+        }
+
+
+
+        $data['pagination'] = $this->pagination->create_links();
+
+        $this->load->view('page/master/country-list', $data);
     }
 }
 
