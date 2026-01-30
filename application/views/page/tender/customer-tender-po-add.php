@@ -20,13 +20,15 @@
                 <fieldset class="tender-inward">
                     <legend class="text-light-blue"><i class="fa fa-file-text-o"></i> Purchase Order Details</legend>
 
-                    <div style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
+                    <div
+                        style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
                         <div class="row">
                             <div class="col-md-4 form-group">
                                 <label for="srch_enq_id">Search Enquiry No</label>
-                                <input type="text" name="srch_enq_id" class="form-control srch_enq_id" value="" placeholder="Search Enquiry No" />
+                                <input type="text" name="srch_enq_id" class="form-control srch_enq_id" value=""
+                                    placeholder="Search Enquiry No" />
                             </div>
-                        </div> 
+                        </div>
                     </div>
 
                     <div class="row">
@@ -41,13 +43,15 @@
                         </div>
 
                         <div class="form-group col-md-3">
-                            <label for="srch_tender_enquiry_id">Tender Enquiry No <span style="color:red;">*</span>  <i class="text-red text-sm text-right"> [ Note: Tender Enq Status : Won ] </i> </label>
+                            <label for="srch_tender_enquiry_id">Tender Enquiry No <span style="color:red;">*</span> <i
+                                    class="text-red text-sm text-right"> [ Note: Tender Enq Status : Won ] </i> </label>
                             <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select Enquiry'], set_value('srch_tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" required'); ?>
-                            
+
                         </div>
 
                         <div class="form-group col-md-3">
-                            <label for="srch_quotation_no">Quotation No <span style="color:red;">*</span> <i class="text-red text-sm text-right"> [ Note: Quotation Status : Won ] </i></label>
+                            <label for="srch_quotation_no">Quotation No <span style="color:red;">*</span> <i
+                                    class="text-red text-sm text-right"> [ Note: Quotation Status : Won ] </i></label>
                             <?php echo form_dropdown('srch_quotation_no', ['' => 'Select Quotation'], set_value('srch_quotation_no'), 'id="srch_quotation_no" class="form-control" required'); ?>
                         </div>
 
@@ -92,6 +96,19 @@
                             <label class="radio-inline"><input type="radio" name="po_status" value="Cancelled">
                                 Cancelled</label>
                         </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="currency_id">Select Currency</label>
+                                <?php
+                                echo form_dropdown(
+                                    'currency_id',
+                                    ['' => 'Select Currency'] + $currency_opt,
+                                    set_value('currency_id', $default_currency_id),
+                                    'id="currency_id" class="form-control" required'
+                                );
+                                ?>
+                            </div>
+                        </div>
 
                         <div class="form-group col-md-3">
                             <label>Status</label><br>
@@ -134,7 +151,8 @@
                                 placeholder="Choose Excel File to Import">
                         </div>
                         <div class="col-md-4 form-group ">
-                            <i class="text-red">Note: <br>Don't change <b class="text-info">[ tender_quotation_item_id ] </b> column its software referance Ids in excel file while
+                            <i class="text-red">Note: <br>Don't change <b class="text-info">[ tender_quotation_item_id ]
+                                </b> column its software referance Ids in excel file while
                                 importing</i>
                         </div>
                     </div>
@@ -162,7 +180,7 @@
     </div>
 </section>
 
-<?php include_once(VIEWPATH . 'inc/footer.php'); 
+<?php include_once(VIEWPATH . 'inc/footer.php');
 
 
 

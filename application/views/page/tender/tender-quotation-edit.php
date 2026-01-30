@@ -126,7 +126,7 @@
                                 
                         </div>
                         <div class="form-group col-md-3">
-                            <label for="currency_id">Currency Symbol <span style="color:red;">*</span></label>
+                            <label for="currency_id">Select Currency <span style="color:red;">*</span></label>
                             <?php echo form_dropdown('currency_id', ['' => 'Select Currency'] + $currency_opt, set_value('currency_id' , $header['currency_id']), 'id="currency_id" class="form-control" required '); ?>
                         </div>
                     </div>

@@ -49,13 +49,15 @@
                         </small>
                     </legend>
 
-                    <div style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
+                    <div
+                        style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
                         <div class="row">
                             <div class="col-md-4 form-group">
                                 <label for="srch_enq_id">Search Enquiry No</label>
-                                <input type="text" name="srch_enq_id" class="form-control srch_enq_id" value="" placeholder="Search Enquiry No" />
+                                <input type="text" name="srch_enq_id" class="form-control srch_enq_id" value=""
+                                    placeholder="Search Enquiry No" />
                             </div>
-                        </div> 
+                        </div>
                     </div>
 
                     <div class="row">
@@ -126,6 +128,20 @@
                                 placeholder="0.00">
                         </div>
 
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="currency_id">Select Currency</label>
+                                <?php
+                                echo form_dropdown(
+                                    'currency_id',
+                                    ['' => 'Select Currency'] + $currency_opt,
+                                    set_value('currency_id', $default_currency_id),
+                                    'id="currency_id" class="form-control" required'
+                                );
+                                ?>
+                            </div>
+                        </div>
+
 
                         <div class="form-group col-md-4">
                             <label>Status</label><br>
@@ -163,14 +179,14 @@
                                 <th style="width:5%;">✔</th>
                                 <th style="width:10%;">Item Code</th>
                                 <th style="width:40%;">Description</th>
-                                <th style="width:10%;">UOM & Qty </th> 
+                                <th style="width:10%;">UOM & Qty </th>
                                 <th style="width:10%;">Rate</th>
                                 <th style="width:10%;">VAT %</th>
                                 <th style="width:10%;">Amount</th>
                             </tr>
                         </thead>
                         <tbody id="item_container"></tbody>
-                         <thead>
+                        <thead>
                             <tr>
                                 <th colspan="6" class="text-right">Total</th>
                                 <th class="text-right">

@@ -540,6 +540,7 @@ class Vendor extends CI_Controller
                 'vendor_quote_id' => $this->input->post('srch_vendor_quote_id'),
                 'vendor_contact_person_id' => $this->input->post('srch_vendor_contact_person_id'),
                 'po_no' => $this->input->post('po_no'),
+                'currency_id' => $this->input->post('currency_id'),
                 'po_date' => $this->input->post('po_date'),
                 'delivery_date' => $this->input->post('delivery_date'),
                 'transport_charges' => $this->input->post('transport_charges'),
@@ -649,7 +650,23 @@ class Vendor extends CI_Controller
         }
 
         $data['po_status_opt'] = ['' => 'Select PO Status', 'In Progress' => 'In Progress', 'Delivered' => 'Delivered'];
+        $data['default_currency_id'] = '';
 
+        $sql = "
+            SELECT currency_id, currency_code
+            FROM currencies_info
+            WHERE status = 'Active'
+            ORDER BY currency_name ASC
+        ";
+        $query = $this->db->query($sql);
+
+        foreach ($query->result_array() as $row) {
+            $data['currency_opt'][$row['currency_id']] = $row['currency_code'];
+
+            if ($row['currency_code'] === 'BHD') {
+                $data['default_currency_id'] = $row['currency_id'];
+            }
+        }
         $this->load->view('page/vendor/vendor-po-add', $data);
     }
 
@@ -896,6 +913,7 @@ class Vendor extends CI_Controller
                 'vendor_id' => $this->input->post('srch_vendor_id'),
                 'vendor_quote_id' => $this->input->post('srch_vendor_quote_id'),
                 'vendor_contact_person_id' => $this->input->post('srch_vendor_contact_person_id'),
+                'currency_id' => $this->input->post('currency_id'),
                 'po_no' => $this->input->post('po_no'),
                 'po_date' => $this->input->post('po_date'),
                 'delivery_date' => $this->input->post('delivery_date'),
@@ -1137,7 +1155,19 @@ class Vendor extends CI_Controller
 
         // Status Options
         $data['quotation_status_opt'] = ['' => 'Select Tender Status', 'Pending' => 'Pending', 'Confirmed' => 'Confirmed', 'Rejected' => 'Rejected'];
+        $data['currency_opt'] = array('' => 'Select');
+        $sql = "
+            SELECT currency_id, currency_code
+            FROM currencies_info
+            WHERE status = 'Active'
+            ORDER BY currency_name ASC
+        ";
+        $query = $this->db->query($sql);
 
+        foreach ($query->result_array() as $row) {
+            $data['currency_opt'][$row['currency_id']] = $row['currency_code'];
+
+        }
 
         $this->load->view('page/vendor/vendor-po-edit', $data);
     }
@@ -1906,6 +1936,7 @@ class Vendor extends CI_Controller
                 'vendor_id' => $this->input->post('srch_vendor_id'),
                 'vendor_rate_enquiry_id' => $this->input->post('srch_vendor_rate_enquiry_id'),
                 'vendor_contact_person_id' => $this->input->post('srch_vendor_contact_person_id'),
+                'currency_id' => $this->input->post('currency_id'),
                 'quote_date' => $this->input->post('quote_date'),
                 'quote_no' => $this->input->post('quote_no'),
                 'remarks' => $this->input->post('remarks'),
@@ -2013,6 +2044,24 @@ class Vendor extends CI_Controller
             $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
         }
         $data['quotation_status_opt'] = ['' => 'Select Tender Status', 'Pending' => 'Pending', 'Confirmed' => 'Confirmed', 'Rejected' => 'Rejected'];
+
+        $data['default_currency_id'] = '';
+
+        $sql = "
+            SELECT currency_id, currency_code
+            FROM currencies_info
+            WHERE status = 'Active'
+            ORDER BY currency_name ASC
+        ";
+        $query = $this->db->query($sql);
+
+        foreach ($query->result_array() as $row) {
+            $data['currency_opt'][$row['currency_id']] = $row['currency_code'];
+
+            if ($row['currency_code'] === 'BHD') {
+                $data['default_currency_id'] = $row['currency_id'];
+            }
+        }
 
         $this->load->view('page/vendor/vendor-quotation-add', $data);
     }
@@ -2252,6 +2301,7 @@ class Vendor extends CI_Controller
                 'vendor_id' => $this->input->post('srch_vendor_id'),
                 'vendor_rate_enquiry_id' => $this->input->post('srch_vendor_rate_enquiry_id'),
                 'vendor_contact_person_id' => $this->input->post('srch_vendor_contact_person_id'),
+                'currency_id' => $this->input->post('currency_id'),
                 'quote_date' => $this->input->post('quote_date'),
                 'quote_no' => $this->input->post('quote_no'),
                 'remarks' => $this->input->post('remarks'),
@@ -2484,6 +2534,18 @@ class Vendor extends CI_Controller
 
         // Status Options
         $data['quotation_status_opt'] = ['' => 'Select Tender Status', 'Pending' => 'Pending', 'Confirmed' => 'Confirmed', 'Rejected' => 'Rejected'];
+        $data['currency_opt'] = ['' => 'Select Currency'];
+        $sql = "
+            SELECT currency_id, currency_code
+            FROM currencies_info
+            WHERE status = 'Active'
+            ORDER BY currency_name ASC
+        ";
+        $query = $this->db->query($sql);
+
+        foreach ($query->result_array() as $row) {
+            $data['currency_opt'][$row['currency_id']] = $row['currency_code'];
+        }
 
         $this->load->view('page/vendor/vendor-quotation-edit', $data);
     }
@@ -4056,7 +4118,7 @@ class Vendor extends CI_Controller
             'Purchases from non-register taxpayers, zero-rated/ exempt purchases (Line 13 of the VAT Return)' => 'Purchases from non-register taxpayers, zero-rated/ exempt purchases (Line 13 of the VAT Return)',
         ];
 
-     
+
         $sql = "
         SELECT vendor_id, vendor_name 
         FROM vendor_info 
@@ -4075,7 +4137,7 @@ class Vendor extends CI_Controller
             $data['vendor_contact_opt'][$row['vendor_contact_id']] = $row['contact_person_name'];
         }
 
-         $sql = "
+        $sql = "
                 SELECT 
                     a.tender_enquiry_id, 
                     get_tender_info(a.tender_enquiry_id) as tender_details
@@ -4092,7 +4154,7 @@ class Vendor extends CI_Controller
             $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_details'];
         }
 
-         $sql = "SELECT vendor_po_id, po_no FROM vendor_po_info WHERE status = 'Active' ORDER BY po_no ASC";
+        $sql = "SELECT vendor_po_id, po_no FROM vendor_po_info WHERE status = 'Active' ORDER BY po_no ASC";
         $query = $this->db->query($sql);
         $data['vendor_po_opt'] = ['' => 'Select Enquiry No'];
         foreach ($query->result_array() as $row) {

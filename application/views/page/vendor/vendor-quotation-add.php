@@ -102,6 +102,20 @@
                             <input type="file" name="quote_doc_upload" id="quote_doc_upload" class="form-control">
                         </div>
 
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="currency_id">Select Currency</label>
+                                <?php 
+                                    echo form_dropdown(
+                                        'currency_id',
+                                        ['' => 'Select Currency'] + $currency_opt,
+                                        set_value('currency_id', $default_currency_id),
+                                        'id="currency_id" class="form-control" required'
+                                    );
+                                ?> 
+                            </div>
+                        </div>
+
                         <div class="form-group col-md-4">
                             <label>Status</label><br>
                             <label class="radio-inline"><input type="radio" name="status" value="Active"

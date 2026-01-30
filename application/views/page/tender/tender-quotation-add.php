@@ -103,9 +103,18 @@
                                 value="<?php echo set_value('other_charges', '0.00'); ?>">
                         </div>
 
-                        <div class="form-group col-md-3">
-                            <label for="currency_id">Currency Symbol <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('currency_id', ['' => 'Select Currency'] + $currency_opt, set_value('currency_id'), 'id="currency_id" class="form-control" required '); ?>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="currency_id">Select Currency</label>
+                                <?php
+                                echo form_dropdown(
+                                    'currency_id',
+                                    ['' => 'Select Currency'] + $currency_opt,
+                                    set_value('currency_id', $default_currency_id),
+                                    'id="currency_id" class="form-control" required'
+                                );
+                                ?>
+                            </div>
                         </div>
 
                     </div>

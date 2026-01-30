@@ -104,6 +104,20 @@
 
                         </div>
 
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="currency_id">Select Currency</label>
+                                <?php 
+                                    echo form_dropdown(
+                                        'currency_id',
+                                        ['' => 'Select Currency'] + $currency_opt, 
+                                        set_value('currency_id', $header['currency_id']),
+                                        'id="currency_id" class="form-control" required'
+                                    );
+                                ?>  
+                            </div>
+                        </div>
+
 
                         <div class="form-group col-md-4">
                             <label>Status</label><br>

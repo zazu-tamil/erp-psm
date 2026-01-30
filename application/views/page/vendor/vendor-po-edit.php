@@ -32,25 +32,29 @@
                         <div class="form-group col-md-4">
                             <label>Company <span style="color:red;">*</span></label>
                             <?php echo form_dropdown('srch_company_id', ['' => 'Select Company'] + $company_opt, set_value('srch_company_id', $header['company_id']), 'id="srch_company_id" class="form-control" required disabled'); ?>
-                            <input type="hidden" name="srch_company_id" id="srch_company_id" value="<?php echo  $header['company_id']; ?>" required="true">
+                            <input type="hidden" name="srch_company_id" id="srch_company_id"
+                                value="<?php echo $header['company_id']; ?>" required="true">
                         </div>
 
                         <div class="form-group col-md-4">
                             <label>Customer <span style="color:red;">*</span></label>
                             <?php echo form_dropdown('srch_customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('srch_customer_id', $header['customer_id']), 'id="srch_customer_id" class="form-control" required disabled'); ?>
-                             <input type="hidden" name="srch_customer_id" id="srch_customer_id" value="<?php echo  $header['customer_id']; ?>">
+                            <input type="hidden" name="srch_customer_id" id="srch_customer_id"
+                                value="<?php echo $header['customer_id']; ?>">
                         </div>
 
                         <div class="form-group col-md-4">
                             <label>Tender Enquiry No <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select Enquiry'] + $tender_enquiry_opt, set_value('srch_tender_enquiry_id', $header['tender_enquiry_id']), 'id="srch_tender_enquiry_id" class="form-control" required disabled' ); ?>
-                                <input type="hidden" name="srch_tender_enquiry_id" id="srch_tender_enquiry_id" value="<?php echo  $header['tender_enquiry_id']; ?>">
+                            <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select Enquiry'] + $tender_enquiry_opt, set_value('srch_tender_enquiry_id', $header['tender_enquiry_id']), 'id="srch_tender_enquiry_id" class="form-control" required disabled'); ?>
+                            <input type="hidden" name="srch_tender_enquiry_id" id="srch_tender_enquiry_id"
+                                value="<?php echo $header['tender_enquiry_id']; ?>">
                         </div>
 
                         <div class="form-group col-md-4">
                             <label>Vendor Name <span style="color:red;">*</span></label>
                             <?php echo form_dropdown('srch_vendor_id', ['' => 'Select Vendor'] + $vendor_opt, set_value('srch_vendor_id', $header['vendor_id']), 'id="srch_vendor_id" class="form-control"  required disabled'); ?>
-                            <input type="hidden" name="srch_vendor_id" id="srch_vendor_id" value="<?php echo  $header['vendor_id']; ?>">
+                            <input type="hidden" name="srch_vendor_id" id="srch_vendor_id"
+                                value="<?php echo $header['vendor_id']; ?>">
                         </div>
 
                         <div class="form-group col-md-4">
@@ -60,8 +64,9 @@
                                     <i class="text-sm text-info fa fa-info-circle"></i>
                                 </span>
                             </label>
-                            <?php echo form_dropdown('srch_vendor_quote_id', ['' => 'Select Enquiry No']  + $vendor_quote_opt, set_value('srch_vendor_quote_id', $header['vendor_quote_id']), 'id="srch_vendor_quote_id" class="form-control" required disabled'); ?>
-                            <input type="hidden" name="srch_vendor_quote_id" id="srch_vendor_quote_id" value="<?php echo  $header['vendor_quote_id']; ?>">
+                            <?php echo form_dropdown('srch_vendor_quote_id', ['' => 'Select Enquiry No'] + $vendor_quote_opt, set_value('srch_vendor_quote_id', $header['vendor_quote_id']), 'id="srch_vendor_quote_id" class="form-control" required disabled'); ?>
+                            <input type="hidden" name="srch_vendor_quote_id" id="srch_vendor_quote_id"
+                                value="<?php echo $header['vendor_quote_id']; ?>">
                         </div>
 
                         <div class="form-group col-md-4">
@@ -78,10 +83,10 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label for="delivery_date">Delivery Date</label>
-                             <input type="date" name="delivery_date" id="delivery_date" class="form-control"
-                                value="<?php echo set_value('delivery_date', date('Y-m-d', strtotime($header['delivery_date']))); ?>">
+                                <input type="date" name="delivery_date" id="delivery_date" class="form-control"
+                                    value="<?php echo set_value('delivery_date', date('Y-m-d', strtotime($header['delivery_date']))); ?>">
 
-                                    
+
                             </div>
                         </div>
 
@@ -90,32 +95,48 @@
                             <?php echo form_dropdown('po_status', ['' => 'Select Status'] + $po_status_opt, set_value('po_status', $header['po_status']), 'id="po_status" class="form-control" required="true"'); ?>
                         </div>
 
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-3">
                             <label>Transport Charges</label>
                             <input type="number" step="0.01" name="transport_charges" id="transport_charges"
-                                class="form-control" value="<?php echo set_value('transport_charges', $header['transport_charges']); ?>"
-                                placeholder="0.00">
-                        </div> 
-                        <div class="form-group col-md-4">
-                            <label>Other Charges</label>
-                            <input type="number" step="0.01" name="other_charges" id="other_charges"
-                                class="form-control" value="<?php echo set_value('other_charges', $header['other_charges']); ?>"
+                                class="form-control"
+                                value="<?php echo set_value('transport_charges', $header['transport_charges']); ?>"
                                 placeholder="0.00">
                         </div>
+                        <div class="form-group col-md-3">
+                            <label>Other Charges</label>
+                            <input type="number" step="0.01" name="other_charges" id="other_charges"
+                                class="form-control"
+                                value="<?php echo set_value('other_charges', $header['other_charges']); ?>"
+                                placeholder="0.00">
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="currency_id">Select Currency</label>
+                                <?php
+                                echo form_dropdown(
+                                    'currency_id',
+                                    ['' => 'Select Currency'] + $currency_opt,
+                                    set_value('currency_id', $header['currency_id']),
+                                    'id="currency_id" class="form-control" required'
+                                );
+                                ?>
+                            </div>
+                        </div>
                         <!-- Po Number -->
-                         <div class="form-group col-md-2">
+                        <div class="form-group col-md-2">
                             <label>Po Number <span style="color:red;">*</span></label>
-                            <input type="text" name="po_no" id="po_no" class="form-control" placeholder="Enter PO Number"
+                            <input type="text" name="po_no" id="po_no" class="form-control"
+                                placeholder="Enter PO Number"
                                 value="<?php echo set_value('po_no', $header['po_no']); ?>" required="true">
-                         </div>
+                        </div>
                         <div class="form-group col-md-2">
                             <label>Status</label><br>
                             <label class="radio-inline"><input type="radio" name="status" value="Active" <?php echo set_radio('status', 'Active', $header['status'] == 'Active'); ?>> Active</label>
                             <label class="radio-inline"><input type="radio" name="status" value="Inactive" <?php echo set_radio('status', 'Inactive', $header['status'] == 'Inactive'); ?>> Inactive</label>
                         </div>
-                    </div> 
+                    </div>
                     <div class="row">
-                      <div class="col-md-6">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label>Notes</label>
                                 <textarea id="editor1" name="remarks" class="form-control"
@@ -134,7 +155,7 @@
 
                 </fieldset>
 
-                 <fieldset class="mt-4">
+                <fieldset class="mt-4">
                     <legend class="text-light-blue"><i class="fa fa-list"></i> Item Details</legend>
                     <table class="table table-bordered table-sm">
                         <thead>
@@ -142,7 +163,7 @@
                                 <th style="width:5%;">Select</th>
                                 <th style="width:10%;">Item Code</th>
                                 <th style="width:30%;">Description</th>
-                                <th style="width:10%;">UOM & Qty</th> 
+                                <th style="width:10%;">UOM & Qty</th>
                                 <th style="width:10%;">Rate</th>
                                 <th style="width:10%;">VAT %</th>
                                 <th style="width:10%;">Amount</th>
@@ -159,35 +180,38 @@
                                         </td>
 
                                         <td>
-                                            <input type="text" class="form-control item_code-input" name="item_code[<?php echo $index; ?>]"
+                                            <input type="text" class="form-control item_code-input"
+                                                name="item_code[<?php echo $index; ?>]"
                                                 value="<?php echo htmlspecialchars($item['item_code']); ?>" readonly>
 
                                             <input type="hidden" name="vendor_rate_enquiry_item_id[<?php echo $index; ?>]"
                                                 value="<?php echo $item['vendor_rate_enquiry_item_id']; ?>">
-                                                <input type="hidden" name="vendor_po_item_id[<?php echo $index; ?>]"
+                                            <input type="hidden" name="vendor_po_item_id[<?php echo $index; ?>]"
                                                 value="<?php echo $item['vendor_po_item_id']; ?>">
-                                            
+
                                         </td>
 
                                         <td>
-                                            <textarea name="item_desc[<?php echo $index; ?>]" class="form-control" rows="2"
-                                                ><?php echo htmlspecialchars($item['item_desc']); ?></textarea>
+                                            <textarea name="item_desc[<?php echo $index; ?>]" class="form-control"
+                                                rows="2"><?php echo htmlspecialchars($item['item_desc']); ?></textarea>
                                         </td>
 
                                         <td>
                                             <input type="text" name="uom[<?php echo $index; ?>]" class="form-control"
-                                                value="<?php echo $item['uom']; ?>" >
+                                                value="<?php echo $item['uom']; ?>">
                                             <br>
                                             <input type="number" step="0.01" name="qty[<?php echo $index; ?>]"
-                                                class="form-control qty-input" value="<?php echo $item['qty']; ?>" >
+                                                class="form-control qty-input" value="<?php echo $item['qty']; ?>">
                                         </td>
 
                                         <td>
-                                            <input type="number" step="0.01" name="rate[<?php echo $index; ?>]"  class="form-control rate-input" value="<?php echo $item['rate']; ?>">
+                                            <input type="number" step="0.01" name="rate[<?php echo $index; ?>]"
+                                                class="form-control rate-input" value="<?php echo $item['rate']; ?>">
                                         </td>
 
                                         <td>
-                                            <input type="number" step="0.01" name="gst[<?php echo $index; ?>]"  class="form-control vat" value="<?php echo $item['vat']; ?>">
+                                            <input type="number" step="0.01" name="gst[<?php echo $index; ?>]"
+                                                class="form-control vat" value="<?php echo $item['vat']; ?>">
                                         </td>
 
                                         <td>
@@ -200,7 +224,7 @@
                                     <?php $index++; endforeach; ?>
                             <?php endif; ?>
                         </tbody>
-                         <thead>
+                        <thead>
                             <tr>
                                 <th colspan="6" class="text-right">Total</th>
                                 <th class="text-right">
@@ -220,5 +244,5 @@
             </div>
         </form>
     </div>
-</section> 
+</section>
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>

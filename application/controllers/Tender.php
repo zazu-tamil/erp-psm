@@ -515,8 +515,8 @@ class Tender extends CI_Controller
             $where .= " AND a.tender_enquiry_id = '" . $this->db->escape_str($srch_customer_rfq_id) . "'";
         }
 
-         // Enquiry Filter
- 
+        // Enquiry Filter
+
         if ($this->input->post('srch_enquiry_no') !== null) {
             $data['srch_enquiry_no'] = $srch_enquiry_no = $this->input->post('srch_enquiry_no');
             $this->session->set_userdata('srch_enquiry_no', $srch_enquiry_no);
@@ -562,7 +562,7 @@ class Tender extends CI_Controller
         //echo $where;
 
         $this->db->where('a.status !=', 'Delete');
-       
+
 
         $this->db->where("DATE(a.enquiry_date) BETWEEN '" .
             $this->db->escape_str($srch_from_date) .
@@ -570,7 +570,7 @@ class Tender extends CI_Controller
             $this->db->escape_str($srch_to_date) .
             "'");
 
-             $this->db->where($where);
+        $this->db->where($where);
 
         $data['total_records'] = $this->db->count_all_results();
 
@@ -1076,19 +1076,22 @@ class Tender extends CI_Controller
         foreach ($query->result_array() as $row) {
             $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
         }
-        // Currency Symbol
-        $data['currency_opt'] = [];
-        $query = $this->db->query("
-            SELECT 
-            currency_id, 
-            symbol ,
-            currency_name,
-            currency_code
-            FROM currencies_info 
-            WHERE status = 'Active' 
-            ORDER BY currency_id ASC");
+        $data['default_currency_id'] = '';
+
+        $sql = "
+            SELECT currency_id, currency_code
+            FROM currencies_info
+            WHERE status = 'Active'
+            ORDER BY currency_name ASC
+        ";
+        $query = $this->db->query($sql);
+
         foreach ($query->result_array() as $row) {
-            $data['currency_opt'][$row['currency_id']] = $row['symbol'] . ' (' . $row['currency_code'] . ')';
+            $data['currency_opt'][$row['currency_id']] = $row['currency_code'];
+
+            if ($row['currency_code'] === 'BHD') {
+                $data['default_currency_id'] = $row['currency_id'];
+            }
         }
 
         // // Get GST options
@@ -1517,16 +1520,13 @@ class Tender extends CI_Controller
 
         $data['currency_opt'] = [];
         $query = $this->db->query("
-            SELECT 
-            currency_id, 
-            symbol ,
-            currency_name,
-            currency_code
-            FROM currencies_info 
-            WHERE status = 'Active' 
-            ORDER BY currency_id ASC");
+          SELECT currency_id, currency_code
+            FROM currencies_info
+            WHERE status = 'Active'
+            ORDER BY currency_name ASC
+            ");
         foreach ($query->result_array() as $row) {
-            $data['currency_opt'][$row['currency_id']] = $row['symbol'] . ' (' . $row['currency_code'] . ')';
+            $data['currency_opt'][$row['currency_id']] = $row['currency_code'];
         }
 
         $sql = "
@@ -1869,6 +1869,7 @@ class Tender extends CI_Controller
                 'customer_id' => $this->input->post('srch_customer_id'),
                 'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
                 'tender_quotation_id' => $this->input->post('srch_quotation_no'),
+                'currency_id' => $this->input->post('currency_id'),
                 'our_po_no' => $this->input->post('our_po_no'),
                 'customer_po_no' => $this->input->post('customer_po_no'),
                 'po_date' => $this->input->post('po_date'),
@@ -1956,6 +1957,24 @@ class Tender extends CI_Controller
             $data['gst_opt'][$row['gst_id']] = $row['gst_percentage'];
         }
 
+        $data['default_currency_id'] = '';
+
+        $sql = "
+            SELECT currency_id, currency_code
+            FROM currencies_info
+            WHERE status = 'Active'
+            ORDER BY currency_name ASC
+        ";
+        $query = $this->db->query($sql);
+
+        foreach ($query->result_array() as $row) {
+            $data['currency_opt'][$row['currency_id']] = $row['currency_code'];
+
+            if ($row['currency_code'] === 'BHD') {
+                $data['default_currency_id'] = $row['currency_id'];
+            }
+        }
+
         $this->load->view('page/tender/customer-tender-po-add', $data);
     }
 
@@ -1980,6 +1999,7 @@ class Tender extends CI_Controller
                 'customer_id' => $this->input->post('srch_customer_id'),
                 'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
                 'tender_quotation_id' => $this->input->post('tender_quotation_id'),
+                'currency_id' => $this->input->post('currency_id'),
                 'our_po_no' => $this->input->post('our_po_no'),
                 'customer_po_no' => $this->input->post('customer_po_no'),
                 'po_date' => $this->input->post('po_date'),
@@ -2130,6 +2150,19 @@ class Tender extends CI_Controller
         $data['gst_opt'] = [];
         foreach ($query->result_array() as $row) {
             $data['gst_opt'][$row['gst_id']] = $row['gst_percentage'];
+        }
+        $data['currency_opt'] = array('' => 'Select');
+        $sql = "
+            SELECT currency_id, currency_code
+            FROM currencies_info
+            WHERE status = 'Active'
+            ORDER BY currency_name ASC
+        ";
+        $query = $this->db->query($sql);
+
+        foreach ($query->result_array() as $row) {
+            $data['currency_opt'][$row['currency_id']] = $row['currency_code'];
+
         }
 
         // ———————— Load header ————————
@@ -2325,7 +2358,7 @@ class Tender extends CI_Controller
 
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();
-         // === DROPDOWNS ===
+        // === DROPDOWNS ===
         $data['company_opt'] = ['' => 'All'];
         $sql = "SELECT company_id, company_name FROM company_info WHERE status = 'Active' ORDER BY company_name";
         $query = $this->db->query($sql);

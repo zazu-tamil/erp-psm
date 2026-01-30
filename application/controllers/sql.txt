@@ -335,3 +335,13 @@ ALTER TABLE `tender_enq_invoice_item_info` ADD `item_code` TEXT NULL AFTER `item
 30-01-2026
 ALTER TABLE `currencies_info`
 	ADD COLUMN `decimal_point` INT NULL DEFAULT NULL AFTER `symbol`;
+
+	ALTER TABLE `vendor_quotation_info`
+	ADD COLUMN `currency_id` INT(11) NULL DEFAULT NULL AFTER `vendor_contact_person_id`;
+
+	ALTER TABLE `customer_tender_po_info`
+	ADD COLUMN `currency_id` INT(11) NULL DEFAULT NULL AFTER `tender_quotation_id`;
+
+
+	ALTER TABLE `vendor_po_info`
+	ADD COLUMN `currency_id` INT(11) NULL DEFAULT NULL AFTER `vendor_contact_person_id`;
