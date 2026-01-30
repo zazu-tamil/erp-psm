@@ -31,7 +31,7 @@
                     <div class="row">
                         <div class="form-group col-md-3">
                             <label for="srch_company_id">Company</label>
-                            <?php echo form_dropdown('srch_company_id', ['' => 'Select'] + $company_opt, set_value('srch_company_id', $header['company_id']), 'id="srch_company_id" class="form-control"'); ?>
+                            <?php echo form_dropdown('srch_company_id',  $company_opt, set_value('srch_company_id', $header['company_id']), 'id="srch_company_id" class="form-control"'); ?>
                         </div>
 
                         <div class="form-group col-md-3">
@@ -126,7 +126,7 @@
                                 
                         </div>
                         <div class="form-group col-md-3">
-                            <label for="currency_id">Select Currency <span style="color:red;">*</span></label>
+                            <label for="currency_id">Currency <span style="color:red;">*</span></label>
                             <?php echo form_dropdown('currency_id', ['' => 'Select Currency'] + $currency_opt, set_value('currency_id' , $header['currency_id']), 'id="currency_id" class="form-control" required '); ?>
                         </div>
                     </div>

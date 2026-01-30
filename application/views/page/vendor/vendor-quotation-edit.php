@@ -106,7 +106,7 @@
 
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label for="currency_id">Select Currency</label>
+                                <label for="currency_id">Currency</label>
                                 <?php 
                                     echo form_dropdown(
                                         'currency_id',

@@ -11,8 +11,7 @@
     <div class="box box-info">
         <div class="box-header with-border">
             <h3 class="box-title"><i class="fa fa-plus-circle"></i> Add Tender Enquiry</h3>
-        </div>
-
+        </div> 
         <form method="post" action="" id="frmadd" enctype="multipart/form-data">
             <div class="box-body">
                 <input type="hidden" name="mode" value="Add" />
@@ -23,7 +22,7 @@
                     <div class="row">
                         <div class="form-group col-md-4">
                             <label>Company <span class="text-danger">*</span></label>
-                            <?php echo form_dropdown('company_id', ['' => 'Select Company'] + $company_opt, set_value('company_id'), 'id="srch_company_id" class="form-control select2" required'); ?>
+                            <?php echo form_dropdown('company_id',$company_opt, set_value('company_id'), 'id="srch_company_id" class="form-control select2" required'); ?>
                         </div>
                         <div class="form-group col-md-4">
                             <label>Customer <span class="text-danger">*</span></label>

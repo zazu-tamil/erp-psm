@@ -656,8 +656,7 @@ class Tender extends CI_Controller
 
 
         // === DROPDOWNS ===
-        $data['company_opt'] = ['' => 'All'];
-        $sql = "
+         $sql = "
             SELECT 
             company_id, 
             company_name 
@@ -897,8 +896,7 @@ class Tender extends CI_Controller
         $data['item_list'] = $q->result_array();
 
 
-        // === DROPDOWNS ===
-        $data['company_opt'] = ['' => 'Select Company'];
+       
         $sql = "
             SELECT 
             company_id, 
@@ -1252,8 +1250,7 @@ class Tender extends CI_Controller
 
 
 
-        // === DROPDOWNS ===
-        $data['company_opt'] = ['' => 'All'];
+        
         $sql = "SELECT company_id, company_name FROM company_info WHERE status = 'Active' ORDER BY company_name";
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
@@ -2097,8 +2094,7 @@ class Tender extends CI_Controller
         // ———————— Load dropdown options ————————
         $sql = "SELECT company_id, company_name FROM company_info WHERE status = 'Active' ORDER BY company_name ASC";
         $query = $this->db->query($sql);
-        $data['company_opt'] = array('' => 'Select');
-        foreach ($query->result_array() as $row) {
+         foreach ($query->result_array() as $row) {
             $data['company_opt'][$row['company_id']] = $row['company_name'];
         }
 
@@ -2359,8 +2355,7 @@ class Tender extends CI_Controller
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();
         // === DROPDOWNS ===
-        $data['company_opt'] = ['' => 'All'];
-        $sql = "SELECT company_id, company_name FROM company_info WHERE status = 'Active' ORDER BY company_name";
+         $sql = "SELECT company_id, company_name FROM company_info WHERE status = 'Active' ORDER BY company_name";
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
             $data['company_opt'][$row['company_id']] = $row['company_name'];

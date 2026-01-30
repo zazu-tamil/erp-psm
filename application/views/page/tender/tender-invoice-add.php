@@ -34,7 +34,7 @@
                     <div class="row">
                         <div class="form-group col-md-3">
                             <label for="srch_company_id">Company <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_company_id', ['' => 'Select Company'] + $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
+                            <?php echo form_dropdown('srch_company_id',   $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
                         </div>
 
                         <div class="form-group col-md-3">
