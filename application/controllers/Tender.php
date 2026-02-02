@@ -656,7 +656,7 @@ class Tender extends CI_Controller
 
 
         // === DROPDOWNS ===
-         $sql = "
+        $sql = "
             SELECT 
             company_id, 
             company_name 
@@ -896,7 +896,7 @@ class Tender extends CI_Controller
         $data['item_list'] = $q->result_array();
 
 
-       
+
         $sql = "
             SELECT 
             company_id, 
@@ -1250,7 +1250,7 @@ class Tender extends CI_Controller
 
 
 
-        
+
         $sql = "SELECT company_id, company_name FROM company_info WHERE status = 'Active' ORDER BY company_name";
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
@@ -2094,7 +2094,7 @@ class Tender extends CI_Controller
         // ———————— Load dropdown options ————————
         $sql = "SELECT company_id, company_name FROM company_info WHERE status = 'Active' ORDER BY company_name ASC";
         $query = $this->db->query($sql);
-         foreach ($query->result_array() as $row) {
+        foreach ($query->result_array() as $row) {
             $data['company_opt'][$row['company_id']] = $row['company_name'];
         }
 
@@ -2355,7 +2355,7 @@ class Tender extends CI_Controller
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();
         // === DROPDOWNS ===
-         $sql = "SELECT company_id, company_name FROM company_info WHERE status = 'Active' ORDER BY company_name";
+        $sql = "SELECT company_id, company_name FROM company_info WHERE status = 'Active' ORDER BY company_name";
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
             $data['company_opt'][$row['company_id']] = $row['company_name'];
@@ -4322,6 +4322,7 @@ class Tender extends CI_Controller
             a.company_id,
             a.customer_id,
             a.tender_enquiry_id,
+            c.customer_name,
             a.enquiry_no
             FROM tender_enquiry_info AS a
             LEFT JOIN company_info AS b ON a.company_id = b.company_id AND b.status = 'Active'
@@ -4343,7 +4344,9 @@ class Tender extends CI_Controller
                 'value' => $row->enq,        // filled in textbox
                 'company_id' => $row->company_id,
                 'customer_id' => $row->customer_id,
-                'tender_enquiry_id' => $row->tender_enquiry_id
+                'tender_enquiry_id' => $row->tender_enquiry_id,
+                'customer_name' => $row->customer_name,
+                'enquiry_no' => $row->enquiry_no
             ];
         }
         echo json_encode($result);
@@ -4602,6 +4605,272 @@ class Tender extends CI_Controller
         $data['pagination'] = $this->pagination->create_links();
 
         $this->load->view('page/tender/receipt-list', $data);
+    }
+
+    public function tender_enquiry_timeline()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data['js'] = 'tender/tender-enquiry-timeline.inc';
+        $data['title'] = 'Tender Enquiry Timeline';
+
+        $this->load->view('page/tender/tender-enquiry-timeline', $data);
+    }
+
+    public function get_load_tender_enq_customer_timeline()
+    {
+        $tender_enquiry_id = $this->input->post('t_enq_id', true);
+
+        $sql = "
+            SELECT
+                a.tender_enquiry_id,
+                a.enquiry_no,
+                a.enquiry_date,
+                a.tender_status,
+                b.quote_date,
+                b.quotation_status,
+                c.po_date,
+                c.po_status,
+                d.dc_date,
+                d.status AS dc_status,
+                e.invoice_date,
+                e.invoice_status,
+                ci.customer_name
+            FROM tender_enquiry_info a 
+            LEFT JOIN tender_quotation_info b 
+                ON a.tender_enquiry_id = b.tender_enquiry_id AND b.status='Active'
+            LEFT JOIN customer_tender_po_info c 
+                ON a.tender_enquiry_id = c.tender_enquiry_id AND c.status='Active'
+            LEFT JOIN tender_dc_info d 
+                ON a.tender_enquiry_id = d.tender_enquiry_id AND d.status='Active'
+            LEFT JOIN tender_enq_invoice_info e 
+                ON a.tender_enquiry_id = e.tender_enquiry_id AND e.status='Active'
+            left join customer_info as ci on a.customer_id = ci.customer_id and ci.status = 'Active'
+            WHERE a.status='Active'
+            AND a.tender_enquiry_id = ?
+            ORDER BY a.tender_enquiry_id
+        ";
+
+        $query = $this->db->query($sql, [$tender_enquiry_id]);
+        echo json_encode($query->result_array());
+    }
+
+    public function get_load_tender_enq_vendor_timeline()
+    {
+        $tender_enquiry_id = $this->input->post('t_enq_id');
+
+        $sql = "
+            select
+            a.tender_enquiry_id,
+            a.enquiry_no,
+            a.enquiry_date,
+            a.tender_status,
+            b.enquiry_date as vendor_rate_enquiry_date,
+            b.vendor_rate_enquiry_status,
+            c.quote_date,
+            c.quote_status,
+            d.po_date,
+            d.po_status,
+            e.inward_date,
+            e.`status` as inward_status,
+            f.invoice_date,
+            f.`status` as invoice_status,
+            vendor.vendor_name
+            from tender_enquiry_info as a 
+            left join vendor_rate_enquiry_info as b on a.tender_enquiry_id = b.tender_enquiry_id and b.`status`='Active'
+            left join vendor_quotation_info as c on a.tender_enquiry_id = c.tender_enquiry_id and c.`status`='Active'
+            left join vendor_po_info as d on a.tender_enquiry_id = d.tender_enquiry_id and d.`status`='Active'
+            left join vendor_pur_inward_info as e on a.tender_enquiry_id = e.tender_enquiry_id and e.`status`='Active'
+            left join vendor_purchase_invoice_info as f on a.tender_enquiry_id = f.tender_enquiry_id and f.`status`='Active' 
+            left join vendor_info as vendor on  b.vendor_id = vendor.vendor_id and vendor.`status`='Active'
+            where a.`status`='Active'
+            and a.tender_enquiry_id  = '" . $tender_enquiry_id . "   '
+            order by a.tender_enquiry_id
+         ";
+
+        $query = $this->db->query($sql);
+        echo json_encode($query->result_array());
+
+    }
+
+
+    public function get_content($table = '', $rec_id = '')
+    {
+        //if(!$this->session->userdata('zazu_logged_in'))  redirect();
+
+        if (empty($table) && empty($rec_id)) {
+            $table = $this->input->post('tbl');
+            $rec_id = $this->input->post('id');
+            $edit_mode = $this->input->post('edit_mode');
+            $del_mode = $this->input->post('del_mode');
+            $flg = true;
+        } else {
+            $flg = false;
+        }
+
+
+        if ($table == 'get_tender_enquiry_timeline') {
+
+            $heading = $this->input->post('modal_label');
+
+            if ($heading === 'Customer Quotation') {
+
+                $query = $this->db->query("
+                    SELECT 
+                        date_format(b.quote_date, '%d-%m-%Y') as quote_date,
+                        b.tender_ref_no,
+                        b.quotation_no, 
+                        b.quotation_status,
+                        FORMAT(b.other_charges, 3)     AS other_charges,
+                        FORMAT(b.transport_charges, 3) AS transport_charges
+                    FROM tender_enquiry_info AS a
+                    LEFT JOIN tender_quotation_info AS b 
+                        ON a.tender_enquiry_id = b.tender_enquiry_id 
+                        AND b.status = 'Active'
+                    WHERE a.status = 'Active'
+                    AND a.tender_enquiry_id = '" . $rec_id . "'
+                    ORDER BY b.quote_date ASC
+                ");
+
+            } elseif ($heading === 'Customer PO') {
+                $query = $this->db->query("
+                   select 
+                     date_format(b.po_date, '%d-%m-%Y') as po_date,
+                    a.enquiry_no,
+                    b.our_po_no,
+                    b.customer_po_no,
+                    b.po_status
+                    from tender_enquiry_info as a 
+                    left join customer_tender_po_info as b on a.tender_enquiry_id = b.tender_enquiry_id
+                    where a.`status`='Active'
+                    and a.tender_enquiry_id = '" . $rec_id . "'
+                    order by b.po_date asc
+                ");
+
+            } elseif ($heading === 'Customer DC') {
+
+                $query = $this->db->query("
+                   select 
+                    date_format(b.dc_date, '%d-%m-%Y') as dc_date,
+                    a.enquiry_no,
+                    b.dc_no,
+                    'Delivered' as dc_status
+                    from tender_enquiry_info as a 
+                    left join tender_dc_info as b on  a.tender_enquiry_id = b.tender_enquiry_id and b.`status`='Active'
+                    where a.`status`='Active'
+                    and a.tender_enquiry_id = '" . $rec_id . "'
+                    order by b.dc_date asc
+                ");
+
+            } elseif ($heading === 'Customer Enquiry') {
+
+                $query = $this->db->query("
+                    select 
+                    date_format(a.enquiry_date, '%d-%m-%Y') as enquiry_date,                    
+                    a.enquiry_no, 
+                    a.tender_name,
+                    DATE_FORMAT(a.closing_date, '%d-%m-%Y %h:%i %p') AS closing_date, 
+                    a.tender_status
+                    from tender_enquiry_info as a 
+                    where a.`status`='Active'
+                    and a.tender_enquiry_id = '" . $rec_id . "'
+                    order by a.enquiry_date asc
+                ");
+
+            } elseif ($heading === 'Customer Invoice') {
+
+                $query = $this->db->query("
+                   select
+                    DATE_FORMAT(b.invoice_date, '%d-%m-%Y') AS invoice_date,
+                    b.invoice_no,
+                    b.invoice_status,
+                    FORMAT(b.tax_amount,3) as tax_amount,
+                    FORMAT(b.total_amount,3) as total_amount
+                    
+                    from tender_enquiry_info as a 
+                    left join tender_enq_invoice_info as b on a.tender_enquiry_id =b.tender_enquiry_id and b.`status`='Active'
+                    where a.`status`='Active'
+                    and a.tender_enquiry_id = '" . $rec_id . "'
+                    order by b.invoice_date asc
+                ");
+
+            } else {
+                $rec_list = [];
+                return;
+            }
+
+            $rec_list = $query->result_array();
+        }
+
+
+
+        if (!empty($rec_list)) {
+
+            if (count($rec_list) > 1) {
+
+                $content = '
+           <table class="table table-bordered table-responsive table-striped" id="sts">
+             <thead>
+                <tr>';
+                $content .= '<th>S.No</th>';
+                foreach ($rec_list[0] as $fld => $val) {
+                    if ($fld != 'id' && $fld != 'tbl')
+                        $content .= '<th class="text-capitalize">' . str_replace('_', ' ', $fld) . '</th>';
+                }
+                if ($edit_mode == 1)
+                    $content .= '<th>Edit</th>';
+                if ($del_mode == 1)
+                    $content .= '<th>Delete</th>';
+                $content .= '</tr>
+              </thead>  
+              <tbody>';
+                foreach ($rec_list as $k => $info) {
+                    $content .= '<tr>
+                      <td>' . ($k + 1) . '</td>';
+                    foreach ($rec_list[0] as $fld => $val) {
+                        if ($fld != 'id') {
+                            if ($fld != 'tbl')
+                                $content .= '<td>' . $info[$fld] . '</td>';
+                        }
+
+                    }
+                    if ($edit_mode == 1)
+                        $content .= '<td><button type="button" class="btn btn-xs btn-info btn-sm btn_chld_edit" value="' . $info['id'] . '" data="' . $table . '"><i class="fa fa-edit"></i></button></td>';
+                    if ($del_mode == 1)
+                        $content .= '<td><button type="button" class="btn btn-xs btn-danger btn-sm btn_chld_del" value="' . $info['id'] . '" data="' . $table . '"><i class="fa fa-remove"></i></button></td>';
+                    $content .= '</tr>';
+                }
+                $content .= '
+              </tbody>  
+            </table>';
+            } else {
+                $content = ' <table class="table table-bordered table-responsive table-striped">  ';
+                $content .= '<tr><th colspan="2">' . strtoupper(str_replace('_', ' ', $table)) . '</th></tr>';
+                foreach ($rec_list[0] as $fld => $val) {
+                    if ($fld != 'id' && $fld != 'tbl') {
+                        $content .= '<tr>';
+                        $content .= '<th>' . strtoupper(str_replace('_', ' ', $fld)) . '</th>';
+                        $content .= '<td>' . $val . '</td>';
+                        $content .= '</tr>';
+                    }
+                }
+                if ($edit_mode == 1)
+                    $content .= '<tr><th>Edit</th><td><button type="button" class="btn btn-xs btn-info btn-sm btn_chld_edit" value="' . $rec_list[0]['id'] . '" data="' . $table . '"><i class="fa fa-edit"></i></button></td></tr>';
+                if ($del_mode == 1)
+                    $content .= '<tr><th>Delete</th><td><button type="button" class="btn btn-xs btn-danger btn-sm btn_chld_del" value="' . $rec_list[0]['id'] . '" data="' . $table . '"><i class="fa fa-remove"></i></button></td></tr>';
+
+                $content .= '</table>';
+            }
+        } else {
+            $content = "<strong>No Record Found</strong>";
+        }
+
+        if (!$flg)
+            return $content;
+        else
+            echo $content;
     }
 
 }
