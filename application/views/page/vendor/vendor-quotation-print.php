@@ -416,10 +416,10 @@
                             <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?: $item['item_uom'] ?: '-'); ?>
                             </td>
                             <td class="text-center"><?php echo number_format($item['qty'], 2); ?></td>
-                            <td class="text-right"><?php echo number_format($item['rate'], 2); ?></td>
-                            <td class="text-center"><?php echo number_format($item['gst'], 2); ?>%</td>
-                            <td class="text-right"><?php echo number_format($item['gst_amount'], 2); ?></td>
-                            <td class="text-right"><strong><?php echo number_format($item['amount'], 2); ?></strong></td>
+                            <td class="text-right"><?php echo number_format($item['rate'], 3); ?></td>
+                            <td class="text-center"><?php echo number_format($item['gst'], 3); ?>%</td>
+                            <td class="text-right"><?php echo number_format($item['gst_amount'], 3); ?></td>
+                            <td class="text-right"><strong><?php echo number_format($item['amount'], 3); ?></strong></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -431,11 +431,11 @@
             <tfoot>
                 <!-- <tr>
                     <th colspan="7" class="text-right">Transport, Packing & Courier</th>
-                    <th class="text-right"><?php echo number_format($record['handling_charges'] ?? 0, 2); ?></th>
+                    <th class="text-right"><?php echo number_format($record['handling_charges'] ?? 0, 3); ?></th>
                 </tr> -->
                 <tr class="grand-total">
                     <th colspan="7" class="text-right">GRAND TOTAL</th>
-                    <th class="text-right"><?php echo number_format($final_total, 2); ?></th>
+                    <th class="text-right"><?php echo number_format($final_total, 3); ?></th>
                 </tr>
             </tfoot>
         </table>

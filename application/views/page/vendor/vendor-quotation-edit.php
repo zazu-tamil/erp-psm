@@ -168,7 +168,7 @@
                     <table class="table table-bordered table-sm">
                         <thead>
                             <tr>
-                                <th style="width:5%;">✔</th>
+                                <th class="text-center" style="width:5%;">✔ <br><input type="checkbox" name="selectall" id="selectall"></th>
                                 <th style="width:5%;">Item Code</th>
                                 <th style="width:30%;">Description</th>
                                 <th style="width:15%;" class="text-right">UOM & QTY</th>
@@ -199,20 +199,20 @@
                                 <td>
                                     <input type="text" name="uom[<?php echo $index; ?>]" class="form-control uom" value="<?php echo $item['uom']; ?>" >
                                     <br>
-                                    <input type="number" step="0.01" name="qty[<?php echo $index; ?>]"  class="form-control qty" value="<?php echo $item['qty']; ?>" >
+                                    <input type="number" step="1.00" name="qty[<?php echo $index; ?>]"  class="form-control qty" value="<?php echo $item['qty']; ?>" >
                                 </td>
 
                                 <td>
-                                    <input type="number" step="0.01" name="rate[<?php echo $index; ?>]" class="form-control rate" value="<?php echo $item['rate']; ?>">
+                                    <input type="number" step="1.00" name="rate[<?php echo $index; ?>]" class="form-control rate" value="<?php echo $item['rate']; ?>">
                                 </td>
 
                                 <td>
-                                    <input type="number" step="0.01" name="gst[<?php echo $index; ?>]" class="form-control gst" value="<?php echo $item['vat']; ?>">
+                                    <input type="number" step="1.00" name="gst[<?php echo $index; ?>]" class="form-control vat" value="<?php echo $item['vat']; ?>">
                                    
                                 </td>
 
                                 <td>
-                                    <input type="number" step="0.01" name="amount[<?php echo $index; ?>]" class="form-control amount" value="<?php echo $item['amount']; ?>"
+                                    <input type="number" step="1.00" name="amount[<?php echo $index; ?>]" class="form-control amount" value="<?php echo $item['amount']; ?>"
                                         readonly>
                                 </td>
 

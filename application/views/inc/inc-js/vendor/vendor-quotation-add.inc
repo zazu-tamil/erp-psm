@@ -65,7 +65,7 @@
         minLength: 1,
          
         select: function (event, ui) {
-           console.log(ui);
+           //console.log(ui);
             $("#srch_company_id").val(ui.item.company_id);
             $("#srch_customer_id").val(ui.item.customer_id).change();
             //$("#srch_tender_enquiry_id").val(ui.item.tender_enquiry_id); 
@@ -225,13 +225,17 @@
     });
 
     // 4. Vendor → Load Rate Enquiry Numbers
-    $("#srch_vendor_id").on("change", function () {
+    $("#srch_vendor_id").on("change", function () { 
+      //alert($('#srch_tender_enquiry_id').val());
+      //alert($(this).val());
       const vendor_id = $(this).val();
       const $enquiry = $("#srch_vendor_rate_enquiry_id");
       const $contact = $("#srch_vendor_contact_id");
 
-      $enquiry.html('<option value="">Select Enquiry No</option>');
-      $contact.html('<option value="">Select Contact</option>');
+      //$enquiry.html('<option value="">Select Enquiry No</option>');
+      //$contact.html('<option value="">Select Contact</option>');
+      $enquiry.html('');
+      $contact.html('');
 
       if (!vendor_id) return;
 
@@ -240,20 +244,25 @@
         "<?php echo site_url('vendor/get_data'); ?>",
         {
           tbl: "get-vendor-rate-enquiry-list",
-          id: vendor_id,
+          id: $(this).val(),
+          tender_enquiry_id : $('#srch_tender_enquiry_id').val(),
         },
-        function (res) {
+        function (res) { //console.log(res); alert('hi');
           if (res.length > 0) {
             $.each(res, function (i, row) {
               $enquiry.append(
-                `<option value="${row.vendor_rate_enquiry_id}">${row.vendor_rate_enquiry_no}</option>`
+                `<option value="${row.vendor_rate_enquiry_id}">${row.vendor_rate_enquiry_no} [ ${row.enquiry_date} ]</option>`
               );
             });
           }
+
+          // 🔥 trigger AFTER options are ready
+          $enquiry.prop('selectedIndex', 0).trigger("change");
         },
         "json"
       );
 
+      
       // Load Contact Persons
       $.post(
         "<?php echo site_url('vendor/get_data'); ?>",
@@ -334,7 +343,7 @@
                             <input type="number" step="0.01" name="rate[]" class="form-control rate" value="">
                         </td>
                         <td  class="text-right">
-                          <input type="number" step="0.01" name="gst[]" class="form-control vat" value=""> 
+                          <input type="number" step="0.01" name="gst[]" class="form-control vat" value="10.00"> 
                         </td> 
                         <td  class="text-right">
                             <input type="number" name="amount[]" class="form-control amount" value="" readonly>
@@ -359,7 +368,7 @@
               // JSON with headers
               const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-              console.log(rows);
+             // console.log(rows);
 
               $("#item_container").empty();
               let i = 0;
@@ -411,7 +420,7 @@
           $('.cls_export').show();
           $('#btnExport').attr('data-xls', JSON.stringify(res));
           $('#btnExport').val('Vendor-Quote-' + $("#srch_vendor_rate_enquiry_id option:selected").text());
-          console.log(res);
+          //console.log(res);
 
 
         if (res.length === 0) {
@@ -440,13 +449,13 @@
                         <td  class="text-right">
                             <input type="text" name="uom[]" class="form-control" value="${ row.uom || ""}" >
                             <br>
-                            <input type="number" step="0.01" name="qty[]" class="form-control qty" value="${row.qty}" >
+                            <input type="number" step="1" name="qty[]" class="form-control qty" value="${row.qty}" >
                         </td> 
                         <td  class="text-right">
-                            <input type="number" step="0.01" name="rate[]" class="form-control rate" value="${row.rate|| "0"}">
+                            <input type="number" step="1" name="rate[]" class="form-control rate" value="${row.rate|| "0"}">
                         </td>
                         <td  class="text-right">
-                          <input type="number" step="0.01" name="gst[]" class="form-control vat" value="${row.vat || "0"}"> 
+                          <input type="number" step="1" name="gst[]" class="form-control vat" value="${row.vat || "10.00"}"> 
                         </td> 
                         <td  class="text-right">
                             <input type="number" name="amount[]" class="form-control amount" value="${row.amount || "0"}" readonly>
@@ -484,7 +493,7 @@ $(document).on("input change", ".rate, .vat, .qty", function () {
         amount = amount + (amount * gst / 100);
     }
 
-    $row.find(".amount").val(amount.toFixed(2));
+    $row.find(".amount").val(amount.toFixed(3));
 
     calculateTotalAmount();
 });
@@ -499,7 +508,20 @@ function calculateTotalAmount() {
         total += parseFloat(row.find(".amount").val()) || 0;
     });
 
-    $("#total_amount").text(total.toFixed(2));
+    $("#total_amount").text(total.toFixed(3));
 }
+
+
+  $('#selectall').on('change', function () {
+      $('.item-check').prop('checked', this.checked);
+  });
+
+  // If any item unchecked → uncheck Select All
+  $('.item-check').on('change', function () {
+      $('#selectall').prop(
+          'checked',
+          $('.item-check:checked').length === $('.item-check').length
+      );
+  });
 
 </script>

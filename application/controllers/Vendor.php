@@ -2503,11 +2503,11 @@ class Vendor extends CI_Controller
             $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['enquiry_no'];
         }
 
-        $sql = "SELECT vendor_rate_enquiry_id, enquiry_no FROM vendor_rate_enquiry_info WHERE status = 'Active' ORDER BY vendor_rate_enquiry_id";
+        $sql = "SELECT vendor_rate_enquiry_id, enquiry_no, DATE_FORMAT(enquiry_date, '%d-%m-%Y') AS enquiry_date FROM vendor_rate_enquiry_info WHERE status = 'Active' ORDER BY vendor_rate_enquiry_id DESC";
         $query = $this->db->query($sql);
         $data['vendor_rate_enquiry_opt'] = ['' => 'Select Enquiry No'];
         foreach ($query->result_array() as $row) {
-            $data['vendor_rate_enquiry_opt'][$row['vendor_rate_enquiry_id']] = $row['enquiry_no'];
+            $data['vendor_rate_enquiry_opt'][$row['vendor_rate_enquiry_id']] = $row['enquiry_no'] . ' [' . $row['enquiry_date'] . ']';
         }
 
         $sql = "SELECT vendor_id, vendor_name FROM vendor_info WHERE status = 'Active' ORDER BY vendor_name ASC";
@@ -3047,6 +3047,7 @@ class Vendor extends CI_Controller
             $query = $this->db->query("
                 SELECT
                     a.vendor_rate_enquiry_id,
+                    DATE_FORMAT(a.enquiry_date, '%d-%m-%Y') AS enquiry_date,
                     a.enquiry_no AS vendor_rate_enquiry_no,
                     b.vendor_id,
                     b.vendor_name,
@@ -3061,9 +3062,11 @@ class Vendor extends CI_Controller
                     AND c.status = 'Active'
                 WHERE a.status = 'Active'
                 AND a.vendor_id = '" . $rec_id . "'
-                and a.vendor_rate_enquiry_status = 'Quotation Received'
-                ORDER BY vendor_rate_enquiry_no ASC
+                AND a.tender_enquiry_id = '" . $this->input->post('tender_enquiry_id') . "'                
+                ORDER BY vendor_rate_enquiry_id desc, enquiry_no desc
             ");
+
+            //and a.vendor_rate_enquiry_status = 'Quotation Received'
 
             $rec_list = $query->result_array();
             echo json_encode($rec_list);

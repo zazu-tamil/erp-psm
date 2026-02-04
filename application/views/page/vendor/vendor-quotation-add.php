@@ -70,7 +70,7 @@
 
                         <div class="form-group col-md-4">
                             <label>Contact Person</label>
-                            <?php echo form_dropdown('srch_vendor_contact_person_id', ['' => 'Select Contact'] + $vendor_contact_opt, set_value('srch_vendor_contact_person_id'), 'id="srch_vendor_contact_id" class="form-control"'); ?>
+                            <?php echo form_dropdown('srch_vendor_contact_person_id', $vendor_contact_opt, set_value('srch_vendor_contact_person_id'), 'id="srch_vendor_contact_id" class="form-control"'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
@@ -169,7 +169,7 @@
                     <table class="table table-bordered table-sm">
                         <thead>
                             <tr>
-                                <th style="width:5%;">✔</th>
+                                <th class="text-center" style="width:5%;">✔ <br><input type="checkbox" name="selectall" id="selectall"></th>
                                 <th style="width:5%;">Item Code</th>
                                 <th style="width:30%;">Description</th>
                                 <th style="width:15%;" class="text-right">UOM & QTY</th>

@@ -157,6 +157,7 @@
         {
           tbl: "get-vendor-rate-enquiry-list",
           id: vendor_id,
+          tender_enquiry_id : $('#srch_tender_enquiry_id').val(),
         },
         function (res) {
           if (res.length > 0) {
@@ -231,15 +232,15 @@
                         <td>
                             <input type="text" name="uom[]" class="form-control uom" value="" readonly>
                             <br>
-                            <input type="number" step="0.01" name="qty[]" class="form-control qty" value="">
+                            <input type="number" step="1.00" name="qty[]" class="form-control qty" value="">
                         </td>
 
                         <td>
-                            <input type="number" step="0.01" name="rate[]" class="form-control rate">
+                            <input type="number" step="1.00" name="rate[]" class="form-control rate">
                         </td>
 
                         <td>
-                            <input type="number" step="0.01" name="gst[]" class="form-control vat">
+                            <input type="number" step="1.00" name="gst[]" class="form-control vat">
                         </td>
 
                         <td>
@@ -416,7 +417,7 @@ $(document).ready(function () {
           amount = amount + (amount * gst / 100);
       }
 
-      $row.find(".amount").val(amount.toFixed(2));
+      $row.find(".amount").val(amount.toFixed(3));
 
       calculateTotalAmount();
   });
@@ -431,10 +432,24 @@ $(document).ready(function () {
           total += parseFloat(row.find(".amount").val()) || 0;
       });
 
-      $("#total_amount").text(total.toFixed(2));
+      $("#total_amount").text(total.toFixed(3));
   }
 
   calculateTotalAmount();
+
+
+ $('#selectall').on('change', function () {
+      $('.item-check').prop('checked', this.checked);
+  });
+
+  // If any item unchecked → uncheck Select All
+  $('.item-check').on('change', function () {
+      $('#selectall').prop(
+          'checked',
+          $('.item-check:checked').length === $('.item-check').length
+      );
+  });
+
 
 });
 </script>
