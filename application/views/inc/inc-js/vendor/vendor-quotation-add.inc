@@ -337,13 +337,13 @@
                         <td  class="text-right">
                             <input type="text" name="uom[]" class="form-control uom" value="" >
                             <br>
-                            <input type="number" step="0.01" name="qty[]" class="form-control qty" value="" >
+                            <input type="number" step="any" name="qty[]" class="form-control qty" value="" >
                         </td> 
                         <td  class="text-right">
-                            <input type="number" step="0.01" name="rate[]" class="form-control rate" value="">
+                            <input type="number" step="any" name="rate[]" class="form-control rate" value="">
                         </td>
                         <td  class="text-right">
-                          <input type="number" step="0.01" name="gst[]" class="form-control vat" value="10.00"> 
+                          <input type="number" step="any" name="gst[]" class="form-control vat" value="10.00"> 
                         </td> 
                         <td  class="text-right">
                             <input type="number" name="amount[]" class="form-control amount" value="" readonly>
@@ -449,13 +449,13 @@
                         <td  class="text-right">
                             <input type="text" name="uom[]" class="form-control" value="${ row.uom || ""}" >
                             <br>
-                            <input type="number" step="1" name="qty[]" class="form-control qty" value="${row.qty}" >
+                            <input type="number" step="any" name="qty[]" class="form-control qty" value="${row.qty}" >
                         </td> 
                         <td  class="text-right">
-                            <input type="number" step="1" name="rate[]" class="form-control rate" value="${row.rate|| "0"}">
+                            <input type="number" step="any" name="rate[]" class="form-control rate" value="${row.rate|| "0"}">
                         </td>
                         <td  class="text-right">
-                          <input type="number" step="1" name="gst[]" class="form-control vat" value="${row.vat || "10.00"}"> 
+                          <input type="number" step="any" name="gst[]" class="form-control vat" value="${row.vat || "10.00"}"> 
                         </td> 
                         <td  class="text-right">
                             <input type="number" name="amount[]" class="form-control amount" value="${row.amount || "0"}" readonly>

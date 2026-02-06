@@ -254,7 +254,8 @@
         type: "POST",
         data: {
           company_id: company_id,
-          customer_id: customer_id
+          customer_id: customer_id,
+          tender_enquiry_id: $(this).val(),
         },
         dataType: "json",
         success: function (res) {

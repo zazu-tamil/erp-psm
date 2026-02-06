@@ -3641,8 +3641,9 @@ class Tender extends CI_Controller
 
         $company_id = $this->input->post('company_id');
         $customer_id = $this->input->post('customer_id');
+        $tender_enquiry_id = $this->input->post('tender_enquiry_id');
 
-        if (empty($company_id) || empty($customer_id)) {
+        if (empty($company_id) || empty($customer_id) || empty($tender_enquiry_id)) {
             echo json_encode([]);
             return;
         }
@@ -3657,12 +3658,14 @@ class Tender extends CI_Controller
             FROM tender_quotation_info tq
             LEFT JOIN tender_enquiry_info te ON tq.tender_enquiry_id = te.tender_enquiry_id
             WHERE tq.company_id = ?
-                AND tq.customer_id = ?
-                AND tq.quotation_status = 'Won'
+                AND tq.customer_id = ? 
+                AND tq.tender_enquiry_id = ?
                 AND tq.status = 'Active'
             ORDER BY tq.quote_date DESC";
 
-        $query = $this->db->query($sql, [$company_id, $customer_id]);
+           //  AND tq.quotation_status = 'Won'
+
+        $query = $this->db->query($sql, [$company_id, $customer_id, $tender_enquiry_id]);
         $result = $query->result_array();
         echo json_encode($result);
     }
@@ -4043,10 +4046,12 @@ class Tender extends CI_Controller
             FROM tender_enquiry_info AS a
             LEFT JOIN company_info AS b ON a.company_id = b.company_id AND b.status = 'Active'
             LEFT JOIN customer_info AS c ON a.customer_id = c.customer_id AND c.status = 'Active'
-            WHERE a.company_id = ? AND a.customer_id = ? AND a.status = 'Active'
-            and a.tender_status = 'Won'
-            ORDER BY a.tender_enquiry_id desc, a.enquiry_no ASC
+            WHERE a.company_id = ? AND a.customer_id = ? AND a.status = 'Active' 
+            ORDER BY a.tender_enquiry_id desc, a.enquiry_no desc
         ";
+
+        //and a.tender_status = 'Won'
+
         $query = $this->db->query($sql, [$company_id, $customer_id]);
         $result = [];
         foreach ($query->result_array() as $row) {

@@ -232,15 +232,15 @@
                         <td>
                             <input type="text" name="uom[]" class="form-control uom" value="" readonly>
                             <br>
-                            <input type="number" step="1.00" name="qty[]" class="form-control qty" value="">
+                            <input type="number" step="any" name="qty[]" class="form-control qty" value="">
                         </td>
 
                         <td>
-                            <input type="number" step="1.00" name="rate[]" class="form-control rate">
+                            <input type="number" step="any" name="rate[]" class="form-control rate">
                         </td>
 
                         <td>
-                            <input type="number" step="1.00" name="gst[]" class="form-control vat">
+                            <input type="number" step="any" name="gst[]" class="form-control vat">
                         </td>
 
                         <td>
@@ -363,13 +363,13 @@
                         </td>
 
                         <td>
-                            <input type="number" step="0.01" name="qty[]" class="form-control qty-input" value="${
+                            <input type="number" step="any" name="qty[]" class="form-control qty-input" value="${
                               row.qty
                             }" readonly>
                         </td>
 
                         <td>
-                            <input type="number" step="0.01" name="rate[]" class="form-control rate-input">
+                            <input type="number" step="any" name="rate[]" class="form-control rate-input">
                         </td>
 
                         <td>

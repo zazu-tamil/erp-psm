@@ -199,20 +199,20 @@
                                 <td>
                                     <input type="text" name="uom[<?php echo $index; ?>]" class="form-control uom" value="<?php echo $item['uom']; ?>" >
                                     <br>
-                                    <input type="number" step="1.00" name="qty[<?php echo $index; ?>]"  class="form-control qty" value="<?php echo $item['qty']; ?>" >
+                                    <input type="number" step="any" name="qty[<?php echo $index; ?>]"  class="form-control qty" value="<?php echo $item['qty']; ?>" >
                                 </td>
 
                                 <td>
-                                    <input type="number" step="1.00" name="rate[<?php echo $index; ?>]" class="form-control rate" value="<?php echo $item['rate']; ?>">
+                                    <input type="number" step="any" name="rate[<?php echo $index; ?>]" class="form-control rate" value="<?php echo $item['rate']; ?>">
                                 </td>
 
                                 <td>
-                                    <input type="number" step="1.00" name="gst[<?php echo $index; ?>]" class="form-control vat" value="<?php echo $item['vat']; ?>">
+                                    <input type="number" step="any" name="gst[<?php echo $index; ?>]" class="form-control vat" value="<?php echo $item['vat']; ?>">
                                    
                                 </td>
 
                                 <td>
-                                    <input type="number" step="1.00" name="amount[<?php echo $index; ?>]" class="form-control amount" value="<?php echo $item['amount']; ?>"
+                                    <input type="number" step="any" name="amount[<?php echo $index; ?>]" class="form-control amount" value="<?php echo $item['amount']; ?>"
                                         readonly>
                                 </td>
 
