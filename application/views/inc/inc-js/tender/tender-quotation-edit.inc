@@ -153,14 +153,14 @@
                       <div class="col-md-6">
                           <div class="form-group">
                               <label>Quantity</label>
-                              <input type="number" step="0.01" name="qty[]" class="form-control qty-input" value="" readonly>
+                              <input type="number" step="any" name="qty[]" class="form-control qty-input" value="" readonly>
                           </div>
                       </div>
 
                       <div class="col-md-6">
                           <div class="form-group">
                               <label>Rate</label>
-                              <input type="number" step="0.01" name="rate[]" class="form-control rate-input" value="">
+                              <input type="number" step="any" name="rate[]" class="form-control rate-input" value="">
                           </div>
                       </div>
 
@@ -174,7 +174,7 @@
                       <div class="col-md-12">
                           <div class="form-group">
                               <label>Amount</label>
-                              <input type="number" step="0.01" name="amount[]"
+                              <input type="number" step="any" name="amount[]"
                                   class="form-control amount-input"
                                   value="" readonly>
                           </div>

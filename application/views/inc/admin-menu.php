@@ -1,6 +1,6 @@
 <?php
 // Define master menu pages
-$g_master = ['company-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list', 'customer-list', 'customer-contact-list', 'vendor-contact-list', 'currency-list', 'account-head-list', 'country-list', 'sub-account-head-list', 'account-head-for-list', 'voucher-type-list', 'opening-balance-list', 'settings'];
+$g_master = ['company-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list', 'customer-list', 'customer-contact-list', 'vendor-contact-list', 'currency-list', 'account-head-list', 'country-list', 'addt-charges-type-list', 'sub-account-head-list', 'account-head-for-list', 'voucher-type-list', 'opening-balance-list', 'settings'];
 
 // Get current page
 $current_page = $this->uri->segment(1, 0);
@@ -463,7 +463,7 @@ class="treeview <?= in_array($this->uri->segment(1), ['cash-ledger', 'cash-in-st
 
         <!-- General -->
         <li
-            class="treeview <?= in_array($current_page, ['category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'currency-list', 'settings', 'country-list']) ? 'active' : '' ?>">
+            class="treeview <?= in_array($current_page, ['category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'currency-list', 'settings', 'country-list', 'addt-charges-type-list']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-cog"></i> General
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
@@ -499,6 +499,11 @@ class="treeview <?= in_array($this->uri->segment(1), ['cash-ledger', 'cash-in-st
                 <li class="<?= ($this->uri->segment(1) == 'country-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('country-list') ?>">
                         <i class="fa fa-globe"></i> Country List
+                    </a>
+                </li>
+                <li class="<?= ($this->uri->segment(1) == 'addt-charges-type-list') ? 'active' : '' ?>">
+                    <a href="<?= site_url('addt-charges-type-list') ?>">
+                        <i class="fa fa-tag"></i> Additional Charges Type List
                     </a>
                 </li>
 

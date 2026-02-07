@@ -112,7 +112,7 @@
                     <div class="row">
                         <div class="form-group col-md-3">
                             <label for="transport_charges">Transport Charges</label>
-                           <input type="number" step="0.01" name="transport_charges" id="transport_charges"
+                           <input type="number" step="any" name="transport_charges" id="transport_charges"
                                 class="form-control"
                                 placeholder="Enter transport charges"
                                 value="<?php echo $header['transport_charges']; ?>">
@@ -120,7 +120,7 @@
                         </div>
                         <div class="form-group col-md-3">
                             <label for="other_charges">Other Charges</label>
-                            <input type="number" step="0.01" name="other_charges" id="other_charges"
+                            <input type="number" step="any" name="other_charges" id="other_charges"
                                 class="form-control" placeholder="Enter other charges"
                                 value="<?php echo number_format($header['other_charges'], 2); ?>">
                                 
@@ -206,7 +206,7 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Quantity</label>
-                                                <input type="number" step="0.01" name="qty[]"
+                                                <input type="number" step="any" name="qty[]"
                                                     class="form-control qty-input"
                                                     value="<?php echo htmlspecialchars($row['qty']); ?>">
                                             </div>
@@ -215,7 +215,7 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Rate</label>
-                                                <input type="number" step="0.01" name="rate[]"
+                                                <input type="number" step="any" name="rate[]"
                                                     class="form-control rate-input"
                                                     value="<?php echo htmlspecialchars($row['rate']); ?>">
                                             </div>
@@ -233,7 +233,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Amount</label>
-                                                <input type="number" step="0.01" name="amount[]"
+                                                <input type="number" step="any" name="amount[]"
                                                     class="form-control amount-input"
                                                     value="<?php echo htmlspecialchars($row['amount']); ?>" readonly>
                                             </div>

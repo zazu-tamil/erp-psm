@@ -242,7 +242,7 @@
                                                     <div class="form-group">
                                                         <label>Amount</label>
                                                         <input type="number" step="0.01" name="amount[]" class="form-control amount-input"
-                                                            value="<?php echo number_format($row['amount'], 2, '.', ''); ?>" readonly>
+                                                            value="<?php echo number_format($row['amount'], 3, '.', ''); ?>" readonly>
                                                     </div>
                                                 </div>
 

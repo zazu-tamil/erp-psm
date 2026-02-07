@@ -92,13 +92,13 @@
                         </div>
                         <div class="form-group col-md-3">
                             <label for="transport_charges">Transport Charges</label>
-                            <input type="number" step="0.01" name="transport_charges" id="transport_charges"
+                            <input type="number" step="any" name="transport_charges" id="transport_charges"
                                 class="form-control" placeholder="Enter transport charges"
                                 value="<?php echo set_value('transport_charges', '0.00'); ?>">
                         </div>
                         <div class="form-group col-md-3">
                             <label for="other_charges">Other Charges</label>
-                            <input type="number" step="0.01" name="other_charges" id="other_charges"
+                            <input type="number" step="any" name="other_charges" id="other_charges"
                                 class="form-control" placeholder="Enter other charges"
                                 value="<?php echo set_value('other_charges', '0.00'); ?>">
                         </div>

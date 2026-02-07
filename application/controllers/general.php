@@ -308,6 +308,21 @@ class General extends CI_Controller
             }
 
         }
+        if ($table == 'addt_charges_type_info') {
+            $query = $this->db->query(" 
+                select 
+                a.* 
+                from addt_charges_type_info as a  
+                where a.addt_charges_type_id = '" . $rec_id . "'
+            ");
+
+            $rec_list = array();
+
+            foreach ($query->result_array() as $row) {
+                $rec_list = $row;
+            }
+
+        }
 
         $this->db->close();
 
@@ -332,6 +347,11 @@ class General extends CI_Controller
         if ($table == 'country_info') {
              $this->db->where('country_id', $rec_id);
             $this->db->update('country_info', array('status' => 'Delete'));
+            echo "Record Deleted Successfully";
+        }
+        if ($table == 'addt_charges_type_info') {
+            $this->db->where('addt_charges_type_id', $rec_id);
+            $this->db->update('addt_charges_type_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
         }
         if ($table == 'vendor_purchase_invoice_info') {
@@ -374,7 +394,7 @@ class General extends CI_Controller
         if ($table == 'tender_enquiry_info') {
             $this->db->where('tender_enquiry_id', $rec_id);
             $this->db->update('tender_enquiry_info', array('status' => 'Delete'));
-            echo "Record Deleted Successfully";
+            echo "Record Deleted Successfully1";
         }
         if ($table == 'vendor_po_info') {
             $this->db->where('vendor_po_id', $rec_id);

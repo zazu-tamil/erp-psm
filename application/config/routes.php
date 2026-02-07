@@ -252,6 +252,9 @@ $route['settings/(:num)'] = 'master/settings_list/$1';
 $route['country-list'] = 'master/country_list';
 $route['country-list/(:num)'] = 'master/country_list/$1';
 
+$route['addt-charges-type-list'] = 'master/addt_charges_type_list';
+$route['addt-charges-type-list/(:num)'] = 'master/addt_charges_type_list/$1';
+
 $route['tender-enquiry-timeline'] = 'tender/tender_enquiry_timeline';
 $route['tender-enquiry-timeline/(:num)'] = 'tender/tender_enquiry_timeline/$1';
 
