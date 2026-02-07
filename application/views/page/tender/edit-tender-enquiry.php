@@ -231,7 +231,7 @@
                                     <input type="text" name="uom[]" id="uom[]" class="form-control" value="<?php echo $items['uom']; ?>">
                                 </div> 
                                 <div class="qty-block">
-                                    <input type="number" step="0.01" name="qty[]" class="form-control" placeholder="Qty"
+                                    <input type="number" step="any" name="qty[]" class="form-control" placeholder="Qty"
                                         value="<?php echo $items['qty']; ?>">
                                 </div>
 

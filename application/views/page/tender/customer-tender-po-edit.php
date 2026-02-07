@@ -217,7 +217,7 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label>Qty</label>
-                                                        <input type="number" step="0.01" name="qty[]" class="form-control qty-input"
+                                                        <input type="number" step="any" name="qty[]" class="form-control qty-input"
                                                             value="<?php echo htmlspecialchars($row['qty']); ?>" readonly>
                                                     </div>
                                                 </div>
@@ -225,7 +225,7 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label>Rate</label>
-                                                        <input type="number" step="0.01" name="rate[]" class="form-control rate-input"
+                                                        <input type="number" step="any" name="rate[]" class="form-control rate-input"
                                                             value="<?php echo $row['rate']; ?>">
                                                     </div>
                                                 </div>
@@ -233,7 +233,7 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label>VAT %</label>
-                                                        <input type="number" step="0.01" name="gst[]" class="form-control vat-dropdown" value="<?php echo $row['vat']; ?>">
+                                                        <input type="number" step="any" name="gst[]" class="form-control vat-dropdown" value="<?php echo $row['vat']; ?>">
                                                        
                                                     </div>
                                                 </div>
@@ -241,7 +241,7 @@
                                                 <div class="col-md-12">
                                                     <div class="form-group">
                                                         <label>Amount</label>
-                                                        <input type="number" step="0.01" name="amount[]" class="form-control amount-input"
+                                                        <input type="number" step="any" name="amount[]" class="form-control amount-input"
                                                             value="<?php echo number_format($row['amount'], 3, '.', ''); ?>" readonly>
                                                     </div>
                                                 </div>

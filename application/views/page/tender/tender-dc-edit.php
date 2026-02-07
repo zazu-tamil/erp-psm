@@ -171,12 +171,12 @@
                                             <input type="text" name="uom[<?= $i ?>]" class="form-control mb-2"
                                                 value="<?= $row['uom']; ?>" readonly>
 
-                                            <input type="number" name="avail_qty[<?= $i ?>]" step="0.01"
+                                            <input type="number" name="avail_qty[<?= $i ?>]" step="any"
                                                 class="form-control" value="<?= $row['avail_qty']; ?>" readonly>
                                         </td>
                                         <td>
                                             <label class="form-label">Enter Delivery Qty</label>
-                                            <input type="number" name="dc_qty[<?= $i ?>]" step="0.01"
+                                            <input type="number" name="dc_qty[<?= $i ?>]" step="any"
                                                 class="form-control dc_qty-input" value="<?= $row['dc_qty']; ?>">
                                         </td>
 

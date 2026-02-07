@@ -168,7 +168,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label>Quantity</label>
-                                                <input type="number" step="0.01" name="qty[]"
+                                                <input type="number" step="any" name="qty[]"
                                                     class="form-control qty-input" value="<?php echo $row['qty']; ?>">
                                             </div>
                                         </div>
@@ -176,7 +176,7 @@
                                         <!-- <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label>Rate</label>
-                                                    <input type="number" step="0.01" name="rate[]"
+                                                    <input type="number" step="any" name="rate[]"
                                                         class="form-control rate-input" value="<?php echo $row['rate']; ?>">
                                                 </div>
                                             </div> -->
@@ -197,7 +197,7 @@
                                         <!-- <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Amount (Qty × Rate × VAT %)</label>
-                                                    <input type="number" step="0.01" name="amount[]"
+                                                    <input type="number" step="any" name="amount[]"
                                                         class="form-control amount-input"
                                                         value="<?php //echo $row['amount']; ?>" readonly>
                                                 </div>
@@ -216,7 +216,7 @@
                                         <h4 style="margin: 0;"><strong>Grand Total:</strong></h4>
                                     </div>
                                     <div class="col-md-2">
-                                        <input type="number" step="0.01" id="grand_total" class="form-control"
+                                        <input type="number" step="any" id="grand_total" class="form-control"
                                             value="0.00" readonly
                                             style="font-weight: bold; font-size: 16px; text-align: center;">
                                     </div>

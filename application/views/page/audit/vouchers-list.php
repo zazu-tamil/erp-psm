@@ -177,11 +177,11 @@
                                                 <?= form_dropdown('ledger_id[]', array('' => 'Select Ledger Account') + $ledger_accounts_list_opt, '', 'class="form-control ledger-select" required'); ?>
                                             </td>
                                             <td>
-                                                <input type="number" step="0.01" name="debit[]"
+                                                <input type="number" step="any" name="debit[]"
                                                     class="form-control debit" placeholder="0.00" value="0.00">
                                             </td>
                                             <td>
-                                                <input type="number" step="0.01" name="credit[]"
+                                                <input type="number" step="any" name="credit[]"
                                                     class="form-control credit" placeholder="0.00" value="0.00">
                                             </td>
                                             <td class="text-center">

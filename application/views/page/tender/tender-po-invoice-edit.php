@@ -161,22 +161,22 @@
                                             <input type="text" name="uom[<?php echo $index; ?>]" class="form-control"
                                                 value="<?php echo $item['uom']; ?>" readonly>
                                             <br>
-                                            <input type="number" step="0.01" name="qty[<?php echo $index; ?>]"
+                                            <input type="number" step="any" name="qty[<?php echo $index; ?>]"
                                                 class="form-control qty-input" value="<?php echo $item['qty']; ?>" readonly>
                                         </td>
 
                                         <td>
-                                            <input type="number" step="0.01" name="rate[<?php echo $index; ?>]"
+                                            <input type="number" step="any" name="rate[<?php echo $index; ?>]"
                                                 class="form-control rate-input" value="<?php echo $item['rate']; ?>">
                                         </td>
 
                                         <td>
-                                            <input type="number" step="0.01" name="gst[<?php echo $index; ?>]"
+                                            <input type="number" step="any" name="gst[<?php echo $index; ?>]"
                                                 class="form-control gst-select" value="<?php echo $item['gst']; ?>">
                                         </td>
 
                                         <td>
-                                            <input type="number" step="0.01" name="amount[<?php echo $index; ?>]"
+                                            <input type="number" step="any" name="amount[<?php echo $index; ?>]"
                                                 class="form-control amount-input" value="<?php echo $item['amount']; ?>"
                                                 readonly>
                                         </td>

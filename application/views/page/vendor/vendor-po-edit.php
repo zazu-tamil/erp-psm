@@ -97,14 +97,14 @@
 
                         <div class="form-group col-md-3">
                             <label>Transport Charges</label>
-                            <input type="number" step="0.01" name="transport_charges" id="transport_charges"
+                            <input type="number" step="any" name="transport_charges" id="transport_charges"
                                 class="form-control"
                                 value="<?php echo set_value('transport_charges', $header['transport_charges']); ?>"
                                 placeholder="0.00">
                         </div>
                         <div class="form-group col-md-3">
                             <label>Other Charges</label>
-                            <input type="number" step="0.01" name="other_charges" id="other_charges"
+                            <input type="number" step="any" name="other_charges" id="other_charges"
                                 class="form-control"
                                 value="<?php echo set_value('other_charges', $header['other_charges']); ?>"
                                 placeholder="0.00">
@@ -200,22 +200,22 @@
                                             <input type="text" name="uom[<?php echo $index; ?>]" class="form-control"
                                                 value="<?php echo $item['uom']; ?>">
                                             <br>
-                                            <input type="number" step="0.01" name="qty[<?php echo $index; ?>]"
+                                            <input type="number" step="any" name="qty[<?php echo $index; ?>]"
                                                 class="form-control qty-input" value="<?php echo $item['qty']; ?>">
                                         </td>
 
                                         <td>
-                                            <input type="number" step="0.01" name="rate[<?php echo $index; ?>]"
+                                            <input type="number" step="any" name="rate[<?php echo $index; ?>]"
                                                 class="form-control rate-input" value="<?php echo $item['rate']; ?>">
                                         </td>
 
                                         <td>
-                                            <input type="number" step="0.01" name="gst[<?php echo $index; ?>]"
+                                            <input type="number" step="any" name="gst[<?php echo $index; ?>]"
                                                 class="form-control vat" value="<?php echo $item['vat']; ?>">
                                         </td>
 
                                         <td>
-                                            <input type="number" step="0.01" name="amount[<?php echo $index; ?>]"
+                                            <input type="number" step="any" name="amount[<?php echo $index; ?>]"
                                                 class="form-control amount-input" value="<?php echo $item['amount']; ?>"
                                                 readonly>
                                         </td>

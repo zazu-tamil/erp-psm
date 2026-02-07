@@ -203,23 +203,23 @@
                                                 <td>
                                                     <input type="text" name="uom[]" class="form-control" 
                                                            value="<?php echo htmlspecialchars($po_item['uom']); ?>" readonly>
-                                                    <input type="number" step="0.01" name="qty[]" 
+                                                    <input type="number" step="any" name="qty[]" 
                                                            class="form-control qty-input" 
                                                            value="<?php echo $item_qty; ?>" readonly>
                                                 </td>
                                                 <td>
-                                                    <input type="number" step="0.01" name="rate[]" 
+                                                    <input type="number" step="any" name="rate[]" 
                                                            class="form-control rate-input" 
                                                            value="<?php echo $item_rate; ?>">
                                                 </td>
                                                 <td>
-                                                    <input type="number" step="0.01" name="gst[]" 
+                                                    <input type="number" step="any" name="gst[]" 
                                                            class="form-control gst-input" 
                                                            value="<?php echo $item_gst; ?>">
                                                     <input type="hidden" name="gst_amount[]" class="gst-amount-input">
                                                 </td>
                                                 <td>
-                                                    <input type="number" step="0.01" name="amount[]" 
+                                                    <input type="number" step="any" name="amount[]" 
                                                            class="form-control amount-input" 
                                                            value="<?php echo $item_amount; ?>" readonly>
                                                 </td>

@@ -337,19 +337,19 @@
                       <input type="text" name="uom[]" class="form-control"
                              value="${row.uom || ""}" readonly>
                       <br>
-                      <input type="number" step="0.01" name="qty[]"
+                      <input type="number" step="any" name="qty[]"
                              class="form-control qty-input"
                              value="${row.qty}" readonly>
                     </td>
 
                     <td>
-                      <input type="number" step="0.01" name="rate[]"
+                      <input type="number" step="any" name="rate[]"
                              class="form-control rate-input"
                              value="${row.rate || ""}">
                     </td>
 
                     <td class="gst-cell">
-                      <input type="number" step="0.01" name="gst[]" class="form-control gst" value="${row.vat || ""}">
+                      <input type="number" step="any" name="gst[]" class="form-control gst" value="${row.vat || ""}">
                     </td>
 
                     <td>

@@ -235,13 +235,13 @@
 
                     <td>
                       <input type="text" name="uom[]" class="form-control mb-2" value="${row.uom}" readonly>
-                      <input type="number" name="avail_qty[]" step="0.01" 
+                      <input type="number" name="avail_qty[]" step="any" 
                         class="form-control" value="${row.avail_qty}" readonly>
                     </td>
 
                     <td>
                       <label class="form-label">Enter Delivery Qty</label>
-                      <input type="number" name="dc_qty[]" step="0.01" class="form-control dc_qty-input">
+                      <input type="number" name="dc_qty[]" step="any" class="form-control dc_qty-input">
                     </td>
 
                     ${hiddenFields}

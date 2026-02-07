@@ -117,13 +117,13 @@
 
                         <div class="form-group col-md-4">
                             <label>Transport Charges</label>
-                            <input type="number" step="0.01" name="transport_charges" id="transport_charges"
+                            <input type="number" step="any" name="transport_charges" id="transport_charges"
                                 class="form-control" value="<?php echo set_value('transport_charges'); ?>"
                                 placeholder="0.00">
                         </div>
                         <div class="form-group col-md-4">
                             <label>Other Charges</label>
-                            <input type="number" step="0.01" name="other_charges" id="other_charges"
+                            <input type="number" step="any" name="other_charges" id="other_charges"
                                 class="form-control" value="<?php echo set_value('other_charges'); ?>"
                                 placeholder="0.00">
                         </div>

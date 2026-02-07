@@ -149,7 +149,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label>Quantity</label>
-                                            <input type="number" step="0.01" name="qty[]" class="form-control qty-input" value="" >
+                                            <input type="number" step="any" name="qty[]" class="form-control qty-input" value="" >
                                         </div>
                                     </div>
                                      
@@ -266,13 +266,13 @@
                                               <div class="col-md-6">
                                                   <div class="form-group">
                                                       <label>Quantity</label>
-                                                      <input type="number" step="0.01" name="qty[]" class="form-control qty-input" value="${row.qty || 0}" readonly>
+                                                      <input type="number" step="any" name="qty[]" class="form-control qty-input" value="${row.qty || 0}" readonly>
                                                   </div>
                                               </div>
                                               <div class="col-md-6">
                                                   <div class="form-group">
                                                       <label>Rate</label>
-                                                      <input type="number" step="0.01" name="rate[]" class="form-control rate-input" value="0">
+                                                      <input type="number" step="any" name="rate[]" class="form-control rate-input" value="0">
                                                   </div>
                                               </div>
                                               <div class="col-md-6">
@@ -286,7 +286,7 @@
                                               <div class="col-md-12">
                                                   <div class="form-group">
                                                       <label>Amount (Qty × Rate × VAT %)</label>
-                                                      <input type="number" step="0.01" name="amount[]" class="form-control amount-input" value="0.00" readonly>
+                                                      <input type="number" step="any" name="amount[]" class="form-control amount-input" value="0.00" readonly>
                                                   </div>
                                               </div>
                                           </div>

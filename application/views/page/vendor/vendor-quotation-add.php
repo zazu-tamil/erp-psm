@@ -92,7 +92,7 @@
 
                         <!-- <div class="form-group col-md-4">
                             <label>Handling Charges</label>
-                            <input type="number" step="0.01" name="handling_charges" id="handling_charges"
+                            <input type="number" step="any" name="handling_charges" id="handling_charges"
                                 class="form-control" value="<?php echo set_value('handling_charges'); ?>"
                                 placeholder="0.00">
                         </div> -->

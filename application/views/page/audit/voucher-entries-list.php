@@ -184,14 +184,14 @@
                                     <!-- Debit -->
                                     <div class="form-group col-md-12" id="debit_div">
                                         <label>Debit</label>
-                                        <input type="number" step="0.01" name="debit" class="form-control" id="debit"
+                                        <input type="number" step="any" name="debit" class="form-control" id="debit"
                                             placeholder="0.00">
                                     </div>
 
                                     <!-- Credit -->
                                     <div class="form-group col-md-12" id="credit_div">
                                         <label>Credit</label>
-                                        <input type="number" step="0.01" name="credit" class="form-control" id="credit"
+                                        <input type="number" step="any" name="credit" class="form-control" id="credit"
                                             placeholder="0.00">
                                     </div>
 
@@ -276,14 +276,14 @@
                                     <!-- Debit -->
                                     <div class="form-group col-md-12" id="debit_div">
                                         <label>Debit</label>
-                                        <input type="number" step="0.01" name="debit" class="form-control" id="debit"
+                                        <input type="number" step="any" name="debit" class="form-control" id="debit"
                                             placeholder="0.00">
                                     </div>
 
                                     <!-- Credit -->
                                     <div class="form-group col-md-12" id="credit_div">
                                         <label>Credit</label>
-                                        <input type="number" step="0.01" name="credit" class="form-control" id="credit"
+                                        <input type="number" step="any" name="credit" class="form-control" id="credit"
                                             placeholder="0.00">
                                     </div>
 

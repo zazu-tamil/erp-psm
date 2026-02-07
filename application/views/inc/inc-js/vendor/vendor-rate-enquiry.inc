@@ -231,7 +231,7 @@ $(document).ready(function () {
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Quantity</label>
-                                        <input type="number" step="0.01" name="qty[]" class="form-control" value="${row.qty}" >
+                                        <input type="number" step="any" name="qty[]" class="form-control" value="${row.qty}" >
                                     </div>
                                 </div>
                             </div>
@@ -292,7 +292,7 @@ $(document).ready(function () {
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Quantity</label>
-                                        <input type="number" step="0.01" name="qty[]" class="form-control qty" value="" >
+                                        <input type="number" step="any" name="qty[]" class="form-control qty" value="" >
                                     </div>
                                 </div>
                             </div>

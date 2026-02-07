@@ -341,7 +341,7 @@
                     </td>
 
                     <td>
-                      <input type="number" step="0.01" name="qty[]"
+                      <input type="number" step="any" name="qty[]"
                              class="form-control qty-input"
                              value="${row.qty}" >
                     </td> 

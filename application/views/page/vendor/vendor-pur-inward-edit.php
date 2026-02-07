@@ -164,7 +164,7 @@
                                         </td>
 
                                         <td>
-                                            <input type="number" step="0.01" name="qty[<?php echo $index; ?>]"
+                                            <input type="number" step="any" name="qty[<?php echo $index; ?>]"
                                                 class="form-control qty-input" value="<?php echo $item['qty']; ?>">
                                         </td> 
 

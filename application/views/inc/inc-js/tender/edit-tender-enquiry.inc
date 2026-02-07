@@ -248,7 +248,7 @@
                          <input type="text"  name="uom[]" class="form-control" value="${item.uom}">
                     </div>
                     <div class="qty-block">
-                        <input type="number" step="0.01" name="qty[]" class="form-control" value="1">
+                        <input type="number" step="any" name="qty[]" class="form-control" value="1">
                     </div>
                     <div class="action-block">
                         <button type="button" class="remove-row"><i class="fa fa-trash"></i></button>
@@ -276,7 +276,7 @@
                 <input type="text" name="uom[]" class="form-control uom">
             </div>
             <div class="qty-block">
-                <input type="number" step="0.01" name="qty[]" class="form-control qty">
+                <input type="number" step="any" name="qty[]" class="form-control qty">
             </div>
             <div class="action-block">
                 <button type="button" class="remove-row"><i class="fa fa-trash"></i></button>

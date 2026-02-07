@@ -27,10 +27,10 @@
                     <?= form_dropdown('ledger_id[]', array('' => 'Select Ledger Account') + $ledger_accounts_list_opt, '', 'class="form-control ledger-select" required'); ?>
                 </td>
                 <td>
-                    <input type="number" step="0.01" name="debit[]" class="form-control debit" value="0.00">
+                    <input type="number" step="any" name="debit[]" class="form-control debit" value="0.00">
                 </td>
                 <td>
-                    <input type="number" step="0.01" name="credit[]" class="form-control credit" value="0.00">
+                    <input type="number" step="any" name="credit[]" class="form-control credit" value="0.00">
                 </td>
                 <td class="text-center">
                     <button type="button" class="btn btn-danger btn-sm removeRow">
@@ -170,10 +170,10 @@
                               </select>
                           </td>
                           <td>
-                              <input type="number" step="0.01" name="debit[]" class="form-control debit" value="${row.debit}">
+                              <input type="number" step="any" name="debit[]" class="form-control debit" value="${row.debit}">
                           </td>
                           <td>
-                              <input type="number" step="0.01" name="credit[]" class="form-control credit" value="${row.credit}">
+                              <input type="number" step="any" name="credit[]" class="form-control credit" value="${row.credit}">
                           </td>
                           <td class="text-center">
                               <button type="button" class="btn btn-danger btn-sm  btn_remove_entry_db" data-entry-id="${row.entry_id}">
@@ -205,10 +205,10 @@
               </select>
           </td>
           <td>
-              <input type="number" step="0.01" name="debit[]" class="form-control debit" value="0.00">
+              <input type="number" step="any" name="debit[]" class="form-control debit" value="0.00">
           </td>
           <td>
-              <input type="number" step="0.01" name="credit[]" class="form-control credit" value="0.00">
+              <input type="number" step="any" name="credit[]" class="form-control credit" value="0.00">
           </td>
           <td class="text-center">
               <button type="button" class="btn btn-danger btn-sm removeEditRow">

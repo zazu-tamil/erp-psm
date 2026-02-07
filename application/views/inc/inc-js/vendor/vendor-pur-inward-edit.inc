@@ -265,13 +265,13 @@
                     </td>
 
                     <td>
-                      <input type="number" step="0.01" name="qty[]"
+                      <input type="number" step="any" name="qty[]"
                              class="form-control qty-input"
                              value="${row.qty}" readonly>
                     </td>
 
                     <td>
-                      <input type="number" step="0.01" name="rate[]"
+                      <input type="number" step="any" name="rate[]"
                              class="form-control rate-input"
                              value="${row.rate || ""}">
                     </td>

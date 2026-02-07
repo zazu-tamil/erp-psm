@@ -365,28 +365,28 @@
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>Quantity</label>
-                            <input type="number" step="0.01" name="qty[]" class="form-control qty-input" value="${row.qty || 0}" readonly>
+                            <input type="number" step="any" name="qty[]" class="form-control qty-input" value="${row.qty || 0}" readonly>
                           </div>
                         </div>
 
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>Rate</label>
-                            <input type="number" step="0.01" name="rate[]" class="form-control rate-input" value="${row.rate || 0}">
+                            <input type="number" step="any" name="rate[]" class="form-control rate-input" value="${row.rate || 0}">
                           </div>
                         </div>
 
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>VAT %</label>
-                            <input type="number" step="0.01" name="gst[]" class="form-control vat-dropdown" value="${row.vat || 0}">                            
+                            <input type="number" step="any" name="gst[]" class="form-control vat-dropdown" value="${row.vat || 0}">                            
                           </div>
                         </div>
 
                         <div class="col-md-12">
                           <div class="form-group">
                             <label>Amount</label>
-                            <input type="number" step="0.01" name="amount[]" class="form-control amount-input" value="${row.amount}" readonly>
+                            <input type="number" step="any" name="amount[]" class="form-control amount-input" value="${row.amount}" readonly>
                           </div>
                         </div>
                       </div>
@@ -449,28 +449,28 @@
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>Quantity</label>
-                            <input type="number" step="0.01" name="qty[]" class="form-control qty-input" value="" readonly>
+                            <input type="number" step="any" name="qty[]" class="form-control qty-input" value="" readonly>
                           </div>
                         </div>
 
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>Rate</label>
-                            <input type="number" step="0.01" name="rate[]" class="form-control rate-input" value="">
+                            <input type="number" step="any" name="rate[]" class="form-control rate-input" value="">
                           </div>
                         </div>
 
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>VAT %</label>
-                            <input type="number" step="0.01" name="gst[]" class="form-control vat-dropdown" value="">                            
+                            <input type="number" step="any" name="gst[]" class="form-control vat-dropdown" value="">                            
                           </div>
                         </div>
 
                         <div class="col-md-12">
                           <div class="form-group">
                             <label>Amount</label>
-                            <input type="number" step="0.01" name="amount[]" class="form-control amount-input" value="" readonly>
+                            <input type="number" step="any" name="amount[]" class="form-control amount-input" value="" readonly>
                           </div>
                         </div>
                       </div>
