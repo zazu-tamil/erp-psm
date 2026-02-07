@@ -350,6 +350,7 @@
             $.each(res, function (i, row) {
 
               $('#tender_ref_no').val(row.enquiry_no) ; 
+              $('#quote_date').val(row.closing_date) ; 
               
               const hiddenFields = `
                 <input type="hidden" name="tender_enquiry_item_id[]" value="${row.tender_enquiry_item_id}"> 
@@ -455,7 +456,7 @@
       const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
 
       const amount = (qty * rate) + ((qty * rate) * gst / 100);
-      $row.find(".amount-input").val(amount.toFixed(2));
+      $row.find(".amount-input").val(amount.toFixed(3));
 
       calculateTotalAmount();
     });
@@ -465,7 +466,7 @@
       $(".amount-input").each(function () {
         total += parseFloat($(this).val()) || 0;
       });
-      $("#total_amount").text(total.toFixed(2));
+      $("#total_amount").text(total.toFixed(3));
     }
 
     /* ================================================================

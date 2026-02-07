@@ -32,7 +32,7 @@
       //alert(gst);
       const amount = (qty * rate) + (qty * rate * gst) / 100;
 
-      $row.find(".amount-input").val(amount.toFixed(2));
+      $row.find(".amount-input").val(amount.toFixed(3));
     }
 
     // --- Function: Total Calculation ---
@@ -49,7 +49,7 @@
 
       $("#total_amount")
         .fadeOut(100, function () {
-          $(this).text(total.toFixed(2));
+          $(this).text(total.toFixed(3));
         })
         .fadeIn(200);
     }
@@ -244,7 +244,7 @@
         let vatAmount  = (baseAmount * vat) / 100;
         let total      = baseAmount + vatAmount;
 
-        row.find(".amount").val(total.toFixed(2));
+        row.find(".amount").val(total.toFixed(3));
     }
 
 

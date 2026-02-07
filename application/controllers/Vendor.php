@@ -2976,6 +2976,7 @@ class Vendor extends CI_Controller
                         SELECT
                             a.tender_enquiry_item_id,  
                             b.enquiry_no,
+                             date_format(b.closing_date, '%Y-%m-%d') as closing_date,
                             a.item_code,
                             a.item_desc,
                             a.uom,
