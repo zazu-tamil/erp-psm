@@ -28,7 +28,7 @@
       font-size: 1.3rem;
       vertical-align: middle;
     }
-    #total_amount {
+    #total_amount , #total_amount_wo_tax{
       font-size: 1.4rem;
       font-weight: 700;
       margin-left: 5px;
@@ -254,8 +254,13 @@
                             <input type="number" step="any" name="gst[]" class="form-control vat-dropdown" value=""> 
                           </div>
                         </div>
-
-                        <div class="col-md-12">
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label>Amount WO Tax</label>
+                            <input type="number" step="any" name="amountwotx[]" class="form-control amountwotx" value="" readonly>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
                           <div class="form-group">
                             <label>Amount</label>
                             <input type="number" step="any" name="amount[]" class="form-control amount-input" value="0.00" readonly>
@@ -394,8 +399,13 @@
                             </select>
                           </div>
                         </div>
-
-                        <div class="col-md-12">
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label>Amount WO Tax</label>
+                            <input type="number" step="any" name="amountwotx[]" class="form-control amountwotx" value="" readonly>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
                           <div class="form-group">
                             <label>Amount</label>
                             <input type="number" step="any" name="amount[]" class="form-control amount-input" value="0.00" readonly>
@@ -412,7 +422,7 @@
             });
 
             // Add total row
-            $container.append(`
+           /* $container.append(`
               <div class="total-wrapper mt-4 mb-4">
                 <div class="total-box shadow-sm">
                   <h5 class="mb-0">
@@ -421,9 +431,29 @@
                     <span class="text-primary">₹ <span id="total_amount">0.00</span></span>
                   </h5>
                 </div>
-              </div>
-
-             
+              </div> 
+            `);*/
+            $container.append(`
+                    <div class="row"> 
+                        <div class="col-md-3 pull-right ">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount With Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3 pull-right">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount WO Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount_wo_tax">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div> 
+                    </div>
             `);
 
             // Calculate totals on load
@@ -448,17 +478,24 @@
       const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
 
       const amount = qty * rate * (1 + gst / 100);
-      $row.find(".amount-input").val(amount.toFixed(2));
+      $row.find(".amount-input").val(amount.toFixed(3));
+      $row.find(".amountwotx").val((qty * rate).toFixed(3));
 
       calculateTotalAmount();
     });
 
-    function calculateTotalAmount() {  
-      let total = 0;
+    function calculateTotalAmount() {
+      let total = 0;      
       $(".amount-input").each(function () {
         total += parseFloat($(this).val()) || 0;
       });
-      $("#total_amount").text(total.toFixed(2));
+      $("#total_amount").text(total.toFixed(3));
+
+      let total_wot = 0;
+      $(".amountwotx").each(function () {
+        total_wot += parseFloat($(this).val()) || 0;
+      });      
+      $("#total_amount_wo_tax").text(total_wot.toFixed(3));
     }
 
     calculateTotalAmount();

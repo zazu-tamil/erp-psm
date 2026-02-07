@@ -237,8 +237,15 @@
                                                        
                                                     </div>
                                                 </div>
-
-                                                <div class="col-md-12">
+                                                 <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Amount WO Tax</label>
+                                                        <input type="number" step="any" name="amount_wo_tax[]" class="form-control amountwotx"
+                                                            value="<?php echo number_format(($row['rate'] * $row['qty']), 3, '.', ''); ?>" readonly>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label>Amount</label>
                                                         <input type="number" step="any" name="amount[]" class="form-control amount-input"
@@ -262,14 +269,25 @@
 
                     <!-- Total Section -->
                      
-                   <div class="total-wrapper mt-4 mb-4">
-                        <div class="total-box shadow-sm">
-                            <h5 class="mb-0">
-                                <i class="fa fa-calculator text-success me-2"></i>
-                                <strong>Total Amount:</strong>
-                                <span class="text-primary"><span id="total_amount">0.00</span></span>
-                            </h5>
+                   <div class="row"> 
+                        <div class="col-md-3 pull-right ">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount With Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                </h5>
+                            </div>
                         </div>
+                        <div class="col-md-3 pull-right">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount WO Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount_wo_tax">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div> 
                     </div>
 
                 </fieldset>

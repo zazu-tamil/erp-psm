@@ -32,7 +32,7 @@
       font-size: 1.3rem;
       vertical-align: middle;
     }
-    #total_amount {
+    #total_amount , #total_amount_wo_tax {
       font-size: 1.4rem;
       font-weight: 700;
       margin-left: 5px;
@@ -328,6 +328,8 @@
             //console.log(res);
 
             $.each(res, function (i, row) {
+              let amtwotx = (row.qty * row.rate);
+
               const hiddenFields = `
                 <input type="hidden" name="tender_quotation_item_id[]" value="${row.tender_quotation_item_id}"> 
               `;
@@ -382,10 +384,15 @@
                             <input type="number" step="any" name="gst[]" class="form-control vat-dropdown" value="${row.vat || 0}">                            
                           </div>
                         </div>
-
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                           <div class="form-group">
-                            <label>Amount</label>
+                            <label>Amount WO Tax</label>
+                            <input type="number" step="any" name="amountwotx[]" class="form-control amountwotx" value="${amtwotx}" readonly>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label>Amount With Tax</label>
                             <input type="number" step="any" name="amount[]" class="form-control amount-input" value="${row.amount}" readonly>
                           </div>
                         </div>
@@ -466,10 +473,15 @@
                             <input type="number" step="any" name="gst[]" class="form-control vat-dropdown" value="">                            
                           </div>
                         </div>
-
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                           <div class="form-group">
-                            <label>Amount</label>
+                            <label>Amount WO Tax</label>
+                            <input type="number" step="any" name="amountwotx[]" class="form-control amountwotx" value="" readonly>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label>Amount With Tax</label>
                             <input type="number" step="any" name="amount[]" class="form-control amount-input" value="" readonly>
                           </div>
                         </div>
@@ -512,6 +524,7 @@
                   newRow.find(".qty-input").val(r.qty);
                   newRow.find(".vat-dropdown").val(r.vat);
                   newRow.find(".rate-input").val(r.rate);
+                  newRow.find(".amountwotx").val((r.rate  * r.qty));
                   newRow.find(".amount-input").val(r.amount);
 
                 
@@ -546,17 +559,24 @@
       const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
 
       const amount = qty * rate * (1 + gst / 100);
-      $row.find(".amount-input").val(amount.toFixed(2));
+      $row.find(".amount-input").val(amount.toFixed(3));
+      $row.find(".amountwotx").val((qty * rate).toFixed(3));
 
       calculateTotalAmount();
     });
 
     function calculateTotalAmount() {
-      let total = 0;
+      let total = 0;      
       $(".amount-input").each(function () {
         total += parseFloat($(this).val()) || 0;
       });
-      $("#total_amount").text(total.toFixed(2));
+      $("#total_amount").text(total.toFixed(3));
+
+      let total_wot = 0;
+      $(".amountwotx").each(function () {
+        total_wot += parseFloat($(this).val()) || 0;
+      });      
+      $("#total_amount_wo_tax").text(total_wot.toFixed(3));
     }
 
     /* ================================================================
