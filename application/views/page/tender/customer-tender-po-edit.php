@@ -187,7 +187,7 @@
                                         </div>
 
                                         <!-- Category + Item -->
-                                        <div class="col-md-3"> 
+                                        <div class="col-md-2"> 
                                             <div class="form-group">
                                                 <label>Item Code</label>
                                                 <input type="text" class="form-control item_code" name="item_code[]" value="<?php echo htmlspecialchars($row['item_code']); ?>" readonly>
@@ -195,7 +195,7 @@
                                         </div>
 
                                         <!-- Item Description -->
-                                        <div class="col-md-4">
+                                        <div class="col-md-5">
                                             <div class="form-group">
                                                 <label>Item Description</label>
                                                 <textarea name="item_desc[]" class="form-control item_desc" rows="3"><?php echo htmlspecialchars($row['item_desc']); ?></textarea>
