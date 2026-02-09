@@ -331,7 +331,7 @@ $(document).ready(function () {
         let gst_amount  = (base_amount * gst) / 100;
         let total       = base_amount + gst_amount;
 
-        row.find(".amount-input").val(total.toFixed(2));
+        row.find(".amount-input").val(total.toFixed(3));
     }
 
     function calculateTotal() {
@@ -339,7 +339,7 @@ $(document).ready(function () {
         $(".amount-input").each(function () {
             total += parseFloat($(this).val()) || 0;
         });
-        $("#total_amount").text(total.toFixed(2));
+        $("#total_amount").text(total.toFixed(3));
     }
 
     // Trigger recalculation on Rate or GST change

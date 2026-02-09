@@ -30,33 +30,28 @@
 
 
                     <div class="form-group col-md-3">
-                        <label for="srch_company_id">Company <span style="color:red;">*</span></label>
-                        <?php echo form_dropdown('srch_company_id',   $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control select2"'); ?>
-                    </div>
-
-                    <div class="form-group col-md-3">
                         <label for="srch_customer_id">Customer <span style="color:red;">*</span></label>
                         <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, set_value('srch_customer_id'), 'id="srch_customer_id" class="form-control select2" '); ?>
                     </div>
 
                     <div class="form-group col-md-3">
-                        <label for="srch_tender_enquiry_id">Tender Enquiry No <span style="color:red;">*</span></label>
-                        <?php echo form_dropdown(
-                            'srch_tender_enquiry_id',
-                            ['' => 'All'] + $tender_enquiry_opt,
-                            set_value('srch_tender_enquiry_id'),
-                            'id="srch_tender_enquiry_id" class="form-control select2"'
-                        ); ?>
+                        <label for="srch_tender_enquiry_id">Customer RFQ No</label>
+                        <input type="text" name="srch_tender_enquiry_id" id="srch_tender_enquiry_id"
+                            class="form-control"
+                            value="<?php echo set_value('srch_tender_enquiry_id', $srch_tender_enquiry_id); ?>"
+                            placeholder="Search the customer rfq no">
                     </div>
-
                     <div class="form-group col-md-3">
-                        <label for="srch_tender_po_id">Tender PO No <span style="color:red;">*</span></label>
-                        <?php echo form_dropdown(
-                            'srch_tender_po_id',
-                            ['' => 'All'] + $tender_po_opt,
-                            set_value('srch_tender_po_id'),
-                            'id="srch_tender_po_id" class="form-control select2"'
-                        ); ?>
+                        <label for="srch_enquiry_no">Our Enquiry No</label>
+                        <input type="text" name="srch_enquiry_no" id="srch_enquiry_no" class="form-control"
+                            value="<?php echo set_value('srch_enquiry_no', $srch_enquiry_no); ?>"
+                            placeholder="Search the our enquiry no">
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="srch_tender_invoice_no">Invoice No</label>
+                        <input type="text" name="srch_tender_invoice_no" id="srch_tender_invoice_no" class="form-control"
+                            value="<?php echo set_value('srch_tender_invoice_no', $srch_tender_invoice_no); ?>"
+                            placeholder="Search the invoice no">
                     </div>
                     <div class="form-group col-md-3 text-left">
                         <br>
@@ -88,8 +83,8 @@
                         <th>Invoice Date</th>
                         <th>Company / RFQ No</th>
                         <th>Customer</th>
-                        <th>Po No</th>
-                         <th>Invoice Status</th>
+                        <th>Invoice No</th>
+                        <th>Invoice Status</th>
                         <th class="text-center" colspan="3">Action</th>
                     </tr>
                 </thead>
@@ -104,7 +99,7 @@
                                 </td>
                                 <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
                                 <td><strong><?php echo htmlspecialchars($row['invoice_no']); ?></strong></td>
- 
+
                                 <?php
                                 $status = $row['invoice_status'];
 
@@ -125,8 +120,8 @@
 
                                 <!-- PRINT / VIEW -->
                                 <td class="text-center">
-                                    <a href="<?php echo site_url('tender-po-invoice-print/' . $row['tender_enq_invoice_id']); ?>" target="_blank"
-                                        class="btn btn-info btn-xs" title="Print / View">
+                                    <a href="<?php echo site_url('tender-po-invoice-print/' . $row['tender_enq_invoice_id']); ?>"
+                                        target="_blank" class="btn btn-info btn-xs" title="Print / View">
                                         <i class="fa fa-print"></i>
                                     </a>
                                 </td>
@@ -139,8 +134,8 @@
                                 </td>
                                 <!-- DELETE -->
                                 <td class="text-center">
-                                    <button value="<?php echo $row['tender_enq_invoice_id']; ?>" class="del_record btn btn-danger btn-xs"
-                                        title="Delete">
+                                    <button value="<?php echo $row['tender_enq_invoice_id']; ?>"
+                                        class="del_record btn btn-danger btn-xs" title="Delete">
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </td>
@@ -167,3 +162,76 @@
 </section>
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script>
+    jQuery(function ($) {
+        $("#srch_enquiry_no").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
+                    type: "POST",
+                    data: { search: request.term },
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data);
+                        response(data);
+                    },
+                });
+            },
+
+            minLength: 1,
+
+            select: function (event, ui) {
+                console.log(ui);
+                // $("#srch_company_id").val(ui.item.company_id);
+                // $("#srch_customer_id").val(ui.item.customer_id).change();
+            },
+        });
+
+        $("#srch_tender_enquiry_id").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "<?php echo base_url('tender/tender_srch_rfq_no'); ?>",
+                    type: "POST",
+                    data: { search: request.term },
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data);
+                        response(data);
+                    },
+                });
+            },
+
+            minLength: 1,
+
+            select: function (event, ui) {
+                console.log(ui);
+                // $("#srch_company_id").val(ui.item.company_id);
+                // $("#srch_customer_id").val(ui.item.customer_id).change();
+            },
+        });
+        $("#srch_tender_invoice_no").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "<?php echo base_url('tender/srch_tender_invoice_no'); ?>",
+                    type: "POST",
+                    data: { search: request.term },
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data);
+                        response(data);
+                    },
+                });
+            },
+
+            minLength: 1,
+
+            select: function (event, ui) {
+                console.log(ui);
+                // $("#srch_company_id").val(ui.item.company_id);
+                // $("#srch_customer_id").val(ui.item.customer_id).change();
+            },
+        });
+    });
+</script>

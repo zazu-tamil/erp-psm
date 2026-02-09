@@ -78,7 +78,7 @@
                                 value="<?php echo htmlspecialchars($header['delivery_date']); ?>">
                         </div>
 
-                           <div class="col-md-4">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label for="currency_id">Currency</label>
                                 <?php 

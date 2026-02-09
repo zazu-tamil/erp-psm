@@ -345,3 +345,9 @@ ALTER TABLE `currencies_info`
 
 	ALTER TABLE `vendor_po_info`
 	ADD COLUMN `currency_id` INT(11) NULL DEFAULT NULL AFTER `vendor_contact_person_id`;
+
+
+
+	09-02-2026
+
+	ALTER TABLE `tender_enq_invoice_info` ADD `currency_id` INT NULL AFTER `tender_po_id`;

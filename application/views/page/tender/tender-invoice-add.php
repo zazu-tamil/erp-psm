@@ -34,7 +34,7 @@
                     <div class="row">
                         <div class="form-group col-md-3">
                             <label for="srch_company_id">Company <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_company_id',   $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
+                            <?php echo form_dropdown('srch_company_id', $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
                         </div>
 
                         <div class="form-group col-md-3">
@@ -67,6 +67,20 @@
                             <label>Invoice Date</label>
                             <input type="date" name="invoice_date" id="invoice_date" class="form-control"
                                 value="<?php echo set_value('invoice_date', date('Y-m-d')); ?>">
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="currency_id">Currency</label>
+                                <?php
+                                echo form_dropdown(
+                                    'currency_id',
+                                    ['' => 'Select Currency'] + $currency_opt,
+                                    set_value('currency_id', $default_currency_id),
+                                    'id="currency_id" class="form-control" required'
+                                );
+                                ?>
+                            </div>
                         </div>
 
                         <div class="form-group col-md-3">
@@ -148,4 +162,3 @@
 </section>
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
-

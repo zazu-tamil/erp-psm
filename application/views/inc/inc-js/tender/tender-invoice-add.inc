@@ -481,8 +481,8 @@
       const gst_amt = (base * gst) / 100;
       const total = base + gst_amt;
 
-      $row.find(".gst-amount-input").val(gst_amt.toFixed(2));
-      $row.find(".amount-input").val(total.toFixed(2));
+      $row.find(".gst-amount-input").val(gst_amt.toFixed(3));
+      $row.find(".amount-input").val(total.toFixed(3));
     }
 
     /* ===============================
@@ -499,11 +499,11 @@
         }
       });
 
-      $("#total_amount_display").text(total_amount.toFixed(2));
-      $("#total_amount").val(total_amount.toFixed(2));
+      $("#total_amount_display").text(total_amount.toFixed(3));
+      $("#total_amount").val(total_amount.toFixed(3));
 
-      $("#total_gst_amount_display").text(total_gst.toFixed(2));
-      $("#total_gst_amount").val(total_gst.toFixed(2));
+      $("#total_gst_amount_display").text(total_gst.toFixed(3));
+      $("#total_gst_amount").val(total_gst.toFixed(3));
     }
 
     /* ===============================

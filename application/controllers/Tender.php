@@ -2732,6 +2732,7 @@ class Tender extends CI_Controller
                 'customer_id' => $this->input->post('srch_customer_id'),
                 'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
                 'tender_po_id' => $this->input->post('srch_tender_po_id'),
+                'currency_id' => $this->input->post('currency_id'),
                 'invoice_no' => $this->input->post('invoice_no'),
                 'invoice_date' => $this->input->post('invoice_date'),
                 'invoice_status' => $this->input->post('invoice_status'),
@@ -2818,6 +2819,24 @@ class Tender extends CI_Controller
             $data['gst_opt'][$row['gst_id']] = $row['gst_percentage'];
         }
 
+        $data['default_currency_id'] = '';
+
+        $sql = "
+            SELECT currency_id, currency_code
+            FROM currencies_info
+            WHERE status = 'Active'
+            ORDER BY currency_name ASC
+        ";
+        $query = $this->db->query($sql);
+
+        foreach ($query->result_array() as $row) {
+            $data['currency_opt'][$row['currency_id']] = $row['currency_code'];
+
+            if ($row['currency_code'] === 'BHD') {
+                $data['default_currency_id'] = $row['currency_id'];
+            }
+        }
+
         $this->load->view('page/tender/tender-invoice-add', $data);
     }
 
@@ -2896,12 +2915,46 @@ class Tender extends CI_Controller
             $where .= " AND a.tender_po_id = '" . $this->db->escape_str($srch_tender_po_id) . "'";
         }
 
-        $this->db->from('tender_enq_invoice_info as a');
+
+        if ($this->input->post('srch_tender_invoice_no') !== null) {
+            $data['srch_tender_invoice_no'] = $srch_tender_invoice_no = $this->input->post('srch_tender_invoice_no');
+            $this->session->set_userdata('srch_tender_invoice_no', $srch_tender_invoice_no);
+        } elseif ($this->session->userdata('srch_tender_invoice_no')) {
+            $data['srch_tender_invoice_no'] = $srch_tender_invoice_no = $this->session->userdata('srch_tender_invoice_no');
+        } else {
+            $data['srch_tender_invoice_no'] = $srch_tender_invoice_no = '';
+        }
+        if (!empty($srch_tender_invoice_no)) {
+            $where .= " AND a.invoice_no = '" . $this->db->escape_str($srch_tender_invoice_no) . "'";
+        }
+
+
+
+        if ($this->input->post('srch_enquiry_no') !== null) {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->input->post('srch_enquiry_no');
+            $this->session->set_userdata('srch_enquiry_no', $srch_enquiry_no);
+        } elseif ($this->session->userdata('srch_enquiry_no')) {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->session->userdata('srch_enquiry_no');
+        } else {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = '';
+        }
+        $where_or = "";
+        if (!empty($srch_enquiry_no)) {
+            $where_or .= "( concat(ifnull(b.company_code,'') , '/', ifnull(d.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(d.customer_sno,''),  '/' , DATE_FORMAT(d.enquiry_date,'%Y') ) like '%" . $this->db->escape_str($srch_enquiry_no) . "%' ) ";
+        }
+
+        if (!empty($where_or)) {
+            $where .= " AND ( " . $where_or . " ) ";
+        }
+
+        $this->db->from('tender_enq_invoice_info a');
+        $this->db->join('company_info b', 'a.company_id = b.company_id AND b.status = "Active"', 'left');
+        $this->db->join('customer_info c', 'a.customer_id = c.customer_id AND c.status = "Active"', 'left');
+        $this->db->join('tender_enquiry_info d', 'a.tender_enquiry_id = d.tender_enquiry_id AND d.status = "Active"', 'left');
         $this->db->where('a.status !=', 'Delete');
         $this->db->where($where);
-        $this->db->where("DATE(a.invoice_date) BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'");
-        $data['total_records'] = $this->db->count_all_results();
 
+        $data['total_records'] = $this->db->count_all_results();
 
         // === PAGINATION ===
         $data['sno'] = $this->uri->segment(2, 0);
@@ -2941,7 +2994,8 @@ class Tender extends CI_Controller
                c.customer_name 
             FROM tender_enq_invoice_info a
             LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status = 'Active'
-            LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active' 
+            LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
+            LEFT JOIN tender_enquiry_info d ON a.tender_enquiry_id = d.tender_enquiry_id AND d.status = 'Active'
             WHERE a.status != 'Delete'
             AND a.invoice_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "' 
             AND $where
@@ -3041,6 +3095,7 @@ class Tender extends CI_Controller
                 'customer_id' => $this->input->post('srch_customer_id'),
                 'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
                 'tender_po_id' => $this->input->post('srch_tender_po_id'),
+                'currency_id' => $this->input->post('currency_id'),
                 'invoice_no' => $this->input->post('invoice_no'),
                 'invoice_date' => $this->input->post('invoice_date'),
                 'invoice_status' => $this->input->post('invoice_status'),
@@ -3179,7 +3234,16 @@ class Tender extends CI_Controller
         foreach ($query->result_array() as $row) {
             $data['company_opt'][$row['company_id']] = $row['company_name'];
         }
-
+        $data['currency_opt'] = [];
+        $query = $this->db->query("
+          SELECT currency_id, currency_code
+            FROM currencies_info
+            WHERE status = 'Active'
+            ORDER BY currency_name ASC
+            ");
+        foreach ($query->result_array() as $row) {
+            $data['currency_opt'][$row['currency_id']] = $row['currency_code'];
+        }
         $sql = "
             SELECT 
             a.tender_enquiry_id, 
@@ -3271,7 +3335,8 @@ class Tender extends CI_Controller
             ci.company_name AS our_company,
             te.enquiry_no AS tender_enquiry_no,
             tei.invoice_no,
-            ci.ltr_header_img
+            ci.ltr_header_img,
+            cur.decimal_point
         FROM
             tender_enq_invoice_info as  tei
         LEFT JOIN customer_info c ON
@@ -3280,6 +3345,7 @@ class Tender extends CI_Controller
             tei.company_id = ci.company_id AND ci.status = 'Active'
         LEFT JOIN tender_enquiry_info te ON
             tei.tender_enquiry_id = te.tender_enquiry_id AND te.status = 'Active'
+        LEFT JOIN currencies_info as cur ON tei.currency_id = cur.currency_id and cur.status = 'Active'
         WHERE
             tei.tender_enq_invoice_id = ? AND tei.status != 'Delete'
         ";
@@ -3704,7 +3770,7 @@ class Tender extends CI_Controller
             $data['srch_from_date'] = $srch_from_date = date('Y-m-d');
             $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
         }
-  
+
         if ($this->input->post('srch_customer_id') !== null) {
             $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
             $this->session->set_userdata('srch_customer_id', $srch_customer_id);
@@ -3717,7 +3783,7 @@ class Tender extends CI_Controller
         if (!empty($srch_customer_id)) {
             $where .= " AND a.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
         }
-  
+
         if ($this->input->post('srch_enquiry_no') !== null) {
             $data['srch_enquiry_no'] = $srch_enquiry_no = $this->input->post('srch_enquiry_no');
             $this->session->set_userdata('srch_enquiry_no', $srch_enquiry_no);
@@ -4700,6 +4766,35 @@ class Tender extends CI_Controller
                 'value' => $row->enquiry_no,   // value inserted in input
                 'tender_enquiry_id' => $row->tender_enquiry_id,
                 'enquiry_no' => $row->enquiry_no
+            ];
+        }
+
+        echo json_encode($result);
+    }
+    public function srch_tender_invoice_no()
+    {
+        $term = $this->input->post('search');
+
+        $sql = "
+            SELECT   
+                a.tender_enq_invoice_id ,
+                a.invoice_no
+            FROM tender_enq_invoice_info AS a 
+            WHERE a.status = 'Active'
+            AND a.invoice_no LIKE '%" . $this->db->escape_like_str($term) . "%'
+            ORDER BY a.tender_enq_invoice_id  DESC, a.invoice_no ASC 
+        ";
+
+        $query = $this->db->query($sql);
+
+        $result = [];
+
+        foreach ($query->result() as $row) {
+            $result[] = [
+                'label' => $row->invoice_no,   // text shown in dropdown
+                'value' => $row->invoice_no,   // value inserted in input
+                'tender_enq_invoice_id' => $row->tender_enq_invoice_id,
+                'invoice_no' => $row->invoice_no
             ];
         }
 

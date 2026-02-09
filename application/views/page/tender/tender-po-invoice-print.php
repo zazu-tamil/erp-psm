@@ -386,6 +386,10 @@ echo '</pre>';
                     
                 </div>
             </div>
+
+            <?php 
+                    $decimal_point = $record['decimal_point'];
+            ?>
         </div>
 
         <!-- Items Table -->
@@ -423,10 +427,10 @@ echo '</pre>';
                             <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?: $item['item_uom'] ?: '-'); ?>
                             </td>
                             <td class="text-center"><?php echo number_format($item['qty'], 2); ?></td>
-                            <td class="text-right"><?php echo number_format($item['rate'], 2); ?></td>
-                            <td class="text-center"><?php echo number_format($item['gst'], 2); ?>%</td>
-                            <td class="text-right"><?php echo number_format($item['gst_amount'], 2); ?></td>
-                            <td class="text-right"><strong><?php echo number_format($item['amount'], 2); ?></strong></td>
+                            <td class="text-right"><?php echo number_format($item['rate'], $decimal_point); ?></td>
+                            <td class="text-center"><?php echo number_format($item['gst'], 2); ?></td>
+                            <td class="text-right"><?php echo number_format($item['gst_amount'], $decimal_point); ?></td>
+                            <td class="text-right"><strong><?php echo number_format($item['amount'], $decimal_point); ?></strong></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -438,11 +442,11 @@ echo '</pre>';
             <tfoot>
                 <!-- <tr>
                     <th colspan="7" class="text-right">Transport, Packing & Courier</th>
-                    <th class="text-right"><?php echo number_format($record['handling_charges'] ?? 0, 2); ?></th>
+                    <th class="text-right"><?php echo number_format($record['handling_charges'] ?? 0, $decimal_point); ?></th>
                 </tr> -->
                 <tr class="grand-total">
                     <th colspan="7" class="text-right">GRAND TOTAL</th>
-                    <th class="text-right"><?php echo number_format($final_total, 2); ?></th>
+                    <th class="text-right"><?php echo number_format($final_total, $decimal_point); ?></th>
                 </tr>
             </tfoot>
         </table>

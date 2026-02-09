@@ -31,23 +31,25 @@
                         <div class="form-group col-md-3">
                             <label for="srch_company_id">Company <span style="color:red;">*</span></label>
                             <?php echo form_dropdown('srch_company_id', ['' => 'Select Company'] + $company_opt, set_value('srch_company_id', $header['company_id']), 'id="srch_company_id" class="form-control" required disabled'); ?>
-                            <input type="hidden" name="srch_company_id" id="srch_company_id" value="<?php echo $header['company_id']; ?>">
+                            <input type="hidden" name="srch_company_id" id="srch_company_id"
+                                value="<?php echo $header['company_id']; ?>">
                         </div>
 
                         <div class="form-group col-md-3">
                             <label for="srch_customer_id">Customer <span style="color:red;">*</span></label>
                             <?php echo form_dropdown('srch_customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('srch_customer_id', $header['customer_id']), 'id="srch_customer_id" class="form-control" required     disabled'); ?>
-                             <input type="hidden" name="srch_customer_id" id="srch_customer_id"
+                            <input type="hidden" name="srch_customer_id" id="srch_customer_id"
                                 value="<?php echo $header['customer_id']; ?>">
                         </div>
 
-                        
+
                         <div class="form-group col-md-3">
-                            <label for="srch_tender_enquiry_id">Tender Enquiry No <span style="color:red;">*</span></label>
+                            <label for="srch_tender_enquiry_id">Tender Enquiry No <span
+                                    style="color:red;">*</span></label>
                             <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select Customer'] + $tender_enquiry_opt, set_value('srch_tender_enquiry_id', $header['tender_enquiry_id']), 'id="srch_tender_enquiry_id" class="form-control" required disabled'); ?>
-                        </div> 
-                          <input type="hidden" name="srch_tender_enquiry_id" id="tender_enquiry_id"
-                                value="<?php echo $header['tender_enquiry_id']; ?>">
+                        </div>
+                        <input type="hidden" name="srch_tender_enquiry_id" id="tender_enquiry_id"
+                            value="<?php echo $header['tender_enquiry_id']; ?>">
 
                         <!-- <div class="form-group col-md-3">
                             <label for="srch_tender_enquiry_id">Tender Enquiry No <span
@@ -83,6 +85,19 @@
                             <input type="text" name="invoice_no" id="invoice_no" class="form-control"
                                 value="<?php echo set_value('invoice_no', $header['invoice_no']); ?>"
                                 placeholder="Enter your invoice date">
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="currency_id">Currency</label>   
+                                <?php
+                                echo form_dropdown(
+                                    'currency_id',
+                                    ['' => ' Currency'] + $currency_opt,
+                                    set_value('currency_id', $header['currency_id']),
+                                    'id="currency_id" class="form-control" required'
+                                );
+                                ?>
+                            </div>
                         </div>
 
                         <div class="form-group col-md-3">
@@ -167,7 +182,7 @@
 
                                         <td>
                                             <input type="number" step="any" name="rate[<?php echo $index; ?>]"
-                                                class="form-control rate-input" value="<?php echo $item['rate']; ?>">
+                                                class="form-control rate-input" value="<?php echo number_format($item[' '], 3); ?>">
                                         </td>
 
                                         <td>
