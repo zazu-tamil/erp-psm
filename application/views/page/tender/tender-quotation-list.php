@@ -33,33 +33,39 @@
                             <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control select2" '); ?>
                         </div>
                     </div>
-
                 </div>
                 <div class="row">
-                    <div class="form-group col-md-4">
+                    <div class="col-md-12 text-center">
+                        <label for="">OR</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-3">
                         <label for="srch_tender_enquiry_id">Customer RFQ No</label>
                         <input type="text" name="srch_tender_enquiry_id" id="srch_tender_enquiry_id"
                             class="form-control"
                             value="<?php echo set_value('srch_tender_enquiry_id', $srch_tender_enquiry_id); ?>"
-                            placeholder="Search the customer rfq no">
+                            placeholder="Search the Customer RFQ No">
                     </div>
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-3">
                         <label for="srch_enquiry_no">Our Enquiry No</label>
                         <input type="text" name="srch_enquiry_no" id="srch_enquiry_no" class="form-control"
                             value="<?php echo set_value('srch_enquiry_no', $srch_enquiry_no); ?>"
                             placeholder="Search the our enquiry no">
                     </div>
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-3">
                         <label for="srch_quotation_no_id">Tender Quotation No</label>
                         <input type="text" name="srch_quotation_no_id" id="srch_quotation_no_id" class="form-control"
                             value="<?php echo set_value('srch_quotation_no_id', $srch_quotation_no_id); ?>"
                             placeholder="Search the our quotation no">
                     </div>
-                </div>
-                <div class="row">
-                    <div class="form-group col-md-12">
+                    <div class="form-group col-md-3">
+                        <br>
                         <button type="submit" class="btn btn-success"><i class="fa fa-search"></i> Show</button>
                     </div>
+                </div>
+                <div class="row">
+                    
                 </div>
             </form>
         </div>
@@ -92,16 +98,16 @@
                 </thead>
                 <tbody>
                     <?php if (!empty($record_list)): ?>
-                        <?php foreach ($record_list as $j => $row): ?>
-                            <tr>
-                                <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
-                                <td><strong><?php echo date('d-m-Y', strtotime($row['quote_date'])); ?></strong></td>
-                                <td><?php echo $row['company_name']; ?><br>
-                                    <span class="label label-success"><?php echo $row['tender_details']; ?></span>
-                                </td>
-                                <td><?php echo htmlspecialchars($row['customer_name']); ?></td>
-                                <td><?php echo htmlspecialchars($row['quotation_no']); ?></td>
-                                <?php
+                    <?php foreach ($record_list as $j => $row): ?>
+                    <tr>
+                        <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
+                        <td><strong><?php echo date('d-m-Y', strtotime($row['quote_date'])); ?></strong></td>
+                        <td><?php echo $row['company_name']; ?><br>
+                            <span class="label label-success"><?php echo $row['tender_details']; ?></span>
+                        </td>
+                        <td><?php echo htmlspecialchars($row['customer_name']); ?></td>
+                        <td><?php echo htmlspecialchars($row['quotation_no']); ?></td>
+                        <?php
                                 $status = $row['quotation_status'];
 
                                 $badge_colors = [
@@ -114,45 +120,45 @@
 
                                 $color = isset($badge_colors[$status]) ? $badge_colors[$status] : 'default';
                                 ?>
-                                <td>
-                                    <span class="label label-<?php echo $color; ?>">
-                                        <?php echo $status; ?>
-                                    </span>
-                                </td>
+                        <td>
+                            <span class="label label-<?php echo $color; ?>">
+                                <?php echo $status; ?>
+                            </span>
+                        </td>
 
 
 
-                                <!-- PRINT -->
-                                <td class="text-center">
-                                    <a href="<?php echo site_url('tender-quotation-print/' . $row['tender_quotation_id']); ?>"
-                                        target="_blank" class="btn btn-info btn-xs" title="Print">
-                                        <i class="fa fa-print"></i>
-                                    </a>
-                                </td>
+                        <!-- PRINT -->
+                        <td class="text-center">
+                            <a href="<?php echo site_url('tender-quotation-print/' . $row['tender_quotation_id']); ?>"
+                                target="_blank" class="btn btn-info btn-xs" title="Print">
+                                <i class="fa fa-print"></i>
+                            </a>
+                        </td>
 
-                                <!-- EDIT -->
-                                <td class="text-center">
-                                    <a href="<?php echo site_url('tender-quotation-edit/' . $row['tender_quotation_id']); ?>"
-                                        class="btn btn-primary btn-xs" title="Edit">
-                                        <i class="fa fa-edit"></i>
-                                    </a>
-                                </td>
+                        <!-- EDIT -->
+                        <td class="text-center">
+                            <a href="<?php echo site_url('tender-quotation-edit/' . $row['tender_quotation_id']); ?>"
+                                class="btn btn-primary btn-xs" title="Edit">
+                                <i class="fa fa-edit"></i>
+                            </a>
+                        </td>
 
 
 
-                                <!-- DELETE -->
-                                <td class="text-center">
-                                    <button value="<?php echo $row['tender_quotation_id']; ?>"
-                                        class="del_record btn btn-danger btn-xs" title="Delete">
-                                        <i class="fa fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
+                        <!-- DELETE -->
+                        <td class="text-center">
+                            <button value="<?php echo $row['tender_quotation_id']; ?>"
+                                class="del_record btn btn-danger btn-xs" title="Delete">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
                     <?php else: ?>
-                        <tr>
-                            <td colspan="11" class="text-center text-danger">No records found.</td>
-                        </tr>
+                    <tr>
+                        <td colspan="11" class="text-center text-danger">No records found.</td>
+                    </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
