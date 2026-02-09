@@ -3755,7 +3755,7 @@ class Tender extends CI_Controller
             $data['srch_tender_dc_no'] = $srch_tender_dc_no = '';
         }
         if (!empty($srch_tender_dc_no)) {
-            $where .= " AND a.tender_dc_no = '" . $this->db->escape_str($srch_tender_dc_no) . "'";
+            $where .= " AND a.tender_dc_id = '" . $this->db->escape_str($srch_tender_dc_no) . "'";
         }
 
 
@@ -4759,6 +4759,35 @@ class Tender extends CI_Controller
                 'value' => $row->customer_po_no,   // value filled in input
                 'tender_po_id' => $row->tender_po_id, // value filled in input
                 'customer_po_no' => $row->customer_po_no
+            ];
+        }
+
+        echo json_encode($result);
+    }
+    public function srch_tender_dc_no()
+    {
+        $term = $this->input->post('search');
+
+        $sql = "
+            SELECT   
+                a.tender_dc_id ,
+                a.dc_no
+            FROM  tender_dc_info AS a
+            WHERE a.status = 'Active'
+            AND a.dc_no LIKE '%" . $this->db->escape_like_str($term) . "%'           
+            ORDER BY a.tender_dc_id   DESC, a.dc_no ASC   
+        ";
+
+        $query = $this->db->query($sql);
+
+        $result = [];
+
+        foreach ($query->result() as $row) {
+            $result[] = [
+                'label' => $row->dc_no,   // text shown in dropdown
+                'value' => $row->dc_no,   // value filled in input
+                'tender_dc_id' => $row->tender_dc_id, // value filled in input
+                'dc_no' => $row->dc_no
             ];
         }
 
