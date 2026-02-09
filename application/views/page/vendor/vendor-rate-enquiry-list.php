@@ -35,14 +35,22 @@
                         </div>
                     </div>
                     <div class="form-group col-md-3">
-                        <label>Customer Code</label>
-                        <?php echo form_dropdown('srch_customer_code', ['' => 'Select Customer Code'] + $customer_code_opt, set_value('srch_customer_code', $srch_customer_code), 'id="srch_customer_code" class="form-control select2" style:"width:100%"'); ?>
+                        <label for="srch_vendor_rfq_no">Vendor RFQ No</label>
+                        <input type="text" name="srch_vendor_rfq_no" id="srch_vendor_rfq_no" class="form-control"
+                            value="<?php echo set_value('srch_vendor_rfq_no', $srch_vendor_rfq_no); ?>"
+                            placeholder="Search the vendor rfq no">
                     </div>
+
+
                 </div>
                 <div class="row">
+
+
                     <div class="form-group col-md-3">
-                        <label for="srch_tender_enquiry_id">Tender RFQ No</label>
-                        <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'All'] + $tender_enquiry_opt, $srch_tender_enquiry_id, 'id="srch_tender_enquiry_id" class="form-control select2"'); ?>
+                        <label for="srch_enquiry_no">Our Enquiry No</label>
+                        <input type="text" name="srch_enquiry_no" id="srch_enquiry_no" class="form-control"
+                            value="<?php echo set_value('srch_enquiry_no', $srch_enquiry_no); ?>"
+                            placeholder="Search the our enquiry no">
                     </div>
 
                     <div class="form-group col-md-3">
@@ -80,12 +88,10 @@
                         <th>Enquiry Date</th>
                         <th>Company / RFQ No</th>
                         <th>Customer</th>
-                        <th>Customer Code</th>
                         <th>Vendor Enquiry No</th>
                         <th>Vendor Name</th>
                         <th>Enquiry Status </th>
                         <th>Status </th>
-                        <!-- <th>Opening Date</th> -->
                         <th>Closing Date</th>
                         <th class="text-center" colspan="3">Action</th>
                     </tr>
@@ -105,9 +111,9 @@
                                 <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['vendor_rate_enquiry_status'] ?? 'Prepared RFQ'); ?></td>
                                 <td><?php echo htmlspecialchars($row['status'] ?? '-'); ?></td>
-                                <!-- <td><?php echo $row['opening_date'] ? date('d-m-Y H:i', strtotime($row['opening_date'])) : '-'; ?> -->
-                                </td>
-                                <td><?php echo $row['closing_date'] ? date('d-m-Y H:i', strtotime($row['closing_date'])) : '-'; ?>
+
+                                <td>
+                                    <?php echo $row['closing_date'] ? date('d-m-Y H:i', strtotime($row['closing_date'])) : '-'; ?>
                                 </td>
 
 
@@ -218,4 +224,57 @@
             <?php endif; ?>
         <?php endif; ?>
     });
+</script>
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script>
+    jQuery(function ($) {
+        $("#srch_vendor_rfq_no").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "<?php echo base_url('vendor/vendor_srch_rfq_no'); ?>",
+                    type: "POST",
+                    data: { search: request.term },
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data);
+                        response(data);
+                    },
+                });
+            },
+
+            minLength: 1,
+
+            select: function (event, ui) {
+                console.log(ui);
+                // $("#srch_company_id").val(ui.item.company_id);
+                // $("#srch_customer_id").val(ui.item.customer_id).change();
+            },
+        });
+
+        $("#srch_enquiry_no").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
+                    type: "POST",
+                    data: { search: request.term },
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data);
+                        response(data);
+                    },
+                });
+            },
+
+            minLength: 1,
+
+            select: function (event, ui) {
+                console.log(ui);
+                // $("#srch_company_id").val(ui.item.company_id);
+                // $("#srch_customer_id").val(ui.item.customer_id).change();
+            },
+        });
+    });
+
 </script>

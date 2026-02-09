@@ -27,10 +27,7 @@
                         <input type="date" name="srch_to_date" id="srch_to_date" class="form-control"
                             value="<?php echo set_value('srch_to_date', $srch_to_date); ?>">
                     </div>
-                    <div class="form-group col-md-3">
-                        <label for="srch_company_id">Company <span style="color:red;">*</span></label>
-                        <?php echo form_dropdown('srch_company_id' , $company_opt, set_value('srch_company_id', $srch_company_id), 'id="srch_company_id" class="form-control select2"'); ?>
-                    </div>
+
 
                     <div class="form-group col-md-3">
                         <label for="srch_customer_id">Customer <span style="color:red;">*</span></label>
@@ -38,14 +35,31 @@
                     </div>
 
                     <div class="form-group col-md-3">
-                        <label for="srch_tender_enquiry_id">Tender Enquiry No <span style="color:red;">*</span></label>
-                        <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'All'] + $tender_enquiry_opt, set_value('srch_tender_enquiry_id', $srch_tender_enquiry_id), 'id="srch_tender_enquiry_id" class="form-control select2"'); ?>
+                        <label for="srch_vendor_rfq_no">Vendor RFQ No</label>
+                        <input type="text" name="srch_vendor_rfq_no" id="srch_vendor_rfq_no" class="form-control"
+                            value="<?php echo set_value('srch_vendor_rfq_no', $srch_vendor_rfq_no); ?>"
+                            placeholder="Search the vendor rfq no">
                     </div>
 
                     <div class="form-group col-md-3">
+                        <label for="srch_enquiry_no">Our Enquiry No</label>
+                        <input type="text" name="srch_enquiry_no" id="srch_enquiry_no" class="form-control"
+                            value="<?php echo set_value('srch_enquiry_no', $srch_enquiry_no); ?>"
+                            placeholder="Search the our enquiry no">
+                    </div>
+
+
+                    <div class="form-group col-md-3">
+                        <label for="srch_vendor_quotation_no">Vendor Quotation No</label>
+                        <input type="text" name="srch_vendor_quotation_no" id="srch_vendor_quotation_no" class="form-control"
+                            value="<?php echo set_value('srch_vendor_quotation_no', $srch_vendor_quotation_no); ?>"
+                            placeholder="Search the our quotation no">
+                    </div>
+
+                    <!-- <div class="form-group col-md-3">
                         <label>Quotation Status</label>
                         <?php echo form_dropdown('srch_quotation_status', ['' => 'All'] + $quotation_status_opt, set_value('srch_quotation_status', $srch_quotation_status), 'id="srch_quotation_status" class="form-control select2"'); ?>
-                    </div>
+                    </div> -->
                     <div class="form-group col-md-3 text-left">
                         <br>
                         <button type="submit" class="btn btn-success"><i class="fa fa-search"></i> Show</button>
@@ -111,7 +125,7 @@
                                     </span>
                                 </td>
                                 <!-- PRINT -->
-                                    <!-- <td class="text-center">
+                                <!-- <td class="text-center">
                                         <a href="<?php echo site_url('vendor-quotation-print/' . $row['vendor_quote_id']); ?>"
                                             class="btn btn-success btn-xs" title="Print" target="_blank">
                                             <i class="fa fa-print"></i>
@@ -154,3 +168,78 @@
 </section>
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script>
+    jQuery(function ($) {
+        $("#srch_vendor_rfq_no").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "<?php echo base_url('vendor/vendor_srch_rfq_no'); ?>",
+                    type: "POST",
+                    data: { search: request.term },
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data);
+                        response(data);
+                    },
+                });
+            },
+
+            minLength: 1,
+
+            select: function (event, ui) {
+                console.log(ui);
+                // $("#srch_company_id").val(ui.item.company_id);
+                // $("#srch_customer_id").val(ui.item.customer_id).change();
+            },
+        });
+
+        $("#srch_enquiry_no").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
+                    type: "POST",
+                    data: { search: request.term },
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data);
+                        response(data);
+                    },
+                });
+            },
+
+            minLength: 1,
+
+            select: function (event, ui) {
+                console.log(ui);
+                // $("#srch_company_id").val(ui.item.company_id);
+                // $("#srch_customer_id").val(ui.item.customer_id).change();
+            },
+        });
+        $("#srch_vendor_quotation_no").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "<?php echo base_url('vendor/srch_vendor_quotation_no'); ?>",
+                    type: "POST",
+                    data: { search: request.term },
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data);
+                        response(data);
+                    },
+                });
+            },
+
+            minLength: 1,
+
+            select: function (event, ui) {
+                console.log(ui);
+                // $("#srch_company_id").val(ui.item.company_id);
+                // $("#srch_customer_id").val(ui.item.customer_id).change();
+            },
+        });
+    });
+
+</script>

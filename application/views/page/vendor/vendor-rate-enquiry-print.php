@@ -378,10 +378,10 @@
                 <div class="info-cell right">
                     <div><span class="info-label">Date:</span>
                         <?php echo date('d-m-Y', strtotime($record['enquiry_date'])); ?></div>
-                    <!-- <div><span class="info-label">Enquiry No:</span>
-                        <?php echo htmlspecialchars($record['enquiry_no'] ?? 'N/A'); ?></div> -->
                     <div><span class="info-label">Enquiry No:</span>
                         <?php echo htmlspecialchars($record['enquiry_no'] ?? 'N/A'); ?></div>
+                    <div><span class="info-label">Tender Ref No:</span>
+                        <?php echo htmlspecialchars($record['tender_enquiry_no'] ?? 'N/A'); ?></div>
                 </div>
             </div>
         </div>
