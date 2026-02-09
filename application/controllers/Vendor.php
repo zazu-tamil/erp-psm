@@ -1124,14 +1124,28 @@ class Vendor extends CI_Controller
             $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['enquiry_no'];
         }
 
-        $sql = "SELECT vendor_quote_id, quote_no FROM vendor_quotation_info WHERE status = 'Active' ORDER BY quote_no ASC";
+
+        $sql = " 
+            SELECT vendor_quote_id, quote_no 
+            FROM vendor_quotation_info
+             WHERE status = 'Active' 
+             and vendor_id = " . $data['header']['vendor_id'] . "
+             and tender_enquiry_id = " . $data['header']['tender_enquiry_id'] . "
+             ORDER BY quote_no ASC
+        ";
         $query = $this->db->query($sql);
         $data['vendor_quote_opt'] = ['' => 'Select Enquiry No'];
         foreach ($query->result_array() as $row) {
             $data['vendor_quote_opt'][$row['vendor_quote_id']] = $row['quote_no'];
         }
 
-        $sql = "SELECT vendor_id, vendor_name FROM vendor_info WHERE status = 'Active' ORDER BY vendor_name ASC";
+
+        $sql = "
+            SELECT vendor_id, vendor_name 
+            FROM vendor_info
+            WHERE status = 'Active' 
+            ORDER BY vendor_name ASC
+        ";
         $query = $this->db->query($sql);
         $data['vendor_opt'] = ['' => 'Select Vendor'];
         foreach ($query->result_array() as $row) {
