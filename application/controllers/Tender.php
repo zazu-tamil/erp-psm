@@ -400,7 +400,7 @@ class Tender extends CI_Controller
             $data['brand_opt'][$row['brand_id']] = $row['brand_name'];
         }
         $data['tender_status_opt'] = ['' => 'Select Tender Status', 'Open' => 'Open', 'Quoted' => 'Quoted', 'Won' => 'Won', 'Lost' => 'Lost', 'On Hold' => 'On Hold'];
- 
+
 
 
 
@@ -423,7 +423,7 @@ class Tender extends CI_Controller
         $data['s_url'] = 'tender-enquiry-list';
         $data['title'] = 'Tender Enquiry List';
 
-        $where="1 = 1";
+        $where = "1 = 1";
 
         // Date Filter
 
@@ -497,7 +497,7 @@ class Tender extends CI_Controller
             $data['srch_customer_contact_id'] = $srch_customer_contact_id = $this->session->userdata('srch_customer_contact_id');
         } else {
             $data['srch_customer_contact_id'] = $srch_customer_contact_id = '';
-        }   
+        }
         if (!empty($srch_customer_contact_id)) {
             $where .= " AND a.customer_contact_id = '" . $this->db->escape_str($srch_customer_contact_id) . "'";
         }
@@ -516,13 +516,13 @@ class Tender extends CI_Controller
         }
         if (!empty($srch_customer_rfq_id)) {
             $where .= " AND a.tender_enquiry_id = '" . $this->db->escape_str($srch_customer_rfq_id) . "'";
-        }   
+        }
 
 
         // Customer RFQ Filter 
 
-         // Status Filter
-         if ($this->input->post('srch_status') !== null) {
+        // Status Filter
+        if ($this->input->post('srch_status') !== null) {
             $data['srch_status'] = $srch_status = $this->input->post('srch_status');
             $this->session->set_userdata('srch_status', $srch_status);
         } elseif ($this->session->userdata('srch_status')) {
@@ -545,20 +545,20 @@ class Tender extends CI_Controller
         } else {
             $data['srch_enquiry_no'] = $srch_enquiry_no = '';
         }
-        $where_or ="";
+        $where_or = "";
         if (!empty($srch_enquiry_no)) {
             $where_or .= "( concat(ifnull(b.company_code,'') , '/', ifnull(a.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(a.customer_sno,''),  '/' , DATE_FORMAT(a.enquiry_date,'%Y') ) like '%" . $this->db->escape_str($srch_enquiry_no) . "%' ) ";
         }
 
         if (!empty($where_or)) {
             $where .= " AND ( " . $where_or . " ) ";
-        }   
+        }
         // Enquiry Filter
 
         $this->db->from('tender_enquiry_info a');
         $this->db->join('company_info b', 'a.company_id = b.company_id AND b.status = "Active"', 'left');
         $this->db->join('customer_info c', 'a.customer_id = c.customer_id AND c.status = "Active"', 'left');
-        $this->db->where('a.status !=', 'Delete'); 
+        $this->db->where('a.status !=', 'Delete');
         $this->db->where($where);
         $data['total_records'] = $this->db->count_all_results();
 
@@ -587,7 +587,7 @@ class Tender extends CI_Controller
         $config['prev_link'] = 'Prev';
         $config['next_link'] = 'Next';
         $this->pagination->initialize($config);
-        $data['pagination'] = $this->pagination->create_links();    
+        $data['pagination'] = $this->pagination->create_links();
 
         $sql = "
            SELECT 
@@ -696,7 +696,7 @@ class Tender extends CI_Controller
         $data['status_opt'] = ['' => 'All', 'Active' => 'Active', 'Inactive' => 'Inactive'];
         $data['tender_status_opt'] = ['' => 'Select Tender Status', 'Open' => 'Open', 'Quoted' => 'Quoted', 'Won' => 'Won', 'Lost' => 'Lost', 'On Hold' => 'On Hold'];
 
-        
+
 
 
         $this->load->view('page/tender/tender-enquiry-list', $data);
@@ -801,7 +801,7 @@ class Tender extends CI_Controller
             $where .= " AND a.tender_enquiry_id = '" . $this->db->escape_str($srch_customer_rfq_id) . "'";
         }
 
-        
+
         // Enquiry Filter
 
         if ($this->input->post('srch_enquiry_no') !== null) {
@@ -1418,19 +1418,6 @@ class Tender extends CI_Controller
         }
 
         // Company Filter
-        if ($this->input->post('srch_company_id') !== null) {
-            $data['srch_company_id'] = $srch_company_id = $this->input->post('srch_company_id');
-            $this->session->set_userdata('srch_company_id', $srch_company_id);
-        } elseif ($this->session->userdata('srch_company_id')) {
-            $data['srch_company_id'] = $srch_company_id = $this->session->userdata('srch_company_id');
-        } else {
-            $data['srch_company_id'] = $srch_company_id = '';
-        }
-        if (!empty($srch_company_id)) {
-            $where .= " AND a.company_id = '" . $this->db->escape_str($srch_company_id) . "'";
-        }
-
-        // Customer Filter
         if ($this->input->post('srch_customer_id') !== null) {
             $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
             $this->session->set_userdata('srch_customer_id', $srch_customer_id);
@@ -1442,8 +1429,7 @@ class Tender extends CI_Controller
         if (!empty($srch_customer_id)) {
             $where .= " AND a.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
         }
-
-        // Tender Enquiry Filter
+        // Company Filter
         if ($this->input->post('srch_tender_enquiry_id') !== null) {
             $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = $this->input->post('srch_tender_enquiry_id');
             $this->session->set_userdata('srch_tender_enquiry_id', $srch_tender_enquiry_id);
@@ -1455,31 +1441,44 @@ class Tender extends CI_Controller
         if (!empty($srch_tender_enquiry_id)) {
             $where .= " AND a.tender_enquiry_id = '" . $this->db->escape_str($srch_tender_enquiry_id) . "'";
         }
-
-        // Status Filter
-        if ($this->input->post('srch_quotation_status') !== null) {
-            $data['srch_quotation_status'] = $srch_quotation_status = $this->input->post('srch_quotation_status');
-            $this->session->set_userdata('srch_quotation_status', $srch_quotation_status);
-        } elseif ($this->session->userdata('srch_quotation_status')) {
-            $data['srch_quotation_status'] = $srch_quotation_status = $this->session->userdata('srch_quotation_status');
+        // Company Filter
+        if ($this->input->post('srch_quotation_no_id') !== null) {
+            $data['srch_quotation_no_id'] = $srch_quotation_no_id = $this->input->post('srch_quotation_no_id');
+            $this->session->set_userdata('srch_quotation_no_id', $srch_quotation_no_id);
+        } elseif ($this->session->userdata('srch_quotation_no_id')) {
+            $data['srch_quotation_no_id'] = $srch_quotation_no_id = $this->session->userdata('srch_quotation_no_id');
         } else {
-            $data['srch_quotation_status'] = $srch_quotation_status = '';
+            $data['srch_quotation_no_id'] = $srch_quotation_no_id = '';
         }
-        if (!empty($srch_quotation_status) && $srch_quotation_status !== 'All') {
-            $where .= " AND a.quotation_status = '" . $this->db->escape_str($srch_quotation_status) . "'";
+        if (!empty($srch_quotation_no_id)) {
+            $where .= " AND a.quotation_no = '" . $this->db->escape_str($srch_quotation_no_id) . "'";
         }
 
-        // === COUNT TOTAL ===
-        $sql_count = "SELECT COUNT(*) as total FROM tender_quotation_info a WHERE a.status != 'Delete' AND $where";
-        $query_count = $this->db->query($sql_count);
-        $data['total_records'] = $query_count->row()->total;
+        
+        if ($this->input->post('srch_enquiry_no') !== null) {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->input->post('srch_enquiry_no');
+            $this->session->set_userdata('srch_enquiry_no', $srch_enquiry_no);
+        } elseif ($this->session->userdata('srch_enquiry_no')) {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->session->userdata('srch_enquiry_no');
+        } else {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = '';
+        }
+        $where_or = "";
+        if (!empty($srch_enquiry_no)) {
+            $where_or .= "( concat(ifnull(b.company_code,'') , '/', ifnull(d.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(d.customer_sno,''),  '/' , DATE_FORMAT(d.enquiry_date,'%Y') ) like '%" . $this->db->escape_str($srch_enquiry_no) . "%' ) ";
+        }
+        
+        if (!empty($where_or)) {
+            $where .= " AND ( " . $where_or . " ) ";
+        } 
 
-        $this->db->from('tender_quotation_info a');
+        $this->db->from('tender_quotation_info a');  
+        $this->db->join('company_info b', 'a.company_id = b.company_id AND b.status = "Active"', 'left');
+        $this->db->join('customer_info c', 'a.customer_id = c.customer_id AND c.status = "Active"', 'left');
+        $this->db->join('tender_enquiry_info d', 'a.tender_enquiry_id = d.tender_enquiry_id AND d.status = "Active"', 'left');
         $this->db->where('a.status !=', 'Delete');
         $this->db->where($where);
-        $this->db->where("DATE(a.quote_date) BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'");
-        $data['total_records'] = $this->db->count_all_results();
-
+        $data['total_records'] = $this->db->count_all_results(); 
         // === PAGINATION ===
         $data['sno'] = $this->uri->segment(2, 0);
         $this->load->library('pagination');
@@ -1511,7 +1510,7 @@ class Tender extends CI_Controller
 
         // === FETCH RECORDS ===
         $sql = "
-            SELECT 
+           SELECT 
                 a.tender_quotation_id,
                 a.quotation_no,
                 a.tender_ref_no,
@@ -1521,12 +1520,14 @@ class Tender extends CI_Controller
                 b.company_name,
                 a.quotation_status,
                 c.customer_name,
-                get_tender_info(a.tender_enquiry_id) as tender_details
+                concat(ifnull(b.company_code,'') , '/', ifnull(d.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(d.customer_sno,''),  '/' , DATE_FORMAT(d.enquiry_date,'%Y') ) as tender_details,
+                d.enquiry_no, 
+                d.customer_sno
             FROM tender_quotation_info a
             LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status = 'Active'
             LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
             LEFT JOIN tender_enquiry_info d ON a.tender_enquiry_id = d.tender_enquiry_id AND d.status = 'Active'
-            WHERE a.status != 'Delete' 
+            WHERE a.status != 'Delete'  
              AND a.quote_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "' 
             AND $where 
             ORDER BY a.tender_quotation_id DESC
@@ -1874,7 +1875,8 @@ class Tender extends CI_Controller
             ci.company_name AS our_company,
             te.enquiry_no AS tender_enquiry_no,
             tqi.quotation_no as tender_quotation_no,
-            ci.ltr_header_img
+            ci.ltr_header_img,
+            curr.decimal_point
         FROM
             tender_quotation_info tqi
         LEFT JOIN customer_info c ON
@@ -1883,6 +1885,7 @@ class Tender extends CI_Controller
             tqi.company_id = ci.company_id AND ci.status = 'Active'
         LEFT JOIN tender_enquiry_info te ON
             tqi.tender_enquiry_id = te.tender_enquiry_id AND te.status = 'Active'
+        left join currencies_info as curr on tqi.currency_id= curr.currency_id and curr.status='Active'
         WHERE
             tqi.tender_quotation_id = ? AND tqi.status != 'Delete'
         ";
@@ -1895,20 +1898,20 @@ class Tender extends CI_Controller
 
         // === ITEMS WITH RATE CALCULATION ===
         $sql = "
-        SELECT 
-            tqii.*,
-            cat.category_name,
-            item.item_name,
-            item.item_description,
-            item.item_code,
-            item.uom AS item_uom
-        FROM tender_quotation_item_info tqii
-        LEFT JOIN category_info cat ON tqii.category_id = cat.category_id
-        LEFT JOIN item_info item ON tqii.item_id = item.item_id
-        WHERE tqii.tender_quotation_id = ? 
-          AND tqii.status IN ('Active', 'Inactive')
-        ORDER BY tqii.tender_quotation_item_id
-    ";
+            SELECT 
+                tqii.*,
+                cat.category_name,
+                item.item_name,
+                item.item_description,
+                item.item_code,
+                item.uom AS item_uom
+            FROM tender_quotation_item_info tqii
+            LEFT JOIN category_info cat ON tqii.category_id = cat.category_id
+            LEFT JOIN item_info item ON tqii.item_id = item.item_id
+            WHERE tqii.tender_quotation_id = ? 
+            AND tqii.status IN ('Active', 'Inactive')
+            ORDER BY tqii.tender_quotation_item_id
+        ";
         $query = $this->db->query($sql, [$tender_quotation_id]);
         $items = $query->result_array();
 
@@ -2391,7 +2394,7 @@ class Tender extends CI_Controller
         foreach ($query->result_array() as $row) {
             $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
         }
-        
+
 
         $sql = "SELECT gst_id, gst_percentage FROM gst_info WHERE status = 'Active' ORDER BY gst_percentage ASC";
         $query = $this->db->query($sql);
@@ -2480,7 +2483,7 @@ class Tender extends CI_Controller
         $data['quotation_opt'] = array('' => 'Select');
         foreach ($query->result_array() as $row) {
             $data['quotation_opt'][$row['tender_quotation_id']] = $row['display'];
-        } 
+        }
 
         $this->load->view('page/tender/customer-tender-po-edit', $data);
     }
@@ -3946,7 +3949,7 @@ class Tender extends CI_Controller
                 AND tq.status = 'Active'
             ORDER BY tq.quote_date DESC";
 
-           //  AND tq.quotation_status = 'Won'
+        //  AND tq.quotation_status = 'Won'
 
         $query = $this->db->query($sql, [$company_id, $customer_id, $tender_enquiry_id]);
         $result = $query->result_array();
@@ -4639,9 +4642,67 @@ class Tender extends CI_Controller
         }
         echo json_encode($result);
 
-
-
     }
+    public function tender_srch_rfq_no()
+    {
+        $term = $this->input->post('search');
+
+        $sql = "
+            SELECT   
+                a.tender_enquiry_id,
+                a.enquiry_no
+            FROM tender_enquiry_info AS a 
+            WHERE a.status = 'Active'
+            AND a.enquiry_no LIKE '%" . $this->db->escape_like_str($term) . "%'
+            ORDER BY a.tender_enquiry_id DESC, a.enquiry_no ASC 
+        ";
+
+        $query = $this->db->query($sql);
+
+        $result = [];
+
+        foreach ($query->result() as $row) {
+            $result[] = [
+                'label' => $row->enquiry_no,   // text shown in dropdown
+                'value' => $row->enquiry_no,   // value inserted in input
+                'tender_enquiry_id' => $row->tender_enquiry_id,
+                'enquiry_no' => $row->enquiry_no
+            ];
+        }
+
+        echo json_encode($result);
+    }
+ 
+    public function srch_tender_quotation_no()
+    {
+        $term = $this->input->post('search');
+
+        $sql = "
+            SELECT   
+                a.tender_quotation_id,
+                a.quotation_no
+            FROM tender_quotation_info AS a
+            WHERE a.status = 'Active'
+            AND a.quotation_no LIKE '%" . $this->db->escape_like_str($term) . "%'           
+            ORDER BY a.tender_quotation_id DESC, a.quotation_no ASC   
+        ";
+
+        $query = $this->db->query($sql);
+
+        $result = [];
+
+        foreach ($query->result() as $row) {
+            $result[] = [
+                'label' => $row->quotation_no,   // text shown in dropdown
+                'value' => $row->quotation_no,   // value filled in input
+                'tender_quotation_id' => $row->tender_quotation_id, // value filled in input
+                'quotation_no' => $row->quotation_no
+            ];
+        }
+
+        echo json_encode($result);
+    }
+
 
 
     public function get_tender_enquiries_by_customer_rfq()

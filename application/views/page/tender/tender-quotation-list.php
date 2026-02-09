@@ -16,34 +16,44 @@
         <div class="box-body">
             <form method="post" action="" id="frmsearch">
                 <div class="row">
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-4">
                         <label for="srch_from_date">From Date</label>
                         <input type="date" name="srch_from_date" id="srch_from_date" class="form-control"
                             value="<?php echo set_value('srch_from_date', $srch_from_date); ?>">
                     </div>
 
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-4">
                         <label for="srch_to_date">To Date</label>
                         <input type="date" name="srch_to_date" id="srch_to_date" class="form-control"
                             value="<?php echo set_value('srch_to_date', $srch_to_date); ?>">
                     </div>
-                    <div class="form-group col-md-3">
-                        <label>Company</label>
-                        <?php echo form_dropdown('srch_company_id', $company_opt, set_value('srch_company_id', $srch_company_id), 'id="srch_company_id" class="form-control select2"'); ?>
-                    </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-4">
                         <label>Customer</label>
                         <div class="form-group">
                             <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control select2" '); ?>
                         </div>
                     </div>
-                    <div class="form-group col-md-3">
-                        <label for="srch_tender_enquiry_id">Tender RFQ No</label>
-                        <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'All'] + $tender_enquiry_opt, $srch_tender_enquiry_id, 'id="srch_tender_enquiry_id" class="form-control select2"'); ?>
+
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-4">
+                        <label for="srch_tender_enquiry_id">Customer RFQ No</label>
+                        <input type="text" name="srch_tender_enquiry_id" id="srch_tender_enquiry_id"
+                            class="form-control"
+                            value="<?php echo set_value('srch_tender_enquiry_id', $srch_tender_enquiry_id); ?>"
+                            placeholder="Search the customer rfq no">
                     </div>
-                    <div class="form-group col-md-3">
-                        <label>Quotation Status</label>
-                        <?php echo form_dropdown('srch_quotation_status', $quotation_status_opt, set_value('srch_quotation_status', $srch_quotation_status), 'id="srch_quotation_status" class="form-control"'); ?>
+                    <div class="form-group col-md-4">
+                        <label for="srch_enquiry_no">Our Enquiry No</label>
+                        <input type="text" name="srch_enquiry_no" id="srch_enquiry_no" class="form-control"
+                            value="<?php echo set_value('srch_enquiry_no', $srch_enquiry_no); ?>"
+                            placeholder="Search the our enquiry no">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="srch_quotation_no_id">Tender Quotation No</label>
+                        <input type="text" name="srch_quotation_no_id" id="srch_quotation_no_id" class="form-control"
+                            value="<?php echo set_value('srch_quotation_no_id', $srch_quotation_no_id); ?>"
+                            placeholder="Search the our quotation no">
                     </div>
                 </div>
                 <div class="row">
@@ -160,3 +170,77 @@
 </section>
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script>
+    jQuery(function ($) {
+        $("#srch_enquiry_no").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
+                    type: "POST",
+                    data: { search: request.term },
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data);
+                        response(data);
+                    },
+                });
+            },
+
+            minLength: 1,
+
+            select: function (event, ui) {
+                console.log(ui);
+                // $("#srch_company_id").val(ui.item.company_id);
+                // $("#srch_customer_id").val(ui.item.customer_id).change();
+            },
+        });
+
+        $("#srch_tender_enquiry_id").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "<?php echo base_url('tender/tender_srch_rfq_no'); ?>",
+                    type: "POST",
+                    data: { search: request.term },
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data);
+                        response(data);
+                    },
+                });
+            },
+
+            minLength: 1,
+
+            select: function (event, ui) {
+                console.log(ui);
+                // $("#srch_company_id").val(ui.item.company_id);
+                // $("#srch_customer_id").val(ui.item.customer_id).change();
+            },
+        });
+        $("#srch_quotation_no_id").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "<?php echo base_url('tender/srch_tender_quotation_no'); ?>",
+                    type: "POST",
+                    data: { search: request.term },
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data);
+                        response(data);
+                    },
+                });
+            },
+
+            minLength: 1,
+
+            select: function (event, ui) {
+                console.log(ui);
+                // $("#srch_company_id").val(ui.item.company_id);
+                // $("#srch_customer_id").val(ui.item.customer_id).change();
+            },
+        });
+    });
+</script>
