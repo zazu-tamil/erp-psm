@@ -3076,6 +3076,8 @@ class Vendor extends CI_Controller
 
         if ($table == 'get-vendor-quotation-load-enquiry-no') {
 
+
+            $tender_enquiry_id = $this->input->post('tender_enquiry_id');
             $query = $this->db->query("
                    SELECT
                     a.vendor_quote_id,
@@ -3089,6 +3091,7 @@ class Vendor extends CI_Controller
                     AND c.status = 'Active'
                 WHERE a.status = 'Active'
                 AND a.vendor_id = '" . $rec_id . "'
+                AND a.tender_enquiry_id = '" . $tender_enquiry_id . "'
                 and a.quote_status = 'Confirmed'
                 ORDER BY a.quote_no ASC
             ");

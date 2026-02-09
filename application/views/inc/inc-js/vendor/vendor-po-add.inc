@@ -1,5 +1,8 @@
 <script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
-<link  rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+<link
+  rel="stylesheet"
+  href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
+/>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <style>
   /* Your existing styles remain unchanged */
@@ -46,91 +49,86 @@
 
 <script>
   $(document).ready(function () {
+    $(".srch_enq_id").autocomplete({
+      source: function (request, response) {
+        $.ajax({
+          url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
+          type: "POST",
+          data: { search: request.term },
+          dataType: "json",
+          success: function (data) {
+            //console.log(data);
+            response(data);
+          },
+        });
+      },
 
-     $(".srch_enq_id").autocomplete({
-        source: function (request, response) {
-          $.ajax({
-            url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
-            type: "POST",
-            data: { search: request.term },
-            dataType: "json",
-            success: function (data) {
-              //console.log(data);
-              response(data);
-            },
-          });
-        },
+      minLength: 1,
 
-        minLength: 1,
-         
-        select: function (event, ui) {
-           console.log(ui);
-            $("#srch_company_id").val(ui.item.company_id);
-            $("#srch_customer_id").val(ui.item.customer_id).change();
-            //$("#srch_tender_enquiry_id").val(ui.item.tender_enquiry_id); 
-            load_tender_enq(ui.item.tender_enquiry_id); 
-        }, 
-      });
+      select: function (event, ui) {
+        console.log(ui);
+        $("#srch_company_id").val(ui.item.company_id);
+        $("#srch_customer_id").val(ui.item.customer_id).change();
+        //$("#srch_tender_enquiry_id").val(ui.item.tender_enquiry_id);
+        load_tender_enq(ui.item.tender_enquiry_id);
+      },
+    });
 
-
-      function load_tender_enq(t_enq_id = '') {
-
+    function load_tender_enq(t_enq_id = "") {
       const customer_id = $("#srch_customer_id").val(); // <-- IMPORTANT
-      const company_id  = $("#srch_company_id").val();
+      const company_id = $("#srch_company_id").val();
       const $enquiryDropdown = $("#srch_tender_enquiry_id");
-      const $container = $("#item_container");  
+      const $container = $("#item_container");
 
       // Reset
       $enquiryDropdown
-          .html('<option value="">Select Enquiry</option>')
-          .prop('disabled', true);
+        .html('<option value="">Select Enquiry</option>')
+        .prop("disabled", true);
 
-       
-      $container.html('');
+      $container.html("");
 
       if (!customer_id || !company_id) return;
 
       $.ajax({
-          url: "<?php echo site_url('vendor/get_tender_enquiries_by_customer'); ?>",
-          type: "POST",
-          data: { 
-              company_id: company_id,
-              customer_id: customer_id 
-          },
-          dataType: "json",
-          success: function (res) {
+        url: "<?php echo site_url('vendor/get_tender_enquiries_by_customer'); ?>",
+        type: "POST",
+        data: {
+          company_id: company_id,
+          customer_id: customer_id,
+        },
+        dataType: "json",
+        success: function (res) {
+          if (res.length > 0) {
+            $enquiryDropdown.prop("disabled", false);
 
-              if (res.length > 0) {
-                  $enquiryDropdown.prop('disabled', false);
+            $.each(res, function (i, row) {
+              $enquiryDropdown.append(
+                $("<option>", {
+                  value: row.tender_enquiry_id,
+                  text: row.display,
+                }),
+              );
+            });
 
-                  $.each(res, function (i, row) {
-                      $enquiryDropdown.append(
-                          $('<option>', {
-                              value: row.tender_enquiry_id,
-                              text: row.display
-                          })
-                      );
-                  });
-
-                  // ✅ SET SELECTED VALUE HERE
-                  if (t_enq_id) {
-                      $enquiryDropdown.val(t_enq_id).trigger('change');
-                  }
-
-              } else {
-                  $enquiryDropdown.html('<option value="">No enquiries found</option>');
-              }
-          },
-          error: function () {
-              alert('Error loading enquiries');
+            // ✅ SET SELECTED VALUE HERE
+            if (t_enq_id) {
+              $enquiryDropdown.val(t_enq_id).trigger("change");
+            }
+          } else {
+            $enquiryDropdown.html(
+              '<option value="">No enquiries found</option>',
+            );
           }
+        },
+        error: function () {
+          alert("Error loading enquiries");
+        },
       });
-    }   
-       
-    $("#srch_customer_id").on("change", function () {
-      load_tender_enq('');
-     });   
+    }
 
+    $("#srch_customer_id").on("change", function () {
+      load_tender_enq("");
+    });
 
     // 1. Company → Load Customers
     /*$("#srch_company_id").on("change", function () {
@@ -182,13 +180,13 @@
           if (res.length > 0) {
             $.each(res, function (i, row) {
               $enquiry.append(
-                `<option value="${row.tender_enquiry_id}">${row.display}</option>`
+                `<option value="${row.tender_enquiry_id}">${row.display}</option>`,
               );
             });
             $enquiry.prop("disabled", false);
           }
         },
-        "json"
+        "json",
       );
     });
 
@@ -213,64 +211,17 @@
           if (res.length > 0) {
             $.each(res, function (i, row) {
               $vendor.append(
-                `<option value="${row.vendor_id}">${row.vendor_name}</option>`
+                `<option value="${row.vendor_id}">${row.vendor_name}</option>`,
               );
             });
           }
         },
-        "json"
+        "json",
       );
     });
 
-    // 4. Vendor → Load Rate Enquiry Numbers
-    $("#srch_vendor_id").on("change", function () {
-      const vendor_id = $(this).val();
-      const $enquiry = $("#srch_vendor_quote_id");
-      const $contact = $("#srch_vendor_contact_id");
-
-      $enquiry.html('<option value="">Select Enquiry No</option>');
-      $contact.html('<option value="">Select Contact</option>');
-
-      if (!vendor_id) return;
-
-      // Load Rate Enquiry Nos
-      $.post(
-        "<?php echo site_url('vendor/get_data'); ?>",
-        {
-          tbl: "get-vendor-quotation-load-enquiry-no",
-          id: vendor_id,
-        },
-        function (res) {
-          if (res.length > 0) {
-            $.each(res, function (i, row) {
-              $enquiry.append(
-                `<option value="${row.vendor_quote_id}">${row.vendor_quote_no}</option>`
-              );
-            });
-          }
-        },
-        "json"
-      );
-
-      // Load Contact Persons
-      $.post(
-        "<?php echo site_url('vendor/get_data'); ?>",
-        {
-          tbl: "get-vendor-contacts",
-          id: vendor_id,
-        },
-        function (res) {
-          if (res.length > 0) {
-            $.each(res, function (i, row) {
-              $contact.append(
-                `<option value="${row.vendor_contact_id}">${row.contact_person_name}</option>`
-              );
-            });
-          }
-        },
-        "json"
-      );
-    });
+   
+   
   });
 
   // CKEditor
@@ -307,7 +258,6 @@
 
         $.each(res, function (i, row) {
           // GST DROPDOWN ---- IMPORTANT FIX
-         
 
           // MAIN ROW HTML
           const rowHtml = `
@@ -322,8 +272,8 @@
                              value="${row.item_code || ""}" readonly>
 
                       <input type="hidden" name="vendor_rate_enquiry_item_id[]" value="${
-                          row.vendor_rate_enquiry_item_id
-                        }">
+                        row.vendor_rate_enquiry_item_id
+                      }">
                             
                     </td>
 
@@ -362,7 +312,7 @@
 
           const $row = $(rowHtml);
 
-           calculateTotalAmount();
+          calculateTotalAmount();
 
           $container.append($row);
         });
@@ -377,29 +327,25 @@
 
 <script>
   // Recalculate amount on qty, rate, or GST change
-  $(document).on(
-    "input change",
-    ".rate-input, .gst, .qty-input",
-    function () {
-      const $row = $(this).closest("tr.item-row");
+  $(document).on("input change", ".rate-input, .gst, .qty-input", function () {
+    const $row = $(this).closest("tr.item-row");
 
-      const qty = parseFloat($row.find(".qty-input").val()) || 0;
-      const rate = parseFloat($row.find(".rate-input").val()) || 0;
-      const gst = parseFloat($row.find(".gst").val()) || 0;
+    const qty = parseFloat($row.find(".qty-input").val()) || 0;
+    const rate = parseFloat($row.find(".rate-input").val()) || 0;
+    const gst = parseFloat($row.find(".gst").val()) || 0;
 
-      // Amount = qty * rate
-      let amount = qty * rate;
+    // Amount = qty * rate
+    let amount = qty * rate;
 
-      // GST added only if gst selected
-      if (gst > 0) {
-        amount = amount + (amount * gst) / 100;
-      }
-
-      $row.find(".amount").val(amount.toFixed(2));
-
-      calculateTotalAmount();
+    // GST added only if gst selected
+    if (gst > 0) {
+      amount = amount + (amount * gst) / 100;
     }
-  );
+
+    $row.find(".amount").val(amount.toFixed(2));
+
+    calculateTotalAmount();
+  });
 
   // Calculate full total of all item rows
   function calculateTotalAmount() {

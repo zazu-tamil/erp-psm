@@ -63,7 +63,7 @@
                     <div class="row">
                         <div class="form-group col-md-4">
                             <label>Company <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_company_id',  $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
+                            <?php echo form_dropdown('srch_company_id', $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
@@ -123,9 +123,8 @@
                         </div>
                         <div class="form-group col-md-4">
                             <label>Other Charges</label>
-                            <input type="number" step="any" name="other_charges" id="other_charges"
-                                class="form-control" value="<?php echo set_value('other_charges'); ?>"
-                                placeholder="0.00">
+                            <input type="number" step="any" name="other_charges" id="other_charges" class="form-control"
+                                value="<?php echo set_value('other_charges'); ?>" placeholder="0.00">
                         </div>
 
                         <div class="col-md-4">
@@ -213,3 +212,58 @@
 
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
+
+<script>
+    $("#srch_vendor_id").on("change", function () {
+        const vendor_id = $(this).val();
+        const $enquiry = $("#srch_vendor_quote_id");
+
+        const tender_enquiry_id = $("#srch_tender_enquiry_id").val();
+
+        const $contact = $("#srch_vendor_contact_id");
+
+        $enquiry.html('<option value="">Select Enquiry No</option>');
+        $contact.html('<option value="">Select Contact</option>');
+
+        if (!vendor_id) return;
+
+        // Load Rate Enquiry Nos
+        $.post(
+            "<?php echo site_url('vendor/get_data'); ?>",
+            {
+                tbl: "get-vendor-quotation-load-enquiry-no",
+                id: vendor_id,
+                tender_enquiry_id: tender_enquiry_id
+            },
+            function (res) {
+                if (res.length > 0) {
+                    $.each(res, function (i, row) {
+                        $enquiry.append(
+                            `<option value="${row.vendor_quote_id}">${row.vendor_quote_no}</option>`,
+                        );
+                    });
+                }
+            },
+            "json",
+        );
+
+        // Load Contact Persons
+        $.post(
+            "<?php echo site_url('vendor/get_data'); ?>",
+            {
+                tbl: "get-vendor-contacts",
+                id: vendor_id,
+            },
+            function (res) {
+                if (res.length > 0) {
+                    $.each(res, function (i, row) {
+                        $contact.append(
+                            `<option value="${row.vendor_contact_id}">${row.contact_person_name}</option>`,
+                        );
+                    });
+                }
+            },
+            "json",
+        );
+    });
+</script>
