@@ -3652,6 +3652,7 @@ class Tender extends CI_Controller
             AND ii.status = 'Active'
 
             WHERE a.status = 'Active' 
+            and a.tender_dc_id = ?
 
             GROUP BY d.vendor_pur_inward_item_id
 
