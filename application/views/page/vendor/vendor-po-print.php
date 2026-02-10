@@ -387,7 +387,9 @@
                             <?php echo htmlspecialchars($record['po_no'] ?? 'N/A'); ?></div>
                         <div><span class="info-label">Quotation No:</span>
                             <?php echo htmlspecialchars($record['quote_no'] ?? 'N/A'); ?></div>
-
+                        <?php 
+                            $decimal_point = $record['decimal_point'];
+                        ?>
 
                     </div>
                 </div>
@@ -416,10 +418,10 @@
                                 <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?? '-'); ?>
                                 </td>
                                 <td class="text-center"><?php echo number_format($item['qty'], 2); ?></td>
-                                <td class="text-right"><?php echo number_format($item['rate'], 2); ?></td>
+                                <td class="text-right"><?php echo number_format($item['rate'], $decimal_point); ?></td>
                                 <td class="text-center"><?php echo number_format($item['gst'], 2); ?>%</td>
-                                <td class="text-right"><?php echo number_format($item['gst_amount'], 2); ?></td>
-                                <td class="text-right"><strong><?php echo number_format($item['amount'], 2); ?></strong></td>
+                                <td class="text-right"><?php echo number_format($item['gst_amount'], $decimal_point); ?></td>
+                                <td class="text-right"><strong><?php echo number_format($item['amount'], $decimal_point); ?></strong></td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -431,17 +433,17 @@
                 <tfoot>
                     <tr>
                         <th colspan="7" class="text-right">Transport, Packing & Courier</th>
-                        <th class="text-right"><?php echo number_format($record['transport_charges'] ?? 0, 2); ?></th>
+                        <th class="text-right"><?php echo number_format($record['transport_charges'] ?? 0, $decimal_point); ?></th>
                     </tr>
                     <?php if (!empty($record['other_charges'])): ?>
                         <tr>
                             <th colspan="7" class="text-right">Other Charges</th>
-                            <th class="text-right"><?php echo number_format($record['other_charges'] ?? 0, 2); ?></th>
+                            <th class="text-right"><?php echo number_format($record['other_charges'] ?? 0, $decimal_point); ?></th>
                         </tr>
                     <?php endif; ?>
                     <tr class="grand-total">
                         <th colspan="7" class="text-right">GRAND TOTAL</th>
-                        <th class="text-right"><?php echo number_format($final_total, 2); ?></th>
+                        <th class="text-right"><?php echo number_format($final_total, $decimal_point); ?></th>
                     </tr>
                 </tfoot>
             </table>

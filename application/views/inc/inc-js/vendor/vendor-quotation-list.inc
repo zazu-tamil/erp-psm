@@ -1,7 +1,5 @@
 <script>
-  $(document).ready(function () { 
- 
-
+  $(document).ready(function () {
     $(".del_record").click(function () {
       if (confirm("Are you sure you want to delete this tender enquiry?")) {
         const id = $(this).val();
@@ -15,7 +13,7 @@
           function (res) {
             alert(res);
             location.reload();
-          }
+          },
         ).fail(function () {
           alert("Error deleting record.");
         });
@@ -77,78 +75,80 @@
   });
 </script>
 
-
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+<link
+  rel="stylesheet"
+  href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
+/>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <script>
-    jQuery(function ($) {
-        $("#srch_vendor_rfq_no").autocomplete({
-            source: function (request, response) {
-                $.ajax({
-                    url: "<?php echo base_url('vendor/vendor_srch_rfq_no'); ?>",
-                    type: "POST",
-                    data: { search: request.term },
-                    dataType: "json",
-                    success: function (data) {
-                        console.log(data);
-                        response(data);
-                    },
-                });
-            },
+  jQuery(function ($) {
 
-            minLength: 1,
-
-            select: function (event, ui) {
-                console.log(ui);
-                // $("#srch_company_id").val(ui.item.company_id);
-                // $("#srch_customer_id").val(ui.item.customer_id).change();
-            },
+    $("#srch_customer_rfq_no").autocomplete({
+      source: function (request, response) {
+        $.ajax({
+          url: "<?php echo base_url('tender/tender_srch_rfq_no'); ?>",
+          type: "POST",
+          data: { search: request.term },
+          dataType: "json",
+          success: function (data) {
+            console.log(data);
+            response(data);
+          },
         });
+      },
 
-        $("#srch_enquiry_no").autocomplete({
-            source: function (request, response) {
-                $.ajax({
-                    url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
-                    type: "POST",
-                    data: { search: request.term },
-                    dataType: "json",
-                    success: function (data) {
-                        console.log(data);
-                        response(data);
-                    },
-                });
-            },
+      minLength: 1,
 
-            minLength: 1,
-
-            select: function (event, ui) {
-                console.log(ui);
-                // $("#srch_company_id").val(ui.item.company_id);
-                // $("#srch_customer_id").val(ui.item.customer_id).change();
-            },
-        });
-        $("#srch_vendor_quotation_no").autocomplete({
-            source: function (request, response) {
-                $.ajax({
-                    url: "<?php echo base_url('vendor/srch_vendor_quotation_no'); ?>",
-                    type: "POST",
-                    data: { search: request.term },
-                    dataType: "json",
-                    success: function (data) {
-                        console.log(data);
-                        response(data);
-                    },
-                });
-            },
-
-            minLength: 1,
-
-            select: function (event, ui) {
-                console.log(ui);
-                // $("#srch_company_id").val(ui.item.company_id);
-                // $("#srch_customer_id").val(ui.item.customer_id).change();
-            },
-        });
+      select: function (event, ui) {
+        console.log(ui);
+        // $("#srch_company_id").val(ui.item.company_id);
+        // $("#srch_customer_id").val(ui.item.customer_id).change();
+      },
     });
 
+    $("#srch_enquiry_no").autocomplete({
+      source: function (request, response) {
+        $.ajax({
+          url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
+          type: "POST",
+          data: { search: request.term },
+          dataType: "json",
+          success: function (data) {
+            console.log(data);
+            response(data);
+          },
+        });
+      },
+
+      minLength: 1,
+
+      select: function (event, ui) {
+        console.log(ui);
+        // $("#srch_company_id").val(ui.item.company_id);
+        // $("#srch_customer_id").val(ui.item.customer_id).change();
+      },
+    });
+    $("#srch_vendor_quotation_no").autocomplete({
+      source: function (request, response) {
+        $.ajax({
+          url: "<?php echo base_url('vendor/srch_vendor_quotation_no'); ?>",
+          type: "POST",
+          data: { search: request.term },
+          dataType: "json",
+          success: function (data) {
+            console.log(data);
+            response(data);
+          },
+        });
+      },
+
+      minLength: 1,
+
+      select: function (event, ui) {
+        console.log(ui);
+        // $("#srch_company_id").val(ui.item.company_id);
+        // $("#srch_customer_id").val(ui.item.customer_id).change();
+      },
+    });
+  });
 </script>

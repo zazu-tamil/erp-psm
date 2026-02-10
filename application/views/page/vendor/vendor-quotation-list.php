@@ -27,20 +27,25 @@
                         <input type="date" name="srch_to_date" id="srch_to_date" class="form-control"
                             value="<?php echo set_value('srch_to_date', $srch_to_date); ?>">
                     </div>
-
-
                     <div class="form-group col-md-3">
-                        <label for="srch_customer_id">Customer <span style="color:red;">*</span></label>
-                        <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, set_value('srch_customer_id', $srch_customer_id), 'id="srch_customer_id" class="form-control select2"'); ?>
+                        <label>Customer</label>
+                        <div class="form-group">
+                            <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control select2" '); ?>
+                        </div>
+                    </div> 
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <label for="">OR</label>
                     </div>
-
-                    <div class="form-group col-md-3">
-                        <label for="srch_vendor_rfq_no">Vendor RFQ No</label>
-                        <input type="text" name="srch_vendor_rfq_no" id="srch_vendor_rfq_no" class="form-control"
-                            value="<?php echo set_value('srch_vendor_rfq_no', $srch_vendor_rfq_no); ?>"
-                            placeholder="Search the vendor rfq no">
+                </div>
+                <div class="row">
+                     <div class="form-group col-md-3">
+                        <label for="srch_customer_rfq_no">Customer RFQ No</label>
+                        <input type="text" name="srch_customer_rfq_no" id="srch_customer_rfq_no" class="form-control"
+                            value="<?php echo set_value('srch_customer_rfq_no', $srch_customer_rfq_no); ?>"
+                            placeholder="Search the Customer RFQ No">
                     </div>
-
                     <div class="form-group col-md-3">
                         <label for="srch_enquiry_no">Our Enquiry No</label>
                         <input type="text" name="srch_enquiry_no" id="srch_enquiry_no" class="form-control"
@@ -51,7 +56,8 @@
 
                     <div class="form-group col-md-3">
                         <label for="srch_vendor_quotation_no">Vendor Quotation No</label>
-                        <input type="text" name="srch_vendor_quotation_no" id="srch_vendor_quotation_no" class="form-control"
+                        <input type="text" name="srch_vendor_quotation_no" id="srch_vendor_quotation_no"
+                            class="form-control"
                             value="<?php echo set_value('srch_vendor_quotation_no', $srch_vendor_quotation_no); ?>"
                             placeholder="Search the our quotation no">
                     </div>
@@ -90,6 +96,7 @@
                         <th>Quotation Date</th>
                         <th>Company / RFQ No</th>
                         <th>Customer</th>
+                        <th>Customer RFQ No</th>
                         <th>Vendor Name</th>
                         <th>Quotation No</th>
                         <th>Quotation Status</th>
@@ -106,6 +113,7 @@
                                         class="label label-success"><?php echo htmlspecialchars($row['tender_enquery_no'] ?? '-'); ?></small>
                                 </td>
                                 <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
+                                <td><?php echo htmlspecialchars($row['customer_rfq_no'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['quote_no'] ?? '-'); ?></td>
                                 <?php

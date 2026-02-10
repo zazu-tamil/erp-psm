@@ -27,7 +27,6 @@
                         <input type="date" name="srch_to_date" id="srch_to_date" class="form-control"
                             value="<?php echo set_value('srch_to_date', $srch_to_date); ?>">
                     </div>
-
                     <div class="form-group col-md-3">
                         <label>Customer</label>
                         <div class="form-group">
@@ -35,27 +34,28 @@
                         </div>
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="srch_vendor_rfq_no">Vendor RFQ No</label>
-                        <input type="text" name="srch_vendor_rfq_no" id="srch_vendor_rfq_no" class="form-control"
-                            value="<?php echo set_value('srch_vendor_rfq_no', $srch_vendor_rfq_no); ?>"
-                            placeholder="Search the vendor rfq no">
+                        <label>Vendor</label>
+                        <?php echo form_dropdown('srch_vendor_id', ['' => 'All'] + $vendor_opt, $srch_vendor_id, 'id="srch_vendor_id" class="form-control select2" style="width:100%"'); ?>
                     </div>
-
-
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <label for="">OR</label>
+                    </div>
                 </div>
                 <div class="row">
 
-
+                    <div class="form-group col-md-3">
+                        <label for="srch_customer_rfq_no">Customer RFQ No</label>
+                        <input type="text" name="srch_customer_rfq_no" id="srch_customer_rfq_no" class="form-control"
+                            value="<?php echo set_value('srch_customer_rfq_no', $srch_customer_rfq_no); ?>"
+                            placeholder="Search the Customer RFQ No">
+                    </div>
                     <div class="form-group col-md-3">
                         <label for="srch_enquiry_no">Our Enquiry No</label>
                         <input type="text" name="srch_enquiry_no" id="srch_enquiry_no" class="form-control"
                             value="<?php echo set_value('srch_enquiry_no', $srch_enquiry_no); ?>"
-                            placeholder="Search the our enquiry no">
-                    </div>
-
-                    <div class="form-group col-md-3">
-                        <label>Vendor</label>
-                        <?php echo form_dropdown('srch_vendor_id', ['' => 'All'] + $vendor_opt, $srch_vendor_id, 'id="srch_vendor_id" class="form-control select2" style="width:100%"'); ?>
+                            placeholder="Search the Our Enquiry No">
                     </div>
 
                     <div class="form-group col-md-3 text-left">
@@ -148,7 +148,11 @@
 
         <div class="box-footer">
             <div class="form-group col-sm-6">
-                <label>Total Records: <?php echo $total_records; ?></label>
+                <?php if (!empty($record_list)): ?>
+                    <label>Total Records: <?php echo count($record_list); ?></label>
+                <?php else: ?>
+                    <label>Total Records: 0</label>
+                <?php endif; ?>
             </div>
             <div class="form-group col-sm-6 text-right">
                 <?php echo $pagination; ?>

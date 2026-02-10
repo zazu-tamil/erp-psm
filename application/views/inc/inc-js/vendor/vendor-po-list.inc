@@ -83,14 +83,15 @@
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <script>
     jQuery(function ($) {
-        $("#srch_vendor_rfq_no").autocomplete({
+        $("#srch_customer_rfq_no").autocomplete({
             source: function (request, response) {
                 $.ajax({
-                    url: "<?php echo base_url('vendor/vendor_srch_rfq_no'); ?>",
+                    url: "<?php echo base_url('tender/tender_srch_rfq_no'); ?>",
                     type: "POST",
                     data: { search: request.term },
                     dataType: "json",
                     success: function (data) {
+
                         console.log(data);
                         response(data);
                     },

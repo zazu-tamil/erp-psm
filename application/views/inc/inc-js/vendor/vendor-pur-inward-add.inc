@@ -315,7 +315,7 @@
                     </td>
 
                     <td>
-                      <input type="text" name="srch_item[]" class="form-control"
+                      <input type="text" name="item_code[]" class="form-control"
                              value="${row.item_code || ""}" readonly>
 
                       <input type="hidden" name="vendor_po_item_id[]" value="${
