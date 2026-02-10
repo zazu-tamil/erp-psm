@@ -1473,10 +1473,7 @@ class Vendor extends CI_Controller
         $data['s_url'] = 'vendor-pur-inward-list';
         $data['title'] = 'Vendor Purchase Inward List';
 
-        // echo '<pre>';
-        // print_r($_POST);
-        // echo '</pre>';
-        $where = "1 = 1";
+        $where = "1=1";
 
         if (isset($_POST['srch_from_date'])) {
             $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
@@ -1487,24 +1484,16 @@ class Vendor extends CI_Controller
             $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_from_date');
             $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_to_date');
         } else {
-            $data['srch_from_date'] = $srch_from_date = date('Y-m-d');
-            $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
+            $data['srch_from_date'] = $srch_from_date = '';
+            $data['srch_to_date'] = $srch_to_date = '';
+        }
+
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $where .= " AND  ( a.inward_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "') ";
         }
 
 
         // Customer Filter
-        if ($this->input->post('srch_company_id') !== null) {
-            $data['srch_company_id'] = $srch_company_id = $this->input->post('srch_company_id');
-            $this->session->set_userdata('srch_company_id', $srch_company_id);
-        } elseif ($this->session->userdata('srch_company_id')) {
-            $data['srch_company_id'] = $srch_company_id = $this->session->userdata('srch_company_id');
-        } else {
-            $data['srch_company_id'] = $srch_company_id = '';
-        }
-
-        if (!empty($srch_company_id)) {
-            $where .= " AND a.company_id = '" . $this->db->escape_str($srch_company_id) . "'";
-        }
         if ($this->input->post('srch_customer_id') !== null) {
             $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
             $this->session->set_userdata('srch_customer_id', $srch_customer_id);
@@ -1513,23 +1502,12 @@ class Vendor extends CI_Controller
         } else {
             $data['srch_customer_id'] = $srch_customer_id = '';
         }
-
         if (!empty($srch_customer_id)) {
             $where .= " AND a.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
         }
 
-        // Vendor Filter
-        if ($this->input->post('srch_tender_enquiry_id') !== null) {
-            $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = $this->input->post('srch_tender_enquiry_id');
-            $this->session->set_userdata('srch_tender_enquiry_id', $srch_tender_enquiry_id);
-        } elseif ($this->session->userdata('srch_tender_enquiry_id')) {
-            $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = $this->session->userdata('srch_tender_enquiry_id');
-        } else {
-            $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = '';
-        }
-        if (!empty($srch_tender_enquiry_id)) {
-            $where .= " AND a.tender_enquiry_id = '" . $this->db->escape_str($srch_tender_enquiry_id) . "'";
-        }
+
+
 
         // Vendor Filter
         if ($this->input->post('srch_vendor_id') !== null) {
@@ -1545,11 +1523,65 @@ class Vendor extends CI_Controller
         }
 
 
+        // Company Filter
+        if ($this->input->post('srch_customer_rfq_no') !== null) {
+            $data['srch_customer_rfq_no'] = $srch_customer_rfq_no = $this->input->post('srch_customer_rfq_no');
+            $this->session->set_userdata('srch_customer_rfq_no', $srch_customer_rfq_no);
+        } elseif ($this->session->userdata('srch_customer_rfq_no')) {
+            $data['srch_customer_rfq_no'] = $srch_customer_rfq_no = $this->session->userdata('srch_customer_rfq_no');
+        } else {
+            $data['srch_customer_rfq_no'] = $srch_customer_rfq_no = '';
+        }
+        if (!empty($srch_customer_rfq_no)) {
+            $where = " (t.enquiry_no = '" . $this->db->escape_str($srch_customer_rfq_no) . "')";
+            $data['srch_vendor_id'] = $srch_vendor_id = '';
+        }
+
+
+
+        if ($this->input->post('srch_enquiry_no') !== null) {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->input->post('srch_enquiry_no');
+            $this->session->set_userdata('srch_enquiry_no', $srch_enquiry_no);
+        } elseif ($this->session->userdata('srch_enquiry_no')) {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->session->userdata('srch_enquiry_no');
+        } else {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = '';
+        }
+        if (!empty($srch_enquiry_no)) {
+            $where = " ( concat(ifnull(ci.company_code,'') , '/', ifnull(t.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(t.customer_sno,''),  '/' , DATE_FORMAT(t.enquiry_date,'%Y') ) like '%" . $this->db->escape_str($srch_enquiry_no) . "%' ) ";
+
+            $data['srch_customer_id'] = $srch_customer_id = '';
+            $data['srch_vendor_id'] = $srch_vendor_id = '';
+        }
+
+        // Company Filter
+        if ($this->input->post('srch_inward_no') !== null) {
+            $data['srch_inward_no'] = $srch_inward_no = $this->input->post('srch_inward_no');
+            $this->session->set_userdata('srch_inward_no', $srch_inward_no);
+        } elseif ($this->session->userdata('srch_inward_no')) {
+            $data['srch_inward_no'] = $srch_inward_no = $this->session->userdata('srch_inward_no');
+        } else {
+            $data['srch_inward_no'] = $srch_inward_no = '';
+        }
+        if (!empty($srch_inward_no)) {
+            $where = " (a.inward_no = '" . $this->db->escape_str($srch_inward_no) . "')";
+            $data['srch_vendor_id'] = $srch_vendor_id = '';
+            $data['srch_customer_id'] = $srch_customer_id = '';
+        }
+
+
+
+
         $this->db->from('vendor_pur_inward_info a');
+        $this->db->join('company_info ci', 'a.company_id = ci.company_id AND ci.status = "Active"', 'left');
+        $this->db->join('customer_info c', 'a.customer_id = c.customer_id AND c.status = "Active"', 'left');
+        $this->db->join('tender_enquiry_info t', 'a.tender_enquiry_id = t.tender_enquiry_id AND t.status = "Active"', 'left');
         $this->db->where('a.status !=', 'Delete');
         $this->db->where($where);
-        $this->db->where("DATE(a.inward_date) BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'");
+
         $data['total_records'] = $this->db->count_all_results();
+
+
 
         // === PAGINATION ===
         $data['sno'] = $this->uri->segment(2, 0);
@@ -1604,7 +1636,7 @@ class Vendor extends CI_Controller
             $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
         }
         $data['tender_enquiry_opt'] = [];
-        if (!empty($srch_customer_id || $srch_tender_enquiry_id)) {
+        if (!empty($srch_customer_id)) {
 
             $sql = "
                 SELECT 
@@ -1623,27 +1655,21 @@ class Vendor extends CI_Controller
                 $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_details'];
             }
         }
-        if (!empty($srch_customer_id || $srch_tender_enquiry_id || $srch_tender_enquiry_id)) {
 
-            $sql = "
+
+        $sql = "
                 SELECT 
-                    d.vendor_id,
-                    d.vendor_name
-                FROM  vendor_po_info AS a
-                left join company_info as b on a.company_id = b.company_id and b.`status`='Active'
-                left join customer_info as c on a.customer_id = c.customer_id and c.`status`='Active'
-                left join vendor_info as d on a.vendor_id = d.vendor_id and d.status='Active'
-                where a.`status`='Active'
-                and a.tender_enquiry_id= '" . $srch_tender_enquiry_id . "'
-                group by d.vendor_id ASC 
-            ";
+                    a.vendor_id,
+                   a.vendor_name
+                FROM  vendor_info AS a 
+                where a.`status`='Active'  
+        ";
 
 
-            $query = $this->db->query($sql);
+        $query = $this->db->query($sql);
 
-            foreach ($query->result_array() as $row) {
-                $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
-            }
+        foreach ($query->result_array() as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
         }
 
         $data['po_status_opt'] = ['' => 'Select PO Status', 'In Progress' => 'In Progress', 'Delivered' => 'Delivered'];
@@ -1659,6 +1685,7 @@ class Vendor extends CI_Controller
                 c.customer_name,
                 v.vendor_name,
                 a.company_id,
+                t.enquiry_no as customer_rfq_no,
                 a.customer_id, 
                 ci.company_name,
                 get_tender_info(a.tender_enquiry_id) as tender_details
@@ -1667,8 +1694,7 @@ class Vendor extends CI_Controller
             LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
             LEFT JOIN tender_enquiry_info t ON a.tender_enquiry_id = t.tender_enquiry_id AND t.status != 'Delete'
             left join company_info as ci on t.company_id = ci.company_id and ci.status = 'Active'
-            WHERE a.status != 'Delete' AND $where
-            AND a.inward_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "' 
+            WHERE a.status != 'Delete' AND $where 
             ORDER BY a.vendor_pur_inward_id  DESC
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
@@ -3677,10 +3703,7 @@ class Vendor extends CI_Controller
         $data['s_url'] = 'vendor-purchase-bill-list';
         $data['title'] = 'Vendor Purchase Invoice List';
 
-        // echo '<pre>';
-        // print_r($_POST);
-        // echo '</pre>';
-        $where = "1 = 1";
+        $where = "1=1";
 
         if (isset($_POST['srch_from_date'])) {
             $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
@@ -3691,24 +3714,16 @@ class Vendor extends CI_Controller
             $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_from_date');
             $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_to_date');
         } else {
-            $data['srch_from_date'] = $srch_from_date = date('Y-m-01');
-            $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
+            $data['srch_from_date'] = $srch_from_date = '';
+            $data['srch_to_date'] = $srch_to_date = '';
+        }
+
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $where .= " AND  ( a.invoice_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "') ";
         }
 
 
         // Customer Filter
-        if ($this->input->post('srch_company_id') !== null) {
-            $data['srch_company_id'] = $srch_company_id = $this->input->post('srch_company_id');
-            $this->session->set_userdata('srch_company_id', $srch_company_id);
-        } elseif ($this->session->userdata('srch_company_id')) {
-            $data['srch_company_id'] = $srch_company_id = $this->session->userdata('srch_company_id');
-        } else {
-            $data['srch_company_id'] = $srch_company_id = '';
-        }
-
-        if (!empty($srch_company_id)) {
-            $where .= " AND a.company_id = '" . $this->db->escape_str($srch_company_id) . "'";
-        }
         if ($this->input->post('srch_customer_id') !== null) {
             $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
             $this->session->set_userdata('srch_customer_id', $srch_customer_id);
@@ -3717,23 +3732,12 @@ class Vendor extends CI_Controller
         } else {
             $data['srch_customer_id'] = $srch_customer_id = '';
         }
-
         if (!empty($srch_customer_id)) {
             $where .= " AND a.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
         }
 
-        // Vendor Filter
-        if ($this->input->post('srch_tender_enquiry_id') !== null) {
-            $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = $this->input->post('srch_tender_enquiry_id');
-            $this->session->set_userdata('srch_tender_enquiry_id', $srch_tender_enquiry_id);
-        } elseif ($this->session->userdata('srch_tender_enquiry_id')) {
-            $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = $this->session->userdata('srch_tender_enquiry_id');
-        } else {
-            $data['srch_tender_enquiry_id'] = $srch_tender_enquiry_id = '';
-        }
-        if (!empty($srch_tender_enquiry_id)) {
-            $where .= " AND a.tender_enquiry_id = '" . $this->db->escape_str($srch_tender_enquiry_id) . "'";
-        }
+
+
 
         // Vendor Filter
         if ($this->input->post('srch_vendor_id') !== null) {
@@ -3749,11 +3753,63 @@ class Vendor extends CI_Controller
         }
 
 
+        // Company Filter
+        if ($this->input->post('srch_customer_rfq_no') !== null) {
+            $data['srch_customer_rfq_no'] = $srch_customer_rfq_no = $this->input->post('srch_customer_rfq_no');
+            $this->session->set_userdata('srch_customer_rfq_no', $srch_customer_rfq_no);
+        } elseif ($this->session->userdata('srch_customer_rfq_no')) {
+            $data['srch_customer_rfq_no'] = $srch_customer_rfq_no = $this->session->userdata('srch_customer_rfq_no');
+        } else {
+            $data['srch_customer_rfq_no'] = $srch_customer_rfq_no = '';
+        }
+        if (!empty($srch_customer_rfq_no)) {
+            $where = " (t.enquiry_no = '" . $this->db->escape_str($srch_customer_rfq_no) . "')";
+            $data['srch_vendor_id'] = $srch_vendor_id = '';
+        }
+
+
+
+        if ($this->input->post('srch_enquiry_no') !== null) {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->input->post('srch_enquiry_no');
+            $this->session->set_userdata('srch_enquiry_no', $srch_enquiry_no);
+        } elseif ($this->session->userdata('srch_enquiry_no')) {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->session->userdata('srch_enquiry_no');
+        } else {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = '';
+        }
+        if (!empty($srch_enquiry_no)) {
+            $where = " ( concat(ifnull(ci.company_code,'') , '/', ifnull(t.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(t.customer_sno,''),  '/' , DATE_FORMAT(t.enquiry_date,'%Y') ) like '%" . $this->db->escape_str($srch_enquiry_no) . "%' ) ";
+
+            $data['srch_customer_id'] = $srch_customer_id = '';
+            $data['srch_vendor_id'] = $srch_vendor_id = '';
+        }
+
+        // Company Filter
+        if ($this->input->post('srch_invoice_no') !== null) {
+            $data['srch_invoice_no'] = $srch_invoice_no = $this->input->post('srch_invoice_no');
+            $this->session->set_userdata('srch_invoice_no', $srch_invoice_no);
+        } elseif ($this->session->userdata('srch_invoice_no')) {
+            $data['srch_invoice_no'] = $srch_invoice_no = $this->session->userdata('srch_invoice_no');
+        } else {
+            $data['srch_invoice_no'] = $srch_invoice_no = '';
+        }
+        if (!empty($srch_invoice_no)) {
+            $where = " (a.invoice_no = '" . $this->db->escape_str($srch_invoice_no) . "')";
+            $data['srch_vendor_id'] = $srch_vendor_id = '';
+            $data['srch_customer_id'] = $srch_customer_id = '';
+        }
+
         $this->db->from('vendor_purchase_invoice_info a');
+        $this->db->join('company_info ci', 'a.company_id = ci.company_id AND ci.status = "Active"', 'left');
+        $this->db->join('customer_info c', 'a.customer_id = c.customer_id AND c.status = "Active"', 'left');
+        $this->db->join('tender_enquiry_info t', 'a.tender_enquiry_id = t.tender_enquiry_id AND t.status = "Active"', 'left');
         $this->db->where('a.status !=', 'Delete');
         $this->db->where($where);
-        $this->db->where("DATE(a.invoice_date) BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'");
+
         $data['total_records'] = $this->db->count_all_results();
+
+
+
 
         // === PAGINATION ===
         $data['sno'] = $this->uri->segment(2, 0);
@@ -3808,7 +3864,7 @@ class Vendor extends CI_Controller
             $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
         }
         $data['tender_enquiry_opt'] = [];
-        if (!empty($srch_customer_id || $srch_tender_enquiry_id)) {
+        if (!empty($srch_customer_id)) {
 
             $sql = "
                 SELECT 
@@ -3827,30 +3883,25 @@ class Vendor extends CI_Controller
                 $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_details'];
             }
         }
-        if (!empty($srch_customer_id || $srch_tender_enquiry_id || $srch_tender_enquiry_id)) {
 
-            $sql = "
+        $sql = "
                 SELECT 
-                    d.vendor_id,
-                    d.vendor_name
+                    b.vendor_id,
+                    b.vendor_name
                 FROM  vendor_po_info AS a
-                left join company_info as b on a.company_id = b.company_id and b.`status`='Active'
-                left join customer_info as c on a.customer_id = c.customer_id and c.`status`='Active'
-                left join vendor_info as d on a.vendor_id = d.vendor_id and d.status='Active'
-                where a.`status`='Active'
-                and a.tender_enquiry_id= '" . $srch_tender_enquiry_id . "'
-                group by d.vendor_id ASC 
+                LEFT JOIN vendor_info as b on  a.vendor_id  =  b.vendor_id and b.status='Active'
+                where a.status='Active' 
             ";
 
+        $query = $this->db->query($sql);
 
-            $query = $this->db->query($sql);
-
-            foreach ($query->result_array() as $row) {
-                $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
-            }
+        foreach ($query->result_array() as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
         }
 
         $data['po_status_opt'] = ['' => 'Select PO Status', 'In Progress' => 'In Progress', 'Delivered' => 'Delivered'];
+
+
         // === FETCH RECORDS ===
         $sql = "
             SELECT 
@@ -3862,6 +3913,7 @@ class Vendor extends CI_Controller
                 a.invoice_date,
                 c.customer_name,
                 v.vendor_name,
+                t.enquiry_no as customer_rfq_no,
                 a.company_id,
                 a.customer_id, 
                 ci.company_name,
@@ -3871,8 +3923,7 @@ class Vendor extends CI_Controller
             LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
             LEFT JOIN tender_enquiry_info t ON a.tender_enquiry_id = t.tender_enquiry_id AND t.status != 'Delete'
             left join company_info as ci on t.company_id = ci.company_id and ci.status = 'Active'
-            WHERE a.status != 'Delete' AND $where
-            AND a.invoice_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "' 
+            WHERE a.status != 'Delete' AND $where 
             ORDER BY a.vendor_purchase_invoice_id  DESC
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
@@ -4309,6 +4360,64 @@ class Vendor extends CI_Controller
                 'value' => $row->po_no,   // value inserted in input
                 'vendor_po_id' => $row->vendor_po_id,
                 'po_no' => $row->po_no
+            ];
+        }
+
+        echo json_encode($result);
+    }
+    public function vendor_srch_inward_no()
+    {
+        $term = $this->input->post('search');
+
+        $sql = "
+            SELECT   
+                a.vendor_pur_inward_id,
+                a.inward_no
+            FROM vendor_pur_inward_info AS a 
+            WHERE a.status = 'Active'
+            AND a.inward_no LIKE '%" . $this->db->escape_like_str($term) . "%'
+            ORDER BY a.vendor_pur_inward_id   DESC, a.inward_no ASC 
+        ";
+
+        $query = $this->db->query($sql);
+
+        $result = [];
+
+        foreach ($query->result() as $row) {
+            $result[] = [
+                'label' => $row->inward_no,   // text shown in dropdown
+                'value' => $row->inward_no,   // value inserted in input
+                'vendor_pur_inward_id' => $row->vendor_pur_inward_id,
+                'inward_no' => $row->inward_no
+            ];
+        }
+
+        echo json_encode($result);
+    }
+    public function vendor_srch_invoice_no()
+    {
+        $term = $this->input->post('search');
+
+        $sql = "
+            SELECT   
+                a.vendor_purchase_invoice_id,
+                a.invoice_no
+            FROM vendor_purchase_invoice_info AS a 
+            WHERE a.status = 'Active'
+            AND a.invoice_no LIKE '%" . $this->db->escape_like_str($term) . "%'
+            ORDER BY a.vendor_purchase_invoice_id   DESC, a.invoice_no ASC 
+        ";
+
+        $query = $this->db->query($sql);
+
+        $result = [];
+
+        foreach ($query->result() as $row) {
+            $result[] = [
+                'label' => $row->invoice_no,    
+                'value' => $row->invoice_no,   
+                'vendor_purchase_invoice_id' => $row->vendor_purchase_invoice_id,
+                'invoice_no' => $row->invoice_no
             ];
         }
 
