@@ -20,50 +20,60 @@
         <div class="box-body">
             <form method="post" action="" id="frmsearch">
                 <div class="row">
-                    <div class="form-group col-md-2">
+                    <div class="form-group col-md-4">
                         <label for="srch_from_date">From Date</label>
                         <input type="date" name="srch_from_date" id="srch_from_date" class="form-control"
                             value="<?php echo set_value('srch_from_date', $srch_from_date); ?>">
                     </div>
 
-                    <div class="form-group col-md-2">
+                    <div class="form-group col-md-4">
                         <label for="srch_to_date">To Date</label>
                         <input type="date" name="srch_to_date" id="srch_to_date" class="form-control"
                             value="<?php echo set_value('srch_to_date', $srch_to_date); ?>">
                     </div>
-                    <div class="form-group col-md-3">
-                        <label>Company</label>
-                        <?php echo form_dropdown('srch_company_id', $company_opt, set_value('srch_company_id', $srch_company_id), 'id="srch_company_id" class="form-control select2"'); ?>
-                    </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-4">
                         <label>Customer</label>
                         <div class="form-group">
                             <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control select2" '); ?>
                         </div>
                     </div>
-                    <div class="form-group col-md-3">
-                        <label for="srch_customer_rfq_id">Tender RFQ No</label>
-                        <?php echo form_dropdown('srch_customer_rfq_id', ['' => 'All'] + $customer_rfq_opt, $srch_customer_rfq_id, 'id="srch_customer_rfq_id" class="form-control select2"'); ?>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <label for="">OR</label>
                     </div>
+                </div>
+                <div class="row">
+
+
                     <div class="form-group col-md-3">
-                        <label>Customer Contact Person</label> 
+                        <label for="srch_tender_enquiry_id">Customer RFQ No</label>
+                        <input type="text" name="srch_tender_enquiry_id" id="srch_tender_enquiry_id"
+                            class="form-control"
+                            value="<?php echo set_value('srch_tender_enquiry_id', $srch_tender_enquiry_id); ?>"
+                            placeholder="Search Customer RFQ No">
+                    </div>
+                   
+                    <div class="form-group col-md-3">
+                        <label for="srch_enquiry_no">Our Enquiry No</label>
+                        <input type="text" name="srch_enquiry_no" id="srch_enquiry_no" class="form-control"
+                            value="<?php echo set_value('srch_enquiry_no', $srch_enquiry_no); ?>" placeholder="Search The Our Enquiry No" >
+                    </div>
+                     <div class="form-group col-md-3">
+                        <label>Customer Contact Person</label>
                         <?php
                         echo form_dropdown(
                             'srch_customer_contact_id',
                             ['' => 'All'] + $customer_contact_opt,
-                            set_value('srch_customer_contact_id' , $srch_customer_contact_id),
+                            set_value('srch_customer_contact_id', $srch_customer_contact_id),
                             'id="srch_srch_customer_contact_id" class="form-control" '
                         );
-                        ?> 
-                    </div> 
-                    <div class="form-group col-md-3">
-                        <label for="srch_enquiry_no">Our Enquiry No</label>
-                        <input type="text" name="srch_enquiry_no" id="srch_enquiry_no" class="form-control" value="<?php echo set_value('srch_enquiry_no', $srch_enquiry_no); ?>">
+                        ?>
                     </div>
-                    <div class="form-group col-md-3">
+                    <!-- <div class="form-group col-md-3">
                         <label>Status</label>
                         <?php echo form_dropdown('srch_status', $tender_status_opt, set_value('srch_status', $srch_status), 'id="srch_status" class="form-control"'); ?>
-                    </div>
+                    </div> -->
                     <div class="form-group col-md-3 text-left">
                         <br>
                         <button type="submit" class="btn btn-success"><i class="fa fa-search"></i> Show</button>

@@ -17,40 +17,48 @@
         <div class="box-body">
             <form method="post" action="" id="frmsearch">
                 <div class="row">
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-4">
                         <label for="srch_from_date">From Date</label>
                         <input type="date" name="srch_from_date" id="srch_from_date" class="form-control"
                             value="<?php echo set_value('srch_from_date', $srch_from_date); ?>">
                     </div>
 
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-4">
                         <label for="srch_to_date">To Date</label>
                         <input type="date" name="srch_to_date" id="srch_to_date" class="form-control"
                             value="<?php echo set_value('srch_to_date', $srch_to_date); ?>">
                     </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-4">
                         <label>Customer</label>
-                        <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, set_value('srch_customer_id', $srch_customer_id), 'id="srch_customer_id" class="form-control select2"'); ?>
+                        <div class="form-group">
+                            <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control select2" '); ?>
+                        </div>
                     </div>
-
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <label for="">OR</label>
+                    </div>
+                </div>
+                <div class="row">
                     <div class="form-group col-md-3">
                         <label for="srch_tender_enquiry_id">Customer RFQ No</label>
                         <input type="text" name="srch_tender_enquiry_id" id="srch_tender_enquiry_id"
                             class="form-control"
                             value="<?php echo set_value('srch_tender_enquiry_id', $srch_tender_enquiry_id); ?>"
-                            placeholder="Search the customer rfq no">
+                            placeholder="Search The Customer RFQ No">
                     </div>
                     <div class="form-group col-md-3">
                         <label for="srch_enquiry_no">Our Enquiry No</label>
                         <input type="text" name="srch_enquiry_no" id="srch_enquiry_no" class="form-control"
                             value="<?php echo set_value('srch_enquiry_no', $srch_enquiry_no); ?>"
-                            placeholder="Search the our enquiry no">
+                            placeholder="Search The Our Enquiry No">
                     </div>
                     <div class="form-group col-md-3">
                         <label for="srch_tender_po_no">Customer PO No</label>
                         <input type="text" name="srch_tender_po_no" id="srch_tender_po_no" class="form-control"
                             value="<?php echo set_value('srch_tender_po_no', $srch_tender_po_no); ?>"
-                            placeholder="Search the our Po no">
+                            placeholder="Search The Customer PO No">
                     </div>
                     <div class="form-group col-md-3">
                         <label>&nbsp;</label>
@@ -184,77 +192,4 @@
     </div>
 </section>
 
-<?php include_once(VIEWPATH . 'inc/footer.php'); ?>
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
-<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-<script>
-    jQuery(function ($) {
-        $("#srch_enquiry_no").autocomplete({
-            source: function (request, response) {
-                $.ajax({
-                    url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
-                    type: "POST",
-                    data: { search: request.term },
-                    dataType: "json",
-                    success: function (data) {
-                        console.log(data);
-                        response(data);
-                    },
-                });
-            },
-
-            minLength: 1,
-
-            select: function (event, ui) {
-                console.log(ui);
-                // $("#srch_company_id").val(ui.item.company_id);
-                // $("#srch_customer_id").val(ui.item.customer_id).change();
-            },
-        });
-
-        $("#srch_tender_enquiry_id").autocomplete({
-            source: function (request, response) {
-                $.ajax({
-                    url: "<?php echo base_url('tender/tender_srch_rfq_no'); ?>",
-                    type: "POST",
-                    data: { search: request.term },
-                    dataType: "json",
-                    success: function (data) {
-                        console.log(data);
-                        response(data);
-                    },
-                });
-            },
-
-            minLength: 1,
-
-            select: function (event, ui) {
-                console.log(ui);
-                // $("#srch_company_id").val(ui.item.company_id);
-                // $("#srch_customer_id").val(ui.item.customer_id).change();
-            },
-        });
-        $("#srch_tender_po_no").autocomplete({
-            source: function (request, response) {
-                $.ajax({
-                    url: "<?php echo base_url('tender/srch_tender_po_no'); ?>",
-                    type: "POST",
-                    data: { search: request.term },
-                    dataType: "json",
-                    success: function (data) {
-                        console.log(data);
-                        response(data);
-                    },
-                });
-            },
-
-            minLength: 1,
-
-            select: function (event, ui) {
-                console.log(ui);
-                // $("#srch_company_id").val(ui.item.company_id);
-                // $("#srch_customer_id").val(ui.item.customer_id).change();
-            },
-        });
-    });
-</script>
+<?php include_once(VIEWPATH . 'inc/footer.php'); ?> 

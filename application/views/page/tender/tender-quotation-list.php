@@ -91,6 +91,7 @@
                         <th>Quote Date</th>
                         <th>Company / RFQ No</th>
                         <th>Customer</th>
+                        <th>Customer RFQ No</th>
                         <th>Quotation No</th>
                         <th>Quotation Status</th>
                         <th class="text-center" colspan="3">Action</th>
@@ -106,6 +107,7 @@
                             <span class="label label-success"><?php echo $row['tender_details']; ?></span>
                         </td>
                         <td><?php echo htmlspecialchars($row['customer_name']); ?></td>
+                               <td><?php echo $row['tender_ref_no']; ?></td>
                         <td><?php echo htmlspecialchars($row['quotation_no']); ?></td>
                         <?php
                                 $status = $row['quotation_status'];

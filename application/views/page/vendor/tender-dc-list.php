@@ -16,34 +16,43 @@
         <div class="box-body">
             <form method="post" action="" id="frmsearch">
                 <div class="row">
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-4">
                         <label for="srch_from_date">From Date</label>
                         <input type="date" name="srch_from_date" id="srch_from_date" class="form-control"
                             value="<?php echo set_value('srch_from_date', $srch_from_date); ?>">
                     </div>
 
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-4">
                         <label for="srch_to_date">To Date</label>
                         <input type="date" name="srch_to_date" id="srch_to_date" class="form-control"
                             value="<?php echo set_value('srch_to_date', $srch_to_date); ?>">
                     </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-4">
                         <label>Customer</label>
-                        <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, set_value('srch_customer_id', $srch_customer_id), 'id="srch_customer_id" class="form-control select2"'); ?>
+                        <div class="form-group">
+                            <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control select2" '); ?>
+                        </div>
                     </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <label for="">OR</label>
+                    </div>
+                </div>
+                <div class="row">
 
                     <div class="form-group col-md-3">
                         <label for="srch_tender_enquiry_id">Customer RFQ No</label>
                         <input type="text" name="srch_tender_enquiry_id" id="srch_tender_enquiry_id"
                             class="form-control"
                             value="<?php echo set_value('srch_tender_enquiry_id', $srch_tender_enquiry_id); ?>"
-                            placeholder="Search the customer rfq no">
+                            placeholder="Search The Customer RFQ No">
                     </div>
                     <div class="form-group col-md-3">
                         <label for="srch_enquiry_no">Our Enquiry No</label>
                         <input type="text" name="srch_enquiry_no" id="srch_enquiry_no" class="form-control"
                             value="<?php echo set_value('srch_enquiry_no', $srch_enquiry_no); ?>"
-                            placeholder="Search the our enquiry no">
+                            placeholder="Search the our Enquiry No">
                     </div>
                     <div class="form-group col-md-3">
                         <label for="srch_tender_dc_no">Dc No</label>
@@ -56,7 +65,7 @@
                         <br>
                         <button type="submit" class="btn btn-success"><i class="fa fa-search"></i>
                             Show</button>
-                    </div> 
+                    </div>
                 </div>
             </form>
         </div>

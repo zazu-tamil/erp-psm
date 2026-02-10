@@ -106,7 +106,7 @@
         $("#srch_tender_enquiry_id").autocomplete({
             source: function (request, response) {
                 $.ajax({
-                    url: "<?php echo base_url('tender/tender_srch_rfq_no'); ?>",
+                    url: "<?php echo base_url('tender/tender_quotation_ref_no'); ?>",
                     type: "POST",
                     data: { search: request.term },
                     dataType: "json",
