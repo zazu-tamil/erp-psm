@@ -663,6 +663,7 @@ class Master extends CI_Controller
 
         $this->load->view('page/master/gst-list', $data);
     }
+    
     public function items_list()
     {
         // Check if user is logged in
@@ -1701,6 +1702,104 @@ class Master extends CI_Controller
         $data['pagination'] = $this->pagination->create_links();
 
         $this->load->view('page/master/country-list', $data);
+    }
+
+    public function vat_filing_head_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        if (
+            $this->session->userdata(SESS_HD . 'level') != 'Admin'
+            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
+        ) {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+
+        $data['js'] = 'vat-filing-head-list.inc';
+
+
+        if ($this->input->post('mode') == 'Add') {
+
+            $ins = array(
+                'vat_filing_head_name' => $this->input->post('vat_filing_head_name'),
+                'vat_filing_head_type' => $this->input->post('vat_filing_head_type'),
+                'status' => $this->input->post('status')
+            );
+
+            $this->db->insert('vat_filing_head_info', $ins);
+            redirect('vat-filing-head-list/');
+
+        }
+
+        if ($this->input->post('mode') == 'Edit') {
+            $upd = array(
+                'vat_filing_head_name' => $this->input->post('vat_filing_head_name'),
+                'vat_filing_head_type' => $this->input->post('vat_filing_head_type'),
+                'status' => $this->input->post('status')
+            );
+
+            $this->db->where('vat_filing_head_id', $this->input->post('vat_filing_head_id'));
+            $this->db->update('vat_filing_head_info', $upd);
+
+            redirect('vat-filing-head-list/');
+        }
+
+
+        $this->load->library('pagination');
+
+        $this->db->where('status != ', 'Delete');
+        $this->db->from('vat_filing_head_info');
+        $data['total_records'] = $cnt = $this->db->count_all_results();
+
+        $data['sno'] = $this->uri->segment(2, 0);
+
+        $config['base_url'] = trim(site_url('vat-filing-head-list/'), '/' . $this->uri->segment(2, 0));
+        $config['total_rows'] = $cnt;
+        $config['per_page'] = 50;
+        $config['uri_segment'] = 2;
+         $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '<span class="sr-only">(current)</span></a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = "Prev";
+        $config['next_link'] = "Next";
+        $this->pagination->initialize($config);
+
+        $sql = "
+            SELECT *
+            FROM vat_filing_head_info
+            WHERE status != 'Delete'
+            order by vat_filing_head_type, vat_filing_head_name asc
+            limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
+        ";
+
+        $data['record_list'] = array();
+
+        $query = $this->db->query($sql);
+
+        foreach ($query->result_array() as $row) {
+            $data['record_list'][] = $row;
+        }
+
+
+
+        $data['pagination'] = $this->pagination->create_links();
+
+        $this->load->view('page/master/vat-filing-head-list', $data);
     }
 
     public function addt_charges_type_list()
