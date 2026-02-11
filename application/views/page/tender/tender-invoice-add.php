@@ -76,13 +76,12 @@
                                 echo form_dropdown(
                                     'currency_id',
                                     ['' => 'Select Currency'] + $currency_opt,
-                                    set_value('currency_id', $default_currency_id),
+                                    set_value('currency_id'),
                                     'id="currency_id" class="form-control" required'
                                 );
                                 ?>
                             </div>
                         </div>
-
                         <div class="form-group col-md-3">
                             <label>Invoice Status</label><br>
                             <label class="radio-inline"><input type="radio" name="invoice_status" value="Pending"
@@ -143,7 +142,7 @@
                                             <i class="fa fa-calculator text-success me-2"></i>
                                             <strong>Total Amount With Tax:</strong>
                                             <span class="text-primary"><span id="total_amount">0.000</span></span>
-                                          <input type="hidden" name="total_amount" class="total_amount_hidden">
+                                            <input type="hidden" name="total_amount" class="total_amount_hidden">
 
 
                                         </h5>
@@ -156,7 +155,7 @@
                                             <strong>Total Amount WO Tax:</strong>
                                             <span class="text-primary"><span
                                                     id="total_amount_wo_tax">0.000</span></span>
-                                          <input type="hidden" name="total_gst_amount" class="gst_amount_only_hidden">
+                                            <input type="hidden" name="total_gst_amount" class="gst_amount_only_hidden">
                                         </h5>
                                     </div>
                                 </div>

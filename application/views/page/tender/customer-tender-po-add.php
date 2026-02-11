@@ -34,7 +34,7 @@
                     <div class="row">
                         <div class="form-group col-md-3">
                             <label for="srch_company_id">Company <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_company_id',  $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
+                            <?php echo form_dropdown('srch_company_id', $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
                         </div>
 
                         <div class="form-group col-md-3">
@@ -103,7 +103,7 @@
                                 echo form_dropdown(
                                     'currency_id',
                                     ['' => 'Select Currency'] + $currency_opt,
-                                    set_value('currency_id', $default_currency_id),
+                                    set_value('currency_id'),
                                     'id="currency_id" class="form-control" required'
                                 );
                                 ?>
@@ -158,7 +158,7 @@
                     </div>
 
                     <div id="item_container"></div>
-                    <div class="row"> 
+                    <div class="row">
                         <div class="col-md-3 pull-right ">
                             <div class="total-box shadow-sm">
                                 <h5 class="mb-0">
@@ -176,7 +176,7 @@
                                     <span class="text-primary"><span id="total_amount_wo_tax">0.000</span></span>
                                 </h5>
                             </div>
-                        </div> 
+                        </div>
                     </div>
                     <!-- <div class="total-wrapper mt-4 mb-4">
                         <div class="total-box shadow-sm">
@@ -217,3 +217,5 @@
                       </div>
                     </div>*/
 ?>
+
+ 
