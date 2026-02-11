@@ -182,7 +182,7 @@
 
                                         <td>
                                             <input type="number" step="any" name="rate[<?php echo $index; ?>]"
-                                                class="form-control rate-input" value="<?php echo number_format($item[' '], 3); ?>">
+                                                class="form-control rate-input" value="<?php echo number_format($item['rate'], 3); ?>">
                                         </td>
 
                                         <td>
