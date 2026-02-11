@@ -351,3 +351,6 @@ ALTER TABLE `currencies_info`
 	09-02-2026
 
 	ALTER TABLE `tender_enq_invoice_info` ADD `currency_id` INT NULL AFTER `tender_po_id`;
+
+	ALTER TABLE `tender_enq_invoice_info` ADD `currency_id` INT NULL AFTER `tender_po_id`;
+

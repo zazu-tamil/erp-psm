@@ -83,17 +83,16 @@
 
                         <div class="form-group col-md-4">
                             <label>Vendor Quotation No <span style="color:red;">*</span>
-                                <span data-toggle="tooltip" title="" class=""
-                                    data-original-title="Only when Vendor Quotation Status is Confirmed then select the Quotation No. Otherwise leave it blank.">
-                                    <i class="text-sm text-info fa fa-info-circle"></i>
-                                </span>
+
                             </label>
-                            <?php echo form_dropdown('srch_vendor_quote_id', ['' => 'Select Enquiry No'], set_value('srch_vendor_quote_id'), 'id="srch_vendor_quote_id" class="form-control" required'); ?>
+                            <select name="srch_vendor_quote_id" id="srch_vendor_quote_id"
+                                class="form-control "></select>
+
                         </div>
 
                         <div class="form-group col-md-4">
                             <label>Contact Person</label>
-                            <?php echo form_dropdown('srch_vendor_contact_person_id', ['' => 'Select Contact'] + $vendor_contact_opt, set_value('srch_vendor_contact_person_id'), 'id="srch_vendor_contact_id" class="form-control"'); ?>
+                            <?php echo form_dropdown('srch_vendor_contact_person_id', $vendor_contact_opt, set_value('srch_vendor_contact_person_id'), 'id="srch_vendor_contact_id" class="form-control"'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
@@ -185,16 +184,28 @@
                             </tr>
                         </thead>
                         <tbody id="item_container"></tbody>
-                        <thead>
-                            <tr>
-                                <th colspan="6" class="text-right">Total</th>
-                                <th class="text-right">
-                                    <span class="value"> <span id="total_amount">0.00</span></span>
-                                </th>
-                            </tr>
-                        </thead>
-                    </table>
 
+                    </table>
+                    <div class="row">
+                        <div class="col-md-3 pull-right ">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount With Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3 pull-right">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount WO Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount_wo_tax">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
                 </fieldset>
             </div>
 
@@ -212,58 +223,3 @@
 
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
-
-<script>
-    $("#srch_vendor_id").on("change", function () {
-        const vendor_id = $(this).val();
-        const $enquiry = $("#srch_vendor_quote_id");
-
-        const tender_enquiry_id = $("#srch_tender_enquiry_id").val();
-
-        const $contact = $("#srch_vendor_contact_id");
-
-        $enquiry.html('<option value="">Select Enquiry No</option>');
-        $contact.html('<option value="">Select Contact</option>');
-
-        if (!vendor_id) return;
-
-        // Load Rate Enquiry Nos
-        $.post(
-            "<?php echo site_url('vendor/get_data'); ?>",
-            {
-                tbl: "get-vendor-quotation-load-enquiry-no",
-                id: vendor_id,
-                tender_enquiry_id: tender_enquiry_id
-            },
-            function (res) {
-                if (res.length > 0) {
-                    $.each(res, function (i, row) {
-                        $enquiry.append(
-                            `<option value="${row.vendor_quote_id}">${row.vendor_quote_no}</option>`,
-                        );
-                    });
-                }
-            },
-            "json",
-        );
-
-        // Load Contact Persons
-        $.post(
-            "<?php echo site_url('vendor/get_data'); ?>",
-            {
-                tbl: "get-vendor-contacts",
-                id: vendor_id,
-            },
-            function (res) {
-                if (res.length > 0) {
-                    $.each(res, function (i, row) {
-                        $contact.append(
-                            `<option value="${row.vendor_contact_id}">${row.contact_person_name}</option>`,
-                        );
-                    });
-                }
-            },
-            "json",
-        );
-    });
-</script>
