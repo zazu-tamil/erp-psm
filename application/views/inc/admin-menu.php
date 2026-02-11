@@ -489,7 +489,11 @@ class="treeview <?= in_array($this->uri->segment(1), ['cash-ledger', 'cash-in-st
                 <li class="<?= ($current_page === 'gst-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('gst-list') ?>"><i class="fa fa-percent"></i> VAT List</a>
                 </li> -->
-
+                <li class="<?= ($this->uri->segment(1) == 'vat-filing-head-list') ? 'active' : '' ?>">
+                    <a href="<?= site_url('vat-filing-head-list') ?>">
+                        <i class="fa fa-file-text-o"></i> VAT Filing Head List
+                    </a>
+                </li>
                 <li class="<?= ($current_page === 'currency-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('currency-list') ?>"><i class="fa fa-money"></i> Currency List</a>
                 </li>
@@ -503,7 +507,7 @@ class="treeview <?= in_array($this->uri->segment(1), ['cash-ledger', 'cash-in-st
                 </li>
                 <li class="<?= ($this->uri->segment(1) == 'addt-charges-type-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('addt-charges-type-list') ?>">
-                        <i class="fa fa-tag"></i> Additional Charges Type List
+                        <i class="fa fa-tag"></i> Addt Charges Type List
                     </a>
                 </li>
 

@@ -252,6 +252,9 @@ $route['settings/(:num)'] = 'master/settings_list/$1';
 $route['country-list'] = 'master/country_list';
 $route['country-list/(:num)'] = 'master/country_list/$1';
 
+$route['vat-filing-head-list'] = 'master/vat_filing_head_list';
+$route['vat-filing-head-list/(:num)'] = 'master/vat_filing_head_list/$1';
+
 $route['addt-charges-type-list'] = 'master/addt_charges_type_list';
 $route['addt-charges-type-list/(:num)'] = 'master/addt_charges_type_list/$1';
 

@@ -306,6 +306,21 @@ class General extends CI_Controller
             foreach ($query->result_array() as $row) {
                 $rec_list = $row;
             }
+        }
+
+        if ($table == 'vat_filing_head_info') {
+            $query = $this->db->query(" 
+                select 
+                a.* 
+                from vat_filing_head_info as a  
+                where a.vat_filing_head_id = '" . $rec_id . "'
+            ");
+
+            $rec_list = array();
+
+            foreach ($query->result_array() as $row) {
+                $rec_list = $row;
+            }
 
         }
         if ($table == 'addt_charges_type_info') {
@@ -349,6 +364,12 @@ class General extends CI_Controller
             $this->db->update('country_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
         }
+        
+        if( $table == 'vat_filing_head_info') {
+             $this->db->where('vat_filing_head_id', $rec_id);
+            $this->db->update('vat_filing_head_info', array('status' => 'Delete'));
+            echo "Record Deleted Successfully";
+        }   
         if ($table == 'addt_charges_type_info') {
             $this->db->where('addt_charges_type_id', $rec_id);
             $this->db->update('addt_charges_type_info', array('status' => 'Delete'));
