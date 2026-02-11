@@ -34,13 +34,15 @@
                         <i class="fa fa-file-text-o"></i> Purchase Bill Details
 
                     </legend>
-                    <div style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
+                    <div
+                        style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
                         <div class="row">
                             <div class="col-md-4 form-group">
                                 <label for="srch_enq_id">Search Enquiry No</label>
-                                <input type="text" name="srch_enq_id" class="form-control srch_enq_id" value="" placeholder="Search Enquiry No" />
+                                <input type="text" name="srch_enq_id" class="form-control srch_enq_id" value=""
+                                    placeholder="Search Enquiry No" />
                             </div>
-                        </div> 
+                        </div>
                     </div>
 
 
@@ -103,26 +105,31 @@
                             <label class="radio-inline"><input type="radio" name="status" value="Inactive"
                                     <?php echo set_radio('status', 'Inactive'); ?>> Inactive</label>
                         </div>
-
-                        <div class="form-group col-md-4">
-                            <label>VAT Payer Purchase</label>
-                            <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('vat_payer_purchase_grp'), 'id="vat_payer_purchase_grp" class="form-control"'); ?>
-                        </div>
-
-                        <div class="form-group col-md-4">
-                            <label>Declaration Number</label>
-                            <input type="text" name="declaration_no" id="declaration_no" class="form-control">
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label>Declaration Date</label>
-                            <input type="date" name="declaration_date" id="declaration_date" class="form-control">
-                        </div>
-
-
-
-
                     </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <fieldset 
+                                style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px;">
+                                <legend class="text-info">For Purchase NBR - VAT Filing </legend>
 
+                                <div class="form-group col-md-6">
+                                    <label>VAT Payer Purchase</label>
+                                    <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('vat_payer_purchase_grp'), 'id="vat_payer_purchase_grp" class="form-control"'); ?>
+                                </div>
+
+                                <div class="form-group col-md-3">
+                                    <label>Declaration Number</label>
+                                    <input type="text" name="declaration_no" id="declaration_no" class="form-control">
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>Declaration Date</label>
+                                    <input type="date" name="declaration_date" id="declaration_date"
+                                        class="form-control">
+                                </div>
+
+                            </fieldset>
+                        </div>
+                    </div> 
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
@@ -163,7 +170,7 @@
                                 <input type="hidden" name="total_gst_amount" id="total_gst_amount">
                             </div>
 
-                           
+
                         </fieldset>
                     </div>
                 </div>
@@ -184,4 +191,3 @@
 
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
-

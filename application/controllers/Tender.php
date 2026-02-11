@@ -3396,9 +3396,9 @@ class Tender extends CI_Controller
             if ($this->db->trans_status() === FALSE) {
                 $this->session->set_flashdata('error', 'Error saving data. Please try again.');
             } else {
-                $this->session->set_flashdata('success', 'Tender Quotation saved successfully.');
+                $this->session->set_flashdata('success', 'Tender DC saved successfully.');
             }
-            redirect('tender-dc-list/');
+            redirect('tender-dc-edit/' . $tender_dc_id);
         }
 
         // Get all companies
@@ -3549,7 +3549,8 @@ class Tender extends CI_Controller
                 $this->session->set_flashdata('success', 'DC updated successfully.');
             }
 
-            redirect('tender-dc-list/');
+            //redirect('tender-dc-list/');
+            redirect('tender-dc-edit/' . $tender_dc_id);
         }
 
 

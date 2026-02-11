@@ -3661,17 +3661,32 @@ class Vendor extends CI_Controller
         }
 
         $data['vendor_opt'] = [];
-        $data['vat_payer_purchase_opt'] = [
-            '' => 'Select VAT Payer Purchase Category',
-            'Standard Rated Domestic Purchases at 5% (Line 8 of the VAT Return)' => 'Standard Rated Domestic Purchases at 5% (Line 8 of the VAT Return)',
-            'Standard Rated Domestic Purchases at 10% (Line 8 of the VAT Return)' => 'Standard Rated Domestic Purchases at 10% (Line 8 of the VAT Return)',
-            'Import subject to VAT paid at customs (Line 9 of the VAT Return)' => 'Import subject to VAT paid at customs (Line 9 of the VAT Return)',
-            'Imports subject to deferral at customs (Line 10 of the VAT Return)' => 'Imports subject to deferral at customs (Line 10 of the VAT Return)',
-            'Import subject to VAT accounted for through reverse charge mechanism at 5% (Line 11 of the VAT Return)' => 'Import subject to VAT accounted for through reverse charge mechanism at 5% (Line 11 of the VAT Return)',
-            'Import subject to VAT accounted for through reverse charge mechanism at 10% (Line 11 of the VAT Return)' => 'Import subject to VAT accounted for through reverse charge mechanism at 10% (Line 11 of the VAT Return)',
-            'Purchases subject to domestic reverse charge mechanism (Line 12 of the VAT Return)' => 'Purchases subject to domestic reverse charge mechanism (Line 12 of the VAT Return)',
-            'Purchases from non-register taxpayers, zero-rated/ exempt purchases (Line 13 of the VAT Return)' => 'Purchases from non-register taxpayers, zero-rated/ exempt purchases (Line 13 of the VAT Return)',
-        ];
+
+        $sql = "
+            SELECT 
+            vat_filing_head_name 
+            FROM vat_filing_head_info 
+            WHERE status = 'Active' 
+            and vat_filing_head_type = 'Purchase'
+            ORDER BY vat_filing_head_id ASC
+            ";
+        $query = $this->db->query($sql);
+        $data['vat_payer_purchase_opt'] = ['' => 'Select VAT Payer Purchase Category'];
+        foreach ($query->result_array() as $row) {
+            $data['vat_payer_purchase_opt'][$row['vat_filing_head_name']] = $row['vat_filing_head_name'];
+        }
+
+        // $data['vat_payer_purchase_opt'] = [
+        //     '' => 'Select VAT Payer Purchase Category',
+        //     'Standard Rated Domestic Purchases at 5% (Line 8 of the VAT Return)' => 'Standard Rated Domestic Purchases at 5% (Line 8 of the VAT Return)',
+        //     'Standard Rated Domestic Purchases at 10% (Line 8 of the VAT Return)' => 'Standard Rated Domestic Purchases at 10% (Line 8 of the VAT Return)',
+        //     'Import subject to VAT paid at customs (Line 9 of the VAT Return)' => 'Import subject to VAT paid at customs (Line 9 of the VAT Return)',
+        //     'Imports subject to deferral at customs (Line 10 of the VAT Return)' => 'Imports subject to deferral at customs (Line 10 of the VAT Return)',
+        //     'Import subject to VAT accounted for through reverse charge mechanism at 5% (Line 11 of the VAT Return)' => 'Import subject to VAT accounted for through reverse charge mechanism at 5% (Line 11 of the VAT Return)',
+        //     'Import subject to VAT accounted for through reverse charge mechanism at 10% (Line 11 of the VAT Return)' => 'Import subject to VAT accounted for through reverse charge mechanism at 10% (Line 11 of the VAT Return)',
+        //     'Purchases subject to domestic reverse charge mechanism (Line 12 of the VAT Return)' => 'Purchases subject to domestic reverse charge mechanism (Line 12 of the VAT Return)',
+        //     'Purchases from non-register taxpayers, zero-rated/ exempt purchases (Line 13 of the VAT Return)' => 'Purchases from non-register taxpayers, zero-rated/ exempt purchases (Line 13 of the VAT Return)',
+        // ];
 
         $data['vendor_contact_opt'] = [];
         $sql = "
@@ -4217,17 +4232,32 @@ class Vendor extends CI_Controller
         }
 
         $data['vendor_opt'] = [];
-        $data['vat_payer_purchase_opt'] = [
-            '' => 'Select VAT Payer Purchase Category',
-            'Standard Rated Domestic Purchases at 5% (Line 8 of the VAT Return)' => 'Standard Rated Domestic Purchases at 5% (Line 8 of the VAT Return)',
-            'Standard Rated Domestic Purchases at 10% (Line 8 of the VAT Return)' => 'Standard Rated Domestic Purchases at 10% (Line 8 of the VAT Return)',
-            'Import subject to VAT paid at customs (Line 9 of the VAT Return)' => 'Import subject to VAT paid at customs (Line 9 of the VAT Return)',
-            'Imports subject to deferral at customs (Line 10 of the VAT Return)' => 'Imports subject to deferral at customs (Line 10 of the VAT Return)',
-            'Import subject to VAT accounted for through reverse charge mechanism at 5% (Line 11 of the VAT Return)' => 'Import subject to VAT accounted for through reverse charge mechanism at 5% (Line 11 of the VAT Return)',
-            'Import subject to VAT accounted for through reverse charge mechanism at 10% (Line 11 of the VAT Return)' => 'Import subject to VAT accounted for through reverse charge mechanism at 10% (Line 11 of the VAT Return)',
-            'Purchases subject to domestic reverse charge mechanism (Line 12 of the VAT Return)' => 'Purchases subject to domestic reverse charge mechanism (Line 12 of the VAT Return)',
-            'Purchases from non-register taxpayers, zero-rated/ exempt purchases (Line 13 of the VAT Return)' => 'Purchases from non-register taxpayers, zero-rated/ exempt purchases (Line 13 of the VAT Return)',
-        ];
+
+         $sql = "
+            SELECT 
+            vat_filing_head_name 
+            FROM vat_filing_head_info 
+            WHERE status = 'Active' 
+            and vat_filing_head_type = 'Purchase'
+            ORDER BY vat_filing_head_id ASC
+            ";
+        $query = $this->db->query($sql);
+        $data['vat_payer_purchase_opt'] = ['' => 'Select VAT Payer Purchase Category'];
+        foreach ($query->result_array() as $row) {
+            $data['vat_payer_purchase_opt'][$row['vat_filing_head_name']] = $row['vat_filing_head_name'];
+        }
+        
+        // $data['vat_payer_purchase_opt'] = [
+        //     '' => 'Select VAT Payer Purchase Category',
+        //     'Standard Rated Domestic Purchases at 5% (Line 8 of the VAT Return)' => 'Standard Rated Domestic Purchases at 5% (Line 8 of the VAT Return)',
+        //     'Standard Rated Domestic Purchases at 10% (Line 8 of the VAT Return)' => 'Standard Rated Domestic Purchases at 10% (Line 8 of the VAT Return)',
+        //     'Import subject to VAT paid at customs (Line 9 of the VAT Return)' => 'Import subject to VAT paid at customs (Line 9 of the VAT Return)',
+        //     'Imports subject to deferral at customs (Line 10 of the VAT Return)' => 'Imports subject to deferral at customs (Line 10 of the VAT Return)',
+        //     'Import subject to VAT accounted for through reverse charge mechanism at 5% (Line 11 of the VAT Return)' => 'Import subject to VAT accounted for through reverse charge mechanism at 5% (Line 11 of the VAT Return)',
+        //     'Import subject to VAT accounted for through reverse charge mechanism at 10% (Line 11 of the VAT Return)' => 'Import subject to VAT accounted for through reverse charge mechanism at 10% (Line 11 of the VAT Return)',
+        //     'Purchases subject to domestic reverse charge mechanism (Line 12 of the VAT Return)' => 'Purchases subject to domestic reverse charge mechanism (Line 12 of the VAT Return)',
+        //     'Purchases from non-register taxpayers, zero-rated/ exempt purchases (Line 13 of the VAT Return)' => 'Purchases from non-register taxpayers, zero-rated/ exempt purchases (Line 13 of the VAT Return)',
+        // ];
 
 
         $sql = "
