@@ -2196,7 +2196,7 @@ class Tender extends CI_Controller
             $data['gst_opt'][$row['gst_id']] = $row['gst_percentage'];
         }
 
-        $data['default_currency_id'] = '';
+
 
         $sql = "
             SELECT currency_id, currency_code
@@ -2208,10 +2208,6 @@ class Tender extends CI_Controller
 
         foreach ($query->result_array() as $row) {
             $data['currency_opt'][$row['currency_id']] = $row['currency_code'];
-
-            if ($row['currency_code'] === 'BHD') {
-                $data['default_currency_id'] = $row['currency_id'];
-            }
         }
 
         $this->load->view('page/tender/customer-tender-po-add', $data);
@@ -2758,7 +2754,7 @@ class Tender extends CI_Controller
             $data['gst_opt'][$row['gst_id']] = $row['gst_percentage'];
         }
 
-        $data['default_currency_id'] = '';
+        $data['currency_opt'] = [];
 
         $sql = "
             SELECT currency_id, currency_code
@@ -2770,10 +2766,6 @@ class Tender extends CI_Controller
 
         foreach ($query->result_array() as $row) {
             $data['currency_opt'][$row['currency_id']] = $row['currency_code'];
-
-            if ($row['currency_code'] === 'BHD') {
-                $data['default_currency_id'] = $row['currency_id'];
-            }
         }
 
         $this->load->view('page/tender/tender-invoice-add', $data);
@@ -4052,6 +4044,71 @@ class Tender extends CI_Controller
         $result = $query->result_array();
         echo json_encode($result);
     }
+
+    public function get_tender_quotaction_currency_id()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            echo json_encode(['error' => 'Unauthorized']);
+            return;
+        }
+
+        $tender_quotation_id = $this->input->post('tender_quotation_id');
+
+        if (empty($tender_quotation_id)) {
+            echo json_encode([]);
+            return;
+        }
+
+        $sql = "
+            SELECT 
+                tqi.tender_quotation_id, 
+                curr.currency_id,
+                curr.currency_code
+            FROM tender_quotation_info tqi  
+            LEFT JOIN currencies_info curr 
+                ON tqi.currency_id = curr.currency_id 
+                AND curr.status = 'Active'
+            WHERE tqi.status = 'Active'
+            AND tqi.tender_quotation_id = ?
+            ORDER BY tqi.tender_quotation_id ASC
+        ";
+
+        $query = $this->db->query($sql, [$tender_quotation_id]);
+        $result = $query->result_array();
+        echo json_encode($result);
+    }
+    public function get_tender_po_currency_id()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            echo json_encode(['error' => 'Unauthorized']);
+            return;
+        }
+
+        $tender_po_id = $this->input->post('tender_po_id'); // ✅ fixed
+
+        if (empty($tender_po_id)) {
+            echo json_encode([]);
+            return;
+        }
+
+        $sql = "
+            SELECT 
+                curr.currency_id,
+                curr.currency_code
+            FROM customer_tender_po_info as a 
+            LEFT JOIN currencies_info curr 
+                ON a.currency_id = curr.currency_id 
+                AND curr.status = 'Active'
+            WHERE a.status = 'Active'
+            AND a.tender_po_id = ?
+            ORDER BY a.tender_po_id ASC
+        ";
+
+        $query = $this->db->query($sql, [$tender_po_id]);
+        $result = $query->result_array();
+        echo json_encode($result);
+    }
+
 
 
     public function get_data()

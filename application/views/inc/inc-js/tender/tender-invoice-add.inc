@@ -492,6 +492,28 @@
           alert("Error loading items");
         },
       });
+
+      $.ajax({
+        url: "<?php echo site_url('tender/get_tender_po_currency_id'); ?>",
+        type: "POST",
+        data: {
+          tender_po_id: tender_po_id,
+        },
+        dataType: "json",
+        success: function (res) {
+          //console.log(d);
+          var $currencyDropdown = $("#currency_id");
+
+          if (res.length > 0) {
+            $currencyDropdown.val(res[0].currency_id).trigger("change");
+          } else {
+            $currencyDropdown.val("");
+          }
+        },
+        error: function () {
+          alert("Error loading currency");
+        },
+      });
     });
 
     /* ===============================
