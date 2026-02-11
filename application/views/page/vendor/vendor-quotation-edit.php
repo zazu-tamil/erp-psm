@@ -219,16 +219,16 @@
                             </tr>
                             <?php $index++; endforeach; ?>
                             <?php endif; ?>
-                        </tbody>
-                        <thead>
-                            <tr>
-                                <th colspan="6" class="text-right">Total</th>
-                                <th class="text-right">
-                                    <span class="value"> <span id="total_amount">0.00</span></span>
-                                </th>
-                            </tr>
-                        </thead>
+                        </tbody> 
                     </table>
+
+                      <div class="total-box shadow-sm">
+                        <h5 class="mb-0">
+                            <i class="fa fa-calculator text-success me-2"></i>
+                            <strong>Total Amount:</strong>
+                            <span class="text-primary"><span id="total_amount">0.00</span></span>
+                        </h5>
+                    </div>
                 </fieldset>
             </div>
 
