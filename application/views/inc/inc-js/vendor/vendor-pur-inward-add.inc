@@ -223,54 +223,66 @@
     });
 
     // 4. Vendor → Load Rate Enquiry Numbers
-    $("#srch_vendor_id").on("change", function () {
-      const vendor_id = $(this).val();
-      const $enquiry = $("#srch_vendor_po_id");
-      const $contact = $("#srch_vendor_contact_id");
+   $("#srch_vendor_id").on("change", function () {
 
-      $enquiry.html('<option value="">Select Enquiry No</option>');
-      $contact.html('<option value="">Select Contact</option>');
+    const vendor_id = $(this).val();
+    const $enquiry = $("#srch_vendor_po_id");
+    const $contact = $("#srch_vendor_contact_id");
 
-      if (!vendor_id) return;
+    let tender_enquiry_id = $('#srch_tender_enquiry_id').val();
 
-      // Load Rate Enquiry Nos
-      $.post(
+    $enquiry.html('<option value="">Select Enquiry No</option>');
+    $contact.html('<option value="">Select Contact</option>');
+
+    if (!vendor_id) return;
+
+    // Load Rate Enquiry Nos
+    $.post(
         "<?php echo site_url('vendor/get_data'); ?>",
         {
-          tbl: "get-vendor-purchase-inward-load-list",
-          id: vendor_id,
+            tbl: "get-vendor-purchase-inward-load-list",
+            id: vendor_id,
+            tender_enquiry_id: tender_enquiry_id
         },
         function (res) {
-          if (res.length > 0) {
-            $.each(res, function (i, row) {
-              $enquiry.append(
-                `<option value="${row.vendor_po_id}">${row.vendor_po_no}</option>`
-              );
-            });
-          }
+
+            console.log(res);
+
+            if (res.length > 0) {
+                $.each(res, function (i, row) {
+                    $enquiry.append(
+                        `<option value="${row.vendor_po_id}">
+                            ${row.vendor_po_no}
+                        </option>`
+                    );
+                });
+            }
         },
         "json"
-      );
+    );
 
-      // Load Contact Persons
-      $.post(
+    // Load Contact Persons
+    $.post(
         "<?php echo site_url('vendor/get_data'); ?>",
         {
-          tbl: "get-vendor-contacts",
-          id: vendor_id,
+            tbl: "get-vendor-contacts",
+            id: vendor_id
         },
         function (res) {
-          if (res.length > 0) {
-            $.each(res, function (i, row) {
-              $contact.append(
-                `<option value="${row.vendor_contact_id}">${row.contact_person_name}</option>`
-              );
-            });
-          }
+
+            if (res.length > 0) {
+                $.each(res, function (i, row) {
+                    $contact.append(
+                        `<option value="${row.vendor_contact_id}">
+                            ${row.contact_person_name}
+                        </option>`
+                    );
+                });
+            }
         },
         "json"
-      );
-    });
+    );
+});
   });
 
   // CKEditor

@@ -35,19 +35,21 @@
 
                     </legend>
 
-                    <div style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
+                    <div
+                        style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
                         <div class="row">
                             <div class="col-md-4 form-group">
                                 <label for="srch_enq_id">Search Enquiry No</label>
-                                <input type="text" name="srch_enq_id" class="form-control srch_enq_id" value="" placeholder="Search Enquiry No" />
+                                <input type="text" name="srch_enq_id" class="form-control srch_enq_id" value=""
+                                    placeholder="Search Enquiry No" />
                             </div>
-                        </div> 
+                        </div>
                     </div>
 
                     <div class="row">
                         <div class="form-group col-md-4">
                             <label>Company <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_company_id',   $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
+                            <?php echo form_dropdown('srch_company_id', $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
@@ -66,18 +68,25 @@
                         </div>
 
                         <div class="form-group col-md-4">
-                            <label>Vendor PO No <span style="color:red;">*</span>
-                                <span data-toggle="tooltip" title="" class=""
+                            <label>
+                                Vendor PO No <span style="color:red;">*</span>
+                                <span data-toggle="tooltip"
                                     data-original-title="Only when Vendor PO Status is Confirmed then select the PO No. Otherwise leave it blank.">
                                     <i class="text-sm text-info fa fa-info-circle"></i>
                                 </span>
                             </label>
-                            <?php echo form_dropdown('srch_vendor_po_id', ['' => 'Select PO No'], set_value('srch_vendor_po_id'), 'id="srch_vendor_po_id" class="form-control" required'); ?>
+
+                            <select name="srch_vendor_po_id" id="srch_vendor_po_id" class="form-control" required>
+
+                            </select>
                         </div>
+
 
                         <div class="form-group col-md-4">
                             <label>Contact Person</label>
-                            <?php echo form_dropdown('srch_vendor_contact_person_id', ['' => 'Select Contact'] + $vendor_contact_opt, set_value('srch_vendor_contact_person_id'), 'id="srch_vendor_contact_id" class="form-control"'); ?>
+                            <?php echo form_dropdown('srch_vendor_contact_person_id', $vendor_contact_opt, set_value('srch_vendor_contact_person_id'), 'id="srch_vendor_contact_id" class="form-control"'); ?>
+
+                             
                         </div>
 
                         <div class="form-group col-md-4">
@@ -94,7 +103,7 @@
                         <div class="form-group col-md-4">
                             <label>Upload Quotation Document</label>
                             <input type="file" name="dc_upload" id="dc_upload" class="form-control">
-                        </div> 
+                        </div>
                         <div class="form-group col-md-4">
                             <label>Status</label><br>
                             <label class="radio-inline"><input type="radio" name="status" value="Active" <?php echo set_radio('status', 'Active', TRUE); ?>> Active</label>
@@ -124,7 +133,7 @@
                                 <th style="width:30%;">Description</th>
                                 <th style="width:5%;">UOM</th>
                                 <th style="width:10%;">Qty</th>
-                             </tr>
+                            </tr>
                         </thead>
                         <tbody id="item_container"></tbody>
                     </table>

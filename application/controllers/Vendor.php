@@ -2875,9 +2875,7 @@ class Vendor extends CI_Controller
             left join vendor_info as d on a.vendor_id = d.vendor_id and d.status='Active'
             where a.`status`='Active'
             and a.tender_enquiry_id= ?
-            group by d.vendor_id ASC 
-            
-          
+            group by d.vendor_id ASC  
         ";
 
         $query = $this->db->query($sql, [$tender_enquiry_id]);
@@ -3173,18 +3171,17 @@ class Vendor extends CI_Controller
 
         if ($table == 'get-vendor-purchase-inward-load-list') {
 
+            $tender_enquiry_id = $this->input->post('tender_enquiry_id');
+
             $query = $this->db->query("
-                   SELECT
-                        a.vendor_po_id, 
-                        IF(NULLIF(a.po_no, '') IS NULL, '', a.po_no) AS vendor_po_no 
-                    FROM vendor_po_info AS a
-                    LEFT JOIN vendor_info AS b 
-                        ON a.vendor_id = b.vendor_id AND b.status = 'Active'
-                    LEFT JOIN vendor_contact_info AS c 
-                        ON a.vendor_contact_person_id = c.vendor_contact_id 
-                        AND c.vendor_id = b.vendor_id 
-                        AND c.status = 'Active'
-                    WHERE a.status = 'Active'
+                  SELECT
+                    a.vendor_po_id,
+                    a.vendor_id,
+                    IF(NULLIF(a.po_no, '') IS NULL, '', a.po_no) AS vendor_po_no 
+                    FROM vendor_po_info as a 
+                    left JOIN vendor_info as b on a.vendor_id  = b.vendor_id and b.status='Active'
+                    where a.status='Active' 
+                    and a.tender_enquiry_id = '" . $tender_enquiry_id . "'
                     AND a.vendor_id =  '" . $rec_id . "'
                     ORDER BY a.po_no desc
             ");

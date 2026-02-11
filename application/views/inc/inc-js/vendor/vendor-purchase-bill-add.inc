@@ -106,7 +106,7 @@
                 $("<option>", {
                   value: row.tender_enquiry_id,
                   text: row.display,
-                })
+                }),
               );
             });
 
@@ -116,7 +116,7 @@
             }
           } else {
             $enquiryDropdown.html(
-              '<option value="">No enquiries found</option>'
+              '<option value="">No enquiries found</option>',
             );
           }
         },
@@ -211,12 +211,12 @@
           if (res.length > 0) {
             $.each(res, function (i, row) {
               $vendor.append(
-                `<option value="${row.vendor_id}">${row.vendor_name}</option>`
+                `<option value="${row.vendor_id}">${row.vendor_name}</option>`,
               );
             });
           }
         },
-        "json"
+        "json",
       );
     });
 
@@ -225,6 +225,8 @@
       const vendor_id = $(this).val();
       const $enquiry = $("#srch_vendor_po_id");
       const $contact = $("#srch_vendor_contact_id");
+
+      let tender_enquiry_id = $("#srch_tender_enquiry_id").val();
 
       $enquiry.html('<option value="">Select Enquiry No</option>');
       $contact.html('<option value="">Select Contact</option>');
@@ -237,17 +239,22 @@
         {
           tbl: "get-vendor-purchase-inward-load-list",
           id: vendor_id,
+          tender_enquiry_id: tender_enquiry_id,
         },
         function (res) {
+          console.log(res);
+
           if (res.length > 0) {
             $.each(res, function (i, row) {
               $enquiry.append(
-                `<option value="${row.vendor_po_id}">${row.vendor_po_no}</option>`
+                `<option value="${row.vendor_po_id}">
+                            ${row.vendor_po_no}
+                        </option>`,
               );
             });
           }
         },
-        "json"
+        "json",
       );
 
       // Load Contact Persons
@@ -261,12 +268,14 @@
           if (res.length > 0) {
             $.each(res, function (i, row) {
               $contact.append(
-                `<option value="${row.vendor_contact_id}">${row.contact_person_name}</option>`
+                `<option value="${row.vendor_contact_id}">
+                            ${row.contact_person_name}
+                        </option>`,
               );
             });
           }
         },
-        "json"
+        "json",
       );
     });
   });
@@ -353,7 +362,7 @@
         dataType: "json",
 
         success: function (res) {
-           console.log(res);
+          console.log(res);
           if (!res || res.length === 0) {
             $container.html(`
                         <tr>
@@ -447,7 +456,7 @@
       ".rate-input, .gst-input, .qty-input, .item-check",
       function () {
         calculateTotals();
-      }
+      },
     );
 
     function calculateRow($row) {
