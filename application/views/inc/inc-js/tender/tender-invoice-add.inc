@@ -1,3 +1,47 @@
+<style>
+  .total-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+  }
+  .total-box {
+    background: linear-gradient(135deg, #f6fff9, #e8f9f0);
+    border: 2px solid #b5e0c6;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 1.15rem;
+    color: #333;
+    min-width: 280px;
+    text-align: right;
+    transition: all 0.3s ease-in-out;
+  }
+  .total-box:hover {
+    background: #e3f7ec;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+  .total-box i {
+    font-size: 1.3rem;
+    vertical-align: middle;
+  }
+  #total_amount,
+  #total_amount_wo_tax {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-left: 5px;
+  }
+  @media (max-width: 768px) {
+    .total-wrapper {
+      justify-content: center;
+    }
+    .total-box {
+      text-align: center;
+      min-width: 220px;
+    }
+  }
+</style>
 <script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
 
 <link
@@ -65,7 +109,7 @@
                 $("<option>", {
                   value: row.tender_enquiry_id,
                   text: row.display,
-                })
+                }),
               );
             });
 
@@ -75,7 +119,7 @@
             }
           } else {
             $enquiryDropdown.html(
-              '<option value="">No enquiries found</option>'
+              '<option value="">No enquiries found</option>',
             );
           }
         },
@@ -180,12 +224,12 @@
               $enquiryDropdown.append(
                 $("<option></option>")
                   .attr("value", row.tender_enquiry_id)
-                  .text(row.display)
+                  .text(row.display),
               );
             });
           } else {
             $enquiryDropdown.html(
-              '<option value="">No enquiries found</option>'
+              '<option value="">No enquiries found</option>',
             );
           }
         },
@@ -460,7 +504,7 @@
         const $row = $(this).closest(".item-row");
         calculateRow($row);
         calculateTotals();
-      }
+      },
     );
 
     /* ===============================
@@ -486,24 +530,33 @@
     }
 
     /* ===============================
-       TOTAL CALCULATION
-    =============================== */
+   TOTAL CALCULATION
+=============================== */
     function calculateTotals() {
-      let total_amount = 0;
-      let total_gst = 0;
+      let total_amount = 0; // WITH TAX
+      let total_wo_tax = 0; // WITHOUT TAX
+      let total_gst_only = 0; // GST ONLY
 
       $(".item-row").each(function () {
         if ($(this).find(".item-check").is(":checked")) {
-          total_amount += parseFloat($(this).find(".amount-input").val()) || 0;
-          total_gst += parseFloat($(this).find(".gst-amount-input").val()) || 0;
+          const amount = parseFloat($(this).find(".amount-input").val()) || 0;
+          const gst_amt =
+            parseFloat($(this).find(".gst-amount-input").val()) || 0;
+
+          total_amount += amount; // With GST
+          total_gst_only += gst_amt; // GST only
+          total_wo_tax += amount - gst_amt; // Without GST
         }
       });
 
-      $("#total_amount_display").text(total_amount.toFixed(3));
-      $("#total_amount").val(total_amount.toFixed(3));
+      // Update Display
+      $("#total_amount").text(total_amount.toFixed(3));
+      $("#total_amount_wo_tax").text(total_wo_tax.toFixed(3));
 
-      $("#total_gst_amount_display").text(total_gst.toFixed(3));
-      $("#total_gst_amount").val(total_gst.toFixed(3));
+      // Update Hidden Fields
+      $(".total_amount_hidden").val(total_amount.toFixed(3)); // With Tax
+      $(".total_gst_amount_hidden").val(total_wo_tax.toFixed(3)); // Without Tax
+      $(".gst_amount_only_hidden").val(total_gst_only.toFixed(3)); // GST Only
     }
 
     /* ===============================

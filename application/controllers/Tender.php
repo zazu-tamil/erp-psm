@@ -3018,6 +3018,8 @@ class Tender extends CI_Controller
                 'invoice_status' => $this->input->post('invoice_status'),
                 'terms' => $this->input->post('terms'),
                 'remarks' => $this->input->post('remarks'),
+                'total_amount' => $this->input->post('total_amount'),
+                'tax_amount' => $this->input->post('total_gst_amount'),
                 'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'updated_date' => date('Y-m-d H:i:s'),
@@ -3733,7 +3735,7 @@ class Tender extends CI_Controller
 
         if (!empty($srch_enquiry_no)) {
             $where = " ( concat(ifnull(ci.company_code,'') , '/', ifnull(t.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(t.customer_sno,''),  '/' , DATE_FORMAT(t.enquiry_date,'%Y') ) like '%" . $this->db->escape_str($srch_enquiry_no) . "%' ) ";
-              $data['srch_from_date'] = $srch_from_date = '';
+            $data['srch_from_date'] = $srch_from_date = '';
             $data['srch_to_date'] = $srch_to_date = '';
             $data['srch_customer_id'] = $srch_customer_id = '';
         }

@@ -88,7 +88,7 @@
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label for="currency_id">Currency</label>   
+                                <label for="currency_id">Currency</label>
                                 <?php
                                 echo form_dropdown(
                                     'currency_id',
@@ -182,19 +182,24 @@
 
                                         <td>
                                             <input type="number" step="any" name="rate[<?php echo $index; ?>]"
-                                                class="form-control rate-input" value="<?php echo number_format($item['rate'], 3); ?>">
+                                                class="form-control rate-input"
+                                                value="<?php echo number_format($item['rate'], 3); ?>">
                                         </td>
 
                                         <td>
                                             <input type="number" step="any" name="gst[<?php echo $index; ?>]"
                                                 class="form-control gst-select" value="<?php echo $item['gst']; ?>">
+
                                         </td>
 
                                         <td>
                                             <input type="number" step="any" name="amount[<?php echo $index; ?>]"
                                                 class="form-control amount-input" value="<?php echo $item['amount']; ?>"
                                                 readonly>
+
+                                            <input type="hidden" class="gst-amount-input" value="0">
                                         </td>
+
 
                                     </tr>
                                     <?php $index++; endforeach; ?>
@@ -202,20 +207,31 @@
                         </tbody>
                     </table>
                 </fieldset>
-                <!-- Total Section -->
-                <div class="total-section mt-5 mb-4">
-                    <div class="total-card shadow-lg">
-                        <div class="total-content d-flex align-items-center justify-content-between">
-                            <div class="total-icon">
-                                <i class="fa fa-calculator text-success"></i>
-                            </div>
-                            <div class="total-text text-end">
-                                <span class="label">Total Amount:</span>
-                                <span class="value">₹ <span id="total_amount">0.00</span></span>
-                            </div>
+                <div class="row">
+                    <div class="col-md-3 pull-right ">
+                        <div class="total-box shadow-sm">
+                            <h5 class="mb-0">
+                                <i class="fa fa-calculator text-success me-2"></i>
+                                <strong>Total Amount With Tax:</strong>
+                                <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                <input type="hidden" name="total_amount" class="total_amount_hidden">
+
+
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-md-3 pull-right">
+                        <div class="total-box shadow-sm">
+                            <h5 class="mb-0">
+                                <i class="fa fa-calculator text-success me-2"></i>
+                                <strong>Total Amount WO Tax:</strong>
+                                <span class="text-primary"><span id="total_amount_wo_tax">0.000</span></span>
+                                <input type="hidden" name="total_gst_amount" class="gst_amount_only_hidden">
+                            </h5>
                         </div>
                     </div>
                 </div>
+
             </div>
 
             <div class="box-footer text-right">

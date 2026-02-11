@@ -136,16 +136,31 @@
                                 <tbody id="item_container"></tbody>
                             </table>
 
-                            <div class="tot_amt text-right">
-                                <label>Total Bill Amount</label>
-                                <div id="total_amount_display">0.00</div>
-                                <input type="hidden" name="total_amount" id="total_amount">
+                            <div class="row">
+                                <div class="col-md-3 pull-right ">
+                                    <div class="total-box shadow-sm">
+                                        <h5 class="mb-0">
+                                            <i class="fa fa-calculator text-success me-2"></i>
+                                            <strong>Total Amount With Tax:</strong>
+                                            <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                          <input type="hidden" name="total_amount" class="total_amount_hidden">
 
-                                <label>Total GST</label>
-                                <div id="total_gst_amount_display">0.00</div>
-                                <input type="hidden" name="total_gst_amount" id="total_gst_amount">
+
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 pull-right">
+                                    <div class="total-box shadow-sm">
+                                        <h5 class="mb-0">
+                                            <i class="fa fa-calculator text-success me-2"></i>
+                                            <strong>Total Amount WO Tax:</strong>
+                                            <span class="text-primary"><span
+                                                    id="total_amount_wo_tax">0.000</span></span>
+                                          <input type="hidden" name="total_gst_amount" class="gst_amount_only_hidden">
+                                        </h5>
+                                    </div>
+                                </div>
                             </div>
-
 
                         </fieldset>
                     </div>

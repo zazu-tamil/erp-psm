@@ -1,5 +1,48 @@
 <script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
-
+<style>
+  .total-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+  }
+  .total-box {
+    background: linear-gradient(135deg, #f6fff9, #e8f9f0);
+    border: 2px solid #b5e0c6;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 1.15rem;
+    color: #333;
+    min-width: 280px;
+    text-align: right;
+    transition: all 0.3s ease-in-out;
+  }
+  .total-box:hover {
+    background: #e3f7ec;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+  .total-box i {
+    font-size: 1.3rem;
+    vertical-align: middle;
+  }
+  #total_amount,
+  #total_amount_wo_tax {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-left: 5px;
+  }
+  @media (max-width: 768px) {
+    .total-wrapper {
+      justify-content: center;
+    }
+    .total-box {
+      text-align: center;
+      min-width: 220px;
+    }
+  }
+</style>
 <script>
   $(document).ready(function () {
     /* ================================================================
@@ -40,13 +83,13 @@
               $customerDropdown.append(
                 $("<option></option>")
                   .attr("value", row.customer_id)
-                  .text(row.customer_name)
+                  .text(row.customer_name),
               );
             });
             $customerDropdown.prop("disabled", false);
           } else {
             $customerDropdown.html(
-              '<option value="">No customers found</option>'
+              '<option value="">No customers found</option>',
             );
           }
         },
@@ -93,12 +136,12 @@
               $enquiryDropdown.append(
                 $("<option></option>")
                   .attr("value", row.tender_enquiry_id)
-                  .text(row.display)
+                  .text(row.display),
               );
             });
           } else {
             $enquiryDropdown.html(
-              '<option value="">No enquiries found</option>'
+              '<option value="">No enquiries found</option>',
             );
           }
         },
@@ -140,8 +183,7 @@
           $po.html(html);
         },
       });
-    }); 
-    
+    });
   });
 
   $(function () {
@@ -257,103 +299,74 @@
     });
   });
 </script>
-<style>
-  .total-section {
-    display: flex;
-    justify-content: flex-end;
-    width: 100%;
-  }
-  .total-card {
-    background: linear-gradient(135deg, #eafaf3, #dff8ec);
-    border: 2px solid #aee0c0;
-    border-radius: 16px;
-    padding: 18px 28px;
-    min-width: 320px;
-    transition: all 0.3s ease-in-out;
-  }
-  .total-card:hover {
-    background: #e1f7ec;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
-  }
-  .total-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .total-icon i {
-    font-size: 1.8rem;
-    background: #d2f0dc;
-    padding: 10px;
-    border-radius: 50%;
-    color: #2e865f;
-  }
-  .total-text .label {
-    font-size: 1.1rem;
-    color: #444;
-    font-weight: 600;
-    margin-right: 6px;
-  }
-  .total-text .value {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: #007a4d;
-  }
-  #total_amount {
-    font-weight: 800;
-  }
-
-  @media (max-width: 768px) {
-    .total-section {
-      justify-content: center;
-    }
-    .total-card {
-      text-align: center;
-      min-width: 240px;
-      padding: 14px 18px;
-    }
-    .total-icon i {
-      font-size: 1.5rem;
-      padding: 8px;
-    }
-  }
-</style>
 <script>
-$(document).ready(function () {
-
+  $(document).ready(function () {
     function calculateItemAmount(row) {
+      let qty = parseFloat(row.find(".qty-input").val()) || 0;
+      let rate = parseFloat(row.find(".rate-input").val()) || 0;
+      let gst = parseFloat(row.find(".gst-select").val()) || 0;
 
-        let qty   = parseFloat(row.find(".qty-input").val())   || 0;
-        let rate  = parseFloat(row.find(".rate-input").val())  || 0;
-        let gst   = parseFloat(row.find(".gst-select").val())  || 0;
+      let base_amount = qty * rate;
+      let gst_amount = (base_amount * gst) / 100;
+      let total = base_amount + gst_amount;
 
-        let base_amount = qty * rate;
-        let gst_amount  = (base_amount * gst) / 100;
-        let total       = base_amount + gst_amount;
+      // Set values
+      row.find(".amount-input").val(total.toFixed(3));
 
-        row.find(".amount-input").val(total.toFixed(3));
+      // Create hidden GST field if not exists
+      if (row.find(".gst-amount-input").length === 0) {
+        row.append('<input type="hidden" class="gst-amount-input" value="0">');
+      }
+
+      row.find(".gst-amount-input").val(gst_amount.toFixed(3));
     }
 
-    function calculateTotal() {
-        let total = 0;
-        $(".amount-input").each(function () {
-            total += parseFloat($(this).val()) || 0;
-        });
-        $("#total_amount").text(total.toFixed(3));
+    /* ===============================
+     TOTAL CALCULATION
+  =============================== */
+    function calculateTotals() {
+      let total_amount = 0; // WITH GST
+      let total_wo_tax = 0; // WITHOUT GST
+      let total_gst_only = 0; // GST ONLY
+
+      $(".item-row").each(function () {
+        if ($(this).find(".item-check").is(":checked")) {
+          const amount = parseFloat($(this).find(".amount-input").val()) || 0;
+          const gst_amt =
+            parseFloat($(this).find(".gst-amount-input").val()) || 0;
+
+          total_amount += amount;
+          total_gst_only += gst_amt;
+          total_wo_tax += amount - gst_amt;
+        }
+      });
+
+      // Display
+      $("#total_amount").text(total_amount.toFixed(3));
+      $("#total_amount_wo_tax").text(total_wo_tax.toFixed(3));
+
+      // Hidden fields
+      $(".total_amount_hidden").val(total_amount.toFixed(3));
+      $(".total_without_tax_hidden").val(total_wo_tax.toFixed(3));
+      $(".gst_amount_only_hidden").val(total_gst_only.toFixed(3));
     }
 
-    // Trigger recalculation on Rate or GST change
-    $(document).on("input change", ".rate-input, .gst-select", function () {
+    // Trigger on change
+    $(document).on(
+      "input change",
+      ".rate-input, .gst-select, .qty-input, .item-check",
+      function () {
         let row = $(this).closest(".item-row");
         calculateItemAmount(row);
-        calculateTotal();
-    });
+        calculateTotals();
+      },
+    );
 
-    // Initial calculation on page load
+    // Initial Load
     $(".item-row").each(function () {
-        calculateItemAmount($(this));
+      calculateItemAmount($(this));
     });
-    calculateTotal();
 
-});
+    calculateTotals();
+  });
 </script>
