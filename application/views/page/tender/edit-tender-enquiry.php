@@ -246,6 +246,12 @@
 
                             <?php }   ?>
                         </div>
+                         <div id="item_rows_add"></div>
+
+                            <button type="button" class="btn btn-primary" id="add_more_added" style="margin-top:10px;">
+                            <i class="fa fa-plus"></i> Add More Item
+                        </button>
+
 
 
                     </div>

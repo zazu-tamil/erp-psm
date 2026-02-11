@@ -169,16 +169,14 @@
           $cust.empty().append('<option value="">Select Customer</option>');
           $.each(data, function (i, c) {
             $cust.append(
-              `<option value="${c.customer_id}">${c.customer_name}</option>`
+              `<option value="${c.customer_id}">${c.customer_name}</option>`,
             );
           });
-           
         },
-        "json"
+        "json",
       );
     });
 
-  
     // Remove Row
     $(document).on("click", ".remove-row", function () {
       if ($(".item-row").length > 0) {
@@ -188,29 +186,27 @@
       }
     });
 
-    
-
-
     $(document).on("keyup", "#item_search_modal", function () {
-        let searchText = $(this).val().trim();
+      let searchText = $(this).val().trim();
 
-          $.ajax({
-              url: "<?php echo base_url('tender/item_search_v2'); ?>",
-              type: "POST",
-              data: { search: searchText },
-              dataType: "json",
-              success: function (data) {
+      $.ajax({
+        url: "<?php echo base_url('tender/item_search_v2'); ?>",
+        type: "POST",
+        data: { search: searchText },
+        dataType: "json",
+        success: function (data) {
+          let tbody = $("#item_search_table_modal tbody");
+          tbody.empty(); // clear table
 
-                  let tbody = $("#item_search_table_modal tbody");
-                  tbody.empty(); // clear table
+          if (data.length === 0) {
+            tbody.append(
+              `<tr><td colspan="5" class="text-center">No Records Found</td></tr>`,
+            );
+            return;
+          }
 
-                  if (data.length === 0) {
-                      tbody.append(`<tr><td colspan="5" class="text-center">No Records Found</td></tr>`);
-                      return;
-                  }
-
-                  $.each(data, function (i, item) {
-                      tbody.append(`
+          $.each(data, function (i, item) {
+            tbody.append(`
                           <tr>
                               <td>${item.item_code}</td>
                               <td>${item.item_desc}</td>
@@ -225,16 +221,15 @@
                               </td>
                           </tr>
                       `);
-                  });
-              }
           });
+        },
       });
+    });
 
-      $(document).on("click", ".select_item_btn", function () {
+    $(document).on("click", ".select_item_btn", function () {
+      let item = $(this).data("item");
 
-            let item = $(this).data("item");
-
-            let row = `
+      let row = `
 
                 <div class="item-row">
                     <div class="cat-item-block"> 
@@ -256,15 +251,13 @@
                 </div> 
             `;
 
-            $("#item_rows").append(row);
+      $("#item_rows").append(row);
 
-            $('#select_item_modal .btn_cancel').click();
-            //$("#select_item_modal").modal("hide");
-        });
+      $("#select_item_modal .btn_cancel").click();
+      //$("#select_item_modal").modal("hide");
+    });
 
-
-
-        const rowTemplate = `
+    const rowTemplate = `
         <div class="item-row">
             <div class="cat-item-block">
                 <input type="text" name="item_code[]" class="form-control item_code"> 
@@ -282,35 +275,32 @@
                 <button type="button" class="remove-row"><i class="fa fa-trash"></i></button>
             </div>
         </div>`;
-    
-        $("#excelFile").on("change", function(e) { 
-            const file = e.target.files[0];
-            const reader = new FileReader();
 
-            reader.onload = function(e) {
-                const workbook = XLSX.read(e.target.result, { type: "binary" });
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rows = XLSX.utils.sheet_to_json(sheet);  // JSON with headers
+    $("#excelFile").on("change", function (e) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
 
-                $("#item_rows").empty(); // Clear previous rows
+      reader.onload = function (e) {
+        const workbook = XLSX.read(e.target.result, { type: "binary" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet); // JSON with headers
 
-                rows.forEach(function(r) {
-                    let newRow = $(rowTemplate);
-                    //alert(r.item_desc);
-                    newRow.find(".item_code").val(r.item_code);
-                    newRow.find(".item_desc").val(r.item_desc);
-                    newRow.find(".uom").val(r.uom); // Should match option value
-                    newRow.find(".qty").val(r.qty); 
+        $("#item_rows").empty(); // Clear previous rows
 
-                    $("#item_rows").append(newRow);
-                });
-            };
+        rows.forEach(function (r) {
+          let newRow = $(rowTemplate);
+          //alert(r.item_desc);
+          newRow.find(".item_code").val(r.item_code);
+          newRow.find(".item_desc").val(r.item_desc);
+          newRow.find(".uom").val(r.uom); // Should match option value
+          newRow.find(".qty").val(r.qty);
 
-            reader.readAsBinaryString(file);
-        }); 
+          $("#item_rows").append(newRow);
+        });
+      };
 
-
- 
+      reader.readAsBinaryString(file);
+    });
   });
 </script>
 <style>
@@ -318,3 +308,59 @@
     height: 80px !important;
   }
 </style>
+
+<script>
+  jQuery(function ($) {
+    $(document).ready(function () {
+      // Add Row on button click
+      $("#add_more_added").on("click", function () {
+        addEmptyRow();
+      });
+
+      // Remove Row
+      $(document).on("click", ".remove-row", function () {
+        if ($("#item_rows_add .item-row").length > 1) {
+          $(this).closest(".item-row").remove();
+        } else {
+          alert("At least one item is required.");
+        }
+      });
+
+      // Function to add new row
+      function addEmptyRow() {
+        const row = `
+            <div class="item-row">
+                <div class="cat-item-block">
+                    <input type="text" name="item_code[]" class="form-control">
+                </div>
+
+                <div class="item-desc-block">
+                    <textarea name="item_desc[]" class="form-control" rows="5"></textarea>
+                </div>
+
+                <div class="uom-block">
+                    <input type="text" name="uom[]" class="form-control">
+                </div>
+
+                <div class="qty-block">
+                    <input type="number" step="any" name="qty[]" class="form-control">
+                </div>
+
+                <div class="action-block">
+                    <button type="button" class="remove-row">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        $("#item_rows_add").append(row);
+
+        // If you have autocomplete or other JS init
+        if (typeof initAutocomplete === "function") {
+          initAutocomplete();
+        }
+      }
+    });
+  });
+</script>
