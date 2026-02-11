@@ -322,7 +322,7 @@
                   <tr class="item-row">
 
                     <td>
-                      <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="${i}">
+                      <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="${i}" checked>
                       <small class="badge badge-secondary">Item ${i + 1}</small>
                     </td>
 

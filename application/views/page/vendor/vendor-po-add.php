@@ -133,9 +133,10 @@
                                 echo form_dropdown(
                                     'currency_id',
                                     ['' => 'Select Currency'] + $currency_opt,
-                                    set_value('currency_id', $default_currency_id),
+                                    set_value('currency_id'),
                                     'id="currency_id" class="form-control" required'
                                 );
+
                                 ?>
                             </div>
                         </div>
@@ -176,13 +177,15 @@
                             <tr>
                                 <th style="width:5%;">✔</th>
                                 <th style="width:10%;">Item Code</th>
-                                <th style="width:40%;">Description</th>
-                                <th style="width:10%;">UOM & Qty </th>
+                                <th style="width:35%;">Description</th>
+                                <th style="width:10%;">UOM & Qty</th>
                                 <th style="width:10%;">Rate</th>
-                                <th style="width:10%;">VAT %</th>
-                                <th style="width:10%;">Amount</th>
+                                <th style="width:8%;">VAT %</th>
+                                <th style="width:11%;">Amt (W/O Tax)</th>
+                                <th style="width:11%;">Amt (With Tax)</th>
                             </tr>
                         </thead>
+
                         <tbody id="item_container"></tbody>
 
                     </table>

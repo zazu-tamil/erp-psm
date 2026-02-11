@@ -650,7 +650,7 @@ class Vendor extends CI_Controller
         }
 
         $data['po_status_opt'] = ['' => 'Select PO Status', 'In Progress' => 'In Progress', 'Delivered' => 'Delivered'];
-        $data['default_currency_id'] = '';
+
 
         $sql = "
             SELECT currency_id, currency_code
@@ -662,10 +662,6 @@ class Vendor extends CI_Controller
 
         foreach ($query->result_array() as $row) {
             $data['currency_opt'][$row['currency_id']] = $row['currency_code'];
-
-            if ($row['currency_code'] === 'BHD') {
-                $data['default_currency_id'] = $row['currency_id'];
-            }
         }
         $this->load->view('page/vendor/vendor-po-add', $data);
     }
@@ -4233,7 +4229,7 @@ class Vendor extends CI_Controller
 
         $data['vendor_opt'] = [];
 
-         $sql = "
+        $sql = "
             SELECT 
             vat_filing_head_name 
             FROM vat_filing_head_info 
@@ -4246,7 +4242,7 @@ class Vendor extends CI_Controller
         foreach ($query->result_array() as $row) {
             $data['vat_payer_purchase_opt'][$row['vat_filing_head_name']] = $row['vat_filing_head_name'];
         }
-        
+
         // $data['vat_payer_purchase_opt'] = [
         //     '' => 'Select VAT Payer Purchase Category',
         //     'Standard Rated Domestic Purchases at 5% (Line 8 of the VAT Return)' => 'Standard Rated Domestic Purchases at 5% (Line 8 of the VAT Return)',
@@ -4441,13 +4437,44 @@ class Vendor extends CI_Controller
 
         foreach ($query->result() as $row) {
             $result[] = [
-                'label' => $row->invoice_no,    
-                'value' => $row->invoice_no,   
+                'label' => $row->invoice_no,
+                'value' => $row->invoice_no,
                 'vendor_purchase_invoice_id' => $row->vendor_purchase_invoice_id,
                 'invoice_no' => $row->invoice_no
             ];
         }
 
+        echo json_encode($result);
+    }
+
+    public function get_vendor_quotation_currency_id()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            echo json_encode(['error' => 'Unauthorized']);
+            return;
+        }
+
+        $vendor_quote_id = $this->input->post('srch_vendor_quote_id');  
+
+        if (empty($vendor_quote_id)) {
+            echo json_encode([]);
+            return;
+        }
+        $sql = "
+            SELECT 
+                curr.currency_id,
+                curr.currency_code
+            FROM vendor_quotation_info as a 
+            LEFT JOIN currencies_info curr 
+                ON a.currency_id = curr.currency_id 
+                AND curr.status = 'Active'
+            WHERE a.status = 'Active'
+            AND a.vendor_quote_id = ?
+            ORDER BY a.vendor_quote_id ASC
+        ";
+
+        $query = $this->db->query($sql, [$vendor_quote_id]);
+        $result = $query->result_array();
         echo json_encode($result);
     }
 }
