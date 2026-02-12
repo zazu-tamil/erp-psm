@@ -246,14 +246,14 @@
 
                             <div class="tot_amt text-right">
                                 <label>Total Bill Amount</label>
-                                <div id="total_amount_display"><?php echo number_format($header['total_amount'], 2); ?>
+                                <div id="total_amount_display"><?php echo number_format($header['total_amount'], 3); ?>
                                 </div>
                                 <input type="hidden" name="total_amount" id="total_amount"
                                     value="<?php echo $header['total_amount']; ?>">
 
                                 <label>Total GST</label>
                                 <div id="total_gst_amount_display">
-                                    <?php echo number_format($header['tax_amount'], 2); ?></div>
+                                    <?php echo number_format($header['tax_amount'], 3); ?></div>
                                 <input type="hidden" name="tax_amount" id="total_gst_amount"
                                     value="<?php echo $header['tax_amount']; ?>">
                             </div>
@@ -550,11 +550,11 @@ $(document).ready(function() {
             }
         });
 
-        $("#total_amount_display").text(total_amount.toFixed(2));
-        $("#total_amount").val(total_amount.toFixed(2));
+        $("#total_amount_display").text(total_amount.toFixed(3));
+        $("#total_amount").val(total_amount.toFixed(3));
 
-        $("#total_gst_amount_display").text(total_gst.toFixed(2));
-        $("#total_gst_amount").val(total_gst.toFixed(2));
+        $("#total_gst_amount_display").text(total_gst.toFixed(3));
+        $("#total_gst_amount").val(total_gst.toFixed(3));
     }
 
     // Form validation

@@ -371,18 +371,12 @@
                         <td>
                             <input type="number" step="any" name="rate[]" class="form-control rate-input">
                         </td>
-
                         <td>
-                            <select name="gst[]" class="form-control vat-dropdown">
-                                <option value="">Select</option>
-                                <?php foreach($gst_opt as $g => $val): ?>
-                                <option value="<?= $val; ?>"><?= $val; ?>%</option>
-                                <?php endforeach; ?>
-                            </select>
+                            <input type="number"  name="gst[]" class="form-control vat-dropdown">
                         </td>
 
                         <td>
-                            <input type="number" name="amount[]" class="form-control amount-input" value="0.00" readonly>
+                            <input type="number" name="amount[]" class="form-control amount-input" value="0.000" readonly>
                         </td> 
                        
                        
@@ -441,7 +435,6 @@ $(document).ready(function () {
           $('.item-check:checked').length === $('.item-check').length
       );
   });
-
-
+ 
 });
 </script>

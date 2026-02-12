@@ -49,7 +49,7 @@
                     <div class="row">
                         <div class="form-group col-md-4">
                             <label>Company <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_company_id',  $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
+                            <?php echo form_dropdown('srch_company_id', $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
@@ -67,20 +67,20 @@
                             <?php echo form_dropdown('srch_vendor_id', ['' => 'Select Vendor'], set_value('srch_vendor_id'), 'id="srch_vendor_id" class="form-control" required'); ?>
                         </div>
 
+
                         <div class="form-group col-md-4">
                             <label>Vendor PO No <span style="color:red;">*</span>
-                                <span data-toggle="tooltip" title="" class=""
-                                    data-original-title="Only when Vendor PO Status is Confirmed then select the PO No. Otherwise leave it blank.">
-                                    <i class="text-sm text-info fa fa-info-circle"></i>
-                                </span>
+
                             </label>
-                            <?php echo form_dropdown('srch_vendor_po_id', ['' => 'Select PO No'], set_value('srch_vendor_po_id'), 'id="srch_vendor_po_id" class="form-control" required'); ?>
+                            <select name="srch_vendor_po_id" id="srch_vendor_po_id" class="form-control "></select>
+
                         </div>
 
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label>Contact Person</label>
-                            <?php echo form_dropdown('srch_vendor_contact_person_id', ['' => 'Select Contact'] + $vendor_contact_opt, set_value('srch_vendor_contact_person_id'), 'id="srch_vendor_contact_id" class="form-control"'); ?>
+                            <?php echo form_dropdown('srch_vendor_contact_person_id', $vendor_contact_opt, set_value('srch_vendor_contact_person_id'), 'id="srch_vendor_contact_id" class="form-control"'); ?>
                         </div>
+
 
                         <div class="form-group col-md-3">
                             <label>Invoice Date</label>
@@ -100,15 +100,13 @@
                         </div>
                         <div class="form-group col-md-3">
                             <label>Status</label><br>
-                            <label class="radio-inline"><input type="radio" name="status" value="Active"
-                                    <?php echo set_radio('status', 'Active', TRUE); ?>> Active</label>
-                            <label class="radio-inline"><input type="radio" name="status" value="Inactive"
-                                    <?php echo set_radio('status', 'Inactive'); ?>> Inactive</label>
+                            <label class="radio-inline"><input type="radio" name="status" value="Active" <?php echo set_radio('status', 'Active', TRUE); ?>> Active</label>
+                            <label class="radio-inline"><input type="radio" name="status" value="Inactive" <?php echo set_radio('status', 'Inactive'); ?>> Inactive</label>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <fieldset 
+                            <fieldset
                                 style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px;">
                                 <legend class="text-info">For Purchase NBR - VAT Filing </legend>
 
@@ -126,10 +124,9 @@
                                     <input type="date" name="declaration_date" id="declaration_date"
                                         class="form-control">
                                 </div>
-
                             </fieldset>
                         </div>
-                    </div> 
+                    </div>
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
@@ -150,27 +147,38 @@
                                     <tr>
                                         <th style="width:5%;">✔</th>
                                         <th style="width:10%;">Item Code</th>
-                                        <th style="width:40%;">Description</th>
+                                        <th style="width:35%;">Description</th>
                                         <th style="width:10%;">UOM & Qty</th>
                                         <th style="width:10%;">Rate</th>
-                                        <th style="width:10%;">VAT %</th>
-                                        <th style="width:10%;">Amount</th>
+                                        <th style="width:8%;">VAT %</th>
+                                        <th style="width:11%;">Amt (W/O Tax)</th>
+                                        <th style="width:11%;">Amt (With Tax)</th>
                                     </tr>
                                 </thead>
                                 <tbody id="item_container"></tbody>
                             </table>
 
-                            <div class="tot_amt text-right">
-                                <label>Total Bill Amount</label>
-                                <div id="total_amount_display">0.00</div>
-                                <input type="hidden" name="total_amount" id="total_amount">
-
-                                <label>Total GST</label>
-                                <div id="total_gst_amount_display">0.00</div>
-                                <input type="hidden" name="total_gst_amount" id="total_gst_amount">
+                            <div class="row">
+                                <div class="col-md-3 pull-right ">
+                                    <div class="total-box shadow-sm">
+                                        <h5 class="mb-0">
+                                            <i class="fa fa-calculator text-success me-2"></i>
+                                            <strong>Total Amount With Tax:</strong>
+                                            <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 pull-right">
+                                    <div class="total-box shadow-sm">
+                                        <h5 class="mb-0">
+                                            <i class="fa fa-calculator text-success me-2"></i>
+                                            <strong>Total Amount WO Tax:</strong>
+                                            <span class="text-primary"><span
+                                                    id="total_amount_wo_tax">0.000</span></span>
+                                        </h5>
+                                    </div>
+                                </div>
                             </div>
-
-
                         </fieldset>
                     </div>
                 </div>
