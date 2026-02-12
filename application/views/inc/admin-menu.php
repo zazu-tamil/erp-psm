@@ -294,6 +294,46 @@ $vendor_m_grp = [
     </ul>
 </li>
 
+<!-- Report -->
+<?php
+$report_m_grp = [
+    'sales-nbr-report',
+    'purchase-nbr-report'
+]; 
+?>
+<li class="header">REPORTS</li>
+
+<li class="treeview 
+    <?= in_array($current_page, $report_m_grp) ? 'active' : '' ?>">
+
+    <a href="#">
+        <i class="fa fa-area-chart"></i>
+        <span>Reports</span>
+        <span class="pull-right-container">
+            <i class="fa fa-angle-left pull-right"></i>
+        </span>
+    </a>
+
+    <ul class="treeview-menu">
+
+        <!-- Vendor Enquiry -->
+        <li
+            class="treeview <?= in_array($current_page, ['sales-nbr-report', 'purchase-nbr-report']) ? 'active' : '' ?>">
+            <a href="#">
+                <i class="fa fa-envelope"></i> NBR Report
+                <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+            </a>
+            <ul class="treeview-menu">
+                <li class="<?= ($current_page === 'sales-nbr-report') ? 'active' : '' ?>">
+                    <a href="<?= site_url('sales-nbr-report') ?>"><i class="fa fa-list"></i> Sales NBR Report</a>
+                </li>
+                <li class="<?= ($current_page === 'purchase-nbr-report') ? 'active' : '' ?>">
+                    <a href="<?= site_url('purchase-nbr-report') ?>"><i class="fa fa-list"></i> Purchase NBR Report</a>
+                </li>
+            </ul>
+        </li>
+         </ul> 
+    </li>
 
 
 <?php /*
