@@ -1,51 +1,57 @@
 <script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script> 
- <style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  .total-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+  }
+  .total-box {
+    background: linear-gradient(135deg, #f6fff9, #e8f9f0);
+    border: 2px solid #b5e0c6;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 1.15rem;
+    color: #333;
+    min-width: 280px;
+    text-align: right;
+    transition: all 0.3s ease-in-out;
+  }
+  .total-box:hover {
+    background: #e3f7ec;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+  .total-box i {
+    font-size: 1.3rem;
+    vertical-align: middle;
+  }
+  #total_amount,
+  #total_amount_wo_tax {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-left: 5px;
+  }
+  @media (max-width: 768px) {
     .total-wrapper {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      width: 100%;
+      justify-content: center;
     }
     .total-box {
-      background: linear-gradient(135deg, #f6fff9, #e8f9f0);
-      border: 2px solid #b5e0c6;
-      border-radius: 12px;
-      padding: 12px 24px;
-      font-family: "Segoe UI", sans-serif;
-      font-size: 1.15rem;
-      color: #333;
-      min-width: 280px;
-      text-align: right;
-      transition: all 0.3s ease-in-out;
+      text-align: center;
+      min-width: 220px;
     }
-    .total-box:hover {
-      background: #e3f7ec;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-      transform: translateY(-2px);
-    }
-    .total-box i {
-      font-size: 1.3rem;
-      vertical-align: middle;
-    }
-    #total_amount , #total_amount_wo_tax{
-      font-size: 1.4rem;
-      font-weight: 700;
-      margin-left: 5px;
-    }
-    @media (max-width: 768px) {
-      .total-wrapper { justify-content: center; }
-      .total-box { text-align: center; min-width: 220px; }
-    }
+  }
 
-    .readonly-select {
-        pointer-events: none;
-        background-color: #e9ecef;
-    }
-  </style>
+  .readonly-select {
+    pointer-events: none;
+    background-color: #e9ecef;
+  }
+</style>
 <script>
   $(document).ready(function () {
-    
+
     /* ================================================================
        1. COMPANY CHANGE - Load ALL Customers (no filtering by company)
        ================================================================ */
@@ -95,7 +101,7 @@
     /* ================================================================
        2. CUSTOMER CHANGE - Load Tender Enquiries (filtered by company + customer)
        ================================================================ */
-       
+
     $("#srch_customer_id").on("change", function () {
       const customer_id = $(this).val();
       const company_id = $("#srch_company_id").val();
@@ -113,9 +119,9 @@
       $.ajax({
         url: "<?php echo site_url('tender/get_tender_enquiries_by_customer'); ?>",
         type: "POST",
-        data: { 
+        data: {
           company_id: company_id,
-          customer_id: customer_id 
+          customer_id: customer_id
         },
         dataType: "json",
         success: function (res) {
@@ -212,7 +218,7 @@
                       <input type="hidden" name="tender_quotation_item_id[]" class="form-control tender_quotation_item_id" value="">
                     </div>
 
-                    <div class="col-md-3"> 
+                    <div class="col-md-3">
                       <div class="form-group">
                         <label>Item Code</label>
                         <input type="text" class="form-control item_code" name="item_code[]" value="" readonly>
@@ -251,7 +257,7 @@
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>VAT %</label>
-                            <input type="number" step="any" name="gst[]" class="form-control vat-dropdown" value=""> 
+                            <input type="number" step="any" name="gst[]" class="form-control vat-dropdown" value="">
                           </div>
                         </div>
                         <div class="col-md-6">
@@ -269,7 +275,7 @@
                       </div>
                     </div>
                   </div>
- 
+
                 </div>
               `;
 
@@ -294,29 +300,29 @@
             $("#item_container").empty();
             let i = 0;
             rows.forEach(function (r) {
-                
+
                 let newRow = $(itemHtml);
 
                 newRow.find(".cnt").html((i+1));
                 newRow.find(".item-check").val(i);
                 newRow.find(".tender_quotation_item_id").val(r.tender_quotation_item_id);
-                newRow.find(".tender_po_item_id").val(r.tender_po_item_id); 
+                newRow.find(".tender_po_item_id").val(r.tender_po_item_id);
                 newRow.find(".item_code").val(r.item_code);
                 newRow.find(".desc-textarea").val(r.item_desc);
                 newRow.find(".uom").val(r.uom);
                 newRow.find(".qty-input").val(r.qty);
                 newRow.find(".vat-dropdown").val(r.vat);
                 newRow.find(".rate-input").val(r.rate);
-                newRow.find(".amount-input").val(r.amount); 
+                newRow.find(".amount-input").val(r.amount);
 
                 $("#item_container").append(newRow);
 
                 newRow.find(".rate-input").change();
-                  
+
                 i++;
             });
         };
-        
+
         reader.readAsBinaryString(file);
     });
 
@@ -341,7 +347,7 @@
           if (res.length > 0) {
             $.each(res, function (i, row) {
               const hiddenFields = `
-                <input type="hidden" name="tender_quotation_item_id[]" value="${row.tender_quotation_item_id}"> 
+                <input type="hidden" name="tender_quotation_item_id[]" value="${row.tender_quotation_item_id}">
               `;
 
               const itemHtml = `
@@ -352,7 +358,7 @@
                       <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="${i}">
                     </div>
 
-                    <div class="col-md-3"> 
+                    <div class="col-md-3">
                       <div class="form-group">
                         <label>Item Code</label>
                         <input type="text" class="form-control" value="${row.item_code || ''}" readonly>
@@ -431,10 +437,10 @@
                     <span class="text-primary">₹ <span id="total_amount">0.00</span></span>
                   </h5>
                 </div>
-              </div> 
+              </div>
             `);*/
             $container.append(`
-                    <div class="row"> 
+                    <div class="row">
                         <div class="col-md-3 pull-right ">
                             <div class="total-box shadow-sm">
                                 <h5 class="mb-0">
@@ -452,7 +458,7 @@
                                     <span class="text-primary"><span id="total_amount_wo_tax">0.000</span></span>
                                 </h5>
                             </div>
-                        </div> 
+                        </div>
                     </div>
             `);
 
@@ -485,7 +491,7 @@
     });
 
     function calculateTotalAmount() {
-      let total = 0;      
+      let total = 0;
       $(".amount-input").each(function () {
         total += parseFloat($(this).val()) || 0;
       });
@@ -494,13 +500,13 @@
       let total_wot = 0;
       $(".amountwotx").each(function () {
         total_wot += parseFloat($(this).val()) || 0;
-      });      
+      });
       $("#total_amount_wo_tax").text(total_wot.toFixed(3));
     }
 
     calculateTotalAmount();
 
-     
+
 
     /* ================================================================
        6. Checkbox Change - Add/Remove Hidden Fields
@@ -519,7 +525,7 @@
     });
   });
 
-  
+
   $(function () {
     CKEDITOR.replace("editor1", {
       height: 80,

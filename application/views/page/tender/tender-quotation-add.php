@@ -37,7 +37,7 @@
                     <div class="row">
                         <div class="form-group col-md-3">
                             <label for="srch_company_id">Company <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_company_id',  $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
+                            <?php echo form_dropdown('srch_company_id', $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
                         </div>
 
                         <div class="form-group col-md-3">
@@ -98,8 +98,8 @@
                         </div>
                         <div class="form-group col-md-3">
                             <label for="other_charges">Other Charges</label>
-                            <input type="number" step="any" name="other_charges" id="other_charges"
-                                class="form-control" placeholder="Enter other charges"
+                            <input type="number" step="any" name="other_charges" id="other_charges" class="form-control"
+                                placeholder="Enter other charges"
                                 value="<?php echo set_value('other_charges', '0.00'); ?>">
                         </div>
 
@@ -159,28 +159,42 @@
                         </div>
                     </div>
                     <div id="item_container"></div>
-                    <div class="total-box shadow-sm">
-                        <h5 class="mb-0">
-                            <i class="fa fa-calculator text-success me-2"></i>
-                            <strong>Total Amount:</strong>
-                            <span class="text-primary"><span id="total_amount">0.00</span></span>
-                        </h5>
-                    </div>
-            </div>
-            </fieldset>
-    </div>
 
-    <div class="box-footer">
-        <div class="row">
-            <div class="col-md-6 text-left">
-                <a href="<?php echo site_url('tender-quotation-list'); ?>" class="btn btn-default"><i
-                        class="fa fa-arrow-left"></i> Back To List</a>
+                    <div class="row">
+                        <div class="col-md-3 pull-right ">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount With Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3 pull-right">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount WO Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount_wo_tax">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
             </div>
-            <div class="col-md-6 text-right"><button type="submit" class="btn btn-success"><i class="fa fa-save"></i>
-                    Save</button></div>
-        </div>
-    </div>
-    </form>
+
+            <div class="box-footer">
+                <div class="row">
+                    <div class="col-md-6 text-left">
+                        <a href="<?php echo site_url('tender-quotation-list'); ?>" class="btn btn-default"><i
+                                class="fa fa-arrow-left"></i> Back To List</a>
+                    </div>
+                    <div class="col-md-6 text-right"><button type="submit" class="btn btn-success"><i
+                                class="fa fa-save"></i>
+                            Save</button></div>
+                </div>
+            </div>
+        </form>
     </div>
 </section>
 

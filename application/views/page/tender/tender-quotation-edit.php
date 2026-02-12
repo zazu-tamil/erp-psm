@@ -228,16 +228,24 @@
                                                  
                                             </div>
                                         </div>
+                                        <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Amount WO Tax</label>
+                                                        <input type="number" step="any" name="amount_wo_tax[]" class="form-control amountwotx"
+                                                            value="<?php echo number_format(($row['rate'] * $row['qty']), 3, '.', ''); ?>" readonly>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Amount</label>
+                                                        <input type="number" step="any" name="amount[]" class="form-control amount-input"
+                                                            value="<?php echo number_format($row['amount'], 3, '.', ''); ?>" readonly>
+                                                    </div>
+                                                </div>
 
+                                       
 
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Amount</label>
-                                                <input type="number" step="any" name="amount[]"
-                                                    class="form-control amount-input"
-                                                    value="<?php echo htmlspecialchars($row['amount']); ?>" readonly>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -251,20 +259,25 @@
                         <?php endif; ?>
                     </div>
 
-
-                    <!-- Total Display Box -->
-                    <div class="total-section mt-5 mb-4">
-                        <div class="total-card shadow-lg">
-                            <div class="total-content d-flex align-items-center justify-content-between">
-                                <div class="total-icon">
-                                    <i class="fa fa-calculator text-success"></i>
-                                </div>
-                                <div class="total-text text-end">
-                                    <span class="label">Total Amount:</span>
-                                    <span class="value">BHD <span id="total_amount">0.00</span></span>
-                                </div>
+                    <div class="row"> 
+                        <div class="col-md-3 pull-right ">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount With Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                </h5>
                             </div>
                         </div>
+                        <div class="col-md-3 pull-right">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount WO Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount_wo_tax">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div> 
                     </div>
                 </fieldset>
             </div>

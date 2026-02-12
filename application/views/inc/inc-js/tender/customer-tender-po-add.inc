@@ -433,23 +433,21 @@
         url: "<?php echo site_url('tender/get_tender_quotaction_currency_id'); ?>",
         type: "POST",
         data: {
-          tender_quotation_id: tender_quotation_id, 
+          tender_quotation_id: tender_quotation_id,
         },
         dataType: "json",
         success: function (res) {
-          if (res.length > 0) {  
-            $.each(res, function (i, row) {
-              $enquiryDropdown.append(
-                $("<option>", {
-                  value: row.currency_id,
-                  text: row.display,
-                }),
-              );
-            });
+          //console.log(d);
+          var $currencyDropdown = $("#currency_id");
+
+          if (res.length > 0) {
+            $currencyDropdown.val(res[0].currency_id).trigger("change");
+          } else {
+            $currencyDropdown.val("");
           }
         },
         error: function () {
-          alert("Error loading enquiries");
+          alert("Error loading currency");
         },
       });
     });

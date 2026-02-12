@@ -501,7 +501,7 @@
         },
         dataType: "json",
         success: function (res) {
-          //console.log(d);
+          console.log(d);
           var $currencyDropdown = $("#currency_id");
 
           if (res.length > 0) {

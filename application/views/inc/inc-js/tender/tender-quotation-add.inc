@@ -1,8 +1,11 @@
-<script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script> 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script> 
-<link  rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+<script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
+/>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
- <style>
+<style>
   .total-wrapper {
     display: flex;
     justify-content: flex-end;
@@ -36,43 +39,90 @@
     margin-left: 5px;
   }
   @media (max-width: 768px) {
-    .total-wrapper { justify-content: center; }
-    .total-box { text-align: center; min-width: 220px; }
+    .total-wrapper {
+      justify-content: center;
+    }
+    .total-box {
+      text-align: center;
+      min-width: 220px;
+    }
+  }
+</style>
+<style>
+  .total-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+  }
+  .total-box {
+    background: linear-gradient(135deg, #f6fff9, #e8f9f0);
+    border: 2px solid #b5e0c6;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 1.15rem;
+    color: #333;
+    min-width: 280px;
+    text-align: right;
+    transition: all 0.3s ease-in-out;
+  }
+  .total-box:hover {
+    background: #e3f7ec;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+  .total-box i {
+    font-size: 1.3rem;
+    vertical-align: middle;
+  }
+  #total_amount,
+  #total_amount_wo_tax {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-left: 5px;
+  }
+  @media (max-width: 768px) {
+    .total-wrapper {
+      justify-content: center;
+    }
+    .total-box {
+      text-align: center;
+      min-width: 220px;
+    }
   }
 </style>
 <script>
   $(document).ready(function () {
-
-
     $(".srch_enq_id").autocomplete({
-        source: function (request, response) {
-          $.ajax({
-            url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
-            type: "POST",
-            data: { search: request.term },
-            dataType: "json",
-            success: function (data) {
-              //console.log(data);
-              response(data);
-            },
-          });
-        },
+      source: function (request, response) {
+        $.ajax({
+          url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
+          type: "POST",
+          data: { search: request.term },
+          dataType: "json",
+          success: function (data) {
+            //console.log(data);
+            response(data);
+          },
+        });
+      },
 
-        minLength: 1,
-         
-        select: function (event, ui) {
-           console.log(ui);
-            $("#srch_company_id").val(ui.item.company_id);
-            $("#srch_customer_id").val(ui.item.customer_id).change();
-            //$("#srch_tender_enquiry_id").val(ui.item.tender_enquiry_id); 
-            load_tender_enq(ui.item.tender_enquiry_id);
-        }, 
-      });
-    
+      minLength: 1,
+
+      select: function (event, ui) {
+        console.log(ui);
+        $("#srch_company_id").val(ui.item.company_id);
+        $("#srch_customer_id").val(ui.item.customer_id).change();
+        //$("#srch_tender_enquiry_id").val(ui.item.tender_enquiry_id);
+        load_tender_enq(ui.item.tender_enquiry_id);
+      },
+    });
+
     /* ================================================================
        1. COMPANY CHANGE - Load ALL Customers (no filtering by company)
        ================================================================ */
-   /* $("#srch_company_id").on("change", function () {
+    /* $("#srch_company_id").on("change", function () {
       const company_id = $(this).val();
       const $customerDropdown = $("#srch_customer_id");
       const $enquiryDropdown = $("#srch_tender_enquiry_id");
@@ -117,86 +167,81 @@
        2. CUSTOMER CHANGE - Load Tender Enquiries (filtered by company + customer)
        ================================================================ */
     $("#srch_customer_id").on("change", function () {
-      load_tender_enq('');
+      load_tender_enq("");
     });
 
-    function load_tender_enq(t_enq_id = '') {
-
+    function load_tender_enq(t_enq_id = "") {
       const customer_id = $("#srch_customer_id").val(); // <-- IMPORTANT
-      const company_id  = $("#srch_company_id").val();
+      const company_id = $("#srch_company_id").val();
       const $enquiryDropdown = $("#srch_tender_enquiry_id");
       const $container = $("#item_container");
 
       // Reset
       $enquiryDropdown
-          .html('<option value="">Select Enquiry</option>')
-          .prop('disabled', true);
+        .html('<option value="">Select Enquiry</option>')
+        .prop("disabled", true);
 
-      $container.html('');
+      $container.html("");
 
       if (!customer_id || !company_id) return;
 
       $.ajax({
-          url: "<?php echo site_url('vendor/get_tender_enquiries_by_customer'); ?>",
-          type: "POST",
-          data: { 
-              company_id: company_id,
-              customer_id: customer_id 
-          },
-          dataType: "json",
-          success: function (res) {
+        url: "<?php echo site_url('vendor/get_tender_enquiries_by_customer'); ?>",
+        type: "POST",
+        data: {
+          company_id: company_id,
+          customer_id: customer_id,
+        },
+        dataType: "json",
+        success: function (res) {
+          if (res.length > 0) {
+            $enquiryDropdown.prop("disabled", false);
 
-              if (res.length > 0) {
-                  $enquiryDropdown.prop('disabled', false);
+            $.each(res, function (i, row) {
+              $enquiryDropdown.append(
+                $("<option>", {
+                  value: row.tender_enquiry_id,
+                  text: row.display,
+                }),
+              );
+            });
 
-                  $.each(res, function (i, row) {
-                      $enquiryDropdown.append(
-                          $('<option>', {
-                              value: row.tender_enquiry_id,
-                              text: row.display
-                          })
-                      );
-                  });
-
-                  // ✅ SET SELECTED VALUE HERE
-                  if (t_enq_id) {
-                      $enquiryDropdown.val(t_enq_id).trigger('change');
-                  }
-
-              } else {
-                  $enquiryDropdown.html('<option value="">No enquiries found</option>');
-              }
-          },
-          error: function () {
-              alert('Error loading enquiries');
+            // ✅ SET SELECTED VALUE HERE
+            if (t_enq_id) {
+              $enquiryDropdown.val(t_enq_id).trigger("change");
+            }
+          } else {
+            $enquiryDropdown.html(
+              '<option value="">No enquiries found</option>',
+            );
           }
+        },
+        error: function () {
+          alert("Error loading enquiries");
+        },
       });
     }
 
-
-     $('.cls_export').hide();
+    $(".cls_export").hide();
 
     $(document).on("click", "#btnExport", function () {
+      let jsonData = $(this).data("xls"); // ✅ already an object
 
-         let jsonData = $(this).data("xls"); // ✅ already an object
-
-        let fileName = $(this).val() || "export";
-        exportJSONToXLSX(jsonData, fileName + ".xlsx");
+      let fileName = $(this).val() || "export";
+      exportJSONToXLSX(jsonData, fileName + ".xlsx");
     });
 
+    function exportJSONToXLSX(data, fileName = "export.xlsx") {
+      // Convert JSON to worksheet
+      const worksheet = XLSX.utils.json_to_sheet(data);
 
-     function exportJSONToXLSX(data, fileName = "export.xlsx") {
-          // Convert JSON to worksheet
-          const worksheet = XLSX.utils.json_to_sheet(data);
+      // Create workbook
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
-          // Create workbook
-          const workbook = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-
-          // Export XLSX
-          XLSX.writeFile(workbook, fileName);
-      }
-
+      // Export XLSX
+      XLSX.writeFile(workbook, fileName);
+    }
 
     const itemHtml = `
                 <div class="item-card border p-3 mb-3" style="background-color:#f9f9f9; border-radius:8px;">
@@ -261,51 +306,46 @@
                   </div> 
                 </div>
                 
-              `;  
+              `;
 
-      $("#excelFile").on("change", function (e) {
+    $("#excelFile").on("change", function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
 
-          const file = e.target.files[0];
-          if (!file) return;
+      const reader = new FileReader();
 
-          const reader = new FileReader();
+      reader.onload = function (e) {
+        const workbook = XLSX.read(e.target.result, { type: "binary" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-          reader.onload = function (e) {
+        // JSON with headers
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-              const workbook = XLSX.read(e.target.result, { type: "binary" });
-              const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        console.log(rows);
 
-              // JSON with headers
-              const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+        $("#item_container").empty();
+        let i = 0;
+        rows.forEach(function (r) {
+          let newRow = $(itemHtml);
 
-              console.log(rows);
+          newRow.find(".cnt").html(i + 1);
+          newRow.find(".item-check").val(i);
+          newRow.find(".tender_enquiry_item_id").val(r.tender_enquiry_item_id);
+          newRow.find(".item_code").val(r.item_code);
+          newRow.find(".desc-textarea").val(r.item_desc);
+          newRow.find(".uom").val(r.uom);
+          newRow.find(".qty-input").val(r.qty);
+          newRow.find(".vat-dropdown").val(r.vat);
+          newRow.find(".rate-input").val(r.rate);
+          newRow.find(".amount").val(r.amount);
 
-              $("#item_container").empty();
-              let i = 0;
-              rows.forEach(function (r) {
-                  
-                  let newRow = $(itemHtml);
+          $("#item_container").append(newRow);
 
-                  newRow.find(".cnt").html((i+1));
-                  newRow.find(".item-check").val(i); 
-                  newRow.find(".tender_enquiry_item_id").val(r.tender_enquiry_item_id); 
-                  newRow.find(".item_code").val(r.item_code);
-                  newRow.find(".desc-textarea").val(r.item_desc);
-                  newRow.find(".uom").val(r.uom);
-                  newRow.find(".qty-input").val(r.qty);
-                  newRow.find(".vat-dropdown").val(r.vat);
-                  newRow.find(".rate-input").val(r.rate);
-                  newRow.find(".amount").val(r.amount);
+          newRow.find(".rate-input").change();
+          i++;
+        });
 
-                
-
-                  $("#item_container").append(newRow);
-
-                  newRow.find(".rate-input").change();
-                  i++;
-              });
-
-             /* $('#item_container').append(`<div class="total-wrapper mt-4 mb-4">
+        /* $('#item_container').append(`<div class="total-wrapper mt-4 mb-4">
                   <div class="total-box shadow-sm">
                     <h5 class="mb-0">
                       <i class="fa fa-calculator text-success me-2"></i>
@@ -314,16 +354,11 @@
                     </h5>
                   </div>
                 </div>`);*/
-          };
+      };
 
-          reader.readAsBinaryString(file);
-      });        
+      reader.readAsBinaryString(file);
+    });
 
-
-
-    /* ================================================================
-       3. TENDER ENQUIRY CHANGE - Load Items
-       ================================================================ */
     $("#srch_tender_enquiry_id").on("change", function () {
       const tender_enquiry_id = $(this).val();
       const $container = $("#item_container");
@@ -341,17 +376,15 @@
         dataType: "json",
         success: function (res) {
           if (res.length > 0) {
-
-            $('.cls_export').show();
-            $('#btnExport').attr('data-xls', JSON.stringify(res));
-            $('#btnExport').val('Enquiry-' + res[0]['enquiry_no']);
+            $(".cls_export").show();
+            $("#btnExport").attr("data-xls", JSON.stringify(res));
+            $("#btnExport").val("Enquiry-" + res[0]["enquiry_no"]);
             //console.log(res);
 
             $.each(res, function (i, row) {
+              $("#tender_ref_no").val(row.enquiry_no);
+              $("#quote_date").val(row.closing_date);
 
-              $('#tender_ref_no').val(row.enquiry_no) ; 
-              $('#quote_date').val(row.closing_date) ; 
-              
               const hiddenFields = `
                 <input type="hidden" name="tender_enquiry_item_id[]" value="${row.tender_enquiry_item_id}"> 
               `;
@@ -407,13 +440,27 @@
                              <input type="number" step="any" name="gst[]" class="form-control vat-dropdown" value="10.00"> 
                           </div>
                         </div>
-
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                           <div class="form-group">
-                            <label>Amount</label>
-                            <input type="number" step="any" name="amount[]" class="form-control amount-input" value="0.00" readonly>
+                            <label>Amount WO Tax</label>
+                            <input type="number" step="any" 
+                                  name="amount_wo_tax[]" 
+                                  class="form-control amountwotx" 
+                                  value="0.000" readonly>
                           </div>
                         </div>
+
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label>Amount With Tax</label>
+                            <input type="number" step="any" 
+                                  name="amount[]" 
+                                  class="form-control amount-input" 
+                                  value="0.000" readonly>
+                          </div>
+                      </div>
+
+                        
                       </div>
                     </div>
                   </div>
@@ -425,7 +472,7 @@
             });
 
             // Add total row
-           /* $container.append(`
+            /* $container.append(`
               <div class="total-wrapper mt-4 mb-4">
                 <div class="total-box shadow-sm">
                   <h5 class="mb-0">
@@ -437,17 +484,19 @@
               </div> 
             `);*/
           } else {
-            $container.html('<div class="alert alert-warning">No items found for this tender enquiry.</div>');
+            $container.html(
+              '<div class="alert alert-warning">No items found for this tender enquiry.</div>',
+            );
           }
         },
         error: function () {
-          alert('Error loading items');
-        }
+          alert("Error loading items");
+        },
       });
     });
 
     /* ================================================================
-       4. Amount Calculation (Rate / VAT change)
+       5. Amount Calculation (Rate / VAT change)
        ================================================================ */
     $(document).on("input change", ".rate-input, .vat-dropdown", function () {
       const $row = $(this).closest(".item-card");
@@ -455,8 +504,9 @@
       const rate = parseFloat($row.find(".rate-input").val()) || 0;
       const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
 
-      const amount = (qty * rate) + ((qty * rate) * gst / 100);
+      const amount = qty * rate * (1 + gst / 100);
       $row.find(".amount-input").val(amount.toFixed(3));
+      $row.find(".amountwotx").val((qty * rate).toFixed(3));
 
       calculateTotalAmount();
     });
@@ -467,11 +517,14 @@
         total += parseFloat($(this).val()) || 0;
       });
       $("#total_amount").text(total.toFixed(3));
+
+      let total_wot = 0;
+      $(".amountwotx").each(function () {
+        total_wot += parseFloat($(this).val()) || 0;
+      });
+      $("#total_amount_wo_tax").text(total_wot.toFixed(3));
     }
 
-    /* ================================================================
-       5. Checkbox Change - Add/Remove Hidden Fields
-       ================================================================ */
     $(document).on("change", ".item-check", function () {
       const $card = $(this).closest(".item-card");
       if (!$(this).is(":checked")) {
@@ -479,7 +532,7 @@
           .find(
             "input[type=hidden][name^='tender_enquiry_item_id'], " +
               "input[type=hidden][name^='category_id'], " +
-              "input[type=hidden][name^='item_id']"
+              "input[type=hidden][name^='item_id']",
           )
           .remove();
       }
@@ -497,17 +550,42 @@
       toolbar: [
         {
           name: "clipboard",
-          items: ["Cut", "Copy", "Paste", "PasteText", "PasteFromWord", "-", "Undo", "Redo"],
+          items: [
+            "Cut",
+            "Copy",
+            "Paste",
+            "PasteText",
+            "PasteFromWord",
+            "-",
+            "Undo",
+            "Redo",
+          ],
         },
         {
           name: "basicstyles",
-          items: ["Bold", "Italic", "Underline", "Strike", "RemoveFormat", "CopyFormatting"],
+          items: [
+            "Bold",
+            "Italic",
+            "Underline",
+            "Strike",
+            "RemoveFormat",
+            "CopyFormatting",
+          ],
         },
         {
           name: "paragraph",
           items: [
-            "NumberedList", "BulletedList", "-", "Outdent", "Indent", "-",
-            "Blockquote", "JustifyLeft", "JustifyCenter", "JustifyRight", "JustifyBlock",
+            "NumberedList",
+            "BulletedList",
+            "-",
+            "Outdent",
+            "Indent",
+            "-",
+            "Blockquote",
+            "JustifyLeft",
+            "JustifyCenter",
+            "JustifyRight",
+            "JustifyBlock",
           ],
         },
         { name: "links", items: ["Link", "Unlink", "Anchor"] },
@@ -520,24 +598,49 @@
         { name: "tools", items: ["Maximize", "ShowBlocks"] },
       ],
     });
-        CKEDITOR.replace("editor2", {
+    CKEDITOR.replace("editor2", {
       height: 80,
       extraPlugins: "justify,colorbutton,font,table",
       removeButtons: "",
       toolbar: [
         {
           name: "clipboard",
-          items: ["Cut", "Copy", "Paste", "PasteText", "PasteFromWord", "-", "Undo", "Redo"],
+          items: [
+            "Cut",
+            "Copy",
+            "Paste",
+            "PasteText",
+            "PasteFromWord",
+            "-",
+            "Undo",
+            "Redo",
+          ],
         },
         {
           name: "basicstyles",
-          items: ["Bold", "Italic", "Underline", "Strike", "RemoveFormat", "CopyFormatting"],
+          items: [
+            "Bold",
+            "Italic",
+            "Underline",
+            "Strike",
+            "RemoveFormat",
+            "CopyFormatting",
+          ],
         },
         {
           name: "paragraph",
           items: [
-            "NumberedList", "BulletedList", "-", "Outdent", "Indent", "-",
-            "Blockquote", "JustifyLeft", "JustifyCenter", "JustifyRight", "JustifyBlock",
+            "NumberedList",
+            "BulletedList",
+            "-",
+            "Outdent",
+            "Indent",
+            "-",
+            "Blockquote",
+            "JustifyLeft",
+            "JustifyCenter",
+            "JustifyRight",
+            "JustifyBlock",
           ],
         },
         { name: "links", items: ["Link", "Unlink", "Anchor"] },
