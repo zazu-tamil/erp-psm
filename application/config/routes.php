@@ -263,3 +263,6 @@ $route['tender-enquiry-timeline/(:num)'] = 'tender/tender_enquiry_timeline/$1';
 
 //summary report
 $route['tender-enquiry-summary-report'] = 'Summary/tender_enquiry_summary_report'; 
+
+$route['sales-nbr-report'] = 'reports/sales_nbr_report';
+$route['purchase-nbr-report'] = 'reports/purchase_nbr_report'; 
