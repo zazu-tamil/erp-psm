@@ -330,220 +330,205 @@
   };
 </script>
 <script>
-  $(".cls_export").hide();
+  $(document).ready(function () {
+    $(".cls_export").hide();
 
-  $(document).on("click", "#btnExport", function () {
-    let jsonData = $(this).data("xls"); // ✅ already an object
+    /* =====================================================
+       EXPORT TO EXCEL
+    ===================================================== */
+    $(document).on("click", "#btnExport", function () {
+      let jsonData = $(this).data("xls");
 
-    let fileName = $(this).val() || "export";
-    exportJSONToXLSX(jsonData, fileName + ".xlsx");
-  });
+      if (typeof jsonData === "string") {
+        jsonData = JSON.parse(jsonData);
+      }
 
-  function exportJSONToXLSX(data, fileName = "export.xlsx") {
-    // Convert JSON to worksheet
-    const worksheet = XLSX.utils.json_to_sheet(data);
+      let fileName = $(this).val() || "export";
 
-    // Create workbook
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+      const worksheet = XLSX.utils.json_to_sheet(jsonData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+      XLSX.writeFile(workbook, fileName + ".xlsx");
+    });
 
-    // Export XLSX
-    XLSX.writeFile(workbook, fileName);
-  }
+    /* =====================================================
+       IMPORT FROM EXCEL
+    ===================================================== */
+    const rowTemplate = `
+        <tr class="item-row"> 
+            <td class="text-center">
+                <input type="checkbox" class="form-check-input item-check">
+            </td> 
+            <td>
+                <input type="text" name="item_code[]" class="form-control item_code">
+                <input type="hidden" name="vendor_rate_enquiry_item_id[]" class="vendor_rate_enquiry_item_id">
+            </td>
+            <td>
+                <textarea name="item_desc[]" class="form-control item_desc" rows="2"></textarea>
+            </td>
+            <td>
+                <input type="text" name="uom[]" class="form-control uom mb-1">
+                <input type="number" step="any" name="qty[]" class="form-control qty">
+            </td>
+            <td>
+                <input type="number" step="any" name="rate[]" class="form-control rate" placeholder="0.000"
+            </td>
+            <td>
+                <input type="number" step="any" name="gst[]" class="form-control vat" value="10.00">
+            </td>
+            <td>
+                <input type="number" class="form-control amount_wo_tax" readonly>
+            </td>
+            <td>
+                <input type="number" class="form-control amount" readonly>
+            </td>
+        </tr>
+    `;
 
-  const rowHtml = `
-                    <tr class="item-row"> 
-                        <td>
-                              Item # <span class="cnt"></span> <br>
-                             <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="" checked>
-                        </td> 
-                       
-                        <td> 
-                             <input type="text" name="item_code[]" class="form-control item_code"  value=""> 
-                             <input type="hidden" name="vendor_rate_enquiry_item_id[]" class="vendor_rate_enquiry_item_id" value=""> 
-                        </td>
+    $("#excelFile").on("change", function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
 
-                        <td>
-                            <textarea name="item_desc[]" class="form-control item_desc" rows="2"></textarea>
-                        </td>
+      const reader = new FileReader();
 
-                        <td  class="text-right">
-                            <input type="text" name="uom[]" class="form-control uom" value="" >
-                            <br>
-                            <input type="number" step="any" name="qty[]" class="form-control qty" value="" >
-                        </td> 
-                        <td  class="text-right">
-                            <input type="number" step="any" name="rate[]" class="form-control rate" value="">
-                        </td>
-                        <td  class="text-right">
-                          <input type="number" step="any" name="gst[]" class="form-control vat" value="10.00"> 
-                        </td> 
-                        <td  class="text-right">
-                            <input type="number" name="amount[]" class="form-control amount" value="" readonly>
-                        </td> 
-                       
-                       
-                    </tr>
-                `;
+      reader.onload = function (e) {
+        const workbook = XLSX.read(e.target.result, { type: "binary" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-  $("#excelFile").on("change", function (e) {
-    const file = e.target.files[0];
-    if (!file) return;
+        $("#item_container").empty();
 
-    const reader = new FileReader();
+        rows.forEach(function (r) {
+          let newRow = $(rowTemplate);
 
-    reader.onload = function (e) {
-      const workbook = XLSX.read(e.target.result, { type: "binary" });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          newRow
+            .find(".vendor_rate_enquiry_item_id")
+            .val(r.vendor_rate_enquiry_item_id || "");
+          newRow.find(".item_code").val(r.item_code || "");
+          newRow.find(".item_desc").val(r.item_desc || "");
+          newRow.find(".uom").val(r.uom || "");
+          newRow.find(".qty").val(r.qty || 0);
+          newRow.find(".rate").val(r.rate || 0);
+          newRow.find(".vat").val(r.vat || 10);
 
-      // JSON with headers
-      const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+          $("#item_container").append(newRow);
+        });
 
-      // console.log(rows);
+        calculateAllRows();
+      };
 
-      $("#item_container").empty();
-      let i = 0;
-      rows.forEach(function (r) {
-        let newRow = $(rowHtml);
+      reader.readAsBinaryString(file);
+    });
 
-        newRow.find(".cnt").html(i + 1);
-        newRow.find(".item-check").val(i);
-        newRow
-          .find(".vendor_rate_enquiry_item_id")
-          .val(r.vendor_rate_enquiry_item_id);
-        newRow.find(".item_code").val(r.item_code);
-        newRow.find(".item_desc").val(r.item_desc);
-        newRow.find(".uom").val(r.uom);
-        newRow.find(".qty").val(r.qty);
-        newRow.find(".rate").val(r.rate);
-        newRow.find(".vat").val(r.vat);
-        newRow.find(".amount").val(r.amount);
+    /* =====================================================
+       LOAD FROM AJAX (Vendor Quotation)
+    ===================================================== */
+    $("#srch_vendor_rate_enquiry_id").on("change", function () {
+      const vendor_rate_enquiry_id = $(this).val();
+      const $container = $("#item_container");
+      $container.html("");
 
-        $("#item_container").append(newRow);
+      if (!vendor_rate_enquiry_id) return;
 
-        i++;
+      $.ajax({
+        url: "<?php echo site_url('vendor/get_vendor_quotation_rate_enquiry'); ?>",
+        type: "POST",
+        data: { vendor_rate_enquiry_id },
+        dataType: "json",
+        success: function (res) {
+          $(".cls_export").show();
+
+          $("#btnExport")
+            .attr("data-xls", JSON.stringify(res))
+            .val(
+              "Vendor-Quote-" +
+                $("#srch_vendor_rate_enquiry_id option:selected").text(),
+            );
+
+          if (res.length === 0) {
+            $container.html(
+              '<tr><td colspan="8" class="text-center text-danger">No items found</td></tr>',
+            );
+            return;
+          }
+
+          $.each(res, function (i, row) {
+            let newRow = $(rowTemplate);
+
+            newRow
+              .find(".vendor_rate_enquiry_item_id")
+              .val(row.vendor_rate_enquiry_item_id);
+            newRow.find(".item_code").val(row.item_code);
+            newRow.find(".item_desc").val(row.item_desc);
+            newRow.find(".uom").val(row.uom);
+            newRow.find(".qty").val(row.qty);
+            newRow.find(".rate").val(row.rate);
+            newRow.find(".vat").val(row.vat || 10);
+
+            $container.append(newRow);
+          });
+
+          calculateAllRows();
+        },
+      });
+    });
+
+    /* =====================================================
+       SELECT ALL CHECKBOX
+    ===================================================== */
+    $(document).on("change", "#selectall", function () {
+      $(".item-check").prop("checked", this.checked);
+    });
+
+    $(document).on("change", ".item-check", function () {
+      $("#selectall").prop(
+        "checked",
+        $(".item-check:checked").length === $(".item-check").length,
+      );
+    });
+
+    /* =====================================================
+       CALCULATIONS
+    ===================================================== */
+    $(document).on("input change", ".qty, .rate, .vat", function () {
+      calculateRow($(this).closest(".item-row"));
+    });
+
+    function calculateRow($row) {
+      const qty = parseFloat($row.find(".qty").val()) || 0;
+      const rate = parseFloat($row.find(".rate").val()) || 0;
+      const gst = parseFloat($row.find(".vat").val()) || 0;
+
+      const baseAmount = qty * rate;
+      const gstAmount = (baseAmount * gst) / 100;
+      const total = baseAmount + gstAmount;
+
+      $row.find(".amount_wo_tax").val(baseAmount.toFixed(3));
+      $row.find(".amount").val(total.toFixed(3));
+
+      calculateTotals();
+    }
+
+    function calculateAllRows() {
+      $(".item-row").each(function () {
+        calculateRow($(this));
+      });
+    }
+
+    function calculateTotals() {
+      let totalWO = 0;
+      let totalWith = 0;
+
+      $(".amount_wo_tax").each(function () {
+        totalWO += parseFloat($(this).val()) || 0;
       });
 
-      $(".qty, .rate, .vat").trigger("input");
-    };
+      $(".amount").each(function () {
+        totalWith += parseFloat($(this).val()) || 0;
+      });
 
-    reader.readAsBinaryString(file);
+      $("#total_amount_wo_tax").text(totalWO.toFixed(3));
+      $("#total_amount").text(totalWith.toFixed(3));
+    }
   });
-
-  $("#srch_vendor_rate_enquiry_id").on("change", function () {
-    const vendor_rate_enquiry_id = $(this).val();
-    const $container = $("#item_container");
-    $container.html("");
-
-    if (!vendor_rate_enquiry_id) return;
-
-    $.ajax({
-      url: "<?php echo site_url('vendor/get_vendor_quotation_rate_enquiry'); ?>",
-      type: "POST",
-      data: { vendor_rate_enquiry_id },
-      dataType: "json",
-      success: function (res) {
-        $(".cls_export").show();
-        $("#btnExport").attr("data-xls", JSON.stringify(res));
-        $("#btnExport").val(
-          "Vendor-Quote-" +
-            $("#srch_vendor_rate_enquiry_id option:selected").text(),
-        );
-        //console.log(res);
-
-        if (res.length === 0) {
-          $container.html(
-            '<tr><td colspan="10" class="text-center text-danger">No items found for this quotation.</td></tr>',
-          );
-          return;
-        }
-
-        $.each(res, function (i, row) {
-          const rowHtml = `
-                    <tr class="item-row"> 
-                        <td>
-                             <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="${i}">
-                        </td> 
-                       
-                        <td> 
-                             <input type="text" name="item_code[]" class="form-control item_code"  value="${row.item_code || ""}" > 
-                             <input type="hidden" name="vendor_rate_enquiry_item_id[]" value="${row.vendor_rate_enquiry_item_id}"> 
-                        </td>
-
-                        <td>
-                            <textarea name="item_desc[]" class="form-control" rows="2" >${row.item_desc || ""}</textarea>
-                        </td>
-
-                        <td  class="text-right">
-                            <input type="text" name="uom[]" class="form-control" value="${row.uom || ""}" >
-                            <br>
-                            <input type="number" step="any" name="qty[]" class="form-control qty" value="${row.qty}" >
-                        </td> 
-                        <td  class="text-right">
-                            <input type="number" step="any" name="rate[]" class="form-control rate" value="${row.rate || "0"}">
-                        </td>
-                        <td  class="text-right">
-                          <input type="number" step="any" name="gst[]" class="form-control vat" value="${row.vat || "10.00"}"> 
-                        </td> 
-                        <td  class="text-right">
-                            <input type="number" name="amount[]" class="form-control amount" value="${row.amount || "0"}" readonly>
-                        </td> 
-                       
-                       
-                    </tr>
-                `;
-
-          $container.append(rowHtml);
-        });
-      },
-      error: function () {
-        alert("Error loading quotation items");
-      },
-    });
-  });
-</script>
-<script>
-  $("#selectall").on("change", function () {
-    $(".item-check").prop("checked", this.checked);
-  });
-
-  // If any item unchecked → uncheck Select All
-  $(".item-check").on("change", function () {
-    $("#selectall").prop(
-      "checked",
-      $(".item-check:checked").length === $(".item-check").length,
-    );
-  });
-
-
-</script>
-
-<script>
-  // Recalculate when qty, rate or vat changes
-  $(document).on("input change", ".qty, .rate, .vat", function () {
-
-    const $row = $(this).closest(".item-row");
-
-    const qty  = parseFloat($row.find(".qty").val())  || 0;
-    const rate = parseFloat($row.find(".rate").val()) || 0;
-    const gst  = parseFloat($row.find(".vat").val())  || 0;
-
-    const baseAmount = qty * rate;
-    const gstAmount  = (baseAmount * gst) / 100;
-    const total      = baseAmount + gstAmount;
-
-    $row.find(".amount").val(total.toFixed(3));
-
-    calculateTotalAmount();
-  });
-
-  function calculateTotalAmount() {
-    let total = 0;
-
-    $(".amount").each(function () {
-      total += parseFloat($(this).val()) || 0;
-    });
-
-    $("#total_amount").text(total.toFixed(3));
-  }
 </script>

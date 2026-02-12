@@ -168,13 +168,14 @@
                     <table class="table table-bordered table-sm">
                         <thead>
                             <tr>
-                                <th class="text-center" style="width:5%;">✔ <br><input type="checkbox" name="selectall" id="selectall"></th>
-                                <th style="width:5%;">Item Code</th>
-                                <th style="width:30%;">Description</th>
-                                <th style="width:15%;" class="text-right">UOM & QTY</th>
-                                <th style="width:5%;" class="text-right">Rate</th>
-                                <th style="width:5%;" class="text-right">VAT %</th>
-                                <th style="width:10%;" class="text-right">Amount</th>
+                                 <th class="text-center" style="width:5%;">✔ <br><input type="checkbox" name="selectall" id="selectall"></th>
+                                <th style="width:10%;">Item Code</th>
+                                <th style="width:35%;">Description</th>
+                                <th style="width:10%;">UOM & Qty</th>
+                                <th style="width:10%;">Rate</th>
+                                <th style="width:8%;">VAT %</th>
+                                <th style="width:11%;">Amt (W/O Tax)</th>
+                                <th style="width:11%;">Amt (With Tax)</th>
                             </tr>
                         </thead>
                         <tbody id="item_container">
@@ -212,22 +213,38 @@
                                 </td>
 
                                 <td>
-                                    <input type="number" step="any" name="amount[<?php echo $index; ?>]" class="form-control amount" value="<?php echo $item['amount']; ?>"
-                                        readonly>
+                                 <input type="number" step="any" name="amount_wo_tax[]" class="form-control amountwotx"
+                                                            value="<?php echo number_format(($item['rate'] * $item['qty']), 3, '.', ''); ?>" readonly>
+                                </td>
+                                <td>
+                                     <input type="number" step="any" name="amount[]" class="form-control amount-input"
+                                                            value="<?php echo number_format($item['amount'], 3, '.', ''); ?>" readonly>
                                 </td>
 
                             </tr>
                             <?php $index++; endforeach; ?>
                             <?php endif; ?>
                         </tbody> 
-                    </table>
-
-                      <div class="total-box shadow-sm">
-                        <h5 class="mb-0">
-                            <i class="fa fa-calculator text-success me-2"></i>
-                            <strong>Total Amount:</strong>
-                            <span class="text-primary"><span id="total_amount">0.00</span></span>
-                        </h5>
+                    </table> 
+                    <div class="row">   
+                        <div class="col-md-3 pull-right ">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount With Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3 pull-right">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount WO Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount_wo_tax">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div> 
                     </div>
                 </fieldset>
             </div>

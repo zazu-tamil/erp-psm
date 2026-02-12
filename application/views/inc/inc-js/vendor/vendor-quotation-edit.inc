@@ -331,7 +331,7 @@
           const rowHtml = `
                     <tr class="item-row"> 
                         <td>
-                             <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="${i}">
+                             <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="${i}" checked>
                         </td> 
                        
                         <td> 
@@ -388,7 +388,7 @@
                        
                     </tr>
                 `;
-
+     calculateTotalAmount();
           $container.append(rowHtml);
         });
       },
@@ -401,42 +401,34 @@
 <script>
 $(document).ready(function () {
 
-    // Recalculate amount on qty, rate, or GST change
-  $(document).on("input change", ".rate, .vat, .qty", function () {
-      const $row = $(this).closest("tr.item-row");
+      $(document).on("input change", ".rate-input, .vat-dropdown", function () {
+       const $row = $(this).closest(".item-card");
+       const qty = parseFloat($row.find(".qty-input").val()) || 0;
+       const rate = parseFloat($row.find(".rate-input").val()) || 0;
+       const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
 
-      const qty  = parseFloat($row.find(".qty").val()) || 0;
-      const rate = parseFloat($row.find(".rate").val()) || 0;
-      const gst  = parseFloat($row.find(".vat").val()) || 0;
+       const amount = qty * rate * (1 + gst / 100);
+       $row.find(".amount-input").val(amount.toFixed(3));
+       $row.find(".amountwotx").val((qty * rate).toFixed(3));
 
-      // Amount = qty * rate
-      let amount = qty * rate;
+       calculateTotalAmount();
+     });
 
-      // GST added only if gst selected
-      if (gst > 0) {
-          amount = amount + (amount * gst / 100);
-      }
+     function calculateTotalAmount() {
+       let total = 0;
+       $(".amount-input").each(function () {
+         total += parseFloat($(this).val()) || 0;
+       });
+       $("#total_amount").text(total.toFixed(3));
 
-      $row.find(".amount").val(amount.toFixed(3));
+       let total_wot = 0;
+       $(".amountwotx").each(function () {
+         total_wot += parseFloat($(this).val()) || 0;
+       });
+       $("#total_amount_wo_tax").text(total_wot.toFixed(3));
+     }
 
-      calculateTotalAmount();
-  });
-
-
-  // Calculate full total of all item rows
-  function calculateTotalAmount() {
-      let total = 0;
-
-      $(".item-check:checked").each(function () {
-          let row = $(this).closest("tr");
-          total += parseFloat(row.find(".amount").val()) || 0;
-      });
-
-      $("#total_amount").text(total.toFixed(3));
-  }
-
-  calculateTotalAmount();
-
+     calculateTotalAmount();
 
  $('#selectall').on('change', function () {
       $('.item-check').prop('checked', this.checked);
