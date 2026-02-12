@@ -391,7 +391,7 @@
                 <input type="checkbox"
                   class="item-check"
                   name="selected_items[]"
-                  value="${i}" checked>
+                  value="${i}" checked >
               </td>
 
               <td>
