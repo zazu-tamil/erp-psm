@@ -2675,6 +2675,9 @@ class Tender extends CI_Controller
                 'terms' => $this->input->post('terms'),
                 'total_amount' => $this->input->post('total_amount'),
                 'tax_amount' => $this->input->post('total_gst_amount'),
+                'vat_payer_sales_grp' => $this->input->post('vat_payer_sales_grp'),
+                'declaration_no' => $this->input->post('declaration_no'),
+                'declaration_date' => $this->input->post('declaration_date'),
                 'status' => 'Active',
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s')
@@ -2763,9 +2766,22 @@ class Tender extends CI_Controller
             ORDER BY currency_name ASC
         ";
         $query = $this->db->query($sql);
-
         foreach ($query->result_array() as $row) {
             $data['currency_opt'][$row['currency_id']] = $row['currency_code'];
+        }
+
+        $sql = "
+            SELECT 
+            vat_filing_head_name 
+            FROM vat_filing_head_info 
+            WHERE status = 'Active' 
+            and vat_filing_head_type = 'Sales'
+            ORDER BY vat_filing_head_id ASC
+            ";
+        $query = $this->db->query($sql);
+        $data['vat_payer_sales_opt'] = ['' => 'Select VAT Payer Sales Category'];
+        foreach ($query->result_array() as $row) {
+            $data['vat_payer_sales_opt'][$row['vat_filing_head_name']] = $row['vat_filing_head_name'];
         }
 
         $this->load->view('page/tender/tender-invoice-add', $data);
@@ -3012,6 +3028,9 @@ class Tender extends CI_Controller
                 'remarks' => $this->input->post('remarks'),
                 'total_amount' => $this->input->post('total_amount'),
                 'tax_amount' => $this->input->post('total_gst_amount'),
+                'vat_payer_sales_grp' => $this->input->post('vat_payer_sales_grp'),
+                'declaration_no' => $this->input->post('declaration_no'),
+                'declaration_date' => $this->input->post('declaration_date'),
                 'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'updated_date' => date('Y-m-d H:i:s'),
@@ -3204,6 +3223,24 @@ class Tender extends CI_Controller
         foreach ($query->result_array() as $row) {
             $data['tender_po_opt'][$row['tender_po_id']] = $row['customer_po_no'];
         }
+
+        $data['vat_payer_sales_opt'] = [];
+        $sql = "
+            SELECT 
+            vat_filing_head_name 
+            FROM vat_filing_head_info 
+            WHERE status = 'Active' 
+            and vat_filing_head_type = 'Sales'
+            ORDER BY vat_filing_head_id ASC
+            ";
+        $query = $this->db->query($sql);
+        $data['vat_payer_sales_opt'] = ['' => 'Select VAT Payer Sales Category'];
+        foreach ($query->result_array() as $row) {
+            $data['vat_payer_sales_opt'][$row['vat_filing_head_name']] = $row['vat_filing_head_name'];
+        }
+
+
+
         /* ---- Load existing record for edit ---- */
         $data['header'] = $this->db->where('tender_enq_invoice_id ', $tender_enq_invoice_id)->get('tender_enq_invoice_info')->row_array();
         $data['item_list'] = [];

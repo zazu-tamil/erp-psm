@@ -592,3 +592,45 @@
     });
   });
 </script>
+<style>
+  /* Your existing styles remain unchanged */
+  .text-light-blue {
+    color: #3c8dbc !important;
+  }
+
+  fieldset {
+    border: 1px solid #d2d6de;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
+
+  legend {
+    font-size: 16px;
+    font-weight: bold;
+    width: auto;
+    padding: 0 12px;
+  }
+
+  .total-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin: 20px 0;
+  }
+
+  .total-box {
+    background: linear-gradient(135deg, #f6fff9, #e8f9f0);
+    border: 2px solid #b5e0c6;
+    border-radius: 12px;
+    padding: 12px 24px;
+    min-width: 280px;
+    text-align: right;
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+
+  #total_amount {
+    font-size: 1.5rem;
+    color: #3c8dbc;
+  }
+</style>

@@ -98,7 +98,29 @@
                                 Inactive</label>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <fieldset
+                                style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px;">
+                                <legend class="text-info">For Sales NBR - VAT Filing </legend>
 
+                                <div class="form-group col-md-6">
+                                    <label>VAT Payer Sales</label>
+                                    <?php echo form_dropdown('vat_payer_sales_grp', $vat_payer_sales_opt, set_value('vat_payer_sales_grp'), 'id="vat_payer_sales_grp" class="form-control"'); ?>
+                                </div>
+
+                                <div class="form-group col-md-3">
+                                    <label>Declaration Number</label>
+                                    <input type="text" name="declaration_no" id="declaration_no" class="form-control">
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>Declaration Date</label>
+                                    <input type="date" name="declaration_date" id="declaration_date"
+                                        class="form-control">
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="form-group col-md-6">
                             <label for="remarks">Notes</label>
