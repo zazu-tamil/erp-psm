@@ -146,9 +146,6 @@
                                             value="<?= $row['category_id']; ?>">
 
                                         <input type="hidden" name="item_id[<?= $i ?>]" value="<?= $row['item_id']; ?>">
-
-
-
                                         <td>
                                             <input type="checkbox" class="form-check-input item-check"
                                                 name="selected_items[]" value="<?= $i ?>" <?= ($row['chk'] == 1) ? 'checked' : ''; ?>>
@@ -161,8 +158,8 @@
                                             <?= $row['dc_no']; ?>
                                         </td>
                                         <td>
-                                            <input type="text" value="<?= $row['item_code']; ?>" class="form-control mb-2"
-                                                readonly>
+                                            <input type="text" name="item_code[<?= $i ?>]" value="<?= $row['item_code']; ?>"
+                                                class="form-control mb-2" readonly>
 
                                             <textarea name="item_desc[<?= $i ?>]" class="form-control desc-textarea"
                                                 rows="2"><?= $row['item_desc']; ?></textarea>
@@ -171,8 +168,8 @@
                                             <input type="text" name="uom[<?= $i ?>]" class="form-control mb-2"
                                                 value="<?= $row['uom']; ?>" readonly>
 
-                                            <input type="number" name="avail_qty[<?= $i ?>]" step="any"
-                                                class="form-control" value="<?= $row['avail_qty']; ?>" readonly>
+                                            <input type="number" name="avail_qty[<?= $i ?>]" step="any" class="form-control"
+                                                value="<?= $row['avail_qty']; ?>" readonly>
                                         </td>
                                         <td>
                                             <label class="form-label">Enter Delivery Qty</label>

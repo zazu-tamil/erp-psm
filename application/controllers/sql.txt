@@ -352,5 +352,11 @@ ALTER TABLE `currencies_info`
 
 	ALTER TABLE `tender_enq_invoice_info` ADD `currency_id` INT NULL AFTER `tender_po_id`;
 
-	ALTER TABLE `tender_enq_invoice_info` ADD `currency_id` INT NULL AFTER `tender_po_id`;
+	12-02-2026
 
+
+ALTER TABLE `tender_dc_item_info`
+	ADD COLUMN `item_code` TEXT NULL DEFAULT NULL AFTER `item_id`;
+
+	ALTER TABLE `tender_dc_item_info`
+	CHANGE COLUMN `item_code` `item_code` VARCHAR(100) NULL DEFAULT NULL AFTER `item_id`;

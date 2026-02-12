@@ -3401,6 +3401,7 @@ class Tender extends CI_Controller
                 $category_ids = $this->input->post('category_id') ?? [];
                 $item_desc = $this->input->post('item_desc') ?? [];
                 $item_ids = $this->input->post('item_id') ?? [];
+                $item_code = $this->input->post('item_code') ?? [];
                 $uoms = $this->input->post('uom') ?? [];
                 $qtys = $this->input->post('dc_qty') ?? [];
                 foreach ($selected_idxs as $idx) {
@@ -3410,6 +3411,7 @@ class Tender extends CI_Controller
                         'vendor_pur_inward_item_id' => $vendor_pur_inward_item_id[$idx] ?? 0,
                         'category_id' => $category_ids[$idx] ?? 0,
                         'item_id' => $item_ids[$idx] ?? 0,
+                        'item_code' => $item_code[$idx] ?? 0,
                         'item_desc' => $item_desc[$idx] ?? 0,
                         'uom' => $uoms[$idx] ?? '',
                         'qty' => $qtys[$idx] ?? 0,
@@ -3513,6 +3515,7 @@ class Tender extends CI_Controller
             $vendor_pur_inward_item_id = $this->input->post('vendor_pur_inward_item_id') ?? [];
             $category_id = $this->input->post('category_id') ?? [];
             $item_id = $this->input->post('item_id') ?? [];
+            $item_code = $this->input->post('item_code');
             $item_desc = $this->input->post('item_desc') ?? [];
             $uom = $this->input->post('uom') ?? [];
             $dc_qty = $this->input->post('dc_qty') ?? [];
@@ -3528,6 +3531,7 @@ class Tender extends CI_Controller
                     'vendor_pur_inward_item_id' => $vendor_pur_inward_item_id[$row_index],
                     'category_id' => $category_id[$row_index],
                     'item_id' => $item_id[$row_index],
+                    'item_code' => $item_code[$row_index],
                     'item_desc' => $item_desc[$row_index],
                     'uom' => $uom[$row_index],
                     'qty' => $dc_qty[$row_index],
@@ -4165,9 +4169,9 @@ class Tender extends CI_Controller
                 a.vendor_pur_inward_id,
                 b.vendor_pur_inward_item_id,
                 b.item_id,
+                b.item_code,
                 ven.vendor_name,
-                b.item_desc,
-                ii.item_code,
+                b.item_desc, 
                 b.category_id,
                 b.uom,
                 b.qty as inward_qty,
