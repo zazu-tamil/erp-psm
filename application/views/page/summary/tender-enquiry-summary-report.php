@@ -15,25 +15,42 @@
         <div class="box-header with-border">
             <h3 class="box-title text-white">Search Filter</h3>
         </div>
+
         <div class="box-body">
-            <form method="post" action="<?php echo site_url('tender-enquiry-summary-report') ?>" id="frmsearch">
+            <form method="post" action="<?php echo site_url('tender-enquiry-summary-report'); ?>" id="frmsearch">
+
                 <div class="row">
+
+                    <!-- Enquiry No -->
                     <div class="form-group col-md-3">
                         <label for="srch_enquiry_no_id">Our Enquiry No</label>
                         <input type="text" name="srch_enquiry_no_id" id="srch_enquiry_no_id" class="form-control"
-                            value="<?php echo set_value('srch_enquiry_no_id', $srch_enquiry_no_id); ?>"
+                            value="<?php echo isset($srch_enquiry_no_id) ? $srch_enquiry_no_id : ''; ?>"
                             placeholder="Search The Our Enquiry No">
+                        <input type="hidden" name="tender_enquiry_id" id="tender_enquiry_id"
+                            value="<?php echo isset($tender_enquiry_id) ? $tender_enquiry_id : ''; ?>">
                     </div>
-                    <div class="form-group col-md-2 text-left">
-                        <br />
+
+                    <!-- Open All Checkbox -->
+                    <div class="form-group col-md-3" style="margin-top:25px;">
+                        <label>
+                            <input type="checkbox" id="chk_open_all"> Open All Sections
+                        </label>
+                    </div>
+
+                    <!-- Show Button -->
+                    <div class="form-group col-md-2" style="margin-top:20px;">
                         <button class="btn btn-success" type="submit" name="btn_show" value="Show">
                             <i class="fa fa-search"></i> Show
                         </button>
                     </div>
+
                 </div>
+
             </form>
         </div>
     </div>
+
 
     <!-- Styles -->
     <style>
@@ -700,10 +717,403 @@
         </div>
     </div>
 
+    <!-- Vendor Quotation List -->
+    <div class="box box-success collapsed-box">
+        <div class="box-header with-border clearfix">
+            <h3 class="box-title">Vendor Quotation List</h3>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
+        </div>
 
+        <div class="box-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <?php if (!empty($vendor_quotation_list)): ?>
+                        <?php foreach ($vendor_quotation_list as $vendor_quotation):
+                            $info = $vendor_quotation['info'] ?? [];
+                            ?>
+                            <thead>
+                                <!-- QUOTATION HEADER -->
+                                <tr class="bg_top_header">
+                                    <th width="12%">Company</th>
+                                    <td width="15%"><?php echo htmlspecialchars($info['company_name'] ?? ''); ?></td>
+                                    <th width="12%">Customer Name</th>
+                                    <td width="15%"><?php echo htmlspecialchars($info['customer_name'] ?? ''); ?></td>
+                                    <th width="12%">Quotation No</th>
+                                    <td colspan="3"><?php echo htmlspecialchars($info['quote_no'] ?? ''); ?></td>
+                                </tr>
+                                <tr class="bg_top_header">
+                                    <th>Tender Enquiry No</th>
+                                    <td><?php echo htmlspecialchars($info['enquiry_no'] ?? ''); ?></td>
+                                    <th>Quotation Date</th>
+                                    <td>
+                                        <?php echo !empty($info['quote_date'])
+                                            ? date('d-m-Y', strtotime($info['quote_date']))
+                                            : ''; ?>
+                                    </td>
+                                    <th>Quotation Status</th>
+                                    <td colspan="3"><?php echo htmlspecialchars($info['quote_status'] ?? ''); ?></td>
+                                </tr>
+                                <!-- ITEM HEADER -->
+                                <tr class="bg_table_header">
+                                    <th width="5%">S.No</th>
+                                    <th width="12%">Item Code</th>
+                                    <th width="30%">Item Description</th>
+                                    <th width="8%">UOM</th>
+                                    <th width="10%" class="text-right">Qty</th>
+                                    <th width="12%" class="text-right">Rate</th>
+                                    <th width="8%" class="text-right">VAT %</th>
+                                    <th width="15%" class="text-right">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- ITEMS -->
+                                <?php if (!empty($vendor_quotation['items'])): ?>
+                                    <?php foreach ($vendor_quotation['items'] as $k => $item):
+                                        $decimal = $item['decimal_point'] ?? 2;
+                                        ?>
+                                        <tr>
+                                            <td><?php echo $k + 1; ?></td>
+                                            <td><?php echo htmlspecialchars($item['item_code'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($item['item_desc'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($item['uom'] ?? ''); ?></td>
+                                            <td class="text-right"><?php echo htmlspecialchars($item['qty'] ?? 0); ?></td>
+                                            <td class="text-right">
+                                                <?php echo number_format($item['rate'] ?? 0, $decimal); ?>
+                                            </td>
+                                            <td class="text-right"><?php echo htmlspecialchars($item['gst'] ?? 0); ?></td>
+                                            <td class="text-right">
+                                                <?php echo number_format($item['amount'] ?? 0, $decimal); ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="8" class="text-center">No items available</td>
+                                    </tr>
+                                <?php endif; ?>
+                                <!-- spacing -->
+                                <tr>
+                                    <td colspan="8" style="height: 20px; border: none;">&nbsp;</td>
+                                </tr>
+                            </tbody>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tbody>
+                            <tr>
+                                <td colspan="8" class="text-center">No records found</td>
+                            </tr>
+                        </tbody>
+                    <?php endif; ?>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vendor Po List -->
+    <div class="box box-success collapsed-box">
+        <div class="box-header with-border clearfix">
+            <h3 class="box-title">Vendor Po List</h3>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="box-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <?php if (!empty($vendor_po_list)): ?>
+                        <?php foreach ($vendor_po_list as $po_list):
+                            $info = $po_list['info'] ?? [];
+                            ?>
+                            <thead>
+                                <!-- TOP HEADER -->
+                                <tr class="bg_top_header">
+                                    <th width="12%">Company</th>
+                                    <td width="15%"><?php echo htmlspecialchars($info['company_name'] ?? ''); ?></td>
+                                    <th width="12%">Customer Name</th>
+                                    <td width="15%"><?php echo htmlspecialchars($info['customer_name'] ?? ''); ?></td>
+                                    <th width="12%">Po No</th>
+                                    <td colspan="3"><?php echo htmlspecialchars($info['po_no'] ?? ''); ?></td>
+                                </tr>
+                                <tr class="bg_top_header">
+                                    <th>Tender Enquiry No</th>
+                                    <td><?php echo htmlspecialchars($info['enquiry_no'] ?? ''); ?></td>
+                                    <th>Po Date</th>
+                                    <td>
+                                        <?php echo !empty($info['po_date'])
+                                            ? date('d-m-Y', strtotime($info['po_date']))
+                                            : ''; ?>
+                                    </td>
+                                    <th>Po Status</th>
+                                    <td colspan="3"><?php echo htmlspecialchars($info['po_status'] ?? ''); ?></td>
+                                </tr>
+                                <!-- ITEM HEADER -->
+                                <tr class="bg_table_header">
+                                    <th width="5%">S.No</th>
+                                    <th width="12%">Item Code</th>
+                                    <th width="30%">Item Description</th>
+                                    <th width="8%">UOM</th>
+                                    <th width="10%" class="text-right">Qty</th>
+                                    <th width="12%" class="text-right">Rate</th>
+                                    <th width="8%" class="text-right">VAT %</th>
+                                    <th width="15%" class="text-right">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- ITEMS -->
+                                <?php if (!empty($po_list['items'])): ?>
+                                    <?php foreach ($po_list['items'] as $k => $item):
+                                        $decimal = $item['decimal_point'] ?? 2;
+                                        ?>
+                                        <tr>
+                                            <td><?php echo $k + 1; ?></td>
+                                            <td><?php echo htmlspecialchars($item['item_code'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($item['item_desc'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($item['uom'] ?? ''); ?></td>
+                                            <td class="text-right"><?php echo htmlspecialchars($item['qty'] ?? 0); ?></td>
+                                            <td class="text-right">
+                                                <?php echo number_format($item['rate'] ?? 0, $decimal); ?>
+                                            </td>
+                                            <td class="text-right"><?php echo htmlspecialchars($item['gst'] ?? 0); ?></td>
+                                            <td class="text-right">
+                                                <?php echo number_format($item['amount'] ?? 0, $decimal); ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="8" class="text-center">No items available</td>
+                                    </tr>
+                                <?php endif; ?>
+                                <!-- spacing -->
+                                <tr>
+                                    <td colspan="8" style="height: 20px; border: none;">&nbsp;</td>
+                                </tr>
+                            </tbody>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tbody>
+                            <tr>
+                                <td colspan="8" class="text-center">No records found</td>
+                            </tr>
+                        </tbody>
+                    <?php endif; ?>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Vendor Purchase Inward List -->
+    <div class="box box-success collapsed-box">
+        <div class="box-header with-border clearfix">
+            <h3 class="box-title">Vendor Purchase Inward List</h3>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="box-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <?php if (!empty($vendor_pur_inward_list)): ?>
+                        <?php foreach ($vendor_pur_inward_list as $pur_inward):
+                            $info = $pur_inward['info'] ?? [];
+                            ?>
+                            <thead>
+                                <!-- ENQUIRY HEADER -->
+                                <tr class="bg_top_header">
+                                    <th width="15%">Company</th>
+                                    <td width="18%">
+                                        <?php echo htmlspecialchars($info['company_name'] ?? ''); ?>
+                                    </td>
+                                    <th width="15%">Customer Name</th>
+                                    <td width="18%">
+                                        <?php echo htmlspecialchars($info['customer_name'] ?? ''); ?>
+                                    </td>
+                                    <th width="15%">Inward No</th>
+                                    <td width="19%">
+                                        <?php echo htmlspecialchars($info['inward_no'] ?? ''); ?>
+                                    </td>
+                                </tr>
+                                <tr class="bg_top_header">
+                                    <th>Tender Name</th>
+                                    <td>
+                                        <?php echo htmlspecialchars($info['tender_name'] ?? ''); ?>
+                                    </td>
+                                    <th>Inward Date</th>
+                                    <td>
+                                        <?php echo !empty($info['inward_date'])
+                                            ? date('d-m-Y', strtotime($info['inward_date']))
+                                            : ''; ?>
+                                    </td>
+                                    <th>Inward Status</th>
+                                    <td>
+                                        <?php echo htmlspecialchars($info['inward_status'] ?? ''); ?>
+                                    </td>
+                                </tr>
+                                <!-- ITEM HEADER -->
+                                <tr class="bg_table_header">
+                                    <th width="5%">S.No</th>
+                                    <th width="15%">Item Code</th>
+                                    <th width="40%" colspan="2">Item Description</th>
+                                    <th width="10%">UOM</th>
+                                    <th width="10%" class="text-center">Qty</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- ITEMS -->
+                                <?php if (!empty($pur_inward['items'])): ?>
+                                    <?php foreach ($pur_inward['items'] as $k => $item): ?>
+                                        <tr>
+                                            <td>
+                                                <?php echo $k + 1; ?>
+                                            </td>
+                                            <td>
+                                                <?php echo htmlspecialchars($item['item_code'] ?? ''); ?>
+                                            </td>
+                                            <td colspan="2">
+                                                <?php echo htmlspecialchars($item['item_desc'] ?? ''); ?>
+                                            </td>
+                                            <td>
+                                                <?php echo htmlspecialchars($item['uom'] ?? ''); ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <?php echo htmlspecialchars($item['qty'] ?? 0); ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="6" class="text-center">No items available</td>
+                                    </tr>
+                                <?php endif; ?>
+                                <!-- spacing -->
+                                <tr>
+                                    <td colspan="6" style="height: 20px; border: none;">&nbsp;</td>
+                                </tr>
+                            </tbody>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tbody>
+                            <tr>
+                                <td colspan="6" class="text-center">No records found</td>
+                            </tr>
+                        </tbody>
+                    <?php endif; ?>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vendor Purchase Invoice List -->
+    <div class="box box-success collapsed-box">
+        <div class="box-header with-border clearfix">
+            <h3 class="box-title">Vendor Purchase Invoice List</h3>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="box-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <?php if (!empty($vendor_invoice_list)): ?>
+                        <?php foreach ($vendor_invoice_list as $vendor_invoice):
+                            $info = $vendor_invoice['info'] ?? [];
+                            ?>
+                            <thead>
+                                <!-- TOP HEADER -->
+                                <tr class="bg_top_header">
+                                    <th width="12%">Company</th>
+                                    <td width="15%"><?php echo htmlspecialchars($info['company_name'] ?? ''); ?></td>
+                                    <th width="12%">Customer Name</th>
+                                    <td width="15%"><?php echo htmlspecialchars($info['customer_name'] ?? ''); ?></td>
+                                    <th width="12%">Invoice No</th>
+                                    <td colspan="3"><?php echo htmlspecialchars($info['invoice_no'] ?? ''); ?></td>
+                                </tr>
+                                <tr class="bg_top_header">
+                                    <th>Tender Enquiry No</th>
+                                    <td><?php echo htmlspecialchars($info['enquiry_no'] ?? ''); ?></td>
+                                    <th>Invoice Date</th>
+                                    <td>
+                                        <?php echo !empty($info['invoice_date'])
+                                            ? date('d-m-Y', strtotime($info['invoice_date']))
+                                            : ''; ?>
+                                    </td>
+                                    <th>Invoice Status</th>
+                                    <td colspan="3"><?php echo htmlspecialchars($info['invoice_status'] ?? ''); ?></td>
+                                </tr>
+                                <!-- ITEM HEADER -->
+                                <tr class="bg_table_header">
+                                    <th width="5%">S.No</th>
+                                    <th width="12%">Item Code</th>
+                                    <th width="30%">Item Description</th>
+                                    <th width="8%">UOM</th>
+                                    <th width="10%" class="text-right">Qty</th>
+                                    <th width="12%" class="text-right">Rate</th>
+                                    <th width="8%" class="text-right">VAT %</th>
+                                    <th width="15%" class="text-right">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- ITEMS -->
+                                <?php if (!empty($vendor_invoice['items'])): ?>
+                                    <?php foreach ($vendor_invoice['items'] as $k => $item):
+                                        $decimal = $item['decimal_point'] ?? 2;
+                                        ?>
+                                        <tr>
+                                            <td><?php echo $k + 1; ?></td>
+                                            <td><?php echo htmlspecialchars($item['item_code'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($item['item_desc'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($item['uom'] ?? ''); ?></td>
+                                            <td class="text-right"><?php echo htmlspecialchars($item['qty'] ?? 0); ?></td>
+                                            <td class="text-right">
+                                                <?php echo number_format($item['rate'] ?? 0, $decimal); ?>
+                                            </td>
+                                            <td class="text-right"><?php echo htmlspecialchars($item['gst'] ?? 0); ?></td>
+                                            <td class="text-right">
+                                                <?php echo number_format($item['amount'] ?? 0, $decimal); ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="8" class="text-center">No items available</td>
+                                    </tr>
+                                <?php endif; ?>
+                                <!-- spacing -->
+                                <tr>
+                                    <td colspan="8" style="height: 20px; border: none;">&nbsp;</td>
+                                </tr>
+                            </tbody>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tbody>
+                            <tr>
+                                <td colspan="8" class="text-center">No records found</td>
+                            </tr>
+                        </tbody>
+                    <?php endif; ?>
+                </table>
+            </div>
+        </div>
+    </div>
 </section>
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
+
+
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <script>
@@ -711,7 +1121,7 @@
         $("#srch_enquiry_no_id").autocomplete({
             source: function (request, response) {
                 $.ajax({
-                    url: "<?php echo base_url('summary/tender_enquiry_id_search'); ?>",
+                    url: "<?php echo base_url('reports/tender_enquiry_id_search'); ?>",
                     type: "POST",
                     data: { search: request.term },
                     dataType: "json",
@@ -725,12 +1135,38 @@
                 });
             },
             minLength: 1,
-            select: function (event, ui) {
-                console.log(ui);
-                // Uncomment and modify as needed:
-                // $("#srch_company_id").val(ui.item.company_id);
-                // $("#srch_customer_id").val(ui.item.customer_id).trigger('change');
+            select: function (event, ui) { 
+                $("#tender_enquiry_id").val(ui.item.tender_enquiry_id);
             }
         });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+
+        $("#chk_open_all").on("change", function () {
+
+            if ($(this).is(":checked")) {
+
+                // Open all boxes
+                $(".box").each(function () {
+                    if ($(this).hasClass("collapsed-box")) {
+                        $(this).find('[data-widget="collapse"]').click();
+                    }
+                });
+
+            } else {
+
+                // Close all boxes
+                $(".box").each(function () {
+                    if (!$(this).hasClass("collapsed-box")) {
+                        $(this).find('[data-widget="collapse"]').click();
+                    }
+                });
+
+            }
+
+        });
+
     });
 </script>
