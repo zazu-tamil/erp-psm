@@ -357,7 +357,7 @@
     const rowTemplate = `
         <tr class="item-row"> 
             <td class="text-center">
-                <input type="checkbox" class="form-check-input item-check">
+                <input type="checkbox" class="form-check-input item-check" name="selected_items[]">
             </td> 
             <td>
                 <input type="text" name="item_code[]" class="form-control item_code">
@@ -377,10 +377,10 @@
                 <input type="number" step="any" name="gst[]" class="form-control vat" value="10.00">
             </td>
             <td>
-                <input type="number" class="form-control amount_wo_tax" readonly>
+                <input type="number" class="form-control amount_wo_tax" name="amount_wo_tax[]" readonly>
             </td>
             <td>
-                <input type="number" class="form-control amount" readonly>
+                <input type="number" class="form-control amount" name="amount[]" readonly>
             </td>
         </tr>
     `;

@@ -569,7 +569,7 @@ class Vendor extends CI_Controller
                 $gst = $this->input->post('gst') ?? [];
                 $amount = $this->input->post('amount') ?? [];
 
-                foreach ($selected_items as $idx) {
+                foreach ($selected_items as $idx => $value) {
 
                     $item = [
                         'vendor_po_id' => $vendor_po_id,
@@ -1379,7 +1379,7 @@ class Vendor extends CI_Controller
                 $gst = $this->input->post('gst') ?? [];
                 $amount = $this->input->post('amount') ?? [];
 
-                foreach ($selected_items as $idx) {
+                foreach ($selected_items as $idx => $value) {
 
                     $item = [
                         'vendor_pur_inward_id' => $vendor_pur_inward_id,
@@ -1801,7 +1801,7 @@ class Vendor extends CI_Controller
                 $gst = $this->input->post('gst') ?? [];
                 $amount = $this->input->post('amount') ?? [];
 
-                foreach ($selected_items as $idx) {
+                foreach ($selected_items as $idx => $value) {
 
                     $item = [
                         'vendor_pur_inward_id' => $vendor_pur_inward_id,
@@ -1960,6 +1960,9 @@ class Vendor extends CI_Controller
         if ($this->input->post('mode') == 'Add') {
             $this->db->trans_start();
 
+            // echo "<pre>";
+            // print_r($_POST);    
+            // echo "</pre>";
 
             // 1. Handle file uploads
             $upload_path = 'vendor-quotations-documents/';
@@ -2005,6 +2008,8 @@ class Vendor extends CI_Controller
             $vendor_quote_id = $this->db->insert_id();
             $selected_items = $this->input->post('selected_items') ?? [];
 
+            //print_r($selected_items);
+
             if (!empty($selected_items)) {
 
                 $vendor_rate_enquiry_item_id = $this->input->post('vendor_rate_enquiry_item_id') ?? [];
@@ -2018,7 +2023,7 @@ class Vendor extends CI_Controller
                 $gst = $this->input->post('gst') ?? [];
                 $amount = $this->input->post('amount') ?? [];
 
-                foreach ($selected_items as $idx) {
+                foreach ($selected_items as  $idx => $value) {
 
                     $item = [
                         'vendor_quote_id' => $vendor_quote_id,
@@ -2036,6 +2041,9 @@ class Vendor extends CI_Controller
                         'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                         'created_date' => date('Y-m-d H:i:s'),
                     ];
+                    // echo "<pre>";
+                    // print_r($item);
+                    // echo "</pre>";
 
                     $this->db->insert('vendor_quote_item_info', $item);
                 }
@@ -2436,7 +2444,7 @@ class Vendor extends CI_Controller
                 $rates = $this->input->post('rate') ?? [];
                 $amounts = $this->input->post('amount') ?? [];
 
-                foreach ($selected_idxs as $idx) {
+                foreach ($selected_idxs as $fld =>$idx) {
                     //if($tender_quotation_item_ids[$idx]){  
                     $item_data = [
                         'vendor_quote_id' => $vendor_quote_id,
@@ -2464,7 +2472,12 @@ class Vendor extends CI_Controller
                         $item_data['created_by'] = $this->session->userdata(SESS_HD . 'user_id');
                         $item_data['created_date'] = date('Y-m-d H:i:s');
 
-                        $this->db->insert('vendor_quote_item_info', $item_data);
+                       if ($this->db->insert('vendor_quote_item_info', $item_data)) {
+                           $current_item_id = $this->db->insert_id();
+                        } else {
+                            $current_item_id = 0;
+                        }
+                        $miss_item_ids[] = $current_item_id;
                     }
                     $miss_item_ids[] = $vendor_quote_item_ids[$idx];
 
@@ -2505,19 +2518,23 @@ class Vendor extends CI_Controller
         $sql = "
             SELECT 
             a.vendor_quote_item_id,
-            a.vendor_rate_enquiry_item_id,
-            a.item_code,
-            a.item_desc,
-            a.uom,
-            a.qty,
+            b.vendor_rate_enquiry_item_id,
+            IF(b.tender_enquiry_item_id != a.vendor_rate_enquiry_item_id, a.item_code,b.item_code) AS item_code,
+            IF(b.tender_enquiry_item_id != a.vendor_rate_enquiry_item_id, a.item_desc,b.item_desc) AS item_desc, 
+            if(b.tender_enquiry_item_id != a.vendor_rate_enquiry_item_id, a.uom,b.uom) AS uom, 
+            if(b.tender_enquiry_item_id != a.vendor_rate_enquiry_item_id, a.qty,b.qty) AS qty,
             a.rate,
-            a.gst as vat,  
-            a.amount        
-            FROM vendor_quote_item_info AS a 
-            WHERE a.vendor_quote_id = ? AND a.status = 'Active'
-            ORDER BY a.vendor_quote_item_id ASC
+            a.gst as vat,
+            a.amount 
+            FROM vendor_rate_enquiry_item_info AS b
+            left join vendor_quote_item_info AS a 
+            ON a.vendor_rate_enquiry_item_id = b.vendor_rate_enquiry_item_id AND a.status='Active' AND a.vendor_quote_id = ?
+            WHERE b.status = 'Active'
+            and b.vendor_rate_enquiry_id =  ?
+            ORDER BY b.vendor_rate_enquiry_item_id ASC
         ";
-        $query = $this->db->query($sql, [$vendor_quote_id]);
+        
+        $query = $this->db->query($sql, [$vendor_quote_id , $data['header']['vendor_rate_enquiry_id']]);
         $data['items'] = $query->result_array();
 
         $sql = "
@@ -3589,7 +3606,7 @@ class Vendor extends CI_Controller
                 $gst = $this->input->post('gst') ?? [];
                 $amount = $this->input->post('amount') ?? [];
 
-                foreach ($selected_items as $idx) {
+                foreach ($selected_items as $idx =>$value) {
                     $item = [
                         'vendor_purchase_invoice_id' => $vendor_purchase_invoice_id,
                         'vendor_po_item_id' => $vendor_po_item_id[$idx] ?? 0,
@@ -4068,7 +4085,7 @@ class Vendor extends CI_Controller
             $gst = $this->input->post('gst') ?? [];
             $amount = $this->input->post('amount') ?? [];
 
-            foreach ($selected_items as $idx) {
+            foreach ($selected_items as $idx => $value) {
 
                 $itemData = [
                     'vendor_purchase_invoice_id' => $vendor_purchase_invoice_id,

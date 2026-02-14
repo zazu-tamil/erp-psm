@@ -182,10 +182,10 @@
                             <?php if (!empty($items)): ?>
                             <?php $index = 0;
                                 foreach ($items as $item): ?>
-                            <tr class="item-row">
+                            <tr class="item-row item-card">
                                 <td>
                                     <input type="checkbox" class="form-check-input item-check" name="selected_items[]"
-                                        value="<?php echo $index; ?>" checked>
+                                        value="<?php echo $index; ?>" <?php echo (!empty($item['vendor_quote_item_id'])) ? 'checked' : ''; ?>>
                                     <input type="hidden" name="vendor_rate_enquiry_item_id[<?php echo $index; ?>]" value="<?php echo $item['vendor_rate_enquiry_item_id']; ?>">
                                     <input type="hidden" name="vendor_quote_item_id[<?php echo $index; ?>]" value="<?php echo $item['vendor_quote_item_id']; ?>">
                                 </td>
@@ -217,7 +217,7 @@
                                                             value="<?php echo number_format(($item['rate'] * $item['qty']), 3, '.', ''); ?>" readonly>
                                 </td>
                                 <td>
-                                     <input type="number" step="any" name="amount[]" class="form-control amount-input"
+                                     <input type="number" step="any" name="amount[]" class="form-control amounttx amount"
                                                             value="<?php echo number_format($item['amount'], 3, '.', ''); ?>" readonly>
                                 </td>
 

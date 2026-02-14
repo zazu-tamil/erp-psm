@@ -257,8 +257,9 @@
                             <tbody>
                                 <!-- ITEMS -->
                                 <?php if (!empty($quotation['items'])): ?>
-                                    <?php foreach ($quotation['items'] as $k => $item):
-                                        $decimal = $item['decimal_point'] ?? 2;
+                                    <?php $tot = 0;  foreach ($quotation['items'] as $k => $item):
+                                        $decimal = $item['decimal_point'] ?? 2; 
+                                        $tot += $item['amount'] ?? 0;
                                         ?>
                                         <tr>
                                             <td><?php echo $k + 1; ?></td>
@@ -271,10 +272,16 @@
                                             </td>
                                             <td class="text-right"><?php echo htmlspecialchars($item['gst'] ?? 0); ?></td>
                                             <td class="text-right">
-                                                <?php echo number_format($item['amount'] ?? 0, $decimal); ?>
+                                                <?php echo $item['currency_code'] . ' ' . number_format($item['amount'] ?? 0, $decimal); ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <tr>
+                                        <td colspan="7" class="text-right"><strong>Total Amount:</strong></td>
+                                        <td class="text-right">
+                                            <?php echo $item['currency_code'] . ' ' . number_format($tot, 2); ?>
+                                        </td>
+                                    </tr>
                                 <?php else: ?>
                                     <tr>
                                         <td colspan="8" class="text-center">No items available</td>
@@ -353,8 +360,9 @@
                             <tbody>
                                 <!-- ITEMS -->
                                 <?php if (!empty($po_list['items'])): ?>
-                                    <?php foreach ($po_list['items'] as $k => $item):
+                                    <?php $tot = 0; foreach ($po_list['items'] as $k => $item):
                                         $decimal = $item['decimal_point'] ?? 2;
+                                        $tot += $item['amount'] ?? 0;   
                                         ?>
                                         <tr>
                                             <td><?php echo $k + 1; ?></td>
@@ -367,10 +375,16 @@
                                             </td>
                                             <td class="text-right"><?php echo htmlspecialchars($item['gst'] ?? 0); ?></td>
                                             <td class="text-right">
-                                                <?php echo number_format($item['amount'] ?? 0, $decimal); ?>
+                                                <?php echo  $item['currency_code'] . ' ' . number_format($item['amount'] ?? 0, $decimal); ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <tr>
+                                        <td colspan="7" class="text-right"><strong>Total Amount:</strong></td>
+                                        <td class="text-right">
+                                            <?php echo $item['currency_code'] . ' ' . number_format($tot, 2); ?>
+                                        </td>
+                                    </tr>
                                 <?php else: ?>
                                     <tr>
                                         <td colspan="8" class="text-center">No items available</td>
@@ -543,8 +557,9 @@
                             <tbody>
                                 <!-- ITEMS -->
                                 <?php if (!empty($invoice_list['items'])): ?>
-                                    <?php foreach ($invoice_list['items'] as $k => $item):
+                                    <?php $tot = 0; foreach ($invoice_list['items'] as $k => $item):
                                         $decimal = $item['decimal_point'] ?? 2;
+                                        $tot += $item['amount'] ?? 0;   
                                         ?>
                                         <tr>
                                             <td>
@@ -569,10 +584,16 @@
                                                 <?php echo htmlspecialchars($item['gst'] ?? 0); ?>
                                             </td>
                                             <td class="text-right">
-                                                <?php echo number_format($item['amount'] ?? 0, $decimal); ?>
+                                                <?php echo $item['currency_code'] . ' ' . number_format($item['amount'] ?? 0, $decimal); ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <tr>
+                                        <td colspan="7" class="text-right"><strong>Total Amount:</strong></td>
+                                        <td class="text-right">
+                                            <?php echo $item['currency_code'] . ' ' . number_format($tot, 2); ?>    
+                                        </td>
+                                    </tr>
                                 <?php else: ?>
                                     <tr>
                                         <td colspan="8" class="text-center">No items available</td>
@@ -664,8 +685,9 @@
                             <tbody>
                                 <!-- ITEMS -->
                                 <?php if (!empty($vendor_rate_enquiry['items'])): ?>
-                                    <?php foreach ($vendor_rate_enquiry['items'] as $k => $item):
+                                    <?php $tot = 0; foreach ($vendor_rate_enquiry['items'] as $k => $item):
                                         $decimal = $item['decimal_point'] ?? 2;
+                                        $tot += $item['amount'] ?? 0;
                                         ?>
                                         <tr>
                                             <td>
@@ -690,10 +712,14 @@
                                                 <?php echo htmlspecialchars($item['gst'] ?? 0); ?>
                                             </td>
                                             <td class="text-right">
-                                                <?php echo number_format($item['amount'] ?? 0, $decimal); ?>
+                                                <?php echo $item['currency_code'] . ' ' . number_format($item['amount'] ?? 0, $decimal); ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <tr>
+                                        <td colspan="7" class="text-right"><strong>Total Amount:</strong></td>
+                                        <td class="text-right"><?php echo $item['currency_code'] . ' ' . number_format($tot, 2); ?></td>
+                                    </tr>
                                 <?php else: ?>
                                     <tr>
                                         <td colspan="8" class="text-center">No items available</td>
@@ -772,8 +798,9 @@
                             <tbody>
                                 <!-- ITEMS -->
                                 <?php if (!empty($vendor_quotation['items'])): ?>
-                                    <?php foreach ($vendor_quotation['items'] as $k => $item):
+                                    <?php $tot=0; foreach ($vendor_quotation['items'] as $k => $item):
                                         $decimal = $item['decimal_point'] ?? 2;
+                                        $tot += $item['amount'] ?? 0;   
                                         ?>
                                         <tr>
                                             <td><?php echo $k + 1; ?></td>
@@ -786,10 +813,14 @@
                                             </td>
                                             <td class="text-right"><?php echo htmlspecialchars($item['gst'] ?? 0); ?></td>
                                             <td class="text-right">
-                                                <?php echo number_format($item['amount'] ?? 0, $decimal); ?>
+                                                <?php echo $item['currency_code'] . ' ' . number_format($item['amount'] ?? 0, $decimal); ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <tr>
+                                        <td colspan="7" class="text-right"><strong>Total Amount:</strong></td>
+                                        <td class="text-right"><?php echo $item['currency_code'] . ' ' . number_format($tot, 2); ?></td>
+                                    </tr>
                                 <?php else: ?>
                                     <tr>
                                         <td colspan="8" class="text-center">No items available</td>
@@ -868,8 +899,9 @@
                             <tbody>
                                 <!-- ITEMS -->
                                 <?php if (!empty($po_list['items'])): ?>
-                                    <?php foreach ($po_list['items'] as $k => $item):
+                                    <?php $tot=0; foreach ($po_list['items'] as $k => $item):
                                         $decimal = $item['decimal_point'] ?? 2;
+                                        $tot += $item['amount'] ?? 0;
                                         ?>
                                         <tr>
                                             <td><?php echo $k + 1; ?></td>
@@ -882,10 +914,14 @@
                                             </td>
                                             <td class="text-right"><?php echo htmlspecialchars($item['gst'] ?? 0); ?></td>
                                             <td class="text-right">
-                                                <?php echo number_format($item['amount'] ?? 0, $decimal); ?>
+                                                <?php echo $item['currency_code'] . ' ' . number_format($item['amount'] ?? 0, $decimal); ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <tr>
+                                        <td colspan="7" class="text-right"><strong>Total Amount:</strong></td>
+                                        <td class="text-right"><?php echo $item['currency_code'] . ' ' . number_format($tot, 2); ?></td>
+                                    </tr>
                                 <?php else: ?>
                                     <tr>
                                         <td colspan="8" class="text-center">No items available</td>
@@ -1069,8 +1105,9 @@
                             <tbody>
                                 <!-- ITEMS -->
                                 <?php if (!empty($vendor_invoice['items'])): ?>
-                                    <?php foreach ($vendor_invoice['items'] as $k => $item):
+                                    <?php $tot = 0; foreach ($vendor_invoice['items'] as $k => $item):
                                         $decimal = $item['decimal_point'] ?? 2;
+                                        $tot += $item['amount'] ?? 0;   
                                         ?>
                                         <tr>
                                             <td><?php echo $k + 1; ?></td>
@@ -1083,10 +1120,14 @@
                                             </td>
                                             <td class="text-right"><?php echo htmlspecialchars($item['gst'] ?? 0); ?></td>
                                             <td class="text-right">
-                                                <?php echo number_format($item['amount'] ?? 0, $decimal); ?>
+                                                <?php echo $item['currency_code'] . ' ' . number_format($item['amount'] ?? 0, $decimal); ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <tr>
+                                        <td colspan="7" class="text-right"><strong>Total Amount:</strong></td>
+                                        <td class="text-right"><?php echo $item['currency_code'] . ' ' . number_format($tot, 2); ?></td>
+                                    </tr>
                                 <?php else: ?>
                                     <tr>
                                         <td colspan="8" class="text-center">No items available</td>

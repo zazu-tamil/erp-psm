@@ -258,11 +258,13 @@ $route['vat-filing-head-list/(:num)'] = 'master/vat_filing_head_list/$1';
 $route['addt-charges-type-list'] = 'master/addt_charges_type_list';
 $route['addt-charges-type-list/(:num)'] = 'master/addt_charges_type_list/$1';
 
-$route['tender-enquiry-timeline'] = 'tender/tender_enquiry_timeline';
-$route['tender-enquiry-timeline/(:num)'] = 'tender/tender_enquiry_timeline/$1';
 
-//summary report
+
+//report
 $route['tender-enquiry-summary-report'] = 'reports/tender_enquiry_summary_report'; 
 
 $route['sales-nbr-report'] = 'reports/sales_nbr_report';
 $route['purchase-nbr-report'] = 'reports/purchase_nbr_report'; 
+
+$route['tender-enquiry-timeline'] = 'tender/tender_enquiry_timeline';
+$route['tender-enquiry-timeline/(:num)'] = 'tender/tender_enquiry_timeline/$1';

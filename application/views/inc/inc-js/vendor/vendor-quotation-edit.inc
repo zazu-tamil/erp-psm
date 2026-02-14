@@ -363,20 +363,20 @@
                         </td>
 
                         <td>
-                            <input type="number" step="any" name="qty[]" class="form-control qty-input" value="${
+                            <input type="number" step="any" name="qty[]" class="form-control qty" value="${
                               row.qty
                             }" readonly>
                         </td>
 
                         <td>
-                            <input type="number" step="any" name="rate[]" class="form-control rate-input">
+                            <input type="number" step="any" name="rate[]" class="form-control rate">
                         </td>
                         <td>
-                            <input type="number"  name="gst[]" class="form-control vat-dropdown">
+                            <input type="number"  name="gst[]" class="form-control vat">
                         </td>
 
                         <td>
-                            <input type="number" name="amount[]" class="form-control amount-input" value="0.000" readonly>
+                            <input type="number" name="amount[]" class="form-control amounttx amount" value="0.000" readonly>
                         </td> 
                        
                        
@@ -395,14 +395,25 @@
 <script>
 $(document).ready(function () {
 
-      $(document).on("input change", ".rate-input, .vat-dropdown", function () {
+      $(document).on("input change", ".rate, .vat", function () {  
        const $row = $(this).closest(".item-card");
-       const qty = parseFloat($row.find(".qty-input").val()) || 0;
-       const rate = parseFloat($row.find(".rate-input").val()) || 0;
-       const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
+
+        const isChecked = $row.find(".item-check").is(":checked");
+
+        if (!isChecked) {
+            // If not checked, clear amounts
+            $row.find(".amountwotx").val("0.000");
+            $row.find(".amount-input").val("0.000");
+            calculateTotalAmount();
+            return;
+        }
+
+       const qty = parseFloat($row.find(".qty").val()) || 0;
+       const rate = parseFloat($row.find(".rate").val()) || 0;
+       const gst = parseFloat($row.find(".vat").val()) || 0;
 
        const amount = qty * rate * (1 + gst / 100);
-       $row.find(".amount-input").val(amount.toFixed(3));
+       $row.find(".amount").val(amount.toFixed(3));
        $row.find(".amountwotx").val((qty * rate).toFixed(3));
 
        calculateTotalAmount();
@@ -410,7 +421,7 @@ $(document).ready(function () {
 
      function calculateTotalAmount() {
        let total = 0;
-       $(".amount-input").each(function () {
+       $(".amount").each(function () {
          total += parseFloat($(this).val()) || 0;
        });
        $("#total_amount").text(total.toFixed(3));
