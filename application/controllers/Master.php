@@ -163,6 +163,7 @@ class Master extends CI_Controller
                 'country' => $this->input->post('country'),
                 'ltr_header_img' => $folder . '/' . $ltr_header_img,
                 'email' => $this->input->post('email'),
+                'bank_id' => $this->input->post('bank_id'),
                 'status' => $this->input->post('status')
             );
 
@@ -198,6 +199,7 @@ class Master extends CI_Controller
                 'invoice_terms' => $this->input->post('invoice_terms'),
                 'company_code' => $this->input->post('company_code'),
                 'email' => $this->input->post('email'),
+                'bank_id' => $this->input->post('bank_id'),
                 'status' => $this->input->post('status')
             );
 
@@ -260,6 +262,23 @@ class Master extends CI_Controller
         $data['country_opt'] = array();
         foreach ($query->result_array() as $row) {
             $data['country_opt'][$row['country_name']] = $row['country_name'];
+        }
+        $sql = "
+          SELECT
+                a.bank_id,
+                a.bank_name
+            FROM
+                company_bank_info AS a
+            WHERE
+                a.status != 'Delete'
+            ORDER BY
+                a.bank_name ASC
+         ";
+
+        $query = $this->db->query($sql);
+        $data['bank_opt'] = array();
+        foreach ($query->result_array() as $row) {
+            $data['bank_opt'][$row['bank_id']] = $row['bank_name'];
         }
 
 
@@ -663,7 +682,7 @@ class Master extends CI_Controller
 
         $this->load->view('page/master/gst-list', $data);
     }
-    
+
     public function items_list()
     {
         // Check if user is logged in
@@ -1664,7 +1683,7 @@ class Master extends CI_Controller
         $config['total_rows'] = $cnt;
         $config['per_page'] = 10;
         $config['uri_segment'] = 2;
-         $config['attributes'] = array('class' => 'page-link');
+        $config['attributes'] = array('class' => 'page-link');
         $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
         $config['full_tag_close'] = '</ul>';
         $config['num_tag_open'] = '<li class="page-item">';
@@ -1762,7 +1781,7 @@ class Master extends CI_Controller
         $config['total_rows'] = $cnt;
         $config['per_page'] = 50;
         $config['uri_segment'] = 2;
-         $config['attributes'] = array('class' => 'page-link');
+        $config['attributes'] = array('class' => 'page-link');
         $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
         $config['full_tag_close'] = '</ul>';
         $config['num_tag_open'] = '<li class="page-item">';
@@ -1890,5 +1909,72 @@ class Master extends CI_Controller
         $data['pagination'] = $this->pagination->create_links();
         $this->load->view('page/master/addt-charges-type-list', $data);
     }
+
+    public function company_bank_list()
+    {
+
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        if (
+            $this->session->userdata(SESS_HD . 'level') != 'Admin'
+            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
+        ) {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+
+        // Include JavaScript file
+        $data['js'] = 'company-bank.inc';
+
+        // Handle Add
+        if ($this->input->post('mode') == 'Add') {
+
+            $ins = array(
+                'account_name' => $this->input->post('account_name'),
+                'bank_name' => $this->input->post('bank_name'),
+                'account_number' => $this->input->post('account_number'),
+                'iban_no' => $this->input->post('iban_no'),
+                'swift_code' => $this->input->post('swift_code'),
+                'remarks' => $this->input->post('remarks'),
+                'status' => $this->input->post('status') ?: 'Active'
+            );
+
+            $this->db->insert('company_bank_info', $ins);
+            redirect('company-bank-list');
+        }
+
+        // Handle Edit
+        if ($this->input->post('mode') == 'Edit') {
+
+            $upd = array(
+                'account_name' => $this->input->post('account_name'),
+                'bank_name' => $this->input->post('bank_name'),
+                'account_number' => $this->input->post('account_number'),
+                'iban_no' => $this->input->post('iban_no'),
+                'swift_code' => $this->input->post('swift_code'),
+                'remarks' => $this->input->post('remarks'),
+                'status' => $this->input->post('status')
+            );
+
+            $this->db->where('bank_id', $this->input->post('bank_id'));
+            $this->db->update('company_bank_info', $upd);
+            redirect('company-bank-list');
+        }
+
+        $sql = "
+        SELECT *
+        FROM company_bank_info
+        WHERE status != 'Delete'
+        ORDER BY bank_name ASC
+    ";
+
+        $query = $this->db->query($sql);
+        $data['record_list'] = $query->result_array();
+
+        $this->load->view('page/master/company-bank-list', $data);
+    }
+
 }
 

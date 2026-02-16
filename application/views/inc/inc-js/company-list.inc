@@ -12,6 +12,8 @@
         success: function (d) {
           console.log(d);
           $("#edit_modal #company_id").val(d.company_id);
+          $("#edit_modal #bank_id").val(d.bank_id).change();
+
           $("#edit_modal #company_name").val(d.company_name);
           $("#edit_modal #contact_name").val(d.contact_name);
           $("#edit_modal #country").val(d.country);
@@ -23,18 +25,22 @@
           $("#edit_modal #GST").val(d.GST);
           $('#edit_modal input:radio[value="' + d.status + '"]').prop(
             "checked",
-            true
+            true,
           );
 
-           // ✅ Load CKEditor content safely
-					if (typeof d !== 'undefined') {
-						if (CKEDITOR.instances['editor1_edit_modal']) {
-							CKEDITOR.instances['editor1_edit_modal'].setData(d.quote_terms || '');
-						}
-						if (CKEDITOR.instances['editor2_edit_modal']) {
-							CKEDITOR.instances['editor2_edit_modal'].setData(d.invoice_terms || '');
-						}
-					}
+          // ✅ Load CKEditor content safely
+          if (typeof d !== "undefined") {
+            if (CKEDITOR.instances["editor1_edit_modal"]) {
+              CKEDITOR.instances["editor1_edit_modal"].setData(
+                d.quote_terms || "",
+              );
+            }
+            if (CKEDITOR.instances["editor2_edit_modal"]) {
+              CKEDITOR.instances["editor2_edit_modal"].setData(
+                d.invoice_terms || "",
+              );
+            }
+          }
 
           if (d.ltr_header_img) {
             let headerUrl =

@@ -360,3 +360,25 @@ ALTER TABLE `tender_dc_item_info`
 
 	ALTER TABLE `tender_dc_item_info`
 	CHANGE COLUMN `item_code` `item_code` VARCHAR(100) NULL DEFAULT NULL AFTER `item_id`;
+
+
+
+	CREATE TABLE `company_bank_info` (
+	`bank_id` INT(10) NOT NULL AUTO_INCREMENT, 
+	`account_name` VARCHAR(100) NULL DEFAULT NULL,
+	`bank_name` VARCHAR(100) NULL DEFAULT NULL,
+	`branch` VARCHAR(100) NULL DEFAULT NULL,
+	`account_type` VARCHAR(100) NULL DEFAULT NULL,
+	`account_number` VARCHAR(100) NULL DEFAULT NULL,
+	`iban_no` VARCHAR(100) NULL DEFAULT NULL,
+	`swift_code` VARCHAR(100) NULL DEFAULT NULL,
+	`remarks` TEXT NULL DEFAULT NULL,
+	`status` VARCHAR(50) NULL DEFAULT NULL,
+	`qr_code` TEXT NULL DEFAULT NULL,
+	PRIMARY KEY (`bank_id`)
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=MyISAM
+AUTO_INCREMENT=1
+;
+ALTER TABLE `company_info` ADD `bank_id` INT NULL AFTER `company_id`;

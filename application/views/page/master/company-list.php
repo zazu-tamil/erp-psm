@@ -183,7 +183,14 @@
                                     </div>
                                 </div>
 
-
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Select Bank <span class="text-danger">*</span></label>
+                                            <?php echo form_dropdown('bank_id', ['' => 'Select Bank'] + $bank_opt, set_value('bank_id'), 'id="bank_id" class="form-control" required'); ?>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="row">
                                     <div class="form-group col-md-12">
                                         <label>Status</label>
@@ -335,7 +342,14 @@
                                         </div>
                                     </div>
                                 </div>
-                                <!--  -->
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Select Bank <span class="text-danger">*</span></label>
+                                            <?php echo form_dropdown('bank_id', ['' => 'Select Bank'] + $bank_opt, set_value('bank_id'), 'id="bank_id" class="form-control" required'); ?>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="row">
                                     <div class="form-group col-md-12">
                                         <label>Status</label>

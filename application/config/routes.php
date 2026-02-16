@@ -268,3 +268,6 @@ $route['purchase-nbr-report'] = 'reports/purchase_nbr_report';
 
 $route['tender-enquiry-timeline'] = 'tender/tender_enquiry_timeline';
 $route['tender-enquiry-timeline/(:num)'] = 'tender/tender_enquiry_timeline/$1';
+
+$route['company-bank-list'] = 'master/company_bank_list';
+$route['company-bank-list/(:num)'] = 'master/company_bank_list/$1';

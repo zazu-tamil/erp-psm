@@ -2759,6 +2759,8 @@ class Tender extends CI_Controller
 
         $data['currency_opt'] = [];
 
+        $data['default_currency_id'] = '';
+
         $sql = "
             SELECT currency_id, currency_code
             FROM currencies_info
@@ -2766,8 +2768,13 @@ class Tender extends CI_Controller
             ORDER BY currency_name ASC
         ";
         $query = $this->db->query($sql);
+
         foreach ($query->result_array() as $row) {
             $data['currency_opt'][$row['currency_id']] = $row['currency_code'];
+
+            if ($row['currency_code'] === 'BHD') {
+                $data['default_currency_id'] = $row['currency_id'];
+            }
         }
 
         $sql = "
@@ -3275,6 +3282,90 @@ class Tender extends CI_Controller
 
         // === MAIN RECORD ===
         $sql = "
+           select
+            a.tender_enq_invoice_id,
+            a.invoice_no,
+            d.ltr_header_img,
+            a.invoice_date,
+            b.our_po_no,
+            b.po_date,
+            c.dc_no,
+            c.dc_date,
+            d.company_name,
+            e.customer_name,
+            e.country,
+            e.address,
+            f.decimal_point
+            from tender_enq_invoice_info  as a
+            left join customer_tender_po_info as b on a.tender_po_id = b.tender_po_id and b.`status`='Active'
+            left join tender_dc_info as c on  a.tender_po_id = c.tender_po_id and c.`status`='Active'
+            left join company_info as d on a.company_id = d.company_id and d.status='Active'
+            left join customer_info as e on a.customer_id = e.customer_id and e.`status`='Active'
+            left join currencies_info as f on a.currency_id = f.currency_id and f.`status`='Active'
+            where a.`status`='Active'
+            and a.tender_enq_invoice_id = ?
+            order by a.tender_enq_invoice_id asc  
+        ";
+        $query = $this->db->query($sql, [$tender_enq_invoice_id]);
+        $data['record'] = $query->row_array();
+
+        if (!$data['record']) {
+            show_404();
+        }
+
+        $sql = "
+            select
+            c.*
+            from tender_enq_invoice_info  as a
+            left join company_info as b on a.company_id = b.company_id and a.`status`='Active'
+            left join company_bank_info as c on b.bank_id = c.bank_id and a.`status`='Active'
+            where a.tender_enq_invoice_id = ?
+            order by a.tender_enq_invoice_id asc
+        ";
+        $query = $this->db->query($sql, [$tender_enq_invoice_id]);
+        $data['bank_details'] = $query->row_array();
+
+
+
+
+        // === ITEM LIST ===
+        $sql = "
+            SELECT 
+                teni.*,
+                cat.category_name,  
+                teni.item_code,
+                teni.item_desc, 
+                teni.uom,
+                teni.rate,
+                teni.qty,
+                teni.gst,
+                (teni.rate * teni.qty) AS Net_amount
+            FROM tender_enq_invoice_item_info as teni
+            LEFT JOIN category_info cat ON 
+                teni.category_id = cat.category_id
+            LEFT JOIN item_info item ON 
+                teni.item_id = item.item_id
+            WHERE teni.tender_enq_invoice_id = ?
+                AND teni.status='Active'
+            ORDER BY teni.tender_enq_invoice_item_id
+        ";
+        $query = $this->db->query($sql, [$tender_enq_invoice_id]);
+        $data['item_list'] = $query->result_array();
+
+        $this->load->view('page/tender/tender-po-invoice-print-v2', $data);
+    }
+    public function tender_po_invoice_print_old($tender_enq_invoice_id = 0)
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        if (!$tender_enq_invoice_id) {
+            show_404();
+        }
+
+        // === MAIN RECORD ===
+        $sql = "
          SELECT
             tei.*,
             c.customer_name,
@@ -3312,7 +3403,7 @@ class Tender extends CI_Controller
             item.item_name,
             item.item_description,
             item.item_code,
-            item.uom AS item_uom
+            item.uom AS item_uom,
         FROM tender_enq_invoice_item_info as teni
         LEFT JOIN category_info cat ON teni.category_id = cat.category_id
         LEFT JOIN item_info item ON teni.item_id = item.item_id

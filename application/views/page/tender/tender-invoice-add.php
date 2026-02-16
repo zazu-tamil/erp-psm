@@ -76,12 +76,13 @@
                                 echo form_dropdown(
                                     'currency_id',
                                     ['' => 'Select Currency'] + $currency_opt,
-                                    set_value('currency_id'),
+                                    set_value('currency_id' ,$default_currency_id),
                                     'id="currency_id" class="form-control" required'
                                 );
                                 ?>
                             </div>
                         </div>
+                        
                         <div class="form-group col-md-3">
                             <label>Invoice Status</label><br>
                             <label class="radio-inline"><input type="radio" name="invoice_status" value="Pending"
