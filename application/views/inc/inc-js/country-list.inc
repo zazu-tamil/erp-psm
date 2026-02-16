@@ -12,6 +12,7 @@
          
           $("#edit_modal #country_id").val(d.country_id); 
           $("#edit_modal #country_name").val(d.country_name); 
+          $("#edit_modal #country_code").val(d.country_code); 
           $('#edit_modal input:radio[value="' + d.status + '"]').prop("checked",true);
 
           $("#edit_modal").modal("show");

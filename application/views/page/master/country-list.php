@@ -20,6 +20,7 @@
                     <tr>
                         <th class="text-center">S.No</th>
                         <th>Country Name</th>
+                        <th>Country Code</th>a
                         <th>Status</th>
                         <th colspan="2" class="text-center">Action</th>
                     </tr>
@@ -31,6 +32,7 @@
                         <tr class="mb-3">
                             <td class="text-center"><?php echo ($j + 1); ?></td>
                             <td><?php echo $ls['country_name'] ?></td>
+                            <td><?php echo $ls['country_code'] ?></td>
                             <td><?php echo $ls['status'] ?></td>
                             <td class="text-center">
                                 <button data-toggle="modal" data-target="#edit_modal"
@@ -67,6 +69,11 @@
                                         <label>Country Name</label>
                                         <input class="form-control" type="text" name="country_name" id="country_name"
                                             value="" placeholder="Country Name" required="true">
+                                    </div>
+                                    <div class="form-group col-md-12">
+                                        <label>Country Code</label>
+                                        <input class="form-control" type="text" name="country_code" id="country_code"
+                                            value="" placeholder="Country Code" required="true">
                                     </div>
                                 </div>
                                 <div class="row">
@@ -117,6 +124,11 @@
                                         <input class="form-control" type="text" name="country_name" id="country_name"
                                             value="" placeholder="Country Name" required="true">
                                     </div>
+                                    <div class="form-group col-md-12">
+                                        <label>Country Code</label>
+                                        <input class="form-control" type="text" name="country_code" id="country_code"
+                                            value="" placeholder="Country Code" required="true">
+                                    </div>
                                 </div>
                                 <div class="row">
                                     <div class="form-group col-md-12">
@@ -142,7 +154,7 @@
                         </form>
                     </div>
                 </div>
-            </div> 
+            </div>
         </div>
         <div class="box-footer">
             <div class="form-group col-sm-6">

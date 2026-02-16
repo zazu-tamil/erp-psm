@@ -1630,6 +1630,7 @@ class Master extends CI_Controller
         if ($this->input->post('mode') == 'Add') {
             $ins = array(
                 'country_name' => $this->input->post('country_name'),
+                'country_code' => $this->input->post('country_code'),
                 'status' => $this->input->post('status')
             );
 
@@ -1640,6 +1641,7 @@ class Master extends CI_Controller
         if ($this->input->post('mode') == 'Edit') {
             $upd = array(
                 'country_name' => $this->input->post('country_name'),
+                'country_code' => $this->input->post('country_code'),
                 'status' => $this->input->post('status')
             );
 
