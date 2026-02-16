@@ -527,10 +527,6 @@ class Vendor extends CI_Controller
         $data['title'] = 'Add Vendor PO';
 
         if ($this->input->post('mode') == 'Add') {
-            // echo "<pre>";
-            // print_r($_POST);
-            // echo "</pre>";
-
             $this->db->trans_start();
             $header = [
                 'company_id' => $this->input->post('srch_company_id'),
@@ -539,6 +535,7 @@ class Vendor extends CI_Controller
                 'vendor_id' => $this->input->post('srch_vendor_id'),
                 'vendor_quote_id' => $this->input->post('srch_vendor_quote_id'),
                 'vendor_contact_person_id' => $this->input->post('srch_vendor_contact_person_id'),
+                'vendor_rate_enquiry_id' => $this->input->post('vendor_rate_enquiry_id'),
                 'po_no' => $this->input->post('po_no'),
                 'currency_id' => $this->input->post('currency_id'),
                 'po_date' => $this->input->post('po_date'),
@@ -2373,7 +2370,7 @@ class Vendor extends CI_Controller
                 'customer_id' => $this->input->post('srch_customer_id'),
                 'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
                 'vendor_id' => $this->input->post('srch_vendor_id'),
-                'vendor_rate_enquiry_id' => $this->input->post('srch_vendor_rate_enquiry_id'),
+                'vendor_rate_enquiry_id' => $this->input->post('vendor_rate_enquiry_id'),
                 'vendor_contact_person_id' => $this->input->post('srch_vendor_contact_person_id'),
                 'currency_id' => $this->input->post('currency_id'),
                 'quote_date' => $this->input->post('quote_date'),
@@ -2779,6 +2776,7 @@ class Vendor extends CI_Controller
         $sql = "
             SELECT
             a.vendor_quote_item_id,
+            b.vendor_rate_enquiry_id,
             a.vendor_rate_enquiry_item_id,
             a.item_code,
             a.item_desc,
@@ -2788,6 +2786,7 @@ class Vendor extends CI_Controller
             a.gst as vat,  
             a.amount        
             FROM vendor_quote_item_info a 
+            left join vendor_quotation_info b on a.vendor_quote_id = b.vendor_quote_id and b.`status` = 'Active'
             WHERE a.status = 'Active'
             AND a.vendor_quote_id = ?
             ORDER BY a.vendor_rate_enquiry_item_id ASC

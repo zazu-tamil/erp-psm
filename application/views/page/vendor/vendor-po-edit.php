@@ -31,7 +31,7 @@
                     <div class="row">
                         <div class="form-group col-md-4">
                             <label>Company <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_company_id',$company_opt, set_value('srch_company_id', $header['company_id']), 'id="srch_company_id" class="form-control" required disabled'); ?>
+                            <?php echo form_dropdown('srch_company_id', $company_opt, set_value('srch_company_id', $header['company_id']), 'id="srch_company_id" class="form-control" required disabled'); ?>
                             <input type="hidden" name="srch_company_id" id="srch_company_id"
                                 value="<?php echo $header['company_id']; ?>" required="true">
                         </div>
@@ -104,8 +104,7 @@
                         </div>
                         <div class="form-group col-md-3">
                             <label>Other Charges</label>
-                            <input type="number" step="any" name="other_charges" id="other_charges"
-                                class="form-control"
+                            <input type="number" step="any" name="other_charges" id="other_charges" class="form-control"
                                 value="<?php echo set_value('other_charges', $header['other_charges']); ?>"
                                 placeholder="0.00">
                         </div>
@@ -166,7 +165,8 @@
                                 <th style="width:10%;">UOM & Qty</th>
                                 <th style="width:10%;">Rate</th>
                                 <th style="width:10%;">VAT %</th>
-                                <th style="width:10%;">Amount</th>
+                                <th style="width:11%;">Amt (W/O Tax)</th>
+                                <th style="width:11%;">Amt (With Tax)</th>
                             </tr>
                         </thead>
                         <tbody id="item_container">
@@ -213,26 +213,42 @@
                                             <input type="number" step="any" name="gst[<?php echo $index; ?>]"
                                                 class="form-control vat" value="<?php echo $item['vat']; ?>">
                                         </td>
-
                                         <td>
-                                            <input type="number" step="any" name="amount[<?php echo $index; ?>]"
-                                                class="form-control amount-input" value="<?php echo $item['amount']; ?>"
+                                            <input type="number" step="any" name="amount_wo_tax[]"
+                                                class="form-control amountwotx"
+                                                value="<?php echo number_format(($item['rate'] * $item['qty']), 3, '.', ''); ?>"
                                                 readonly>
+                                        </td>
+                                        <td>
+                                            <input type="number" step="any" name="amount[]" class="form-control amounttx amount"
+                                                value="<?php echo number_format($item['amount'], 3, '.', ''); ?>" readonly>
                                         </td>
 
                                     </tr>
                                     <?php $index++; endforeach; ?>
                             <?php endif; ?>
                         </tbody>
-                        <thead>
-                            <tr>
-                                <th colspan="6" class="text-right">Total</th>
-                                <th class="text-right">
-                                    <span class="value"> <span id="total_amount">0.00</span></span>
-                                </th>
-                            </tr>
-                        </thead>
                     </table>
+                    <div class="row">
+                        <div class="col-md-3 pull-right ">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount With Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3 pull-right">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount WO Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount_wo_tax">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
                 </fieldset>
             </div>
 

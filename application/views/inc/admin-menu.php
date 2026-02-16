@@ -161,19 +161,10 @@ echo "<br> dsfsdfsdf" . $current_page;
     <a href="<?= site_url('tender-enquiry-timeline') ?>">
         <i class="fa fa-clock-o"></i>
         <span>Tender Timeline</span>
-    </a>
-<<<<<<< HEAD
+    </a> 
 </li>
-<li class="<?= ($current_page === 'tender-enquiry-summary-report') ? 'active' : '' ?>">
-    <a href="<?= site_url('tender-enquiry-summary-report') ?>">
-        <i class="fa fa-file-text-o"></i>
-        <span>Tender Summary Report</span>
-    </a>
-</li>
-
-=======
-</li> -->
->>>>>>> c33eee16866ffa5536714fcc7280dbdbc03b6664
+  -->
+ 
 <?php
 $vendor_m_grp = [
     'vendor-rate-enquiry',

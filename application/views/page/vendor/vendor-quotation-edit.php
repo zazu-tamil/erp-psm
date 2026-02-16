@@ -1,4 +1,9 @@
-<?php include_once(VIEWPATH . 'inc/header.php'); ?>
+<?php include_once(VIEWPATH . 'inc/header.php'); 
+
+// echo '<pre>';
+// print_r($header);
+// echo '</pre>';
+?>
 
 <section class="content-header">
     <h1><?php echo htmlspecialchars($title); ?></h1>
@@ -58,7 +63,8 @@
 
                         <div class="form-group col-md-4">
                             <label>Vendor Rate Enquiry No <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_vendor_rate_enquiry_id', $vendor_rate_enquiry_opt, $header['vendor_rate_enquiry_id'], 'id="srch_vendor_rate_enquiry_id" class="form-control readonly-select" required readonly'); ?>
+                            <?php echo form_dropdown('srch_vendor_rate_enquiry_id', $vendor_rate_enquiry_opt, $header['vendor_rate_enquiry_id'], 'id="srch_vendor_rate_enquiry_id" class="form-control readonly-select" required disabled'); ?>
+                            <input type="hidden" name="vendor_rate_enquiry_id" value="<?php echo $header['vendor_rate_enquiry_id']; ?>" id="vendor_rate_enquiry_id">
                         </div>
 
                         <div class="form-group col-md-4">

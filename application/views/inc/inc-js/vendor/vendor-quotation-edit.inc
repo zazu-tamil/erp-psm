@@ -1,15 +1,15 @@
 <script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   /* Your existing styles remain unchanged */
   .text-light-blue {
     color: #3c8dbc !important;
   }
 
-    .readonly-select {
-        pointer-events: none;
-        background-color: #e9ecef;
-    }
+  .readonly-select {
+    pointer-events: none;
+    background-color: #e9ecef;
+  }
 
   fieldset {
     border: 1px solid #d2d6de;
@@ -213,16 +213,16 @@
 
 
     const rowHtml = `
-                    <tr class="item-row"> 
+                    <tr class="item-row">
                         <td>
                              <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="" checked>
-                        </td> 
-                       
-                        <td> 
-                             <input type="text" name="item_code[]" class="form-control item_code" value="" >                            
+                        </td>
+
+                        <td>
+                             <input type="text" name="item_code[]" class="form-control item_code" value="" >
                              <input type="hidden" name="vendor_quote_item_id[]" class="vendor_quote_item_id" value="">
                              <input type="hidden" name="vendor_rate_enquiry_item_id[]" class="vendor_rate_enquiry_item_id" value="">
-                             
+
                         </td>
 
                         <td>
@@ -245,9 +245,9 @@
 
                         <td>
                             <input type="number" name="amount[]" class="form-control amount" value="0.00" readonly>
-                        </td> 
-                       
-                       
+                        </td>
+
+
                     </tr>
                 `;
 
@@ -271,32 +271,32 @@
               $("#item_container").empty();
               let i = 0;
               rows.forEach(function (r) {
-                  
-                  let newRow = $(rowHtml); 
+
+                  let newRow = $(rowHtml);
 
                   newRow.find(".cnt").html((i+1));
-                  newRow.find(".item-check").val(i); 
-                  newRow.find(".vendor_quote_item_id").val(r.vendor_quote_item_id); 
-                  newRow.find(".vendor_rate_enquiry_item_id").val(r.vendor_rate_enquiry_item_id); 
+                  newRow.find(".item-check").val(i);
+                  newRow.find(".vendor_quote_item_id").val(r.vendor_quote_item_id);
+                  newRow.find(".vendor_rate_enquiry_item_id").val(r.vendor_rate_enquiry_item_id);
                   newRow.find(".item_code").val(r.item_code);
                   newRow.find(".item_desc").val(r.item_desc);
                   newRow.find(".uom").val(r.uom);
-                  newRow.find(".qty").val(r.qty); 
-                  newRow.find(".rate").val(r.rate); 
-                  newRow.find(".vat").val(r.vat); 
-                  newRow.find(".amount").val(r.amount);   
+                  newRow.find(".qty").val(r.qty);
+                  newRow.find(".rate").val(r.rate);
+                  newRow.find(".vat").val(r.vat);
+                  newRow.find(".amount").val(r.amount);
 
-                  $("#item_container").append(newRow); 
-                  
+                  $("#item_container").append(newRow);
+
                   i++;
-              }); 
+              });
 
               $(".qty, .rate, .vat").trigger("input");
-           
+
           };
 
           reader.readAsBinaryString(file);
-      }); 
+      });
 
 
 
@@ -322,7 +322,7 @@
       success: function (res) {
         if (res.length === 0) {
           $container.html(
-            '<tr><td colspan="10" class="text-center text-danger">No items found for this quotation.</td></tr>'
+            '<tr><td colspan="10" class="text-center text-danger">No items found for this quotation.</td></tr>',
           );
           return;
         }
@@ -382,7 +382,7 @@
                        
                     </tr>
                 `;
-     calculateTotalAmount();
+          calculateTotalAmount();
           $container.append(rowHtml);
         });
       },
@@ -393,59 +393,82 @@
   });
 </script>
 <script>
-$(document).ready(function () {
+  $(document).ready(function () {
+    // ===== ROW CALCULATION =====
+    function calculateRow($row) {
+      const isChecked = $row.find(".item-check").is(":checked");
 
-      $(document).on("input change", ".rate, .vat", function () {  
-       const $row = $(this).closest(".item-card");
+      if (!isChecked) {
+        $row.find(".amount").val("0.000");
+        $row.find(".amountwotx").val("0.000");
+        return;
+      }
 
-        const isChecked = $row.find(".item-check").is(":checked");
+      const qty = parseFloat($row.find(".qty").val()) || 0;
+      const rate = parseFloat($row.find(".rate").val()) || 0;
+      const vat = parseFloat($row.find(".vat").val()) || 0;
 
-        if (!isChecked) {
-            // If not checked, clear amounts
-            $row.find(".amountwotx").val("0.000");
-            $row.find(".amount-input").val("0.000");
-            calculateTotalAmount();
-            return;
+      const amountWOTax = qty * rate;
+      const amountWithTax = amountWOTax + (amountWOTax * vat) / 100;
+
+      $row.find(".amountwotx").val(amountWOTax.toFixed(3));
+      $row.find(".amount").val(amountWithTax.toFixed(3));
+    }
+
+    // ===== TOTAL CALCULATION =====
+    function calculateTotalAmount() {
+      let total = 0;
+      let totalWOT = 0;
+
+      $(".item-card").each(function () {
+        const $row = $(this);
+
+        if ($row.find(".item-check").is(":checked")) {
+          total += parseFloat($row.find(".amount").val()) || 0;
+          totalWOT += parseFloat($row.find(".amountwotx").val()) || 0;
         }
+      });
 
-       const qty = parseFloat($row.find(".qty").val()) || 0;
-       const rate = parseFloat($row.find(".rate").val()) || 0;
-       const gst = parseFloat($row.find(".vat").val()) || 0;
+      $("#total_amount").text(total.toFixed(3));
+      $("#total_amount_wo_tax").text(totalWOT.toFixed(3));
+    }
 
-       const amount = qty * rate * (1 + gst / 100);
-       $row.find(".amount").val(amount.toFixed(3));
-       $row.find(".amountwotx").val((qty * rate).toFixed(3));
+    // ===== INPUT CHANGE =====
+    $(document).on("input change", ".qty, .rate, .vat", function () {
+      const $row = $(this).closest(".item-card");
+      calculateRow($row);
+      calculateTotalAmount();
+    });
 
-       calculateTotalAmount();
-     });
+    // ===== CHECKBOX CHANGE =====
+    $(document).on("change", ".item-check", function () {
+      const $row = $(this).closest(".item-card");
 
-     function calculateTotalAmount() {
-       let total = 0;
-       $(".amount").each(function () {
-         total += parseFloat($(this).val()) || 0;
-       });
-       $("#total_amount").text(total.toFixed(3));
+      calculateRow($row);
+      calculateTotalAmount();
 
-       let total_wot = 0;
-       $(".amountwotx").each(function () {
-         total_wot += parseFloat($(this).val()) || 0;
-       });
-       $("#total_amount_wo_tax").text(total_wot.toFixed(3));
-     }
-
-     calculateTotalAmount();
-
- $('#selectall').on('change', function () {
-      $('.item-check').prop('checked', this.checked);
-  });
-
-  // If any item unchecked → uncheck Select All
-  $('.item-check').on('change', function () {
-      $('#selectall').prop(
-          'checked',
-          $('.item-check:checked').length === $('.item-check').length
+      $("#selectall").prop(
+        "checked",
+        $(".item-check:checked").length === $(".item-check").length,
       );
+    });
+
+    // ===== SELECT ALL =====
+    $("#selectall").on("change", function () {
+      $(".item-check").prop("checked", this.checked);
+
+      $(".item-card").each(function () {
+        calculateRow($(this));
+      });
+
+      calculateTotalAmount();
+    });
+
+    // ===== EDIT MODE INITIAL LOAD =====
+    $(".item-card").each(function () {
+      calculateRow($(this));
+    });
+
+    calculateTotalAmount();
   });
- 
-});
 </script>
