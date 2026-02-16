@@ -30,8 +30,6 @@
 
         .header-img {
             width: 100%;
-            /* max-height: 100px;
-            object-fit: contain; */
             margin-bottom: 15px;
         }
 
@@ -155,10 +153,6 @@
             text-decoration: underline;
         }
 
-        /* .summary-section {
-            margin-top: 10px;
-        } */
-
         .summary-row {
             display: flex;
             justify-content: space-between;
@@ -174,6 +168,16 @@
             background: #000;
             color: #fff;
             font-size: 11pt;
+        }
+
+        .amount-in-words {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #000;
+            font-weight: bold;
+            font-size: 10pt;
+            line-height: 1.5;
         }
 
         .payment-terms {
@@ -293,19 +297,10 @@
                 print-color-adjust: exact;
             }
 
-            .currency-badge {
-                text-align: right;
-                margin: 10px 0;
-            }
-
             .currency-badge span {
-                display: inline-block;
-                background: #000;
-                color: #fff;
-                padding: 6px 15px;
-                font-weight: bold;
-                font-size: 10pt;
-                   -webkit-print-color-adjust: exact;
+                background: #000 !important;
+                color: #fff !important;
+                -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
         }
@@ -317,20 +312,87 @@
         .inline-label {
             display: inline;
         }
-
-        .security-text {
-            position: absolute;
-            right: 10px;
-            bottom: 10px;
-            font-size: 7pt;
-            color: #999;
-            transform: rotate(-45deg);
-            opacity: 0.3;
-        }
     </style>
 </head>
 
 <body>
+    <?php
+    // Function to convert number to words in Bahraini Dinar format
+    function convertAmountToWords($amount, $currency = 'BHD', $decimal_point = 3) {
+        $ones = array(
+            '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+            'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen',
+            'Seventeen', 'Eighteen', 'Nineteen'
+        );
+        
+        $tens = array(
+            '', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'
+        );
+        
+        $hundreds = array(
+            '', 'One Hundred', 'Two Hundred', 'Three Hundred', 'Four Hundred',
+            'Five Hundred', 'Six Hundred', 'Seven Hundred', 'Eight Hundred', 'Nine Hundred'
+        );
+        
+        function convertNumberToWords($number, $ones, $tens, $hundreds) {
+            if ($number == 0) return 'Zero';
+            
+            $words = '';
+            
+            if ($number >= 1000000) {
+                $millions = floor($number / 1000000);
+                $words .= convertNumberToWords($millions, $ones, $tens, $hundreds) . ' Million ';
+                $number %= 1000000;
+            }
+            
+            if ($number >= 1000) {
+                $thousands = floor($number / 1000);
+                $words .= convertNumberToWords($thousands, $ones, $tens, $hundreds) . ' Thousand ';
+                $number %= 1000;
+            }
+            
+            if ($number >= 100) {
+                $words .= $hundreds[floor($number / 100)] . ' ';
+                $number %= 100;
+            }
+            
+            if ($number >= 20) {
+                $words .= $tens[floor($number / 10)] . ' ';
+                $number %= 10;
+            }
+            
+            if ($number > 0) {
+                $words .= $ones[$number] . ' ';
+            }
+            
+            return trim($words);
+        }
+        
+        // Split amount into integer and decimal parts
+        $amount = floatval($amount);
+        $integer_part = floor($amount);
+        
+        // Calculate decimal part based on decimal points
+        $multiplier = pow(10, $decimal_point);
+        $decimal_part = round(($amount - $integer_part) * $multiplier);
+        
+        // Convert integer part to words
+        $words = '';
+        if ($integer_part > 0) {
+            $words = convertNumberToWords($integer_part, $ones, $tens, $hundreds);
+        } else {
+            $words = 'Zero';
+        }
+        
+        // Add "& Fils" for decimal part in BHD format
+        if ($decimal_part > 0) {
+            $words .= ' & Fils ' . $decimal_part . '/' . $multiplier;
+        }
+        
+        return $words;
+    }
+    ?>
+
     <div class="page">
         <!-- Header Image -->
         <?php if (!empty($record['ltr_header_img'])): ?>
@@ -415,6 +477,7 @@
                 $total_net_amount = 0;
                 $total_vat_amount = 0;
                 $grand_total = 0;
+                $vat_percentage = 0;
 
                 if (!empty($item_list)):
                     foreach ($item_list as $i => $item):
@@ -491,7 +554,7 @@
                                 <?php endif; ?>
                             </div>
                         </td>
-                        <td colspan="4" class="text-right" style="vertical-align: top; position: relative;">
+                        <td colspan="3" class="text-right" style="vertical-align: top; position: relative;">
                             <div class="summary-section">
                                 <div class="summary-row" style="border-bottom: 1px solid #000;">
                                     <span>TOTAL EXCL. VAT</span>
@@ -526,13 +589,11 @@
                             <strong><?php echo number_format($total_vat_amount, $decimal_point); ?></strong>
                         </td>
                     </tr>
-                    <tr style="background: #000; color: #fff;    -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;">
+                    <tr style="background: #000; color: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                         <td colspan="5" class="text-right" style="padding: 12px; border: 1px solid #000; font-size: 11pt;">
                             <strong>TOTAL <?php echo htmlspecialchars($currency_code); ?></strong>
                         </td>
-                        <td colspan="2" class="text-right" style="padding: 12px; border: 1px solid #000; font-size: 11pt;    -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;">
+                        <td colspan="2" class="text-right" style="padding: 12px; border: 1px solid #000; font-size: 11pt; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                             <strong><?php echo number_format($grand_total, $decimal_point); ?></strong>
                         </td>
                     </tr>
@@ -540,13 +601,15 @@
             </tbody>
         </table>
 
-        <!-- Total in Words -->
-        <?php if (!empty($record['amount_in_words'])): ?>
-            <div style="margin: 10px 0; font-weight: bold; font-size: 9.5pt;">
-                Total <?php echo htmlspecialchars($currency_code); ?>:
-                <?php echo htmlspecialchars($record['amount_in_words']); ?> Only.
-            </div>
-        <?php endif; ?>
+        <!-- Total in Words - Enhanced Display -->
+        <?php 
+        // Generate amount in words
+        $amount_in_words = convertAmountToWords($grand_total, $currency_code, $decimal_point);
+        ?>
+        <div class="amount-in-words">
+            <strong>Total <?php echo htmlspecialchars($currency_code); ?>:</strong> 
+            <?php echo $amount_in_words; ?> Only.
+        </div>
 
         <!-- Payment Terms -->
         <div class="payment-terms">
@@ -576,7 +639,7 @@
                     For
                     <?php echo htmlspecialchars($record['our_company'] ?? $record['company_name'] ?? 'Our Company'); ?>
                 </div> 
-            </div>
+             </div>
         </div>
     </div>
 

@@ -1,6 +1,6 @@
 <?php
 // Define master menu pages
-$g_master = ['company-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list', 'customer-list', 'customer-contact-list', 'vendor-contact-list', 'currency-list', 'account-head-list', 'country-list', 'addt-charges-type-list', 'sub-account-head-list', 'account-head-for-list', 'voucher-type-list', 'opening-balance-list', 'settings'];
+$g_master = ['company-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list', 'customer-list', 'customer-contact-list', 'vendor-contact-list', 'currency-list', 'account-head-list', 'country-list', 'addt-charges-type-list', 'sub-account-head-list', 'account-head-for-list', 'voucher-type-list', 'opening-balance-list', 'settings','company-bank-list'];
 
 // Get current page
 $current_page = $this->uri->segment(1, 0);
@@ -573,7 +573,7 @@ class="treeview <?= in_array($this->uri->segment(1), ['cash-ledger', 'cash-in-st
         </li>
 
         <!-- Company Info -->
-        <li class="treeview <?= in_array($current_page, ['company-list', 'user-list']) ? 'active' : '' ?>">
+        <li class="treeview <?= in_array($current_page, ['company-list', 'user-list','company-bank-list']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-building"></i> Company Info
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
@@ -582,6 +582,9 @@ class="treeview <?= in_array($this->uri->segment(1), ['cash-ledger', 'cash-in-st
             <ul class="treeview-menu">
                 <li class="<?= ($current_page === 'company-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('company-list') ?>"><i class="fa fa-address-book"></i> Company Details</a>
+                </li>
+                <li class="<?= ($current_page === 'company-bank-list') ? 'active' : '' ?>">
+                    <a href="<?= site_url('company-bank-list') ?>"><i class="fa fa-bank"></i>Bank Details</a>
                 </li>
 
                 <li class="<?= ($current_page === 'user-list') ? 'active' : '' ?>">
