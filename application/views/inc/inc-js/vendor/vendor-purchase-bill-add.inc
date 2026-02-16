@@ -402,9 +402,7 @@
                 <input type="hidden"
                   name="vendor_po_item_id[]"
                   value="${row.vendor_po_item_id}">
-              </td>
-
-              <td>
+               <i class="text-sm">Desc</i>
                 <textarea class="form-control"
                   rows="2"
                   name="item_desc[]" readonly>${row.item_desc || ""}</textarea>
@@ -415,7 +413,7 @@
                   name="uom[]"
                   class="form-control"
                   value="${row.uom || ""}" readonly>
-
+                <i class="text-sm">Qty</i>
                 <input type="number"
                   step="any"
                   name="qty[]"
@@ -428,26 +426,43 @@
                   step="any"
                   name="rate[]"
                   class="form-control rate-input"
-                  value="${rate}">
+                  value="${rate}"> 
+                <i class="text-sm">Conversion Rate</i> 
+                <input type="number"
+                  step="any"
+                  name="conversion_rate[]"
+                  class="form-control conversion_rate"
+                  value="1"> 
+                
+                
               </td>
-
               <td>
                 <input type="number"
+                  step="any"
+                  name="act_amt[]"
+                  class="form-control act_amt"
+                  value="" readonly>
+                <i class="text-sm">Duty %</i>
+                <input type="number"
+                  step="any"
+                  name="duty[]"
+                  class="form-control duty"
+                  value="0">
+              </td>
+              <td>
+                  <input type="number"
                   step="any"
                   name="gst[]"
                   class="form-control gst-input"
                   value="${gst}">
-              </td>
-
+              </td> 
               <td>
                 <input type="number"
                   step="any"
                   name="amountwotx[]"
                   class="form-control amountwotx"
                   value="${baseAmount.toFixed(3)}" readonly>
-              </td>
-
-              <td>
+               <i class="text-sm">With Tax</i>
                 <input type="number"
                   step="any"
                   name="amount[]"
@@ -473,7 +488,7 @@
     // Auto calculate when rate/qty/gst changes
     $(document).on(
       "input change",
-      ".rate-input, .gst-input, .qty-input",
+      ".rate-input, .gst-input, .qty-input , .conversion_rate , .duty ",
       function () {
         const $row = $(this).closest("tr.item-row");
         calculateRow($row);
@@ -486,9 +501,17 @@
       const qty = parseFloat($row.find(".qty-input").val()) || 0;
       const rate = parseFloat($row.find(".rate-input").val()) || 0;
       const gst = parseFloat($row.find(".gst-input").val()) || 0;
+      const c_rate = parseFloat($row.find(".conversion_rate").val()) || 1;
+      const dty = parseFloat($row.find(".duty").val()) || 0;
 
-      const amountWithoutTax = qty * rate;
-      const amountWithTax = amountWithoutTax * (1 + gst / 100);
+      const ac_amt = qty * rate * c_rate;
+
+
+      //const amountWithoutTax = qty * rate;
+      const amountWithoutTax = (ac_amt ) + ((ac_amt) * dty /100);
+      const amountWithTax = amountWithoutTax + (amountWithoutTax * gst / 100);
+
+      $row.find(".act_amt").val(ac_amt.toFixed(3));
 
       $row.find(".amountwotx").val(amountWithoutTax.toFixed(3));
       $row.find(".amount-input").val(amountWithTax.toFixed(3));
