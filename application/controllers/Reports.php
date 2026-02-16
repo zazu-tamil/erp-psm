@@ -302,6 +302,7 @@ class Reports extends CI_Controller
                     b.rate,
                     b.gst,
                     b.amount,
+                    e.currency_code,
                     e.decimal_point
 
                 FROM tender_quotation_info as a
@@ -352,6 +353,7 @@ class Reports extends CI_Controller
                     b.rate,
                     b.gst,
                     b.amount,
+                    e.currency_code,
                     e.decimal_point
 
                 FROM customer_tender_po_info as a
@@ -446,6 +448,7 @@ class Reports extends CI_Controller
                     b.rate,
                     b.gst,
                     b.amount,
+                    e.currency_code,
                     e.decimal_point
 
                 FROM tender_enq_invoice_info as a
@@ -546,6 +549,7 @@ class Reports extends CI_Controller
                     b.rate,
                     b.gst,
                     b.amount,
+                    e.currency_code,
                     e.decimal_point
 
                 FROM vendor_quotation_info as a
@@ -595,6 +599,7 @@ class Reports extends CI_Controller
                     b.rate,
                     b.gst,
                     b.amount,
+                    e.currency_code,
                     e.decimal_point
 
                 FROM vendor_po_info as a
