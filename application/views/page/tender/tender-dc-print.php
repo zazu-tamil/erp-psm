@@ -198,6 +198,10 @@
             padding-top: 10px;
             width: 260px;
         }
+        .no-border td {
+            border: none !important; 
+            background: transparent !important;
+        }
 
         /* -------------------------------------
             PRINT MODE (Color Safe)
@@ -258,18 +262,32 @@
             <div class="info-block">
                 <div><span class="label">DC No:</span> <?php echo $record['dc_no']; ?></div>
                 <div><span class="label">Date:</span> <?php echo date('d-m-Y', strtotime($record['dc_date'])); ?></div>
+                <div><span class="label">PO No:</span> <?php echo $record['po_no']; ?></div>
+                <div><span class="label">PO Date:</span> <?php echo date('d-m-Y', strtotime($record['po_date'])); ?></div>
                 <!-- <div><span class="label">Place of Supply:</span> Gujarat (24)</div>
                 <div><span class="label">Phone:</span> 9814556613</div>
                 <div><span class="label">GSTIN:</span> 24AAACC1206D1ZG</div> -->
-
+                <table class="table no-border">
+                    <tr>
+                        <td>DC No : </td><td><?php echo $record['dc_no']; ?></td>
+                    </tr>
+                    <tr>
+                        <td>DC No : </td><td><?php echo $record['dc_no']; ?></td>
+                    </tr>
+                    <tr>
+                        <td>DC No : </td><td><?php echo $record['dc_no']; ?></td>
+                    </tr>
+                    <tr>
+                        <td>DC No : </td><td><?php echo $record['dc_no']; ?></td>
+                    </tr>
+                </table>
             </div>
         </div>
 
         <!-- Table -->
         <table>
             <tr>
-                <th style="width: 5%;">Sr.</th>
-                <th style="width: 15%;">Item Code</th>
+                <th style="width: 5%;">Sr.</th> 
                 <th style="width: 60%;">Description of Goods</th>
                 <th style="width: 10%;">UOM</th>
                 <th style="width: 10%;">Quantity</th>
@@ -277,15 +295,14 @@
 
             <?php foreach ($items as $j => $item) { ?>
                 <tr>
-                    <td class="text-center"><?php echo ($j + 1); ?></td>
-                    <td class="text-center"><?php echo $item['item_code']; ?></td>
-                    <td class="text-center"><?php echo $item['item_desc']; ?></td>
+                    <td class="text-center"><?php echo ($j + 1); ?></td> 
+                    <td class="text-center"><?php echo $item['item_code']; ?> : <?php echo $item['item_desc']; ?></td>
                     <td class="text-center"><?php echo $item['uom']; ?></td>
                     <td class="text-center"><?php echo $item['qty']; ?></td>
                 </tr>
             <?php } ?>
             <tr class="">
-                <td colspan="4" style="text-align: right;"><strong>Total Qty :</strong></td>
+                <td colspan="3" style="text-align: right;"><strong>Total Qty :</strong></td>
                 <?php
                 $total_qty = 0;
                 foreach ($items as $row) {

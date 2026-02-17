@@ -533,6 +533,8 @@
       });
 
       $("#total_amount_wo_tax").text(total_wot.toFixed(3));
+
+      $('#total_vat_amount').text((total - total_wot).toFixed(3));
     }
 
     // Form submit validation

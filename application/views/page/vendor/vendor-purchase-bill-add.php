@@ -88,17 +88,22 @@
                                 value="<?php echo set_value('invoice_date', date('Y-m-d')); ?>" required="true">
                         </div>
 
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-2">
                             <label>Invoice No </label>
                             <input type="text" name="invoice_no" id="invoice_no" class="form-control"
                                 placeholder="Enter Invoice No" required="true">
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label>Entry Date <i class="text-danger text-sm">[VAT Filing Date]</i></label>
+                            <input type="date" name="entry_date" id="entry_date" class="form-control"
+                                value="<?php echo set_value('entry_date'); ?>" required="true">
                         </div>
                         <div class="form-group col-md-3">
                             <label>Upload Purchase Bill Document</label>
                             <input type="file" name="purchase_bill_upload" id="purchase_bill_upload"
                                 class="form-control">
                         </div>
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-2">
                             <label>Status</label><br>
                             <label class="radio-inline"><input type="radio" name="status" value="Active" <?php echo set_radio('status', 'Active', TRUE); ?>> Active</label>
                             <label class="radio-inline"><input type="radio" name="status" value="Inactive" <?php echo set_radio('status', 'Inactive'); ?>> Inactive</label>
@@ -112,7 +117,7 @@
 
                                 <div class="form-group col-md-6">
                                     <label>VAT Payer Purchase</label>
-                                    <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('vat_payer_purchase_grp'), 'id="vat_payer_purchase_grp" class="form-control"'); ?>
+                                    <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('vat_payer_purchase_grp'), 'id="vat_payer_purchase_grp" class="form-control" required'); ?>
                                 </div>
 
                                 <div class="form-group col-md-3">
@@ -166,6 +171,15 @@
                                             <i class="fa fa-calculator text-success me-2"></i>
                                             <strong>Total Amount With Tax:</strong>
                                             <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 pull-right ">
+                                    <div class="total-box shadow-sm">
+                                        <h5 class="mb-0">
+                                            <i class="fa fa-calculator text-success me-2"></i>
+                                            <strong>Total VAT Amount :</strong>
+                                            <span class="text-primary"><span id="total_vat_amount">0.000</span></span>
                                         </h5>
                                     </div>
                                 </div>

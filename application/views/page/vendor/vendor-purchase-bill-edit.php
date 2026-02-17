@@ -58,9 +58,8 @@
 
                         <div class="form-group col-md-4">
                             <label>Tender Enquiry No <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select Enquiry'] +$tender_enquiry_opt , $header['tender_enquiry_id'], 'id="srch_tender_enquiry_id" class="form-control" disabled required'); ?>
-                            <input type="hidden" name="srch_tender_enquiry_id"
-                                value="<?php echo $header['tender_enquiry_id']; ?>">
+                            <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select Enquiry'] +$tender_enquiry_opt , $header['tender_enquiry_id'], 'id="srch_tender_enquiry_id" class="form-control readonly" required readonly'); ?>
+                             
                         </div>
 
                         <div class="form-group col-md-4">
@@ -76,31 +75,36 @@
                                     <i class="text-sm text-info fa fa-info-circle"></i>
                                 </span>
                             </label>
-                            <?php echo form_dropdown('srch_vendor_po_id', ['' => 'Select PO No'] + $vendor_po_opt, $header['vendor_po_id'], 'id="srch_vendor_po_id" class="form-control" disabled required'); ?>
+                            <?php echo form_dropdown('srch_vendor_po_id',$vendor_po_opt, $header['vendor_po_id'], 'id="srch_vendor_po_id" class="form-control readonly" disabled required'); ?>
                             <input type="hidden" name="srch_vendor_po_id" id="srch_vendor_po_id"
                                 value="<?php echo  $header['vendor_po_id']; ?>">
                         </div>
 
                         <div class="form-group col-md-4">
                             <label>Contact Person</label>
-                            <?php echo form_dropdown('srch_vendor_contact_person_id', ['' => 'Select Contact'] + $vendor_contact_opt, $header['vendor_contact_person_id'], 'id=" " class="form-control"'); ?>
-                            <input type="hidden" name="srch_vendor_contact_person_id" id=""
+                            <?php echo form_dropdown('srch_vendor_contact_person_id', ['' => 'Select Contact'] + $vendor_contact_opt, $header['vendor_contact_person_id'], 'id="srch_vendor_contact_person_id" class="form-control readonly" readonly'); ?>
+                            <input type="hidden" name="srch_vendor_contact_person_id"
+                                id="srch_vendor_contact_person_id_hidden"
                                 value="<?php echo $header['vendor_contact_person_id']; ?>">
                         </div>
 
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-2">
                             <label>Invoice Date</label>
                             <input type="date" name="invoice_date" id="invoice_date" class="form-control"
                                 value="<?php echo $header['invoice_date']; ?>" required="true">
                         </div>
 
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-2">
                             <label>Invoice No</label>
                             <input type="text" name="invoice_no" id="invoice_no" class="form-control"
                                 value="<?php echo htmlspecialchars($header['invoice_no']); ?>"
                                 placeholder="Enter Invoice No" required="true">
                         </div>
-
+                        <div class="form-group col-md-2">
+                            <label>Entry Date <i class="text-danger text-sm">[VAT Filing Date]</i></label>
+                            <input type="date" name="entry_date" id="entry_date" class="form-control"
+                                value="<?php echo $header['entry_date']; ?>" required="true">
+                        </div>
                         <div class="form-group col-md-3">
                             <label>Upload Purchase Bill Document</label>
                             <input type="file" name="purchase_bill_upload" id="purchase_bill_upload"
@@ -113,7 +117,7 @@
                             <?php endif; ?>
                         </div>
 
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-2">
                             <label>Status</label><br>
                             <label class="radio-inline">
                                 <input type="radio" name="status" value="Active"
@@ -125,34 +129,33 @@
                             </label>
                         </div>
 
-                        
+
                     </div>
                     <div class="row">
-                            <div class="col-md-12">
-                                <fieldset
-                                    style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px;">
-                                    <legend class="text-info">For Purchase NBR - VAT Filing </legend>
+                        <div class="col-md-12">
+                            <fieldset
+                                style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px;">
+                                <legend class="text-info">For Purchase NBR - VAT Filing </legend>
 
-                                    <div class="form-group col-md-6">
-                                        <label>VAT Payer Purchase</label>
-                                        <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, $header['vat_payer_purchase_grp'], 'id="vat_payer_purchase_grp" class="form-control"'); ?>
-                                    </div>
+                                <div class="form-group col-md-6">
+                                    <label>VAT Payer Purchase</label>
+                                    <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, $header['vat_payer_purchase_grp'], 'id="vat_payer_purchase_grp" class="form-control" required'); ?>
+                                </div>
 
-                                    <div class="form-group col-md-3">
-                                        <label>Declaration Number</label>
-                                        <input type="text" name="declaration_no" id="declaration_no"
-                                            class="form-control"
-                                            value="<?php echo htmlspecialchars($header['declaration_no']); ?>">
-                                    </div>
+                                <div class="form-group col-md-3">
+                                    <label>Declaration Number</label>
+                                    <input type="text" name="declaration_no" id="declaration_no" class="form-control"
+                                        value="<?php echo htmlspecialchars($header['declaration_no']); ?>">
+                                </div>
 
-                                    <div class="form-group col-md-3">
-                                        <label>Declaration Date</label>
-                                        <input type="date" name="declaration_date" id="declaration_date"
-                                            class="form-control" value="<?php echo $header['declaration_date']; ?>">
-                                    </div>
-                                </fieldset>
-                            </div>
+                                <div class="form-group col-md-3">
+                                    <label>Declaration Date</label>
+                                    <input type="date" name="declaration_date" id="declaration_date"
+                                        class="form-control" value="<?php echo $header['declaration_date']; ?>">
+                                </div>
+                            </fieldset>
                         </div>
+                    </div>
 
                     <div class="row">
                         <div class="col-md-12">
@@ -173,12 +176,12 @@
                                 <thead>
                                     <tr>
                                         <th style="width:5%;">✔</th>
-                                        <th style="width:40%;">Item Code & Description</th> 
+                                        <th style="width:40%;">Item Code & Description</th>
                                         <th style="width:10%;">UOM & Qty</th>
                                         <th style="width:10%;">Rate & Conversion</th>
                                         <th style="width:10%;">Amount & Duty %</th>
                                         <th style="width:8%;">VAT %</th>
-                                        <th style="width:11%;">In BHD <br>Amt (W/O Tax) & <br> Amt (With Tax)</th> 
+                                        <th style="width:11%;">In BHD <br>Amt (W/O Tax) & <br> Amt (With Tax)</th>
                                     </tr>
                                 </thead>
                                 <tbody id="item_container">
@@ -224,7 +227,7 @@
                                         <td>
                                             <input type="text" name="uom[]" class="form-control"
                                                 value="<?php echo htmlspecialchars($po_item['uom']); ?>" readonly>
-                                                <i class="text-sm">Qty</i>
+                                            <i class="text-sm">Qty</i>
                                             <input type="number" step="any" name="qty[]" class="form-control qty-input"
                                                 value="<?php echo $item_qty; ?>" readonly>
                                         </td>
@@ -232,21 +235,27 @@
                                             <input type="number" step="any" name="rate[]"
                                                 class="form-control rate-input" value="<?php echo $item_rate; ?>">
                                             <i class="text-sm">Conversion Rate</i>
-                                            <input type="number" step="any" name="conversion_rate[]" class="form-control conversion_rate"
+                                            <input type="number" step="any" name="conversion_rate[]"
+                                                class="form-control conversion_rate"
                                                 value="<?php echo $item_conversion_rate; ?>">
                                         </td>
                                         <td>
-                                            <input type="number" step="any" name="act_amt[]" class="form-control act_amt" value="<?php echo $item_act_amt; ?>" readonly>
+                                            <input type="number" step="any" name="act_amt[]"
+                                                class="form-control act_amt" value="<?php echo $item_act_amt; ?>"
+                                                readonly>
                                             <i class="text-sm">Duty %</i>
                                             <input type="number" step="any" name="duty[]" class="form-control duty"
-                                                value="<?php echo $item_duty; ?>"> 
+                                                value="<?php echo $item_duty; ?>">
                                         </td>
                                         <td>
-                                            <input type="number" step="any" name="gst[]" class="form-control gst-input" value="<?php echo $item_gst; ?>">
-                                            
+                                            <input type="number" step="any" name="gst[]" class="form-control gst-input"
+                                                value="<?php echo $item_gst; ?>">
+
                                         </td>
                                         <td>
-                                            <input type="number" step="any" name="amountwotx[]" class="form-control amountwotx" value="<?php echo $amountwotx; ?>" readonly>
+                                            <input type="number" step="any" name="amountwotx[]"
+                                                class="form-control amountwotx" value="<?php echo $amountwotx; ?>"
+                                                readonly>
                                             <i class="text-sm">With Tax</i>
                                             <input type="number" step="any" name="amount[]"
                                                 class="form-control amount-input" value="<?php echo $item_amount; ?>"
@@ -279,6 +288,15 @@
                                             <i class="fa fa-calculator text-success me-2"></i>
                                             <strong>Total Amount With Tax:</strong>
                                             <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 pull-right ">
+                                    <div class="total-box shadow-sm">
+                                        <h5 class="mb-0">
+                                            <i class="fa fa-calculator text-success me-2"></i>
+                                            <strong>Total VAT Amount :</strong>
+                                            <span class="text-primary"><span id="total_vat_amount">0.000</span></span>
                                         </h5>
                                     </div>
                                 </div>
@@ -354,7 +372,7 @@ legend {
     text-align: right;
     font-size: 1.2rem;
     font-weight: bold;
-  }
+}
 
 .tot_amt div {
     display: inline-block;
@@ -362,6 +380,10 @@ legend {
     color: #3c8dbc;
     font-weight: bold;
     margin-right: 20px;
+}
+
+.readonly {
+    pointer-events: none;
 }
 </style>
 
@@ -517,8 +539,8 @@ $(document).ready(function() {
         const $enquiry = $("#srch_vendor_po_id");
         const $contact = $("#srch_vendor_contact_id");
 
-        $enquiry.html('<option value="">Select Enquiry No</option>');
-        $contact.html('<option value="">Select Contact</option>');
+        //$enquiry.html('<option value="">Select Enquiry No</option>');
+        //$contact.html('<option value="">Select Contact</option>');
 
         if (!vendor_id) return;
 
@@ -597,7 +619,7 @@ $(document).ready(function() {
 
 
         //const amountWithoutTax = qty * rate;
-        const amountWithoutTax = (ac_amt ) + ((ac_amt) * dty /100);
+        const amountWithoutTax = (ac_amt) + ((ac_amt) * dty / 100);
         const amountWithTax = amountWithoutTax + (amountWithoutTax * gst / 100);
 
         $row.find(".act_amt").val(ac_amt.toFixed(3));
@@ -625,19 +647,20 @@ $(document).ready(function() {
     }
 
     function calculateTotalAmount() {
-      let total = 0;
-      $(".amount-input").each(function () {
-        total += parseFloat($(this).val()) || 0;
-      });
+        let total = 0;
+        $(".amount-input").each(function() {
+            total += parseFloat($(this).val()) || 0;
+        });
 
-      $("#total_amount").text(total.toFixed(3));
+        $("#total_amount").text(total.toFixed(3));
 
-      let total_wot = 0;
-      $(".amountwotx").each(function () {
-        total_wot += parseFloat($(this).val()) || 0;
-      });
+        let total_wot = 0;
+        $(".amountwotx").each(function() {
+            total_wot += parseFloat($(this).val()) || 0;
+        });
 
-      $("#total_amount_wo_tax").text(total_wot.toFixed(3));
+        $("#total_amount_wo_tax").text(total_wot.toFixed(3));
+        $('#total_vat_amount').text((total - total_wot).toFixed(3));
     }
 
     // Form validation
