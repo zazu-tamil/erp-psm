@@ -382,3 +382,7 @@ ENGINE=MyISAM
 AUTO_INCREMENT=1
 ;
 ALTER TABLE `company_info` ADD `bank_id` INT NULL AFTER `company_id`;
+
+17-02-2026
+ALTER TABLE `tender_enq_invoice_info`
+	ADD COLUMN `tender_dc_id` VARCHAR(200) NULL DEFAULT NULL AFTER `tender_po_id`;

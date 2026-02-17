@@ -2659,75 +2659,83 @@ class Tender extends CI_Controller
         $data['title'] = 'Tender Invoice Generator';
 
         if ($this->input->post('mode') == 'Add') {
+
             $this->db->trans_start();
 
-            /* ---- 1. Header record ---- */
+            $tender_dc_ids = $this->input->post('dc_id') ?? [];
+            $tender_dc_ids = implode(',', $tender_dc_ids);
+
+            // -------- HEADER --------
             $header = [
                 'company_id' => $this->input->post('srch_company_id'),
                 'customer_id' => $this->input->post('srch_customer_id'),
                 'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
                 'tender_po_id' => $this->input->post('srch_tender_po_id'),
+                'tender_dc_id' => $tender_dc_ids,
                 'currency_id' => $this->input->post('currency_id'),
                 'invoice_no' => $this->input->post('invoice_no'),
                 'invoice_date' => $this->input->post('invoice_date'),
+                'vat_payer_sales_grp' => $this->input->post('vat_payer_sales_grp'),
+                'declaration_no' => $this->input->post('declaration_no'),
+                'declaration_date' => $this->input->post('declaration_date'),
                 'invoice_status' => $this->input->post('invoice_status'),
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
                 'total_amount' => $this->input->post('total_amount'),
                 'tax_amount' => $this->input->post('total_gst_amount'),
-                'vat_payer_sales_grp' => $this->input->post('vat_payer_sales_grp'),
-                'declaration_no' => $this->input->post('declaration_no'),
-                'declaration_date' => $this->input->post('declaration_date'),
                 'status' => 'Active',
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s')
             ];
+
             $this->db->insert('tender_enq_invoice_info', $header);
-            $tender_enq_invoice_id = $this->db->insert_id();
+            $invoice_id = $this->db->insert_id();
 
-            /* ---- 2. ONLY SELECTED items ---- */
+            // -------- ITEMS --------
             $selected_idxs = $this->input->post('selected_items') ?? [];
+            $tender_po_item_id = $this->input->post('tender_po_item_id') ?? [];
+            $item_codes = $this->input->post('item_code') ?? [];
+            $item_descs = $this->input->post('item_desc') ?? [];
+            $uoms = $this->input->post('uom') ?? [];
+            $qtys = $this->input->post('qty') ?? [];
+            $rates = $this->input->post('rate') ?? [];
+            $gsts = $this->input->post('gst') ?? [];
+            $amounts = $this->input->post('amount') ?? [];
 
-            if (!empty($selected_idxs)) {
-                $tender_po_item_id = $this->input->post('tender_po_item_id') ?? [];
-                $category_ids = $this->input->post('category_id') ?? [];
-                $item_ids = $this->input->post('item_id') ?? [];
-                $item_descs = $this->input->post('item_desc') ?? [];
-                $uoms = $this->input->post('uom') ?? [];
-                $qtys = $this->input->post('qty') ?? [];
-                $rates = $this->input->post('rate') ?? [];
-                $gsts = $this->input->post('gst') ?? [];
-                $amounts = $this->input->post('amount') ?? [];
+            foreach ($selected_idxs as $idx) {
 
-                foreach ($selected_idxs as $idx) {
-                    $item_data = [
-                        'tender_enq_invoice_id' => $tender_enq_invoice_id,
-                        'tender_po_item_id' => $tender_po_item_id[$idx] ?? 0,
-                        'category_id' => $category_ids[$idx] ?? 0,
-                        'item_id' => $item_ids[$idx] ?? 0,
-                        'item_desc' => $item_descs[$idx] ?? '',
-                        'uom' => $uoms[$idx] ?? '',
-                        'qty' => $qtys[$idx] ?? 0,
-                        'rate' => $rates[$idx] ?? 0,
-                        'gst' => $gsts[$idx] ?? 0,
-                        'amount' => $amounts[$idx] ?? 0,
-                        'status' => 'Active',
-                        'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
-                        'created_date' => date('Y-m-d H:i:s')
-                    ];
-                    $this->db->insert('tender_enq_invoice_item_info', $item_data);
-                }
+                if (!isset($tender_po_item_id[$idx]))
+                    continue;
+
+                $item = [
+                    'tender_enq_invoice_id' => $invoice_id,
+                    'tender_po_item_id' => $tender_po_item_id[$idx],
+                    'item_code' => $item_codes[$idx] ?? '',
+                    'item_desc' => $item_descs[$idx] ?? '',
+                    'uom' => $uoms[$idx] ?? '',
+                    'qty' => $qtys[$idx] ?? 0,
+                    'rate' => $rates[$idx] ?? 0,
+                    'gst' => $gsts[$idx] ?? 0,
+                    'amount' => $amounts[$idx] ?? 0,
+                    'status' => 'Active',
+                    'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                    'created_date' => date('Y-m-d H:i:s')
+                ];
+
+                $this->db->insert('tender_enq_invoice_item_info', $item);
             }
 
             $this->db->trans_complete();
 
             if ($this->db->trans_status() === FALSE) {
-                $this->session->set_flashdata('error', 'Error saving data. Please try again.');
+                $this->session->set_flashdata('error', 'Error saving data.');
             } else {
                 $this->session->set_flashdata('success', 'Tender Invoice added successfully.');
             }
+
             redirect('tender-invoice-list');
         }
+
 
         // Get all companies
         $sql = "SELECT company_id, company_name FROM company_info WHERE status = 'Active' ORDER BY company_name ASC";
@@ -3049,9 +3057,15 @@ class Tender extends CI_Controller
             $this->db->update('tender_enq_invoice_info', $header);
 
 
+            // dELETE ALL ITEM ROWS
+            $this->db->where('tender_enq_invoice_id', $tender_enq_invoice_id);
+            $this->db->update('tender_enq_invoice_item_info', ['status' => 'Delete']);
+
+
+
             /* ----------------- 2. UPDATE ONLY ITEM ROWS ----------------- */
             $selected_items = $this->input->post('selected_items') ?? [];
-            $item_ids_arr = $this->input->post('tender_enq_invoice_item_id') ?? [];
+            //$item_ids_arr = $this->input->post('tender_enq_invoice_item_id') ?? [];
 
             if (!empty($selected_items)) {
 
@@ -3083,9 +3097,11 @@ class Tender extends CI_Controller
                         'updated_date' => date('Y-m-d H:i:s'),
                     ];
 
-                    /* --- IMPORTANT: update using row-wise item ID --- */
-                    $this->db->where('tender_enq_invoice_item_id', $item_ids_arr[$idx]);
-                    $this->db->update('tender_enq_invoice_item_info', $item_data);
+                    // /* --- IMPORTANT: update using row-wise item ID --- */
+                    // $this->db->where('tender_enq_invoice_item_id', $item_ids_arr[$idx]);
+                    // $this->db->update('tender_enq_invoice_item_info', $item_data);
+
+                    $this->db->insert('tender_enq_invoice_item_info', $item_data);
                 }
             }
 
@@ -4167,7 +4183,7 @@ class Tender extends CI_Controller
         echo json_encode($result);
     }
 
-    public function get_tender_po_invoice_load_items()
+    /* public function get_tender_po_invoice_load_items()
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in')) {
             echo json_encode(['error' => 'Unauthorized']);
@@ -4195,7 +4211,85 @@ class Tender extends CI_Controller
         $query = $this->db->query($sql, [$tender_po_id]);
         $result = $query->result_array();
         echo json_encode($result);
+    } */
+
+
+    public function get_tender_po_invoice_load_items_dc_id()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            echo json_encode(['error' => 'Unauthorized']);
+            return;
+        }
+
+        $dc_ids = $this->input->post('dc_id'); // array from ajax
+        $tender_po_id = $this->input->post('tender_po_id');
+
+        if (empty($dc_ids)) {
+            echo json_encode([]);
+            return;
+        }
+
+
+        if (!is_array($dc_ids)) {
+            $dc_ids = [$dc_ids];
+        }
+
+
+        $dc_ids = array_filter($dc_ids);
+        $dc_ids = array_map('intval', $dc_ids);
+
+        if (empty($dc_ids)) {
+            echo json_encode([]);
+            return;
+        }
+
+
+        $placeholders = implode(',', array_fill(0, count($dc_ids), '?'));
+
+        $sql = "
+            select 
+            a.tender_dc_id,
+            a.dc_no,
+            a.dc_date,
+            b.item_code,
+            b.item_desc,
+            b.uom,
+            b.qty,
+            b.vendor_pur_inward_id,
+            b.vendor_pur_inward_item_id,
+            d.vendor_po_item_id,
+            f.tender_enquiry_item_id,
+            g.tender_enquiry_item_id,
+            h.tender_po_id,
+            h.tender_po_item_id,
+            h.rate,
+            h.gst,
+            h.qty as order_qty,
+            sum(b.qty) as del_qty
+            from  tender_dc_info as a 
+            left join tender_dc_item_info as b on b.tender_dc_id = a.tender_dc_id and b.status = 'Active'
+            left join vendor_pur_inward_info as c on c.vendor_pur_inward_id = b.vendor_pur_inward_id  and c.status = 'Active'
+            left join vendor_pur_inward_item_info as d on d.vendor_pur_inward_item_id = b.vendor_pur_inward_item_id and d.status = 'Active'
+            left join vendor_po_info as e1 on  e1.vendor_po_id = c.vendor_po_id and e1.status = 'Active'
+            left join vendor_po_item_info as e on e.vendor_po_item_id = d.vendor_po_item_id and e.status = 'Active'
+            left join vendor_rate_enquiry_info as f1  on f1.vendor_rate_enquiry_id = e1.vendor_rate_enquiry_id and f1.status = 'Active'
+            left join vendor_rate_enquiry_item_info as f on f.vendor_rate_enquiry_item_id = e.vendor_rate_enquiry_item_id and f.status = 'Active'
+            left join tender_quotation_info as g1 on  g1.tender_enquiry_id = a.tender_enquiry_id and g1.status = 'Active'
+            left join tender_quotation_item_info as g on g.tender_enquiry_item_id = f.tender_enquiry_item_id and g.status = 'Active'
+            left join customer_tender_po_info as h1 on h1.tender_quotation_id = g1.tender_quotation_id and h1.tender_enquiry_id = a.tender_enquiry_id  and h1.status = 'Active'
+            left join tender_po_item_info as h on h.tender_quotation_item_id = g.tender_quotation_item_id  and h.tender_po_id = a.tender_po_id  and h.status = 'Active'
+            where a.status = 'Active' 
+            and a.tender_po_id = $tender_po_id
+            and a.tender_dc_id in ($placeholders)
+            group by h.tender_po_item_id 
+            order by h.tender_po_item_id asc
+        ";
+
+        $query = $this->db->query($sql, $dc_ids);
+
+        echo json_encode($query->result_array());
     }
+
 
 
     public function get_quotation_items()
@@ -4436,7 +4530,7 @@ class Tender extends CI_Controller
         }
 
 
-         if ($table == 'get-tender-po-list') {
+        if ($table == 'get-tender-po-list') {
 
             $sql = "
             SELECT 
