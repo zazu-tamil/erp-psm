@@ -2438,7 +2438,7 @@ class Vendor extends CI_Controller
                 $uoms = $this->input->post('uom') ?? [];
                 $qtys = $this->input->post('qty') ?? [];
                 $gsts = $this->input->post('gst') ?? [];
-                $rates = $this->input->post('rate') ?? [];
+                $rates = $this->input->post('rate') ?? []; 
                 $amounts = $this->input->post('amount') ?? [];
 
                 foreach ($selected_idxs as $fld => $idx) {
@@ -2452,12 +2452,12 @@ class Vendor extends CI_Controller
                         'uom' => $uoms[$idx] ?? '',
                         'qty' => $qtys[$idx] ?? 0,
                         'gst' => $gsts[$idx] ?? 0,
-                        'rate' => $rates[$idx] ?? 0,
+                        'rate' => $rates[$idx] ?? 0, 
                         'amount' => $amounts[$idx] ?? 0,
                         'status' => 'Active',
                         'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                         'created_date' => date('Y-m-d H:i:s')
-                    ];
+                    ]; 
 
                     if (!empty($vendor_quote_item_ids[$idx]) && $vendor_quote_item_ids[$idx] > 0) {
                         // UPDATE existing item
@@ -3604,6 +3604,8 @@ class Vendor extends CI_Controller
                 $rate = $this->input->post('rate') ?? [];
                 $gst = $this->input->post('gst') ?? [];
                 $amount = $this->input->post('amount') ?? [];
+                $conversion_rates = $this->input->post('conversion_rate') ?? [];
+                $dutys = $this->input->post('duty') ?? [];
 
                 foreach ($selected_items as $idx => $value) {
                     $item = [
@@ -3616,6 +3618,8 @@ class Vendor extends CI_Controller
                         'qty' => $qty[$idx] ?? 0,
                         'rate' => $rate[$idx] ?? 0,
                         'gst' => $gst[$idx] ?? 0,
+                        'conversion_rate' => $conversion_rates[$idx] ?? 1,
+                        'duty' => $dutys[$idx] ?? 0,
                         'amount' => $amount[$idx] ?? 0,
                         'status' => 'Active',
                         'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
@@ -4082,6 +4086,8 @@ class Vendor extends CI_Controller
             $qty = $this->input->post('qty') ?? [];
             $rate = $this->input->post('rate') ?? [];
             $gst = $this->input->post('gst') ?? [];
+            $conversion_rates = $this->input->post('conversion_rate') ?? [];
+            $dutys = $this->input->post('duty') ?? [];
             $amount = $this->input->post('amount') ?? [];
 
             foreach ($selected_items as $idx => $value) {
@@ -4098,6 +4104,8 @@ class Vendor extends CI_Controller
                     'rate' => $rate[$idx] ?? 0,
                     'gst' => $gst[$idx] ?? 0,
                     'amount' => $amount[$idx] ?? 0,
+                    'conversion_rate' => $conversion_rates[$idx] ?? 1,
+                    'duty' => $dutys[$idx] ?? 0,
                     'status' => 'Active',
                     'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                     'updated_date' => date('Y-m-d H:i:s'),
@@ -4158,6 +4166,8 @@ class Vendor extends CI_Controller
             a.qty,
             a.rate,
             a.gst,
+            a.conversion_rate,
+            a.duty,
             a.amount
         FROM vendor_purchase_invoice_item_info as a
         WHERE a.status='Active'

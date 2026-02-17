@@ -173,12 +173,12 @@
                                 <thead>
                                     <tr>
                                         <th style="width:5%;">✔</th>
-                                        <th style="width:10%;">Item Code</th>
-                                        <th style="width:40%;">Description</th>
+                                        <th style="width:40%;">Item Code & Description</th> 
                                         <th style="width:10%;">UOM & Qty</th>
-                                        <th style="width:10%;">Rate</th>
-                                        <th style="width:10%;">VAT %</th>
-                                        <th style="width:10%;">Amount</th>
+                                        <th style="width:10%;">Rate & Conversion</th>
+                                        <th style="width:10%;">Amount & Duty %</th>
+                                        <th style="width:8%;">VAT %</th>
+                                        <th style="width:11%;">In BHD <br>Amt (W/O Tax) & <br> Amt (With Tax)</th> 
                                     </tr>
                                 </thead>
                                 <tbody id="item_container">
@@ -194,6 +194,10 @@
                                                 $item_gst = $is_checked ? $saved_data['gst'] : $po_item['gst'];
                                                 $item_qty = $is_checked ? $saved_data['qty'] : $po_item['qty'];
                                                 $item_amount = $is_checked ? $saved_data['amount'] : $po_item['amount'];
+                                                $item_conversion_rate = $is_checked ? $saved_data['conversion_rate'] : 1;
+                                                $item_duty = $is_checked ? $saved_data['duty'] : 0;
+                                                $item_act_amt = ($item_qty * $item_rate * $item_conversion_rate); // Base amount without tax
+                                                $amountwotx = $item_act_amt + ($item_act_amt * $item_duty / 100); // Amount without tax but with duty   
                                             ?>
                                     <tr class="item-row">
                                         <td>
@@ -213,27 +217,37 @@
                                                 value="<?php echo $po_item['item_id']; ?>">
                                             <input type="hidden" name="item_code[]"
                                                 value="<?php echo htmlspecialchars($po_item['item_code']); ?>">
-                                        </td>
-                                        <td>
+                                            <i class="text-sm">Desc</i>
                                             <textarea class="form-control" rows="2" name="item_desc[]"
                                                 readonly><?php echo htmlspecialchars($po_item['item_desc']); ?></textarea>
                                         </td>
                                         <td>
                                             <input type="text" name="uom[]" class="form-control"
                                                 value="<?php echo htmlspecialchars($po_item['uom']); ?>" readonly>
+                                                <i class="text-sm">Qty</i>
                                             <input type="number" step="any" name="qty[]" class="form-control qty-input"
                                                 value="<?php echo $item_qty; ?>" readonly>
                                         </td>
                                         <td>
                                             <input type="number" step="any" name="rate[]"
                                                 class="form-control rate-input" value="<?php echo $item_rate; ?>">
+                                            <i class="text-sm">Conversion Rate</i>
+                                            <input type="number" step="any" name="conversion_rate[]" class="form-control conversion_rate"
+                                                value="<?php echo $item_conversion_rate; ?>">
                                         </td>
                                         <td>
-                                            <input type="number" step="any" name="gst[]" class="form-control gst-input"
-                                                value="<?php echo $item_gst; ?>">
-                                            <input type="hidden" name="gst_amount[]" class="gst-amount-input">
+                                            <input type="number" step="any" name="act_amt[]" class="form-control act_amt" value="<?php echo $item_act_amt; ?>" readonly>
+                                            <i class="text-sm">Duty %</i>
+                                            <input type="number" step="any" name="duty[]" class="form-control duty"
+                                                value="<?php echo $item_duty; ?>"> 
                                         </td>
                                         <td>
+                                            <input type="number" step="any" name="gst[]" class="form-control gst-input" value="<?php echo $item_gst; ?>">
+                                            
+                                        </td>
+                                        <td>
+                                            <input type="number" step="any" name="amountwotx[]" class="form-control amountwotx" value="<?php echo $amountwotx; ?>" readonly>
+                                            <i class="text-sm">With Tax</i>
                                             <input type="number" step="any" name="amount[]"
                                                 class="form-control amount-input" value="<?php echo $item_amount; ?>"
                                                 readonly>
@@ -244,7 +258,7 @@
                                 </tbody>
                             </table>
 
-                            <div class="tot_amt text-right">
+                            <!-- <div class="tot_amt text-right">
                                 <label>Total Bill Amount</label>
                                 <div id="total_amount_display"><?php echo number_format($header['total_amount'], 3); ?>
                                 </div>
@@ -256,6 +270,28 @@
                                     <?php echo number_format($header['tax_amount'], 3); ?></div>
                                 <input type="hidden" name="tax_amount" id="total_gst_amount"
                                     value="<?php echo $header['tax_amount']; ?>">
+                            </div> -->
+
+                            <div class="row">
+                                <div class="col-md-3 pull-right ">
+                                    <div class="total-box shadow-sm">
+                                        <h5 class="mb-0">
+                                            <i class="fa fa-calculator text-success me-2"></i>
+                                            <strong>Total Amount With Tax:</strong>
+                                            <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 pull-right">
+                                    <div class="total-box shadow-sm">
+                                        <h5 class="mb-0">
+                                            <i class="fa fa-calculator text-success me-2"></i>
+                                            <strong>Total Amount WO Tax:</strong>
+                                            <span class="text-primary"><span
+                                                    id="total_amount_wo_tax">0.000</span></span>
+                                        </h5>
+                                    </div>
+                                </div>
                             </div>
                         </fieldset>
                     </div>
@@ -308,6 +344,17 @@ legend {
     font-weight: bold;
     margin-right: 10px;
 }
+
+.total-box {
+    background: linear-gradient(135deg, #f6fff9, #e8f9f0);
+    border: 2px solid #b5e0c6;
+    border-radius: 12px;
+    padding: 12px 24px;
+    min-width: 280px;
+    text-align: right;
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
 
 .tot_amt div {
     display: inline-block;
@@ -518,16 +565,18 @@ $(document).ready(function() {
     // Recalculate on input change
     $(document).on(
         "input change",
-        ".rate-input, .gst-input, .qty-input, .item-check",
+        ".rate-input, .gst-input, .qty-input, .item-check , .conversion_rate, .duty",
         function() {
             const $row = $(this).closest('.item-row');
             calculateRow($row);
-            calculateTotals();
+            calculateTotalAmount();
         }
     );
 
+    calculateTotalAmount();
+
     function calculateRow($row) {
-        const qty = parseFloat($row.find(".qty-input").val()) || 0;
+        /*const qty = parseFloat($row.find(".qty-input").val()) || 0;
         const rate = parseFloat($row.find(".rate-input").val()) || 0;
         const gst = parseFloat($row.find(".gst-input").val()) || 0;
 
@@ -536,7 +585,25 @@ $(document).ready(function() {
         const total = base + gst_amt;
 
         $row.find(".gst-amount-input").val(gst_amt.toFixed(2));
-        $row.find(".amount-input").val(total.toFixed(2));
+        $row.find(".amount-input").val(total.toFixed(2));*/
+
+        const qty = parseFloat($row.find(".qty-input").val()) || 0;
+        const rate = parseFloat($row.find(".rate-input").val()) || 0;
+        const gst = parseFloat($row.find(".gst-input").val()) || 0;
+        const c_rate = parseFloat($row.find(".conversion_rate").val()) || 1;
+        const dty = parseFloat($row.find(".duty").val()) || 0;
+
+        const ac_amt = qty * rate * c_rate;
+
+
+        //const amountWithoutTax = qty * rate;
+        const amountWithoutTax = (ac_amt ) + ((ac_amt) * dty /100);
+        const amountWithTax = amountWithoutTax + (amountWithoutTax * gst / 100);
+
+        $row.find(".act_amt").val(ac_amt.toFixed(3));
+
+        $row.find(".amountwotx").val(amountWithoutTax.toFixed(3));
+        $row.find(".amount-input").val(amountWithTax.toFixed(3));
     }
 
     function calculateTotals() {
@@ -555,6 +622,22 @@ $(document).ready(function() {
 
         $("#total_gst_amount_display").text(total_gst.toFixed(3));
         $("#total_gst_amount").val(total_gst.toFixed(3));
+    }
+
+    function calculateTotalAmount() {
+      let total = 0;
+      $(".amount-input").each(function () {
+        total += parseFloat($(this).val()) || 0;
+      });
+
+      $("#total_amount").text(total.toFixed(3));
+
+      let total_wot = 0;
+      $(".amountwotx").each(function () {
+        total_wot += parseFloat($(this).val()) || 0;
+      });
+
+      $("#total_amount_wo_tax").text(total_wot.toFixed(3));
     }
 
     // Form validation

@@ -20,7 +20,7 @@
             </h3>
 
 
-            <a href="<?php echo site_url('vendor-pur-inward-list'); ?>" class="btn btn-warning pull-right">
+            <a href="<?php echo site_url('vendor-purchase-bill-list'); ?>" class="btn btn-warning pull-right">
                 <i class="fa fa-arrow-left"></i> Back To List
             </a>
         </div>
@@ -139,20 +139,21 @@
 
                 </fieldset>
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-12 table-responsive">
                         <fieldset class="mt-4">
                             <legend class="text-light-blue"><i class="fa fa-list"></i> Item Details</legend>
                             <table class="table table-bordered table-sm table-responsive">
                                 <thead>
                                     <tr>
                                         <th style="width:5%;">✔</th>
-                                        <th style="width:10%;">Item Code</th>
-                                        <th style="width:35%;">Description</th>
+                                        <th style="width:40%;">Item Code & Description</th>
+                                        <!-- <th style="width:35%;">Description</th> -->
                                         <th style="width:10%;">UOM & Qty</th>
-                                        <th style="width:10%;">Rate</th>
+                                        <th style="width:10%;">Rate & Conversion</th>
+                                        <th style="width:10%;">Amount & Duty %</th>
                                         <th style="width:8%;">VAT %</th>
-                                        <th style="width:11%;">Amt (W/O Tax)</th>
-                                        <th style="width:11%;">Amt (With Tax)</th>
+                                        <th style="width:11%;">In BHD <br>Amt (W/O Tax) & <br> Amt (With Tax)</th>
+                                        <!-- <th style="width:11%;">Amt (With Tax)</th> -->
                                     </tr>
                                 </thead>
                                 <tbody id="item_container"></tbody>
