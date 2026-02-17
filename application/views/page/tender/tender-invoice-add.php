@@ -63,6 +63,13 @@
                             ); ?>
                         </div>
 
+                        <div class="form-group col-md-12"> 
+                             <fieldset
+                                style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px;">
+                                <legend class="text-info">DC List </legend>
+                                <div id="dc_list_container"></div>
+                            </fieldset>
+                        </div>
                         <div class="form-group col-md-3">
                             <label>Invoice Date</label>
                             <input type="date" name="invoice_date" id="invoice_date" class="form-control"

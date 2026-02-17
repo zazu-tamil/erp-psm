@@ -46,6 +46,12 @@
                             <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select Enquiry'], set_value('srch_tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" required'); ?>
                         </div>
 
+                         <div class="form-group col-md-4">
+                            <label for="tender_po_id">Tender PO No <span
+                                    style="color:red;">*</span></label>
+                            <?php echo form_dropdown('tender_po_id', ['' => 'Select PO'], set_value('tender_po_id'), 'id="tender_po_id" class="form-control" required'); ?>
+                        </div>
+
                         <div class="form-group col-md-4">
                             <label>DC Date</label>
                             <input type="date" name="dc_date" id="dc_date" class="form-control"
@@ -105,7 +111,7 @@
             </div>
 
             <div class="box-footer text-right">
-                <a href="<?php echo site_url('tender-quotation-list'); ?>" class="btn btn-default"><i
+                <a href="<?php echo site_url('tender-dc-list'); ?>" class="btn btn-default"><i
                         class="fa fa-arrow-left"></i> Back To List</a>
                 <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
             </div>

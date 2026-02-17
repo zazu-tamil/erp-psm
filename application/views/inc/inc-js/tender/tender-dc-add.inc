@@ -182,13 +182,42 @@
       });
     });
 
+    function load_tender_po(tender_enquiry_id) 
+    {
+      //alert(tender_enquiry_id);
+       $("#tender_po_id > option").remove();
+
+        $.ajax({
+          url: "<?php echo site_url('tender/get_data');?>",
+          type: "post",
+          data: { tbl: "get-tender-po-list", id: tender_enquiry_id },
+          success: function (res) {
+            console.log(res);
+
+           /* var opt1 = $("<option />");
+            opt1.val("");
+            opt1.text("Select");
+            $("#tender_po_id").append(opt1);*/
+
+            $.each(res, function (key, info) {
+              var opt1 = $("<option />");
+              opt1.val(info.tender_po_id);
+              opt1.text(info.customer_po_no + " [ "+ info.po_date +" ]");
+              $("#tender_po_id").append(opt1);
+            }); 
+          }
+        });
+    }
+
     $("#srch_tender_enquiry_id").on("change", function () {
       const tender_enquiry_id = $(this).val();
       const $container = $("#item_container");
       $container.html("");
 
       if (!tender_enquiry_id) return;
-
+      
+      load_tender_po(tender_enquiry_id);
+       
       $.ajax({
         url: "<?php echo site_url('tender/get_data'); ?>",
         type: "POST",
@@ -261,6 +290,7 @@
           alert("Error loading items");
         },
       });
+      
     });
 
     $(document).on("change", ".item-check", function () {

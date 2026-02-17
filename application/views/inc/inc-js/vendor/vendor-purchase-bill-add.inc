@@ -476,7 +476,8 @@
             $container.append(html);
           });
 
-          calculateTotalAmount();
+          $(".conversion_rate").change();
+          //calculateTotalAmount();
         },
 
         error: function () {

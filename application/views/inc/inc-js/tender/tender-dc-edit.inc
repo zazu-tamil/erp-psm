@@ -1,5 +1,10 @@
+<style>
+   .readonly  { 
+         pointer-events: none;
+    }
+</style>
 <script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
-
+ 
 <script> 
   $(function () {
     CKEDITOR.replace("editor1", {

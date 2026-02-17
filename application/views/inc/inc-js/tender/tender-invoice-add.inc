@@ -396,6 +396,51 @@
 
       if (!tender_po_id) return;
 
+
+    $.ajax({
+    url: "<?php echo site_url('tender/get_tender_po_DC_list'); ?>",
+    type: "POST",
+    data: { tender_po_id: tender_po_id },
+    dataType: "json",
+
+    success: function (res1) {
+
+        console.log(res1);
+
+        let html = '';
+
+        if (res1.length > 0) {
+
+            $.each(res1, function (i, row) {
+
+                html += `
+                    <div class="col-md-3">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox"
+                                    class="dc_list"
+                                    name="dc_id[]"
+                                    value="${row.tender_dc_id}">
+                                    DC No: ${row.dc_no} [ ${row.dc_date} ] ( ${row.total_items} )
+                            </label>
+                        </div>
+                    </div>
+                `;
+            });
+
+        } else {
+            html = '<div class="col-md-12 text-danger">No DC Found</div>';
+        }
+
+        $('#dc_list_container').html(html);
+    }
+});
+
+
+     
+
+
+
       $.ajax({
         url: "<?php echo site_url('tender/get_tender_po_invoice_load_items'); ?>",
         type: "POST",

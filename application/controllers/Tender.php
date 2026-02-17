@@ -3472,6 +3472,7 @@ class Tender extends CI_Controller
                 'company_id' => $this->input->post('srch_company_id'),
                 'customer_id' => $this->input->post('srch_customer_id'),
                 'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
+                'tender_po_id' => $this->input->post('tender_po_id'),
                 'dc_date' => $this->input->post('dc_date'),
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
@@ -3582,7 +3583,7 @@ class Tender extends CI_Controller
                 'company_id' => $this->input->post('srch_company_id'),
                 'customer_id' => $this->input->post('srch_customer_id'),
                 'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
-                'tender_po_id' => $this->input->post('srch_tender_po_id'),
+                'tender_po_id' => $this->input->post('tender_po_id'),
                 'dc_no' => $this->input->post('dc_no'),
                 'dc_date' => $this->input->post('dc_date'),
                 'terms' => $this->input->post('terms'),
@@ -3729,6 +3730,8 @@ class Tender extends CI_Controller
 
 
         $data['header'] = $this->db->where('tender_dc_id', $tender_dc_id)->get('tender_dc_info')->row_array();
+
+
         $sql = "
             SELECT  
             a.*, 
@@ -3781,12 +3784,28 @@ class Tender extends CI_Controller
             WHERE a.status = 'Active' 
             and a.tender_dc_id = ?
 
-            GROUP BY d.vendor_pur_inward_item_id
-
+            GROUP BY d.vendor_pur_inward_item_id 
 
         ";
         $query = $this->db->query($sql, [$tender_dc_id]);
         $data['items'] = $query->result_array();
+
+
+        $data['tender_po_opt'] = [];
+        $sql = "
+             SELECT 
+                tender_po_id, 
+                customer_po_no,
+                DATE_FORMAT(po_date, '%d-%m-%Y') AS po_date
+            FROM customer_tender_po_info
+            WHERE tender_enquiry_id = ?
+            AND status = 'Active'
+            order by po_date desc , tender_po_id desc
+        ";
+        $query = $this->db->query($sql, [$data['header']['tender_enquiry_id']]);
+        foreach ($query->result_array() as $row) {
+            $data['tender_po_opt'][$row['tender_po_id']] = $row['customer_po_no'] . ' [ ' . $row['po_date'] . ' ]';
+        }
 
         $this->load->view('page/tender/tender-dc-edit', $data);
     }
@@ -4113,6 +4132,41 @@ class Tender extends CI_Controller
         echo json_encode($result);
     }
 
+    public function get_tender_po_DC_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            echo json_encode(['error' => 'Unauthorized']);
+            return;
+        }
+
+        $tender_po_id = $this->input->post('tender_po_id');
+
+        if (empty($tender_po_id)) {
+            echo json_encode([]);
+            return;
+        }
+
+        $sql = "
+           SELECT 
+            dc.tender_dc_id,
+            dc.dc_no,
+            DATE_FORMAT(dc.dc_date, '%d-%m-%Y') as dc_date,
+            count(c.tender_dc_item_id) as total_items
+            FROM tender_dc_info AS dc
+            left join tender_dc_item_info as c on c.tender_dc_id = dc.tender_dc_id and c.status='Active' 
+            WHERE 
+                dc.tender_po_id = ?
+                AND dc.status = 'Active'
+            group by dc.tender_dc_id, dc.dc_no, dc.dc_date    
+            ORDER BY 
+                dc.tender_dc_id ASC
+        ";
+
+        $query = $this->db->query($sql, [$tender_po_id]);
+        $result = $query->result_array();
+        echo json_encode($result);
+    }
+
     public function get_tender_po_invoice_load_items()
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in')) {
@@ -4379,6 +4433,28 @@ class Tender extends CI_Controller
 
             echo json_encode($query->result());
             return;
+        }
+
+
+         if ($table == 'get-tender-po-list') {
+
+            $sql = "
+            SELECT 
+                tender_po_id, 
+                customer_po_no,
+                DATE_FORMAT(po_date, '%d-%m-%Y') AS po_date
+            FROM customer_tender_po_info
+            WHERE tender_enquiry_id = ?
+            AND status = 'Active'
+            order by po_date desc , tender_po_id desc
+        ";
+
+            $query = $this->db->query($sql, [$rec_id]);
+
+            $rec_list = $query->result_array();
+
+            //echo json_encode($rec_list);
+            //return;
         }
 
         header('Content-Type: application/json');

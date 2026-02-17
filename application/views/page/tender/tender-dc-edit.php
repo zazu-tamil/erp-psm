@@ -38,7 +38,7 @@
                                 'srch_company_id',
                                 ['' => 'Select Company'] + $company_opt,
                                 set_value('srch_company_id', $header['company_id']),
-                                'id="srch_company_id" class="form-control" required'
+                                'id="srch_company_id" class="form-control readonly" required readonly'
                             );
                             ?>
                         </div>
@@ -49,7 +49,7 @@
                                 'srch_customer_id',
                                 ['' => 'Select Customer'] + $customer_opt,
                                 set_value('srch_customer_id', $header['customer_id']),
-                                'id="srch_customer_id" class="form-control" required'
+                                'id="srch_customer_id" class="form-control readonly" required readonly'
                             );
                             ?>
                         </div>
@@ -61,7 +61,19 @@
                                 'srch_tender_enquiry_id',
                                 ['' => 'Select Enquiry'] + $tender_enquiry_opt,
                                 set_value('srch_tender_enquiry_id', $header['tender_enquiry_id']),
-                                'id="srch_tender_enquiry_id" class="form-control" required'
+                                'id="srch_tender_enquiry_id" class="form-control readonly" required readonly'
+                            );
+                            ?>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="tender_po_id">Tender PO No <span
+                                    style="color:red;">*</span></label>
+                            <?php
+                            echo form_dropdown(
+                                'tender_po_id',
+                                ['' => 'Select PO'] + $tender_po_opt,
+                                set_value('tender_po_id', $header['tender_po_id']),
+                                'id="tender_po_id" class="form-control readonly" required readonly'
                             );
                             ?>
                         </div>
