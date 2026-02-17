@@ -173,22 +173,22 @@
                             <?php if (!empty($items)): ?>
                                 <?php $index = 0;
                                 foreach ($items as $item): ?>
-                                    <tr class="item-row">
+                                    <tr class="item-row"> 
                                         <td>
                                             <input type="checkbox" class="form-check-input item-check" name="selected_items[]"
-                                                value="<?php echo $index; ?>" checked>
+                                                value="<?php echo $index; ?>" <?php echo (!empty($item['vendor_po_item_id'])) ? 'checked' : ''; ?>>
+
+                                            <input type="hidden" name="vendor_rate_enquiry_item_id[<?php echo $index; ?>]"
+                                                value="<?php echo $item['vendor_rate_enquiry_item_id']; ?>">
+
+                                            <input type="hidden" name="vendor_po_item_id[<?php echo $index; ?>]"
+                                                value="<?php echo $item['vendor_po_item_id']; ?>">
                                         </td>
 
                                         <td>
                                             <input type="text" class="form-control item_code-input"
                                                 name="item_code[<?php echo $index; ?>]"
-                                                value="<?php echo htmlspecialchars($item['item_code']); ?>" readonly>
-
-                                            <input type="hidden" name="vendor_rate_enquiry_item_id[<?php echo $index; ?>]"
-                                                value="<?php echo $item['vendor_rate_enquiry_item_id']; ?>">
-                                            <input type="hidden" name="vendor_po_item_id[<?php echo $index; ?>]"
-                                                value="<?php echo $item['vendor_po_item_id']; ?>">
-
+                                                value="<?php echo htmlspecialchars($item['item_code']); ?>" readonly> 
                                         </td>
 
                                         <td>

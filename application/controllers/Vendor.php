@@ -944,8 +944,29 @@ class Vendor extends CI_Controller
             // $this->db->where('vendor_po_id', $vendor_po_id);
             // $this->db->delete('vendor_po_item_info');
 
-            // Insert only selected items
-            $selected_idxs = $this->input->post('selected_items') ?? [];
+            // Insert only selected items 
+           $selected_idxs = $this->input->post('selected_items') ?? [];
+
+            /*if (!empty($selected_items)) {
+                 foreach ($selected_items as $idx) {
+                     $item = [
+                         'vendor_quote_id' => $vendor_quote_id,
+                         'vendor_rate_enquiry_item_id' => $this->input->post("vendor_rate_enquiry_item_id")[$idx] ?? 0,
+                         'category_id' => $this->input->post("category_id")[$idx] ?? 0,
+                         'item_id' => $this->input->post("item_id")[$idx] ?? 0,
+                         'item_desc' => $this->input->post("item_desc")[$idx] ?? '',
+                         'uom' => $this->input->post("uom")[$idx] ?? '',
+                         'qty' => $this->input->post("qty")[$idx] ?? 0,
+                         'rate' => $this->input->post("rate")[$idx] ?? 0,
+                         'gst' => $this->input->post("gst")[$idx] ?? 0,
+                         'amount' => $this->input->post("amount")[$idx] ?? 0,
+                         'status' => 'Active',
+                         'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                         'updated_date' => date('Y-m-d H:i:s'),
+                     ];
+                     $this->db->insert('vendor_quote_item_info', $item);
+                 }
+             }*/
 
             if (!empty($selected_idxs)) {
                 // All arrays are posted with the SAME order as the rows
@@ -960,7 +981,7 @@ class Vendor extends CI_Controller
                 $rates = $this->input->post('rate') ?? [];
                 $amounts = $this->input->post('amount') ?? [];
 
-                foreach ($selected_idxs as $idx) {
+                foreach ($selected_idxs as $fld => $idx) {
                     //if($tender_quotation_item_ids[$idx]){  
                     $item_data = [
                         'vendor_po_id' => $vendor_po_id,
@@ -974,8 +995,8 @@ class Vendor extends CI_Controller
                         'rate' => $rates[$idx] ?? 0,
                         'amount' => $amounts[$idx] ?? 0,
                         'status' => 'Active',
-                        'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
-                        'updated_date' => date('Y-m-d H:i:s')
+                        'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                        'created_date' => date('Y-m-d H:i:s')
                     ];
 
                     if (!empty($vendor_po_item_ids[$idx]) && $vendor_po_item_ids[$idx] > 0) {
@@ -988,57 +1009,33 @@ class Vendor extends CI_Controller
                         $item_data['created_by'] = $this->session->userdata(SESS_HD . 'user_id');
                         $item_data['created_date'] = date('Y-m-d H:i:s');
 
-                        $this->db->insert('vendor_po_item_info', $item_data);
+                        if ($this->db->insert('vendor_po_item_info', $item_data)) {
+                            $current_item_id = $this->db->insert_id();
+                        } else {
+                            $current_item_id = 0;
+                        }
+                        $miss_item_ids[] = $current_item_id;
                     }
                     $miss_item_ids[] = $vendor_po_item_ids[$idx];
 
                 }
                 // DELETE items which are not in the selected list
                 if (!empty($miss_item_ids)) {
-                    $this->db->where('vendor_po_item_id', $vendor_po_item_ids[$idx]);
+                    $this->db->where('vendor_po_id', $vendor_po_id);
                     $this->db->where_not_in('vendor_po_item_id', $miss_item_ids);
                     $this->db->update('vendor_po_item_info', ['status' => 'Deleted', 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'), 'updated_date' => date('Y-m-d H:i:s')]);
                 }
             }
 
-            /*if (!empty($selected_items)) {
-                $vendor_rate_enquiry_item_id = $this->input->post('vendor_rate_enquiry_item_id') ?? [];
-                $category_id = $this->input->post('category_id') ?? [];
-                $item_id = $this->input->post('item_id') ?? [];
-                $item_desc = $this->input->post('item_desc') ?? [];
-                $uom = $this->input->post('uom') ?? [];
-                $qty = $this->input->post('qty') ?? [];
-                $rate = $this->input->post('rate') ?? [];
-                $gst = $this->input->post('gst') ?? [];
-                $amount = $this->input->post('amount') ?? [];
-
-                foreach ($selected_items as $idx) {
-                    $item = [
-                        'vendor_po_id' => $vendor_po_id,
-                        'vendor_rate_enquiry_item_id' => $vendor_rate_enquiry_item_id[$idx] ?? 0,
-                        'category_id' => $category_id[$idx] ?? 0,
-                        'item_id' => $item_id[$idx] ?? 0,
-                        'item_desc' => $item_desc[$idx] ?? '',
-                        'uom' => $uom[$idx] ?? '',
-                        'qty' => $qty[$idx] ?? 0,
-                        'rate' => $rate[$idx] ?? 0,
-                        'gst' => $gst[$idx] ?? 0,
-                        'amount' => $amount[$idx] ?? 0,
-                        'status' => 'Active',
-                        'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
-                        'created_date' => date('Y-m-d H:i:s'),
-                    ];
-                    $this->db->insert('vendor_po_item_info', $item);
-                }
-            }*/
-
             $this->db->trans_complete();
 
             if ($this->db->trans_status() === FALSE) {
-                $this->session->set_flashdata('error', 'Error updating Vendor PO.');
+                $this->session->set_flashdata('error', 'Error updating Vendor Quotation.');
             } else {
-                $this->session->set_flashdata('success', 'Vendor PO updated successfully.');
-            }
+                $this->session->set_flashdata('success', 'Vendor Quotation updated successfully.');
+            } 
+
+
             redirect('vendor-po-edit/' . $vendor_po_id);
         }
         // Load dependent dropdowns (same AJAX will refill others)
@@ -1066,21 +1063,24 @@ class Vendor extends CI_Controller
         $data['header'] = $query->row_array();
 
         $sql = "
-            SELECT 
-            a.vendor_po_item_id,
+          select
+            b.vendor_po_item_id,
+            b.vendor_po_id,
             a.vendor_rate_enquiry_item_id,
-            a.item_code,
-            a.item_desc,
-            a.uom,
-            a.qty,
-            a.rate,
-            a.gst as vat,  
-            a.amount    
-            FROM vendor_po_item_info a 
-            WHERE a.vendor_po_id = ? AND a.status = 'Active'
-            ORDER BY a.vendor_po_item_id ASC
+            IF(a.tender_enquiry_item_id != a.vendor_rate_enquiry_item_id, b.item_code,a.item_code) AS item_code,
+            IF(a.tender_enquiry_item_id != a.vendor_rate_enquiry_item_id, b.item_desc,a.item_desc) AS item_desc, 
+            if(a.tender_enquiry_item_id != a.vendor_rate_enquiry_item_id, b.uom,a.uom) AS uom, 
+            if(a.tender_enquiry_item_id != a.vendor_rate_enquiry_item_id, b.qty,a.qty) AS qty,
+             a.rate,
+            a.gst as vat,
+            a.amount 
+            from  vendor_rate_enquiry_item_info as a 
+            left join vendor_po_item_info as b on a.vendor_rate_enquiry_item_id = b.vendor_rate_enquiry_item_id  and b.`status`='Active'  and b.vendor_po_id= ?
+            where a.`status`='Active' 
+            and a.vendor_rate_enquiry_id  = ?
+ 
         ";
-        $query = $this->db->query($sql, [$vendor_po_id]);
+        $query = $this->db->query($sql, [$vendor_po_id, $data['header']['vendor_rate_enquiry_id']]);
         $data['items'] = $query->result_array();
 
         $sql = "
@@ -2020,7 +2020,7 @@ class Vendor extends CI_Controller
                 $gst = $this->input->post('gst') ?? [];
                 $amount = $this->input->post('amount') ?? [];
 
-                foreach ($selected_items as  $idx => $value) {
+                foreach ($selected_items as $idx => $value) {
 
                     $item = [
                         'vendor_quote_id' => $vendor_quote_id,
@@ -2407,7 +2407,7 @@ class Vendor extends CI_Controller
             // Re-insert only selected (checked) items
             $selected_idxs = $this->input->post('selected_items') ?? [];
 
-            /* if (!empty($selected_items)) {
+            /*if (!empty($selected_items)) {
                  foreach ($selected_items as $idx) {
                      $item = [
                          'vendor_quote_id' => $vendor_quote_id,
@@ -2441,7 +2441,7 @@ class Vendor extends CI_Controller
                 $rates = $this->input->post('rate') ?? [];
                 $amounts = $this->input->post('amount') ?? [];
 
-                foreach ($selected_idxs as $fld =>$idx) {
+                foreach ($selected_idxs as $fld => $idx) {
                     //if($tender_quotation_item_ids[$idx]){  
                     $item_data = [
                         'vendor_quote_id' => $vendor_quote_id,
@@ -2469,8 +2469,8 @@ class Vendor extends CI_Controller
                         $item_data['created_by'] = $this->session->userdata(SESS_HD . 'user_id');
                         $item_data['created_date'] = date('Y-m-d H:i:s');
 
-                       if ($this->db->insert('vendor_quote_item_info', $item_data)) {
-                           $current_item_id = $this->db->insert_id();
+                        if ($this->db->insert('vendor_quote_item_info', $item_data)) {
+                            $current_item_id = $this->db->insert_id();
                         } else {
                             $current_item_id = 0;
                         }
@@ -2530,8 +2530,8 @@ class Vendor extends CI_Controller
             and b.vendor_rate_enquiry_id =  ?
             ORDER BY b.vendor_rate_enquiry_item_id ASC
         ";
-        
-        $query = $this->db->query($sql, [$vendor_quote_id , $data['header']['vendor_rate_enquiry_id']]);
+
+        $query = $this->db->query($sql, [$vendor_quote_id, $data['header']['vendor_rate_enquiry_id']]);
         $data['items'] = $query->result_array();
 
         $sql = "
@@ -3605,7 +3605,7 @@ class Vendor extends CI_Controller
                 $gst = $this->input->post('gst') ?? [];
                 $amount = $this->input->post('amount') ?? [];
 
-                foreach ($selected_items as $idx =>$value) {
+                foreach ($selected_items as $idx => $value) {
                     $item = [
                         'vendor_purchase_invoice_id' => $vendor_purchase_invoice_id,
                         'vendor_po_item_id' => $vendor_po_item_id[$idx] ?? 0,
@@ -4470,7 +4470,7 @@ class Vendor extends CI_Controller
             return;
         }
 
-        $vendor_quote_id = $this->input->post('srch_vendor_quote_id');  
+        $vendor_quote_id = $this->input->post('srch_vendor_quote_id');
 
         if (empty($vendor_quote_id)) {
             echo json_encode([]);
