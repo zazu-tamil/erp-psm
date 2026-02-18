@@ -714,7 +714,7 @@
     <!-- Action Buttons -->
     <div class="button-container">
         <button type="button" class="btn btn-primary"
-            onclick="window.location.href='<?= site_url('tender-quotation-list') ?>'">
+            onclick="window.location.href='<?= site_url('tender-invoice-list') ?>'">
             ← Back To List
         </button>
         <button type="button" class="btn btn-success" onclick="window.print()">

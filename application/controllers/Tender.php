@@ -1913,7 +1913,7 @@ class Tender extends CI_Controller
                 $gsts = $this->input->post('gst') ?? [];
                 $amounts = $this->input->post('amount') ?? [];
 
-                foreach ($selected_idxs as $idx) {
+                foreach ($selected_idxs as $idx => $value) {
                     $item_data = [
                         'tender_quotation_id' => $tender_quotation_id,
                         'tender_enquiry_item_id' => $tender_enquiry_item_ids[$idx] ?? 0,
@@ -2107,7 +2107,7 @@ class Tender extends CI_Controller
                 $gsts = $this->input->post('gst') ?? [];
                 $amounts = $this->input->post('amount') ?? [];
 
-                foreach ($selected_idxs as $idx) {
+                foreach ($selected_idxs as $idx => $val) {
                     $item_data = [
                         'tender_po_id' => $tender_po_id,
                         'tender_quotation_item_id' => $tender_quotation_item_ids[$idx] ?? 0,
@@ -2236,7 +2236,7 @@ class Tender extends CI_Controller
             $gsts = $this->input->post('gst') ?: [];
             $amounts = $this->input->post('amount') ?: [];
 
-            foreach ($selected_idxs as $idx) {
+            foreach ($selected_idxs as $idx => $value) {
                 // Get existing PO item ID if it exists (from hidden field)
                 $existing_po_item_id = $tender_po_item_ids[$idx];
 
@@ -2594,8 +2594,7 @@ class Tender extends CI_Controller
             FROM tender_enquiry_info AS a 
             LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status='Active' 
             LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status='Active' 
-            WHERE a.status = 'Active'
-            and a.tender_status = 'Won' 
+            WHERE a.status = 'Active' 
             ORDER BY a.tender_enquiry_id, a.enquiry_no ASC";
         $query = $this->db->query($sql);
         $data['tender_enquiry_opt'] = array('' => 'Select');
@@ -2671,7 +2670,7 @@ class Tender extends CI_Controller
             $gsts = $this->input->post('gst') ?? [];
             $amounts = $this->input->post('amount') ?? [];
 
-            foreach ($selected_idxs as $idx) {
+            foreach ($selected_idxs as $idx => $val) {
 
                 if (!isset($tender_po_item_id[$idx]))
                     continue;
@@ -2944,8 +2943,7 @@ class Tender extends CI_Controller
             FROM tender_enquiry_info AS a 
             LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status='Active' 
             LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status='Active' 
-            WHERE a.status = 'Active'
-            and a.tender_status = 'Won' 
+            WHERE a.status = 'Active' 
             ORDER BY a.tender_enquiry_id ASC
         ";
         $query = $this->db->query($sql);
@@ -3173,8 +3171,7 @@ class Tender extends CI_Controller
             FROM tender_enquiry_info AS a 
             LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status='Active' 
             LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status='Active' 
-            WHERE a.status = 'Active'
-            and a.tender_status = 'Won' 
+            WHERE a.status = 'Active' 
             ORDER BY a.tender_enquiry_id ASC
         ";
         $query = $this->db->query($sql);
@@ -3494,7 +3491,7 @@ class Tender extends CI_Controller
                 $item_code = $this->input->post('item_code') ?? [];
                 $uoms = $this->input->post('uom') ?? [];
                 $qtys = $this->input->post('dc_qty') ?? [];
-                foreach ($selected_idxs as $idx) {
+                foreach ($selected_idxs as $idx => $value) {
                     $item_data = [
                         'tender_dc_id' => $tender_dc_id,
                         'vendor_pur_inward_id' => $vendor_pur_inward_id[$idx] ?? 0,
@@ -4264,6 +4261,8 @@ class Tender extends CI_Controller
             left join customer_tender_po_info as h1 on h1.tender_quotation_id = g1.tender_quotation_id and h1.tender_enquiry_id = a.tender_enquiry_id  and h1.status = 'Active'
             left join tender_po_item_info as h on h.tender_quotation_item_id = g.tender_quotation_item_id  and h.tender_po_id = a.tender_po_id  and h.status = 'Active'
             where a.status = 'Active' 
+            and b.status = 'Active'
+            and h.tender_po_item_id != ''
             and a.tender_po_id = $tender_po_id
             and a.tender_dc_id in ($placeholders)
             group by h.tender_po_item_id 

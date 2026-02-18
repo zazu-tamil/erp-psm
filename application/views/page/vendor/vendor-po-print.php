@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <?php
-// echo "<pre>";
-// print_r($dc_list_info);
-// echo "</pre>";
+echo "<pre>";
+print_r($item_list);
+echo "</pre>";
 ?>
 <html>
 
@@ -605,7 +605,7 @@
     <!-- Buttons (screen only) -->
     <div class="button-container">
         <button type="button" class="btn btn-primary"
-            onclick="window.location.href='<?= site_url('tender-quotation-list') ?>'">
+            onclick="window.location.href='<?= site_url('vendor-po-list') ?>'">
             ← Back To List
         </button>
         <button type="button" class="btn btn-success" onclick="window.print()">

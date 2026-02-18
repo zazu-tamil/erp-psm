@@ -47,7 +47,7 @@ class Vendor extends CI_Controller
             $qtys = $this->input->post('qty');
 
             if (!empty($selected_items)) {
-                foreach ($selected_items as $index) {
+                foreach ($selected_items as $index => $value) {
                     if (!empty($item_descs[$index])) {
                         $insert_item_data = array(
                             'vendor_rate_enquiry_id' => $vendor_rate_enquiry_id,
@@ -246,7 +246,7 @@ class Vendor extends CI_Controller
                 $uoms = $this->input->post('uom') ?? [];
                 $qtys = $this->input->post('qty') ?? [];
 
-                foreach ($selected_idxs as $idx) {
+                foreach ($selected_idxs as $idx => $value) {
                     //if($tender_quotation_item_ids[$idx]){  
                     $item_data = [
                         'vendor_rate_enquiry_id' => $id,
@@ -945,7 +945,7 @@ class Vendor extends CI_Controller
             // $this->db->delete('vendor_po_item_info');
 
             // Insert only selected items 
-           $selected_idxs = $this->input->post('selected_items') ?? [];
+            $selected_idxs = $this->input->post('selected_items') ?? [];
 
             /*if (!empty($selected_items)) {
                  foreach ($selected_items as $idx) {
@@ -1033,7 +1033,7 @@ class Vendor extends CI_Controller
                 $this->session->set_flashdata('error', 'Error updating Vendor Quotation.');
             } else {
                 $this->session->set_flashdata('success', 'Vendor Quotation updated successfully.');
-            } 
+            }
 
 
             redirect('vendor-po-edit/' . $vendor_po_id);
@@ -1062,7 +1062,7 @@ class Vendor extends CI_Controller
         $query = $this->db->query($sql, [$vendor_po_id]);
         $data['header'] = $query->row_array();
 
-        $sql = "
+        echo$sql = "
           select
             b.vendor_po_item_id,
             b.vendor_po_id,
@@ -1071,9 +1071,9 @@ class Vendor extends CI_Controller
             IF(a.tender_enquiry_item_id != a.vendor_rate_enquiry_item_id, b.item_desc,a.item_desc) AS item_desc, 
             if(a.tender_enquiry_item_id != a.vendor_rate_enquiry_item_id, b.uom,a.uom) AS uom, 
             if(a.tender_enquiry_item_id != a.vendor_rate_enquiry_item_id, b.qty,a.qty) AS qty,
-             a.rate,
-            a.gst as vat,
-            a.amount 
+            b.rate,
+            b.gst as vat,
+            b.amount 
             from  vendor_rate_enquiry_item_info as a 
             left join vendor_po_item_info as b on a.vendor_rate_enquiry_item_id = b.vendor_rate_enquiry_item_id  and b.`status`='Active'  and b.vendor_po_id= ?
             where a.`status`='Active' 
@@ -1222,9 +1222,12 @@ class Vendor extends CI_Controller
                 e.address,
                 e.vendor_id,
                 e.country,
+                curr.currency_code,
                 curr.decimal_point,
                 f.quote_no,
-                a.vendor_po_id
+                a.vendor_po_id,
+                get_tender_info(a.tender_enquiry_id) as enquiry_no,
+                d.enquiry_date
             FROM vendor_po_info as  a 
             LEFT JOIN customer_info as b on a.customer_id = b.customer_id  and b.status='Active'
             LEFT JOIN company_info as c  on a.company_id = c.company_id and c.status='Active'
@@ -1244,55 +1247,25 @@ class Vendor extends CI_Controller
 
         // === ITEMS WITH RATE CALCULATION ===
         $sql = "
-            select 
-                a.item_desc, 
-                a.uom,
-                a.qty,
-                a.rate,
-                a.gst ,
-                a.amount
-            from vendor_po_item_info as a 
-            left join category_info as b  on a.category_id = b.category_id and b.`status`='Active'
-            left join item_info as c  on a.item_id = c.item_id and c.status='Active'
+           select
+            a.vendor_po_id,
+            b.item_code,
+            b.uom,
+            b.qty,
+            b.rate,
+            b.gst,
+            b.amount,
+            (b.rate * b.qty) AS Net_amount
+            from vendor_po_info as a 
+            left join vendor_po_item_info as b  on a.vendor_po_id = b.vendor_po_id and b.`status`='Active'
+            left join currencies_info as c on a.currency_id = c.currency_id and c.`status`='Active'
             where a.`status`='Active'
             and a.vendor_po_id = ?
+            order by a.vendor_po_id asc
         ";
         $query = $this->db->query($sql, [$vendor_po_id]);
-        $items = $query->result_array();
+        $data['item_list'] = $query->result_array();
 
-        $data['items'] = [];
-        $gst_summary = [];
-
-        foreach ($items as $item) {
-            $qty = floatval($item['qty']);
-            $gst = floatval($item['gst']);
-            $amount = floatval($item['amount']);
-            $rate = floatval($item['rate']);
-
-
-            // === GST Amount ===
-            $gst_amount = $amount - ($qty * $rate);
-
-            // === Store in item ===
-            $item['rate'] = $rate;
-            $item['gst_amount'] = $gst_amount;
-            $item['base_amount'] = $qty * $rate;
-
-            $data['items'][] = $item;
-
-            // === GST Summary ===
-            $gst_key = number_format($gst, 2);
-            if (!isset($gst_summary[$gst_key])) {
-                $gst_summary[$gst_key] = ['gst' => $gst, 'base' => 0, 'gst_amount' => 0];
-            }
-            $gst_summary[$gst_key]['base'] += $qty * $rate;
-            $gst_summary[$gst_key]['gst_amount'] += $gst_amount;
-        }
-
-        $data['gst_summary'] = $gst_summary;
-        $data['grand_total'] = array_sum(array_column($data['items'], 'base_amount'));
-        $data['total_gst'] = array_sum(array_column($data['items'], 'gst_amount'));
-        $data['final_total'] = $data['grand_total'] + $data['total_gst'] + $data['record']['other_charges'] + $data['record']['transport_charges'];
 
         $this->load->view('page/vendor/vendor-po-print', $data);
     }
@@ -2438,10 +2411,10 @@ class Vendor extends CI_Controller
                 $uoms = $this->input->post('uom') ?? [];
                 $qtys = $this->input->post('qty') ?? [];
                 $gsts = $this->input->post('gst') ?? [];
-                $rates = $this->input->post('rate') ?? []; 
+                $rates = $this->input->post('rate') ?? [];
                 $amounts = $this->input->post('amount') ?? [];
 
-                foreach ($selected_idxs as $fld => $idx) {
+                foreach ($selected_idxs as $idx => $value) {
                     //if($tender_quotation_item_ids[$idx]){  
                     $item_data = [
                         'vendor_quote_id' => $vendor_quote_id,
@@ -2452,12 +2425,12 @@ class Vendor extends CI_Controller
                         'uom' => $uoms[$idx] ?? '',
                         'qty' => $qtys[$idx] ?? 0,
                         'gst' => $gsts[$idx] ?? 0,
-                        'rate' => $rates[$idx] ?? 0, 
+                        'rate' => $rates[$idx] ?? 0,
                         'amount' => $amounts[$idx] ?? 0,
                         'status' => 'Active',
                         'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                         'created_date' => date('Y-m-d H:i:s')
-                    ]; 
+                    ];
 
                     if (!empty($vendor_quote_item_ids[$idx]) && $vendor_quote_item_ids[$idx] > 0) {
                         // UPDATE existing item
