@@ -44,8 +44,8 @@
 
 
                         <div class="form-group col-md-3">
-                            <label for="srch_tender_enquiry_id">Customer <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_tender_enquiry_id', $tender_enquiry_opt, set_value('srch_tender_enquiry_id', $header['tender_enquiry_id']), 'id="srch_tender_enquiry_id" class="form-control"'); ?>
+                            <label for="srch_tender_enquiry_id">Tender Enquiry No <span style="color:red;">*</span></label>
+                            <?php echo form_dropdown('srch_tender_enquiry_id', $tender_enquiry_opt, set_value('srch_tender_enquiry_id', $header['tender_enquiry_id']), 'id="srch_tender_enquiry_id" class="form-control readonly" readonly'); ?>
 
                         </div>
 
@@ -200,7 +200,7 @@
             </div>
 
             <div class="box-footer text-right">
-                <a href="<?php echo site_url('customer-tender-po-list'); ?>" class="btn btn-default"><i
+                <a href="<?php echo site_url('tender-invoice-list'); ?>" class="btn btn-default"><i
                         class="fa fa-arrow-left"></i> Back To List</a>
                 <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
             </div>
@@ -209,6 +209,11 @@
 </section>
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
+<style>
+   .readonly  { 
+         pointer-events: none;
+    }
+</style>
 <script>
     $(document).ready(function () {
 
@@ -274,7 +279,7 @@
             });
 
             // ---- Load currency ----
-            $.ajax({
+           /* $.ajax({
                 url: "<?php echo site_url('tender/get_tender_po_currency_id'); ?>",
                 type: "POST",
                 data: { tender_po_id: tender_po_id },
@@ -284,7 +289,7 @@
                         $("#currency_id").val(res[0].currency_id).trigger("change");
                     }
                 }
-            });
+            });*/
 
         });
 
