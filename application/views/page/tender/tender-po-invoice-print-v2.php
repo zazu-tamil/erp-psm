@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<?php
+// echo "<pre>";
+// print_r($dc_list_info);
+// echo "</pre>";
+?>
 <html>
 
 <head>
@@ -29,23 +34,23 @@
         }
 
         .header-img {
-            width: 100%;
-            margin-bottom: 15px;
+            width: 100%; 
         }
 
         .invoice-header {
             position: relative;
             text-align: center;
-            padding: 12px 0;
-            border-top: 2px solid #000;
-            border-bottom: 2px solid #000;
+            padding: 10px 0;
+            /* border-top: 2px solid #000;
+            border-bottom: 2px solid #000; */
             margin-bottom: 15px;
         }
 
         .invoice-title {
-            font-size: 18pt;
+            font-size: 24px;
             font-weight: bold;
             letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         .invoice-number {
@@ -53,7 +58,7 @@
             right: 0;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 16pt;
+            font-size: 18px;
             font-weight: bold;
         }
 
@@ -61,6 +66,7 @@
             margin-bottom: 12px;
             font-size: 9.5pt;
             line-height: 1.6;
+            margin-left: 30px;
         }
 
         .reference-line {
@@ -187,7 +193,7 @@
         }
 
         .signature-section {
-            margin-top: 60px;
+            /* margin-top: 60px; */
             text-align: right;
         }
 
@@ -199,7 +205,7 @@
 
         .signature-company {
             font-size: 10pt;
-            margin-bottom: 50px;
+            /* margin-bottom: 50px; */
         }
 
         .signature-line {
@@ -318,64 +324,101 @@
 <body>
     <?php
     // Function to convert number to words in Bahraini Dinar format
-    function convertAmountToWords($amount, $currency = 'BHD', $decimal_point = 3) {
+    function convertAmountToWords($amount, $currency = 'BHD', $decimal_point = 3)
+    {
         $ones = array(
-            '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
-            'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen',
-            'Seventeen', 'Eighteen', 'Nineteen'
+            '',
+            'One',
+            'Two',
+            'Three',
+            'Four',
+            'Five',
+            'Six',
+            'Seven',
+            'Eight',
+            'Nine',
+            'Ten',
+            'Eleven',
+            'Twelve',
+            'Thirteen',
+            'Fourteen',
+            'Fifteen',
+            'Sixteen',
+            'Seventeen',
+            'Eighteen',
+            'Nineteen'
         );
-        
+
         $tens = array(
-            '', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'
+            '',
+            '',
+            'Twenty',
+            'Thirty',
+            'Forty',
+            'Fifty',
+            'Sixty',
+            'Seventy',
+            'Eighty',
+            'Ninety'
         );
-        
+
         $hundreds = array(
-            '', 'One Hundred', 'Two Hundred', 'Three Hundred', 'Four Hundred',
-            'Five Hundred', 'Six Hundred', 'Seven Hundred', 'Eight Hundred', 'Nine Hundred'
+            '',
+            'One Hundred',
+            'Two Hundred',
+            'Three Hundred',
+            'Four Hundred',
+            'Five Hundred',
+            'Six Hundred',
+            'Seven Hundred',
+            'Eight Hundred',
+            'Nine Hundred'
         );
-        
-        function convertNumberToWords($number, $ones, $tens, $hundreds) {
-            if ($number == 0) return 'Zero';
-            
+
+        function convertNumberToWords($number, $ones, $tens, $hundreds)
+        {
+            if ($number == 0)
+                return 'Zero';
+
             $words = '';
-            
+
             if ($number >= 1000000) {
                 $millions = floor($number / 1000000);
                 $words .= convertNumberToWords($millions, $ones, $tens, $hundreds) . ' Million ';
                 $number %= 1000000;
             }
-            
+
             if ($number >= 1000) {
                 $thousands = floor($number / 1000);
                 $words .= convertNumberToWords($thousands, $ones, $tens, $hundreds) . ' Thousand ';
                 $number %= 1000;
             }
-            
+
             if ($number >= 100) {
                 $words .= $hundreds[floor($number / 100)] . ' ';
                 $number %= 100;
             }
-            
+
             if ($number >= 20) {
                 $words .= $tens[floor($number / 10)] . ' ';
                 $number %= 10;
             }
-            
+
             if ($number > 0) {
                 $words .= $ones[$number] . ' ';
             }
-            
+
             return trim($words);
         }
-        
+
         // Split amount into integer and decimal parts
         $amount = floatval($amount);
         $integer_part = floor($amount);
-        
+
         // Calculate decimal part based on decimal points
         $multiplier = pow(10, $decimal_point);
         $decimal_part = round(($amount - $integer_part) * $multiplier);
-        
+
         // Convert integer part to words
         $words = '';
         if ($integer_part > 0) {
@@ -383,12 +426,12 @@
         } else {
             $words = 'Zero';
         }
-        
+
         // Add "& Fils" for decimal part in BHD format
         if ($decimal_part > 0) {
             $words .= ' & Fils ' . $decimal_part . '/' . $multiplier;
         }
-        
+
         return $words;
     }
     ?>
@@ -401,14 +444,24 @@
 
         <!-- Invoice Title & Number -->
         <div class="invoice-header">
-            <div class="invoice-title">TAX INVOICE</div>
-            <div class="invoice-number">No: <?php echo htmlspecialchars($record['invoice_no'] ?? 'N/A'); ?></div>
-        </div>
+            <?php if ($record['vat_payer_sales_grp'] == 'Exports (Line 5 of the VAT Return)') { ?>
+                <div class="invoice-title">Exports INVOICE</div>
+                <div class="invoice-number">No:
+                    <?php echo htmlspecialchars($record['invoice_no'] ?? 'N/A'); ?>
+                </div>
+            <?php } else { ?>
+                <div class="invoice-title">TAX INVOICE</div>
+                <div class="invoice-number">No:
+                    <?php echo htmlspecialchars($record['invoice_no'] ?? 'N/A'); ?>
+                </div>
+            <?php } ?>
+        </div> 
 
-        <!-- Reference Information -->
+
         <div class="reference-section">
             <div class="reference-line">
-                <span class="label-bold">Your P.O. No:</span> <?php echo htmlspecialchars($record['our_po_no'] ?? 'N/A'); ?>,
+                <span class="label-bold">Your P.O. No:</span>
+                <?php echo htmlspecialchars($record['our_po_no'] ?? 'N/A'); ?>,
                 <span class="label-bold">Dated:</span>
                 <?php echo date('d-m-Y', strtotime($record['po_date'] ?? 'N/A')); ?>
                 <span style="float: right;">
@@ -416,11 +469,19 @@
                     <?php echo date('d-m-Y', strtotime($record['invoice_date'] ?? 'N/A')); ?>
                 </span>
             </div>
-            <div class="reference-line">
-                <span class="label-bold">Our D. N. No:</span>
-                <?php echo htmlspecialchars($record['dc_no'] ?? 'N/A'); ?>,
-                <span class="label-bold">Dated:</span> <?php echo date('d-m-Y', strtotime($record['dc_date'] ?? 'N/A')); ?>.
-            </div>
+
+            <?php if (!empty($dc_list_info)) { ?>
+                <?php foreach ($dc_list_info as $dc_info) { ?>
+                    <div class="reference-line">
+                        <span class="label-bold">Our D. N. No:</span>
+                        <?php echo htmlspecialchars($dc_info['dc_no'] ?? 'N/A'); ?>,
+                        <span class="label-bold">Dated:</span>
+                        <?php echo date('d-m-Y', strtotime($dc_info['dc_date'] ?? 'N/A')); ?>.
+                    </div>
+                <?php } ?>
+            <?php } else { ?>
+                <div class="text-center">N/A</div>
+            <?php } ?>
         </div>
 
         <!-- Customer Information -->
@@ -440,20 +501,20 @@
 
         <!-- Currency Badge -->
         <?php
-        $decimal_point = isset($record['decimal_point']) ? intval($record['decimal_point']) : 3;
-        $currency_code = $record['currency_code'] ?? 'BHD';
+            $decimal_point = isset($record['decimal_point']) ? intval($record['decimal_point']) : 3;
+            $currency_code = $record['currency_code'] ?? 'BHD';
 
-        // Calculate totals
-        $subtotal = 0;
-        $total_vat = 0;
-        if (!empty($item_list)) {
-            foreach ($item_list as $item) {
-                $subtotal += floatval($item['Net_amount'] ?? 0);
-                $vat_amount = (floatval($item['Net_amount'] ?? 0) * floatval($item['gst'] ?? 0)) / 100;
-                $total_vat += $vat_amount;
+            // Calculate totals
+            $subtotal = 0;
+            $total_vat = 0;
+            if (!empty($item_list)) {
+                foreach ($item_list as $item) {
+                    $subtotal += floatval($item['Net_amount'] ?? 0);
+                    $vat_amount = (floatval($item['Net_amount'] ?? 0) * floatval($item['gst'] ?? 0)) / 100;
+                    $total_vat += $vat_amount;
+                }
             }
-        }
-        $grand_total_amount = $subtotal + $total_vat;
+            $grand_total_amount = $subtotal + $total_vat;
         ?>
         <div class="currency-badge">
             <span>Currency: <?php echo htmlspecialchars($currency_code); ?></span>
@@ -463,15 +524,16 @@
         <table class="items-table">
             <thead>
                 <tr>
-                    <th style="width:6%;">Item<br>No.</th>
-                    <th style="width:40%;">Description</th>
-                    <th style="width:8%;">Qty</th>
-                    <th style="width:8%;">Unit</th>
-                    <th style="width:12%;">Unit<br>Rate</th>
-                    <th style="width:13%;">Net Price</th>
-                    <th style="width:10%;">VAT<br>%</th>
+                    <th style="width:6%; text-align:center;">Item<br>No.</th>
+                    <th style="width:40%; text-align:left;">Description</th>
+                    <th style="width:5%; text-align:center;">Qty</th>
+                    <th style="width:5%; text-align:center;">Unit</th>
+                    <th style="width:10%; text-align:right;">Unit<br>Rate</th>
+                    <th style="width:10%; text-align:right;">Net Price</th>
+                    <th style="width:7%; text-align:center;">VAT<br>%</th>
                 </tr>
             </thead>
+
             <tbody>
                 <?php
                 $total_net_amount = 0;
@@ -516,7 +578,7 @@
                                 <?php echo number_format($vat_percentage, 2); ?>
                             </td>
                         </tr>
-                    <?php
+                        <?php
                     endforeach;
                     $grand_total = $total_net_amount + $total_vat_amount;
                 else:
@@ -535,21 +597,25 @@
                             <div class="bank-details-section">
                                 <div class="bank-details-title">OUR BANK ACCOUNT DETAILS</div>
                                 <?php if (!empty($bank_details['account_name'])): ?>
-                                    <div><strong>ACCOUNT NAME:</strong> <?php echo htmlspecialchars($bank_details['account_name']); ?>
+                                    <div><strong>ACCOUNT NAME:</strong>
+                                        <?php echo htmlspecialchars($bank_details['account_name']); ?>
                                     </div>
                                 <?php endif; ?>
                                 <?php if (!empty($bank_details['bank_name'])): ?>
-                                    <div><strong>BANK NAME:</strong> <?php echo htmlspecialchars($bank_details['bank_name']); ?></div>
+                                    <div><strong>BANK NAME:</strong> <?php echo htmlspecialchars($bank_details['bank_name']); ?>
+                                    </div>
                                 <?php endif; ?>
                                 <?php if (!empty($bank_details['account_number'])): ?>
                                     <div><strong>ACCOUNT NO.:</strong>
                                         <?php echo htmlspecialchars($bank_details['account_number']); ?></div>
                                 <?php endif; ?>
                                 <?php if (!empty($bank_details['iban_no'])): ?>
-                                    <div><strong>IBAN NO:</strong> <?php echo htmlspecialchars($bank_details['iban_no']); ?></div>
+                                    <div><strong>IBAN NO:</strong> <?php echo htmlspecialchars($bank_details['iban_no']); ?>
+                                    </div>
                                 <?php endif; ?>
                                 <?php if (!empty($bank_details['swift_code'])): ?>
-                                    <div><strong>SWIFT/BIC:</strong> <?php echo htmlspecialchars($bank_details['swift_code']); ?>
+                                    <div><strong>SWIFT/BIC:</strong>
+                                        <?php echo htmlspecialchars($bank_details['swift_code']); ?>
                                     </div>
                                 <?php endif; ?>
                             </div>
@@ -589,11 +655,13 @@
                             <strong><?php echo number_format($total_vat_amount, $decimal_point); ?></strong>
                         </td>
                     </tr>
-                    <tr style="background: #000; color: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                    <tr
+                        style="background: #000; color: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                         <td colspan="5" class="text-right" style="padding: 12px; border: 1px solid #000; font-size: 11pt;">
                             <strong>TOTAL <?php echo htmlspecialchars($currency_code); ?></strong>
                         </td>
-                        <td colspan="2" class="text-right" style="padding: 12px; border: 1px solid #000; font-size: 11pt; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                        <td colspan="2" class="text-right"
+                            style="padding: 12px; border: 1px solid #000; font-size: 11pt; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                             <strong><?php echo number_format($grand_total, $decimal_point); ?></strong>
                         </td>
                     </tr>
@@ -602,12 +670,12 @@
         </table>
 
         <!-- Total in Words - Enhanced Display -->
-        <?php 
+        <?php
         // Generate amount in words
         $amount_in_words = convertAmountToWords($grand_total, $currency_code, $decimal_point);
         ?>
         <div class="amount-in-words">
-            <strong>Total <?php echo htmlspecialchars($currency_code); ?>:</strong> 
+            <strong>Total <?php echo htmlspecialchars($currency_code); ?>:</strong>
             <?php echo $amount_in_words; ?> Only.
         </div>
 
@@ -638,8 +706,8 @@
                 <div class="signature-company">
                     For
                     <?php echo htmlspecialchars($record['our_company'] ?? $record['company_name'] ?? 'Our Company'); ?>
-                </div> 
-             </div>
+                </div>
+            </div>
         </div>
     </div>
 

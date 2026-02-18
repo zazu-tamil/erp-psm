@@ -1826,8 +1826,10 @@ class Tender extends CI_Controller
             c.country AS customer_country,
             ci.company_name AS our_company,
             te.enquiry_no AS tender_enquiry_no,
+            te.enquiry_date AS tender_enquiry_date,
             tqi.quotation_no as tender_quotation_no,
             ci.ltr_header_img,
+            curr.currency_code,
             curr.decimal_point
         FROM
             tender_quotation_info tqi
@@ -1850,56 +1852,23 @@ class Tender extends CI_Controller
 
         // === ITEMS WITH RATE CALCULATION ===
         $sql = "
-            SELECT 
-                tqii.*,
-                cat.category_name,
-                item.item_name,
-                item.item_description,
-                item.item_code,
-                item.uom AS item_uom
-            FROM tender_quotation_item_info tqii
-            LEFT JOIN category_info cat ON tqii.category_id = cat.category_id
-            LEFT JOIN item_info item ON tqii.item_id = item.item_id
-            WHERE tqii.tender_quotation_id = ? 
-            AND tqii.status IN ('Active', 'Inactive')
-            ORDER BY tqii.tender_quotation_item_id
+           select
+            a.tender_quotation_id,
+            b.item_code,
+            b.item_desc,
+            b.uom,
+            b.qty,
+            b.rate,
+            b.gst,
+            b.amount,
+            (b.rate * b.qty) AS Net_amount
+            from tender_quotation_info as a  
+            left join tender_quotation_item_info as b on a.tender_quotation_id = b.tender_quotation_id and a.`status`='Active'
+            where a.`status`='Active'
+            and a.tender_quotation_id = ?
         ";
         $query = $this->db->query($sql, [$tender_quotation_id]);
-        $items = $query->result_array();
-
-        $data['items'] = [];
-        $gst_summary = [];
-
-        foreach ($items as $item) {
-            $qty = floatval($item['qty']);
-            $gst = floatval($item['gst']);
-            $amount = floatval($item['amount']);
-            $rate = floatval($item['rate']);
-
-
-            // === GST Amount ===
-            $gst_amount = $amount - ($qty * $rate);
-
-            // === Store in item ===
-            $item['rate'] = $rate;
-            $item['gst_amount'] = $gst_amount;
-            $item['base_amount'] = $qty * $rate;
-
-            $data['items'][] = $item;
-
-            // === GST Summary ===
-            $gst_key = number_format($gst, 2);
-            if (!isset($gst_summary[$gst_key])) {
-                $gst_summary[$gst_key] = ['gst' => $gst, 'base' => 0, 'gst_amount' => 0];
-            }
-            $gst_summary[$gst_key]['base'] += $qty * $rate;
-            $gst_summary[$gst_key]['gst_amount'] += $gst_amount;
-        }
-
-        $data['gst_summary'] = $gst_summary;
-        $data['grand_total'] = array_sum(array_column($data['items'], 'base_amount'));
-        $data['total_gst'] = array_sum(array_column($data['items'], 'gst_amount'));
-        $data['final_total'] = $data['grand_total'] + $data['total_gst'];
+        $data['item_list'] = $query->result_array();
 
         $this->load->view('page/tender/tender-quotation-print', $data);
     }
@@ -3304,17 +3273,16 @@ class Tender extends CI_Controller
             d.ltr_header_img,
             a.invoice_date,
             b.our_po_no,
-            b.po_date,
-            c.dc_no,
-            c.dc_date,
+            a.vat_payer_sales_grp,
+            b.po_date,  
             d.company_name,
             e.customer_name,
             e.country,
             e.address,
+            f.currency_code,
             f.decimal_point
             from tender_enq_invoice_info  as a
-            left join customer_tender_po_info as b on a.tender_po_id = b.tender_po_id and b.`status`='Active'
-            left join tender_dc_info as c on  a.tender_po_id = c.tender_po_id and c.`status`='Active'
+            left join customer_tender_po_info as b on a.tender_po_id = b.tender_po_id and b.`status`='Active' 
             left join company_info as d on a.company_id = d.company_id and d.status='Active'
             left join customer_info as e on a.customer_id = e.customer_id and e.`status`='Active'
             left join currencies_info as f on a.currency_id = f.currency_id and f.`status`='Active'
@@ -3324,6 +3292,20 @@ class Tender extends CI_Controller
         ";
         $query = $this->db->query($sql, [$tender_enq_invoice_id]);
         $data['record'] = $query->row_array();
+
+        $sql = "
+            select
+            a.tender_enq_invoice_id, 
+            DATE_FORMAT(d.dc_date, '%d-%m-%Y') AS dc_date ,
+            d.dc_no
+            from tender_enq_invoice_info  as a 
+            LEFT JOIN tender_dc_info AS d ON FIND_IN_SET(d.tender_dc_id, a.tender_dc_id) and d.`status`='Active'  
+            where a.`status` ='Active'  
+            and a.tender_enq_invoice_id = ?
+            order by a.tender_enq_invoice_id asc, d.tender_dc_id asc            
+        ";
+        $query = $this->db->query($sql, [$tender_enq_invoice_id]);
+        $data['dc_list_info'] = $query->result_array();
 
         if (!$data['record']) {
             show_404();
