@@ -5,10 +5,9 @@
 // echo "</pre>";
 ?>
 <html>
-
 <head>
     <meta charset="UTF-8">
-    <title>Tax Invoice - <?php echo htmlspecialchars($record['invoice_no'] ?? ''); ?></title>
+    <title>Quotation - <?php echo htmlspecialchars($record['tender_quotation_no'] ?? ''); ?></title>
     <style>
         * {
             margin: 0;
@@ -35,14 +34,13 @@
 
         .header-img {
             width: 100%;
+            margin-bottom: 10px;
         }
 
         .invoice-header {
             position: relative;
             text-align: center;
             padding: 10px 0;
-            /* border-top: 2px solid #000;
-            border-bottom: 2px solid #000; */
             margin-bottom: 15px;
         }
 
@@ -66,7 +64,6 @@
             margin-bottom: 12px;
             font-size: 9.5pt;
             line-height: 1.6;
-            /* margin-left: 30px; */
         }
 
         .reference-line {
@@ -131,10 +128,6 @@
             font-size: 9pt;
         }
 
-        .items-table tbody tr {
-            background: #fff;
-        }
-
         .item-description {
             font-size: 8.5pt;
             line-height: 1.4;
@@ -151,12 +144,6 @@
             border: 1px solid #000;
             font-size: 8.5pt;
             line-height: 1.5;
-        }
-
-        .bank-details-title {
-            font-weight: bold;
-            margin-bottom: 5px;
-            text-decoration: underline;
         }
 
         .summary-row {
@@ -193,7 +180,7 @@
         }
 
         .signature-section {
-            /* margin-top: 60px; */
+            margin-top: 40px;
             text-align: right;
         }
 
@@ -205,25 +192,17 @@
 
         .signature-company {
             font-size: 10pt;
-            /* margin-bottom: 50px; */
         }
 
         .signature-line {
             border-top: 1px solid #000;
             margin: 5px 0;
+            width: 250px;
         }
 
-        .text-center {
-            text-align: center;
-        }
-
-        .text-right {
-            text-align: right;
-        }
-
-        .text-left {
-            text-align: left;
-        }
+        .text-center { text-align: center; }
+        .text-right   { text-align: right; }
+        .text-left    { text-align: left; }
 
         .button-container {
             text-align: center;
@@ -250,26 +229,21 @@
             color: #fff;
         }
 
-        .btn-primary:hover {
-            background: #0052a3;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-
+        .btn-primary:hover { background: #0052a3; }
         .btn-success {
             background: #28a745;
             color: #fff;
         }
 
-        .btn-success:hover {
-            background: #218838;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
+        .btn-success:hover { background: #218838; }
+
+        /* ──────────────────────────────────────────────── */
+        /*               PRINT-SPECIFIC FIXES               */
+        /* ──────────────────────────────────────────────── */
 
         @page {
             size: A4;
-            margin: 0;
+            margin: 10mm;
         }
 
         @media print {
@@ -287,181 +261,147 @@
             }
 
             .button-container {
-                display: none;
+                display: none !important;
             }
 
+            /* Repeat table header on every page */
+            thead {
+                display: table-header-group !important;
+            }
+
+            /* Prevent row from breaking inside */
+            tr {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                orphans: 2;
+                widows: 2;
+            }
+
+            /* Extra protection for cells with long content */
+            td, th {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            /* Protect description block */
+            .item-description {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            /* Keep totals, amount in words, payment terms, signature together */
+            .amount-in-words,
+            .payment-terms,
+            .signature-section,
+            tr:last-child {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                break-before: auto;
+            }
+
+            /* Force better color fidelity */
             .items-table thead {
                 background: #d9e2f3 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
 
-            .summary-row:last-child {
+            tr[style*="background: #000"],
+            .summary-row:last-child,
+            tr.grand-total-row {
                 background: #000 !important;
                 color: #fff !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
 
             .currency-badge span {
                 background: #000 !important;
                 color: #fff !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact !important;
             }
         }
 
-        .label-bold {
-            font-weight: bold;
-        }
-
-        .inline-label {
-            display: inline;
-        }
+        .label-bold { font-weight: bold; }
     </style>
 </head>
 
 <body>
+
     <?php
-    // Function to convert number to words in Bahraini Dinar format
+    // Function to convert number to words (BHD style with Fils)
     function convertAmountToWords($amount, $currency = 'BHD', $decimal_point = 3)
     {
-        $ones = array(
-            '',
-            'One',
-            'Two',
-            'Three',
-            'Four',
-            'Five',
-            'Six',
-            'Seven',
-            'Eight',
-            'Nine',
-            'Ten',
-            'Eleven',
-            'Twelve',
-            'Thirteen',
-            'Fourteen',
-            'Fifteen',
-            'Sixteen',
-            'Seventeen',
-            'Eighteen',
-            'Nineteen'
-        );
+        $ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
+                 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+        $tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+        $hundreds = ['', 'One Hundred', 'Two Hundred', 'Three Hundred', 'Four Hundred', 'Five Hundred',
+                     'Six Hundred', 'Seven Hundred', 'Eight Hundred', 'Nine Hundred'];
 
-        $tens = array(
-            '',
-            '',
-            'Twenty',
-            'Thirty',
-            'Forty',
-            'Fifty',
-            'Sixty',
-            'Seventy',
-            'Eighty',
-            'Ninety'
-        );
-
-        $hundreds = array(
-            '',
-            'One Hundred',
-            'Two Hundred',
-            'Three Hundred',
-            'Four Hundred',
-            'Five Hundred',
-            'Six Hundred',
-            'Seven Hundred',
-            'Eight Hundred',
-            'Nine Hundred'
-        );
-
-        function convertNumberToWords($number, $ones, $tens, $hundreds)
-        {
-            if ($number == 0)
-                return 'Zero';
-
+        function convertNumberToWords($number, $ones, $tens, $hundreds) {
+            if ($number == 0) return 'Zero';
             $words = '';
-
             if ($number >= 1000000) {
                 $millions = floor($number / 1000000);
                 $words .= convertNumberToWords($millions, $ones, $tens, $hundreds) . ' Million ';
                 $number %= 1000000;
             }
-
             if ($number >= 1000) {
                 $thousands = floor($number / 1000);
                 $words .= convertNumberToWords($thousands, $ones, $tens, $hundreds) . ' Thousand ';
                 $number %= 1000;
             }
-
             if ($number >= 100) {
                 $words .= $hundreds[floor($number / 100)] . ' ';
                 $number %= 100;
             }
-
             if ($number >= 20) {
                 $words .= $tens[floor($number / 10)] . ' ';
                 $number %= 10;
             }
-
             if ($number > 0) {
                 $words .= $ones[$number] . ' ';
             }
-
             return trim($words);
         }
 
-        // Split amount into integer and decimal parts
         $amount = floatval($amount);
         $integer_part = floor($amount);
-
-        // Calculate decimal part based on decimal points
         $multiplier = pow(10, $decimal_point);
         $decimal_part = round(($amount - $integer_part) * $multiplier);
 
-        // Convert integer part to words
-        $words = '';
-        if ($integer_part > 0) {
-            $words = convertNumberToWords($integer_part, $ones, $tens, $hundreds);
-        } else {
-            $words = 'Zero';
-        }
+        $words = $integer_part > 0 ? convertNumberToWords($integer_part, $ones, $tens, $hundreds) : 'Zero';
 
-        // Add "& Fils" for decimal part in BHD format
         if ($decimal_part > 0) {
             $words .= ' & Fils ' . $decimal_part . '/' . $multiplier;
         }
 
-        return $words;
+        return $words . ' Only.';
     }
     ?>
 
     <div class="page">
+
         <!-- Header Image -->
         <?php if (!empty($record['ltr_header_img'])): ?>
-            <img src="<?php echo base_url('') . $record['ltr_header_img']; ?>" alt="Company Header" class="header-img">
+            <img src="<?php echo base_url('') . $record['ltr_header_img']; ?>" alt="Company Header" class="header-img ">
         <?php endif; ?>
 
         <!-- Invoice Title & Number -->
         <div class="invoice-header">
-
             <div class="invoice-title">QUOTATION</div>
-            <div class="invoice-number">No:
-                <?php echo htmlspecialchars($record['tender_quotation_no'] ?? 'N/A'); ?>
+            <div class="invoice-number">No: <?php echo htmlspecialchars($record['tender_quotation_no'] ?? 'N/A'); ?></div>
+        </div>
+
+        <!-- Reference -->
+        <div class="reference-section">
+            <div class="reference-line">
+                <span class="label-bold">Tender Ref No:</span> <?php echo $record['tender_ref_no'] ?? 'N/A'; ?>,
+                <span class="label-bold">Dated:</span> <?php echo date('d-m-Y', strtotime($record['tender_enquiry_date'] ?? 'now')); ?>
             </div>
         </div>
 
-        <!-- Reference Information -->
-        <div class="reference-section">
-            <div class="reference-line">
-                <span class="label-bold">Tender Ref No:</span>
-                <?php echo $record['tender_ref_no'] ?? 'N/A'; ?>,
-                <span class="label-bold">Dated:</span>
-                <?php echo date('d-m-Y', strtotime($record['tender_enquiry_date'] ?? 'N/A')); ?> 
-            </div> 
-        </div>
-
-        <!-- Customer Information -->
+        <!-- Customer -->
         <div class="customer-section">
             <div class="customer-label">To,</div>
             <div class="customer-address">
@@ -476,22 +416,24 @@
             </div>
         </div>
 
-        <!-- Currency Badge -->
+        <!-- Currency -->
         <?php
         $decimal_point = isset($record['decimal_point']) ? intval($record['decimal_point']) : 3;
         $currency_code = $record['currency_code'] ?? 'BHD';
 
-        // Calculate totals
-        $subtotal = 0;
-        $total_vat = 0;
+        $total_net_amount = 0;
+        $total_vat_amount = 0;
+
         if (!empty($item_list)) {
             foreach ($item_list as $item) {
-                $subtotal += floatval($item['Net_amount'] ?? 0);
-                $vat_amount = (floatval($item['Net_amount'] ?? 0) * floatval($item['gst'] ?? 0)) / 100;
-                $total_vat += $vat_amount;
+                $net = floatval($item['Net_amount'] ?? 0);
+                $vat_rate = floatval($item['gst'] ?? 0);
+                $vat = $net * $vat_rate / 100;
+                $total_net_amount += $net;
+                $total_vat_amount += $vat;
             }
         }
-        $grand_total_amount = $subtotal + $total_vat;
+        $grand_total = $total_net_amount + $total_vat_amount;
         ?>
         <div class="currency-badge">
             <span>Currency: <?php echo htmlspecialchars($currency_code); ?></span>
@@ -501,36 +443,21 @@
         <table class="items-table">
             <thead>
                 <tr>
-                    <th style="width:6%; text-align:center;">Item<br>No.</th>
+                    <th style="width:6%;">Item<br>No.</th>
                     <th style="width:40%; text-align:left;">Description</th>
-                    <th style="width:5%; text-align:center;">Qty</th>
-                    <th style="width:5%; text-align:center;">Unit</th>
+                    <th style="width:5%;">Qty</th>
+                    <th style="width:5%;">Unit</th>
                     <th style="width:10%; text-align:right;">Unit<br>Rate</th>
                     <th style="width:10%; text-align:right;">Net Price</th>
-                    <th style="width:7%; text-align:center;">VAT<br>%</th>
+                    <th style="width:7%;">VAT<br>%</th>
                 </tr>
             </thead>
-
             <tbody>
-                <?php
-                $total_net_amount = 0;
-                $total_vat_amount = 0;
-                $grand_total = 0;
-                $vat_percentage = 0;
-
-                // echo '<pre>';
-                // print_r($item_list);
-                // echo '</pre>';
-
-                if (!empty($item_list)):
-                    foreach ($item_list as $i => $item):
-                        $net_amount = $item['Net_amount'] ?? 0;
+                <?php if (!empty($item_list)): ?>
+                    <?php foreach ($item_list as $i => $item):
+                        $net_amount = floatval($item['Net_amount'] ?? 0);
                         $vat_percentage = floatval($item['gst'] ?? 0);
-                        $vat_amount = ($net_amount * $vat_percentage) / 100;
-
-                        $total_net_amount += $net_amount;
-                        $total_vat_amount += $vat_amount;
-                        ?>
+                    ?>
                         <tr>
                             <td class="text-center"><?php echo $i + 1; ?></td>
                             <td class="text-left">
@@ -538,95 +465,64 @@
                                     <?php if (!empty($item['item_code'])): ?>
                                         <div class="item-code"><?php echo htmlspecialchars($item['item_code']); ?></div>
                                     <?php endif; ?>
-                                    <?php if (!empty($item['item_desc'])): ?>
-                                        <?php echo htmlspecialchars($item['item_desc']); ?>
-                                    <?php endif; ?>
+                                    <?php echo htmlspecialchars($item['item_desc'] ?? ''); ?>
                                 </div>
                             </td>
-                            <td class="text-center">
-                                <?php echo number_format($item['qty'] ?? 0, 0); ?>
-                            </td>
-                            <td class="text-center">
-                                <?php echo htmlspecialchars($item['uom'] ?? '-'); ?>
-                            </td>
-                            <td class="text-right">
-                                <?php echo number_format($item['rate'] ?? 0, $decimal_point); ?>
-                            </td>
-                            <td class="text-right">
-                                <?php echo number_format($net_amount, $decimal_point); ?>
-                            </td>
-                            <td class="text-center">
-                                <?php echo number_format($vat_percentage, 2); ?>
-                            </td>
+                            <td class="text-center"><?php echo number_format($item['qty'] ?? 0, 0); ?></td>
+                            <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?? '-'); ?></td>
+                            <td class="text-right"><?php echo number_format($item['rate'] ?? 0, $decimal_point); ?></td>
+                            <td class="text-right"><?php echo number_format($net_amount, $decimal_point); ?></td>
+                            <td class="text-center"><?php echo number_format($vat_percentage, 2); ?></td>
                         </tr>
-                        <?php
-                    endforeach;
-                    $grand_total = $total_net_amount + $total_vat_amount;
-                else:
-                    ?>
+                    <?php endforeach; ?>
+                <?php else: ?>
                     <tr>
-                        <td colspan="7" class="text-center" style="padding:30px; color:#999;">
-                            No items found
-                        </td>
+                        <td colspan="7" class="text-center" style="padding:30px; color:#999;">No items found</td>
                     </tr>
                 <?php endif; ?>
+
+                <!-- Summary rows -->
                 <tr>
-                    <td colspan="5" class="text-right" style="padding: 10px; border: 1px solid #000;">
-                        <strong>TOTAL EXCL. VAT</strong>
-                    </td>
-                    <td colspan="2" class="text-right" style="padding: 10px; border: 1px solid #000;">
-                        <strong><?php echo number_format($total_net_amount, $decimal_point); ?></strong>
-                    </td>
+                    <td colspan="5" class="text-right"><strong>TOTAL EXCL. VAT</strong></td>
+                    <td colspan="2" class="text-right"><strong><?php echo number_format($total_net_amount, $decimal_point); ?></strong></td>
                 </tr>
                 <tr>
-                    <td colspan="5" class="text-right" style="padding: 10px; border: 1px solid #000;">
-                        <strong>VAT <?php echo number_format($vat_percentage ?? 0, 0); ?>%</strong>
-                    </td>
-                    <td colspan="2" class="text-right" style="padding: 10px; border: 1px solid #000;">
-                        <strong><?php echo number_format($total_vat_amount, $decimal_point); ?></strong>
-                    </td>
+                    <td colspan="5" class="text-right"><strong>VAT <?php echo number_format($vat_percentage ?? 0, 0); ?>%</strong></td>
+                    <td colspan="2" class="text-right"><strong><?php echo number_format($total_vat_amount, $decimal_point); ?></strong></td>
                 </tr>
-                <tr
-                    style="background: #000; color: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
-                    <td colspan="5" class="text-right" style="padding: 12px; border: 1px solid #000; font-size: 11pt;">
-                        <strong>TOTAL <?php echo htmlspecialchars($currency_code); ?></strong>
-                    </td>
-                    <td colspan="2" class="text-right"
-                        style="padding: 12px; border: 1px solid #000; font-size: 11pt; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
-                        <strong><?php echo number_format($grand_total, $decimal_point); ?></strong>
-                    </td>
+                <tr style="background:#000; color:#fff;">
+                    <td colspan="5" class="text-right"><strong>TOTAL <?php echo htmlspecialchars($currency_code); ?></strong></td>
+                    <td colspan="2" class="text-right"><strong><?php echo number_format($grand_total, $decimal_point); ?></strong></td>
                 </tr>
             </tbody>
         </table>
 
-        <!-- Total in Words - Enhanced Display -->
-        <?php
-        // Generate amount in words
-        $amount_in_words = convertAmountToWords($grand_total, $currency_code, $decimal_point);
-        ?>
+        <!-- Amount in Words -->
+        <?php $amount_in_words = convertAmountToWords($grand_total, $currency_code, $decimal_point); ?>
         <div class="amount-in-words">
-            <strong>Total <?php echo htmlspecialchars($currency_code); ?>:</strong>
-            <?php echo $amount_in_words; ?> Only.
+            <strong>Total <?php echo htmlspecialchars($currency_code); ?>:</strong><br>
+            <?php echo $amount_in_words; ?>
         </div>
 
         <!-- Payment Terms -->
-        <div class="payment-terms">
+        <!-- <div class="payment-terms">
             Payment: Within 30 days from the above date.
-        </div>
+        </div> -->
+        <p>&nbsp;</p>
 
-        <!-- Notes/Remarks -->
+        <!-- Notes -->
         <?php if (!empty($record['remarks'])): ?>
-            <div style="margin: 15px 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #000;">
-                <div style="font-weight: bold; margin-bottom: 5px;">Notes:</div>
-                <div style="font-size: 9pt;"><?php echo nl2br(htmlspecialchars($record['remarks'])); ?></div>
+            <div style="margin:15px 0; padding:10px; background:#f9f9f9; border-left:3px solid #000; page-break-inside: avoid; break-inside: avoid;">
+                <div style="font-weight:bold; margin-bottom:5px;">Notes:</div>
+                <?php echo nl2br($record['remarks']); ?>
             </div>
         <?php endif; ?>
 
         <!-- Terms & Conditions -->
         <?php if (!empty($record['terms'])): ?>
-            <div style="margin: 15px 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #000;">
-                <div style="font-weight: bold; margin-bottom: 5px;">Terms & Conditions:</div>
-                <div style="font-size: 9pt;"><?php echo nl2br(htmlspecialchars($record['terms'])); ?></div>
+            <div style="margin:15px 0; padding:10px; background:#f9f9f9; border-left:3px solid #000;page-break-inside: avoid; break-inside: avoid;">
+                <div style="font-weight:bold; margin-bottom:5px;">Terms & Conditions:</div>
+                <?php echo nl2br($record['terms']); ?>
             </div>
         <?php endif; ?>
 
@@ -634,17 +530,17 @@
         <div class="signature-section">
             <div class="signature-box">
                 <div class="signature-company">
-                    For
-                    <?php echo htmlspecialchars($record['our_company'] ?? $record['company_name'] ?? 'Our Company'); ?>
+                    For <?php echo htmlspecialchars($record['our_company'] ?? $record['company_name'] ?? 'Our Company'); ?>
                 </div>
+                <div class="signature-line"></div>
             </div>
         </div>
+
     </div>
 
-    <!-- Action Buttons -->
+    <!-- Buttons (screen only) -->
     <div class="button-container">
-        <button type="button" class="btn btn-primary"
-            onclick="window.location.href='<?= site_url('tender-quotation-list') ?>'">
+        <button type="button" class="btn btn-primary" onclick="window.location.href='<?= site_url('tender-quotation-list') ?>'">
             ← Back To List
         </button>
         <button type="button" class="btn btn-success" onclick="window.print()">
@@ -653,5 +549,4 @@
     </div>
 
 </body>
-
 </html>
