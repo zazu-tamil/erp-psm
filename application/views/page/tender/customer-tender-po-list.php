@@ -163,7 +163,7 @@
 
                                 <!-- DELETE -->
                                 <td class="text-center">
-                                    <button value="<?php echo $row['tender_po_id']; ?>" class="del_po btn btn-danger btn-xs"
+                                    <button value="<?php echo $row['tender_po_id']; ?>" class="del_record btn btn-danger btn-xs"
                                         title="Delete">
                                         <i class="fa fa-trash"></i>
                                     </button>

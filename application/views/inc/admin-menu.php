@@ -546,11 +546,11 @@ class="treeview <?= in_array($this->uri->segment(1), ['cash-ledger', 'cash-in-st
                 <li class="<?= ($current_page === 'gst-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('gst-list') ?>"><i class="fa fa-percent"></i> VAT List</a>
                 </li> -->
-                <li class="<?= ($this->uri->segment(1) == 'vat-filing-head-list') ? 'active' : '' ?>">
+                <!-- <li class="<?= ($this->uri->segment(1) == 'vat-filing-head-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('vat-filing-head-list') ?>">
                         <i class="fa fa-file-text-o"></i> VAT Filing Head List
                     </a>
-                </li>
+                </li> -->
                 <li class="<?= ($current_page === 'currency-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('currency-list') ?>"><i class="fa fa-money"></i> Currency List</a>
                 </li>
@@ -617,8 +617,7 @@ class="treeview <?= in_array($this->uri->segment(1), ['cash-ledger', 'cash-in-st
             <a href="#">
                 <i class="fa fa-address-card"></i> Vendor Info
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
-            </a>
-
+            </a> 
             <ul class="treeview-menu">
                 <li class="<?= ($current_page === 'vendor-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('vendor-list') ?>"><i class="fa fa-users"></i> Vendor List</a>
