@@ -4042,11 +4042,14 @@ class Tender extends CI_Controller
                 ci.address AS company_address,
                 ci.email,
                 ci.mobile,
-                ci.ltr_header_img
+                ci.ltr_header_img,
+                po.customer_po_no as po_no,
+                date_format(po.po_date, '%d-%m-%Y') as po_date
             FROM tender_dc_info as dc
             LEFT JOIN customer_info c ON dc.customer_id = c.customer_id AND c.status = 'Active'
             LEFT JOIN company_info ci ON dc.company_id = ci.company_id AND ci.status = 'Active'
             LEFT JOIN tender_enquiry_info te ON dc.tender_enquiry_id = te.tender_enquiry_id AND te.status = 'Active'
+            left join customer_tender_po_info as po on dc.tender_po_id = po.tender_po_id and po.status='Active'
             WHERE dc.status != 'Delete'
             AND dc.tender_dc_id = ?
         ";
