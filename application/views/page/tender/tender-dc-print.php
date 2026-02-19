@@ -8,7 +8,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Quotation - <?php echo htmlspecialchars($record['tender_quotation_no'] ?? ''); ?></title>
+    <title>Delivery Challan - <?php echo htmlspecialchars($record['dc_no'] ?? ''); ?></title>
     <style>
         * {
             margin: 0;
@@ -95,8 +95,8 @@
 
         .currency-badge span {
             display: inline-block;
-            background: #000;
-            color: #fff;
+            background: #ffffff;
+            color: #000000;
             padding: 6px 15px;
             font-weight: bold;
             font-size: 10pt;
@@ -110,7 +110,7 @@
         }
 
         .items-table thead {
-            background: #d9e2f3;
+            background: #ffffff;
             border: 2px solid #000;
         }
 
@@ -140,7 +140,7 @@
         }
 
         .bank-details-section {
-            background: #f0f0f0;
+            background: #ffffff;
             padding: 8px;
             border: 1px solid #000;
             font-size: 8.5pt;
@@ -159,8 +159,8 @@
 
         .summary-row:last-child {
             border-bottom: 1px solid #000;
-            background: #000;
-            color: #fff;
+            background: #ffffff;
+            color: #000000;
             font-size: 11pt;
         }
 
@@ -328,7 +328,7 @@
 
             /* Force better color fidelity */
             .items-table thead {
-                background: #d9e2f3 !important;
+                background: #ffffff !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -336,15 +336,15 @@
             tr[style*="background: #000"],
             .summary-row:last-child,
             tr.grand-total-row {
-                background: #000 !important;
-                color: #fff !important;
+                background: #ffffff !important;
+                color: #000000 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
             .currency-badge span {
-                background: #000 !important;
-                color: #fff !important;
+                background: #ffffff !important;
+                color: #000000 !important;
                 -webkit-print-color-adjust: exact !important;
             }
         }
@@ -472,10 +472,10 @@
         <div class="customer-section">
             <div class="customer-label">To,</div>
             <div class="customer-address">
-                <strong><?php echo htmlspecialchars($record['customer_name'] ?? 'N/A'); ?></strong><br>
-                <?php echo nl2br(htmlspecialchars($record['address'] ?? 'N/A')); ?><br>
+                <strong><?php echo htmlspecialchars($record['customer_name'] ?? ''); ?></strong><br>
+                <?php echo nl2br(htmlspecialchars($record['customer_address'] ?? '')); ?><br>
                 <?php if (!empty($record['customer_country'])): ?>
-                    Country: (<?php echo htmlspecialchars($record['customer_country']); ?>)<br>
+                    Country: <?php echo htmlspecialchars($record['customer_country']); ?><br>
                 <?php endif; ?>
                 <?php if (!empty($record['vat_account_no'])): ?>
                     VAT Account. No: <?php echo htmlspecialchars($record['vat_account_no']); ?>
@@ -530,7 +530,7 @@
                         <td colspan="4" class="text-center" style="padding:30px; color:#999;">No items found</td>
                     </tr>
                 <?php endif; ?>
-                <tr style="background:#000; color:#fff;">
+                <tr style="background:#ffff; color:#000;">
                     <td colspan="3" class="text-right"><strong>TOTAL QTY</strong></td>
                     <td colspan="2" class="text-center">
                         <strong><?php echo number_format($total_qty_ordered, 0); ?></strong>
@@ -544,7 +544,7 @@
         <!-- Notes -->
         <?php if (!empty($record['remarks'])): ?>
             <div
-                style="margin:15px 0; padding:10px; background:#f9f9f9; border-left:3px solid #000; page-break-inside: avoid; break-inside: avoid;">
+                style="margin:15px 0; padding:10px; background:#f9f9f9;  page-break-inside: avoid; break-inside: avoid;">
                 <div style="font-weight:bold; margin-bottom:5px;">Notes:</div>
                 <?php echo nl2br($record['remarks']); ?>
             </div>
@@ -553,7 +553,7 @@
         <!-- Terms & Conditions -->
         <?php if (!empty($record['terms'])): ?>
             <div
-                style="margin:15px 0; padding:10px; background:#f9f9f9; border-left:3px solid #000;page-break-inside: avoid; break-inside: avoid;">
+                style="margin:15px 0; padding:10px; background:#f9f9f9; page-break-inside: avoid; break-inside: avoid;">
                 <div style="font-weight:bold; margin-bottom:5px;">Terms & Conditions:</div>
                 <?php echo nl2br($record['terms']); ?>
             </div>
@@ -597,7 +597,7 @@
     <!-- Buttons (screen only) -->
     <div class="button-container">
         <button type="button" class="btn btn-primary"
-            onclick="window.location.href='<?= site_url('tender-quotation-list') ?>'">
+            onclick="window.location.href='<?= site_url('tender-dc-list') ?>'">
             ← Back To List
         </button>
         <button type="button" class="btn btn-success" onclick="window.print()">
