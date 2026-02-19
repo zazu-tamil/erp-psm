@@ -97,8 +97,8 @@
 
         .currency-badge span {
             display: inline-block;
-            background: #000;
-            color: #fff;
+            background: #ffffff;
+            color: #000000;
             padding: 6px 15px;
             font-weight: bold;
             font-size: 10pt;
@@ -112,7 +112,7 @@
         }
 
         .items-table thead {
-            background: #d9e2f3;
+            background: #ffffff;
             border: 2px solid #000;
         }
 
@@ -146,7 +146,7 @@
         }
 
         .bank-details-section {
-            background: #f0f0f0;
+            background: #ffffff;
             padding: 8px;
             border: 1px solid #000;
             font-size: 8.5pt;
@@ -171,15 +171,15 @@
 
         .summary-row:last-child {
             border-bottom: 1px solid #000;
-            background: #000;
-            color: #fff;
+            background: #ffffff;
+            color: #000000;
             font-size: 11pt;
         }
 
         .amount-in-words {
             margin: 10px 0;
             padding: 10px;
-            background: #f9f9f9;
+            background: #ffffff;
             border: 1px solid #000;
             font-weight: bold;
             font-size: 10pt;
@@ -291,21 +291,21 @@
             }
 
             .items-table thead {
-                background: #d9e2f3 !important;
+                background: #ffffff !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
 
             .summary-row:last-child {
-                background: #000 !important;
-                color: #fff !important;
+                background: #ffffff !important;
+                color: #000000 !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
 
             .currency-badge span {
-                background: #000 !important;
-                color: #fff !important;
+                background: #ffffff !important;
+                color: #000000 !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }

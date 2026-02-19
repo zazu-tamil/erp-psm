@@ -95,8 +95,8 @@
 
         .currency-badge span {
             display: inline-block;
-            background: #000;
-            color: #fff;
+            background: #ffffff;
+            color: #000000;
             padding: 6px 15px;
             font-weight: bold;
             font-size: 10pt;
@@ -110,7 +110,7 @@
         }
 
         .items-table thead {
-            background: #d9e2f3;
+            background: #ffffff;
             border: 2px solid #000;
         }
 
@@ -159,15 +159,15 @@
 
         .summary-row:last-child {
             border-bottom: 1px solid #000;
-            background: #000;
-            color: #fff;
+            background: #ffffff;
+            color: #000000;
             font-size: 11pt;
         }
 
         .amount-in-words {
             margin: 10px 0;
             padding: 10px;
-            background: #f9f9f9;
+            background: #ffffff;
             border: 1px solid #000;
             font-weight: bold;
             font-size: 10pt;
@@ -316,7 +316,7 @@
 
             /* Force better color fidelity */
             .items-table thead {
-                background: #d9e2f3 !important;
+                background: #ffffff !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -324,15 +324,15 @@
             tr[style*="background: #000"],
             .summary-row:last-child,
             tr.grand-total-row {
-                background: #000 !important;
-                color: #fff !important;
+                background: #ffffff !important;
+                color: #000000 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
             .currency-badge span {
-                background: #000 !important;
-                color: #fff !important;
+                background: #ffffff !important;
+                color: #000000 !important;
                 -webkit-print-color-adjust: exact !important;
             }
         }
@@ -443,8 +443,8 @@
         </div>
 
         <!-- Reference -->
-        <div class="reference-section"> 
-           
+        <div class="reference-section">
+
             <div class="reference-line">
                 <span class="label-bold">Tender Ref No:</span>
                 <?php echo htmlspecialchars($record['enquiry_no'] ?? 'N/A'); ?>,
@@ -461,14 +461,16 @@
         <div class="customer-section">
             <div class="customer-label">To,</div>
             <div class="customer-address">
-                <strong><?php echo htmlspecialchars($record['customer_name'] ?? 'N/A'); ?></strong><br>
-                <?php echo nl2br(htmlspecialchars($record['address'] ?? 'N/A')); ?><br>
-                <?php if (!empty($record['customer_country'])): ?>
-                    Country: (<?php echo htmlspecialchars($record['customer_country']); ?>)<br>
+                <strong><?php echo htmlspecialchars($record['vendor_name'] ?? 'N/A'); ?></strong><br>
+                <?php echo nl2br(htmlspecialchars($record['vendor_address'] ?? 'N/A')); ?><br>
+                <?php if (!empty($record['vendor_country'])): ?>
+                    Country: <?php echo htmlspecialchars($record['vendor_country']); ?><br>
                 <?php endif; ?>
-                <?php if (!empty($record['vat_account_no'])): ?>
-                    VAT Account. No: <?php echo htmlspecialchars($record['vat_account_no']); ?>
-                <?php endif; ?>
+                <?php /*
+                    <?php if (!empty($record['vat_account_no'])): ?>
+                        VAT Account. No: <?php echo htmlspecialchars($record['vat_account_no']); ?>
+                    <?php endif; ?>
+           */ ?>
             </div>
         </div>
 
@@ -510,31 +512,31 @@
             </thead>
             <tbody>
                 <?php if (!empty($item_list)): ?>
-                    <?php foreach ($item_list as $i => $item):
-                        $net_amount = floatval($item['Net_amount'] ?? 0);
-                        $vat_percentage = floatval($item['gst'] ?? 0);
-                        ?>
-                        <tr>
-                            <td class="text-center"><?php echo $i + 1; ?></td>
-                            <td class="text-left">
-                                <div class="item-description">
-                                    <?php if (!empty($item['item_code'])): ?>
-                                        <div class="item-code"><?php echo htmlspecialchars($item['item_code']); ?></div>
-                                    <?php endif; ?>
-                                    <?php echo htmlspecialchars($item['item_desc'] ?? ''); ?>
-                                </div>
-                            </td>
-                            <td class="text-center"><?php echo number_format($item['qty'] ?? 0, 0); ?></td>
-                            <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?? '-'); ?></td>
-                            <td class="text-right"><?php echo number_format($item['rate'] ?? 0, $decimal_point); ?></td>
-                            <td class="text-right"><?php echo number_format($net_amount, $decimal_point); ?></td>
-                            <td class="text-center"><?php echo number_format($vat_percentage, 2); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
+                        <?php foreach ($item_list as $i => $item):
+                            $net_amount = floatval($item['Net_amount'] ?? 0);
+                            $vat_percentage = floatval($item['gst'] ?? 0);
+                            ?>
+                                <tr>
+                                    <td class="text-center"><?php echo $i + 1; ?></td>
+                                    <td class="text-left">
+                                        <div class="item-description">
+                                            <?php if (!empty($item['item_code'])): ?>
+                                                    <div class="item-code"><?php echo htmlspecialchars($item['item_code']); ?></div>
+                                            <?php endif; ?>
+                                            <?php echo htmlspecialchars($item['item_desc'] ?? ''); ?>
+                                        </div>
+                                    </td>
+                                    <td class="text-center"><?php echo number_format($item['qty'] ?? 0, 0); ?></td>
+                                    <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?? '-'); ?></td>
+                                    <td class="text-right"><?php echo number_format($item['rate'] ?? 0, $decimal_point); ?></td>
+                                    <td class="text-right"><?php echo number_format($net_amount, $decimal_point); ?></td>
+                                    <td class="text-center"><?php echo number_format($vat_percentage, 2); ?></td>
+                                </tr>
+                        <?php endforeach; ?>
                 <?php else: ?>
-                    <tr>
-                        <td colspan="7" class="text-center" style="padding:30px; color:#999;">No items found</td>
-                    </tr>
+                        <tr>
+                            <td colspan="7" class="text-center" style="padding:30px; color:#999;">No items found</td>
+                        </tr>
                 <?php endif; ?>
 
                 <!-- Summary rows -->
@@ -549,7 +551,7 @@
                     <td colspan="2" class="text-right">
                         <strong><?php echo number_format($total_vat_amount, $decimal_point); ?></strong></td>
                 </tr>
-                <tr style="background:#000; color:#fff;">
+                <tr style="background:#ffff; color:#000;">
                     <td colspan="5" class="text-right"><strong>TOTAL
                             <?php echo htmlspecialchars($currency_code); ?></strong></td>
                     <td colspan="2" class="text-right">
@@ -573,20 +575,20 @@
 
         <!-- Notes -->
         <?php if (!empty($record['remarks'])): ?>
-            <div
-                style="margin:15px 0; padding:10px; background:#f9f9f9; border-left:3px solid #000; page-break-inside: avoid; break-inside: avoid;">
-                <div style="font-weight:bold; margin-bottom:5px;">Notes:</div>
-                <?php echo nl2br($record['remarks']); ?>
-            </div>
+                <div
+                    style="margin:15px 0; padding:10px; background:#f9f9f9;  page-break-inside: avoid; break-inside: avoid;">
+                    <div style="font-weight:bold; margin-bottom:5px;">Notes:</div>
+                    <?php echo nl2br($record['remarks']); ?>
+                </div>
         <?php endif; ?>
 
         <!-- Terms & Conditions -->
         <?php if (!empty($record['terms'])): ?>
-            <div
-                style="margin:15px 0; padding:10px; background:#f9f9f9; border-left:3px solid #000;page-break-inside: avoid; break-inside: avoid;">
-                <div style="font-weight:bold; margin-bottom:5px;">Terms & Conditions:</div>
-                <?php echo nl2br($record['terms']); ?>
-            </div>
+                <div
+                    style="margin:15px 0; padding:10px; background:#f9f9f9; page-break-inside: avoid; break-inside: avoid;">
+                    <div style="font-weight:bold; margin-bottom:5px;">Terms & Conditions:</div>
+                    <?php echo nl2br($record['terms']); ?>
+                </div>
         <?php endif; ?>
 
         <!-- Signature -->
