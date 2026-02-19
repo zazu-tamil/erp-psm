@@ -461,7 +461,7 @@
         <div class="reference-section">
             <div class="reference-line">
                 <span class="label-bold">Your P.O. No:</span>
-                <?php echo htmlspecialchars($record['our_po_no'] ?? 'N/A'); ?>,
+                <?php echo htmlspecialchars($record['po_no'] ?? 'N/A'); ?>,
                 <span class="label-bold">Dated:</span>
                 <?php echo date('d-m-Y', strtotime($record['po_date'] ?? 'N/A')); ?>
                 <span style="float: right;">

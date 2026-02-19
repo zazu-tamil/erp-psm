@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<?php
+// echo "<pre>";
+// print_r($dc_list_info);
+// echo "</pre>";
+?>
+<html>
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delivery Challan - Gujarat Freight Tools</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+    <title>Quotation - <?php echo htmlspecialchars($record['tender_quotation_no'] ?? ''); ?></title>
     <style>
         * {
             margin: 0;
@@ -15,338 +17,592 @@
         }
 
         body {
-            font-family: "Inter", sans-serif;
-            background: #eef2f3;
-            color: #1a1a1a;
-            padding: 20px;
+            font-family: 'Arial', 'Helvetica', sans-serif;
+            font-size: 10pt;
+            line-height: 1.3;
+            color: #000;
+            background: #f5f5f5;
         }
 
-        /* -------------------------------------
-            BUTTONS 
-        ---------------------------------------*/
-        .top-buttons {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .btn {
-            padding: 10px 22px;
-            border-radius: 6px;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            margin-right: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
-        }
-
-        .btn-back {
-            background: #007bff;
-        }
-
-        .btn-print {
-            background: #28a745;
-        }
-
-        .btn:hover {
-            opacity: 0.85;
-        }
-
-        /* -------------------------------------
-            WRAPPER
-        ---------------------------------------*/
-
-
-        /* -------------------------------------
-            HEADER
-        ---------------------------------------*/
-        .header {
-            background: #ffffffff;
-            color: white;
-            padding: 25px 32px;
-            margin: 0 auto;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header img {
-
-            margin: 0 auto;
-            display: block;
-            align-items: center;
-        }
-
-        .company-info h1 {
-            font-size: 32px;
-            font-weight: 700;
-        }
-
-        .tagline {
-            opacity: 0.9;
-            font-size: 15px;
-            font-weight: 500;
-        }
-
-        .company-details {
-            margin-top: 8px;
-            font-size: 13px;
-        }
-
-        .logo {
-            width: 110px;
-            height: 110px;
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 20px auto;
+            padding: 10mm;
             background: #fff;
-            border-radius: 12px;
-            object-fit: contain;
-            padding: 8px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
-        /* TITLE BAR */
-        .title-bar {
-            background: #48459b;
-            color: white;
-            text-align: center;
-            padding: 14px;
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        /* -------------------------------------
-            INFO SECTION
-        ---------------------------------------*/
-        .info-section {
-            padding: 25px 32px;
-            display: flex;
-            gap: 50px;
-            border-bottom: 1px dashed #ccc;
-            font-size: 14px;
-        }
-
-        .info-block {
-            flex: 1;
-        }
-
-        .label {
-            width: 135px;
-            display: inline-block;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        /* -------------------------------------
-            TABLE
-        ---------------------------------------*/
-        table {
+        .header-img {
             width: 100%;
-            margin: 25px auto;
-            border-collapse: collapse;
-            font-size: 13px;
+            margin-bottom: 10px;
         }
 
-        th {
-            background: #48459b;
-            color: white;
-            padding: 12px;
-            font-size: 13px;
+        .invoice-header {
+            position: relative;
+            text-align: center;
+            padding: 10px 0;
+            margin-bottom: 15px;
+        }
+
+        .invoice-title {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            border: 1px solid #2f6e2d;
         }
 
-        td {
-            padding: 11px;
-            border: 1px solid #444;
-            vertical-align: top;
+        .invoice-number {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            font-weight: bold;
         }
 
-        tr:nth-child(even) {
-            background: #f8fff8;
+        .reference-section {
+            margin-bottom: 12px;
+            font-size: 9.5pt;
+            line-height: 1.6;
         }
 
-        .total-row {
-            background: #e6f9e6 !important;
-            font-weight: 700;
-            font-size: 14px;
+        .reference-line {
+            margin-bottom: 5px;
         }
 
-        /* -------------------------------------
-            TERMS & FOOTER
-        ---------------------------------------*/
-        .terms {
-              margin-bottom: 30px;
-
-            padding: 16px;
-            background: #fafafa;
-            border-left: 4px solid #48459b;
-            border-radius: 6px;
-            font-size: 13.5px;
+        .customer-section {
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid #000;
+            min-height: 80px;
         }
 
-        .footer {
-            padding: 40px 30px;
+        .customer-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .customer-address {
+            line-height: 1.5;
+            font-size: 9.5pt;
+        }
+
+        .currency-badge {
             text-align: right;
-            border-top: 1px solid #ddd;
+            margin: 10px 0;
+        }
+
+        .currency-badge span {
+            display: inline-block;
+            background: #000;
+            color: #fff;
+            padding: 6px 15px;
+            font-weight: bold;
+            font-size: 10pt;
+        }
+
+        table.items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 9pt;
+        }
+
+        .items-table thead {
+            background: #d9e2f3;
+            border: 2px solid #000;
+        }
+
+        .items-table thead th {
+            padding: 8px 5px;
+            border: 1px solid #000;
+            font-weight: bold;
+            text-align: center;
+            font-size: 9pt;
+        }
+
+        .items-table tbody td {
+            padding: 6px 5px;
+            border: 1px solid #000;
+            vertical-align: top;
+            font-size: 9pt;
+        }
+
+        .item-description {
+            font-size: 8.5pt;
+            line-height: 1.4;
+        }
+
+        .item-code {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .bank-details-section {
+            background: #f0f0f0;
+            padding: 8px;
+            border: 1px solid #000;
+            font-size: 8.5pt;
+            line-height: 1.5;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 10px;
+            border: 1px solid #000;
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 10pt;
+        }
+
+        .summary-row:last-child {
+            border-bottom: 1px solid #000;
+            background: #000;
+            color: #fff;
+            font-size: 11pt;
+        }
+
+        .amount-in-words {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #000;
+            font-weight: bold;
+            font-size: 10pt;
+            line-height: 1.5;
+        }
+
+        .payment-terms {
+            margin: 15px 0;
+            font-size: 9.5pt;
+            font-weight: bold;
+        }
+
+        .signature-section {
+            margin-top: 60px;
+        }
+
+        .signature-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .received-by {
+            width: 25%;
+        }
+
+        .signature-center {
+            width: 25%;
+            text-align: center;
         }
 
         .signature-box {
+            width: 40%;
+            text-align: right;
+        }
+
+        .signature-company {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            width: 200px;
+            margin-left: auto;
+        }
+
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+        }
+
+        .btn {
             display: inline-block;
-
-            font-weight: 600;
-            padding-top: 10px;
-            width: 260px;
+            padding: 12px 30px;
+            margin: 0 10px;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
-        .no-border td {
-            border: none !important; 
-            background: transparent !important;
+
+        .btn-primary {
+            background: #0066cc;
+            color: #fff;
         }
 
-        /* -------------------------------------
-            PRINT MODE (Color Safe)
-        ---------------------------------------*/
+        .btn-primary:hover {
+            background: #0052a3;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+    
+        @page {
+            size: A4;
+            margin: 5mm;
+        }
+
         @media print {
+            body {
+                background: #fff;
+                margin: 0;
+                padding: 0;
+            }
 
-            * {
+            .page {
+                width: 210mm;
+                margin: 0;
+                padding: 10mm;
+                box-shadow: none;
+            }
+
+            .button-container {
+                display: none !important;
+            }
+
+            /* Repeat table header on every page */
+            thead {
+                display: table-header-group !important;
+            }
+
+            /* Prevent row from breaking inside */
+            tr {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                orphans: 2;
+                widows: 2;
+            }
+
+            /* Extra protection for cells with long content */
+            td,
+            th {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            /* Protect description block */
+            .item-description {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            /* Keep totals, amount in words, payment terms, signature together */
+            .amount-in-words,
+            .payment-terms,
+            .signature-section,
+            tr:last-child {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                break-before: auto;
+            }
+
+            /* Force better color fidelity */
+            .items-table thead {
+                background: #d9e2f3 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
-            body {
-                background: white !important;
+            tr[style*="background: #000"],
+            .summary-row:last-child,
+            tr.grand-total-row {
+                background: #000 !important;
+                color: #fff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
 
-            .no-print {
-                display: none !important;
+            .currency-badge span {
+                background: #000 !important;
+                color: #fff !important;
+                -webkit-print-color-adjust: exact !important;
             }
+        }
 
-            @page {
-                margin: 5mm;
-            }
+        .label-bold {
+            font-weight: bold;
         }
     </style>
 </head>
 
 <body>
 
+    <?php
+    // Function to convert number to words (BHD style with Fils)
+    function convertAmountToWords($amount, $currency = 'BHD', $decimal_point = 3)
+    {
+        $ones = [
+            '',
+            'One',
+            'Two',
+            'Three',
+            'Four',
+            'Five',
+            'Six',
+            'Seven',
+            'Eight',
+            'Nine',
+            'Ten',
+            'Eleven',
+            'Twelve',
+            'Thirteen',
+            'Fourteen',
+            'Fifteen',
+            'Sixteen',
+            'Seventeen',
+            'Eighteen',
+            'Nineteen'
+        ];
+        $tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+        $hundreds = [
+            '',
+            'One Hundred',
+            'Two Hundred',
+            'Three Hundred',
+            'Four Hundred',
+            'Five Hundred',
+            'Six Hundred',
+            'Seven Hundred',
+            'Eight Hundred',
+            'Nine Hundred'
+        ];
 
-    <!-- BUTTONS -->
-    <div class="top-buttons no-print">
-        <a href="<?php echo site_url('tender-dc-list'); ?>" class="btn btn-back">Back list</a>
-        <!-- Print Button -->
-        <button type="button" class="btn btn-print" onclick="window.print()">
-            🖨 Print
-        </button>
-    </div>
+        function convertNumberToWords($number, $ones, $tens, $hundreds)
+        {
+            if ($number == 0)
+                return 'Zero';
+            $words = '';
+            if ($number >= 1000000) {
+                $millions = floor($number / 1000000);
+                $words .= convertNumberToWords($millions, $ones, $tens, $hundreds) . ' Million ';
+                $number %= 1000000;
+            }
+            if ($number >= 1000) {
+                $thousands = floor($number / 1000);
+                $words .= convertNumberToWords($thousands, $ones, $tens, $hundreds) . ' Thousand ';
+                $number %= 1000;
+            }
+            if ($number >= 100) {
+                $words .= $hundreds[floor($number / 100)] . ' ';
+                $number %= 100;
+            }
+            if ($number >= 20) {
+                $words .= $tens[floor($number / 10)] . ' ';
+                $number %= 10;
+            }
+            if ($number > 0) {
+                $words .= $ones[$number] . ' ';
+            }
+            return trim($words);
+        }
 
-    <!-- CONTENT -->
-    <div class="invoice-wrapper">
+        $amount = floatval($amount);
+        $integer_part = floor($amount);
+        $multiplier = pow(10, $decimal_point);
+        $decimal_part = round(($amount - $integer_part) * $multiplier);
 
-        <!-- Header -->
-        <div class="header">
-            <img src="<?= base_url('' . $record['ltr_header_img']); ?>">
+        $words = $integer_part > 0 ? convertNumberToWords($integer_part, $ones, $tens, $hundreds) : 'Zero';
+
+        if ($decimal_part > 0) {
+            $words .= ' & Fils ' . $decimal_part . '/' . $multiplier;
+        }
+
+        return $words . ' Only.';
+    }
+    ?>
+
+    <div class="page">
+
+        <!-- Header Image -->
+        <?php if (!empty($record['ltr_header_img'])): ?>
+            <img src="<?php echo base_url('') . $record['ltr_header_img']; ?>" alt="Company Header" class="header-img ">
+        <?php endif; ?>
+
+        <!-- Invoice Title & Number -->
+        <div class="invoice-header">
+            <div class="invoice-title">Delivery Challan</div>
+            <div class="invoice-number">No: <?php echo htmlspecialchars($record['dc_no'] ?? 'N/A'); ?></div>
+
         </div>
 
-        <!-- Title -->
-        <div class="title-bar">Delivery Challan</div>
-
-        <!-- Info -->
-        <div class="info-section">
-            <div class="info-block">
-                <strong>Bill To:</strong><br>
-                <strong>M/S:</strong> <?php echo $record['customer_name']; ?><br>
-                <strong>Address:</strong> <br> <?php echo nl2br($record['customer_address']); ?>
-            </div>
-
-            <div class="info-block">
-                <div><span class="label">DC No:</span> <?php echo $record['dc_no']; ?></div>
-                <div><span class="label">Date:</span> <?php echo date('d-m-Y', strtotime($record['dc_date'])); ?></div>
-                <div><span class="label">PO No:</span> <?php echo $record['po_no']; ?></div>
-                <div><span class="label">PO Date:</span> <?php echo date('d-m-Y', strtotime($record['po_date'])); ?></div>
-                <!-- <div><span class="label">Place of Supply:</span> Gujarat (24)</div>
-                <div><span class="label">Phone:</span> 9814556613</div>
-                <div><span class="label">GSTIN:</span> 24AAACC1206D1ZG</div> -->
-                <table class="table no-border">
-                    <tr>
-                        <td>DC No : </td><td><?php echo $record['dc_no']; ?></td>
-                    </tr>
-                    <tr>
-                        <td>DC No : </td><td><?php echo $record['dc_no']; ?></td>
-                    </tr>
-                    <tr>
-                        <td>DC No : </td><td><?php echo $record['dc_no']; ?></td>
-                    </tr>
-                    <tr>
-                        <td>DC No : </td><td><?php echo $record['dc_no']; ?></td>
-                    </tr>
-                </table>
+        <div class="reference-section">
+            <div class="reference-line">
+                <span class="label-bold">Your P.O. No:</span>
+                <?php echo htmlspecialchars($record['po_no'] ?? 'N/A'); ?>,
+                <span class="label-bold">Dated:</span>
+                <?php echo date('d-m-Y', strtotime($record['po_date'] ?? 'N/A')); ?>
+                <span style="float: right;">
+                    <span class="label-bold">Date:</span>
+                    <?php echo date('d-m-Y', strtotime($record['dc_date'] ?? 'N/A')); ?>
+                </span>
             </div>
         </div>
 
-        <!-- Table -->
-        <table>
-            <tr>
-                <th style="width: 5%;">Sr.</th> 
-                <th style="width: 60%;">Description of Goods</th>
-                <th style="width: 10%;">UOM</th>
-                <th style="width: 10%;">Quantity</th>
-            </tr>
+        <!-- Customer -->
+        <div class="customer-section">
+            <div class="customer-label">To,</div>
+            <div class="customer-address">
+                <strong><?php echo htmlspecialchars($record['customer_name'] ?? 'N/A'); ?></strong><br>
+                <?php echo nl2br(htmlspecialchars($record['address'] ?? 'N/A')); ?><br>
+                <?php if (!empty($record['customer_country'])): ?>
+                    Country: (<?php echo htmlspecialchars($record['customer_country']); ?>)<br>
+                <?php endif; ?>
+                <?php if (!empty($record['vat_account_no'])): ?>
+                    VAT Account. No: <?php echo htmlspecialchars($record['vat_account_no']); ?>
+                <?php endif; ?>
+            </div>
+        </div>
 
-            <?php foreach ($items as $j => $item) { ?>
+
+        <!-- <div class="currency-badge">
+            <span>Currency: <?php echo htmlspecialchars($currency_code); ?></span>
+        </div> -->
+
+        <!-- Items Table -->
+        <table class="items-table">
+            <thead>
                 <tr>
-                    <td class="text-center"><?php echo ($j + 1); ?></td> 
-                    <td class="text-center"><?php echo $item['item_code']; ?> : <?php echo $item['item_desc']; ?></td>
-                    <td class="text-center"><?php echo $item['uom']; ?></td>
-                    <td class="text-center"><?php echo $item['qty']; ?></td>
+                    <th style="width:6%;">Item<br>No.</th>
+                    <th style="width:74%; text-align:left;">Description</th>
+                    <th style="width:10%;">Unit</th>
+                    <th style="width:10%;">Qty</th>
                 </tr>
-            <?php } ?>
-            <tr class="">
-                <td colspan="3" style="text-align: right;"><strong>Total Qty :</strong></td>
+            </thead>
+            <tbody>
                 <?php
-                $total_qty = 0;
-                foreach ($items as $row) {
-                    $total_qty += $row['qty'];
-                }
+                $total_qty_ordered = 0; // ✅ Initialize before loop
                 ?>
-                <td class="text-center"><strong><?= $total_qty; ?></strong></td>
-            </tr>
+                <?php if (!empty($item_list)): ?>
+                    <?php foreach ($item_list as $i => $item):
+
+                        $qty = $item['qty'] ?? 0;
+                        $total_qty_ordered += $qty; // ✅ Add each qty
+                
+                        ?>
+                        <tr>
+                            <td class="text-center"><?php echo $i + 1; ?></td>
+                            <td class="text-left">
+                                <div class="item-description">
+                                    <?php if (!empty($item['item_code'])): ?>
+                                        <div class="item-code"><?php echo htmlspecialchars($item['item_code']); ?></div>
+                                    <?php endif; ?>
+                                    <?php echo htmlspecialchars($item['item_desc'] ?? ''); ?>
+                                </div>
+                            </td>
+                            <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?? '-'); ?></td>
+                            <td class="text-center">
+                                <?php echo number_format($item['qty'] ?? 0, 0); ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="4" class="text-center" style="padding:30px; color:#999;">No items found</td>
+                    </tr>
+                <?php endif; ?>
+                <tr style="background:#000; color:#fff;">
+                    <td colspan="3" class="text-right"><strong>TOTAL QTY</strong></td>
+                    <td colspan="2" class="text-center">
+                        <strong><?php echo number_format($total_qty_ordered, 0); ?></strong>
+                    </td>
+                </tr>
+            </tbody>
         </table>
 
-        <?php if ($record['remarks'] != '') { ?>
-            <div class="terms">
-                <strong>Note:</strong><br><br>
+
+
+        <!-- Notes -->
+        <?php if (!empty($record['remarks'])): ?>
+            <div
+                style="margin:15px 0; padding:10px; background:#f9f9f9; border-left:3px solid #000; page-break-inside: avoid; break-inside: avoid;">
+                <div style="font-weight:bold; margin-bottom:5px;">Notes:</div>
                 <?php echo nl2br($record['remarks']); ?>
             </div>
-        <?php } ?>
+        <?php endif; ?>
 
-        <?php if ($record['terms'] != '') { ?>
-            <div class="terms">
-                <strong>Terms & Conditions:</strong><br><br>
+        <!-- Terms & Conditions -->
+        <?php if (!empty($record['terms'])): ?>
+            <div
+                style="margin:15px 0; padding:10px; background:#f9f9f9; border-left:3px solid #000;page-break-inside: avoid; break-inside: avoid;">
+                <div style="font-weight:bold; margin-bottom:5px;">Terms & Conditions:</div>
                 <?php echo nl2br($record['terms']); ?>
             </div>
-        <?php } ?>
+        <?php endif; ?>
 
+        <!-- Signature Section -->
+        <div class="signature-section">
+            <div class="signature-row">
 
-        <style>
-            .span_sing {
-                display: block;
-                border-bottom: 1px solid black;
-                padding-bottom: 32px;
-                text-align: center;
-            }
-        </style>
-        <!-- Footer -->
-        <div class="foote1r">
-            <table style="width:100%; height:100px; margin-top:50px; border:none;">
-                <tr>
-                    <td><span class="span_sing1"> Goods Received By</span></td>
-                    <td><span class="span_sing1"> Seal & Signatare</span></td>
-                </tr>
-                </table>
-             
-             
+                <div class="received-by">
+                    <strong>Received By:</strong>
+                </div>
+
+                <div class="signature-center">
+                    <strong>Signature:</strong>
+                </div>
+
+                <div class="signature-box">
+                    <div class="signature-company">
+                        For
+                        <?php echo htmlspecialchars($record['our_company'] ?? $record['company_name'] ?? 'Our Company'); ?>
+                    </div>
+
+                    <!-- If you have signature image -->
+                    <?php if (!empty($record['signature_image'])): ?>
+                        <div class="signature-image">
+                            <img src="<?php echo base_url('uploads/signatures/' . $record['signature_image']); ?>"
+                                style="height:60px;">
+                        </div>
+                    <?php endif; ?>
+
+                    <div class="signature-line"></div>
+                </div>
+
+            </div>
         </div>
+
+
+    </div>
+
+    <!-- Buttons (screen only) -->
+    <div class="button-container">
+        <button type="button" class="btn btn-primary"
+            onclick="window.location.href='<?= site_url('tender-quotation-list') ?>'">
+            ← Back To List
+        </button>
+        <button type="button" class="btn btn-success" onclick="window.print()">
+            🖨️ Print
+        </button>
     </div>
 
 </body>

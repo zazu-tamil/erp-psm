@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <?php
-echo "<pre>";
-print_r($item_list);
-echo "</pre>";
+// echo "<pre>";
+// print_r($item_list);
+// echo "</pre>";
 ?>
 <html>
 
 <head>
     <meta charset="UTF-8">
-    <title>Quotation - <?php echo htmlspecialchars($record['tender_quotation_no'] ?? ''); ?></title>
+    <title>Purchase Order - <?php echo htmlspecialchars($record['po_no'] ?? ''); ?></title>
     <style>
         * {
             margin: 0;

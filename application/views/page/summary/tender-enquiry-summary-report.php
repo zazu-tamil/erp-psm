@@ -712,13 +712,13 @@
                                                 <?php echo htmlspecialchars($item['gst'] ?? 0); ?>
                                             </td>
                                             <td class="text-right">
-                                                <?php echo $item['currency_code'] . ' ' . number_format($item['amount'] ?? 0, $decimal); ?>
+                                                <?php echo $item['currency_code'] ?? '' . ' ' . number_format($item['amount'] ?? 0, $decimal); ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
                                     <tr>
                                         <td colspan="7" class="text-right"><strong>Total Amount:</strong></td>
-                                        <td class="text-right"><?php echo $item['currency_code'] . ' ' . number_format($tot, 2); ?></td>
+                                        <td class="text-right"><?php echo $item['currency_code'] ?? '' . ' ' . number_format($tot, 2); ?></td>
                                     </tr>
                                 <?php else: ?>
                                     <tr>

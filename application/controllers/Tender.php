@@ -3269,7 +3269,7 @@ class Tender extends CI_Controller
             a.invoice_no,
             d.ltr_header_img,
             a.invoice_date,
-            b.our_po_no,
+            b.customer_po_no as po_no,
             a.vat_payer_sales_grp,
             b.po_date,  
             d.company_name,
@@ -4040,20 +4040,22 @@ class Tender extends CI_Controller
         }
 
         $sql = "
-            SELECT 
-                dci.uom,
-                dci.qty, 
-                item.item_code,
-                dci.item_desc
-            FROM tender_dc_item_info as dci
-            LEFT JOIN category_info cat ON dci.category_id = cat.category_id
-            LEFT JOIN item_info item ON dci.item_id = item.item_id
-            WHERE dci.tender_dc_id = ?
-            AND dci.status='Active'
-            ORDER BY dci.tender_dc_item_id
+           select
+            a.tender_dc_id,
+            b.tender_dc_item_id,
+            b.item_code,
+            b.item_desc,
+            b.uom,
+            b.qty
+            from tender_dc_info as a 
+            left join tender_dc_item_info as b on a.tender_dc_id = b.tender_dc_id and b.`status`='Active' 
+            left join customer_tender_po_info as c on a.tender_po_id = c.tender_po_id and c.`status`='Active'
+            where a.`status`='Active'
+            and a.tender_dc_id = ?
+            order by b.tender_dc_item_id asc
         ";
         $query = $this->db->query($sql, [$tender_dc_id]);
-        $data['items'] = $query->result_array();
+        $data['item_list'] = $query->result_array();
 
         $this->load->view('page/tender/tender-dc-print', $data);
     }

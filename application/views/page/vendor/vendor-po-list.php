@@ -91,11 +91,11 @@
                         <th class="text-center">S.No</th>
                         <th>PO Date</th>
                         <th>Company / RFQ No</th>
-                        <th>Customer</th>
-                        <th>Customer RFQ No</th>
-                        <th>Po No</th>
-                        <th>Vendor</th>
+                        <th>Customer</th> 
+                        <th>Po No</th> 
                         <th>Po Status</th>
+
+
                         <th class="text-center" colspan="3">Action</th>
                     </tr>
                 </thead>
@@ -109,8 +109,8 @@
                                         class="label label-success"><?php echo htmlspecialchars($row['tender_details'] ?? '-'); ?></small>
                                 </td>
                                 <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
-                                <td><strong><?php echo htmlspecialchars($row['po_no']); ?></strong></td>
-                                <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
+
+                                <td><strong><?php echo htmlspecialchars($row['po_no']); ?></strong></td> 
 
                                 <?php
                                 $status = $row['po_status'];
