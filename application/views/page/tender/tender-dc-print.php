@@ -475,7 +475,7 @@
                 <strong><?php echo htmlspecialchars($record['customer_name'] ?? ''); ?></strong><br>
                 <?php echo nl2br(htmlspecialchars($record['customer_address'] ?? '')); ?><br>
                 <?php if (!empty($record['customer_country'])): ?>
-                    Country: <?php echo htmlspecialchars($record['customer_country']); ?><br>
+                    <b><?php echo htmlspecialchars($record['customer_country']); ?></b><br>
                 <?php endif; ?>
                 <?php if (!empty($record['vat_account_no'])): ?>
                     VAT Account. No: <?php echo htmlspecialchars($record['vat_account_no']); ?>
