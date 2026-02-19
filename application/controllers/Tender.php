@@ -1830,7 +1830,8 @@ class Tender extends CI_Controller
             tqi.quotation_no as tender_quotation_no,
             ci.ltr_header_img,
             curr.currency_code,
-            curr.decimal_point
+            curr.decimal_point,
+            get_tender_info(tqi.tender_enquiry_id) as our_enq_ref_details
         FROM
             tender_quotation_info tqi
         LEFT JOIN customer_info c ON

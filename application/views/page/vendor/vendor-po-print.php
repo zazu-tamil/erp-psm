@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <?php
 // echo "<pre>";
-// print_r($item_list);
+// print_r($record);
 // echo "</pre>";
 ?>
 <html>
@@ -110,8 +110,8 @@
         }
 
         .items-table thead {
-            background: #ffffff;
-            border: 2px solid #000;
+            
+            border: 1px solid #000;
         }
 
         .items-table thead th {
@@ -439,32 +439,22 @@
         <!-- Invoice Title & Number -->
         <div class="invoice-header">
             <div class="invoice-title">Purchase Order</div>
-            <div class="invoice-number">No: <?php echo htmlspecialchars($record['po_no'] ?? 'N/A'); ?></div>
+            <div style="float:right; text-align:right;">
+                Date : <?php echo htmlspecialchars(date('d/m/Y', strtotime($record['po_date'] ?? ''))); ?><br>
+                Our PO No: <?php echo htmlspecialchars($record['po_no'] ?? 'N/A'); ?>
+            </div> 
         </div>
-
-        <!-- Reference -->
-        <div class="reference-section">
-
-            <div class="reference-line">
-                <span class="label-bold">Tender Ref No:</span>
-                <?php echo htmlspecialchars($record['enquiry_no'] ?? 'N/A'); ?>,
-                <span class="label-bold">Dated:</span>
-                <?php echo date('d-m-Y', strtotime($record['enquiry_date'] ?? 'N/A')); ?>
-                <span style="float: right;">
-                    <span class="label-bold">Date:</span>
-                    <?php echo date('d-m-Y', strtotime($record['po_date'] ?? 'N/A')); ?>
-                </span>
-            </div>
-        </div>
+            <br>
+       
 
         <!-- Customer -->
         <div class="customer-section">
             <div class="customer-label">To,</div>
-            <div class="customer-address">
+            <div class="customer-address" style="padding-left:10px;">
                 <strong><?php echo htmlspecialchars($record['vendor_name'] ?? 'N/A'); ?></strong><br>
                 <?php echo nl2br(htmlspecialchars($record['vendor_address'] ?? 'N/A')); ?><br>
                 <?php if (!empty($record['vendor_country'])): ?>
-                    Country: <?php echo htmlspecialchars($record['vendor_country']); ?><br>
+                <?php echo htmlspecialchars($record['vendor_country']); ?><br>
                 <?php endif; ?>
                 <?php /*
                     <?php if (!empty($record['vat_account_no'])): ?>
@@ -472,6 +462,16 @@
                     <?php endif; ?>
            */ ?>
             </div>
+        </div>
+        <?php if(!empty($record['contact_person_name'])): ?>           
+        <div>
+           <b> Attn: <?php echo htmlspecialchars($record['contact_person_name']); ?></b>
+        </div>
+        <?php endif; ?>
+        <div>
+            <b> Your Quote Ref: <?php echo htmlspecialchars($record['quote_no']); ?>, Dated on <?php echo date('d-m-Y', strtotime($record['quote_date'] ?? 'N/A')); ?> </b>
+            <div style="float:right;"><b>Our Ref: <?php echo htmlspecialchars($record['enquiry_no']); ?></b></div>
+            
         </div>
 
         <!-- Currency -->
@@ -521,7 +521,7 @@
                                     <td class="text-left">
                                         <div class="item-description">
                                             <?php if (!empty($item['item_code'])): ?>
-                                                    <div class="item-code"><?php echo htmlspecialchars($item['item_code']); ?></div>
+                                                    <div class="item-code1"><?php echo htmlspecialchars($item['item_code']); ?></div>
                                             <?php endif; ?>
                                             <?php echo htmlspecialchars($item['item_desc'] ?? ''); ?>
                                         </div>
@@ -559,13 +559,15 @@
                 </tr>
             </tbody>
         </table>
-
+        <?php /*            
         <!-- Amount in Words -->
         <?php $amount_in_words = convertAmountToWords($grand_total, $currency_code, $decimal_point); ?>
         <div class="amount-in-words">
             <strong>Total <?php echo htmlspecialchars($currency_code); ?>:</strong><br>
             <?php echo $amount_in_words; ?>
         </div>
+         */           
+        ?>
 
         <!-- Payment Terms -->
         <!-- <div class="payment-terms">
@@ -576,18 +578,18 @@
         <!-- Notes -->
         <?php if (!empty($record['remarks'])): ?>
                 <div
-                    style="margin:15px 0; padding:10px; background:#f9f9f9;  page-break-inside: avoid; break-inside: avoid;">
+                    style="margin:15px 0; padding:10px;  page-break-inside: avoid; break-inside: avoid;">
                     <div style="font-weight:bold; margin-bottom:5px;">Notes:</div>
-                    <?php echo nl2br($record['remarks']); ?>
+                    <?php echo ($record['remarks']); ?>
                 </div>
         <?php endif; ?>
 
         <!-- Terms & Conditions -->
         <?php if (!empty($record['terms'])): ?>
                 <div
-                    style="margin:15px 0; padding:10px; background:#f9f9f9; page-break-inside: avoid; break-inside: avoid;">
+                    style="margin:15px 0; padding:10px;   page-break-inside: avoid; break-inside: avoid;">
                     <div style="font-weight:bold; margin-bottom:5px;">Terms & Conditions:</div>
-                    <?php echo nl2br($record['terms']); ?>
+                    <?php echo ($record['terms']); ?>
                 </div>
         <?php endif; ?>
 

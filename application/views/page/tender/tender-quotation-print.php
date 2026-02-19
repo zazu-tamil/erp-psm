@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <?php
 // echo "<pre>";
-// print_r($dc_list_info);
+// print_r($record);
 // echo "</pre>";
 ?>
 <html>
@@ -110,8 +110,8 @@
         }
 
         .items-table thead {
-            background: #ffffff;
-            border: 2px solid #000;
+           
+            border: 1px solid #000;
         }
 
         .items-table thead th {
@@ -347,86 +347,86 @@
 
     <?php
     // Function to convert number to words (BHD style with Fils)
-    function convertAmountToWords($amount, $currency = 'BHD', $decimal_point = 3)
-    {
-        $ones = [
-            '',
-            'One',
-            'Two',
-            'Three',
-            'Four',
-            'Five',
-            'Six',
-            'Seven',
-            'Eight',
-            'Nine',
-            'Ten',
-            'Eleven',
-            'Twelve',
-            'Thirteen',
-            'Fourteen',
-            'Fifteen',
-            'Sixteen',
-            'Seventeen',
-            'Eighteen',
-            'Nineteen'
-        ];
-        $tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-        $hundreds = [
-            '',
-            'One Hundred',
-            'Two Hundred',
-            'Three Hundred',
-            'Four Hundred',
-            'Five Hundred',
-            'Six Hundred',
-            'Seven Hundred',
-            'Eight Hundred',
-            'Nine Hundred'
-        ];
+    // function convertAmountToWords($amount, $currency = 'BHD', $decimal_point = 3)
+    // {
+    //     $ones = [
+    //         '',
+    //         'One',
+    //         'Two',
+    //         'Three',
+    //         'Four',
+    //         'Five',
+    //         'Six',
+    //         'Seven',
+    //         'Eight',
+    //         'Nine',
+    //         'Ten',
+    //         'Eleven',
+    //         'Twelve',
+    //         'Thirteen',
+    //         'Fourteen',
+    //         'Fifteen',
+    //         'Sixteen',
+    //         'Seventeen',
+    //         'Eighteen',
+    //         'Nineteen'
+    //     ];
+    //     $tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    //     $hundreds = [
+    //         '',
+    //         'One Hundred',
+    //         'Two Hundred',
+    //         'Three Hundred',
+    //         'Four Hundred',
+    //         'Five Hundred',
+    //         'Six Hundred',
+    //         'Seven Hundred',
+    //         'Eight Hundred',
+    //         'Nine Hundred'
+    //     ];
 
-        function convertNumberToWords($number, $ones, $tens, $hundreds)
-        {
-            if ($number == 0)
-                return 'Zero';
-            $words = '';
-            if ($number >= 1000000) {
-                $millions = floor($number / 1000000);
-                $words .= convertNumberToWords($millions, $ones, $tens, $hundreds) . ' Million ';
-                $number %= 1000000;
-            }
-            if ($number >= 1000) {
-                $thousands = floor($number / 1000);
-                $words .= convertNumberToWords($thousands, $ones, $tens, $hundreds) . ' Thousand ';
-                $number %= 1000;
-            }
-            if ($number >= 100) {
-                $words .= $hundreds[floor($number / 100)] . ' ';
-                $number %= 100;
-            }
-            if ($number >= 20) {
-                $words .= $tens[floor($number / 10)] . ' ';
-                $number %= 10;
-            }
-            if ($number > 0) {
-                $words .= $ones[$number] . ' ';
-            }
-            return trim($words);
-        }
+    //     function convertNumberToWords($number, $ones, $tens, $hundreds)
+    //     {
+    //         if ($number == 0)
+    //             return 'Zero';
+    //         $words = '';
+    //         if ($number >= 1000000) {
+    //             $millions = floor($number / 1000000);
+    //             $words .= convertNumberToWords($millions, $ones, $tens, $hundreds) . ' Million ';
+    //             $number %= 1000000;
+    //         }
+    //         if ($number >= 1000) {
+    //             $thousands = floor($number / 1000);
+    //             $words .= convertNumberToWords($thousands, $ones, $tens, $hundreds) . ' Thousand ';
+    //             $number %= 1000;
+    //         }
+    //         if ($number >= 100) {
+    //             $words .= $hundreds[floor($number / 100)] . ' ';
+    //             $number %= 100;
+    //         }
+    //         if ($number >= 20) {
+    //             $words .= $tens[floor($number / 10)] . ' ';
+    //             $number %= 10;
+    //         }
+    //         if ($number > 0) {
+    //             $words .= $ones[$number] . ' ';
+    //         }
+    //         return trim($words);
+    //     }
 
-        $amount = floatval($amount);
-        $integer_part = floor($amount);
-        $multiplier = pow(10, $decimal_point);
-        $decimal_part = round(($amount - $integer_part) * $multiplier);
+    //     $amount = floatval($amount);
+    //     $integer_part = floor($amount);
+    //     $multiplier = pow(10, $decimal_point);
+    //     $decimal_part = round(($amount - $integer_part) * $multiplier);
 
-        $words = $integer_part > 0 ? convertNumberToWords($integer_part, $ones, $tens, $hundreds) : 'Zero';
+    //     $words = $integer_part > 0 ? convertNumberToWords($integer_part, $ones, $tens, $hundreds) : 'Zero';
 
-        if ($decimal_part > 0) {
-            $words .= ' & Fils ' . $decimal_part . '/' . $multiplier;
-        }
+    //     if ($decimal_part > 0) {
+    //         $words .= ' & Fils ' . $decimal_part . '/' . $multiplier;
+    //     }
 
-        return $words . ' Only.';
-    }
+    //     return $words . ' Only.';
+    // }
     ?>
 
     <div class="page">
@@ -439,34 +439,44 @@
         <!-- Invoice Title & Number -->
         <div class="invoice-header">
             <div class="invoice-title">QUOTATION</div>
-            <div class="invoice-number">No: <?php echo htmlspecialchars($record['tender_quotation_no'] ?? 'N/A'); ?>
+            <div style="float:right; text-align:right;">
+                Date : <?php echo htmlspecialchars(date('d/m/Y', strtotime($record['quote_date']))); ?><br>
+                Quote No: <?php echo htmlspecialchars($record['tender_quotation_no'] ?? 'N/A'); ?>
             </div>
+            
         </div>
+       
 
         <!-- Reference -->
         <div class="reference-section">
             <div class="reference-line">
-                <span class="label-bold">Tender Ref No:</span> <?php echo $record['tender_ref_no'] ?? 'N/A'; ?>,
-                <span class="label-bold">Dated:</span>
-                <?php echo date('d-m-Y', strtotime($record['tender_enquiry_date'] ?? 'now')); ?>
+                <span class="label-bold">Our Ref No:</span> <?php echo $record['our_enq_ref_details'] ?? '-'; ?>
+                 
             </div>
         </div>
 
         <!-- Customer -->
         <div class="customer-section">
             <div class="customer-label">To,</div>
-            <div class="customer-address">
+            <div class="customer-address" style="padding-left:10px;">
                 <strong><?php echo htmlspecialchars($record['customer_name'] ?? 'N/A'); ?></strong><br>
                 <?php echo nl2br(htmlspecialchars($record['address'] ?? 'N/A')); ?><br>
                 <?php if (!empty($record['customer_country'])): ?>
-                    Country: (<?php echo htmlspecialchars($record['customer_country']); ?>)<br>
+                    <b><?php echo htmlspecialchars($record['customer_country']); ?></b><br>
                 <?php endif; ?>
                 <?php if (!empty($record['vat_account_no'])): ?>
                     VAT Account. No: <?php echo htmlspecialchars($record['vat_account_no']); ?>
                 <?php endif; ?>
             </div>
         </div>
-
+        <?php if(!empty($record['contact_person'])): ?>           
+        <div>
+           <b> Attn: <?php echo htmlspecialchars($record['contact_person']); ?></b>
+        </div>
+        <?php endif; ?>
+        <div> Dear Sir, </div>
+        <div style="text-align: center; font-weight: bold;"><u>SUB: Your Enquiry Ref: <?php echo htmlspecialchars($record['tender_ref_no']); ?>, Dated: <?php echo date('d/m/Y', strtotime($record['tender_enquiry_date'] ?? '')); ?>.</u></div>
+`       <div>Thank you for your enquiry, we are pleased to offer our best price with terms and conditions below.</div>
         <!-- Currency -->
         <?php
         $decimal_point = isset($record['decimal_point']) ? intval($record['decimal_point']) : 3;
@@ -552,13 +562,15 @@
                 </tr>
             </tbody>
         </table>
-
-        <!-- Amount in Words -->
-        <?php $amount_in_words = convertAmountToWords($grand_total, $currency_code, $decimal_point); ?>
-        <div class="amount-in-words">
+         <?php  /*          
+        <!-- Amount in Words --> 
+        //$amount_in_words = convertAmountToWords($grand_total, $currency_code, $decimal_point); ?>
+        <!-- <div class="amount-in-words1">
             <strong>Total <?php echo htmlspecialchars($currency_code); ?>:</strong><br>
             <?php echo $amount_in_words; ?>
-        </div>
+        </div> -->
+        */ 
+        ?>
 
         <!-- Payment Terms -->
         <!-- <div class="payment-terms">
@@ -568,18 +580,18 @@
 
         <!-- Notes -->
         <?php if (!empty($record['remarks'])): ?>
-            <div style="margin:15px 0; padding:10px; background:#f9f9f9;  page-break-inside: avoid; break-inside: avoid;">
+            <div>
                 <div style="font-weight:bold; margin-bottom:5px;">Notes:</div>
-                <?php echo nl2br($record['remarks']); ?>
+                <?php echo ($record['remarks']); ?>
             </div>
         <?php endif; ?>
 
         <!-- Terms & Conditions -->
         <?php if (!empty($record['terms'])): ?>
-            <div style="margin:15px 0; padding:10px; background:#f9f9f9; page-break-inside: avoid; break-inside: avoid;">
-                <div style="font-weight:bold; margin-bottom:5px;">Terms & Conditions:</div>
-                <?php echo nl2br($record['terms']); ?>
-            </div>
+                <div style="padding:1px; ">
+                 <div style="font-weight:bold; margin-bottom:5px;">Terms & Conditions:</div>
+                <?php echo ($record['terms']); ?>
+                </div> 
         <?php endif; ?>
 
         <!-- Signature -->

@@ -1225,9 +1225,11 @@ class Vendor extends CI_Controller
                 curr.currency_code,
                 curr.decimal_point,
                 f.quote_no,
+                f.quote_date,
                 a.vendor_po_id,
                 get_tender_info(a.tender_enquiry_id) as enquiry_no,
-                d.enquiry_date
+                d.enquiry_date,
+                vc.contact_person_name
             FROM vendor_po_info as  a 
             LEFT JOIN customer_info as b on a.customer_id = b.customer_id  and b.status='Active'
             LEFT JOIN company_info as c  on a.company_id = c.company_id and c.status='Active'
@@ -1235,6 +1237,7 @@ class Vendor extends CI_Controller
             left join vendor_info as e on a.vendor_id = e.vendor_id and e.status='Active' 
             left join vendor_quotation_info as f on  a.vendor_quote_id = f.vendor_quote_id and f.`status`='Active'
             left join currencies_info  as curr on a.currency_id = curr.currency_id and curr.status='Active'
+            left join vendor_contact_info as vc on a.vendor_contact_person_id = vc.vendor_contact_id and vc.status='Active'
             WHERE a.status='Active'
             and a.vendor_po_id = ?
         ";
