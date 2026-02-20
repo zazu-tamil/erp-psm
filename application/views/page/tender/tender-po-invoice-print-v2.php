@@ -193,7 +193,7 @@
         }
 
         .signature-section {
-            /* margin-top: 60px; */
+            margin-top: 30px;
             text-align: right;
         }
 
@@ -494,7 +494,7 @@
                     Country: (<?php echo htmlspecialchars($record['customer_country']); ?>)<br>
                 <?php endif; ?>
                 <?php if (!empty($record['vat_account_no'])): ?>
-                    VAT Account. No: <?php echo htmlspecialchars($record['vat_account_no']); ?>
+                   <strong> VAT Account. No:</strong> <?php echo htmlspecialchars($record['vat_account_no']); ?>
                 <?php endif; ?>
             </div>
         </div>
@@ -620,7 +620,7 @@
                                 <?php endif; ?>
                             </div>
                         </td>
-                        <td colspan="3" class="text-right" style="vertical-align: top; position: relative;">
+                        <td colspan="3" class="text-right" style="vertical-align: middle; position: relative;">
                             <div class="summary-section">
                                 <div class="summary-row" style="border-bottom: 1px solid #000;">
                                     <span>TOTAL EXCL. VAT</span>
@@ -656,7 +656,7 @@
                         </td>
                     </tr>
                     <tr
-                        style="background: #000; color: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                        style="background: #ffffff; color: #000000; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                         <td colspan="5" class="text-right" style="padding: 12px; border: 1px solid #000; font-size: 11pt;">
                             <strong>TOTAL <?php echo htmlspecialchars($currency_code); ?></strong>
                         </td>

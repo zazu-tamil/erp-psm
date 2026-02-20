@@ -62,13 +62,13 @@
                              
                         </div>
 
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-3">
                             <label>Vendor Name <span style="color:red;">*</span></label>
                             <?php echo form_dropdown('srch_vendor_id', ['' => 'Select Vendor'] + $vendor_opt, $header['vendor_id'], 'id="srch_vendor_id" class="form-control" disabled required'); ?>
                             <input type="hidden" name="srch_vendor_id" value="<?php echo $header['vendor_id']; ?>">
                         </div>
 
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-3">
                             <label>Vendor PO No <span style="color:red;">*</span>
                                 <span data-toggle="tooltip" title="" class=""
                                     data-original-title="Only when Vendor PO Status is Confirmed then select the PO No. Otherwise leave it blank.">
@@ -80,12 +80,27 @@
                                 value="<?php echo  $header['vendor_po_id']; ?>">
                         </div>
 
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-3">
                             <label>Contact Person</label>
                             <?php echo form_dropdown('srch_vendor_contact_person_id', ['' => 'Select Contact'] + $vendor_contact_opt, $header['vendor_contact_person_id'], 'id="srch_vendor_contact_person_id" class="form-control readonly" readonly'); ?>
                             <input type="hidden" name="srch_vendor_contact_person_id"
                                 id="srch_vendor_contact_person_id_hidden"
                                 value="<?php echo $header['vendor_contact_person_id']; ?>">
+                        </div>
+
+                        <div class="form-group col-md-3">
+                            <label>Check Door Delivery</label>
+
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox"
+                                        name="door_delivery"
+                                        id="door_delivery"
+                                        value="Door Delivery"
+                                        <?= (!empty($header['door_delivery']) && $header['door_delivery'] == 'Door Delivery') ? 'checked' : ''; ?>>
+                                    Door Delivery
+                                </label>
+                            </div>
                         </div>
 
                         <div class="form-group col-md-2">
@@ -288,6 +303,7 @@
                                             <i class="fa fa-calculator text-success me-2"></i>
                                             <strong>Total Amount With Tax:</strong>
                                             <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                            <input type="hidden" name="total_amount" class="total_amount_hidden">
                                         </h5>
                                     </div>
                                 </div>
@@ -297,6 +313,8 @@
                                             <i class="fa fa-calculator text-success me-2"></i>
                                             <strong>Total VAT Amount :</strong>
                                             <span class="text-primary"><span id="total_vat_amount">0.000</span></span>
+                                            <input type="hidden" name="total_vat_amount" class="total_vat_amount_hidden">
+
                                         </h5>
                                     </div>
                                 </div>
@@ -307,6 +325,7 @@
                                             <strong>Total Amount WO Tax:</strong>
                                             <span class="text-primary"><span
                                                     id="total_amount_wo_tax">0.000</span></span>
+                                            <input type="hidden" name="total_amount_wo_tax" class="total_amount_wo_tax_hidden">
                                         </h5>
                                     </div>
                                 </div>
@@ -653,6 +672,7 @@ $(document).ready(function() {
         });
 
         $("#total_amount").text(total.toFixed(3));
+        $('.total_amount_hidden').val(total.toFixed(3));
 
         let total_wot = 0;
         $(".amountwotx").each(function() {
@@ -660,7 +680,10 @@ $(document).ready(function() {
         });
 
         $("#total_amount_wo_tax").text(total_wot.toFixed(3));
+        $('.total_amount_wo_tax_hidden').val(total_wot.toFixed(3));
+
         $('#total_vat_amount').text((total - total_wot).toFixed(3));
+        $('.total_vat_amount_hidden').val((total - total_wot).toFixed(3));
     }
 
     // Form validation

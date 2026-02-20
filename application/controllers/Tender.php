@@ -3277,6 +3277,7 @@ class Tender extends CI_Controller
             e.customer_name,
             e.country,
             e.address,
+            e.gst as vat_account_no,
             f.currency_code,
             f.decimal_point
             from tender_enq_invoice_info  as a

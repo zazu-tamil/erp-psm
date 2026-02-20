@@ -507,10 +507,9 @@
 
       const ac_amt = qty * rate * c_rate;
 
-
       //const amountWithoutTax = qty * rate;
-      const amountWithoutTax = (ac_amt ) + ((ac_amt) * dty /100);
-      const amountWithTax = amountWithoutTax + (amountWithoutTax * gst / 100);
+      const amountWithoutTax = ac_amt + (ac_amt * dty) / 100;
+      const amountWithTax = amountWithoutTax + (amountWithoutTax * gst) / 100;
 
       $row.find(".act_amt").val(ac_amt.toFixed(3));
 
@@ -518,7 +517,6 @@
       $row.find(".amount-input").val(amountWithTax.toFixed(3));
     }
 
-    // Total calculation
     function calculateTotalAmount() {
       let total = 0;
       $(".amount-input").each(function () {
@@ -526,6 +524,7 @@
       });
 
       $("#total_amount").text(total.toFixed(3));
+      $(".total_amount_hidden").val(total.toFixed(3));
 
       let total_wot = 0;
       $(".amountwotx").each(function () {
@@ -533,8 +532,10 @@
       });
 
       $("#total_amount_wo_tax").text(total_wot.toFixed(3));
+      $(".total_amount_wo_tax_hidden").val(total_wot.toFixed(3));
 
-      $('#total_vat_amount').text((total - total_wot).toFixed(3));
+      $("#total_vat_amount").text((total - total_wot).toFixed(3));
+      $(".total_vat_amount_hidden").val((total - total_wot).toFixed(3));
     }
 
     // Form submit validation

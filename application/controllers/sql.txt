@@ -386,3 +386,17 @@ ALTER TABLE `company_info` ADD `bank_id` INT NULL AFTER `company_id`;
 17-02-2026
 ALTER TABLE `tender_enq_invoice_info`
 	ADD COLUMN `tender_dc_id` VARCHAR(200) NULL DEFAULT NULL AFTER `tender_po_id`;
+
+
+20-02-2026
+
+ALTER TABLE `vendor_purchase_invoice_info`
+	ADD COLUMN `door_delivery` VARCHAR(50) NULL DEFAULT NULL AFTER `total_amount`;
+
+	
+ALTER TABLE `vendor_purchase_invoice_info`
+	CHANGE COLUMN `invoice_no` `invoice_no` VARCHAR(50) NULL DEFAULT NULL AFTER `entry_date`;
+
+	
+ALTER TABLE `vendor_purchase_invoice_info`
+	ADD COLUMN `total_amount_wo_tax` DECIMAL(14,3) NULL DEFAULT NULL AFTER `tax_amount`;

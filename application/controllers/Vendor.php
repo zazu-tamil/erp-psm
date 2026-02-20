@@ -1062,7 +1062,7 @@ class Vendor extends CI_Controller
         $query = $this->db->query($sql, [$vendor_po_id]);
         $data['header'] = $query->row_array();
 
-        echo$sql = "
+        echo $sql = "
           select
             b.vendor_po_item_id,
             b.vendor_po_id,
@@ -3557,8 +3557,10 @@ class Vendor extends CI_Controller
                 'vat_payer_purchase_grp' => $this->input->post('vat_payer_purchase_grp'),
                 'declaration_no' => $this->input->post('declaration_no'),
                 'declaration_date' => $this->input->post('declaration_date'),
-                'tax_amount' => $this->input->post('total_gst_amount'),
+                'total_amount_wo_tax' => $this->input->post('total_amount_wo_tax'),
+                'tax_amount' => $this->input->post('total_vat_amount'),
                 'total_amount' => $this->input->post('total_amount'),
+                'door_delivery' => $this->input->post('door_delivery'),
                 'remarks' => $this->input->post('remarks'),
                 'purchase_bill_upload' => 'vendor-pur-invoice-documents/' . $purchase_bill_upload,
                 'status' => $this->input->post('status'),
@@ -3994,8 +3996,10 @@ class Vendor extends CI_Controller
                 'vat_payer_purchase_grp' => $this->input->post('vat_payer_purchase_grp'),
                 'declaration_no' => $this->input->post('declaration_no'),
                 'declaration_date' => $this->input->post('declaration_date'),
-                'tax_amount' => $this->input->post('tax_amount'),
+                'total_amount_wo_tax' => $this->input->post('total_amount_wo_tax'),
+                'tax_amount' => $this->input->post('total_vat_amount'),
                 'total_amount' => $this->input->post('total_amount'),
+                'door_delivery' => $this->input->post('door_delivery'),
                 'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),

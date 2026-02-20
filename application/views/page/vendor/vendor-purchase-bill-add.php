@@ -62,13 +62,13 @@
                             <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select Enquiry'], set_value('srch_tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" required'); ?>
                         </div>
 
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-3">
                             <label>Vendor Name <span style="color:red;">*</span></label>
                             <?php echo form_dropdown('srch_vendor_id', ['' => 'Select Vendor'], set_value('srch_vendor_id'), 'id="srch_vendor_id" class="form-control" required'); ?>
                         </div>
 
 
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-3">
                             <label>Vendor PO No <span style="color:red;">*</span>
 
                             </label>
@@ -76,11 +76,21 @@
 
                         </div>
 
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-3">
                             <label>Contact Person</label>
                             <?php echo form_dropdown('srch_vendor_contact_person_id', $vendor_contact_opt, set_value('srch_vendor_contact_person_id'), 'id="srch_vendor_contact_id" class="form-control"'); ?>
                         </div>
 
+                        <div class="form-group col-md-3">
+                            <label>Check Door Delivery</label>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" name="door_delivery" id="door_delivery"
+                                        value="Door Delivery">
+                                    Door Delivery
+                                </label>
+                            </div>
+                        </div>
 
                         <div class="form-group col-md-3">
                             <label>Invoice Date</label>
@@ -171,6 +181,7 @@
                                             <i class="fa fa-calculator text-success me-2"></i>
                                             <strong>Total Amount With Tax:</strong>
                                             <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                            <input type="hidden" name="total_amount" class="total_amount_hidden">
                                         </h5>
                                     </div>
                                 </div>
@@ -180,6 +191,8 @@
                                             <i class="fa fa-calculator text-success me-2"></i>
                                             <strong>Total VAT Amount :</strong>
                                             <span class="text-primary"><span id="total_vat_amount">0.000</span></span>
+                                            <input type="hidden" name="total_vat_amount" class="total_vat_amount_hidden">
+
                                         </h5>
                                     </div>
                                 </div>
@@ -190,6 +203,8 @@
                                             <strong>Total Amount WO Tax:</strong>
                                             <span class="text-primary"><span
                                                     id="total_amount_wo_tax">0.000</span></span>
+                                            <input type="hidden" name="total_amount_wo_tax"
+                                                class="total_amount_wo_tax_hidden">
                                         </h5>
                                     </div>
                                 </div>
