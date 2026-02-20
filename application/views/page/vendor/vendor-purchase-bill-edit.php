@@ -296,40 +296,69 @@
                                     value="<?php echo $header['tax_amount']; ?>">
                             </div> -->
 
-                            <div class="row">
-                                <div class="col-md-3 pull-right ">
-                                    <div class="total-box shadow-sm">
-                                        <h5 class="mb-0">
-                                            <i class="fa fa-calculator text-success me-2"></i>
-                                            <strong>Total Amount With Tax:</strong>
-                                            <span class="text-primary"><span id="total_amount">0.000</span></span>
-                                            <input type="hidden" name="total_amount" class="total_amount_hidden">
-                                        </h5>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 pull-right ">
-                                    <div class="total-box shadow-sm">
-                                        <h5 class="mb-0">
-                                            <i class="fa fa-calculator text-success me-2"></i>
-                                            <strong>Total VAT Amount :</strong>
-                                            <span class="text-primary"><span id="total_vat_amount">0.000</span></span>
-                                            <input type="hidden" name="total_vat_amount" class="total_vat_amount_hidden">
+                           <div class="row">
 
-                                        </h5>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="fix_theamount_total">Fix The Amount</label>
+
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox"
+                                                name="fix_theamount_total"
+                                                id="fix_theamount_total"
+                                                value="1"
+                                                <?php if($header['fix_theamount_total'] == 1){ echo 'checked'; } ?>>
+
+                                            Fix The Amount
+                                        </label>
                                     </div>
-                                </div>
-                                <div class="col-md-3 pull-right">
-                                    <div class="total-box shadow-sm">
-                                        <h5 class="mb-0">
-                                            <i class="fa fa-calculator text-success me-2"></i>
-                                            <strong>Total Amount WO Tax:</strong>
-                                            <span class="text-primary"><span
-                                                    id="total_amount_wo_tax">0.000</span></span>
-                                            <input type="hidden" name="total_amount_wo_tax" class="total_amount_wo_tax_hidden">
-                                        </h5>
-                                    </div>
+
                                 </div>
                             </div>
+
+                            <!-- Total With Tax -->
+                            <div class="col-md-3 pull-right">
+                                <div class="form-group total-box shadow-sm">
+                                    <label>
+                                        <i class="fa fa-calculator text-success"></i>
+                                        Total Amount With Tax
+                                    </label>
+                                    <input type="number"
+                                        name="total_amount" step="any"
+                                        id="total_amount"
+                                        class="form-control text-right font-weight-bold" value="<?php echo $header['total_amount'];?>" readonly>
+                                </div>
+                            </div>
+                             <div class="col-md-3 pull-right">
+                                <div class="form-group total-box shadow-sm">
+                                    <label>
+                                        <i class="fa fa-calculator text-success"></i>
+                                        Total VAT Amount
+                                    </label>
+                                    <input type="number"
+                                        name="total_vat_amount" step="any"
+                                        id="total_vat_amount"
+                                        class="form-control text-right" value="<?php echo $header['tax_amount'];?>" readonly>
+                                </div>
+                            </div> 
+                            <!-- Total Amount WO Tax -->
+                            <div class="col-md-3 pull-right">
+                                <div class="form-group total-box shadow-sm">
+                                    <label>
+                                        <i class="fa fa-calculator text-success"></i>
+                                        Total Amount WO Tax
+                                    </label>
+                                    <input type="number" step="any"
+                                        name="total_amount_wo_tax"
+                                        id="total_amount_wo_tax"
+                                        class="form-control text-right" value="<?php echo $header['total_amount_wo_tax'];?>" readonly> 
+                                </div>
+                            </div>
+
+                            <!-- Total VAT -->
+                           
+                        </div>
                         </fieldset>
                     </div>
                 </div>
@@ -407,361 +436,226 @@ legend {
 </style>
 
 <script>
-$(document).ready(function() {
-    // Calculate totals on page load for existing items
-    setTimeout(function() {
-        $(".item-row").each(function() {
-            calculateRow($(this));
-        });
-        calculateTotals();
-    }, 500);
+$(document).ready(function () {
 
-    // Initialize with existing values
-    const initialCompanyId = $("#srch_company_id").val();
-    const initialCustomerId = $("#srch_customer_id").val();
-    const initialTenderEnqId = $("#srch_tender_enquiry_id").val();
-    const initialVendorId = $("#srch_vendor_id").val();
-    const initialVendorPoId = $("#srch_vendor_po_id").val();
-
-    // Load initial dropdowns on page load
-    if (initialCustomerId && initialCompanyId) {
-        load_tender_enq(initialTenderEnqId);
-    }
-
-    if (initialTenderEnqId) {
-        setTimeout(function() {
-            load_vendors(initialTenderEnqId, initialVendorId);
-        }, 500);
-    }
-
-    if (initialVendorId) {
-        setTimeout(function() {
-            load_vendor_po_and_contacts(initialVendorId, initialVendorPoId);
-        }, 1000);
-    }
-
-    // Autocomplete for Enquiry Search
-    $(".srch_enq_id").autocomplete({
-        source: function(request, response) {
-            $.ajax({
-                url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
-                type: "POST",
-                data: {
-                    search: request.term
-                },
-                dataType: "json",
-                success: function(data) {
-                    response(data);
-                },
-            });
-        },
-        minLength: 1,
-        select: function(event, ui) {
-            $("#srch_company_id").val(ui.item.company_id);
-            $("#srch_customer_id").val(ui.item.customer_id).change();
-            load_tender_enq(ui.item.tender_enquiry_id);
-        },
+/* =====================================================
+   INITIAL TOTAL LOAD
+=====================================================*/
+setTimeout(function () {
+    $(".item-row").each(function () {
+        calculateRow($(this));
     });
-
-    function load_tender_enq(t_enq_id = "") {
-        const customer_id = $("#srch_customer_id").val();
-        const company_id = $("#srch_company_id").val();
-        const $enquiryDropdown = $("#srch_tender_enquiry_id");
-
-        $enquiryDropdown
-            .html('<option value="">Select Enquiry</option>')
-            .prop("disabled", true);
-
-        if (!customer_id || !company_id) return;
-
-        $.ajax({
-            url: "<?php echo site_url('vendor/get_tender_enquiries_by_customer'); ?>",
-            type: "POST",
-            data: {
-                company_id: company_id,
-                customer_id: customer_id,
-            },
-            dataType: "json",
-            success: function(res) {
-                if (res.length > 0) {
-                    $enquiryDropdown.prop("disabled", false);
-
-                    $.each(res, function(i, row) {
-                        $enquiryDropdown.append(
-                            $("<option>", {
-                                value: row.tender_enquiry_id,
-                                text: row.display,
-                            })
-                        );
-                    });
-
-                    if (t_enq_id) {
-                        $enquiryDropdown.val(t_enq_id).trigger("change");
-                    }
-                } else {
-                    $enquiryDropdown.html('<option value="">No enquiries found</option>');
-                }
-            },
-            error: function() {
-                alert("Error loading enquiries");
-            },
-        });
-    }
-
-    $("#srch_customer_id").on("change", function() {
-        load_tender_enq("");
-    });
-
-    // Load Vendors when Tender Enquiry changes
-    $("#srch_tender_enquiry_id").on("change", function() {
-        const tender_id = $(this).val();
-        load_vendors(tender_id, "");
-    });
-
-    function load_vendors(tender_id, selected_vendor = "") {
-        const $vendor = $("#srch_vendor_id");
-        $vendor.html('<option value="">Loading...</option>');
-
-        if (!tender_id) {
-            $vendor.html('<option value="">Select Vendor</option>');
-            return;
-        }
-
-        $.post(
-            "<?php echo site_url('vendor/get_vendor_list_purchase_inward'); ?>", {
-                srch_tender_enquiry_id: tender_id
-            },
-            function(res) {
-                $vendor.html('<option value="">Select Vendor</option>');
-                if (res.length > 0) {
-                    $.each(res, function(i, row) {
-                        $vendor.append(
-                            `<option value="${row.vendor_id}">${row.vendor_name}</option>`
-                        );
-                    });
-                    if (selected_vendor) {
-                        $vendor.val(selected_vendor).trigger("change");
-                    }
-                }
-            },
-            "json"
-        );
-    }
-
-    // Load PO and Contacts when Vendor changes
-    $("#srch_vendor_id").on("change", function() {
-        const vendor_id = $(this).val();
-        load_vendor_po_and_contacts(vendor_id, "");
-    });
-
-    function load_vendor_po_and_contacts(vendor_id, selected_po = "") {
-        const $enquiry = $("#srch_vendor_po_id");
-        const $contact = $("#srch_vendor_contact_id");
-
-        //$enquiry.html('<option value="">Select Enquiry No</option>');
-        //$contact.html('<option value="">Select Contact</option>');
-
-        if (!vendor_id) return;
-
-        // Load PO Numbers
-        $.post(
-            "<?php echo site_url('vendor/get_data'); ?>", {
-                tbl: "get-vendor-purchase-inward-load-list",
-                id: vendor_id,
-            },
-            function(res) {
-                if (res.length > 0) {
-                    $.each(res, function(i, row) {
-                        $enquiry.append(
-                            `<option value="${row.vendor_po_id}">${row.vendor_po_no}</option>`
-                        );
-                    });
-                    if (selected_po) {
-                        $enquiry.val(selected_po);
-                    }
-                }
-            },
-            "json"
-        );
-
-        // Load Contact Persons
-        $.post(
-            "<?php echo site_url('vendor/get_data'); ?>", {
-                tbl: "get-vendor-contacts",
-                id: vendor_id,
-            },
-            function(res) {
-                if (res.length > 0) {
-                    $.each(res, function(i, row) {
-                        $contact.append(
-                            `<option value="${row.vendor_contact_id}">${row.contact_person_name}</option>`
-                        );
-                    });
-                }
-            },
-            "json"
-        );
-    }
-
-    // Recalculate on input change
-    $(document).on(
-        "input change",
-        ".rate-input, .gst-input, .qty-input, .item-check , .conversion_rate, .duty",
-        function() {
-            const $row = $(this).closest('.item-row');
-            calculateRow($row);
-            calculateTotalAmount();
-        }
-    );
-
     calculateTotalAmount();
-
-    function calculateRow($row) {
-        /*const qty = parseFloat($row.find(".qty-input").val()) || 0;
-        const rate = parseFloat($row.find(".rate-input").val()) || 0;
-        const gst = parseFloat($row.find(".gst-input").val()) || 0;
-
-        const base = qty * rate;
-        const gst_amt = (base * gst) / 100;
-        const total = base + gst_amt;
-
-        $row.find(".gst-amount-input").val(gst_amt.toFixed(2));
-        $row.find(".amount-input").val(total.toFixed(2));*/
-
-        const qty = parseFloat($row.find(".qty-input").val()) || 0;
-        const rate = parseFloat($row.find(".rate-input").val()) || 0;
-        const gst = parseFloat($row.find(".gst-input").val()) || 0;
-        const c_rate = parseFloat($row.find(".conversion_rate").val()) || 1;
-        const dty = parseFloat($row.find(".duty").val()) || 0;
-
-        const ac_amt = qty * rate * c_rate;
+    toggleFixAmount(); // ✅ AUTO LOAD FIX AMOUNT
+}, 500);
 
 
-        //const amountWithoutTax = qty * rate;
-        const amountWithoutTax = (ac_amt) + ((ac_amt) * dty / 100);
-        const amountWithTax = amountWithoutTax + (amountWithoutTax * gst / 100);
-
-        $row.find(".act_amt").val(ac_amt.toFixed(3));
-
-        $row.find(".amountwotx").val(amountWithoutTax.toFixed(3));
-        $row.find(".amount-input").val(amountWithTax.toFixed(3));
-    }
-
-    function calculateTotals() {
-        let total_amount = 0;
-        let total_gst = 0;
-
-        $(".item-row").each(function() {
-            if ($(this).find(".item-check").is(":checked")) {
-                total_amount += parseFloat($(this).find(".amount-input").val()) || 0;
-                total_gst += parseFloat($(this).find(".gst-amount-input").val()) || 0;
-            }
+/* =====================================================
+   AUTOCOMPLETE ENQUIRY
+=====================================================*/
+$(".srch_enq_id").autocomplete({
+    source: function (request, response) {
+        $.ajax({
+            url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
+            type: "POST",
+            data: { search: request.term },
+            dataType: "json",
+            success: response
         });
+    },
+    minLength: 1,
+    select: function (event, ui) {
+        $("#srch_company_id").val(ui.item.company_id);
+        $("#srch_customer_id")
+            .val(ui.item.customer_id)
+            .trigger("change");
 
-        $("#total_amount_display").text(total_amount.toFixed(3));
-        $("#total_amount").val(total_amount.toFixed(3));
-
-        $("#total_gst_amount_display").text(total_gst.toFixed(3));
-        $("#total_gst_amount").val(total_gst.toFixed(3));
+        load_tender_enq(ui.item.tender_enquiry_id);
     }
-
-    function calculateTotalAmount() {
-        let total = 0;
-        $(".amount-input").each(function() {
-            total += parseFloat($(this).val()) || 0;
-        });
-
-        $("#total_amount").text(total.toFixed(3));
-        $('.total_amount_hidden').val(total.toFixed(3));
-
-        let total_wot = 0;
-        $(".amountwotx").each(function() {
-            total_wot += parseFloat($(this).val()) || 0;
-        });
-
-        $("#total_amount_wo_tax").text(total_wot.toFixed(3));
-        $('.total_amount_wo_tax_hidden').val(total_wot.toFixed(3));
-
-        $('#total_vat_amount').text((total - total_wot).toFixed(3));
-        $('.total_vat_amount_hidden').val((total - total_wot).toFixed(3));
-    }
-
-    // Form validation
-    $("form").on("submit", function() {
-        if ($(".item-check:checked").length === 0) {
-            alert("Please select at least one item");
-            return false;
-        }
-    });
 });
 
-// CKEditor
-window.onload = function() {
-    CKEDITOR.replace("editor2", {
-        height: 80,
-        extraPlugins: "justify,colorbutton,font,table",
-        removeButtons: "",
-        toolbar: [{
-                name: "clipboard",
-                items: [
-                    "Cut",
-                    "Copy",
-                    "Paste",
-                    "PasteText",
-                    "PasteFromWord",
-                    "-",
-                    "Undo",
-                    "Redo",
-                ],
-            },
-            {
-                name: "basicstyles",
-                items: [
-                    "Bold",
-                    "Italic",
-                    "Underline",
-                    "Strike",
-                    "RemoveFormat",
-                    "CopyFormatting",
-                ],
-            },
-            {
-                name: "paragraph",
-                items: [
-                    "NumberedList",
-                    "BulletedList",
-                    "-",
-                    "Outdent",
-                    "Indent",
-                    "-",
-                    "Blockquote",
-                    "JustifyLeft",
-                    "JustifyCenter",
-                    "JustifyRight",
-                    "JustifyBlock",
-                ],
-            },
-            {
-                name: "links",
-                items: ["Link", "Unlink", "Anchor"]
-            },
-            {
-                name: "insert",
-                items: ["Image", "Table", "HorizontalRule", "SpecialChar"],
-            },
-            {
-                name: "styles",
-                items: ["Format", "Font", "FontSize"]
-            },
-            {
-                name: "colors",
-                items: ["TextColor", "BGColor"]
-            },
-            {
-                name: "tools",
-                items: ["Maximize", "ShowBlocks"]
-            },
-        ],
+
+/* =====================================================
+   LOAD TENDER ENQUIRY
+=====================================================*/
+function load_tender_enq(t_enq_id="") {
+
+    const customer_id = $("#srch_customer_id").val();
+    const company_id  = $("#srch_company_id").val();
+    const $drop = $("#srch_tender_enquiry_id");
+
+    $drop.html('<option value="">Select Enquiry</option>')
+         .prop("disabled", true);
+
+    if(!customer_id || !company_id) return;
+
+    $.post(
+        "<?php echo site_url('vendor/get_tender_enquiries_by_customer');?>",
+        {company_id,customer_id},
+        function(res){
+
+            $drop.prop("disabled",false);
+
+            $.each(res,function(i,row){
+                $drop.append(
+                    `<option value="${row.tender_enquiry_id}">
+                        ${row.display}
+                     </option>`
+                );
+            });
+
+            if(t_enq_id){
+                $drop.val(t_enq_id).trigger("change");
+            }
+        },
+        "json"
+    );
+}
+
+
+/* =====================================================
+   ROW INPUT CHANGE
+=====================================================*/
+$(document).on(
+"input change",
+".rate-input,.gst-input,.qty-input,.item-check,.conversion_rate,.duty",
+function () {
+
+    const $row = $(this).closest(".item-row");
+
+    calculateRow($row);
+    calculateTotalAmount();
+});
+
+
+/* =====================================================
+   FIX AMOUNT CHECKBOX
+=====================================================*/
+$(document).on("change","#fix_theamount_total",function(){
+    toggleFixAmount();
+});
+
+
+/* =====================================================
+   FIX AMOUNT FUNCTION (AUTO + CHANGE)
+=====================================================*/
+function toggleFixAmount(){
+
+    if($("#fix_theamount_total").is(":checked")){
+
+        $("#total_amount").data("fixed",true);
+        $("#total_vat_amount").data("fixed",true);
+        $("#total_amount_wo_tax").data("fixed",true);
+
+        $("#total_amount,#total_vat_amount,#total_amount_wo_tax")
+            .prop("readonly",false)
+            .css("background","#fff");
+
+    }else{
+
+        $("#total_amount").data("fixed",false);
+        $("#total_vat_amount").data("fixed",false);
+        $("#total_amount_wo_tax").data("fixed",false);
+
+        $("#total_amount,#total_vat_amount,#total_amount_wo_tax")
+            .prop("readonly",true)
+            .css("background","#eee");
+
+        calculateTotalAmount();
+    }
+}
+
+
+/* =====================================================
+   ROW CALCULATION
+=====================================================*/
+function calculateRow($row){
+
+    const qty   = parseFloat($row.find(".qty-input").val())||0;
+    const rate  = parseFloat($row.find(".rate-input").val())||0;
+    const gst   = parseFloat($row.find(".gst-input").val())||0;
+    const cRate = parseFloat($row.find(".conversion_rate").val())||1;
+    const duty  = parseFloat($row.find(".duty").val())||0;
+
+    let ac_amt = qty*rate*cRate;
+
+    let amountWithoutTax =
+        ac_amt + ((ac_amt*duty)/100);
+
+    let amountWithTax =
+        amountWithoutTax +
+        (amountWithoutTax*gst/100);
+
+    let gstAmount =
+        amountWithTax-amountWithoutTax;
+
+    $row.find(".act_amt")
+        .val(ac_amt.toFixed(3));
+
+    $row.find(".amountwotx")
+        .val(amountWithoutTax.toFixed(3));
+
+    $row.find(".gst-amount-input")
+        .val(gstAmount.toFixed(3));
+
+    $row.find(".amount-input")
+        .val(amountWithTax.toFixed(3));
+}
+
+
+/* =====================================================
+   TOTAL CALCULATION
+=====================================================*/
+function calculateTotalAmount(){
+
+    if($("#fix_theamount_total").is(":checked")){
+        return;
+    }
+
+    let total=0;
+    let total_wot=0;
+
+    $(".item-row").each(function(){
+
+        if($(this).find(".item-check").is(":checked")){
+
+            total+=parseFloat(
+                $(this).find(".amount-input").val()
+            )||0;
+
+            total_wot+=parseFloat(
+                $(this).find(".amountwotx").val()
+            )||0;
+        }
     });
-};
+
+    let totalVat = total-total_wot;
+
+    $("#total_amount").val(total.toFixed(3));
+    $("#total_amount_wo_tax").val(total_wot.toFixed(3));
+    $("#total_vat_amount").val(totalVat.toFixed(3));
+
+    $(".total_amount_hidden")
+        .val(total.toFixed(3));
+
+    $(".total_amount_wo_tax_hidden")
+        .val(total_wot.toFixed(3));
+
+    $(".total_vat_amount_hidden")
+        .val(totalVat.toFixed(3));
+}
+
+
+/* =====================================================
+   FORM VALIDATION
+=====================================================*/
+$("form").on("submit",function(){
+
+    if($(".item-check:checked").length===0){
+        alert("Please select at least one item");
+        return false;
+    }
+});
+
+});
 </script>

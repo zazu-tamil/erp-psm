@@ -175,39 +175,63 @@
                             </table>
 
                             <div class="row">
-                                <div class="col-md-3 pull-right ">
-                                    <div class="total-box shadow-sm">
-                                        <h5 class="mb-0">
-                                            <i class="fa fa-calculator text-success me-2"></i>
-                                            <strong>Total Amount With Tax:</strong>
-                                            <span class="text-primary"><span id="total_amount">0.000</span></span>
-                                            <input type="hidden" name="total_amount" class="total_amount_hidden">
-                                        </h5>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="fix_theamount_total">Fix The Amount</label>
+
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox"
+                                                    name="fix_theamount_total"
+                                                    id="fix_theamount_total"
+                                                    value="1">
+
+                                                Fix The Amount
+                                            </label>
+                                        </div>
+
                                     </div>
                                 </div>
-                                <div class="col-md-3 pull-right ">
-                                    <div class="total-box shadow-sm">
-                                        <h5 class="mb-0">
-                                            <i class="fa fa-calculator text-success me-2"></i>
-                                            <strong>Total VAT Amount :</strong>
-                                            <span class="text-primary"><span id="total_vat_amount">0.000</span></span>
-                                            <input type="hidden" name="total_vat_amount" class="total_vat_amount_hidden">
 
-                                        </h5>
+                                <!-- Total With Tax -->
+                                <div class="col-md-3 pull-right">
+                                    <div class="form-group total-box shadow-sm">
+                                        <label>
+                                            <i class="fa fa-calculator text-success"></i>
+                                            Total Amount With Tax
+                                        </label>
+                                        <input type="number"
+                                            name="total_amount" step="any"
+                                            id="total_amount"
+                                            class="form-control text-right font-weight-bold" value="0.000" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-3 pull-right">
-                                    <div class="total-box shadow-sm">
-                                        <h5 class="mb-0">
-                                            <i class="fa fa-calculator text-success me-2"></i>
-                                            <strong>Total Amount WO Tax:</strong>
-                                            <span class="text-primary"><span
-                                                    id="total_amount_wo_tax">0.000</span></span>
-                                            <input type="hidden" name="total_amount_wo_tax"
-                                                class="total_amount_wo_tax_hidden">
-                                        </h5>
+                                    <div class="form-group total-box shadow-sm">
+                                        <label>
+                                            <i class="fa fa-calculator text-success"></i>
+                                            Total VAT Amount
+                                        </label>
+                                        <input type="number"
+                                            name="total_vat_amount" step="any"
+                                            id="total_vat_amount"
+                                            class="form-control text-right" value="0.000" readonly>
                                     </div>
-                                </div>
+                                </div> 
+                                <!-- Total Amount WO Tax -->
+                                <div class="col-md-3 pull-right">
+                                    <div class="form-group total-box shadow-sm">
+                                        <label>
+                                            <i class="fa fa-calculator text-success"></i>
+                                            Total Amount WO Tax
+                                        </label>
+                                        <input type="number" step="any"
+                                            name="total_amount_wo_tax"
+                                            id="total_amount_wo_tax"
+                                            class="form-control text-right" value="0.000" readonly> 
+                                    </div>
+                                </div> 
                             </div>
                         </fieldset>
                     </div>

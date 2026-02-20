@@ -2629,6 +2629,11 @@ class Tender extends CI_Controller
 
         if ($this->input->post('mode') == 'Add') {
 
+            // echo "<pre>";
+            // print_r($this->input->post());
+            // echo "</pre>";
+            // exit;
+
             $this->db->trans_start();
 
             $tender_dc_ids = $this->input->post('dc_id') ?? [];
@@ -2659,50 +2664,50 @@ class Tender extends CI_Controller
 
             $this->db->insert('tender_enq_invoice_info', $header);
             $invoice_id = $this->db->insert_id();
+            $selected_items = $this->input->post('selected_items') ?? [];
 
-            // -------- ITEMS --------
-            $selected_idxs = $this->input->post('selected_items') ?? [];
-            $tender_po_item_id = $this->input->post('tender_po_item_id') ?? [];
-            $item_codes = $this->input->post('item_code') ?? [];
-            $item_descs = $this->input->post('item_desc') ?? [];
-            $uoms = $this->input->post('uom') ?? [];
-            $qtys = $this->input->post('qty') ?? [];
-            $rates = $this->input->post('rate') ?? [];
-            $gsts = $this->input->post('gst') ?? [];
-            $amounts = $this->input->post('amount') ?? [];
+            if (empty($selected_items)) {
 
-            foreach ($selected_idxs as $idx => $val) {
+                $tender_po_item_id = $this->input->post('tender_po_item_id') ?? [];
+                $item_codes = $this->input->post('item_code') ?? [];
+                $item_descs = $this->input->post('item_desc') ?? [];
+                $uoms = $this->input->post('uom') ?? [];
+                $qtys = $this->input->post('qty') ?? [];
+                $rates = $this->input->post('rate') ?? [];
+                $gsts = $this->input->post('gst') ?? [];
+                $amounts = $this->input->post('amount') ?? [];
 
-                if (!isset($tender_po_item_id[$idx]))
-                    continue;
 
-                $item = [
-                    'tender_enq_invoice_id' => $invoice_id,
-                    'tender_po_item_id' => $tender_po_item_id[$idx],
-                    'item_code' => $item_codes[$idx] ?? '',
-                    'item_desc' => $item_descs[$idx] ?? '',
-                    'uom' => $uoms[$idx] ?? '',
-                    'qty' => $qtys[$idx] ?? 0,
-                    'rate' => $rates[$idx] ?? 0,
-                    'gst' => $gsts[$idx] ?? 0,
-                    'amount' => $amounts[$idx] ?? 0,
-                    'status' => 'Active',
-                    'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
-                    'created_date' => date('Y-m-d H:i:s')
-                ];
+                foreach ($selected_items as $idx => $value) {
 
-                $this->db->insert('tender_enq_invoice_item_info', $item);
+                    $item = [
+                        'tender_enq_invoice_id' => $invoice_id,
+                        'tender_po_item_id' => $tender_po_item_id[$idx],
+                        'item_code' => $item_codes[$idx] ?? '',
+                        'item_desc' => $item_descs[$idx] ?? '',
+                        'uom' => $uoms[$idx] ?? '',
+                        'qty' => $qtys[$idx] ?? 0,
+                        'rate' => $rates[$idx] ?? 0,
+                        'gst' => $gsts[$idx] ?? 0,
+                        'amount' => $amounts[$idx] ?? 0,
+                        'status' => 'Active',
+                        'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                        'created_date' => date('Y-m-d H:i:s')
+                    ];
+                    $this->db->insert('tender_enq_invoice_item_info', $item);
+                }
             }
-
             $this->db->trans_complete();
-
             if ($this->db->trans_status() === FALSE) {
-                $this->session->set_flashdata('error', 'Error saving data.');
+                $this->session->set_flashdata('error', 'Error saving Vendor PO. Please try again.');
             } else {
-                $this->session->set_flashdata('success', 'Tender Invoice added successfully.');
+                $this->session->set_flashdata('success', 'Vendor PO saved successfully.');
+
             }
 
             redirect('tender-invoice-list');
+
+
         }
 
 
@@ -3040,6 +3045,7 @@ class Tender extends CI_Controller
                 $tender_po_item_id = $this->input->post('tender_po_item_id') ?? [];
                 $category_id = $this->input->post('category_id') ?? [];
                 $item_id = $this->input->post('item_id') ?? [];
+                $item_codes = $this->input->post('item_code') ?? [];
                 $item_desc = $this->input->post('item_desc') ?? [];
                 $uom = $this->input->post('uom') ?? [];
                 $qty = $this->input->post('qty') ?? [];
@@ -3054,6 +3060,7 @@ class Tender extends CI_Controller
                         'tender_po_item_id' => $tender_po_item_id[$idx] ?? 0,
                         'category_id' => $category_id[$idx] ?? 0,
                         'item_id' => $item_id[$idx] ?? 0,
+                        'item_code' => $item_codes[$idx] ?? '',
                         'item_desc' => $item_desc[$idx] ?? '',
                         'uom' => $uom[$idx] ?? '',
                         'qty' => $qty[$idx] ?? 0,
@@ -3275,7 +3282,7 @@ class Tender extends CI_Controller
             b.po_date,  
             d.company_name,
             e.customer_name,
-            e.country,
+            e.country as customer_country,
             e.address,
             e.gst as vat_account_no,
             f.currency_code,
@@ -3327,24 +3334,21 @@ class Tender extends CI_Controller
 
         // === ITEM LIST ===
         $sql = "
-            SELECT 
-                teni.*,
-                cat.category_name,  
-                teni.item_code,
-                teni.item_desc, 
-                teni.uom,
-                teni.rate,
-                teni.qty,
-                teni.gst,
-                (teni.rate * teni.qty) AS Net_amount
-            FROM tender_enq_invoice_item_info as teni
-            LEFT JOIN category_info cat ON 
-                teni.category_id = cat.category_id
-            LEFT JOIN item_info item ON 
-                teni.item_id = item.item_id
-            WHERE teni.tender_enq_invoice_id = ?
-                AND teni.status='Active'
-            ORDER BY teni.tender_enq_invoice_item_id
+          select
+            b.tender_enq_invoice_item_id,
+            b.tender_enq_invoice_id,
+            b.item_code,
+            b.item_desc,
+            b.uom,
+            b.qty,
+            b.rate,
+            b.gst,
+            b.amount,
+            (b.qty * b.rate) as Net_Amount
+            from tender_enq_invoice_info as a 
+            left join tender_enq_invoice_item_info as b on a.tender_enq_invoice_id = b.tender_enq_invoice_id and b.`status`='Active'
+            where a.`status`='Active'
+            and a.tender_enq_invoice_id = ?
         ";
         $query = $this->db->query($sql, [$tender_enq_invoice_id]);
         $data['item_list'] = $query->result_array();

@@ -486,58 +486,6 @@
       });
     });
 
-    // Auto calculate when rate/qty/gst changes
-    $(document).on(
-      "input change",
-      ".rate-input, .gst-input, .qty-input , .conversion_rate , .duty ",
-      function () {
-        const $row = $(this).closest("tr.item-row");
-        calculateRow($row);
-        calculateTotalAmount();
-      },
-    );
-
-    // Row calculation function
-    function calculateRow($row) {
-      const qty = parseFloat($row.find(".qty-input").val()) || 0;
-      const rate = parseFloat($row.find(".rate-input").val()) || 0;
-      const gst = parseFloat($row.find(".gst-input").val()) || 0;
-      const c_rate = parseFloat($row.find(".conversion_rate").val()) || 1;
-      const dty = parseFloat($row.find(".duty").val()) || 0;
-
-      const ac_amt = qty * rate * c_rate;
-
-      //const amountWithoutTax = qty * rate;
-      const amountWithoutTax = ac_amt + (ac_amt * dty) / 100;
-      const amountWithTax = amountWithoutTax + (amountWithoutTax * gst) / 100;
-
-      $row.find(".act_amt").val(ac_amt.toFixed(3));
-
-      $row.find(".amountwotx").val(amountWithoutTax.toFixed(3));
-      $row.find(".amount-input").val(amountWithTax.toFixed(3));
-    }
-
-    function calculateTotalAmount() {
-      let total = 0;
-      $(".amount-input").each(function () {
-        total += parseFloat($(this).val()) || 0;
-      });
-
-      $("#total_amount").text(total.toFixed(3));
-      $(".total_amount_hidden").val(total.toFixed(3));
-
-      let total_wot = 0;
-      $(".amountwotx").each(function () {
-        total_wot += parseFloat($(this).val()) || 0;
-      });
-
-      $("#total_amount_wo_tax").text(total_wot.toFixed(3));
-      $(".total_amount_wo_tax_hidden").val(total_wot.toFixed(3));
-
-      $("#total_vat_amount").text((total - total_wot).toFixed(3));
-      $(".total_vat_amount_hidden").val((total - total_wot).toFixed(3));
-    }
-
     // Form submit validation
     $("form").on("submit", function () {
       if ($(".item-check:checked").length === 0) {
@@ -545,5 +493,95 @@
         return false;
       }
     });
+
+    $(document).on(
+      "input change",
+      ".rate-input,.gst-input,.qty-input,.item-check,.conversion_rate,.duty",
+      function () {
+        const $row = $(this).closest(".item-row");
+
+        calculateRow($row);
+        calculateTotalAmount();
+      },
+    );
+
+    $(document).on("change", "#fix_theamount_total", function () {
+      toggleFixAmount();
+    });
+
+    function toggleFixAmount() {
+      if ($("#fix_theamount_total").is(":checked")) {
+        $("#total_amount").data("fixed", true);
+        $("#total_vat_amount").data("fixed", true);
+        $("#total_amount_wo_tax").data("fixed", true);
+
+        $("#total_amount,#total_vat_amount,#total_amount_wo_tax")
+          .prop("readonly", false)
+          .css("background", "#fff");
+      } else {
+        $("#total_amount").data("fixed", false);
+        $("#total_vat_amount").data("fixed", false);
+        $("#total_amount_wo_tax").data("fixed", false);
+
+        $("#total_amount,#total_vat_amount,#total_amount_wo_tax")
+          .prop("readonly", true)
+          .css("background", "#eee");
+
+        calculateTotalAmount();
+      }
+    }
+
+    function calculateRow($row) {
+      const qty = parseFloat($row.find(".qty-input").val()) || 0;
+      const rate = parseFloat($row.find(".rate-input").val()) || 0;
+      const gst = parseFloat($row.find(".gst-input").val()) || 0;
+      const cRate = parseFloat($row.find(".conversion_rate").val()) || 1;
+      const duty = parseFloat($row.find(".duty").val()) || 0;
+
+      let ac_amt = qty * rate * cRate;
+
+      let amountWithoutTax = ac_amt + (ac_amt * duty) / 100;
+
+      let amountWithTax = amountWithoutTax + (amountWithoutTax * gst) / 100;
+
+      let gstAmount = amountWithTax - amountWithoutTax;
+
+      $row.find(".act_amt").val(ac_amt.toFixed(3));
+
+      $row.find(".amountwotx").val(amountWithoutTax.toFixed(3));
+
+      $row.find(".gst-amount-input").val(gstAmount.toFixed(3));
+
+      $row.find(".amount-input").val(amountWithTax.toFixed(3));
+    }
+
+    function calculateTotalAmount() {
+      if ($("#fix_theamount_total").is(":checked")) {
+        return;
+      }
+
+      let total = 0;
+      let total_wot = 0;
+
+      $(".item-row").each(function () {
+        if ($(this).find(".item-check").is(":checked")) {
+          total += parseFloat($(this).find(".amount-input").val()) || 0;
+
+          total_wot += parseFloat($(this).find(".amountwotx").val()) || 0;
+        }
+      });
+
+      let totalVat = total - total_wot;
+
+      $("#total_amount").val(total.toFixed(3));
+      $("#total_amount_wo_tax").val(total_wot.toFixed(3));
+      $("#total_vat_amount").val(totalVat.toFixed(3));
+
+      $(".total_amount_hidden").val(total.toFixed(3));
+
+      $(".total_amount_wo_tax_hidden").val(total_wot.toFixed(3));
+
+      $(".total_vat_amount_hidden").val(totalVat.toFixed(3));
+    }
   });
 </script>

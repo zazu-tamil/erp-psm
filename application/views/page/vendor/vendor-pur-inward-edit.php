@@ -142,15 +142,14 @@
                                         </td>
 
                                         <td>
-                                            <input type="text" class="form-control"
+                                            <input type="text" class="form-control" name="item_code[<?php echo $index; ?>]"
                                                 value="<?php echo htmlspecialchars($item['item_code']); ?>" readonly>
 
-                                            <input type="hidden" name="vendor_po_item_id[<?php echo $index; ?>]"
-                                                value="<?php echo $item['vendor_po_item_id']; ?>">
-                                            <input type="hidden" name="category_id[<?php echo $index; ?>]"
-                                                value="<?php echo $item['category_id']; ?>">
-                                            <input type="hidden" name="item_id[<?php echo $index; ?>]"
-                                                value="<?php echo $item['item_id']; ?>">
+                                            <input type="text" name="vendor_pur_inward_item_id[<?php echo $index; ?>]"
+                                                value="<?php echo $item['vendor_pur_inward_item_id']; ?>"> 
+                                            <input type="text" name="vendor_po_item_id[<?php echo $index; ?>]"
+                                                value="<?php echo $item['vendor_po_item_id']; ?>"> 
+                                           
                                         </td>
 
                                         <td>

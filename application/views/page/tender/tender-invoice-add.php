@@ -332,7 +332,7 @@
                         <td>
                             <input type="checkbox"
                                 class="item-check"
-                                name="selected_items[]"
+                                name="selected_items[${i}]"    
                                 value="${i}"
                                 checked>
                         </td>

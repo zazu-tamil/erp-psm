@@ -399,4 +399,7 @@ ALTER TABLE `vendor_purchase_invoice_info`
 
 	
 ALTER TABLE `vendor_purchase_invoice_info`
-	ADD COLUMN `total_amount_wo_tax` DECIMAL(14,3) NULL DEFAULT NULL AFTER `tax_amount`;
+	ADD COLUMN `total_amount_wo_tax` DECIMAL(14,3) NULL DEFAULT NULL AFTER `tax_amount`;  
+
+
+ALTER TABLE `vendor_purchase_invoice_info` ADD `fix_theamount_total` CHAR(1) NOT NULL DEFAULT '0' AFTER `door_delivery`;

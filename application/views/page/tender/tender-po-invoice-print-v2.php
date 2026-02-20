@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <?php
 // echo "<pre>";
-// print_r($dc_list_info);
+// print_r($item_list);
 // echo "</pre>";
 ?>
 <html>
@@ -34,7 +34,7 @@
         }
 
         .header-img {
-            width: 100%; 
+            width: 100%;
         }
 
         .invoice-header {
@@ -446,16 +446,18 @@
         <div class="invoice-header">
             <?php if ($record['vat_payer_sales_grp'] == 'Exports (Line 5 of the VAT Return)') { ?>
                 <div class="invoice-title">Exports INVOICE</div>
-                <div class="invoice-number">No:
-                    <?php echo htmlspecialchars($record['invoice_no'] ?? 'N/A'); ?>
+                <div style="float:right; text-align:right;">
+                    Date : <?php echo htmlspecialchars(date('d/m/Y', strtotime($record['invoice_date']))); ?><br>
+                    Invoice No: <?php echo htmlspecialchars($record['invoice_no'] ?? 'N/A'); ?>
                 </div>
             <?php } else { ?>
                 <div class="invoice-title">TAX INVOICE</div>
-                <div class="invoice-number">No:
-                    <?php echo htmlspecialchars($record['invoice_no'] ?? 'N/A'); ?>
+                <div style="float:right; text-align:right;">
+                    Date : <?php echo htmlspecialchars(date('d/m/Y', strtotime($record['invoice_date']))); ?><br>
+                    Invoice No: <?php echo htmlspecialchars($record['invoice_no'] ?? 'N/A'); ?>
                 </div>
             <?php } ?>
-        </div> 
+        </div>
 
 
         <div class="reference-section">
@@ -464,10 +466,6 @@
                 <?php echo htmlspecialchars($record['po_no'] ?? 'N/A'); ?>,
                 <span class="label-bold">Dated:</span>
                 <?php echo date('d-m-Y', strtotime($record['po_date'] ?? 'N/A')); ?>
-                <span style="float: right;">
-                    <span class="label-bold">Date:</span>
-                    <?php echo date('d-m-Y', strtotime($record['invoice_date'] ?? 'N/A')); ?>
-                </span>
             </div>
 
             <?php if (!empty($dc_list_info)) { ?>
@@ -491,30 +489,30 @@
                 <strong><?php echo htmlspecialchars($record['customer_name'] ?? 'N/A'); ?></strong><br>
                 <?php echo nl2br(htmlspecialchars($record['address'] ?? 'N/A')); ?><br>
                 <?php if (!empty($record['customer_country'])): ?>
-                    Country: (<?php echo htmlspecialchars($record['customer_country']); ?>)<br>
+                    <?php echo htmlspecialchars($record['customer_country']); ?><br>
                 <?php endif; ?>
                 <?php if (!empty($record['vat_account_no'])): ?>
-                   <strong> VAT Account. No:</strong> <?php echo htmlspecialchars($record['vat_account_no']); ?>
+                    <strong> VAT Account. No:</strong> <?php echo htmlspecialchars($record['vat_account_no']); ?>
                 <?php endif; ?>
             </div>
         </div>
 
         <!-- Currency Badge -->
         <?php
-            $decimal_point = isset($record['decimal_point']) ? intval($record['decimal_point']) : 3;
-            $currency_code = $record['currency_code'] ?? 'BHD';
+        $decimal_point = isset($record['decimal_point']) ? intval($record['decimal_point']) : 3;
+        $currency_code = $record['currency_code'] ?? 'BHD';
 
-            // Calculate totals
-            $subtotal = 0;
-            $total_vat = 0;
-            if (!empty($item_list)) {
-                foreach ($item_list as $item) {
-                    $subtotal += floatval($item['Net_amount'] ?? 0);
-                    $vat_amount = (floatval($item['Net_amount'] ?? 0) * floatval($item['gst'] ?? 0)) / 100;
-                    $total_vat += $vat_amount;
-                }
+        // Calculate totals
+        $subtotal = 0;
+        $total_vat = 0;
+        if (!empty($item_list)) {
+            foreach ($item_list as $item) {
+                $subtotal += floatval($item['Net_amount'] ?? 0);
+                $vat_amount = (floatval($item['Net_amount'] ?? 0) * floatval($item['gst'] ?? 0)) / 100;
+                $total_vat += $vat_amount;
             }
-            $grand_total_amount = $subtotal + $total_vat;
+        }
+        $grand_total_amount = $subtotal + $total_vat;
         ?>
         <div class="currency-badge">
             <span>Currency: <?php echo htmlspecialchars($currency_code); ?></span>
@@ -539,52 +537,61 @@
                 $total_net_amount = 0;
                 $total_vat_amount = 0;
                 $grand_total = 0;
-                $vat_percentage = 0;
 
                 if (!empty($item_list)):
-                    foreach ($item_list as $i => $item):
-                        $net_amount = $item['Net_amount'] ?? 0;
-                        $vat_percentage = floatval($item['gst'] ?? 0);
-                        $vat_amount = ($net_amount * $vat_percentage) / 100;
 
-                        $total_net_amount += $net_amount;
+                    foreach ($item_list as $i => $item):
+
+                        $qty = $item['qty'] ?? 0;
+                        $rate = $item['rate'] ?? 0;
+                        $net = $item['Net_Amount'] ?? ($qty * $rate);
+                        $vat_percentage = $item['gst'] ?? 0;
+
+                        // VAT Calculation
+                        $vat_amount = ($net * $vat_percentage) / 100;
+
+                        // Totals
+                        $total_net_amount += $net;
                         $total_vat_amount += $vat_amount;
                         ?>
                         <tr>
-                            <td class="text-center"><?php echo $i + 1; ?></td>
+                            <td class="text-center"><?= $i + 1 ?></td>
+
                             <td class="text-left">
-                                <div class="item-description">
-                                    <?php if (!empty($item['item_code'])): ?>
-                                        <div class="item-code"><?php echo htmlspecialchars($item['item_code']); ?></div>
-                                    <?php endif; ?>
-                                    <?php if (!empty($item['item_desc'])): ?>
-                                        <?php echo htmlspecialchars($item['item_desc']); ?>
-                                    <?php endif; ?>
-                                </div>
+                                <?php if (!empty($item['item_code'])): ?>
+                                    <div><strong><?= htmlspecialchars($item['item_code']) ?></strong></div>
+                                <?php endif; ?>
+                                <?= htmlspecialchars($item['item_desc'] ?? '') ?>
                             </td>
+
+                            <td class="text-center"><?= number_format($qty, 0) ?></td>
+
                             <td class="text-center">
-                                <?php echo number_format($item['qty'] ?? 0, 0); ?>
+                                <?= htmlspecialchars($item['uom'] ?? '-') ?>
                             </td>
-                            <td class="text-center">
-                                <?php echo htmlspecialchars($item['uom'] ?? '-'); ?>
-                            </td>
+
                             <td class="text-right">
-                                <?php echo number_format($item['rate'] ?? 0, $decimal_point); ?>
+                                <?= number_format($rate, $decimal_point) ?>
                             </td>
+
                             <td class="text-right">
-                                <?php echo number_format($net_amount, $decimal_point); ?>
+                                <?= number_format($net, $decimal_point) ?>
                             </td>
+
                             <td class="text-center">
-                                <?php echo number_format($vat_percentage, 2); ?>
+                                <?= number_format($vat_percentage, 2) ?>
                             </td>
                         </tr>
+
                         <?php
                     endforeach;
+
                     $grand_total = $total_net_amount + $total_vat_amount;
+
                 else:
                     ?>
                     <tr>
-                        <td colspan="7" class="text-center" style="padding:30px; color:#999;">
+                        <td colspan="7" class="text-center" style="padding:30px;color:#999;">
                             No items found
                         </td>
                     </tr>

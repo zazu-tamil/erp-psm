@@ -1755,12 +1755,13 @@ class Vendor extends CI_Controller
             $this->db->where('vendor_pur_inward_id', $vendor_pur_inward_id);
             $this->db->update('vendor_pur_inward_info', $header);
 
-            // === 5. DELETE Old Items ===
-            $this->db->where('vendor_pur_inward_id', $vendor_pur_inward_id);
-            $this->db->delete('vendor_pur_inward_item_info');
+            // // === 5. DELETE Old Items ===
+            // $this->db->where('vendor_pur_inward_id', $vendor_pur_inward_id);
+            // $this->db->delete('vendor_pur_inward_item_info');
 
             // === 6. INSERT New Items ===
             $selected_items = $this->input->post('selected_items') ?? [];
+            $vendor_pur_inward_item_ids = $this->input->post('vendor_pur_inward_item_id') ?? [];
 
             if (!empty($selected_items)) {
 
@@ -1792,7 +1793,13 @@ class Vendor extends CI_Controller
                         'created_date' => date('Y-m-d H:i:s'),
                     ];
 
-                    $this->db->insert('vendor_pur_inward_item_info', $item);
+                    if (!empty($vendor_pur_inward_item_ids[$idx])) {
+                        $item['vendor_pur_inward_item_id'] = $vendor_pur_inward_item_ids[$idx];
+                        $this->db->where('vendor_pur_inward_item_id', $vendor_pur_inward_item_ids[$idx]);
+                        $this->db->update('vendor_pur_inward_item_info', $item);
+                    } else {
+                        $this->db->insert('vendor_pur_inward_item_info', $item);
+                    }
                 }
             }
 
@@ -1907,9 +1914,6 @@ class Vendor extends CI_Controller
             $gst_opt[$row['gst_percentage']] = $row['gst_percentage'];
         }
         $data['gst_opt'] = $gst_opt;
-
-
-
 
         $this->load->view('page/vendor/vendor-pur-inward-edit', $data);
     }
@@ -3561,6 +3565,7 @@ class Vendor extends CI_Controller
                 'tax_amount' => $this->input->post('total_vat_amount'),
                 'total_amount' => $this->input->post('total_amount'),
                 'door_delivery' => $this->input->post('door_delivery'),
+                'fix_theamount_total' => $this->input->post('fix_theamount_total'),
                 'remarks' => $this->input->post('remarks'),
                 'purchase_bill_upload' => 'vendor-pur-invoice-documents/' . $purchase_bill_upload,
                 'status' => $this->input->post('status'),
@@ -3999,6 +4004,7 @@ class Vendor extends CI_Controller
                 'total_amount_wo_tax' => $this->input->post('total_amount_wo_tax'),
                 'tax_amount' => $this->input->post('total_vat_amount'),
                 'total_amount' => $this->input->post('total_amount'),
+                'fix_theamount_total' => $this->input->post('fix_theamount_total'),
                 'door_delivery' => $this->input->post('door_delivery'),
                 'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
@@ -4126,9 +4132,9 @@ class Vendor extends CI_Controller
 
         // === Fetch Header Data ===
         $sql = "
-        SELECT * FROM vendor_purchase_invoice_info
-        WHERE vendor_purchase_invoice_id = ? AND status = 'Active'
-    ";
+            SELECT * FROM vendor_purchase_invoice_info
+            WHERE vendor_purchase_invoice_id = ? AND status = 'Active'
+        ";
         $data['header'] = $this->db->query($sql, [$vendor_purchase_invoice_id])->row_array();
 
         if (empty($data['header'])) {
