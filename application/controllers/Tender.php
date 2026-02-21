@@ -1608,7 +1608,7 @@ class Tender extends CI_Controller
                 $rates = $this->input->post('rate') ?? [];
                 $amounts = $this->input->post('amount') ?? [];
 
-                foreach ($selected_idxs as $idx) {
+                foreach ($selected_idxs as $idx => $val) {
                     //if($tender_quotation_item_ids[$idx]){  
                     $item_data = [
                         'tender_quotation_id' => $tender_quotation_id,

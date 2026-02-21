@@ -230,50 +230,60 @@ class Vendor extends CI_Controller
             $this->db->where('vendor_rate_enquiry_id', $id);
             $this->db->update('vendor_rate_enquiry_info', $update_data);
 
-            // $this->db->where('vendor_rate_enquiry_id', $id);
-            // $this->db->delete('vendor_rate_enquiry_item_info');
+
+            $selected_idxs = $this->input->post('selected_items') ?? [];
+
+            $vendor_rate_enquiry_item_ids = $this->input->post('vendor_rate_enquiry_item_id') ?? [];
+            $tender_enquiry_item_ids = $this->input->post('tender_enquiry_item_id') ?? [];
+            $item_codes = $this->input->post('item_code') ?? [];
+            $item_descs = $this->input->post('item_desc') ?? [];
+            $uoms = $this->input->post('uom') ?? [];
+            $qtys = $this->input->post('qty') ?? [];
+
+            /*
+            ----------------------------------------
+            STEP 1 : Make all items inactive first
+            ----------------------------------------
+            */
+            $this->db->where('vendor_rate_enquiry_id', $id);
+            $this->db->update('vendor_rate_enquiry_item_info', [
+                'status' => 'Delete'
+            ]);
 
 
-            $selected_idxs = $this->input->post('selected_items') ?? [];   // array of "i" values
+            foreach ($selected_idxs as $rowIndex) {
 
-            if (!empty($selected_idxs)) {
-                // All arrays are posted with the SAME order as the rows
-                $vendor_rate_enquiry_item_ids = $this->input->post('vendor_rate_enquiry_item_id') ?? [];
-                $tender_enquiry_item_ids = $this->input->post('tender_enquiry_item_id') ?? [];
+                $item_data = [
+                    'vendor_rate_enquiry_id' => $id,
+                    'tender_enquiry_item_id' => $tender_enquiry_item_ids[$rowIndex] ?? 0,
+                    'item_code' => $item_codes[$rowIndex] ?? '',
+                    'item_desc' => $item_descs[$rowIndex] ?? '',
+                    'uom' => $uoms[$rowIndex] ?? '',
+                    'qty' => $qtys[$rowIndex] ?? 0,
+                    'status' => 'Active',
+                    'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                    'updated_date' => date('Y-m-d H:i:s')
+                ];
 
-                $item_codes = $this->input->post('item_code') ?? [];
-                $item_descs = $this->input->post('item_desc') ?? [];
-                $uoms = $this->input->post('uom') ?? [];
-                $qtys = $this->input->post('qty') ?? [];
+                // ✅ UPDATE
+                if (!empty($vendor_rate_enquiry_item_ids[$rowIndex])) {
 
-                foreach ($selected_idxs as $idx => $value) {
-                    //if($tender_quotation_item_ids[$idx]){  
-                    $item_data = [
-                        'vendor_rate_enquiry_id' => $id,
-                        'tender_enquiry_item_id' => $tender_enquiry_item_ids[$idx] ?? 0,
-                        // 'category_id' => $category_ids[$idx] ?? 0,
-                        'item_code' => $item_codes[$idx] ?? 0,
-                        'item_desc' => $item_descs[$idx] ?? '',
-                        'uom' => $uoms[$idx] ?? '',
-                        'qty' => $qtys[$idx] ?? 0,
-                        'status' => 'Active',
-                        'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
-                        'updated_date' => date('Y-m-d H:i:s')
-                    ];
+                    $this->db->where(
+                        'vendor_rate_enquiry_item_id',
+                        $vendor_rate_enquiry_item_ids[$rowIndex]
+                    )->update('vendor_rate_enquiry_item_info', $item_data);
+                } else {
 
-                    if (!empty($vendor_rate_enquiry_item_ids[$idx]) && $vendor_rate_enquiry_item_ids[$idx] > 0) {
-                        // UPDATE existing item
-                        $this->db->where('vendor_rate_enquiry_item_id', $vendor_rate_enquiry_item_ids[$idx])
-                            ->update('vendor_rate_enquiry_item_info', $item_data);
+                    $item_data['created_by'] =
+                        $this->session->userdata(SESS_HD . 'user_id');
 
-                    } else {
-                        // INSERT new item
-                        $item_data['created_by'] = $this->session->userdata(SESS_HD . 'user_id');
-                        $item_data['created_date'] = date('Y-m-d H:i:s');
+                    $item_data['created_date'] =
+                        date('Y-m-d H:i:s');
 
-                        $this->db->insert('vendor_rate_enquiry_item_info', $item_data);
-                    }
-
+                    $this->db->insert(
+                        'vendor_rate_enquiry_item_info',
+                        $item_data
+                    );
                 }
             }
 
@@ -557,6 +567,7 @@ class Vendor extends CI_Controller
             if (!empty($selected_items)) {
 
                 $vendor_rate_enquiry_item_id = $this->input->post('vendor_rate_enquiry_item_id') ?? [];
+                $vendor_quote_item_ids = $this->input->post('vendor_quote_item_id') ?? [];
                 //$category_id = $this->input->post('category_id') ?? [];
                 $item_codes = $this->input->post('item_code') ?? [];
                 $item_desc = $this->input->post('item_desc') ?? [];
@@ -571,6 +582,7 @@ class Vendor extends CI_Controller
                     $item = [
                         'vendor_po_id' => $vendor_po_id,
                         'vendor_rate_enquiry_item_id' => $vendor_rate_enquiry_item_id[$idx] ?? 0,
+                        'vendor_quote_item_id' => $vendor_quote_item_ids[$idx] ?? 0,
                         // 'category_id' => $category_id[$idx] ?? 0,
                         'item_code' => $item_codes[$idx] ?? 0,
                         'item_desc' => $item_desc[$idx] ?? '',
@@ -972,6 +984,7 @@ class Vendor extends CI_Controller
                 // All arrays are posted with the SAME order as the rows
                 $vendor_po_item_ids = $this->input->post('vendor_po_item_id') ?? [];
                 $vendor_rate_enquiry_item_ids = $this->input->post('vendor_rate_enquiry_item_id') ?? [];
+                $vendor_quote_item_ids = $this->input->post('vendor_quote_item_id') ?? [];
 
                 $item_codes = $this->input->post('item_code') ?? [];
                 $item_descs = $this->input->post('item_desc') ?? [];
@@ -986,6 +999,7 @@ class Vendor extends CI_Controller
                     $item_data = [
                         'vendor_po_id' => $vendor_po_id,
                         'vendor_rate_enquiry_item_id' => $vendor_rate_enquiry_item_ids[$idx] ?? 0,
+                        'vendor_quote_item_id' => $vendor_quote_item_ids[$idx] ?? 0,
                         // 'category_id' => $category_ids[$idx] ?? 0,
                         'item_code' => $item_codes[$idx] ?? 0,
                         'item_desc' => $item_descs[$idx] ?? '',
@@ -1062,26 +1076,75 @@ class Vendor extends CI_Controller
         $query = $this->db->query($sql, [$vendor_po_id]);
         $data['header'] = $query->row_array();
 
-        echo $sql = "
-          select
-            b.vendor_po_item_id,
-            b.vendor_po_id,
-            a.vendor_rate_enquiry_item_id,
-            IF(a.tender_enquiry_item_id != a.vendor_rate_enquiry_item_id, b.item_code,a.item_code) AS item_code,
-            IF(a.tender_enquiry_item_id != a.vendor_rate_enquiry_item_id, b.item_desc,a.item_desc) AS item_desc, 
-            if(a.tender_enquiry_item_id != a.vendor_rate_enquiry_item_id, b.uom,a.uom) AS uom, 
-            if(a.tender_enquiry_item_id != a.vendor_rate_enquiry_item_id, b.qty,a.qty) AS qty,
-            b.rate,
-            b.gst as vat,
-            b.amount 
-            from  vendor_rate_enquiry_item_info as a 
-            left join vendor_po_item_info as b on a.vendor_rate_enquiry_item_id = b.vendor_rate_enquiry_item_id  and b.`status`='Active'  and b.vendor_po_id= ?
-            where a.`status`='Active' 
-            and a.vendor_rate_enquiry_id  = ?
- 
+
+
+        $sql = "
+            SELECT
+                d.vendor_quote_item_id,
+                d.vendor_quote_id,
+                d.vendor_rate_enquiry_item_id,
+
+                CASE 
+                    WHEN b.vendor_po_item_id IS NOT NULL THEN b.vendor_po_item_id
+                    ELSE NULL
+                END AS vendor_po_item_id,
+
+                CASE 
+                    WHEN b.vendor_po_item_id IS NOT NULL THEN COALESCE(b.item_code, d.item_code)
+                    ELSE d.item_code
+                END AS item_code,
+
+                CASE 
+                    WHEN b.vendor_po_item_id IS NOT NULL THEN COALESCE(b.item_desc, d.item_desc)
+                    ELSE d.item_desc
+                END AS item_desc,
+
+                CASE 
+                    WHEN b.vendor_po_item_id IS NOT NULL THEN COALESCE(b.uom, d.uom)
+                    ELSE d.uom
+                END AS uom,
+
+                CASE 
+                    WHEN b.vendor_po_item_id IS NOT NULL THEN COALESCE(b.qty, d.qty)
+                    ELSE d.qty
+                END AS qty,
+                
+                CASE 
+                    WHEN b.vendor_po_item_id IS NOT NULL THEN COALESCE(b.gst, d.gst)
+                    ELSE d.rate
+                END AS vat,
+
+                CASE 
+                    WHEN b.vendor_po_item_id IS NOT NULL THEN COALESCE(b.rate, d.rate)
+                    ELSE d.rate
+                END AS rate,
+                
+                CASE 
+                    WHEN b.vendor_po_item_id IS NOT NULL THEN COALESCE(b.amount, d.amount)
+                    ELSE d.amount
+                END AS amount,
+
+                CASE 
+                    WHEN b.vendor_po_item_id IS NOT NULL 
+                        THEN 'checked'
+                    ELSE 'unchecked'
+                END AS checkbox_status
+
+            FROM vendor_quotation_info AS q
+            LEFT JOIN vendor_quote_item_info AS d 
+                ON q.vendor_quote_id = d.vendor_quote_id
+                AND d.status = 'Active'
+            LEFT JOIN vendor_po_item_info AS b 
+                ON d.vendor_quote_item_id = b.vendor_quote_item_id
+                AND b.vendor_po_id = ?
+                AND b.status = 'Active'
+            WHERE q.status = 'Active'
+                AND q.vendor_rate_enquiry_id = ?
+            ORDER BY d.vendor_quote_item_id;
         ";
         $query = $this->db->query($sql, [$vendor_po_id, $data['header']['vendor_rate_enquiry_id']]);
         $data['items'] = $query->result_array();
+
 
         $sql = "
             SELECT

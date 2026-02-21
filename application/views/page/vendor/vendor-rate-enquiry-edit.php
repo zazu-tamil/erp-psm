@@ -119,9 +119,7 @@
                                 <div class="col-md-2">
                                     <div class="form-group" style="margin-top: 25px;">
                                         <div class="form-check">
-                                            <input type="checkbox" class="form-check-input item-check"
-                                                name="selected_items[]" value="<?php echo $i; ?>"
-                                                id="check_<?php echo $i; ?>" checked>
+                                            <input type="checkbox"name="selected_items[]"value="<?= $i ?>"<?= !empty($row['vendor_rate_enquiry_item_id']) ? 'checked' : '' ?>>
                                             <label class="form-check-label" for="check_<?php echo $i; ?>"
                                                 style="margin-left: 5px;">Select</label>
                                         </div>

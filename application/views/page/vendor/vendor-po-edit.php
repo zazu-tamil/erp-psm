@@ -171,61 +171,79 @@
                         </thead>
                         <tbody id="item_container">
                             <?php if (!empty($items)): ?>
-                                <?php $index = 0;
-                                foreach ($items as $item): ?>
-                                    <tr class="item-row"> 
+                                <?php foreach ($items as $index => $item): ?>
+
+                                    <tr class="item-row">
+
+                                        <!-- ✅ SELECT CHECKBOX -->
                                         <td>
                                             <input type="checkbox" class="form-check-input item-check" name="selected_items[]"
-                                                value="<?php echo $index; ?>" <?php echo (!empty($item['vendor_po_item_id'])) ? 'checked' : ''; ?>>
+                                                value="<?= $index; ?>" <?= !empty($item['vendor_po_item_id']) ? 'checked' : ''; ?>>
 
-                                            <input type="hidden" name="vendor_rate_enquiry_item_id[<?php echo $index; ?>]"
-                                                value="<?php echo $item['vendor_rate_enquiry_item_id']; ?>">
+                                            <input type="text" name="vendor_rate_enquiry_item_id[<?= $index; ?>]"
+                                                value="<?= $item['vendor_rate_enquiry_item_id'] ?? ''; ?>">
 
-                                            <input type="hidden" name="vendor_po_item_id[<?php echo $index; ?>]"
-                                                value="<?php echo $item['vendor_po_item_id']; ?>">
+                                            <input type="text" name="vendor_quote_item_id[<?= $index; ?>]"
+                                                value="<?= $item['vendor_quote_item_id'] ?? ''; ?>">
+
+                                            <input type="text" name="vendor_po_item_id[<?= $index; ?>]"
+                                                value="<?= $item['vendor_po_item_id'] ?? ''; ?>">
                                         </td>
 
+                                        <!-- ✅ ITEM CODE -->
                                         <td>
                                             <input type="text" class="form-control item_code-input"
-                                                name="item_code[<?php echo $index; ?>]"
-                                                value="<?php echo htmlspecialchars($item['item_code']); ?>" readonly> 
+                                                name="item_code[<?= $index; ?>]"
+                                                value="<?= htmlspecialchars($item['item_code'] ?? ''); ?>" readonly>
                                         </td>
 
+                                        <!-- ✅ DESCRIPTION -->
                                         <td>
-                                            <textarea name="item_desc[<?php echo $index; ?>]" class="form-control"
-                                                rows="2"><?php echo htmlspecialchars($item['item_desc']); ?></textarea>
+                                            <textarea name="item_desc[<?= $index; ?>]" class="form-control"
+                                                rows="2"><?= htmlspecialchars($item['item_desc'] ?? ''); ?></textarea>
                                         </td>
 
+                                        <!-- ✅ UOM + QTY --> 
                                         <td>
-                                            <input type="text" name="uom[<?php echo $index; ?>]" class="form-control"
-                                                value="<?php echo $item['uom']; ?>">
+                                            <input type="text" name="uom[<?= $index; ?>]" class="form-control"
+                                                value="<?= $item['uom'] ?? ''; ?>">
+
                                             <br>
-                                            <input type="number" step="any" name="qty[<?php echo $index; ?>]"
-                                                class="form-control qty-input" value="<?php echo $item['qty']; ?>">
+
+                                            <input type="number" step="any" name="qty[<?= $index; ?>]"
+                                                class="form-control qty-input" value="<?= $item['qty'] ?? 0; ?>">
                                         </td>
 
+                                        <!-- ✅ RATE -->
                                         <td>
-                                            <input type="number" step="any" name="rate[<?php echo $index; ?>]"
-                                                class="form-control rate-input" value="<?php echo $item['rate']; ?>">
+                                            <input type="number" step="any" name="rate[<?= $index; ?>]"
+                                                class="form-control rate-input" value="<?= $item['rate'] ?? 0; ?>">
                                         </td>
 
+                                        <!-- ✅ GST -->
                                         <td>
-                                            <input type="number" step="any" name="gst[<?php echo $index; ?>]"
-                                                class="form-control vat" value="<?php echo $item['vat']; ?>">
+                                            <input type="number" step="any" name="gst[<?= $index; ?>]" class="form-control vat"
+                                                value="<?= $item['vat'] ?? 0; ?>">
                                         </td>
+
+                                        <!-- ✅ AMOUNT WITHOUT TAX -->
                                         <td>
-                                            <input type="number" step="any" name="amount_wo_tax[]"
+                                            <input type="number" step="any" name="amount_wo_tax[<?= $index; ?>]"
                                                 class="form-control amountwotx"
-                                                value="<?php echo number_format(($item['rate'] * $item['qty']), 3, '.', ''); ?>"
+                                                value="<?= number_format((($item['rate'] ?? 0) * ($item['qty'] ?? 0)), 3, '.', ''); ?>"
                                                 readonly>
                                         </td>
+
+                                        <!-- ✅ FINAL AMOUNT -->
                                         <td>
-                                            <input type="number" step="any" name="amount[]" class="form-control amounttx amount"
-                                                value="<?php echo number_format($item['amount'], 3, '.', ''); ?>" readonly>
+                                            <input type="number" step="any" name="amount[<?= $index; ?>]"
+                                                class="form-control amounttx amount"
+                                                value="<?= number_format(($item['amount'] ?? 0), 3, '.', ''); ?>" readonly>
                                         </td>
 
                                     </tr>
-                                    <?php $index++; endforeach; ?>
+
+                                <?php endforeach; ?>
                             <?php endif; ?>
                         </tbody>
                     </table>

@@ -386,7 +386,7 @@
               $("#quote_date").val(row.closing_date);
 
               const hiddenFields = `
-                <input type="hidden" name="tender_enquiry_item_id[]" value="${row.tender_enquiry_item_id}"> 
+                <input type="hidden" name="tender_enquiry_item_id[${i}]" value="${row.tender_enquiry_item_id}"> 
               `;
 
               const itemHtml = `

@@ -288,6 +288,9 @@
                             <input type="hidden"
                                    name="vendor_rate_enquiry_item_id[]"
                                    value="${row.vendor_rate_enquiry_item_id || ""}">
+                            <input type="hidden"
+                                   name="vendor_quote_item_id[]"
+                                   value="${row.vendor_quote_item_id || ""}">
                         </td>
 
                         <td>

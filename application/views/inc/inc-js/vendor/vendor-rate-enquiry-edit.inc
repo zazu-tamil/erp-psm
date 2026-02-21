@@ -222,7 +222,7 @@
                               <div class="item-card border p-3 mb-3" style="background-color:#f9f9f9; border-radius:8px;">
                                   <h5 class="text-primary mb-3">Item Details ${i + 1}</h5>
                                   <input type="hidden" name="vendor_rate_enquiry_item_id[]" value="">
-                                  <input type="hidden" name="tender_enquiry_item_id[]" value="${row.tender_enquiry_item_id}">
+                                  <input type="hidden" name="tender_enquiry_item_id[${i}]" value="${row.tender_enquiry_item_id}">
                                   <input type="hidden" name="category_id[]" value="${row.category_id}">
                                   <input type="hidden" name="item_id[]" value="${row.item_id}">
                                   <div class="row">
@@ -346,15 +346,7 @@
           $("#grand_total").val(grandTotal.toFixed(2));
       }
 
-      // Initialize - set opacity based on checkbox state on page load
-      $(".item-card").each(function() {
-          const isChecked = $(this).find(".item-check").is(":checked");
-          if (!isChecked) {
-              $(this).css("opacity", "0.6");
-          } else {
-              $(this).css("opacity", "1");
-          }
-      });
+     
     $("#srch_customer_id").on("change", function () {
       const customer_id = $(this).val();
         const $enquiryDropdown = $("#srch_tender_enquiry_id");
@@ -392,36 +384,6 @@
         }
       });
     });
-      // Handle checkbox change - toggle opacity and update grand total
-      $(document).on("change", ".item-check", function() {
-          const card = $(this).closest(".item-card");
-          const isChecked = $(this).is(":checked");
-
-          if (!isChecked) {
-              card.css("opacity", "0.6");
-          } else {
-              card.css("opacity", "1");
-          }
-
-          calculateGrandTotal();
-      });
-
-      // Form submission - send all items with their checkbox state
-      $("#frmadd").on("submit", function (e) {
-          let hasChecked = false;
-
-          $(".item-card").each(function () {
-              const isChecked = $(this).find(".item-check").is(":checked");
-              if (isChecked) {
-                  hasChecked = true;
-              }
-          });
-
-          if (!hasChecked) {
-              alert("Please select at least one item.");
-              e.preventDefault();
-              return false;
-          }
-      });
+       
   });
 </script>
