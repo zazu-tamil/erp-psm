@@ -519,10 +519,7 @@
                                 <tr>
                                     <td class="text-center"><?php echo $i + 1; ?></td>
                                     <td class="text-left">
-                                        <div class="item-description">
-                                            <?php if (!empty($item['item_code'])): ?>
-                                                    <div class="item-code1"><?php echo htmlspecialchars($item['item_code']); ?></div>
-                                            <?php endif; ?>
+                                        <div class="item-description"> 
                                             <?php echo htmlspecialchars($item['item_desc'] ?? ''); ?>
                                         </div>
                                     </td>

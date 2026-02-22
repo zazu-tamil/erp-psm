@@ -92,6 +92,7 @@
                         <th>Customer</th>
                         <th>Invoice No</th>
                         <th>Invoice Status</th>
+                        <th>Invoice Amount</th>
                         <th class="text-center" colspan="3">Action</th>
                     </tr>
                 </thead>
@@ -122,6 +123,7 @@
                                         <?php echo $status; ?>
                                     </span>
                                 </td>
+                                <td class="text-right"><?php echo ($row['total_amount']) ?? 0; ?></td>
 
 
 
