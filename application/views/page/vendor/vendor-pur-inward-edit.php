@@ -1,7 +1,7 @@
 <?php include_once(VIEWPATH . 'inc/header.php');
-echo '<pre>';
- print_r($items);
-echo '</pre>'; 
+// echo '<pre>';
+//  print_r($items);
+// echo '</pre>'; 
 ?>
 
 <section class="content-header">
@@ -143,9 +143,9 @@ echo '</pre>';
                                         </td>
 
                                         <td> 
-                                            <input type="text" name="vendor_pur_inward_item_id[]"
+                                            <input type="hidden" name="vendor_pur_inward_item_id[]"
                                                 value="<?php echo $item['vendor_pur_inward_item_id']; ?>"> 
-                                            <input type="text" name="vendor_po_item_id[<?php echo $index; ?>]"
+                                            <input type="hidden" name="vendor_po_item_id[<?php echo $index; ?>]"
                                                 value="<?php echo $item['vendor_po_item_id']; ?>"> 
                                            
                                         </td>
