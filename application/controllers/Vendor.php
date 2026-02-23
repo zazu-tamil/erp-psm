@@ -1823,47 +1823,100 @@ class Vendor extends CI_Controller
             // $this->db->where('vendor_pur_inward_id', $vendor_pur_inward_id);
             // $this->db->delete('vendor_pur_inward_item_info');
 
-            // === 6. INSERT New Items ===
-            $selected_items = $this->input->post('selected_items') ?? [];
+
             $vendor_pur_inward_item_ids = $this->input->post('vendor_pur_inward_item_id') ?? [];
 
-            if (!empty($selected_items)) {
+            $selected_idxs = $this->input->post('selected_items') ?? [];
 
-                $vendor_po_item_id = $this->input->post('vendor_po_item_id') ?? [];
-                $category_id = $this->input->post('category_id') ?? [];
-                $item_id = $this->input->post('item_id') ?? [];
-                $item_desc = $this->input->post('item_desc') ?? [];
-                $uom = $this->input->post('uom') ?? [];
-                $qty = $this->input->post('qty') ?? [];
-                $rate = $this->input->post('rate') ?? [];
-                $gst = $this->input->post('gst') ?? [];
-                $amount = $this->input->post('amount') ?? [];
+            $miss_item_ids = [];
 
-                foreach ($selected_items as $idx => $value) {
+            if (!empty($selected_idxs)) {
 
-                    $item = [
+                $vendor_pur_inward_item_ids = $this->input->post('vendor_pur_inward_item_id') ?? [];
+
+                $vendor_po_item_ids = $this->input->post('vendor_po_item_id') ?? [];
+
+                $category_ids = $this->input->post('category_id') ?? [];
+                $item_ids = $this->input->post('item_id') ?? [];
+                $item_descs = $this->input->post('item_desc') ?? [];
+                $uoms = $this->input->post('uom') ?? [];
+                $qtys = $this->input->post('qty') ?? [];
+                $rates = $this->input->post('rate') ?? [];
+                $gsts = $this->input->post('gst') ?? [];
+                $amounts = $this->input->post('amount') ?? [];
+
+                foreach ($selected_idxs as $fld => $idx) {
+
+                    $item_data = [
                         'vendor_pur_inward_id' => $vendor_pur_inward_id,
-                        'vendor_po_item_id' => $vendor_po_item_id[$idx] ?? 0,
-                        'category_id' => $category_id[$idx] ?? 0,
-                        'item_id' => $item_id[$idx] ?? 0,
-                        'item_desc' => $item_desc[$idx] ?? '',
-                        'uom' => $uom[$idx] ?? '',
-                        'qty' => $qty[$idx] ?? 0,
-                        'rate' => $rate[$idx] ?? 0,
-                        'gst' => $gst[$idx] ?? 0,
-                        'amount' => $amount[$idx] ?? 0,
+                        'vendor_po_item_id' => $vendor_po_item_ids[$idx] ?? 0,
+                        'category_id' => $category_ids[$idx] ?? 0,
+                        'item_id' => $item_ids[$idx] ?? 0,
+                        'item_desc' => $item_descs[$idx] ?? '',
+                        'uom' => $uoms[$idx] ?? '',
+                        'qty' => $qtys[$idx] ?? 0,
+                        'rate' => $rates[$idx] ?? 0,
+                        'gst' => $gsts[$idx] ?? 0,
+                        'amount' => $amounts[$idx] ?? 0,
                         'status' => 'Active',
-                        'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
-                        'created_date' => date('Y-m-d H:i:s'),
+                        'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                        'updated_date' => date('Y-m-d H:i:s')
                     ];
 
-                    if (!empty($vendor_pur_inward_item_ids[$idx])) {
-                        $item['vendor_pur_inward_item_id'] = $vendor_pur_inward_item_ids[$idx];
-                        $this->db->where('vendor_pur_inward_item_id', $vendor_pur_inward_item_ids[$idx]);
-                        $this->db->update('vendor_pur_inward_item_info', $item);
+                    if (
+                        !empty($vendor_pur_inward_item_ids[$idx]) && $vendor_pur_inward_item_ids[$idx] > 0
+                    ) {
+
+                        $this->db->where('vendor_pur_inward_item_id', $vendor_pur_inward_item_ids[$idx])->update(
+                            'vendor_pur_inward_item_info',
+                            $item_data
+                        );
+
+                        $miss_item_ids[] =
+                            $vendor_pur_inward_item_ids[$idx];
+
                     } else {
-                        $this->db->insert('vendor_pur_inward_item_info', $item);
+
+                        /* ================= INSERT ================= */
+                        $item_data['created_by'] =
+                            $this->session->userdata(SESS_HD . 'user_id');
+
+                        $item_data['created_date'] =
+                            date('Y-m-d H:i:s');
+
+                        $this->db->insert(
+                            'vendor_pur_inward_item_info',
+                            $item_data
+                        );
+
+                        $miss_item_ids[] =
+                            $this->db->insert_id();
                     }
+                }
+
+
+                if (!empty($miss_item_ids)) {
+
+                    $this->db->where(
+                        'vendor_pur_inward_id',
+                        $vendor_pur_inward_id
+                    );
+
+                    $this->db->where_not_in(
+                        'vendor_pur_inward_item_id',
+                        $miss_item_ids
+                    );
+
+                    $this->db->update(
+                        'vendor_pur_inward_item_info',
+                        [
+                            'status' => 'Deleted',
+                            'updated_by' =>
+                                $this->session->userdata(SESS_HD . 'user_id'),
+                            'updated_date' =>
+                                date('Y-m-d H:i:s')
+                        ]
+                    );
                 }
             }
 
@@ -1889,17 +1942,71 @@ class Vendor extends CI_Controller
         $data['header'] = $this->db->query($sql, [$vendor_pur_inward_id])->row_array();
 
         $sql = "
-            SELECT 
-                vpi.*,
-                ci.category_name,
-                ii.item_code
-            FROM vendor_pur_inward_item_info vpi
-            LEFT JOIN category_info ci ON vpi.category_id = ci.category_id
-            LEFT JOIN item_info ii ON vpi.item_id = ii.item_id
-            WHERE vpi.vendor_pur_inward_id = ? AND vpi.status = 'Active'
-            ORDER BY vpi.vendor_pur_inward_item_id ASC
+           SELECT
+                b.vendor_pur_inward_id, 
+                b.vendor_pur_inward_item_id,
+                d.vendor_po_item_id,
+                d.vendor_po_id,
+
+                CASE 
+                    WHEN d.vendor_po_item_id IS NOT NULL THEN d.vendor_po_item_id
+                    ELSE NULL
+                END AS vendor_po_item_id,
+
+                CASE 
+                    WHEN b.vendor_po_item_id IS NOT NULL THEN COALESCE(b.item_code, d.item_code)
+                    ELSE d.item_code
+                END AS item_code,
+
+                CASE 
+                    WHEN b.vendor_po_item_id IS NOT NULL THEN COALESCE(b.item_desc, d.item_desc)
+                    ELSE d.item_desc
+                END AS item_desc,
+
+                CASE 
+                    WHEN b.vendor_po_item_id IS NOT NULL THEN COALESCE(b.uom, d.uom)
+                    ELSE d.uom
+                END AS uom,
+
+                CASE 
+                    WHEN b.vendor_po_item_id IS NOT NULL THEN COALESCE(b.qty, d.qty)
+                    ELSE d.qty
+                END AS qty,
+                
+                CASE 
+                    WHEN b.vendor_po_item_id IS NOT NULL THEN COALESCE(b.gst, d.gst)
+                    ELSE d.rate
+                END AS vat,
+
+                CASE 
+                    WHEN b.vendor_po_item_id IS NOT NULL THEN COALESCE(b.rate, d.rate)
+                    ELSE d.rate
+                END AS rate,
+                
+                CASE 
+                    WHEN b.vendor_po_item_id IS NOT NULL THEN COALESCE(b.amount, d.amount)
+                    ELSE d.amount
+                END AS amount,
+
+                CASE 
+                    WHEN b.vendor_po_item_id IS NOT NULL 
+                        THEN 'checked'
+                    ELSE 'unchecked'
+                END AS checkbox_status
+
+            FROM vendor_po_info AS po
+            LEFT JOIN vendor_po_item_info AS d 
+                ON po.vendor_po_id = d.vendor_po_id
+                AND d.status = 'Active'
+            LEFT JOIN vendor_pur_inward_item_info AS b 
+                ON d.vendor_po_item_id = b.vendor_po_item_id
+                AND b.vendor_pur_inward_id = 1
+                AND b.status = 'Active'
+            WHERE po.status = 'Active'
+                AND po.vendor_po_id = 1
+            ORDER BY d.vendor_po_item_id;
         ";
-        $data['items'] = $this->db->query($sql, [$vendor_pur_inward_id])->result_array();
+        $data['items'] = $this->db->query($sql, [$vendor_pur_inward_id, $data['header']['vendor_po_id']])->result_array();
 
         $sql = "
             SELECT
@@ -1981,6 +2088,7 @@ class Vendor extends CI_Controller
 
         $this->load->view('page/vendor/vendor-pur-inward-edit', $data);
     }
+
 
     public function vendor_quotation_add()
     {
