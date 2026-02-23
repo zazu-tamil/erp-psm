@@ -1316,6 +1316,7 @@ class Vendor extends CI_Controller
            select
             a.vendor_po_id,
             b.item_code,
+            b.item_desc,
             b.uom,
             b.qty,
             b.rate,

@@ -591,7 +591,7 @@
                                     <tr>
                                         <td colspan="7" class="text-right"><strong>Total Amount:</strong></td>
                                         <td class="text-right">
-                                            <?php echo $item['currency_code'] . ' ' . number_format($tot, 2); ?>    
+                                            <?php echo $item['currency_code'] . ' ' . number_format($tot, 3); ?>    
                                         </td>
                                     </tr>
                                 <?php else: ?>

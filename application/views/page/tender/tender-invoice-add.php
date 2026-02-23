@@ -364,6 +364,7 @@
                                 readonly>
 
                             <input type="number"
+                                step="any"
                                 class="form-control qty-input"
                                 name="qty[${i}]"
                                 value="${row.del_qty || 0}"
@@ -372,6 +373,7 @@
 
                         <td>
                             <input type="number"
+                                step="any"
                                 class="form-control rate-input"
                                 name="rate[${i}]"
                                 value="${row.rate || 0}">
@@ -379,6 +381,7 @@
 
                         <td>
                             <input type="number"
+                                step="any"
                                 class="form-control gst-input"
                                 name="gst[${i}]"
                                 value="${row.gst || 0}">
@@ -390,6 +393,7 @@
 
                         <td>
                             <input type="number"
+                                step="any"
                                 class="form-control amount-input"
                                 name="amount[${i}]"
                                 readonly>

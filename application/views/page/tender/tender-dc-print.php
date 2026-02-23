@@ -8,7 +8,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Delivery Challan - <?php echo htmlspecialchars($record['dc_no'] ?? ''); ?></title>
+    <title>Delivery Note - <?php echo htmlspecialchars($record['dc_no'] ?? ''); ?></title>
     <style>
         * {
             margin: 0;
@@ -74,7 +74,7 @@
         .customer-section {
             margin: 15px 0;
             padding: 10px;
-            border: 1px solid #000;
+             
             min-height: 80px;
         }
 
@@ -111,7 +111,7 @@
 
         .items-table thead {
             background: #ffffff;
-            border: 2px solid #000;
+            border: 1px solid #000;
         }
 
         .items-table thead th {
@@ -450,7 +450,7 @@
 
         <!-- Invoice Title & Number -->
         <div class="invoice-header">
-            <div class="invoice-title">Delivery Challan</div>
+            <div class="invoice-title">Delivery Note</div>
             <div class="invoice-number">No: <?php echo htmlspecialchars($record['dc_no'] ?? 'N/A'); ?></div>
 
         </div>

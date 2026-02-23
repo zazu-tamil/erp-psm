@@ -3742,6 +3742,7 @@ class Tender extends CI_Controller
             d.qty AS inward_qty,
             b.tender_dc_item_id,
             d.*,
+            b.item_desc,
             IFNULL(dc_sum.total_dc_qty, 0) AS total_dc_qty, 
             (d.qty - IFNULL(dc_sum.total_dc_qty, 0)) AS avail_qty, 
             IF(b.vendor_pur_inward_item_id = d.vendor_pur_inward_item_id, 1, 0) AS chk, 
