@@ -180,13 +180,13 @@
                                             <input type="checkbox" class="form-check-input item-check" name="selected_items[]"
                                                 value="<?= $index; ?>" <?= !empty($item['vendor_po_item_id']) ? 'checked' : ''; ?>>
 
-                                            <input type="text" name="vendor_rate_enquiry_item_id[<?= $index; ?>]"
+                                            <input type="hidden" name="vendor_rate_enquiry_item_id[<?= $index; ?>]"
                                                 value="<?= $item['vendor_rate_enquiry_item_id'] ?? ''; ?>">
 
-                                            <input type="text" name="vendor_quote_item_id[<?= $index; ?>]"
+                                            <input type="hidden" name="vendor_quote_item_id[<?= $index; ?>]"
                                                 value="<?= $item['vendor_quote_item_id'] ?? ''; ?>">
 
-                                            <input type="text" name="vendor_po_item_id[<?= $index; ?>]"
+                                            <input type="hidden" name="vendor_po_item_id[<?= $index; ?>]"
                                                 value="<?= $item['vendor_po_item_id'] ?? ''; ?>">
                                         </td>
 

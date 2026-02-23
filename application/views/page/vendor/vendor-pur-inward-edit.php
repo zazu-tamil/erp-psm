@@ -137,15 +137,13 @@
                                 foreach ($items as $item): ?>
                                     <tr class="item-row">
                                         <td>
-                                            <input type="checkbox" class="form-check-input item-check" name="selected_items[]"
-                                                value="<?php echo $index; ?>" checked> <small class="badge badge-secondary">Item<?php echo $index + 1; ?></small>
+                                               <input type="checkbox" class="form-check-input item-check" name="selected_items[<?php echo $index; ?>]"
+                                                value="<?= $index; ?>" <?= !empty($item['vendor_pur_inward_item_id']) ? 'checked' : ''; ?>>
+
                                         </td>
 
-                                        <td>
-                                            <input type="text" class="form-control" name="item_code[<?php echo $index; ?>]"
-                                                value="<?php echo htmlspecialchars($item['item_code']); ?>" readonly>
-
-                                            <input type="text" name="vendor_pur_inward_item_id[<?php echo $index; ?>]"
+                                        <td> 
+                                            <input type="text" name="vendor_pur_inward_item_id[]"
                                                 value="<?php echo $item['vendor_pur_inward_item_id']; ?>"> 
                                             <input type="text" name="vendor_po_item_id[<?php echo $index; ?>]"
                                                 value="<?php echo $item['vendor_po_item_id']; ?>"> 
