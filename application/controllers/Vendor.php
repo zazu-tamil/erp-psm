@@ -1838,6 +1838,7 @@ class Vendor extends CI_Controller
 
                 $category_ids = $this->input->post('category_id') ?? [];
                 $item_ids = $this->input->post('item_id') ?? [];
+                $item_codes = $this->input->post('item_code') ?? [];
                 $item_descs = $this->input->post('item_desc') ?? [];
                 $uoms = $this->input->post('uom') ?? [];
                 $qtys = $this->input->post('qty') ?? [];
@@ -1851,6 +1852,7 @@ class Vendor extends CI_Controller
                         'vendor_pur_inward_id' => $vendor_pur_inward_id,
                         'vendor_po_item_id' => $vendor_po_item_ids[$idx] ?? 0,
                         'category_id' => $category_ids[$idx] ?? 0,
+                        'item_code' => $item_codes[$idx] ?? 0,
                         'item_id' => $item_ids[$idx] ?? 0,
                         'item_desc' => $item_descs[$idx] ?? '',
                         'uom' => $uoms[$idx] ?? '',
