@@ -2632,7 +2632,7 @@ class Tender extends CI_Controller
             // echo "<pre>";
             // print_r($this->input->post());
             // echo "</pre>";
-            // exit;
+            //exit;
 
             $this->db->trans_start();
 
@@ -2666,7 +2666,7 @@ class Tender extends CI_Controller
             $invoice_id = $this->db->insert_id();
             $selected_items = $this->input->post('selected_items') ?? [];
 
-            if (empty($selected_items)) {
+            if (!empty($selected_items)) {
 
                 $tender_po_item_id = $this->input->post('tender_po_item_id') ?? [];
                 $item_codes = $this->input->post('item_code') ?? [];
@@ -2695,6 +2695,10 @@ class Tender extends CI_Controller
                         'created_date' => date('Y-m-d H:i:s')
                     ];
                     $this->db->insert('tender_enq_invoice_item_info', $item);
+
+                    // echo "<pre>";
+                    // print_r($item);
+                    // echo "</pre>";
                 }
             }
             $this->db->trans_complete();
@@ -2705,7 +2709,7 @@ class Tender extends CI_Controller
 
             }
 
-            redirect('tender-invoice-list');
+            //redirect('tender-invoice-list');
 
 
         }
@@ -3031,14 +3035,15 @@ class Tender extends CI_Controller
 
 
             // dELETE ALL ITEM ROWS
-            $this->db->where('tender_enq_invoice_id', $tender_enq_invoice_id);
-            $this->db->update('tender_enq_invoice_item_info', ['status' => 'Delete']);
+            // $this->db->where('tender_enq_invoice_id', $tender_enq_invoice_id);
+            // $this->db->update('tender_enq_invoice_item_info', ['status' => 'Delete']);
 
 
 
             /* ----------------- 2. UPDATE ONLY ITEM ROWS ----------------- */
             $selected_items = $this->input->post('selected_items') ?? [];
             //$item_ids_arr = $this->input->post('tender_enq_invoice_item_id') ?? [];
+            $miss_item_ids= [];
 
             if (!empty($selected_items)) {
 
@@ -3053,7 +3058,7 @@ class Tender extends CI_Controller
                 $gst = $this->input->post('gst') ?? [];
                 $amount = $this->input->post('amount') ?? [];
 
-                foreach ($selected_items as $idx) {
+                foreach ($selected_items as $idx => $tender_enq_invoice_item_id) {
 
                     $item_data = [
                         'tender_enq_invoice_id' => $tender_enq_invoice_id,
@@ -3072,12 +3077,24 @@ class Tender extends CI_Controller
                         'updated_date' => date('Y-m-d H:i:s'),
                     ];
 
-                    // /* --- IMPORTANT: update using row-wise item ID --- */
-                    // $this->db->where('tender_enq_invoice_item_id', $item_ids_arr[$idx]);
-                    // $this->db->update('tender_enq_invoice_item_info', $item_data);
-
-                    $this->db->insert('tender_enq_invoice_item_info', $item_data);
+                  
+                   if($tender_enq_invoice_item_id > 0){
+                        // Update existing item
+                        $this->db->where('tender_enq_invoice_item_id', $tender_enq_invoice_item_id);
+                        $this->db->update('tender_enq_invoice_item_info', $item_data);
+                        $miss_item_ids[] = $tender_enq_invoice_item_id;
+                    } else {
+                        // Insert new item
+                        $this->db->insert('tender_enq_invoice_item_info', $item_data);
+                        $miss_item_ids[] = $this->db->insert_id();
+                    }
                 }
+                $miss_item_ids_str = implode(',', $miss_item_ids);
+                // Mark items not in the current list as deleted
+                $this->db->where('tender_enq_invoice_id', $tender_enq_invoice_id);
+                $this->db->where_not_in('tender_enq_invoice_item_id', $miss_item_ids_str);
+                $this->db->update('tender_enq_invoice_item_info', ['status' => 'Delete' , 'updated_by' => $this->session->userdata(SESS_HD . 'user_id') , 'updated_date' => date('Y-m-d H:i:s')]);  
+
             }
 
             /* ----------------- COMPLETE TRANSACTION ----------------- */
@@ -3241,6 +3258,10 @@ class Tender extends CI_Controller
         /* ---- Load existing record for edit ---- */
         $data['header'] = $this->db->where('tender_enq_invoice_id ', $tender_enq_invoice_id)->get('tender_enq_invoice_info')->row_array();
         $data['item_list'] = [];
+
+
+       
+
 
         $sql = "
             SELECT 
@@ -3742,7 +3763,8 @@ class Tender extends CI_Controller
             d.qty AS inward_qty,
             b.tender_dc_item_id,
             d.*,
-            b.item_desc,
+           if(b.tender_dc_item_id is null , d.item_code , b.item_code ) as item_code,
+           if(b.tender_dc_item_id is null , d.item_desc , b.item_desc ) as item_desc,
             IFNULL(dc_sum.total_dc_qty, 0) AS total_dc_qty, 
             (d.qty - IFNULL(dc_sum.total_dc_qty, 0)) AS avail_qty, 
             IF(b.vendor_pur_inward_item_id = d.vendor_pur_inward_item_id, 1, 0) AS chk, 
@@ -4279,6 +4301,134 @@ class Tender extends CI_Controller
         ";
 
         $query = $this->db->query($sql, $dc_ids);
+
+        echo json_encode($query->result_array());
+    }
+
+
+    public function get_tender_po_invoice_edit_load_items_dc_id()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            echo json_encode(['error' => 'Unauthorized']);
+            return;
+        }
+
+        $dc_ids = $this->input->post('dc_id'); // array from ajax
+        $tender_po_id = $this->input->post('tender_po_id');
+        $tender_enq_invoice_id = $this->input->post('tender_enq_invoice_id');
+
+       /* if (empty($dc_ids)) {
+            echo json_encode([]);
+            return;
+        }
+
+
+        if (!is_array($dc_ids)) {
+            $dc_ids = [$dc_ids];
+        }
+
+
+        $dc_ids = array_filter($dc_ids);
+        $dc_ids = array_map('intval', $dc_ids);
+
+        if (empty($dc_ids)) {
+            echo json_encode([]);
+            return;
+        } 
+
+
+        $placeholders = implode(',', array_fill(0, count($dc_ids), '?'));
+        */
+        /*
+        $sql = "
+            select 
+            a.tender_dc_id,
+            a.dc_no,
+            a.dc_date,
+            b.item_code,
+            b.item_desc,
+            b.uom,
+            b.qty,
+            b.vendor_pur_inward_id,
+            b.vendor_pur_inward_item_id,
+            d.vendor_po_item_id,
+            f.tender_enquiry_item_id,
+            g.tender_enquiry_item_id,
+            h.tender_po_id,
+            h.tender_po_item_id,
+            h.rate,
+            h.gst,
+            h.qty as order_qty,
+            sum(b.qty) as del_qty
+            from  tender_dc_info as a 
+            left join tender_dc_item_info as b on b.tender_dc_id = a.tender_dc_id and b.status = 'Active'
+            left join vendor_pur_inward_info as c on c.vendor_pur_inward_id = b.vendor_pur_inward_id  and c.status = 'Active'
+            left join vendor_pur_inward_item_info as d on d.vendor_pur_inward_item_id = b.vendor_pur_inward_item_id and d.status = 'Active'
+            left join vendor_po_info as e1 on  e1.vendor_po_id = c.vendor_po_id and e1.status = 'Active'
+            left join vendor_po_item_info as e on e.vendor_po_item_id = d.vendor_po_item_id and e.status = 'Active'
+            left join vendor_rate_enquiry_info as f1  on f1.vendor_rate_enquiry_id = e1.vendor_rate_enquiry_id and f1.status = 'Active'
+            left join vendor_rate_enquiry_item_info as f on f.vendor_rate_enquiry_item_id = e.vendor_rate_enquiry_item_id and f.status = 'Active'
+            left join tender_quotation_info as g1 on  g1.tender_enquiry_id = a.tender_enquiry_id and g1.status = 'Active'
+            left join tender_quotation_item_info as g on g.tender_enquiry_item_id = f.tender_enquiry_item_id and g.status = 'Active'
+            left join customer_tender_po_info as h1 on h1.tender_quotation_id = g1.tender_quotation_id and h1.tender_enquiry_id = a.tender_enquiry_id  and h1.status = 'Active'
+            left join tender_po_item_info as h on h.tender_quotation_item_id = g.tender_quotation_item_id  and h.tender_po_id = a.tender_po_id  and h.status = 'Active'
+            where a.status = 'Active' 
+            and b.status = 'Active'
+            and h.tender_po_item_id != ''
+            and a.tender_po_id = $tender_po_id
+            and a.tender_dc_id in ($placeholders)
+            group by h.tender_po_item_id 
+            order by h.tender_po_item_id asc
+        ";
+        */
+
+         $sql = "
+            select 
+            a.tender_dc_id,
+            a.dc_no,
+            a.dc_date,
+            b.item_code as item_code_dc,
+            b.item_desc as item_desc_dc,
+            b.uom,
+            b.qty as dc_qty,
+            b.vendor_pur_inward_id,
+            b.vendor_pur_inward_item_id,
+            d.vendor_po_item_id,
+            f.tender_enquiry_item_id,
+            g.tender_enquiry_item_id,
+            h.tender_po_id,
+            h.tender_po_item_id,
+            h.rate,
+            h.gst,
+            h.qty as order_qty,
+            sum(b.qty) as del_qty,
+            i.tender_enq_invoice_item_id,
+            if(i.tender_enq_invoice_item_id is null,  b.item_code, i.item_code) as item_code,
+            if(i.tender_enq_invoice_item_id is null,  b.item_desc, i.item_desc) as item_desc,
+            if(i.tender_enq_invoice_item_id is null,  b.qty, i.qty) as qty
+            from  tender_dc_info as a 
+            left join tender_dc_item_info as b on b.tender_dc_id = a.tender_dc_id and b.status = 'Active'
+            left join vendor_pur_inward_info as c on c.vendor_pur_inward_id = b.vendor_pur_inward_id  and c.status = 'Active'
+            left join vendor_pur_inward_item_info as d on d.vendor_pur_inward_item_id = b.vendor_pur_inward_item_id and d.status = 'Active'
+            left join vendor_po_info as e1 on  e1.vendor_po_id = c.vendor_po_id and e1.status = 'Active'
+            left join vendor_po_item_info as e on e.vendor_po_item_id = d.vendor_po_item_id and e.status = 'Active'
+            left join vendor_rate_enquiry_info as f1  on f1.vendor_rate_enquiry_id = e1.vendor_rate_enquiry_id and f1.status = 'Active'
+            left join vendor_rate_enquiry_item_info as f on f.vendor_rate_enquiry_item_id = e.vendor_rate_enquiry_item_id and f.status = 'Active'
+            left join tender_quotation_info as g1 on  g1.tender_enquiry_id = a.tender_enquiry_id and g1.status = 'Active'
+            left join tender_quotation_item_info as g on g.tender_enquiry_item_id = f.tender_enquiry_item_id and g.status = 'Active'
+            left join customer_tender_po_info as h1 on h1.tender_quotation_id = g1.tender_quotation_id and h1.tender_enquiry_id = a.tender_enquiry_id  and h1.status = 'Active'
+            left join tender_po_item_info as h on h.tender_quotation_item_id = g.tender_quotation_item_id  and h.tender_po_id = a.tender_po_id  and h.status = 'Active'
+            left join tender_enq_invoice_item_info as i on i.tender_po_item_id = h.tender_po_item_id and i.tender_enq_invoice_id = '".$tender_enq_invoice_id."' and i.status = 'Active'
+            where a.status = 'Active' 
+            and b.status = 'Active'
+            and h.tender_po_item_id != ''
+            and a.tender_po_id = '".$tender_po_id."' 
+            and a.tender_dc_id in (".$dc_ids.")
+            group by h.tender_po_item_id 
+            order by h.tender_po_item_id asc
+        ";
+
+        $query = $this->db->query($sql);
 
         echo json_encode($query->result_array());
     }

@@ -245,11 +245,12 @@ class Vendor extends CI_Controller
             STEP 1 : Make all items inactive first
             ----------------------------------------
             */
-            $this->db->where('vendor_rate_enquiry_id', $id);
-            $this->db->update('vendor_rate_enquiry_item_info', [
-                'status' => 'Delete'
-            ]);
+            // $this->db->where('vendor_rate_enquiry_id', $id);
+            // $this->db->update('vendor_rate_enquiry_item_info', [
+            //     'status' => 'Delete'
+            // ]);
 
+            $miss_item_ids = [];
 
             foreach ($selected_idxs as $rowIndex) {
 
@@ -272,6 +273,7 @@ class Vendor extends CI_Controller
                         'vendor_rate_enquiry_item_id',
                         $vendor_rate_enquiry_item_ids[$rowIndex]
                     )->update('vendor_rate_enquiry_item_info', $item_data);
+                    $miss_item_ids[] = $vendor_rate_enquiry_item_ids[$rowIndex];
                 } else {
 
                     $item_data['created_by'] =
@@ -284,8 +286,20 @@ class Vendor extends CI_Controller
                         'vendor_rate_enquiry_item_info',
                         $item_data
                     );
+                    $miss_item_ids[] = $this->db->insert_id();
                 }
             }
+
+                // ✅ DELETE
+                if (!empty($miss_item_ids)) {
+                    $this->db->where('vendor_rate_enquiry_id', $id)
+                        ->where_not_in('vendor_rate_enquiry_item_id', $miss_item_ids)
+                        ->update('vendor_rate_enquiry_item_info', ['status' => 'Delete']);
+                } else {
+                    // If no items are selected, mark all as deleted
+                    $this->db->where('vendor_rate_enquiry_id', $id)
+                        ->update('vendor_rate_enquiry_item_info', ['status' => 'Delete']);
+                }
 
             /* 
             $tender_enquiry_item_ids = $this->input->post('tender_enquiry_item_id');
@@ -424,22 +438,42 @@ class Vendor extends CI_Controller
         }
 
         $sql = "
-       SELECT
-            a.vendor_rate_enquiry_item_id,
-            a.vendor_rate_enquiry_id,
-            a.tender_enquiry_item_id,
-            a.item_code,
-            a.item_desc,
-            a.uom,
-            a.qty     
-        FROM
-            vendor_rate_enquiry_item_info a 
-        WHERE
-        a.status ='Active'
-        and a.vendor_rate_enquiry_id = ?
-        ORDER BY a.vendor_rate_enquiry_item_id ASC
-    ";
-        $query = $this->db->query($sql, array($id));
+        SELECT
+                a.vendor_rate_enquiry_item_id,
+                a.vendor_rate_enquiry_id,
+                a.tender_enquiry_item_id,
+                a.item_code,
+                a.item_desc,
+                a.uom,
+                a.qty     
+            FROM
+                vendor_rate_enquiry_item_info a 
+            WHERE
+            a.status ='Active'
+            and a.vendor_rate_enquiry_id = ?
+            ORDER BY a.vendor_rate_enquiry_item_id ASC
+        ";
+
+        $sql = "
+        select  
+        b.tender_enquiry_item_id,
+        c.vendor_rate_enquiry_item_id,
+        c.vendor_rate_enquiry_id, 
+        if(vendor_rate_enquiry_item_id is null,  b.item_code, c.item_code) as item_code,
+        if(vendor_rate_enquiry_item_id is null,  b.item_desc, c.item_desc) as item_desc, 
+        if(vendor_rate_enquiry_item_id is null,  b.qty, c.qty) as qty,  
+        if(vendor_rate_enquiry_item_id is null,  b.uom, c.uom) as uom,  
+        c.`status`
+        from tender_enquiry_info as a
+        left join tender_enquiry_item_info as b on b.tender_enquiry_id = a.tender_enquiry_id 
+        left join vendor_rate_enquiry_item_info as c on c.tender_enquiry_item_id = b.tender_enquiry_item_id and c.`status` = 'Active'
+        where a.`status` = 'Active'
+        and b.`status` = 'Active'
+        and a.tender_enquiry_id = ?
+        order by c.vendor_rate_enquiry_item_id desc  
+        ";
+        //$query = $this->db->query($sql, array($id));
+        $query = $this->db->query($sql, array($data['main']['tender_enquiry_id']));
         $data['item_rows'] = $query->result_array();
 
         $this->load->view('page/vendor/vendor-rate-enquiry-edit', $data);
@@ -2002,10 +2036,10 @@ class Vendor extends CI_Controller
                 AND d.status = 'Active'
             LEFT JOIN vendor_pur_inward_item_info AS b 
                 ON d.vendor_po_item_id = b.vendor_po_item_id
-                AND b.vendor_pur_inward_id = 1
+                AND b.vendor_pur_inward_id = ?
                 AND b.status = 'Active'
             WHERE po.status = 'Active'
-                AND po.vendor_po_id = 1
+                AND po.vendor_po_id = ?
             ORDER BY d.vendor_po_item_id;
         ";
         $data['items'] = $this->db->query($sql, [$vendor_pur_inward_id, $data['header']['vendor_po_id']])->result_array();

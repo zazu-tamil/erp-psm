@@ -28,6 +28,7 @@
                         <div class="input-group">
                             <span class="input-group-addon"><i class="fa fa-search"></i></span>
                             <input type="text" class="form-control srch_enq_id" placeholder="Type to search...">
+                            <span class="input-group-addon" id="btn_reload"><i class="fa fa-refresh"></i></span>
                         </div>
                     </div>
                 </div>
@@ -498,6 +499,15 @@
                 // Load both timelines
                 load_tender_enq_customer_timeline(currentEnquiryId);
                 load_tender_enq_vendor_timeline(currentEnquiryId);
+            }
+        });
+
+        $("#btn_reload").on("click", function () {
+            if (currentEnquiryId) {
+                load_tender_enq_customer_timeline(currentEnquiryId);
+                load_tender_enq_vendor_timeline(currentEnquiryId);
+            } else {
+                alert("Please select an enquiry to reload.");
             }
         });
 

@@ -11,7 +11,7 @@
 <!-- Main content -->
 <section class="content">
     <!-- Search Filter -->
-    <div class="box box-info no-print">
+    <div class="box box-info no-print" id="search_filter_box">
         <div class="box-header with-border">
             <h3 class="box-title text-white">Search Filter</h3>
         </div>
@@ -34,7 +34,12 @@
                     <!-- Open All Checkbox -->
                     <div class="form-group col-md-3" style="margin-top:25px;">
                         <label>
-                            <input type="checkbox" id="chk_open_all"> Open All Sections
+                            <input type="checkbox" id="chk_open_all" name="chk_open_all" value="1" <?php 
+                            if(($this->input->post('chk_open_all')!= '') && $this->input->post('chk_open_all') == 1) {
+                                echo 'checked';
+                            }   
+                             
+                            ?>> Open All Sections
                         </label>
                     </div>
 
@@ -1182,32 +1187,36 @@
         });
     });
 </script>
-<script>
+<script> 
+
     $(document).ready(function () {
 
-        $("#chk_open_all").on("change", function () {
+        function toggleBoxes() {
 
-            if ($(this).is(":checked")) {
+            var isChecked = $("#chk_open_all").is(":checked");
 
-                // Open all boxes
-                $(".box").each(function () {
-                    if ($(this).hasClass("collapsed-box")) {
-                        $(this).find('[data-widget="collapse"]').click();
-                    }
-                });
+            $(".box").not("#search_filter_box").each(function () {
 
-            } else {
+                if (isChecked) {
+                    $(this)
+                        .removeClass("collapsed-box")
+                        .children(".box-body, .box-footer")
+                        .slideDown();
+                } else {
+                    $(this)
+                        .addClass("collapsed-box")
+                        .children(".box-body, .box-footer")
+                        .slideUp();
+                }
 
-                // Close all boxes
-                $(".box").each(function () {
-                    if (!$(this).hasClass("collapsed-box")) {
-                        $(this).find('[data-widget="collapse"]').click();
-                    }
-                });
+            });
+        }
 
-            }
+        // Run on page load
+        toggleBoxes();
 
-        });
+        // Run on checkbox change
+        $("#chk_open_all").on("change", toggleBoxes);
 
     });
 </script>

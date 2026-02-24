@@ -274,7 +274,9 @@
                     }
 
                     $("#dc_list_container").html(html);
-                    loadItemsByDC(dc_ids);
+
+
+                    loadItemsByDC(dc_ids.split(","));  
                 }
             });
 
@@ -305,7 +307,7 @@
 
             $(".dc_list:checked").each(function () {
                 dc_ids.push($(this).val());
-            });
+            }); 
             loadItemsByDC(dc_ids);
         });
 
@@ -324,15 +326,17 @@
             }
 
             $.ajax({
-                url: "<?php echo site_url('tender/get_tender_po_invoice_load_items_dc_id'); ?>",
+                url: "<?php echo site_url('tender/get_tender_po_invoice_edit_load_items_dc_id'); ?>",
                 type: "POST",
                 data: {
-                    dc_id: dc_ids,
-                    tender_po_id: $("#srch_tender_po_id").val()
+                    dc_id:  dc_ids.join(","),
+                    tender_po_id: $("#srch_tender_po_id").val(),
+                    tender_enq_invoice_id: '<?php echo $header['tender_enq_invoice_id']; ?>',
                 },
                 dataType: "json",
 
                 success: function (res) {
+                //console.log(res);
 
                     if (!res || res.length === 0) {
                         $container.html(`
@@ -345,6 +349,11 @@
                     }
 
                     $.each(res, function (i, row) {
+                        if(row.tender_enq_invoice_item_id) {
+                             $chked = "checked";    
+                        } else {
+                            $chked = "";
+                        }
 
                         const html = `
                     <tr class="item-row">
@@ -353,8 +362,8 @@
                             <input type="checkbox"
                                 class="item-check"
                                 name="selected_items[]"
-                                value="${i}"
-                                checked>
+                                value="${row.tender_enq_invoice_item_id || 0}"
+                                ${ $chked }>
                         </td>
 
                         <td>
@@ -362,7 +371,11 @@
                                 class="form-control"
                                 name="item_code[${i}]"
                                 value="${row.item_code || ''}"
-                                readonly>
+                                >
+
+                            <input type="hidden"
+                                name="tender_enq_invoice_item_id[${i}]"
+                                value="${row.tender_enq_invoice_item_id || 0}">    
 
                             <input type="hidden"
                                 name="tender_po_item_id[${i}]"
@@ -373,7 +386,7 @@
                             <textarea class="form-control"
                                 name="item_desc[${i}]"
                                 rows="2"
-                                readonly>${row.item_desc || ''}</textarea>
+                                >${row.item_desc || ''}</textarea>
                         </td>
 
                         <td>
@@ -387,21 +400,21 @@
                                 class="form-control qty-input"
                                 name="qty[${i}]"
                                 value="${row.del_qty || 0}"
-                                readonly>
+                                >
                         </td>
 
                         <td>
                             <input type="number"
                                 class="form-control rate-input"
                                 name="rate[${i}]"
-                                value="${row.rate || 0}" readonly>
+                                value="${row.rate || 0}" >
                         </td>
 
                         <td>
                             <input type="number"
                                 class="form-control gst-input"
                                 name="gst[${i}]"
-                                value="${row.gst || 0}" readonly>
+                                value="${row.gst || 0}" >
 
                             <input type="hidden"
                                 class="gst-amount-input"

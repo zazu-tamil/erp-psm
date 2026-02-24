@@ -15,8 +15,8 @@
 <section class="content">
     <div class="box box-info">
         <div class="box-header with-border">
-            <h3 class="box-title"><i class="fa fa-plus-circle"></i> Add Vendor PO</h3>
-            <a href="<?php echo site_url('vendor-po-list'); ?>" class="btn btn-warning pull-right">
+            <h3 class="box-title"><i class="fa fa-plus-circle"></i> Add Vendor Purchase Inward</h3>
+            <a href="<?php echo site_url('vendor-pur-inward-list'); ?>" class="btn btn-warning pull-right">
                 <i class="fa fa-arrow-left"></i> Back To List
             </a>
         </div>
@@ -26,7 +26,7 @@
                 <input type="hidden" name="mode" value="Edit" />
                 <input type="hidden" name="vendor_pur_inward_id" value="<?php echo $header['vendor_pur_inward_id']; ?>" />
                 <fieldset class="tender-inward">
-                    <legend class="text-light-blue"><i class="fa fa-file-text-o"></i> Po Details</legend>
+                    <legend class="text-light-blue"><i class="fa fa-file-text-o"></i> Vendor Purchase Inward Details</legend>
 
                     <div class="row">
                         <div class="form-group col-md-4">
