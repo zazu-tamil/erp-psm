@@ -2352,26 +2352,48 @@ class Tender extends CI_Controller
 
 
         // Fetch ALL items from the selected quotation
-        $quotation_items = [];
-        if ($tender_quotation_id) {
-            $sql = "SELECT 
-                    a.tender_po_item_id,
-                    a.tender_quotation_item_id,  
-                    a.item_code,
-                    a.item_desc,
-                    a.uom,
-                    a.qty,
-                    a.rate,
-                    a.gst as vat,
-                    a.amount
-                FROM tender_po_item_info a 
-                WHERE a.tender_po_id = ? AND a.status = 'Active'
-                ORDER BY a.tender_po_item_id ASC";
-            $query = $this->db->query($sql, [$tender_po_id]);
-            $quotation_items = $query->result_array();
+        // $quotation_items = [];
+        // if ($tender_quotation_id) {
+        //     $sql = "SELECT 
+        //             a.tender_po_item_id,
+        //             a.tender_quotation_item_id,  
+        //             a.item_code,
+        //             a.item_desc,
+        //             a.uom,
+        //             a.qty,
+        //             a.rate,
+        //             a.gst as vat,
+        //             a.amount
+        //         FROM tender_po_item_info a 
+        //         WHERE a.tender_po_id = ? AND a.status = 'Active'
+        //         ORDER BY a.tender_po_item_id ASC";
+        //     $query = $this->db->query($sql, [$tender_po_id]);
+        //     $quotation_items = $query->result_array();
 
-            $data['merged_items'] = $quotation_items;
-        }
+        //     $data['merged_items'] = $quotation_items;
+        // }
+
+         $sql = "
+            select 
+            b.tender_quotation_item_id,
+            c.tender_po_item_id,
+            if(c.tender_po_item_id is null , b.item_code , c.item_code) as item_code,
+            if(c.tender_po_item_id is null , b.item_desc , c.item_desc) as item_desc, 
+            if(c.tender_po_item_id is null , b.uom , c.uom) as uom,
+            if(c.tender_po_item_id is null , b.qty , c.qty) as qty,
+            if(c.tender_po_item_id is null , b.rate , c.rate) as rate,
+            if(c.tender_po_item_id is null , b.gst , c.gst) as vat,
+            if(c.tender_po_item_id is null , b.amount , c.amount) as amount
+            from tender_quotation_info as a
+            left join tender_quotation_item_info as b on b.tender_quotation_id = a.tender_quotation_id 
+            left join tender_po_item_info as c on c.tender_quotation_item_id = b.tender_quotation_item_id and c.tender_po_id = ? and c.`status` = 'Active'
+            where a.`status` = 'Active' and b.`status` = 'Active'
+            and a.tender_quotation_id = ?
+            order by c.tender_po_item_id desc ,  b.tender_quotation_item_id asc 
+        ";
+        $query = $this->db->query($sql, [$tender_po_id ,  $tender_quotation_id]);
+
+        $data['merged_items'] = $query->result_array();
 
 
         $sql = "SELECT 

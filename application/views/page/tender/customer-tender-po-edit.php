@@ -28,12 +28,12 @@
                     <div class="row">
                         <div class="form-group col-md-3">
                             <label for="srch_company_id">Company</label>
-                            <?php echo form_dropdown('srch_company_id',   $company_opt, set_value('srch_company_id', $header['company_id']), 'id="srch_company_id" class="form-control"'); ?>
+                            <?php echo form_dropdown('srch_company_id',   $company_opt, set_value('srch_company_id', $header['company_id']), 'id="srch_company_id" class="form-control readonly-select"'); ?>
                         </div>
 
                         <div class="form-group col-md-3">
                             <label for="srch_customer_id">Customer</label>
-                            <?php echo form_dropdown('srch_customer_id', ['' => 'Select'] + $customer_opt, set_value('srch_customer_id', $header['customer_id']), 'id="srch_customer_id" class="form-control"'); ?>
+                            <?php echo form_dropdown('srch_customer_id', ['' => 'Select'] + $customer_opt, set_value('srch_customer_id', $header['customer_id']), 'id="srch_customer_id" class="form-control readonly-select"'); ?>
                         </div>
 
                         <div class="form-group col-md-3">
@@ -180,7 +180,7 @@
                                         <div class="col-md-1 d-flex align-items-center justify-content-center">
                                             <input type="checkbox" class="form-check-input item-check" 
                                                 name="selected_items[]" value="<?php echo $i; ?>"
-                                                checked >
+                                                 <?php if (!empty($row['tender_po_item_id'])): ?> checked <?php endif; ?>>
                                                  <input type="hidden" name="tender_quotation_item_id[]" value="<?php echo $row['tender_quotation_item_id']; ?>"> 
                                                 <input type="hidden" name="tender_po_item_id[]>"  value="<?php echo $row['tender_po_item_id']; ?>"> 
 
