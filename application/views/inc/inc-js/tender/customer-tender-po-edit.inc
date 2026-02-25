@@ -326,9 +326,7 @@
         reader.readAsBinaryString(file);
     });
 
-    /* ================================================================
-       4. QUOTATION CHANGE - Load Items from Selected Quotation
-       ================================================================ */
+ 
     $("#srch_quotation_no").on("change", function () {
       const tender_quotation_id = $(this).val();
       const $container = $("#item_container");
@@ -473,58 +471,70 @@
         }
       });
     });
-
-    /* ================================================================
-       5. Amount Calculation (Rate / VAT change)
-       ================================================================ */
-    $(document).on("input change", ".rate-input, .vat-dropdown", function () {
-      const $row = $(this).closest(".item-card");
-      const qty = parseFloat($row.find(".qty-input").val()) || 0;
-      const rate = parseFloat($row.find(".rate-input").val()) || 0;
-      const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
-
-      const amount = qty * rate * (1 + gst / 100);
-      $row.find(".amount-input").val(amount.toFixed(3));
-      $row.find(".amountwotx").val((qty * rate).toFixed(3));
-
-      calculateTotalAmount();
-    });
-
-    function calculateTotalAmount() {
-      let total = 0;
-      $(".amount-input").each(function () {
-        total += parseFloat($(this).val()) || 0;
-      });
-      $("#total_amount").text(total.toFixed(3));
-
-      let total_wot = 0;
-      $(".amountwotx").each(function () {
-        total_wot += parseFloat($(this).val()) || 0;
-      });
-      $("#total_amount_wo_tax").text(total_wot.toFixed(3));
-    }
-
-    calculateTotalAmount();
-
-
-
-    /* ================================================================
-       6. Checkbox Change - Add/Remove Hidden Fields
-       ================================================================ */
-    $(document).on("change", ".item-check", function () {
-      const $card = $(this).closest(".item-card");
-      if (!$(this).is(":checked")) {
-        $card
-          .find(
-            "input[type=hidden][name^='tender_quotation_item_id'], " +
-              "input[type=hidden][name^='category_id'], " +
-              "input[type=hidden][name^='item_id']"
-          )
-          .remove();
-      }
-    });
+     calculateTotalAmount();
   });
 
+  $(document).on("input change", ".rate-input, .vat-dropdown, .qty-input, .item-check", function () {
+
+      const $row = $(this).closest(".item-card");
+      const isChecked = $row.find(".item-check").is(":checked");
+
+      const qty  = parseFloat($row.find(".qty-input").val()) || 0;
+      const rate = parseFloat($row.find(".rate-input").val()) || 0;
+      const gst  = parseFloat($row.find(".vat-dropdown").val()) || 0;
+
+      if (isChecked) {
+
+          const amount = qty * rate * (1 + gst / 100);
+
+          $row.find(".amount-input").val(amount.toFixed(3));
+          $row.find(".amountwotx").val((qty * rate).toFixed(3));
+
+      } else { 
+          $row.find(".amount-input").val("0.000");
+          $row.find(".amountwotx").val("0.000");
+      } 
+      calculateTotalAmount();
+  });
+
+  function calculateTotalAmount() {
+
+      let total = 0;
+      let total_wot = 0;
+
+      $(".item-card").each(function () {
+
+          if ($(this).find(".item-check").is(":checked")) {
+
+              total += parseFloat($(this).find(".amount-input").val()) || 0;
+              total_wot += parseFloat($(this).find(".amountwotx").val()) || 0;
+          }
+      });
+
+      $("#total_amount").text(total.toFixed(3));
+      $("#total_amount_wo_tax").text(total_wot.toFixed(3));
+  }
+
+  $(document).on("change", ".item-check", function () {
+
+        const $card = $(this).closest(".item-card");
+
+        if (!$(this).is(":checked")) {
+
+            // remove hidden fields
+            $card.find(
+                "input[type=hidden][name^='tender_quotation_item_id'], \
+                input[type=hidden][name^='category_id'], \
+                input[type=hidden][name^='item_id']"
+            ).remove();
+
+            // reset amount
+            $card.find(".amount-input").val("0.000");
+            $card.find(".amountwotx").val("0.000");
+        }
+
+        calculateTotalAmount();
+  });
 
   $(function () {
     CKEDITOR.replace("editor1", {

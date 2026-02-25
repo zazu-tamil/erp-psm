@@ -2237,7 +2237,7 @@ class Tender extends CI_Controller
             $gsts = $this->input->post('gst') ?: [];
             $amounts = $this->input->post('amount') ?: [];
 
-            foreach ($selected_idxs as $idx => $value) {
+            foreach ($selected_idxs as $idx) {
                 // Get existing PO item ID if it exists (from hidden field)
                 $existing_po_item_id = $tender_po_item_ids[$idx];
 

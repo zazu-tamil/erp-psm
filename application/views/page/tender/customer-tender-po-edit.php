@@ -181,6 +181,7 @@
                                             <input type="checkbox" class="form-check-input item-check" 
                                                 name="selected_items[]" value="<?php echo $i; ?>"
                                                  <?php if (!empty($row['tender_po_item_id'])): ?> checked <?php endif; ?>>
+                                                    
                                                  <input type="hidden" name="tender_quotation_item_id[]" value="<?php echo $row['tender_quotation_item_id']; ?>"> 
                                                 <input type="hidden" name="tender_po_item_id[]>"  value="<?php echo $row['tender_po_item_id']; ?>"> 
 
