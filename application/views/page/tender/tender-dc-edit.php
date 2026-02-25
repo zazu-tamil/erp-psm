@@ -142,25 +142,25 @@
                             </thead>
                             <tbody id="item_container">
                                 <?php foreach ($items as $i => $row) { ?>
-                                    <tr>
+                                    <tr> 
+                                       
 
+                                     
 
-                                        <input type="hidden" name="tender_dc_item_id[<?= $i ?>]"
+                                         <td>
+                                   
+
+                                             <input type="checkbox" class="form-check-input item-check" 
+                                                name="selected_items[]" value="<?php echo $i; ?>"
+                                                 <?php if (!empty($row['tender_dc_item_id'])): ?> checked <?php endif; ?>>
+                                                    <input type="text" name="tender_dc_item_id[]"
                                             value="<?= $row['tender_dc_item_id']; ?>">
-
-                                        <input type="hidden" name="vendor_pur_inward_id[<?= $i ?>]"
+                                             <input type="text" name="vendor_pur_inward_id[<?= $i ?>]"
                                             value="<?= $row['vendor_pur_inward_id']; ?>">
 
-                                        <input type="hidden" name="vendor_pur_inward_item_id[<?= $i ?>]"
+                                        <input type="text" name="vendor_pur_inward_item_id[<?= $i ?>]"
                                             value="<?= $row['vendor_pur_inward_item_id']; ?>">
 
-                                        <input type="hidden" name="category_id[<?= $i ?>]"
-                                            value="<?= $row['category_id']; ?>">
-
-                                        <input type="hidden" name="item_id[<?= $i ?>]" value="<?= $row['item_id']; ?>">
-                                        <td>
-                                            <input type="checkbox" class="form-check-input item-check"
-                                                name="selected_items[]" value="<?= $i ?>" <?= ($row['chk'] == 1) ? 'checked' : ''; ?>>
                                         </td>
 
 

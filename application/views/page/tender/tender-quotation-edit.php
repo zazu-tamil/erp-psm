@@ -170,9 +170,14 @@
                         <div class="item-card border p-3 mb-3" style="background-color:#f9f9f9; border-radius:8px;">
                             <h5 class="text-primary mb-3">Item Details <?php echo $i + 1; ?></h5>
                             <div class="row">
-                                <div class="col-md-1 d-flex align-items-center justify-content-center">
-                                    <input type="checkbox" class="form-check-input item-check" name="selected_items[]"
-                                        value="<?php echo $i; ?>" checked>
+                                <div class="col-md-1 d-flex align-items-center justify-content-center">  
+                                             <input type="checkbox" class="form-check-input item-check" 
+                                                name="selected_items[]" value="<?php echo $i; ?>"
+                                                 <?php if (!empty($row['tender_quotation_item_id'])): ?> checked <?php endif; ?>>
+                                                    <input type="hidden" name="tender_quotation_item_id[]"
+                                            value="<?= $row['tender_quotation_item_id']; ?>">
+
+
                                          <input type="hidden" name="tender_quotation_item_id[]" class="tender_quotation_item_id" value="<?php echo htmlspecialchars($row['tender_quotation_item_id']); ?>">
                                          <input type="hidden" name="tender_enquiry_item_id[]" class="tender_enquiry_item_id" value="<?php echo htmlspecialchars($row['tender_enquiry_item_id']); ?>">
                                         

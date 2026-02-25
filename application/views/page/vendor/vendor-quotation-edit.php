@@ -186,35 +186,36 @@
                         </thead>
                         <tbody id="item_container">
                             <?php if (!empty($items)): ?>
-                            <?php $index = 0;
-                                foreach ($items as $item): ?>
+                            <?php 
+                                foreach ($items as $key => $item): ?>
                             <tr class="item-row item-card">
                                 <td>
-                                    <input type="checkbox" class="form-check-input item-check" name="selected_items[]"
-                                        value="<?php echo $index; ?>" <?php echo (!empty($item['vendor_quote_item_id'])) ? 'checked' : ''; ?>>
-                                    <input type="hidden" name="vendor_rate_enquiry_item_id[<?php echo $index; ?>]" value="<?php echo $item['vendor_rate_enquiry_item_id']; ?>">
-                                    <input type="hidden" name="vendor_quote_item_id[<?php echo $index; ?>]" value="<?php echo $item['vendor_quote_item_id']; ?>">
+                                 <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="<?php echo $key; ?>"
+                                    <?php echo (!empty($item['vendor_quote_item_id'])) ? 'checked' : ''; ?>>
+
+                                    <input type="hidden" name="vendor_rate_enquiry_item_id[]" value="<?php echo $item['vendor_rate_enquiry_item_id']; ?>">
+                                     <input type="hidden" name="vendor_quote_item_id[]" value="<?php echo $item['vendor_quote_item_id']; ?>">
                                 </td>
 
                                 <td>
-                                    <input type="text" class="form-control item_code" name="item_code[<?php echo $index; ?>]"  value="<?php echo htmlspecialchars($item['item_code']); ?>">
+                                    <input type="text" class="form-control item_code" name="item_code[]"  value="<?php echo htmlspecialchars($item['item_code']); ?>">
                                 </td>
                                 <td>
-                                    <textarea name="item_desc[<?php echo $index; ?>]" class="form-control" rows="2"  ><?php echo htmlspecialchars($item['item_desc']); ?></textarea>
+                                    <textarea name="item_desc[]" class="form-control" rows="2"  ><?php echo htmlspecialchars($item['item_desc']); ?></textarea>
                                 </td>
 
                                 <td>
-                                    <input type="text" name="uom[<?php echo $index; ?>]" class="form-control uom" value="<?php echo $item['uom']; ?>" >
+                                    <input type="text" name="uom[]" class="form-control uom" value="<?php echo $item['uom']; ?>" >
                                     <br>
-                                    <input type="number" step="any" name="qty[<?php echo $index; ?>]"  class="form-control qty" value="<?php echo $item['qty']; ?>" >
+                                    <input type="number" step="any" name="qty[]"  class="form-control qty" value="<?php echo $item['qty']; ?>" >
                                 </td>
 
                                 <td>
-                                    <input type="number" step="any" name="rate[<?php echo $index; ?>]" class="form-control rate" value="<?php echo $item['rate']; ?>">
+                                    <input type="number" step="any" name="rate[]" class="form-control rate" value="<?php echo $item['rate']; ?>">
                                 </td>
 
                                 <td>
-                                    <input type="number" step="any" name="gst[<?php echo $index; ?>]" class="form-control vat" value="<?php echo $item['vat']; ?>">
+                                    <input type="number" step="any" name="gst[]" class="form-control vat" value="<?php echo $item['vat'] ?? 10; ?>">
                                    
                                 </td>
 
@@ -228,7 +229,7 @@
                                 </td>
 
                             </tr>
-                            <?php $index++; endforeach; ?>
+                            <?php endforeach; ?>
                             <?php endif; ?>
                         </tbody> 
                     </table> 

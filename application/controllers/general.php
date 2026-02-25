@@ -344,7 +344,7 @@ class General extends CI_Controller
                 a.* 
                 from company_bank_info as a  
                 where a.bank_id = '" . $rec_id . "'
-            "); 
+            ");
             $rec_list = array();
 
             foreach ($query->result_array() as $row) {
@@ -374,66 +374,89 @@ class General extends CI_Controller
 
 
         if ($table == 'country_info') {
-             $this->db->where('country_id', $rec_id);
+            $this->db->where('country_id', $rec_id);
             $this->db->update('country_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
         }
-        
-        if( $table == 'vat_filing_head_info') {
-             $this->db->where('vat_filing_head_id', $rec_id);
+
+        if ($table == 'vat_filing_head_info') {
+            $this->db->where('vat_filing_head_id', $rec_id);
             $this->db->update('vat_filing_head_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
-        }   
+        }
         if ($table == 'addt_charges_type_info') {
             $this->db->where('addt_charges_type_id', $rec_id);
             $this->db->update('addt_charges_type_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
         }
         if ($table == 'vendor_purchase_invoice_info') {
-             $this->db->where('vendor_purchase_invoice_id ', $rec_id);
+            $this->db->where('vendor_purchase_invoice_id', $rec_id);
             $this->db->update('vendor_purchase_invoice_info', array('status' => 'Delete'));
+            $this->db->where('vendor_purchase_invoice_id ', $rec_id);
+            $this->db->update('vendor_purchase_invoice_item_info', array('status' => 'Delete'));
+
             echo "Record Deleted Successfully";
         }
         if ($table == 'tender_enq_invoice_info') {
-            $this->db->where('tender_enq_invoice_id ', $rec_id);
+            $this->db->where('tender_enq_invoice_id', $rec_id);
             $this->db->update('tender_enq_invoice_info', array('status' => 'Delete'));
+            $this->db->where('tender_enq_invoice_id', $rec_id);
+            $this->db->update('tender_enq_invoice_item_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
         }
         if ($table == 'tender_dc_info') {
             $this->db->where('tender_dc_id ', $rec_id);
             $this->db->update('tender_dc_info', array('status' => 'Delete'));
+            $this->db->where('tender_dc_id ', $rec_id);
+            $this->db->update('tender_dc_item_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
         }
 
         if ($table == 'vendor_pur_inward_info') {
             $this->db->where('vendor_pur_inward_id', $rec_id);
             $this->db->update('vendor_pur_inward_info', array('status' => 'Delete'));
+            $this->db->where('vendor_pur_inward_id', $rec_id);
+            $this->db->update('vendor_pur_inward_item_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
         }
 
         if ($table == 'vendor_quotation_info') {
             $this->db->where('vendor_quote_id', $rec_id);
             $this->db->update('vendor_quotation_info', array('status' => 'Delete'));
+            $this->db->where('vendor_quote_id', $rec_id);
+            $this->db->update('vendor_quote_item_info', array('status' => 'Delete'));
+
             echo "Record Deleted Successfully";
         }
+
+
         if ($table == 'tender_quotation_info') {
             $this->db->where('tender_quotation_id', $rec_id);
             $this->db->update('tender_quotation_info', array('status' => 'Delete'));
+            $this->db->where('tender_quotation_id', $rec_id);
+            $this->db->update('tender_quotation_item_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
         }
         if ($table == 'customer_tender_po_info') {
             $this->db->where('tender_po_id', $rec_id);
             $this->db->update('customer_tender_po_info', array('status' => 'Delete'));
+            $this->db->where('tender_po_id', $rec_id);
+            $this->db->update('tender_po_item_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
         }
+
         if ($table == 'tender_enquiry_info') {
             $this->db->where('tender_enquiry_id', $rec_id);
             $this->db->update('tender_enquiry_info', array('status' => 'Delete'));
+            $this->db->where('tender_enquiry_id', $rec_id);
+            $this->db->update('tender_enquiry_item_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully1";
         }
         if ($table == 'vendor_po_info') {
             $this->db->where('vendor_po_id', $rec_id);
             $this->db->update('vendor_po_info', array('status' => 'Delete'));
+            $this->db->where('vendor_po_id', $rec_id);
+            $this->db->update('vendor_po_item_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
         }
         if ($table == 'company_info') {

@@ -331,11 +331,68 @@
 </script>
 <script>
   $(document).ready(function () {
+    let rowIndex = 0; // ⭐ VERY IMPORTANT
+
     $(".cls_export").hide();
 
+    
+    function getRowTemplate(index) {
+      return `
+          <tr class="item-row">
+
+          <td class="text-center">
+          <input type="checkbox"
+          class="form-check-input item-check"
+          name="selected_items[]"
+          value="${index}">
+          </td>
+
+          <td>
+          <input type="text" name="item_code[]" class="form-control item_code">
+          <input type="hidden"
+          name="vendor_rate_enquiry_item_id[]"
+          class="vendor_rate_enquiry_item_id">
+          </td>
+
+          <td>
+          <textarea name="item_desc[]" 
+          class="form-control item_desc"></textarea>
+          </td>
+
+          <td>
+          <input type="text" name="uom[]" class="form-control uom mb-1">
+          <input type="number" step="any"
+          name="qty[]" class="form-control qty">
+          </td>
+
+          <td>
+          <input type="number" step="any"
+          name="rate[]" class="form-control rate">
+          </td>
+
+          <td>
+          <input type="number" step="any"
+          name="gst[]" class="form-control vat" value="10">
+          </td>
+
+          <td>
+          <input type="number"
+          name="amount_wo_tax[]"
+          class="form-control amount_wo_tax" readonly>
+          </td>
+
+          <td>
+          <input type="number"
+          name="amount[]"
+          class="form-control amount" readonly>
+          </td>
+
+          </tr>`;
+    }
+
     /* =====================================================
-       EXPORT TO EXCEL
-    ===================================================== */
+   EXPORT EXCEL
+===================================================== */
     $(document).on("click", "#btnExport", function () {
       let jsonData = $(this).data("xls");
 
@@ -343,48 +400,16 @@
         jsonData = JSON.parse(jsonData);
       }
 
-      let fileName = $(this).val() || "export";
+      const ws = XLSX.utils.json_to_sheet(jsonData);
+      const wb = XLSX.utils.book_new();
 
-      const worksheet = XLSX.utils.json_to_sheet(jsonData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-      XLSX.writeFile(workbook, fileName + ".xlsx");
+      XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+      XLSX.writeFile(wb, "VendorQuote.xlsx");
     });
 
     /* =====================================================
-       IMPORT FROM EXCEL
-    ===================================================== */
-    const rowTemplate = `
-        <tr class="item-row"> 
-            <td class="text-center">
-                <input type="checkbox" class="form-check-input item-check" name="selected_items[]">
-            </td> 
-            <td>
-                <input type="text" name="item_code[]" class="form-control item_code">
-                <input type="hidden" name="vendor_rate_enquiry_item_id[]" class="vendor_rate_enquiry_item_id">
-            </td>
-            <td>
-                <textarea name="item_desc[]" class="form-control item_desc" rows="2"></textarea>
-            </td>
-            <td>
-                <input type="text" name="uom[]" class="form-control uom mb-1">
-                <input type="number" step="any" name="qty[]" class="form-control qty">
-            </td>
-            <td>
-                <input type="number" step="any" name="rate[]" class="form-control rate" placeholder="0.000"
-            </td>
-            <td>
-                <input type="number" step="any" name="gst[]" class="form-control vat" value="10.00">
-            </td>
-            <td>
-                <input type="number" class="form-control amount_wo_tax" name="amount_wo_tax[]" readonly>
-            </td>
-            <td>
-                <input type="number" class="form-control amount" name="amount[]" readonly>
-            </td>
-        </tr>
-    `;
-
+   IMPORT EXCEL
+===================================================== */
     $("#excelFile").on("change", function (e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -392,18 +417,20 @@
       const reader = new FileReader();
 
       reader.onload = function (e) {
-        const workbook = XLSX.read(e.target.result, { type: "binary" });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const wb = XLSX.read(e.target.result, { type: "binary" });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
         $("#item_container").empty();
+        rowIndex = 0;
 
         rows.forEach(function (r) {
-          let newRow = $(rowTemplate);
+          let newRow = $(getRowTemplate(rowIndex));
 
           newRow
             .find(".vendor_rate_enquiry_item_id")
             .val(r.vendor_rate_enquiry_item_id || "");
+
           newRow.find(".item_code").val(r.item_code || "");
           newRow.find(".item_desc").val(r.item_desc || "");
           newRow.find(".uom").val(r.uom || "");
@@ -412,6 +439,8 @@
           newRow.find(".vat").val(r.vat || 10);
 
           $("#item_container").append(newRow);
+
+          rowIndex++;
         });
 
         calculateAllRows();
@@ -421,43 +450,35 @@
     });
 
     /* =====================================================
-       LOAD FROM AJAX (Vendor Quotation)
-    ===================================================== */
-    $("#srch_vendor_rate_enquiry_id").on("change", function () {
-      const vendor_rate_enquiry_id = $(this).val();
-      const $container = $("#item_container");
-      $container.html("");
+   AJAX LOAD ITEMS
+===================================================== */
+    $("#srch_vendor_rate_enquiry_id").change(function () {
+      const id = $(this).val();
+      const container = $("#item_container");
 
-      if (!vendor_rate_enquiry_id) return;
+      container.html("");
+      rowIndex = 0;
+
+      if (!id) return;
 
       $.ajax({
-        url: "<?php echo site_url('vendor/get_vendor_quotation_rate_enquiry'); ?>",
+        url: "<?= site_url('vendor/get_vendor_quotation_rate_enquiry');?>",
         type: "POST",
-        data: { vendor_rate_enquiry_id },
+        data: { vendor_rate_enquiry_id: id },
         dataType: "json",
+
         success: function (res) {
           $(".cls_export").show();
 
-          $("#btnExport")
-            .attr("data-xls", JSON.stringify(res))
-            .val(
-              "Vendor-Quote-" +
-                $("#srch_vendor_rate_enquiry_id option:selected").text(),
-            );
-
-          if (res.length === 0) {
-            $container.html(
-              '<tr><td colspan="8" class="text-center text-danger">No items found</td></tr>',
-            );
-            return;
-          }
+          $("#btnExport").attr("data-xls", JSON.stringify(res));
 
           $.each(res, function (i, row) {
-            let newRow = $(rowTemplate);
+            let newRow = $(getRowTemplate(rowIndex));
 
             newRow
               .find(".vendor_rate_enquiry_item_id")
               .val(row.vendor_rate_enquiry_item_id);
+
             newRow.find(".item_code").val(row.item_code);
             newRow.find(".item_desc").val(row.item_desc);
             newRow.find(".uom").val(row.uom);
@@ -465,7 +486,9 @@
             newRow.find(".rate").val(row.rate);
             newRow.find(".vat").val(row.vat || 10);
 
-            $container.append(newRow);
+            container.append(newRow);
+
+            rowIndex++;
           });
 
           calculateAllRows();
@@ -474,8 +497,8 @@
     });
 
     /* =====================================================
-       SELECT ALL CHECKBOX
-    ===================================================== */
+   SELECT ALL
+===================================================== */
     $(document).on("change", "#selectall", function () {
       $(".item-check").prop("checked", this.checked);
     });
@@ -488,23 +511,23 @@
     });
 
     /* =====================================================
-       CALCULATIONS
-    ===================================================== */
-    $(document).on("input change", ".qty, .rate, .vat", function () {
+   AUTO CALCULATION
+===================================================== */
+    $(document).on("input change", ".qty,.rate,.vat", function () {
       calculateRow($(this).closest(".item-row"));
     });
 
-    function calculateRow($row) {
-      const qty = parseFloat($row.find(".qty").val()) || 0;
-      const rate = parseFloat($row.find(".rate").val()) || 0;
-      const gst = parseFloat($row.find(".vat").val()) || 0;
+    function calculateRow(row) {
+      const qty = parseFloat(row.find(".qty").val()) || 0;
+      const rate = parseFloat(row.find(".rate").val()) || 0;
+      const gst = parseFloat(row.find(".vat").val()) || 0;
 
-      const baseAmount = qty * rate;
-      const gstAmount = (baseAmount * gst) / 100;
-      const total = baseAmount + gstAmount;
+      const base = qty * rate;
+      const gstAmt = (base * gst) / 100;
+      const total = base + gstAmt;
 
-      $row.find(".amount_wo_tax").val(baseAmount.toFixed(3));
-      $row.find(".amount").val(total.toFixed(3));
+      row.find(".amount_wo_tax").val(base.toFixed(3));
+      row.find(".amount").val(total.toFixed(3));
 
       calculateTotals();
     }
@@ -516,19 +539,19 @@
     }
 
     function calculateTotals() {
-      let totalWO = 0;
-      let totalWith = 0;
+      let wo = 0;
+      let wt = 0;
 
       $(".amount_wo_tax").each(function () {
-        totalWO += parseFloat($(this).val()) || 0;
+        wo += parseFloat($(this).val()) || 0;
       });
 
       $(".amount").each(function () {
-        totalWith += parseFloat($(this).val()) || 0;
+        wt += parseFloat($(this).val()) || 0;
       });
 
-      $("#total_amount_wo_tax").text(totalWO.toFixed(3));
-      $("#total_amount").text(totalWith.toFixed(3));
+      $("#total_amount_wo_tax").text(wo.toFixed(3));
+      $("#total_amount").text(wt.toFixed(3));
     }
   });
 </script>

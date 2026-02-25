@@ -173,12 +173,11 @@
                             <?php if (!empty($items)): ?>
                                 <?php foreach ($items as $index => $item): ?>
 
-                                    <tr class="item-row">
-
-                                        <!-- ✅ SELECT CHECKBOX -->
+                                    <tr class="item-row"> 
                                         <td>
-                                            <input type="checkbox" class="form-check-input item-check" name="selected_items[]"
-                                                value="<?= $index; ?>" <?= !empty($item['vendor_po_item_id']) ? 'checked' : ''; ?>>
+                                         <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="<?= $index; ?>"
+                                        <?= !empty($item['vendor_po_item_id']) ? 'checked' : ''; ?>>
+
 
                                             <input type="hidden" name="vendor_rate_enquiry_item_id[<?= $index; ?>]"
                                                 value="<?= $item['vendor_rate_enquiry_item_id'] ?? ''; ?>">
@@ -188,22 +187,16 @@
 
                                             <input type="hidden" name="vendor_po_item_id[<?= $index; ?>]"
                                                 value="<?= $item['vendor_po_item_id'] ?? ''; ?>">
-                                        </td>
-
-                                        <!-- ✅ ITEM CODE -->
+                                        </td> 
                                         <td>
                                             <input type="text" class="form-control item_code-input"
                                                 name="item_code[<?= $index; ?>]"
                                                 value="<?= htmlspecialchars($item['item_code'] ?? ''); ?>" readonly>
-                                        </td>
-
-                                        <!-- ✅ DESCRIPTION -->
+                                        </td> 
                                         <td>
                                             <textarea name="item_desc[<?= $index; ?>]" class="form-control"
                                                 rows="2"><?= htmlspecialchars($item['item_desc'] ?? ''); ?></textarea>
-                                        </td>
-
-                                        <!-- ✅ UOM + QTY --> 
+                                        </td> 
                                         <td>
                                             <input type="text" name="uom[<?= $index; ?>]" class="form-control"
                                                 value="<?= $item['uom'] ?? ''; ?>">
@@ -212,21 +205,15 @@
 
                                             <input type="number" step="any" name="qty[<?= $index; ?>]"
                                                 class="form-control qty-input" value="<?= $item['qty'] ?? 0; ?>">
-                                        </td>
-
-                                        <!-- ✅ RATE -->
+                                        </td> 
                                         <td>
                                             <input type="number" step="any" name="rate[<?= $index; ?>]"
                                                 class="form-control rate-input" value="<?= $item['rate'] ?? 0; ?>">
-                                        </td>
-
-                                        <!-- ✅ GST -->
+                                        </td> 
                                         <td>
                                             <input type="number" step="any" name="gst[<?= $index; ?>]" class="form-control vat"
                                                 value="<?= $item['vat'] ?? 0; ?>">
-                                        </td>
-
-                                        <!-- ✅ AMOUNT WITHOUT TAX -->
+                                        </td> 
                                         <td>
                                             <input type="number" step="any" name="amount_wo_tax[<?= $index; ?>]"
                                                 class="form-control amountwotx"
@@ -234,7 +221,7 @@
                                                 readonly>
                                         </td>
 
-                                        <!-- ✅ FINAL AMOUNT -->
+                                    
                                         <td>
                                             <input type="number" step="any" name="amount[<?= $index; ?>]"
                                                 class="form-control amounttx amount"

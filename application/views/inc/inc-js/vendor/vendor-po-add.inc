@@ -227,15 +227,18 @@
     CKEDITOR.replace("editor2", { height: 120 });
   };
 </script>
+
 <script>
   $(document).ready(function () {
-    // =====================================
-    // LOAD QUOTATION ITEMS
-    // =====================================
+    let rowIndex = 0;
+
+  
     $("#srch_vendor_quote_id").on("change", function () {
       const srch_vendor_quote_id = $(this).val();
       const $container = $("#item_container");
+
       $container.html("");
+      rowIndex = 0;
 
       if (!srch_vendor_quote_id) {
         calculateTotalAmount();
@@ -243,20 +246,20 @@
       }
 
       $.ajax({
-        url: "<?php echo site_url('vendor/get_vendor_quotation_data_load_po'); ?>",
+        url: "<?= site_url('vendor/get_vendor_quotation_data_load_po'); ?>",
         type: "POST",
-        data: { srch_vendor_quote_id: srch_vendor_quote_id },
+        data: { srch_vendor_quote_id },
         dataType: "json",
+
         success: function (res) {
           if (!res || res.length === 0) {
             $container.html(`
-                        <tr>
-                            <td colspan="10" class="text-center text-danger">
-                                No items found for this quotation.
-                            </td>
-                        </tr>
-                    `);
-            calculateTotalAmount();
+                    <tr>
+                        <td colspan="10"
+                            class="text-center text-danger">
+                            No items found
+                        </td>
+                    </tr>`);
             return;
           }
 
@@ -265,131 +268,143 @@
             let rate = parseFloat(row.rate) || 0;
             let gst = parseFloat(row.vat) || 0;
 
-            let amountWithoutTax = qty * rate;
-            let amountWithTax =
-              amountWithoutTax + (amountWithoutTax * gst) / 100;
+            let wot = qty * rate;
+            let total = wot + (wot * gst) / 100;
 
-            const rowHtml = `
-                    <tr class="item-row">
+            const html = `
+<tr class="item-row">
 
-                        <td>
-                            <input type="checkbox"
-                                   class="item-check"
-                                   checked name="selected_items[]">
-                        </td>
+<td>
+<input type="checkbox"
+       class="item-check"
+       name="selected_items[]"
+       value="${rowIndex}"
+       checked>
 
-                        <td>
-                            <input type="text" name="item_code[]" class="form-control"
-                                   value="${row.item_code || ""}" readonly>
+<input type="hidden"
+       name="vendor_po_item_id[${rowIndex}]"
+       value="">
 
-                            <input type="hidden"
-                                   name="vendor_rate_enquiry_id"
-                                   value="${row.vendor_rate_enquiry_id || ""}">
-                            <input type="hidden"
-                                   name="vendor_rate_enquiry_item_id[]"
-                                   value="${row.vendor_rate_enquiry_item_id || ""}">
-                            <input type="hidden"
-                                   name="vendor_quote_item_id[]"
-                                   value="${row.vendor_quote_item_id || ""}">
-                        </td>
+<input type="hidden"
+       name="vendor_rate_enquiry_item_id[${rowIndex}]"
+       value="${row.vendor_rate_enquiry_item_id || ""}">
 
-                        <td>
-                            <textarea name="item_desc[]" class="form-control"
-                                      rows="2" readonly>${row.item_desc || ""}</textarea>
-                        </td>
+<input type="hidden"
+       name="vendor_quote_item_id[${rowIndex}]"
+       value="${row.vendor_quote_item_id || ""}">
+</td>
 
-                        <td>
-                            <input type="text" name="uom[]" class="form-control"
-                                   value="${row.uom || ""}" readonly>
-                            <br>
-                            <input type="number" step="any"
-                                   name="qty[]"
-                                   class="form-control qty-input"
-                                   value="${qty}" readonly>
-                        </td>
+<td>
+<input type="text"
+       class="form-control"
+       name="item_code[${rowIndex}]"
+       value="${row.item_code || ""}"
+       readonly>
+</td>
 
-                        <td>
-                            <input type="number"
-                                   step="0.001"
-                                   name="rate[]"
-                                   class="form-control rate-input"
-                                   value="${rate.toFixed(3)}">
-                        </td>
+<td>
+<textarea class="form-control"
+          name="item_desc[${rowIndex}]"
+          readonly>${row.item_desc || ""}</textarea>
+</td>
 
-                        <td>
-                            <input type="number"
-                                   step="any"
-                                   name="gst[]"
-                                   class="form-control gst-input"
-                                   value="${gst}">
-                        </td>
+<td>
+<input type="text"
+       class="form-control"
+       name="uom[${rowIndex}]"
+       value="${row.uom || ""}"
+       readonly>
 
-                        <td>
-                            <input type="number"
-                                   name="amountwotx[]"
-                                   class="form-control amountwotx"
-                                   value="${amountWithoutTax.toFixed(3)}"
-                                   readonly>
-                        </td>
+<br>
 
-                        <td>
-                            <input type="number"
-                                   name="amount[]"
-                                   class="form-control amount-input"
-                                   value="${amountWithTax.toFixed(3)}"
-                                   readonly>
-                        </td>
+<input type="number"
+       class="form-control qty-input"
+       name="qty[${rowIndex}]"
+       value="${qty}"
+       readonly>
+</td>
 
-                    </tr>`;
-            $container.append(rowHtml);
+<td>
+<input type="number"
+       step="0.001"
+       class="form-control rate-input"
+       name="rate[${rowIndex}]"
+       value="${rate.toFixed(3)}">
+</td>
+
+<td>
+<input type="number"
+       class="form-control gst-input"
+       name="gst[${rowIndex}]"
+       value="${gst}">
+</td>
+
+<td>
+<input type="number"
+       class="form-control amountwotx"
+       name="amount_wo_tax[${rowIndex}]"
+       value="${wot.toFixed(3)}"
+       readonly>
+</td>
+
+<td>
+<input type="number"
+       class="form-control amount-input"
+       name="amount[${rowIndex}]"
+       value="${total.toFixed(3)}"
+       readonly>
+</td>
+
+</tr>`;
+
+            $container.append(html);
+            rowIndex++;
           });
 
           calculateTotalAmount();
         },
       });
 
-      // Load currency
+      /* ================= Currency Load ================= */
       $.ajax({
-        url: "<?php echo site_url('vendor/get_vendor_quotation_currency_id'); ?>",
+        url: "<?= site_url('vendor/get_vendor_quotation_currency_id'); ?>",
         type: "POST",
-        data: { srch_vendor_quote_id: srch_vendor_quote_id },
+        data: { srch_vendor_quote_id },
         dataType: "json",
         success: function (res) {
-          if (res.length > 0) {
-            $("#currency_id").val(res[0].currency_id).trigger("change");
-          } else {
-            $("#currency_id").val("");
-          }
+          $("#currency_id")
+            .val(res.length ? res[0].currency_id : "")
+            .trigger("change");
         },
       });
     });
 
-    // =====================================
-    // ROW CALCULATION (LIVE UPDATE)
-    // =====================================
+    /* =====================================================
+   ROW CALCULATION
+=====================================================*/
     $(document).on(
       "input change",
       ".rate-input, .gst-input, .qty-input, .item-check",
       function () {
         const $row = $(this).closest(".item-row");
 
-        const qty = parseFloat($row.find(".qty-input").val()) || 0;
-        const rate = parseFloat($row.find(".rate-input").val()) || 0;
-        const gst = parseFloat($row.find(".gst-input").val()) || 0;
+        let qty = parseFloat($row.find(".qty-input").val()) || 0;
+        let rate = parseFloat($row.find(".rate-input").val()) || 0;
+        let gst = parseFloat($row.find(".gst-input").val()) || 0;
 
-        const amountWithoutTax = qty * rate;
-        const amountWithTax = amountWithoutTax + (amountWithoutTax * gst) / 100;
+        let wot = qty * rate;
+        let total = wot + (wot * gst) / 100;
 
-        $row.find(".amountwotx").val(amountWithoutTax.toFixed(3));
-        $row.find(".amount-input").val(amountWithTax.toFixed(3));
+        $row.find(".amountwotx").val(wot.toFixed(3));
+        $row.find(".amount-input").val(total.toFixed(3));
 
         calculateTotalAmount();
       },
     );
 
-    // =====================================
-    // TOTAL CALCULATION
-    // =====================================
+    /* =====================================================
+   TOTAL CALCULATION
+=====================================================*/
     function calculateTotalAmount() {
       let total = 0;
       let totalWOT = 0;
@@ -397,6 +412,7 @@
       $(".item-row").each(function () {
         if ($(this).find(".item-check").is(":checked")) {
           total += parseFloat($(this).find(".amount-input").val()) || 0;
+
           totalWOT += parseFloat($(this).find(".amountwotx").val()) || 0;
         }
       });
@@ -406,7 +422,6 @@
     }
   });
 </script>
-
 <script>
   $("#srch_vendor_id").on("change", function () {
     const vendor_id = $(this).val();

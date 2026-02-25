@@ -340,7 +340,7 @@
               let amtwotx = row.qty * row.rate;
 
               const hiddenFields = `
-                <input type="hidden" name="tender_quotation_item_id[]" value="${row.tender_quotation_item_id}"> 
+                <input type="hidden" name="tender_quotation_item_id[${i}]" value="${row.tender_quotation_item_id}"> 
               `;
 
               const itemHtml = `
@@ -452,26 +452,30 @@
       });
     });
 
+    let itemIndex = 0;
+
+    const index = itemIndex++;
+
     const itemHtml = `
                 <div class="item-card border p-3 mb-3" style="background-color:#f9f9f9; border-radius:8px;">
                   <h5 class="text-primary mb-3">Item Details <span class="cnt"></span></h5>
                   <div class="row">
                     <div class="col-md-1 d-flex align-items-center justify-content-center">
-                      <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="" checked>
-                      <input type="hidden" name="tender_quotation_item_id[]" class="form-control tender_quotation_item_id" value=""> 
+                      <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="${index}" checked>
+                      <input type="hidden" name="tender_quotation_item_id[${index}]" class="form-control tender_quotation_item_id" value=""> 
                     </div>
 
                     <div class="col-md-3"> 
                       <div class="form-group">
                         <label>Item Code</label>
-                        <input type="text" class="form-control item_code" name="item_code[]" value="" readonly>
+                        <input type="text" class="form-control item_code" name="item_code[${index}]" value="" readonly>
                       </div>
                     </div>
 
                     <div class="col-md-4">
                       <div class="form-group">
                         <label>Item Description</label>
-                        <textarea name="item_desc[]" class="form-control desc-textarea" rows="3"></textarea>
+                        <textarea name="item_desc[${index}]" class="form-control desc-textarea" rows="3"></textarea>
                       </div>
                     </div>
 
@@ -480,39 +484,39 @@
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>UOM</label>
-                            <input type="text" name="uom[]" class="form-control uom" value="" readonly>
+                            <input type="text" name="uom[${index}]" class="form-control uom" value="" readonly>
                           </div>
                         </div>
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>Quantity</label>
-                            <input type="number" step="any" name="qty[]" class="form-control qty-input" value="" readonly>
+                            <input type="number" step="any" name="qty[${index}]" class="form-control qty-input" value="" readonly>
                           </div>
                         </div>
 
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>Rate</label>
-                            <input type="number" step="any" name="rate[]" class="form-control rate-input" value="">
+                            <input type="number" step="any" name="rate[${index}]" class="form-control rate-input" value="">
                           </div>
                         </div>
 
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>VAT %</label>
-                            <input type="number" step="any" name="gst[]" class="form-control vat-dropdown" value="">                            
+                            <input type="number" step="any" name="gst[${index}]" class="form-control vat-dropdown" value="">                            
                           </div>
                         </div>
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>Amount WO Tax</label>
-                            <input type="number" step="any" name="amountwotx[]" class="form-control amountwotx" value="" readonly>
+                            <input type="number" step="any" name="amountwotx[${index}]" class="form-control amountwotx" value="" readonly>
                           </div>
                         </div>
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>Amount With Tax</label>
-                            <input type="number" step="any" name="amount[]" class="form-control amount-input" value="" readonly>
+                            <input type="number" step="any" name="amount[${index}]" class="form-control amount-input" value="" readonly>
                           </div>
                         </div>
                       </div>

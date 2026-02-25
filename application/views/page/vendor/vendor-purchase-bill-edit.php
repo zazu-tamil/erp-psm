@@ -646,16 +646,7 @@ function calculateTotalAmount(){
 }
 
 
-/* =====================================================
-   FORM VALIDATION
-=====================================================*/
-$("form").on("submit",function(){
-
-    if($(".item-check:checked").length===0){
-        alert("Please select at least one item");
-        return false;
-    }
-});
+ 
 
 });
 </script>

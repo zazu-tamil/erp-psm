@@ -174,9 +174,8 @@
                                         
                                     </h5>
 
-                                    <div class="row">
-
-                                        <!-- Checkbox -->
+                                    <div class="row"> 
+                                        
                                         <div class="col-md-1 d-flex align-items-center justify-content-center">
                                             <input type="checkbox" class="form-check-input item-check" 
                                                 name="selected_items[]" value="<?php echo $i; ?>"

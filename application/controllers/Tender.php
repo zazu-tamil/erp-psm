@@ -1608,7 +1608,7 @@ class Tender extends CI_Controller
                 $rates = $this->input->post('rate') ?? [];
                 $amounts = $this->input->post('amount') ?? [];
 
-                foreach ($selected_idxs as $idx => $val) {
+                foreach ($selected_idxs as $idx) {
                     //if($tender_quotation_item_ids[$idx]){  
                     $item_data = [
                         'tender_quotation_id' => $tender_quotation_id,
@@ -2108,7 +2108,7 @@ class Tender extends CI_Controller
                 $gsts = $this->input->post('gst') ?? [];
                 $amounts = $this->input->post('amount') ?? [];
 
-                foreach ($selected_idxs as $idx => $val) {
+                foreach ($selected_idxs as $idx) {
                     $item_data = [
                         'tender_po_id' => $tender_po_id,
                         'tender_quotation_item_id' => $tender_quotation_item_ids[$idx] ?? 0,
@@ -2197,6 +2197,19 @@ class Tender extends CI_Controller
 
         if ($this->input->post('mode') == 'Edit') {
             $this->db->trans_start();
+
+            // $selected_idxs = $this->input->post('selected_items') ?? [];
+            // foreach ($selected_idxs as $idx) {
+            //     echo $idx . "<br>";
+            // }
+            // foreach ($selected_idxs as $idx => $val) {
+            //     echo $idx . " => " . $val . "<br>";
+            // }
+            // echo "<pre>";
+            // print_r($this->input->post());
+            // echo "</pre>"; 
+            // exit;
+
 
             /* ---- 1. UPDATE Header record ---- */
             $header = [
@@ -2373,7 +2386,7 @@ class Tender extends CI_Controller
         //     $data['merged_items'] = $quotation_items;
         // }
 
-         $sql = "
+        $sql = "
             select 
             b.tender_quotation_item_id,
             c.tender_po_item_id,
@@ -2391,7 +2404,7 @@ class Tender extends CI_Controller
             and a.tender_quotation_id = ?
             order by c.tender_po_item_id desc ,  b.tender_quotation_item_id asc 
         ";
-        $query = $this->db->query($sql, [$tender_po_id ,  $tender_quotation_id]);
+        $query = $this->db->query($sql, [$tender_po_id, $tender_quotation_id]);
 
         $data['merged_items'] = $query->result_array();
 
@@ -3065,7 +3078,7 @@ class Tender extends CI_Controller
             /* ----------------- 2. UPDATE ONLY ITEM ROWS ----------------- */
             $selected_items = $this->input->post('selected_items') ?? [];
             //$item_ids_arr = $this->input->post('tender_enq_invoice_item_id') ?? [];
-            $miss_item_ids= [];
+            $miss_item_ids = [];
 
             if (!empty($selected_items)) {
 
@@ -3099,8 +3112,8 @@ class Tender extends CI_Controller
                         'updated_date' => date('Y-m-d H:i:s'),
                     ];
 
-                  
-                   if($tender_enq_invoice_item_id > 0){
+
+                    if ($tender_enq_invoice_item_id > 0) {
                         // Update existing item
                         $this->db->where('tender_enq_invoice_item_id', $tender_enq_invoice_item_id);
                         $this->db->update('tender_enq_invoice_item_info', $item_data);
@@ -3115,7 +3128,7 @@ class Tender extends CI_Controller
                 // Mark items not in the current list as deleted
                 $this->db->where('tender_enq_invoice_id', $tender_enq_invoice_id);
                 $this->db->where_not_in('tender_enq_invoice_item_id', $miss_item_ids_str);
-                $this->db->update('tender_enq_invoice_item_info', ['status' => 'Delete' , 'updated_by' => $this->session->userdata(SESS_HD . 'user_id') , 'updated_date' => date('Y-m-d H:i:s')]);  
+                $this->db->update('tender_enq_invoice_item_info', ['status' => 'Delete', 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'), 'updated_date' => date('Y-m-d H:i:s')]);
 
             }
 
@@ -3282,7 +3295,7 @@ class Tender extends CI_Controller
         $data['item_list'] = [];
 
 
-       
+
 
 
         $sql = "
@@ -3542,7 +3555,7 @@ class Tender extends CI_Controller
                 $item_code = $this->input->post('item_code') ?? [];
                 $uoms = $this->input->post('uom') ?? [];
                 $qtys = $this->input->post('dc_qty') ?? [];
-                foreach ($selected_idxs as $idx => $value) {
+                foreach ($selected_idxs as $idx ) {
                     $item_data = [
                         'tender_dc_id' => $tender_dc_id,
                         'vendor_pur_inward_id' => $vendor_pur_inward_id[$idx] ?? 0,
@@ -3832,7 +3845,7 @@ class Tender extends CI_Controller
             WHERE a.status = 'Active' 
             and a.tender_dc_id = ?
 
-            GROUP BY d.vendor_pur_inward_item_id 
+            GROUP BY d.vendor_pur_inward_item_id
 
         ";
         $query = $this->db->query($sql, [$tender_dc_id]);
@@ -4340,28 +4353,28 @@ class Tender extends CI_Controller
         $tender_po_id = $this->input->post('tender_po_id');
         $tender_enq_invoice_id = $this->input->post('tender_enq_invoice_id');
 
-       /* if (empty($dc_ids)) {
-            echo json_encode([]);
-            return;
-        }
+        /* if (empty($dc_ids)) {
+             echo json_encode([]);
+             return;
+         }
 
 
-        if (!is_array($dc_ids)) {
-            $dc_ids = [$dc_ids];
-        }
+         if (!is_array($dc_ids)) {
+             $dc_ids = [$dc_ids];
+         }
 
 
-        $dc_ids = array_filter($dc_ids);
-        $dc_ids = array_map('intval', $dc_ids);
+         $dc_ids = array_filter($dc_ids);
+         $dc_ids = array_map('intval', $dc_ids);
 
-        if (empty($dc_ids)) {
-            echo json_encode([]);
-            return;
-        } 
+         if (empty($dc_ids)) {
+             echo json_encode([]);
+             return;
+         } 
 
 
-        $placeholders = implode(',', array_fill(0, count($dc_ids), '?'));
-        */
+         $placeholders = implode(',', array_fill(0, count($dc_ids), '?'));
+         */
         /*
         $sql = "
             select 
@@ -4405,7 +4418,7 @@ class Tender extends CI_Controller
         ";
         */
 
-         $sql = "
+        $sql = "
             select 
             a.tender_dc_id,
             a.dc_no,
@@ -4441,12 +4454,12 @@ class Tender extends CI_Controller
             left join tender_quotation_item_info as g on g.tender_enquiry_item_id = f.tender_enquiry_item_id and g.status = 'Active'
             left join customer_tender_po_info as h1 on h1.tender_quotation_id = g1.tender_quotation_id and h1.tender_enquiry_id = a.tender_enquiry_id  and h1.status = 'Active'
             left join tender_po_item_info as h on h.tender_quotation_item_id = g.tender_quotation_item_id  and h.tender_po_id = a.tender_po_id  and h.status = 'Active'
-            left join tender_enq_invoice_item_info as i on i.tender_po_item_id = h.tender_po_item_id and i.tender_enq_invoice_id = '".$tender_enq_invoice_id."' and i.status = 'Active'
+            left join tender_enq_invoice_item_info as i on i.tender_po_item_id = h.tender_po_item_id and i.tender_enq_invoice_id = '" . $tender_enq_invoice_id . "' and i.status = 'Active'
             where a.status = 'Active' 
             and b.status = 'Active'
             and h.tender_po_item_id != ''
-            and a.tender_po_id = '".$tender_po_id."' 
-            and a.tender_dc_id in (".$dc_ids.")
+            and a.tender_po_id = '" . $tender_po_id . "' 
+            and a.tender_dc_id in (" . $dc_ids . ")
             group by h.tender_po_item_id 
             order by h.tender_po_item_id asc
         ";
