@@ -62,13 +62,13 @@
                              
                         </div>
 
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label>Vendor Name <span style="color:red;">*</span></label>
                             <?php echo form_dropdown('srch_vendor_id', ['' => 'Select Vendor'] + $vendor_opt, $header['vendor_id'], 'id="srch_vendor_id" class="form-control" disabled required'); ?>
                             <input type="hidden" name="srch_vendor_id" value="<?php echo $header['vendor_id']; ?>">
                         </div>
 
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label>Vendor PO No <span style="color:red;">*</span>
                                 <span data-toggle="tooltip" title="" class=""
                                     data-original-title="Only when Vendor PO Status is Confirmed then select the PO No. Otherwise leave it blank.">
@@ -80,7 +80,7 @@
                                 value="<?php echo  $header['vendor_po_id']; ?>">
                         </div>
 
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label>Contact Person</label>
                             <?php echo form_dropdown('srch_vendor_contact_person_id', ['' => 'Select Contact'] + $vendor_contact_opt, $header['vendor_contact_person_id'], 'id="srch_vendor_contact_person_id" class="form-control readonly" readonly'); ?>
                             <input type="hidden" name="srch_vendor_contact_person_id"
@@ -88,7 +88,7 @@
                                 value="<?php echo $header['vendor_contact_person_id']; ?>">
                         </div>
 
-                        <div class="form-group col-md-3">
+                        <!-- <div class="form-group col-md-3">
                             <label>Check Door Delivery</label>
 
                             <div class="checkbox">
@@ -101,7 +101,7 @@
                                     Door Delivery
                                 </label>
                             </div>
-                        </div>
+                        </div> -->
 
                         <div class="form-group col-md-2">
                             <label>Invoice Date</label>

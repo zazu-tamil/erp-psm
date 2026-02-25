@@ -62,13 +62,13 @@
                             <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select Enquiry'], set_value('srch_tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" required'); ?>
                         </div>
 
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label>Vendor Name <span style="color:red;">*</span></label>
                             <?php echo form_dropdown('srch_vendor_id', ['' => 'Select Vendor'], set_value('srch_vendor_id'), 'id="srch_vendor_id" class="form-control" required'); ?>
                         </div>
 
 
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label>Vendor PO No <span style="color:red;">*</span>
 
                             </label>
@@ -76,12 +76,12 @@
 
                         </div>
 
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label>Contact Person</label>
                             <?php echo form_dropdown('srch_vendor_contact_person_id', $vendor_contact_opt, set_value('srch_vendor_contact_person_id'), 'id="srch_vendor_contact_id" class="form-control"'); ?>
                         </div>
 
-                        <div class="form-group col-md-3">
+                        <!-- <div class="form-group col-md-3">
                             <label>Check Door Delivery</label>
                             <div class="checkbox">
                                 <label>
@@ -90,7 +90,7 @@
                                     Door Delivery
                                 </label>
                             </div>
-                        </div>
+                        </div> -->
 
                         <div class="form-group col-md-3">
                             <label>Invoice Date</label>
