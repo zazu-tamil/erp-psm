@@ -1,9 +1,14 @@
 <!DOCTYPE html>
+<?php
+// echo "<pre>";
+// print_r($dc_list_info);
+// echo "</pre>";
+?>
 <html>
 
 <head>
     <meta charset="UTF-8">
-    <title>Vendor Rate Enquiry - <?php echo htmlspecialchars($record['quotation_no'] ?? ''); ?></title>
+    <title>Vendor Rate Enquiry - <?php echo htmlspecialchars($record['dc_no'] ?? ''); ?></title>
     <style>
         * {
             margin: 0;
@@ -13,9 +18,9 @@
 
         body {
             font-family: 'Arial', 'Helvetica', sans-serif;
-            font-size: 11pt;
-            line-height: 1.4;
-            color: #333;
+            font-size: 10pt;
+            line-height: 1.3;
+            color: #000;
             background: #f5f5f5;
         }
 
@@ -23,202 +28,156 @@
             width: 210mm;
             min-height: 297mm;
             margin: 20px auto;
-            padding: 15mm;
+            padding: 10mm;
             background: #fff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
         .header-img {
             width: 100%;
-            max-height: 120px;
-            object-fit: contain;
+            margin-bottom: 10px;
         }
 
-        .company-title {
+        .invoice-header {
+            position: relative;
             text-align: center;
-            font-size: 24pt;
+            padding: 10px 0;
+            margin-bottom: 15px;
+        }
+
+        .invoice-title {
+            font-size: 24px;
             font-weight: bold;
-            color: #1a1a1a;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 3px solid #0066cc;
-            padding-bottom: 10px;
         }
 
-        .document-title {
-            text-align: center;
-            font-size: 16pt;
+        .invoice-number {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
             font-weight: bold;
-            color: #0066cc;
-            margin: 20px 0 25px 0;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
-        .info-section {
-            display: table;
-            width: 100%;
-            margin-bottom: 25px;
-            border: 2px solid #0066cc;
-            border-radius: 5px;
-            overflow: hidden;
+        .reference-section {
+            margin-bottom: 12px;
+            font-size: 9.5pt;
+            line-height: 1.6;
         }
 
-        .info-row {
-            display: table-row;
+        .reference-line {
+            margin-bottom: 5px;
         }
 
-        .info-cell {
-            display: table-cell;
-            padding: 12px 15px;
-            vertical-align: top;
-            line-height: 1.8;
+        .customer-section {
+            margin: 15px 0;
+            padding: 10px;
+
+            min-height: 80px;
         }
 
-        .info-cell.left {
-            width: 50%;
-            border-right: 2px solid #0066cc;
-            background: #f9f9f9;
-        }
-
-        .info-cell.right {
-            width: 50%;
-            background: #fff;
-        }
-
-        .info-label {
+        .customer-label {
             font-weight: bold;
-            color: #0066cc;
+            margin-bottom: 5px;
+        }
+
+        .customer-address {
+            line-height: 1.5;
+            font-size: 9.5pt;
+        }
+
+        .currency-badge {
+            text-align: right;
+            margin: 10px 0;
+        }
+
+        .currency-badge span {
             display: inline-block;
-            min-width: 120px;
-        }
-
-        .customer-name {
-            font-size: 12px;
+            background: #ffffff;
+            color: #000000;
+            padding: 6px 15px;
             font-weight: bold;
-            color: #1a1a1a;
-            margin-top: 5px;
+            font-size: 10pt;
         }
 
         table.items-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 25px 0;
-            font-size: 10pt;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin: 15px 0;
+            font-size: 9pt;
         }
 
-        .items-table thead tr {
-            background: linear-gradient(to bottom, #0066cc, #0052a3);
-            color: #fff;
-            text-align: center;
-            font-weight: bold;
-            font-size: 10pt;
+        .items-table thead {
+            background: #ffffff;
+            border: 1px solid #000;
         }
 
         .items-table thead th {
-            padding: 12px 8px;
-            border: 1px solid #0052a3;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            padding: 8px 5px;
+            border: 1px solid #000;
+            font-weight: bold;
+            text-align: center;
+            font-size: 9pt;
         }
 
         .items-table tbody td {
-            padding: 10px 8px;
-            border: 1px solid #ddd;
+            padding: 6px 5px;
+            border: 1px solid #000;
             vertical-align: top;
-        }
-
-        .items-table tbody tr:nth-child(even) {
-            background: #f9f9f9;
-        }
-
-        .items-table tbody tr:hover {
-            background: #f0f8ff;
+            font-size: 9pt;
         }
 
         .item-description {
+            font-size: 8.5pt;
+            line-height: 1.4;
+        }
+
+        .item-code {
             font-weight: 600;
-            color: #1a1a1a;
             margin-bottom: 3px;
         }
 
-        .item-details {
-            font-size: 9pt;
-            color: #666;
-            font-style: italic;
+        .bank-details-section {
+            background: #ffffff;
+            padding: 8px;
+            border: 1px solid #000;
+            font-size: 8.5pt;
+            line-height: 1.5;
         }
 
-        .items-table tfoot tr {
-            background: #f5f5f5;
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 10px;
+            border: 1px solid #000;
+            border-bottom: none;
             font-weight: bold;
+            font-size: 10pt;
         }
 
-        .items-table tfoot th {
-            padding: 10px 8px;
-            border: 1px solid #ddd;
+        .summary-row:last-child {
+            border-bottom: 1px solid #000;
+            background: #ffffff;
+            color: #000000;
+            font-size: 11pt;
         }
 
-        .items-table tfoot tr.grand-total {
-            background: linear-gradient(to bottom, #0066cc, #0052a3);
-            color: #fff;
-            font-size: 12pt;
-        }
-
-        .items-table tfoot tr.grand-total th {
-            border: 1px solid #0052a3;
-            padding: 12px 8px;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .text-right {
-            text-align: right;
-        }
-
-        .text-left {
-            text-align: left;
-        }
-
-        .section {
-            margin: 25px 0;
-            padding: 15px;
-            background: #f9f9f9;
-            border-left: 4px solid #0066cc;
-            border-radius: 3px;
-        }
-
-        .section-title {
+        .amount-in-words {
+            margin: 10px 0;
+            padding: 10px;
+            background: #ffff;
+            border: 1px solid #000;
             font-weight: bold;
-            font-size: 12pt;
-            color: #0066cc;
-            margin-bottom: 10px;
-            text-transform: uppercase;
+            font-size: 10pt;
+            line-height: 1.5;
         }
 
-        .section-content {
-            color: #333;
-            line-height: 1.6;
-        }
-
-        .terms-section {
-            margin: 25px 0;
-            padding: 15px;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        .terms-section ul {
-            margin-left: 20px;
-            margin-top: 10px;
-        }
-
-        .terms-section li {
-            margin-bottom: 8px;
-            line-height: 1.6;
+        .payment-terms {
+            margin: 15px 0;
+            font-size: 9.5pt;
+            font-weight: bold;
         }
 
         .signature-section {
@@ -233,31 +192,39 @@
         }
 
         .signature-company {
-            font-size: 11pt;
-            color: #666;
-            margin-bottom: 60px;
+            font-size: 10pt;
+            font-weight: bold;
         }
 
         .signature-line {
-            border-top: 2px solid #333;
-            margin: 10px 0;
+            border-top: 1px solid #000;
+            margin: 5px 0;
+            width: 250px;
         }
 
-        .signature-label {
-            font-weight: bold;
-            font-size: 11pt;
-            color: #1a1a1a;
-            margin-top: 5px;
-        }
-
-        .footer-note {
-            margin-top: 30px;
-            padding-top: 15px;
-            border-top: 2px solid #0066cc;
+        .text-center {
             text-align: center;
-            font-size: 9pt;
-            color: #666;
-            font-style: italic;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-left {
+            text-align: left;
         }
 
         .button-container {
@@ -287,8 +254,6 @@
 
         .btn-primary:hover {
             background: #0052a3;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
         .btn-success {
@@ -298,13 +263,12 @@
 
         .btn-success:hover {
             background: #218838;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
+
 
         @page {
             size: A4;
-            margin: 0;
+            margin: 5mm;
         }
 
         @media print {
@@ -317,146 +281,290 @@
             .page {
                 width: 210mm;
                 margin: 0;
-                padding: 15mm;
+                padding: 10mm;
                 box-shadow: none;
             }
 
             .button-container {
-                display: none;
+                display: none !important;
             }
 
-            .items-table tbody tr:hover {
-                background: inherit;
+            /* Repeat table header on every page */
+            thead {
+                display: table-header-group !important;
             }
 
-            .items-table thead tr {
-                background: #0066cc !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+            /* Prevent row from breaking inside */
+            tr {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                orphans: 2;
+                widows: 2;
             }
 
-            .items-table tfoot tr.grand-total {
-                background: #0066cc !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+            /* Extra protection for cells with long content */
+            td,
+            th {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            /* Protect description block */
+            .item-description {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            /* Keep totals, amount in words, payment terms, signature together */
+            .amount-in-words,
+            .payment-terms,
+            .signature-section,
+            tr:last-child {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                break-before: auto;
+            }
+
+            /* Force better color fidelity */
+            .items-table thead {
+                background: #ffffff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            tr[style*="background: #000"],
+            .summary-row:last-child,
+            tr.grand-total-row {
+                background: #ffffff !important;
+                color: #000000 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .currency-badge span {
+                background: #ffffff !important;
+                color: #000000 !important;
+                -webkit-print-color-adjust: exact !important;
             }
         }
 
-        .address_info {
-            font-size: 12px;
-            color: #666;
+        .label-bold {
+            font-weight: bold;
         }
     </style>
-    <!-- <script src="https://rawgit.com/Snack-X/excelexport.js/master/excelexport.js"></script> -->
- 
 </head>
 
 <body>
 
+    <?php
+    // Function to convert number to words (BHD style with Fils)
+    function convertAmountToWords($amount, $currency = 'BHD', $decimal_point = 3)
+    {
+        $ones = [
+            '',
+            'One',
+            'Two',
+            'Three',
+            'Four',
+            'Five',
+            'Six',
+            'Seven',
+            'Eight',
+            'Nine',
+            'Ten',
+            'Eleven',
+            'Twelve',
+            'Thirteen',
+            'Fourteen',
+            'Fifteen',
+            'Sixteen',
+            'Seventeen',
+            'Eighteen',
+            'Nineteen'
+        ];
+        $tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+        $hundreds = [
+            '',
+            'One Hundred',
+            'Two Hundred',
+            'Three Hundred',
+            'Four Hundred',
+            'Five Hundred',
+            'Six Hundred',
+            'Seven Hundred',
+            'Eight Hundred',
+            'Nine Hundred'
+        ];
+
+        function convertNumberToWords($number, $ones, $tens, $hundreds)
+        {
+            if ($number == 0)
+                return 'Zero';
+            $words = '';
+            if ($number >= 1000000) {
+                $millions = floor($number / 1000000);
+                $words .= convertNumberToWords($millions, $ones, $tens, $hundreds) . ' Million ';
+                $number %= 1000000;
+            }
+            if ($number >= 1000) {
+                $thousands = floor($number / 1000);
+                $words .= convertNumberToWords($thousands, $ones, $tens, $hundreds) . ' Thousand ';
+                $number %= 1000;
+            }
+            if ($number >= 100) {
+                $words .= $hundreds[floor($number / 100)] . ' ';
+                $number %= 100;
+            }
+            if ($number >= 20) {
+                $words .= $tens[floor($number / 10)] . ' ';
+                $number %= 10;
+            }
+            if ($number > 0) {
+                $words .= $ones[$number] . ' ';
+            }
+            return trim($words);
+        }
+
+        $amount = floatval($amount);
+        $integer_part = floor($amount);
+        $multiplier = pow(10, $decimal_point);
+        $decimal_part = round(($amount - $integer_part) * $multiplier);
+
+        $words = $integer_part > 0 ? convertNumberToWords($integer_part, $ones, $tens, $hundreds) : 'Zero';
+
+        if ($decimal_part > 0) {
+            $words .= ' & Fils ' . $decimal_part . '/' . $multiplier;
+        }
+
+        return $words . ' Only.';
+    }
+    ?>
+
     <div class="page">
+
         <!-- Header Image -->
         <?php if (!empty($record['ltr_header_img'])): ?>
-            <img src="<?php echo base_url('') . $record['ltr_header_img']; ?>" alt="Company Header" class="header-img">
+            <img src="<?php echo base_url('') . $record['ltr_header_img']; ?>" alt="Company Header" class="header-img ">
         <?php endif; ?>
-        <p>&nbsp;</p>
 
-        <!-- Customer & Quotation Info -->
-        <div class="info-section">
-            <div class="info-row">
-                <div class="info-cell left">
-                    <div><span class="info-label">To:</span></div>
-                    <div class="customer-name">
-                        <?php echo $record['vendor_name']; ?>
-                    </div>
-                    <div class="customer-name">
-                        <?php echo nl2br($record['address'] ?? 'N/A'); ?>
-                        <br>
-                        <?php echo $record['vendor_country']; ?>
-                    </div>
+        <!-- Invoice Title & Number -->
+        <div class="invoice-header">
+            <div class="invoice-title">Vendor Rate Enquiry</div>
+            <div class="invoice-number">No: <?php echo htmlspecialchars($record['enquiry_no'] ?? 'N/A'); ?></div>
 
-                </div>
-                <div class="info-cell right">
-                    <div><span class="info-label">Date:</span>
-                        <?php echo date('d-m-Y', strtotime($record['enquiry_date'])); ?></div>
-                    <!-- <div><span class="info-label">Enquiry No:</span>
-                        <?php echo htmlspecialchars($record['enquiry_no'] ?? 'N/A'); ?></div> -->
-                    <div><span class="info-label">Enquiry No:</span>
-                        <?php echo htmlspecialchars($record['enquiry_no'] ?? 'N/A'); ?></div>
-                </div>
+        </div>
+
+        <div class="reference-section">
+            <div class="reference-line">
+                <span style="float: right;">
+                    <span class="label-bold">Date:</span>
+                    <?php echo date('d-m-Y', strtotime($record['enquiry_date'] ?? 'N/A')); ?>
+                </span>
             </div>
         </div>
 
-        <table id="content-table" class="items-table content-table">
+        <!-- Customer -->
+        <div class="customer-section">
+            <div class="customer-label">To,</div>
+            <div class="customer-address">
+                <strong><?php echo htmlspecialchars($record['vendor_name'] ?? ''); ?></strong><br>
+                <?php echo nl2br(htmlspecialchars($record['address'] ?? '')); ?><br>
+                <?php if (!empty($record['vendor_country'])): ?>
+                    <b><?php echo htmlspecialchars($record['vendor_country']); ?></b><br>
+                <?php endif; ?>
+                <?php if (!empty($record['gst'])): ?>
+                    VAT Account. No: <?php echo htmlspecialchars($record['gst']); ?>
+                <?php endif; ?>
+            </div>
+        </div>
 
+
+        <!-- <div class="currency-badge">
+            <span>Currency: <?php echo htmlspecialchars($currency_code); ?></span>
+        </div> -->
+
+        <!-- Items Table -->
+        <table class="items-table">
             <thead>
                 <tr>
-                    <th style="width:5%;">S.No</th>
-                    <th style="width:30%;">Item Description</th>
-                    <th style="width:8%;">UOM</th>
-                    <th style="width:8%;">Qty</th>
+                    <th style="width:6%;">Item<br>No.</th>
+                    <th style="width:74%; text-align:left;">Description</th>
+                    <th style="width:10%;">Unit</th>
+                    <th style="width:10%;">Qty</th>
                 </tr>
             </thead>
             <tbody>
+                <?php
+                $total_qty_ordered = 0; // ✅ Initialize before loop
+                ?>
                 <?php if (!empty($items)): ?>
-                    <?php foreach ($items as $i => $item): ?>
+                    <?php foreach ($items as $i => $item):
+
+                        $qty = $item['qty'] ?? 0;
+                        $total_qty_ordered += $qty; // ✅ Add each qty
+                
+                        ?>
                         <tr>
-                            <td class="text-center"><?= $i + 1; ?></td>
-
+                            <td class="text-center"><?php echo $i + 1; ?></td>
                             <td class="text-left">
-                                <?php if (!empty($item['item_desc'])): ?>
-                                    <?= htmlspecialchars($item['item_desc']); ?>
-                                <?php else: ?>
-                                    -
-                                <?php endif; ?>
+                                <div class="item-description">
+                                    <?php if (!empty($item['item_code'])): ?>
+                                        <div class="item-code"><?php echo htmlspecialchars($item['item_code']); ?></div>
+                                    <?php endif; ?>
+                                    <?php echo htmlspecialchars($item['item_desc'] ?? ''); ?>
+                                </div>
                             </td>
-
+                            <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?? '-'); ?></td>
                             <td class="text-center">
-                                <?= htmlspecialchars($item['uom'] ?? $item['item_uom'] ?? '-'); ?>
-                            </td>
-
-                            <td class="text-center">
-                                <?= number_format($item['qty'] ?? 0, 2); ?>
+                                <?php echo number_format($item['qty'] ?? 0, 0); ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="4" class="text-center" style="padding:20px;color:#999;">
-                            No items found
-                        </td>
+                        <td colspan="4" class="text-center" style="padding:30px; color:#999;">No items found</td>
                     </tr>
                 <?php endif; ?>
+                <tr style="background:#ffff; color:#000;">
+                    <td colspan="3" class="text-right"><strong>TOTAL QTY</strong></td>
+                    <td colspan="2" class="text-center">
+                        <strong><?php echo number_format($total_qty_ordered, 0); ?></strong>
+                    </td>
+                </tr>
             </tbody>
         </table>
 
 
 
-
-        <!-- Terms & Conditions -->
-        <?php if (!empty($record['quote_terms'])): ?>
-            <div class="quote_terms-section">
-                <div class="section-title">Terms & Conditions</div>
-                <div class="section-content">
-                    <?php echo $record['quote_terms']; ?>
-                </div>
+        <!-- Notes -->
+        <?php if (!empty($record['remarks'])): ?>
+            <div style="margin:15px 0; padding:10px; background:#ffff;  page-break-inside: avoid; break-inside: avoid;">
+                <div style="font-weight:bold; margin-bottom:5px;">Notes:</div>
+                <?php echo nl2br($record['remarks']); ?>
             </div>
         <?php endif; ?>
 
-        <!-- Signature -->
+        <!-- Terms & Conditions -->
+        <?php if (!empty($record['terms'])): ?>
+            <div style="margin:15px 0; padding:10px; background:#ffff; page-break-inside: avoid; break-inside: avoid;">
+                <div style="font-weight:bold; margin-bottom:5px;">Terms & Conditions:</div>
+                <?php echo nl2br($record['terms']); ?>
+            </div>
+        <?php endif; ?>
+
         <div class="signature-section">
             <div class="signature-box">
-                <div class="signature-company">For
+                <div class="signature-company">
+                    For
                     <?php echo htmlspecialchars($record['our_company'] ?? $record['company_name'] ?? 'Our Company'); ?>
                 </div>
                 <div class="signature-line"></div>
-                <div class="signature-label">Authorised Signatory</div>
             </div>
         </div>
 
-
     </div>
 
-    <!-- Action Buttons -->
+    <!-- Buttons (screen only) -->
     <div class="button-container">
         <button type="button" class="btn btn-primary"
             onclick="window.location.href='<?= site_url('vendor-rate-enquiry-list') ?>'">
@@ -465,29 +573,7 @@
         <button type="button" class="btn btn-success" onclick="window.print()">
             🖨️ Print
         </button>
-        <button id="exportExcel" class="btn btn-success">
-            Export to Excel
-        </button>
-
     </div>
-    <script>
-        document.getElementById("exportExcel").addEventListener("click", function () {
-
-            var table = document.getElementById("content-table");
-            var html = table.outerHTML;
-
-            // Excel MIME type
-            var uri = 'data:application/vnd.ms-excel;charset=utf-8,' + encodeURIComponent(html);
-
-            var link = document.createElement("a");
-            link.href = uri;
-            link.download = "items.xls";
-
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
-    </script>
 
 </body>
 

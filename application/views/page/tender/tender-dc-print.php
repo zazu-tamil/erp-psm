@@ -167,7 +167,7 @@
         .amount-in-words {
             margin: 10px 0;
             padding: 10px;
-            background: #f9f9f9;
+            background: #ffff;
             border: 1px solid #000;
             font-weight: bold;
             font-size: 10pt;
@@ -544,7 +544,7 @@
         <!-- Notes -->
         <?php if (!empty($record['remarks'])): ?>
             <div
-                style="margin:15px 0; padding:10px; background:#f9f9f9;  page-break-inside: avoid; break-inside: avoid;">
+                style="margin:15px 0; padding:10px; background:#ffff;  page-break-inside: avoid; break-inside: avoid;">
                 <div style="font-weight:bold; margin-bottom:5px;">Notes:</div>
                 <?php echo nl2br($record['remarks']); ?>
             </div>
@@ -553,7 +553,7 @@
         <!-- Terms & Conditions -->
         <?php if (!empty($record['terms'])): ?>
             <div
-                style="margin:15px 0; padding:10px; background:#f9f9f9; page-break-inside: avoid; break-inside: avoid;">
+                style="margin:15px 0; padding:10px; background:#ffff; page-break-inside: avoid; break-inside: avoid;">
                 <div style="font-weight:bold; margin-bottom:5px;">Terms & Conditions:</div>
                 <?php echo nl2br($record['terms']); ?>
             </div>

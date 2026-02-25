@@ -525,31 +525,21 @@ class Vendor extends CI_Controller
 
         // Fetch items
         $sql = "
-        SELECT 
-            vrei_item.*,
-            cat.category_name,
-            item.item_name,
-            item.item_description,
-            item.uom AS item_uom
-        FROM vendor_rate_enquiry_item_info vrei_item
-        LEFT JOIN category_info cat ON vrei_item.category_id = cat.category_id
-        LEFT JOIN item_info item ON vrei_item.item_id = item.item_id
-        WHERE vrei_item.vendor_rate_enquiry_id = ? AND vrei_item.status = 'Active'
-        ORDER BY vrei_item.vendor_rate_enquiry_item_id
+            select
+            a.vendor_rate_enquiry_id,
+            b.vendor_rate_enquiry_item_id,
+            b.item_code,
+            b.item_desc,
+            b.uom,
+            b.qty
+            from vendor_rate_enquiry_info as a 
+            left join vendor_rate_enquiry_item_info as b on a.vendor_rate_enquiry_id = b.vendor_rate_enquiry_id and b.`status`='Active'
+            where a.`status`='Active'
+            and a.vendor_rate_enquiry_id = ?
+            group by b.vendor_rate_enquiry_item_id asc 
     ";
         $query = $this->db->query($sql, [$vendor_rate_enquiry_id]);
-        $data['items'] = $query->result_array();
-
-        // Calculate totals
-        $data['grand_total'] = 0;
-        $data['total_gst'] = 0;
-        foreach ($data['items'] as &$item) {
-            $item['amount'] = $item['rate'] * $item['qty'];
-            $item['gst_amount'] = $item['amount'] * ($item['gst'] / 100);
-            $data['grand_total'] += $item['amount'];
-            $data['total_gst'] += $item['gst_amount'];
-        }
-        $data['final_total'] = $data['grand_total'] + $data['total_gst'];
+        $data['items'] = $query->result_array(); 
 
         $this->load->view('page/vendor/vendor-rate-enquiry-print', $data);
     }

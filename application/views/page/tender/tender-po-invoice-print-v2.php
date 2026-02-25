@@ -76,7 +76,7 @@
         .customer-section {
             margin: 15px 0;
             padding: 10px;
-            border: 1px solid #000;
+            border: 1px solid #ffffff;
             min-height: 80px;
         }
 
@@ -113,7 +113,7 @@
 
         .items-table thead {
             background: #ffffff;
-            border: 2px solid #000;
+            border: 1px solid #000;
         }
 
         .items-table thead th {
@@ -693,17 +693,17 @@
 
         <!-- Notes/Remarks -->
         <?php if (!empty($record['remarks'])): ?>
-            <div style="margin: 15px 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #000;">
+            <div style="margin:  0; padding: 10px; background: #ffffff; border-left: 3px solid #ffffff;">
                 <div style="font-weight: bold; margin-bottom: 5px;">Notes:</div>
-                <div style="font-size: 9pt;"><?php echo nl2br(htmlspecialchars($record['remarks'])); ?></div>
-            </div>
+                <div style="font-size: 9pt;"><?php echo $record['remarks']; ?></div>
+            </div> 
         <?php endif; ?>
 
         <!-- Terms & Conditions -->
         <?php if (!empty($record['terms'])): ?>
-            <div style="margin: 15px 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #000;">
+            <div style="margin:  0; padding: 10px; background: #ffffff; border-left: 3px solid #ffffff;">
                 <div style="font-weight: bold; margin-bottom: 5px;">Terms & Conditions:</div>
-                <div style="font-size: 9pt;"><?php echo nl2br(htmlspecialchars($record['terms'])); ?></div>
+                <div style="font-size: 9pt;"><?php echo $record['terms']; ?></div>
             </div>
         <?php endif; ?>
 

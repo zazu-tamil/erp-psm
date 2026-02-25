@@ -3307,7 +3307,9 @@ class Tender extends CI_Controller
             e.address,
             e.gst as vat_account_no,
             f.currency_code,
-            f.decimal_point
+            f.decimal_point,
+            a.remarks,
+            a.terms
             from tender_enq_invoice_info  as a
             left join customer_tender_po_info as b on a.tender_po_id = b.tender_po_id and b.`status`='Active' 
             left join company_info as d on a.company_id = d.company_id and d.status='Active'
@@ -4301,7 +4303,6 @@ class Tender extends CI_Controller
         ";
 
         $query = $this->db->query($sql, $dc_ids);
-
         echo json_encode($query->result_array());
     }
 

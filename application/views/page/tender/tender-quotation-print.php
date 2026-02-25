@@ -74,7 +74,7 @@
         .customer-section {
             margin: 15px 0;
             padding: 10px;
-            border: 1px solid #000;
+            border: 1px solid #ffffff;
             min-height: 80px;
         }
 
@@ -584,6 +584,7 @@
                 <div style="font-weight:bold; margin-bottom:5px;">Notes:</div>
                 <?php echo ($record['remarks']); ?>
             </div>
+            <br>
         <?php endif; ?>
 
         <!-- Terms & Conditions -->
