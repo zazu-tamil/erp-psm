@@ -137,9 +137,9 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Terms & Conditions</label>
+                                <label>Terms & Conditions Invoice</label>
                                 <textarea id="editor1" name="terms" class="form-control custom-textarea"
-                                    placeholder="Enter PO terms" required></textarea>
+                                    placeholder="Enter Invoice terms" required></textarea>
                             </div>
                         </div>
                     </div>
@@ -471,4 +471,47 @@
         }
 
     });
+</script>
+<script>
+  $(document).ready(function () {
+    var editorConfig = {
+      height: 120,
+      extraPlugins: "justify,colorbutton,font,table",
+    };
+
+    CKEDITOR.replace("editor1", editorConfig);
+    CKEDITOR.replace("editor2", editorConfig);
+
+    CKEDITOR.instances.editor1.on("instanceReady", function () {
+      let companyId = $("#srch_company_id").val();
+
+      if (companyId) {
+        load_terms_and_conditions(companyId);
+      }
+    });
+  });
+
+  function load_terms_and_conditions(companyId) {
+    $.ajax({
+      url: "<?php echo site_url('get-data'); ?>",
+      type: "POST",
+      dataType: "json",
+      data: {
+        tbl: "get-company-terms-and-conditions-list",
+        id: companyId,
+      },
+      success: function (res) {
+        console.log("Response:", res);
+
+        if (res && res.length > 0) {
+          CKEDITOR.instances.editor1.setData(res[0].invoice_terms || "");
+        } else {
+          CKEDITOR.instances.editor1.setData("");
+        }
+      },
+      error: function (xhr) {
+        console.log(xhr.responseText);
+      },
+    });
+  }
 </script>

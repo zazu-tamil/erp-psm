@@ -35,6 +35,24 @@ class General extends CI_Controller
         $table = $this->input->post('tbl');
         $rec_id = $this->input->post('id');
 
+        
+        if ($table == 'get-company-terms-and-conditions-list') {
+
+            $query = $this->db->query("
+                SELECT *
+                FROM company_info
+                WHERE company_id = '" . $rec_id . "'
+            ");
+
+            $rec_list = $query->result_array();
+
+            // ✅ CLEAN OUTPUT
+            header('Content-Type: application/json');
+            echo json_encode($rec_list);
+            exit;   // ⭐ VERY IMPORTANT
+        }
+
+
         if ($table == 'company_info') {
             $query = $this->db->query(" 
                 select 
@@ -50,6 +68,8 @@ class General extends CI_Controller
             }
 
         }
+
+
         if ($table == 'customer_contact_info') {
             $query = $this->db->query(" 
                 select 

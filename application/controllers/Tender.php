@@ -3555,7 +3555,7 @@ class Tender extends CI_Controller
                 $item_code = $this->input->post('item_code') ?? [];
                 $uoms = $this->input->post('uom') ?? [];
                 $qtys = $this->input->post('dc_qty') ?? [];
-                foreach ($selected_idxs as $idx ) {
+                foreach ($selected_idxs as $idx) {
                     $item_data = [
                         'tender_dc_id' => $tender_dc_id,
                         'vendor_pur_inward_id' => $vendor_pur_inward_id[$idx] ?? 0,
@@ -3659,68 +3659,88 @@ class Tender extends CI_Controller
 
             /* ----------------- 2. FETCH ITEM POST ARRAYS ----------------- */
 
-            $selected = $this->input->post('selected_items') ?? [];
+            /* =====================================================
+      SELECTED ITEM SAVE
+   ===================================================== */
 
-            $tender_dc_item_id = $this->input->post('tender_dc_item_id') ?? [];
-            $vendor_pur_inward_id = $this->input->post('vendor_pur_inward_id') ?? [];
-            $vendor_pur_inward_item_id = $this->input->post('vendor_pur_inward_item_id') ?? [];
-            $category_id = $this->input->post('category_id') ?? [];
-            $item_id = $this->input->post('item_id') ?? [];
-            $item_code = $this->input->post('item_code');
-            $item_desc = $this->input->post('item_desc') ?? [];
-            $uom = $this->input->post('uom') ?? [];
-            $dc_qty = $this->input->post('dc_qty') ?? [];
+            $miss_item_ids = [];
 
+            $selected_idxs = $this->input->post('selected_items') ?? [];
 
-            /* ----------------- 3. INSERT / UPDATE SELECTED ITEMS ----------------- */
+            if (!empty($selected_idxs)) {
 
-            foreach ($selected as $row_index) {
+                $tender_dc_item_ids = $this->input->post('tender_dc_item_id') ?? [];
+                $vendor_pur_inward_id = $this->input->post('vendor_pur_inward_id') ?? [];
+                $vendor_pur_inward_item_id = $this->input->post('vendor_pur_inward_item_id') ?? [];
+                $category_id = $this->input->post('category_id') ?? [];
+                $item_id = $this->input->post('item_id') ?? [];
+                $item_code = $this->input->post('item_code') ?? [];
+                $item_desc = $this->input->post('item_desc') ?? [];
+                $uom = $this->input->post('uom') ?? [];
+                $dc_qty = $this->input->post('dc_qty') ?? [];
 
-                $item_data = [
-                    'tender_dc_id' => $tender_dc_id,
-                    'vendor_pur_inward_id' => $vendor_pur_inward_id[$row_index],
-                    'vendor_pur_inward_item_id' => $vendor_pur_inward_item_id[$row_index],
-                    'category_id' => $category_id[$row_index],
-                    'item_id' => $item_id[$row_index],
-                    'item_code' => $item_code[$row_index],
-                    'item_desc' => $item_desc[$row_index],
-                    'uom' => $uom[$row_index],
-                    'qty' => $dc_qty[$row_index],
-                    'status' => 'Active',
-                    'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
-                    'updated_date' => date('Y-m-d H:i:s'),
-                ];
-
-                if (!empty($tender_dc_item_id[$row_index])) {
-                    // UPDATE existing item
-                    $this->db->where('tender_dc_item_id', $tender_dc_item_id[$row_index])
-                        ->update('tender_dc_item_info', $item_data);
-
-                } else {
-                    // INSERT new item
-                    $item_data['created_by'] = $this->session->userdata(SESS_HD . 'user_id');
-                    $item_data['created_date'] = date('Y-m-d H:i:s');
-
-                    $this->db->insert('tender_dc_item_info', $item_data);
-                }
-            }
+                $user_id = $this->session->userdata(SESS_HD . 'user_id');
+                $now = date('Y-m-d H:i:s');
 
 
-            /* ----------------- 4. MARK UNCHECKED ITEMS AS DELETED ----------------- */
+                foreach ($selected_idxs as $idx) {
 
-            foreach ($tender_dc_item_id as $index => $id) {
-                if (!in_array($index, $selected) && !empty($id)) {
-
-                    $delete_data = [
-                        'status' => 'Deleted',
-                        'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
-                        'updated_date' => date('Y-m-d H:i:s'),
+                    $item_data = [
+                        'tender_dc_id' => $tender_dc_id,
+                        'vendor_pur_inward_id' => $vendor_pur_inward_id[$idx] ?? 0,
+                        'vendor_pur_inward_item_id' => $vendor_pur_inward_item_id[$idx] ?? 0,
+                        'category_id' => $category_id[$idx] ?? NULL,
+                        'item_id' => $item_id[$idx] ?? NULL,
+                        'item_code' => $item_code[$idx] ?? '',
+                        'item_desc' => $item_desc[$idx] ?? '',
+                        'uom' => $uom[$idx] ?? '',
+                        'qty' => $dc_qty[$idx] ?? 0,
+                        'status' => 'Active'
                     ];
 
-                    $this->db->where('tender_dc_item_id', $id)
-                        ->update('tender_dc_item_info', $delete_data);
+
+                    /* ===============================
+                       UPDATE EXISTING
+                    =============================== */
+                    if (!empty($tender_dc_item_ids[$idx])) {
+
+                        $item_data['updated_by'] = $user_id;
+                        $item_data['updated_date'] = $now;
+
+                        $this->db->where('tender_dc_item_id', $tender_dc_item_ids[$idx])->update('tender_dc_item_info', $item_data);
+                        $miss_item_ids[] = $tender_dc_item_ids[$idx];
+                    } else {
+
+                        $item_data['created_by'] = $user_id;
+                        $item_data['created_date'] = $now;
+
+                        $this->db->insert(
+                            'tender_dc_item_info',
+                            $item_data
+                        );
+
+                        $miss_item_ids[] = $this->db->insert_id();
+                    }
                 }
             }
+
+            $this->db->where('tender_dc_id', $tender_dc_id);
+
+            if (!empty($miss_item_ids)) {
+                $this->db->where_not_in(
+                    'tender_dc_item_id',
+                    $miss_item_ids
+                );
+            }
+
+            $this->db->update('tender_dc_item_info', [
+                'status' => 'Deleted',
+                'updated_by' =>
+                    $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            ]);
+
+
 
 
             /* ----------------- 5. COMPLETE TRANSACTION ----------------- */
