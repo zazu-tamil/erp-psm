@@ -258,7 +258,7 @@
                     </td>
 
                     <td>
-                      <input type="text" name="item_code" value="${row.item_code}" class="form-control mb-2" readonly>
+                      <input type="text" name="item_code[]" value="${row.item_code}" class="form-control mb-2" readonly>
                       <textarea name="item_desc[]" class="form-control desc-textarea" rows="2">${row.item_desc}</textarea>
                     </td>
 

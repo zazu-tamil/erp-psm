@@ -253,8 +253,11 @@ class Reports extends CI_Controller
             $sql = "
                 SELECT 
                     a.tender_enquiry_id,
+                    B.tender_enquiry_item_id,
                     a.enquiry_no,
                     a.enquiry_date,
+                    a.opening_date,
+                    a.closing_date,
                     a.tender_name,
                     a.tender_status,
                     c.company_name,
@@ -287,12 +290,17 @@ class Reports extends CI_Controller
             $sql = "
                 SELECT 
                     a.tender_quotation_id,
+                    a.tender_enquiry_id,
+                    b.tender_enquiry_item_id,
                     a.quotation_no,
                     a.tender_ref_no,
                     a.quote_date,
                     a.quotation_status,
                     c.company_name,
                     d.customer_name,
+                    a.transport_charges,
+                    a.other_charges,
+                    a.remarks,
 
                     b.tender_quotation_item_id,
                     b.item_code,
@@ -339,8 +347,13 @@ class Reports extends CI_Controller
                 SELECT 
                     a.tender_po_id,
                     a.our_po_no,
-                    a.po_date,
-                    f.enquiry_no, 
+                    a.tender_enquiry_id,
+                    a.tender_quotation_id,
+                    b.tender_quotation_item_id,
+                    a.customer_po_no,
+                    a.po_received_date,
+                    a.delivery_date,
+                    a.po_date, 
                     a.po_status,
                     c.company_name,
                     d.customer_name,
@@ -368,8 +381,7 @@ class Reports extends CI_Controller
                 LEFT JOIN customer_info as d 
                     ON a.customer_id = d.customer_id 
                     AND d.status='Active'
-                left join currencies_info as e on a.currency_id = e.currency_id and e.`status`='Active'
-                left join tender_enquiry_info as f on a.tender_enquiry_id = f.tender_enquiry_id and f.`status`='Active'
+                left join currencies_info as e on a.currency_id = e.currency_id and e.`status`='Active' 
 
                 WHERE a.status='Active'
                 AND a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
@@ -389,6 +401,8 @@ class Reports extends CI_Controller
             $sql = "
                 SELECT 
                     a.tender_dc_id,
+                    a.tender_po_id,
+                    a.tender_enquiry_id, 
                     a.dc_no,
                     a.dc_date,
                     f.enquiry_no, 
@@ -396,6 +410,8 @@ class Reports extends CI_Controller
                     c.company_name,
                     d.customer_name,
 
+                    b.vendor_pur_inward_id,
+                    b.vendor_pur_inward_item_id,
                     b.tender_dc_item_id,
                     b.item_code,
                     b.item_desc,
@@ -484,21 +500,27 @@ class Reports extends CI_Controller
             $sql = "
                 SELECT 
                     a.vendor_rate_enquiry_id,
-                    a.enquiry_no,
-                    a.enquiry_date,
-                    f.enquiry_no, 
+                    a.enquiry_no as vendor_rate_enquiry_no,
+                    a.enquiry_date as vendor_rate_enquiry_date, 
                     a.vendor_rate_enquiry_status,
-                    c.company_name,
+                    c.company_name as company_name, 
                     d.customer_name,
-
+                    a.opening_date,
+                    a.closing_date,
                     b.vendor_rate_enquiry_item_id,
+                    a.tender_enquiry_id,
+                    b.tender_enquiry_item_id,
                     b.item_code,
                     b.item_desc,
                     b.uom,
                     b.qty,
                     b.rate,
                     b.gst,
-                    b.amount
+                    b.amount,
+
+
+                    e.vendor_name,
+                    f.contact_person_name as vendor_contact_person
 
                 FROM vendor_rate_enquiry_info as a
                 LEFT JOIN vendor_rate_enquiry_item_info as b 
@@ -512,9 +534,9 @@ class Reports extends CI_Controller
                 LEFT JOIN customer_info as d 
                     ON a.customer_id = d.customer_id 
                     AND d.status='Active'
-               
-                left join tender_enquiry_info as f on a.tender_enquiry_id = f.tender_enquiry_id and f.`status`='Active'
-
+                left join vendor_info as e on a.vendor_id = e.vendor_id and e.`status`='Active'
+                left join vendor_contact_info as f on a.vendor_id = f.vendor_id and e.vendor_id = f.vendor_id and f.`status`='Active'
+           
                 WHERE a.status='Active'
                 AND a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
 
@@ -536,12 +558,14 @@ class Reports extends CI_Controller
                     a.vendor_quote_id,
                     a.quote_no,
                     a.quote_date,
-                    f.enquiry_no, 
+                    a.tender_enquiry_id,
+                   
                     a.quote_status,
                     c.company_name,
                     d.customer_name,
 
                     b.vendor_quote_item_id,
+                    b.vendor_rate_enquiry_item_id,
                     b.item_code,
                     b.item_desc,
                     b.uom,
@@ -550,8 +574,15 @@ class Reports extends CI_Controller
                     b.gst,
                     b.amount,
                     e.currency_code,
-                    e.decimal_point
+                    e.decimal_point,
+                    
+                    v.vendor_name,
+                    vc.contact_person_name,
 
+                    a.transport_charges,
+                    a.other_charges
+
+                 
                 FROM vendor_quotation_info as a
                 LEFT JOIN vendor_quote_item_info as b 
                     ON a.vendor_quote_id = b.vendor_quote_id
@@ -565,7 +596,10 @@ class Reports extends CI_Controller
                     ON a.customer_id = d.customer_id 
                     AND d.status='Active' 
                 left join currencies_info as e on a.currency_id = e.currency_id and e.`status`='Active'
-                left join tender_enquiry_info as f on a.tender_enquiry_id = f.tender_enquiry_id and f.`status`='Active' 
+
+              	left join vendor_info as v on a.vendor_id = v.vendor_id and v.`status`='Active'
+              	left join vendor_contact_info  as vc on a.vendor_contact_person_id = vc.vendor_contact_id and vc.`status`='Active'
+            
                 WHERE a.status='Active'
                 AND a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
 
@@ -584,14 +618,15 @@ class Reports extends CI_Controller
             $sql = "
                 SELECT 
                     a.vendor_po_id,
+                    a.tender_enquiry_id,
                     a.po_no,
-                    a.po_date,
-                    f.enquiry_no, 
+                    a.po_date, 
                     a.po_status,
                     c.company_name,
                     d.customer_name,
 
                     b.vendor_po_item_id,
+                    b.vendor_quote_item_id,
                     b.item_code,
                     b.item_desc,                    
                     b.uom,
@@ -600,7 +635,13 @@ class Reports extends CI_Controller
                     b.gst,
                     b.amount,
                     e.currency_code,
-                    e.decimal_point
+                    e.decimal_point,
+
+                    v.vendor_name,
+                    vc.contact_person_name,
+
+                    a.transport_charges,
+                    a.other_charges
 
                 FROM vendor_po_info as a
                 LEFT JOIN vendor_po_item_info as b 
@@ -614,8 +655,11 @@ class Reports extends CI_Controller
                 LEFT JOIN customer_info as d 
                     ON a.customer_id = d.customer_id 
                     AND d.status='Active'   
-                left join currencies_info as e on a.currency_id = e.currency_id and e.`status`='Active'
-                left join tender_enquiry_info as f on a.tender_enquiry_id = f.tender_enquiry_id and f.`status`='Active' 
+                left join currencies_info as e on a.currency_id = e.currency_id and e.`status`='Active' 
+                
+              	left join vendor_info as v on a.vendor_id = v.vendor_id and v.`status`='Active'
+              	left join vendor_contact_info  as vc on a.vendor_contact_person_id = vc.vendor_contact_id and vc.`status`='Active' 
+
                 WHERE a.status='Active'
                 AND a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
 
@@ -631,23 +675,29 @@ class Reports extends CI_Controller
             }
 
 
+
             //vendor purchase inward list
             $sql = "
                  SELECT 
                     a.vendor_pur_inward_id,
+                    a.tender_enquiry_id,
+                    a.vendor_po_id,
                     a.inward_no,
-                    a.inward_date,
-                    f.enquiry_no, 
+                    a.inward_date, 
                     'Delivered' as inward_status,
-                    c.company_name,
-                    f.tender_name,
+                    c.company_name, 
                     d.customer_name,
 
                     b.vendor_pur_inward_item_id,
+                    b.vendor_po_item_id,
                     b.item_code,
                     b.item_desc,                    
                     b.uom,
-                    b.qty
+                    b.qty,
+                    
+
+                     v.vendor_name,
+                    vc.contact_person_name
                    
                 FROM vendor_pur_inward_info as a
                 LEFT JOIN vendor_pur_inward_item_info as b 
@@ -661,7 +711,10 @@ class Reports extends CI_Controller
                 LEFT JOIN customer_info as d 
                     ON a.customer_id = d.customer_id 
                     AND d.status='Active'   
-                left join tender_enquiry_info as f on a.tender_enquiry_id = f.tender_enquiry_id and f.`status`='Active' 
+              
+              	left join vendor_info as v on a.vendor_id = v.vendor_id and v.`status`='Active'
+              	left join vendor_contact_info  as vc on a.vendor_contact_person_id = vc.vendor_contact_id and vc.`status`='Active' 
+
                 WHERE a.status='Active'
                 AND a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
 
@@ -680,22 +733,34 @@ class Reports extends CI_Controller
             $sql = "
                 SELECT 
                     a.vendor_purchase_invoice_id,
+                    a.tender_enquiry_id,
                     a.invoice_no,
-                    a.invoice_date,
-                    f.enquiry_no, 
+                    a.vendor_po_id,
+                    a.invoice_date, 
                     'Invoice ' as invoice_status,
-                    c.company_name,
-                    f.tender_name,
+                    c.company_name, 
                     d.customer_name,
 
+                    a.vat_payer_purchase_grp,
+                    a.declaration_no,
+                    a.declaration_date, 
+
+                    a.tax_amount,
+                    a.total_amount_wo_tax,
+                    a.entry_date,
+                    a.total_amount,
+
                     b.vendor_purchase_invoice_item_id,
+                    b.vendor_po_item_id,
                     b.item_code,
                     b.item_desc,                    
                     b.uom,
                     b.qty,
                     b.rate,
                     b.gst,
-                    b.amount 
+                    b.amount , 
+                    v.vendor_name,
+                    vc.contact_person_name
 
                 FROM vendor_purchase_invoice_info as a
                 LEFT JOIN vendor_purchase_invoice_item_info as b 
@@ -709,7 +774,10 @@ class Reports extends CI_Controller
                 LEFT JOIN customer_info as d 
                     ON a.customer_id = d.customer_id 
                     AND d.status='Active'   
-                left join tender_enquiry_info as f on a.tender_enquiry_id = f.tender_enquiry_id and f.`status`='Active' 
+            
+                left join vendor_info as v on a.vendor_id = v.vendor_id and v.`status`='Active'
+              	left join vendor_contact_info  as vc on a.vendor_contact_person_id = vc.vendor_contact_id and vc.`status`='Active' 
+
                 WHERE a.status='Active'
                 AND a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
 

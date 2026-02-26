@@ -34,11 +34,11 @@
                     <!-- Open All Checkbox -->
                     <div class="form-group col-md-3" style="margin-top:25px;">
                         <label>
-                            <input type="checkbox" id="chk_open_all" name="chk_open_all" value="1" <?php 
-                            if(($this->input->post('chk_open_all')!= '') && $this->input->post('chk_open_all') == 1) {
+                            <input type="checkbox" id="chk_open_all" name="chk_open_all" value="1" <?php
+                            if (($this->input->post('chk_open_all') != '') && $this->input->post('chk_open_all') == 1) {
                                 echo 'checked';
-                            }   
-                             
+                            }
+
                             ?>> Open All Sections
                         </label>
                     </div>
@@ -124,38 +124,42 @@
                             <thead>
                                 <!-- ENQUIRY HEADER -->
                                 <tr class="bg_top_header">
-                                    <th width="15%">Company</th>
-                                    <td width="18%">
+                                    <th>Company</th>
+                                    <td colspan="2">
                                         <?php echo htmlspecialchars($info['company_name'] ?? ''); ?>
                                     </td>
-                                    <th width="15%">Customer Name</th>
-                                    <td width="18%">
+                                    <th>Customer Name</th>
+                                    <td colspan="2">
                                         <?php echo htmlspecialchars($info['customer_name'] ?? ''); ?>
                                     </td>
-                                    <th width="15%">Enquiry No</th>
-                                    <td width="19%">
+                                    <th>Enquiry No</th>
+                                    <td width="20%  ">
                                         <?php echo htmlspecialchars($info['enquiry_no'] ?? ''); ?>
                                     </td>
                                 </tr>
                                 <tr class="bg_top_header">
-                                    <th>Tender Name</th>
+                                    <th width="15%"> Opening Date</th>
                                     <td>
-                                        <?php echo htmlspecialchars($info['tender_name'] ?? ''); ?>
+                                        <?php echo date('d-m-Y', strtotime($info['opening_date'])); ?>
+                                    </td>
+                                    <th width="10%"> Closing Date</th>
+                                    <td>
+                                        <?php echo date('d-m-Y', strtotime($info['closing_date'])); ?>
                                     </td>
                                     <th>Enquiry Date</th>
                                     <td>
-                                        <?php echo !empty($info['enquiry_date'])
-                                            ? date('d-m-Y', strtotime($info['enquiry_date']))
-                                            : ''; ?>
+                                        <?php echo !empty($info['enquiry_date']) ? date('d-m-Y', strtotime($info['enquiry_date'])) : ''; ?>
                                     </td>
-                                    <th>Tender Status</th>
-                                    <td>
+                                    <th width="10%">Tender Status</th>
+                                    <td width="10%">
                                         <?php echo htmlspecialchars($info['tender_status'] ?? ''); ?>
                                     </td>
                                 </tr>
                                 <!-- ITEM HEADER -->
                                 <tr class="bg_table_header">
                                     <th width="5%">S.No</th>
+                                    <th width="5%">Tender Enq ID</th>
+                                    <th width="5%">Tender Enq Item ID</th>
                                     <th width="15%">Item Code</th>
                                     <th width="40%" colspan="2">Item Description</th>
                                     <th width="10%">UOM</th>
@@ -163,44 +167,69 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- ITEMS -->
+
                                 <?php if (!empty($enquiry_info['items'])): ?>
-                                    <?php foreach ($enquiry_info['items'] as $k => $item): ?>
+                                    <?php
+                                    $tot = 0;
+                                    foreach ($enquiry_info['items'] as $k => $item):
+                                        $tot += $item['qty'] ?? 0;
+                                        ?>
                                         <tr>
-                                            <td>
-                                                <?php echo $k + 1; ?>
-                                            </td>
-                                            <td>
-                                                <?php echo htmlspecialchars($item['item_code'] ?? ''); ?>
-                                            </td>
-                                            <td colspan="2">
-                                                <?php echo htmlspecialchars($item['item_desc'] ?? ''); ?>
-                                            </td>
-                                            <td>
-                                                <?php echo htmlspecialchars($item['uom'] ?? ''); ?>
-                                            </td>
+                                            <td><?= $k + 1; ?></td>
+
                                             <td class="text-center">
-                                                <?php echo htmlspecialchars($item['qty'] ?? 0); ?>
+                                                <?= $item['tender_enquiry_id'] ?? ''; ?>
+                                            </td>
+
+                                            <td>
+                                                <?= htmlspecialchars($item['tender_enquiry_item_id'] ?? ''); ?>
+                                            </td>
+
+                                            <td>
+                                                <?= htmlspecialchars($item['item_code'] ?? ''); ?>
+                                            </td>
+
+                                            <td colspan="2">
+                                                <?= htmlspecialchars($item['item_desc'] ?? ''); ?>
+                                            </td>
+
+                                            <td>
+                                                <?= htmlspecialchars($item['uom'] ?? ''); ?>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <?= number_format($item['qty'] ?? 0, 2); ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
+
+                                    <!-- TOTAL ROW -->
+                                    <tr>
+                                        <td colspan="7" class="text-right">
+                                            <strong>Total Qty :</strong>
+                                        </td>
+                                        <td class="text-center">
+                                            <strong><?= number_format($tot, 2); ?></strong>
+                                        </td>
+                                    </tr>
+
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="6" class="text-center">No items available</td>
+                                        <td colspan="8" class="text-center">
+                                            No items available
+                                        </td>
                                     </tr>
                                 <?php endif; ?>
-                                <!-- spacing -->
+
+                                <!-- SPACING ROW -->
                                 <tr>
-                                    <td colspan="6" style="height: 20px; border: none;">&nbsp;</td>
+                                    <td colspan="8" style="height:20px;border:none;">&nbsp;</td>
                                 </tr>
+
                             </tbody>
                         <?php endforeach; ?>
-                    <?php else: ?>
-                        <tbody>
-                            <tr>
-                                <td colspan="6" class="text-center">No records found</td>
-                            </tr>
-                        </tbody>
+
+
                     <?php endif; ?>
                 </table>
             </div>
@@ -228,29 +257,36 @@
                             <thead>
                                 <!-- QUOTATION HEADER -->
                                 <tr class="bg_top_header">
-                                    <th width="12%">Company</th>
-                                    <td width="15%"><?php echo htmlspecialchars($info['company_name'] ?? ''); ?></td>
-                                    <th width="12%">Customer Name</th>
-                                    <td width="15%"><?php echo htmlspecialchars($info['customer_name'] ?? ''); ?></td>
-                                    <th width="12%">Quotation No</th>
-                                    <td colspan="3"><?php echo htmlspecialchars($info['quotation_no'] ?? ''); ?></td>
+                                    <th colspan="2">Quotation No</th>
+                                    <td><?php echo htmlspecialchars($info['quotation_no'] ?? ''); ?></td>
+                                    <th colspan="2">Tender Reference No</th>
+                                    <td><?php echo htmlspecialchars($info['tender_ref_no'] ?? ''); ?></td>
+                                    <th colspan="1">Transport Charges</th>
+                                    <td><?php echo htmlspecialchars($info['transport_charges'] ?? ''); ?></td>
+                                    <th colspan="2">Currency Code</th>
+                                    <td colspan="2"><?php echo htmlspecialchars($info['currency_code'] ?? ''); ?></td>
                                 </tr>
                                 <tr class="bg_top_header">
-                                    <th>Tender Reference No</th>
-                                    <td><?php echo htmlspecialchars($info['tender_ref_no'] ?? ''); ?></td>
-                                    <th>Quotation Date</th>
+                                    <th colspan="2">Quotation Date</th>
                                     <td>
                                         <?php echo !empty($info['quote_date'])
                                             ? date('d-m-Y', strtotime($info['quote_date']))
                                             : ''; ?>
                                     </td>
-                                    <th>Quotation Status</th>
-                                    <td colspan="3"><?php echo htmlspecialchars($info['quotation_status'] ?? ''); ?></td>
+                                    <th colspan="2">Quotation Status</th>
+                                    <td><?php echo htmlspecialchars($info['quotation_status'] ?? ''); ?></td>
+                                    <th>Other Charges</th>
+                                    <td><?php echo htmlspecialchars($info['other_charges'] ?? ''); ?></td>
+                                    <th>Tender Enquiry Id</th>
+                                    <td colspan="3"><?php echo $info['tender_enquiry_id']; ?></td>
                                 </tr>
                                 <!-- ITEM HEADER -->
                                 <tr class="bg_table_header">
                                     <th width="5%">S.No</th>
-                                    <th width="12%">Item Code</th>
+                                    <th width="5%">Tender Quotation Id</th>
+                                    <th width="5%">Tender Quotation Item Id</th>
+                                    <th width="5%">Tender Enquiry Item Id</th>
+                                    <th width="8%">Item Code</th>
                                     <th width="30%">Item Description</th>
                                     <th width="8%">UOM</th>
                                     <th width="10%" class="text-right">Qty</th>
@@ -262,12 +298,22 @@
                             <tbody>
                                 <!-- ITEMS -->
                                 <?php if (!empty($quotation['items'])): ?>
-                                    <?php $tot = 0;  foreach ($quotation['items'] as $k => $item):
-                                        $decimal = $item['decimal_point'] ?? 2; 
+                                    <?php $tot = 0;
+                                    foreach ($quotation['items'] as $k => $item):
+                                        $decimal = $item['decimal_point'] ?? 2;
                                         $tot += $item['amount'] ?? 0;
                                         ?>
                                         <tr>
                                             <td><?php echo $k + 1; ?></td>
+                                            <td class="text-center">
+                                                <?php echo $item['tender_quotation_id'] ?? ''; ?>
+                                            </td>
+                                            <td>
+                                                <?php echo htmlspecialchars($item['tender_quotation_item_id'] ?? ''); ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <?php echo $item['tender_enquiry_item_id'] ?? ''; ?>
+                                            </td>
                                             <td><?php echo htmlspecialchars($item['item_code'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($item['item_desc'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($item['uom'] ?? ''); ?></td>
@@ -283,8 +329,8 @@
                                     <?php endforeach; ?>
                                     <tr>
                                         <td colspan="7" class="text-right"><strong>Total Amount:</strong></td>
-                                        <td class="text-right">
-                                            <?php echo $item['currency_code'] . ' ' . number_format($tot, 2); ?>
+                                        <td class="text-right" colspan="3">
+                                            <?php echo $item['currency_code'] . ' ' . number_format($tot, 3); ?>
                                         </td>
                                     </tr>
                                 <?php else: ?>
@@ -320,57 +366,102 @@
                 </button>
             </div>
         </div>
-
+        <style>
+            .bg_table_header th {
+                white-space: nowrap;
+            }
+        </style>
         <div class="box-body">
             <div class="table-responsive">
-                <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped w-100">
                     <?php if (!empty($tender_po_list)): ?>
                         <?php foreach ($tender_po_list as $po_list):
                             $info = $po_list['info'] ?? [];
                             ?>
                             <thead>
-                                <!-- PO HEADER -->
+
+                                <!-- ================= PO HEADER ================= -->
                                 <tr class="bg_top_header">
-                                    <th width="12%">Company</th>
-                                    <td width="15%"><?php echo htmlspecialchars($info['company_name'] ?? ''); ?></td>
-                                    <th width="12%">Customer Name</th>
-                                    <td width="15%"><?php echo htmlspecialchars($info['customer_name'] ?? ''); ?></td>
-                                    <th width="12%">PO No</th>
-                                    <td colspan="3"><?php echo htmlspecialchars($info['our_po_no'] ?? ''); ?></td>
-                                </tr>
-                                <tr class="bg_top_header">
-                                    <th>Tender Enquiry No</th>
-                                    <td><?php echo htmlspecialchars($info['enquiry_no'] ?? ''); ?></td>
-                                    <th>PO Date</th>
+                                    <th colspan="2">Customer PO No</th>
+                                    <td colspan="3"><?= htmlspecialchars($info['customer_po_no'] ?? ''); ?></td>
+
+                                    <th colspan="2">Our PO No</th>
+                                    <td colspan="2"><?= htmlspecialchars($info['our_po_no'] ?? ''); ?></td>
+
+                                    <th>Delivery Date</th>
                                     <td>
-                                        <?php echo !empty($info['po_date'])
+                                        <?= !empty($info['delivery_date'])
+                                            ? date('d-m-Y', strtotime($info['delivery_date']))
+                                            : ''; ?>
+                                    </td>
+                                </tr>
+
+                                <tr class="bg_top_header">
+                                    <th colspan="2">PO Date</th>
+                                    <td colspan="3">
+                                        <?= !empty($info['po_date'])
                                             ? date('d-m-Y', strtotime($info['po_date']))
                                             : ''; ?>
                                     </td>
+
+                                    <th colspan="2">PO Received Date</th>
+                                    <td colspan="2">
+                                        <?= !empty($info['po_received_date'])
+                                            ? date('d-m-Y', strtotime($info['po_received_date']))
+                                            : ''; ?>
+                                    </td>
+
                                     <th>PO Status</th>
-                                    <td colspan="3"><?php echo htmlspecialchars($info['po_status'] ?? ''); ?></td>
+                                    <td><?= htmlspecialchars($info['po_status'] ?? ''); ?></td>
                                 </tr>
-                                <!-- ITEM HEADER -->
+
+                                <tr class="bg_top_header">
+                                    <th colspan="2">Tender Enquiry Id</th>
+                                    <td colspan="3">
+                                        <?= htmlspecialchars($info['tender_enquiry_id'] ?? ''); ?>
+                                    </td>
+
+                                    <th colspan="2">Tender Quotation Id</th>
+                                    <td colspan="4">
+                                        <?= htmlspecialchars($info['tender_quotation_id'] ?? ''); ?>
+                                    </td>
+                                </tr>
+
+                                <!-- ================= ITEM HEADER ================= -->
                                 <tr class="bg_table_header">
-                                    <th width="5%">S.No</th>
-                                    <th width="12%">Item Code</th>
-                                    <th width="30%">Item Description</th>
-                                    <th width="8%">UOM</th>
-                                    <th width="10%" class="text-right">Qty</th>
-                                    <th width="12%" class="text-right">Rate</th>
-                                    <th width="8%" class="text-right">VAT %</th>
-                                    <th width="15%" class="text-right">Amount</th>
+                                    <th width="4%">S.No</th>
+                                    <th width="6%">Tender PO Id</th>
+                                    <th width="8%">Tender PO Item Id</th>
+                                    <th width="10%">Tender Quotation Item Id</th>
+                                    <th width="10%">Item Code</th>
+                                    <th width="26%">Item Description</th>
+                                    <th width="6%">UOM</th>
+                                    <th width="8%" class="text-right">Qty</th>
+                                    <th width="8%" class="text-right">Rate</th>
+                                    <th width="6%" class="text-right">VAT %</th>
+                                    <th width="8%" class="text-right">Amount</th>
                                 </tr>
+
                             </thead>
                             <tbody>
                                 <!-- ITEMS -->
                                 <?php if (!empty($po_list['items'])): ?>
-                                    <?php $tot = 0; foreach ($po_list['items'] as $k => $item):
+                                    <?php $tot = 0;
+                                    foreach ($po_list['items'] as $k => $item):
                                         $decimal = $item['decimal_point'] ?? 2;
-                                        $tot += $item['amount'] ?? 0;   
+                                        $tot += $item['amount'] ?? 0;
                                         ?>
                                         <tr>
                                             <td><?php echo $k + 1; ?></td>
+                                            <td class="text-center">
+                                                <?php echo $item['tender_po_id'] ?? ''; ?>
+                                            </td>
+                                            <td>
+                                                <?php echo htmlspecialchars($item['tender_po_item_id'] ?? ''); ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <?php echo $item['tender_quotation_item_id'] ?? ''; ?>
+                                            </td>
                                             <td><?php echo htmlspecialchars($item['item_code'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($item['item_desc'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($item['uom'] ?? ''); ?></td>
@@ -380,14 +471,14 @@
                                             </td>
                                             <td class="text-right"><?php echo htmlspecialchars($item['gst'] ?? 0); ?></td>
                                             <td class="text-right">
-                                                <?php echo  $item['currency_code'] . ' ' . number_format($item['amount'] ?? 0, $decimal); ?>
+                                                <?php echo $item['currency_code'] . ' ' . number_format($item['amount'] ?? 0, $decimal); ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
                                     <tr>
-                                        <td colspan="7" class="text-right"><strong>Total Amount:</strong></td>
-                                        <td class="text-right">
-                                            <?php echo $item['currency_code'] . ' ' . number_format($tot, 2); ?>
+                                        <td colspan="9" class="text-right"><strong>Total Amount:</strong></td>
+                                        <td class="text-right" colspan="4">
+                                            <?php echo $item['currency_code'] . ' ' . number_format($tot, $decimal); ?>
                                         </td>
                                     </tr>
                                 <?php else: ?>
@@ -432,35 +523,47 @@
                             $info = $dc_list['info'] ?? [];
                             ?>
                             <thead>
-                                <!-- DC HEADER -->
+
+                                <!-- ================= PO HEADER ================= -->
                                 <tr class="bg_top_header">
-                                    <th width="12%">Company</th>
-                                    <td width="21%"><?php echo htmlspecialchars($info['company_name'] ?? ''); ?></td>
-                                    <th width="12%">Customer Name</th>
-                                    <td width="21%"><?php echo htmlspecialchars($info['customer_name'] ?? ''); ?></td>
-                                    <th width="12%">DC No</th>
-                                    <td width="22%"><?php echo htmlspecialchars($info['dc_no'] ?? ''); ?></td>
+                                    <th colspan="2">Customer Name</th>
+                                    <td colspan="2"><?= htmlspecialchars($info['customer_name'] ?? ''); ?></td>
+
+                                    <th colspan="2">DC No</th>
+                                    <td colspan="2"><?= htmlspecialchars($info['dc_no'] ?? ''); ?></td>
+
+                                    <th>Tender Enquiry Id</th>
+                                    <td><?= htmlspecialchars($info['tender_enquiry_id'] ?? ''); ?></td>
                                 </tr>
+
                                 <tr class="bg_top_header">
-                                    <th>Tender Enquiry No</th>
-                                    <td><?php echo htmlspecialchars($info['enquiry_no'] ?? ''); ?></td>
-                                    <th>DC Date</th>
-                                    <td>
-                                        <?php echo !empty($info['dc_date'])
+                                    <th colspan="2">DC Date</th>
+                                    <td colspan="2">
+                                        <?= !empty($info['dc_date'])
                                             ? date('d-m-Y', strtotime($info['dc_date']))
                                             : ''; ?>
                                     </td>
-                                    <th>DC Status</th>
-                                    <td><?php echo htmlspecialchars($info['dc_status'] ?? ''); ?></td>
+
+                                    <th colspan="2">DC Status</th>
+                                    <td colspan="2"><?= htmlspecialchars($info['dc_status'] ?? ''); ?></td>
+
+                                    <th>Tender PO Id</th>
+                                    <td><?= htmlspecialchars($info['tender_po_id'] ?? ''); ?></td>
                                 </tr>
-                                <!-- ITEM HEADER -->
+
+                                <!-- ================= ITEM HEADER ================= -->
                                 <tr class="bg_table_header">
-                                    <th width="8%" class="text-center">S.No</th>
-                                    <th width="15%">Item Code</th>
-                                    <th width="40%">Item Description</th>
-                                    <th width="12%" class="text-center">UOM</th>
-                                    <th width="12%" class="text-right" colspan="2">Qty</th>
+                                    <th width="6%" class="text-center">S.No</th>
+                                    <th width="8%">Tender Dc Id</th>
+                                    <th width="8%">Tender Dc Item Id</th>
+                                    <th width="10%">Vendor Purchase Inward Id</th>
+                                    <th width="10%">Vendor Purchase Inward Item Id</th>
+                                    <th width="12%">Item Code</th>
+                                    <th width="28%">Item Description</th>
+                                    <th width="8%" class="text-center">UOM</th>
+                                    <th width="10%" colspan="2" class="text-right">Qty</th>
                                 </tr>
+
                             </thead>
                             <tbody>
                                 <!-- ITEMS -->
@@ -468,6 +571,18 @@
                                     <?php foreach ($dc_list['items'] as $k => $item): ?>
                                         <tr>
                                             <td class="text-center"><?php echo $k + 1; ?></td>
+                                            <td class="text-center">
+                                                <?php echo $item['tender_dc_id'] ?? ''; ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <?php echo $item['tender_dc_item_id'] ?? ''; ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <?php echo $item['vendor_pur_inward_id'] ?? ''; ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <?php echo $item['vendor_pur_inward_item_id'] ?? ''; ?>
+                                            </td>
                                             <td><?php echo htmlspecialchars($item['item_code'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($item['item_desc'] ?? ''); ?></td>
                                             <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?? ''); ?></td>
@@ -516,7 +631,7 @@
                             $info = $invoice_list['info'] ?? [];
                             ?>
                             <thead>
-                                <!-- PO HEADER -->
+
                                 <tr class="bg_top_header">
                                     <th width="12%">Company</th>
                                     <td width="15%">
@@ -526,30 +641,36 @@
                                     <td width="15%">
                                         <?php echo htmlspecialchars($info['customer_name'] ?? ''); ?>
                                     </td>
-                                    <th width="12%">Invoice No</th>
-                                    <td colspan="3">
+                                    <th colspan="3">Invoice No</th>
+                                    <td colspan="4">
                                         <?php echo htmlspecialchars($info['invoice_no'] ?? ''); ?>
                                     </td>
                                 </tr>
+
                                 <tr class="bg_top_header">
-                                    <th>Tender Enquiry No</th>
+                                    <th>Tender Invoice Amount</th>
                                     <td>
-                                        <?php echo htmlspecialchars($info['enquiry_no'] ?? ''); ?>
+                                        <?php echo htmlspecialchars($info['total_amount'] ?? ''); ?>
                                     </td>
-                                    <th>Invoice Date</th>
+                                    <th colspan="3">Invoice Date</th>
                                     <td>
                                         <?php echo !empty($info['invoice_date'])
                                             ? date('d-m-Y', strtotime($info['invoice_date']))
                                             : ''; ?>
                                     </td>
-                                    <th>Invoice Status</th>
+                                    <th colspan="3">Invoice Status</th>
                                     <td colspan="3">
                                         <?php echo htmlspecialchars($info['invoice_status'] ?? ''); ?>
                                     </td>
-                                </tr>
-                                <!-- ITEM HEADER -->
+                                </tr> 
+
+
+
                                 <tr class="bg_table_header">
                                     <th width="5%">S.No</th>
+                                    <th width="5%">Tender Enquiry Invoice Id</th>
+                                    <th width="5%">Tender Enquiry Invoice Item Id</th>
+                                    <th width="5%">Tender PO Item Id</th>
                                     <th width="12%">Item Code</th>
                                     <th width="30%">Item Description</th>
                                     <th width="8%">UOM</th>
@@ -558,17 +679,28 @@
                                     <th width="8%" class="text-right">VAT %</th>
                                     <th width="15%" class="text-right">Amount</th>
                                 </tr>
+
                             </thead>
                             <tbody>
                                 <!-- ITEMS -->
                                 <?php if (!empty($invoice_list['items'])): ?>
-                                    <?php $tot = 0; foreach ($invoice_list['items'] as $k => $item):
+                                    <?php $tot = 0;
+                                    foreach ($invoice_list['items'] as $k => $item):
                                         $decimal = $item['decimal_point'] ?? 2;
-                                        $tot += $item['amount'] ?? 0;   
+                                        $tot += $item['amount'] ?? 0;
                                         ?>
                                         <tr>
                                             <td>
                                                 <?php echo $k + 1; ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <?php echo $item['tender_enq_invoice_id'] ?? ''; ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <?php echo $item['tender_enq_invoice_item_id'] ?? ''; ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <?php echo $item['tender_po_item_id'] ?? ''; ?>
                                             </td>
                                             <td>
                                                 <?php echo htmlspecialchars($item['item_code'] ?? ''); ?>
@@ -594,9 +726,9 @@
                                         </tr>
                                     <?php endforeach; ?>
                                     <tr>
-                                        <td colspan="7" class="text-right"><strong>Total Amount:</strong></td>
-                                        <td class="text-right">
-                                            <?php echo $item['currency_code'] . ' ' . number_format($tot, 3); ?>    
+                                        <td colspan="9" class="text-right"><strong>Total Amount:</strong></td>
+                                        <td colspan="2" class="text-right">
+                                            <?php echo $item['currency_code'] . ' ' . number_format($tot, 3); ?>
                                         </td>
                                     </tr>
                                 <?php else: ?>
@@ -644,64 +776,91 @@
                             $info = $vendor_rate_enquiry['info'] ?? [];
                             ?>
                             <thead>
-                                <!-- QUOTATION HEADER -->
+
+                                <!-- ================= QUOTATION HEADER ================= -->
                                 <tr class="bg_top_header">
-                                    <th width="12%">Company</th>
-                                    <td width="15%">
-                                        <?php echo htmlspecialchars($info['company_name'] ?? ''); ?>
-                                    </td>
-                                    <th width="12%">Customer Name</th>
-                                    <td width="15%">
-                                        <?php echo htmlspecialchars($info['customer_name'] ?? ''); ?>
-                                    </td>
-                                    <th width="12%">Vendor Rate Enquiry No</th>
-                                    <td colspan="3">
-                                        <?php echo htmlspecialchars($info['vendor_rate_enquiry_no'] ?? ''); ?>
-                                    </td>
+                                    <th colspan="2">Vendor Name</th>
+                                    <td><?= htmlspecialchars($info['vendor_name'] ?? ''); ?></td>
+
+                                    <th colspan="2">Customer Name</th>
+                                    <td><?= htmlspecialchars($info['customer_name'] ?? ''); ?></td>
+
+                                    <th colspan="2">Vendor Rate Enquiry No</th>
+                                    <td><?= htmlspecialchars($info['vendor_rate_enquiry_no'] ?? ''); ?></td>
                                 </tr>
+
                                 <tr class="bg_top_header">
-                                    <th>Tender Enquiry No</th>
+                                    <th colspan="2">Vendor Contact Person</th>
+                                    <td><?= htmlspecialchars($info['vendor_contact_person'] ?? ''); ?></td>
+
+                                    <th colspan="2">Vendor Rate Enquiry Date</th>
                                     <td>
-                                        <?php echo htmlspecialchars($info['enquiry_no'] ?? ''); ?>
-                                    </td>
-                                    <th>Enquiry Date</th>
-                                    <td>
-                                        <?php echo !empty($info['enquiry_date'])
-                                            ? date('d-m-Y', strtotime($info['enquiry_date']))
+                                        <?= !empty($info['vendor_rate_enquiry_date'])
+                                            ? date('d-m-Y', strtotime($info['vendor_rate_enquiry_date']))
                                             : ''; ?>
                                     </td>
-                                    <th>Enquiry Status</th>
-                                    <td colspan="3">
-                                        <?php echo htmlspecialchars($info['vendor_rate_enquiry_status'] ?? ''); ?>
-                                    </td>
+
+                                    <th colspan="2">Enquiry Status</th>
+                                    <td><?= htmlspecialchars($info['vendor_rate_enquiry_status'] ?? ''); ?></td>
                                 </tr>
-                                <!-- ITEM HEADER -->
+
+                                <tr class="bg_top_header">
+                                    <th colspan="2"> Opening Date</th>
+                                    <td>
+                                        <?= !empty($info['opening_date'])
+                                            ? date('d-m-Y', strtotime($info['opening_date']))
+                                            : ''; ?>
+                                    </td>
+
+                                    <th colspan="2"> Closing Date</th>
+                                    <td>
+                                        <?= !empty($info['closing_date'])
+                                            ? date('d-m-Y', strtotime($info['closing_date']))
+                                            : ''; ?>
+                                    </td>
+
+                                    <th>Tender Enquiry Id</th>
+                                    <td colspan="2"><?= htmlspecialchars($info['tender_enquiry_id'] ?? ''); ?></td>
+                                </tr>
+
+                                <!-- ================= ITEM HEADER ================= -->
                                 <tr class="bg_table_header">
                                     <th width="5%">S.No</th>
+                                    <th width="10%">Vendor Rate Enquiry Id</th>
+                                    <th width="12%">Vendor Rate Enquiry Item Id</th>
+                                    <th width="12%">Tender Enquiry Item Id</th>
                                     <th width="12%">Item Code</th>
-                                    <th width="30%">Item Description</th>
+                                    <th width="29%" colspan="2">Item Description</th>
                                     <th width="8%">UOM</th>
-                                    <th width="10%" class="text-right">Qty</th>
-                                    <th width="12%" class="text-right">Rate</th>
-                                    <th width="8%" class="text-right">VAT %</th>
-                                    <th width="15%" class="text-right">Amount</th>
+                                    <th width="12%" class="text-right">Qty</th>
                                 </tr>
+
                             </thead>
                             <tbody>
                                 <!-- ITEMS -->
                                 <?php if (!empty($vendor_rate_enquiry['items'])): ?>
-                                    <?php $tot = 0; foreach ($vendor_rate_enquiry['items'] as $k => $item):
+                                    <?php $tot = 0;
+                                    foreach ($vendor_rate_enquiry['items'] as $k => $item):
                                         $decimal = $item['decimal_point'] ?? 2;
-                                        $tot += $item['amount'] ?? 0;
+                                        $tot += $item['qty'] ?? 0;
                                         ?>
                                         <tr>
                                             <td>
                                                 <?php echo $k + 1; ?>
                                             </td>
+                                            <td class="text-center">
+                                                <?php echo $item['vendor_rate_enquiry_id'] ?? ''; ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <?php echo $item['vendor_rate_enquiry_item_id'] ?? ''; ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <?php echo $item['tender_enquiry_item_id'] ?? ''; ?>
+                                            </td>
                                             <td>
                                                 <?php echo htmlspecialchars($item['item_code'] ?? ''); ?>
                                             </td>
-                                            <td>
+                                            <td colspan="2">
                                                 <?php echo htmlspecialchars($item['item_desc'] ?? ''); ?>
                                             </td>
                                             <td>
@@ -710,20 +869,24 @@
                                             <td class="text-right">
                                                 <?php echo htmlspecialchars($item['qty'] ?? 0); ?>
                                             </td>
-                                            <td class="text-right">
-                                                <?php echo number_format($item['rate'] ?? 0, $decimal); ?>
+                                            <!-- <td class="text-right">
+                                                <?php // echo number_format($item['rate'] ?? 0, $decimal); ?>
                                             </td>
                                             <td class="text-right">
-                                                <?php echo htmlspecialchars($item['gst'] ?? 0); ?>
+                                                <?php //echo htmlspecialchars($item['gst'] ?? 0); ?>
                                             </td>
                                             <td class="text-right">
-                                                <?php echo $item['currency_code'] ?? '' . ' ' . number_format($item['amount'] ?? 0, $decimal); ?>
-                                            </td>
+                                                <?php //echo $item['currency_code'] ?? '' . ' ' . number_format($item['amount'] ?? 0, $decimal); ?>
+                                            </td> -->
                                         </tr>
                                     <?php endforeach; ?>
                                     <tr>
-                                        <td colspan="7" class="text-right"><strong>Total Amount:</strong></td>
-                                        <td class="text-right"><?php echo $item['currency_code'] ?? '' . ' ' . number_format($tot, 2); ?></td>
+                                        <td colspan="8" class="text-right"><strong>Total Qty:</strong></td>
+                                        <td class="text-right">
+                                            <!-- <?php //echo $item['currency_code'] ?? '' . ' ' . number_format($tot, 2); ?> -->
+                                            <!-- total qty  -->
+                                            <?php echo number_format($tot, 2); ?>
+                                        </td>
                                     </tr>
                                 <?php else: ?>
                                     <tr>
@@ -767,48 +930,73 @@
                             $info = $vendor_quotation['info'] ?? [];
                             ?>
                             <thead>
-                                <!-- QUOTATION HEADER -->
+
+                                <!-- ================= QUOTATION HEADER ================= -->
                                 <tr class="bg_top_header">
-                                    <th width="12%">Company</th>
-                                    <td width="15%"><?php echo htmlspecialchars($info['company_name'] ?? ''); ?></td>
-                                    <th width="12%">Customer Name</th>
-                                    <td width="15%"><?php echo htmlspecialchars($info['customer_name'] ?? ''); ?></td>
-                                    <th width="12%">Quotation No</th>
-                                    <td colspan="3"><?php echo htmlspecialchars($info['quote_no'] ?? ''); ?></td>
+                                    <th colspan="2">Vendor Name</th>
+                                    <td colspan="2"><?= htmlspecialchars($info['vendor_name'] ?? ''); ?></td>
+
+                                    <th colspan="2">Contact Person</th>
+                                    <td colspan="2"><?= htmlspecialchars($info['contact_person_name'] ?? ''); ?></td>
+
+                                    <th>Customer Name</th>
+                                    <td colspan="2"><?= htmlspecialchars($info['customer_name'] ?? ''); ?></td>
                                 </tr>
+
                                 <tr class="bg_top_header">
-                                    <th>Tender Enquiry No</th>
-                                    <td><?php echo htmlspecialchars($info['enquiry_no'] ?? ''); ?></td>
-                                    <th>Quotation Date</th>
-                                    <td>
-                                        <?php echo !empty($info['quote_date'])
+                                    <th colspan="2">Vendor Quotation No</th>
+                                    <td colspan="2"><?= htmlspecialchars($info['quote_no'] ?? ''); ?></td>
+
+                                    <th colspan="2">Quotation Date</th>
+                                    <td colspan="2">
+                                        <?= !empty($info['quote_date'])
                                             ? date('d-m-Y', strtotime($info['quote_date']))
                                             : ''; ?>
                                     </td>
-                                    <th>Quotation Status</th>
-                                    <td colspan="3"><?php echo htmlspecialchars($info['quote_status'] ?? ''); ?></td>
+
+                                    <th colspan="2">Quotation Status</th>
+                                    <td><?= htmlspecialchars($info['quote_status'] ?? ''); ?></td>
                                 </tr>
-                                <!-- ITEM HEADER -->
+
+                                <tr class="bg_top_header">
+                                    <th colspan="2">Tender Enquiry Id</th>
+                                    <td colspan="2"><?= htmlspecialchars($info['tender_enquiry_id'] ?? ''); ?></td>
+
+                                    <th colspan="2">Transport Charges</th>
+                                    <td colspan="2"><?= $info['transport_charges'] ?? '0.00'; ?></td>
+
+                                    <th>Other Charges</th>
+                                    <td colspan="2"><?= $info['other_charges'] ?? '0.00'; ?></td>
+                                </tr>
+
+                                <!-- ================= ITEM HEADER ================= -->
                                 <tr class="bg_table_header">
-                                    <th width="5%">S.No</th>
-                                    <th width="12%">Item Code</th>
-                                    <th width="30%">Item Description</th>
-                                    <th width="8%">UOM</th>
-                                    <th width="10%" class="text-right">Qty</th>
-                                    <th width="12%" class="text-right">Rate</th>
-                                    <th width="8%" class="text-right">VAT %</th>
-                                    <th width="15%" class="text-right">Amount</th>
+                                    <th width="4%">S.No</th>
+                                    <th width="8%">Vendor Quotation Id</th>
+                                    <th width="10%">Vendor Quote Item Id</th>
+                                    <th width="10%">Vendor Rate Enquiry Item Id</th>
+                                    <th width="10%">Item Code</th>
+                                    <th width="22%">Item Description</th>
+                                    <th width="6%">UOM</th>
+                                    <th width="8%" class="text-right">Qty</th>
+                                    <th width="8%" class="text-right">Rate</th>
+                                    <th width="6%" class="text-right">VAT %</th>
+                                    <th width="8%" class="text-right">Amount</th>
                                 </tr>
+
                             </thead>
                             <tbody>
-                                <!-- ITEMS -->
                                 <?php if (!empty($vendor_quotation['items'])): ?>
-                                    <?php $tot=0; foreach ($vendor_quotation['items'] as $k => $item):
+                                    <?php $tot = 0;
+                                    foreach ($vendor_quotation['items'] as $k => $item):
                                         $decimal = $item['decimal_point'] ?? 2;
-                                        $tot += $item['amount'] ?? 0;   
+                                        $tot += $item['amount'] ?? 0;
                                         ?>
                                         <tr>
                                             <td><?php echo $k + 1; ?></td>
+                                            <td><?php echo $item['vendor_quote_id'] ?? ''; ?></td>
+                                            <td><?php echo $item['vendor_quote_item_id'] ?? ''; ?></td>
+                                            <td><?php echo $item['vendor_rate_enquiry_item_id'] ?? ''; ?></td>
                                             <td><?php echo htmlspecialchars($item['item_code'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($item['item_desc'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($item['uom'] ?? ''); ?></td>
@@ -823,8 +1011,10 @@
                                         </tr>
                                     <?php endforeach; ?>
                                     <tr>
-                                        <td colspan="7" class="text-right"><strong>Total Amount:</strong></td>
-                                        <td class="text-right"><?php echo $item['currency_code'] . ' ' . number_format($tot, 2); ?></td>
+                                        <td colspan="9" class="text-right"><strong>Total Amount:</strong></td>
+                                        <td class="text-right" colspan="2">
+                                            <?php echo $item['currency_code'] . ' ' . number_format($tot, 2); ?>
+                                        </td>
                                     </tr>
                                 <?php else: ?>
                                     <tr>
@@ -849,6 +1039,8 @@
         </div>
     </div>
 
+
+
     <!-- Vendor Po List -->
     <div class="box box-success collapsed-box">
         <div class="box-header with-border clearfix">
@@ -868,48 +1060,76 @@
                             $info = $po_list['info'] ?? [];
                             ?>
                             <thead>
-                                <!-- TOP HEADER -->
+
+                                <!-- ================= QUOTATION HEADER ================= -->
                                 <tr class="bg_top_header">
-                                    <th width="12%">Company</th>
-                                    <td width="15%"><?php echo htmlspecialchars($info['company_name'] ?? ''); ?></td>
-                                    <th width="12%">Customer Name</th>
-                                    <td width="15%"><?php echo htmlspecialchars($info['customer_name'] ?? ''); ?></td>
-                                    <th width="12%">Po No</th>
-                                    <td colspan="3"><?php echo htmlspecialchars($info['po_no'] ?? ''); ?></td>
+                                    <th colspan="2">Vendor Name</th>
+                                    <td colspan="2"><?= htmlspecialchars($info['vendor_name'] ?? ''); ?></td>
+
+                                    <th colspan="2">Contact Person</th>
+                                    <td colspan="2"><?= htmlspecialchars($info['contact_person_name'] ?? ''); ?></td>
+
+                                    <th>Customer Name</th>
+                                    <td colspan="2"><?= htmlspecialchars($info['customer_name'] ?? ''); ?></td>
                                 </tr>
+
                                 <tr class="bg_top_header">
-                                    <th>Tender Enquiry No</th>
-                                    <td><?php echo htmlspecialchars($info['enquiry_no'] ?? ''); ?></td>
-                                    <th>Po Date</th>
-                                    <td>
-                                        <?php echo !empty($info['po_date'])
+                                    <th colspan="2">Vendor PO No</th>
+                                    <td colspan="2"><?= htmlspecialchars($info['po_no'] ?? ''); ?></td>
+
+                                    <th colspan="2">PO Date</th>
+                                    <td colspan="2">
+                                        <?= !empty($info['po_date'])
                                             ? date('d-m-Y', strtotime($info['po_date']))
                                             : ''; ?>
                                     </td>
-                                    <th>Po Status</th>
-                                    <td colspan="3"><?php echo htmlspecialchars($info['po_status'] ?? ''); ?></td>
+
+                                    <th colspan="2">PO Status</th>
+                                    <td><?= htmlspecialchars($info['po_status'] ?? ''); ?></td>
                                 </tr>
-                                <!-- ITEM HEADER -->
+
+                                <tr class="bg_top_header">
+                                    <th colspan="2">Tender Enquiry Id</th>
+                                    <td colspan="2"><?= htmlspecialchars($info['tender_enquiry_id'] ?? ''); ?></td>
+
+                                    <th colspan="2">Transport Charges</th>
+                                    <td colspan="2"><?= $info['transport_charges'] ?? '0.00'; ?></td>
+
+                                    <th>Other Charges</th>
+                                    <td colspan="2"><?= $info['other_charges'] ?? '0.00'; ?></td>
+                                </tr>
+
+                                <!-- ================= ITEM HEADER ================= -->
                                 <tr class="bg_table_header">
-                                    <th width="5%">S.No</th>
-                                    <th width="12%">Item Code</th>
-                                    <th width="30%">Item Description</th>
-                                    <th width="8%">UOM</th>
-                                    <th width="10%" class="text-right">Qty</th>
-                                    <th width="12%" class="text-right">Rate</th>
-                                    <th width="8%" class="text-right">VAT %</th>
-                                    <th width="15%" class="text-right">Amount</th>
+                                    <th width="4%">S.No</th>
+                                    <th width="8%">Vendor PO Id</th>
+                                    <th width="10%">Vendor PO Item Id</th>
+                                    <th width="10%">Vendor Quotation Item Id</th>
+                                    <th width="10%">Item Code</th>
+                                    <th width="22%">Item Description</th>
+                                    <th width="6%">UOM</th>
+                                    <th width="8%" class="text-right">Qty</th>
+                                    <th width="8%" class="text-right">Rate</th>
+                                    <th width="6%" class="text-right">VAT %</th>
+                                    <th width="8%" class="text-right">Amount</th>
                                 </tr>
+
                             </thead>
                             <tbody>
                                 <!-- ITEMS -->
                                 <?php if (!empty($po_list['items'])): ?>
-                                    <?php $tot=0; foreach ($po_list['items'] as $k => $item):
+                                    <?php $tot = 0;
+                                    foreach ($po_list['items'] as $k => $item):
                                         $decimal = $item['decimal_point'] ?? 2;
                                         $tot += $item['amount'] ?? 0;
                                         ?>
                                         <tr>
                                             <td><?php echo $k + 1; ?></td>
+                                            <td class="text-center"><?php echo htmlspecialchars($item['vendor_po_id'] ?? ''); ?></td>
+                                            <td class="text-center"><?php echo htmlspecialchars($item['vendor_po_item_id'] ?? ''); ?>
+                                            </td>
+                                            <td class="text-center"><?php echo htmlspecialchars($item['vendor_quote_item_id'] ?? ''); ?>
+                                            </td>
                                             <td><?php echo htmlspecialchars($item['item_code'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($item['item_desc'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($item['uom'] ?? ''); ?></td>
@@ -924,8 +1144,10 @@
                                         </tr>
                                     <?php endforeach; ?>
                                     <tr>
-                                        <td colspan="7" class="text-right"><strong>Total Amount:</strong></td>
-                                        <td class="text-right"><?php echo $item['currency_code'] . ' ' . number_format($tot, 2); ?></td>
+                                        <td colspan="9" class="text-right"><strong>Total Amount:</strong></td>
+                                        <td class="text-right" colspan="2">
+                                            <?php echo $item['currency_code'] . ' ' . number_format($tot, 2); ?>
+                                        </td>
                                     </tr>
                                 <?php else: ?>
                                     <tr>
@@ -970,40 +1192,47 @@
                             $info = $pur_inward['info'] ?? [];
                             ?>
                             <thead>
-                                <!-- ENQUIRY HEADER -->
                                 <tr class="bg_top_header">
-                                    <th width="15%">Company</th>
-                                    <td width="18%">
-                                        <?php echo htmlspecialchars($info['company_name'] ?? ''); ?>
-                                    </td>
-                                    <th width="15%">Customer Name</th>
-                                    <td width="18%">
-                                        <?php echo htmlspecialchars($info['customer_name'] ?? ''); ?>
-                                    </td>
-                                    <th width="15%">Inward No</th>
-                                    <td width="19%">
-                                        <?php echo htmlspecialchars($info['inward_no'] ?? ''); ?>
-                                    </td>
+                                    <th colspan="2">Vendor Name</th>
+                                    <td colspan="2"><?= htmlspecialchars($info['vendor_name'] ?? ''); ?></td>
+
+                                    <th colspan="2">Contact Person</th>
+                                    <td><?= htmlspecialchars($info['contact_person_name'] ?? ''); ?></td>
+
+                                    <th>Customer Name</th>
+                                    <td><?= htmlspecialchars($info['customer_name'] ?? ''); ?></td>
                                 </tr>
+
                                 <tr class="bg_top_header">
-                                    <th>Tender Name</th>
+                                    <th colspan="2">Vendor Inward No</th>
+                                    <td><?= htmlspecialchars($info['inward_no'] ?? ''); ?></td>
+
+                                    <th colspan="2">Inward Date</th>
                                     <td>
-                                        <?php echo htmlspecialchars($info['tender_name'] ?? ''); ?>
-                                    </td>
-                                    <th>Inward Date</th>
-                                    <td>
-                                        <?php echo !empty($info['inward_date'])
+                                        <?= !empty($info['inward_date'])
                                             ? date('d-m-Y', strtotime($info['inward_date']))
                                             : ''; ?>
                                     </td>
-                                    <th>Inward Status</th>
-                                    <td>
-                                        <?php echo htmlspecialchars($info['inward_status'] ?? ''); ?>
-                                    </td>
+
+                                    <th colspan="2">Inward Status</th>
+                                    <td><?= htmlspecialchars($info['inward_status'] ?? 'Active'); ?></td>
                                 </tr>
-                                <!-- ITEM HEADER -->
+
+                                <tr class="bg_top_header">
+                                    <th colspan="2">Tender Enquiry Id</th>
+                                    <td><?= htmlspecialchars($info['tender_enquiry_id'] ?? ''); ?></td>
+                                    <th colspan="2">Vendor Po Id</th>
+                                    <td><?= htmlspecialchars($info['vendor_po_id'] ?? ''); ?></td>
+
+                                    <th>Other Charges</th>
+                                    <td colspan="2"><?= $info['other_charges'] ?? '0.00'; ?></td>
+                                </tr>
+
                                 <tr class="bg_table_header">
                                     <th width="5%">S.No</th>
+                                    <th width="5%">Vendor Purchase Inward Id</th>
+                                    <th width="5%">Vendor Purchase Inward Item Id</th>
+                                    <th width="5%">Vendor PO Item Id</th>
                                     <th width="15%">Item Code</th>
                                     <th width="40%" colspan="2">Item Description</th>
                                     <th width="10%">UOM</th>
@@ -1017,6 +1246,15 @@
                                         <tr>
                                             <td>
                                                 <?php echo $k + 1; ?>
+                                            </td>
+                                            <td>
+                                                <?php echo htmlspecialchars($item['vendor_pur_inward_id'] ?? ''); ?>
+                                            </td>
+                                            <td>
+                                                <?php echo htmlspecialchars($item['vendor_pur_inward_item_id'] ?? ''); ?>
+                                            </td>
+                                            <td>
+                                                <?php echo htmlspecialchars($item['vendor_po_item_id'] ?? ''); ?>
                                             </td>
                                             <td>
                                                 <?php echo htmlspecialchars($item['item_code'] ?? ''); ?>
@@ -1066,6 +1304,12 @@
             </div>
         </div>
 
+        <?php
+        //         echo '<pre>';
+        // print_r($vendor_invoice_list);
+        // echo '</pre>';
+        ?>
+
         <div class="box-body">
             <div class="table-responsive">
                 <table class="table table-bordered table-striped">
@@ -1074,48 +1318,93 @@
                             $info = $vendor_invoice['info'] ?? [];
                             ?>
                             <thead>
-                                <!-- TOP HEADER -->
                                 <tr class="bg_top_header">
-                                    <th width="12%">Company</th>
-                                    <td width="15%"><?php echo htmlspecialchars($info['company_name'] ?? ''); ?></td>
-                                    <th width="12%">Customer Name</th>
-                                    <td width="15%"><?php echo htmlspecialchars($info['customer_name'] ?? ''); ?></td>
-                                    <th width="12%">Invoice No</th>
-                                    <td colspan="3"><?php echo htmlspecialchars($info['invoice_no'] ?? ''); ?></td>
+                                    <th colspan="2">Vendor Name</th>
+                                    <td colspan="2"><?= htmlspecialchars($info['vendor_name'] ?? ''); ?></td>
+
+                                    <th colspan="2">Contact Person</th>
+                                    <td><?= htmlspecialchars($info['contact_person_name'] ?? ''); ?></td>
+
+                                    <th colspan="2">Customer Name</th>
+                                    <td colspan="2"><?= htmlspecialchars($info['customer_name'] ?? ''); ?></td>
                                 </tr>
+
                                 <tr class="bg_top_header">
-                                    <th>Tender Enquiry No</th>
-                                    <td><?php echo htmlspecialchars($info['enquiry_no'] ?? ''); ?></td>
-                                    <th>Invoice Date</th>
+                                    <th colspan="2">Vendor Invoice No</th>
+                                    <td><?= htmlspecialchars($info['invoice_no'] ?? ''); ?></td>
+
+                                    <th colspan="2">Invoice Date</th>
                                     <td>
-                                        <?php echo !empty($info['invoice_date'])
+                                        <?= !empty($info['invoice_date'])
                                             ? date('d-m-Y', strtotime($info['invoice_date']))
                                             : ''; ?>
                                     </td>
-                                    <th>Invoice Status</th>
-                                    <td colspan="3"><?php echo htmlspecialchars($info['invoice_status'] ?? ''); ?></td>
+
+                                    <th colspan="2">Entry Date</th>
+                                    <td colspan="3">
+                                        <?= !empty($info['entry_date']) ? date('d-m-Y', strtotime($info['entry_date'])) : ''; ?>
+                                    </td>
                                 </tr>
-                                <!-- ITEM HEADER -->
+
+                                <tr class="bg_top_header">
+                                    <th colspan="2">Vat Payer Id</th>
+                                    <td colspan="3"><?= htmlspecialchars($info['vat_payer_purchase_grp'] ?? ''); ?></td>
+
+                                    <th colspan="1">Declaration No</th>
+                                    <td>
+                                        <?= !empty($info['declaration_no'])
+                                            ? $info['declaration_no']
+                                            : ''; ?>
+                                    </td>
+
+                                    <th colspan="2">Declaration Date</th>
+                                    <td colspan="2">
+                                        <?= !empty($info['declaration_date']) ? date('d-m-Y', strtotime($info['declaration_date'])) : ''; ?>
+                                    </td>
+                                </tr>
+
+                                <tr class="bg_top_header">
+                                    <th colspan="2">Tender Enquiry Id</th>
+                                    <td><?= htmlspecialchars($info['tender_enquiry_id'] ?? ''); ?></td>
+                                    <th colspan="2">Vendor Po Id</th>
+                                    <td><?= htmlspecialchars($info['vendor_po_id'] ?? ''); ?></td>
+
+                                    <th>Invoice Total</th>
+                                    <td colspan="4"><?= $info['total_amount'] ?? '0.00'; ?></td>
+                                </tr>
+
                                 <tr class="bg_table_header">
                                     <th width="5%">S.No</th>
-                                    <th width="12%">Item Code</th>
-                                    <th width="30%">Item Description</th>
-                                    <th width="8%">UOM</th>
-                                    <th width="10%" class="text-right">Qty</th>
-                                    <th width="12%" class="text-right">Rate</th>
-                                    <th width="8%" class="text-right">VAT %</th>
-                                    <th width="15%" class="text-right">Amount</th>
+                                    <th width="5%">Vendor Purchase Invoice Id</th>
+                                    <th width="5%">Vendor Purchase Invoice Item Id</th>
+                                    <th width="5%">Vendor PO Item Id</th>
+                                    <th width="15%">Item Code</th>
+                                    <th width="40%">Item Description</th>
+                                    <th width="10%">UOM</th>
+                                    <th width="8%" class="text-right">Qty</th>
+                                    <th width="8%" class="text-right">Rate</th>
+                                    <th width="6%" class="text-right">VAT %</th>
+                                    <th width="8%" class="text-right">Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <!-- ITEMS -->
                                 <?php if (!empty($vendor_invoice['items'])): ?>
-                                    <?php $tot = 0; foreach ($vendor_invoice['items'] as $k => $item):
+                                    <?php $tot = 0;
+                                    foreach ($vendor_invoice['items'] as $k => $item):
                                         $decimal = $item['decimal_point'] ?? 2;
-                                        $tot += $item['amount'] ?? 0;   
+                                        $tot += $item['amount'] ?? 0;
                                         ?>
                                         <tr>
                                             <td><?php echo $k + 1; ?></td>
+                                            <td class="text-center">
+                                                <?php echo htmlspecialchars($item['vendor_purchase_invoice_id'] ?? ''); ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <?php echo htmlspecialchars($item['vendor_purchase_invoice_item_id'] ?? ''); ?>
+                                            </td>
+                                            <td class="text-center"><?php echo htmlspecialchars($item['vendor_po_item_id'] ?? ''); ?>
+                                            </td>
                                             <td><?php echo htmlspecialchars($item['item_code'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($item['item_desc'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($item['uom'] ?? ''); ?></td>
@@ -1125,13 +1414,14 @@
                                             </td>
                                             <td class="text-right"><?php echo htmlspecialchars($item['gst'] ?? 0); ?></td>
                                             <td class="text-right">
-                                                <?php echo $item['currency_code'] . ' ' . number_format($item['amount'] ?? 0, $decimal); ?>
+                                                <?php echo number_format($item['amount'] ?? 0, $decimal); ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
                                     <tr>
-                                        <td colspan="7" class="text-right"><strong>Total Amount:</strong></td>
-                                        <td class="text-right"><?php echo $item['currency_code'] . ' ' . number_format($tot, 2); ?></td>
+                                        <td colspan="9" class="text-right"><strong>Total Amount:</strong></td>
+                                        <td class="text-right" colspan="2"><?php echo number_format($tot, 2); ?>
+                                        </td>
                                     </tr>
                                 <?php else: ?>
                                     <tr>
@@ -1181,13 +1471,13 @@
                 });
             },
             minLength: 1,
-            select: function (event, ui) { 
+            select: function (event, ui) {
                 $("#tender_enquiry_id").val(ui.item.tender_enquiry_id);
             }
         });
     });
 </script>
-<script> 
+<script>
 
     $(document).ready(function () {
 
