@@ -362,10 +362,9 @@
                             <input type="checkbox"
                                 class="item-check"
                                 name="selected_items[]"
-                                value="${row.tender_enq_invoice_item_id || 0}"
+                                value="${i}"
                                 ${ $chked }>
-                        </td>
-
+                        </td> 
                         <td>
                             <input type="text"
                                 class="form-control"

@@ -253,7 +253,7 @@ class Reports extends CI_Controller
             $sql = "
                 SELECT 
                     a.tender_enquiry_id,
-                    B.tender_enquiry_item_id,
+                    b.tender_enquiry_item_id,
                     a.enquiry_no,
                     a.enquiry_date,
                     a.opening_date,

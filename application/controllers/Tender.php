@@ -2713,7 +2713,7 @@ class Tender extends CI_Controller
                 $amounts = $this->input->post('amount') ?? [];
 
 
-                foreach ($selected_items as $idx => $value) {
+                foreach ($selected_items as $idx ) {
 
                     $item = [
                         'tender_enq_invoice_id' => $invoice_id,
@@ -2744,7 +2744,7 @@ class Tender extends CI_Controller
 
             }
 
-            //redirect('tender-invoice-list');
+            redirect('tender-po-invoice-edit/' . $invoice_id);
 
 
         }
@@ -3092,8 +3092,9 @@ class Tender extends CI_Controller
                 $rate = $this->input->post('rate') ?? [];
                 $gst = $this->input->post('gst') ?? [];
                 $amount = $this->input->post('amount') ?? [];
+                $tender_enq_invoice_item_id = $this->input->post('tender_enq_invoice_item_id') ?? [];
 
-                foreach ($selected_items as $idx => $tender_enq_invoice_item_id) {
+                foreach ($selected_items as $idx) {
 
                     $item_data = [
                         'tender_enq_invoice_id' => $tender_enq_invoice_id,
@@ -3113,21 +3114,25 @@ class Tender extends CI_Controller
                     ];
 
 
-                    if ($tender_enq_invoice_item_id > 0) {
+                    if ($tender_enq_invoice_item_id[$idx] != '' && $tender_enq_invoice_item_id[$idx] != 0) {
                         // Update existing item
-                        $this->db->where('tender_enq_invoice_item_id', $tender_enq_invoice_item_id);
+                        $this->db->where('tender_enq_invoice_item_id', $tender_enq_invoice_item_id[$idx]);
                         $this->db->update('tender_enq_invoice_item_info', $item_data);
-                        $miss_item_ids[] = $tender_enq_invoice_item_id;
+                        $miss_item_ids[] = $tender_enq_invoice_item_id[$idx] ;
                     } else {
                         // Insert new item
                         $this->db->insert('tender_enq_invoice_item_info', $item_data);
-                        $miss_item_ids[] = $this->db->insert_id();
+                        $inserted_id = $this->db->insert_id();
+                        $miss_item_ids[] = $inserted_id;
                     }
                 }
                 $miss_item_ids_str = implode(',', $miss_item_ids);
+
+                //print_r($miss_item_ids_str);
+
                 // Mark items not in the current list as deleted
                 $this->db->where('tender_enq_invoice_id', $tender_enq_invoice_id);
-                $this->db->where_not_in('tender_enq_invoice_item_id', $miss_item_ids_str);
+                $this->db->where_not_in('tender_enq_invoice_item_id', $miss_item_ids);
                 $this->db->update('tender_enq_invoice_item_info', ['status' => 'Delete', 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'), 'updated_date' => date('Y-m-d H:i:s')]);
 
             }
@@ -3142,6 +3147,7 @@ class Tender extends CI_Controller
             }
 
             redirect('tender-invoice-list/');
+            //redirect('tender-po-invoice-edit/' . $tender_enq_invoice_id);
         }
 
 
@@ -3149,7 +3155,7 @@ class Tender extends CI_Controller
         $this->load->library('pagination');
 
         $this->db->where('status != ', 'Delete');
-        $this->db->from('vendor_rate_enquiry_info');
+        $this->db->from('tender_enq_invoice_info');
         $data['total_records'] = $cnt = $this->db->count_all_results();
 
         $data['sno'] = $this->uri->segment(2, 0);
