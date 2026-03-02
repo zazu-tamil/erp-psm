@@ -59,7 +59,7 @@
                         <div class="form-group col-md-4">
                             <label>Tender Enquiry No <span style="color:red;">*</span></label>
                             <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select Enquiry'] +$tender_enquiry_opt , $header['tender_enquiry_id'], 'id="srch_tender_enquiry_id" class="form-control readonly" required readonly'); ?>
-                             
+
                         </div>
 
                         <div class="form-group col-md-4">
@@ -183,6 +183,93 @@
                     </div>
                 </fieldset>
 
+                <div class="box box-warning ">
+                    <div class="box-header with-border bg-warning">
+                        <h3 class="box-title">
+                            <i class="fa fa-truck"></i> Delivery Partner Bill Details
+                        </h3>
+                        <!-- <div class="box-tools pull-right ">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i
+                                    class="fa fa-minus"></i> </button>
+                        </div> -->
+                         <div class="box-tools pull-right">
+                            <label style="margin-bottom:0;">
+                                <input type="checkbox" id="toggle_dp_bill"> Show / Hide
+                            </label>
+                        </div>
+                    </div>
+                    <div class="box-body bg-warning">
+                        <fieldset
+                            style="background-color:#FFF; border:1px solid #ddd; padding:10px; margin-bottom:10px; border-radius:5px;">
+                            <legend class="text-light-blue"><i class="fa fa-file-text"></i> Delivery Partner Bill (if
+                                any)
+                            </legend>
+                            <div class="row">
+                                <div class="form-group col-md-5">
+                                    <label>Delivery Partner</label>
+                                    <div class="input-group input-group-sm">
+                                        <?php echo form_dropdown('delivery_partner_id', ['' => 'Select'] + $delivery_partner_opt, set_value('delivery_partner_id', $header['delivery_partner_id']), 'id="delivery_partner_id" class="form-control"'); ?>
+                                        <span class="input-group-btn">
+                                            <button type="button" class="btn btn-info btn-flat" data-toggle="modal"
+                                                data-target="#add_modal">Add New</button>
+                                        </span>
+                                    </div>
+
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>DP Bill No</label>
+                                    <input type="text" name="delivery_partner_bill_no" id="delivery_partner_bill_no"
+                                        value="<?php echo $header['delivery_partner_bill_no']?>" class="form-control">
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>DP Bill Date</label>
+                                    <input type="date" name="delivery_partner_bill_date" id="delivery_partner_bill_date"
+                                        value="<?php echo $header['delivery_partner_bill_date']?>" class="form-control">
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>DP Bill Entry Date <i class="text-sm text-warning">[For VAT
+                                            Filing]</i></label>
+                                    <input type="date" name="dp_bill_entry_date" id="dp_bill_entry_date"
+                                        value="<?php echo $header['dp_bill_entry_date']?>" class="form-control">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>VAT Payer Purchase</label>
+                                    <?php echo form_dropdown('dp_vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('dp_vat_payer_purchase_grp', $header['dp_vat_payer_purchase_grp']), 'id="vat_payer_purchase_grp" class="form-control" required'); ?>
+                                </div>
+
+                                <div class="form-group col-md-3">
+                                    <label>Declaration Number</label>
+                                    <input type="text" name="dp_declaration_no" id="dp_declaration_no"
+                                        class="form-control" value="<?php echo $header['dp_declaration_no']?>">
+                                </div>
+
+                                <div class="form-group col-md-3">
+                                    <label>Bayan VAT Amount</label>
+                                    <input type="number" step="any" name="dp_vat_amount" id="dp_vat_amount"
+                                        value="<?php echo $header['dp_vat_amount']?>" class="form-control">
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>Bayan Duty Amount</label>
+                                    <input type="number" step="any" name="dp_duty_amount" id="dp_duty_amount"
+                                        value="<?php echo $header['dp_duty_amount']?>" class="form-control">
+                                </div>
+
+                                <div class="form-group col-md-3">
+                                    <label>DP Admin Fee & Other Fee</label>
+                                    <input type="number" step="any" name="dp_admin_other_fee" id="dp_admin_other_fee"
+                                        value="<?php echo $header['dp_admin_other_fee']?>" class="form-control">
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>DP Admin Fee & Other Fee VAT Amount</label>
+                                    <input type="number" step="any" name="dp_admin_other_fee_vat_amount"
+                                        value="<?php echo $header['dp_admin_other_fee_vat_amount']?>"
+                                        id="dp_admin_other_fee_vat_amount" class="form-control">
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+
                 <div class="row">
                     <div class="col-md-12">
                         <fieldset class="mt-4">
@@ -282,86 +369,185 @@
                                 </tbody>
                             </table>
 
-                            <!-- <div class="tot_amt text-right">
-                                <label>Total Bill Amount</label>
-                                <div id="total_amount_display"><?php echo number_format($header['total_amount'], 3); ?>
+
+
+                            <!-- <div class="row">
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="fix_theamount_total">Fix The Amount</label>
+
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox" name="fix_theamount_total"
+                                                    id="fix_theamount_total" value="1"
+                                                    <?php if($header['fix_theamount_total'] == 1){ echo 'checked'; } ?>>
+
+                                                Fix The Amount
+                                            </label>
+                                        </div>
+
+                                    </div>
+                                </div> 
+                                <div class="col-md-3 pull-right">
+                                    <div class="form-group total-box shadow-sm">
+                                        <label>
+                                            <i class="fa fa-calculator text-success"></i>
+                                            Total Amount With Tax
+                                        </label>
+                                        <input type="number" name="total_amount" step="any" id="total_amount"
+                                            class="form-control text-right font-weight-bold"
+                                            value="<?php echo $header['total_amount'];?>" readonly>
+                                    </div>
                                 </div>
-                                <input type="hidden" name="total_amount" id="total_amount"
-                                    value="<?php echo $header['total_amount']; ?>">
+                                <div class="col-md-3 pull-right">
+                                    <div class="form-group total-box shadow-sm">
+                                        <label>
+                                            <i class="fa fa-calculator text-success"></i>
+                                            Total VAT Amount
+                                        </label>
+                                        <input type="number" name="total_vat_amount" step="any" id="total_vat_amount"
+                                            class="form-control text-right" value="<?php echo $header['tax_amount'];?>"
+                                            readonly>
+                                    </div>
+                                </div> 
+                                <div class="col-md-3 pull-right">
+                                    <div class="form-group total-box shadow-sm">
+                                        <label>
+                                            <i class="fa fa-calculator text-success"></i>
+                                            Total Amount WO Tax
+                                        </label>
+                                        <input type="number" step="any" name="total_amount_wo_tax"
+                                            id="total_amount_wo_tax" class="form-control text-right"
+                                            value="<?php echo $header['total_amount_wo_tax'];?>" readonly>
+                                    </div>
+                                </div>
+ 
 
-                                <label>Total GST</label>
-                                <div id="total_gst_amount_display">
-                                    <?php echo number_format($header['tax_amount'], 3); ?></div>
-                                <input type="hidden" name="tax_amount" id="total_gst_amount"
-                                    value="<?php echo $header['tax_amount']; ?>">
                             </div> -->
+                        </fieldset>
+                    </div>
+                </div>
 
-                           <div class="row">
-
-                            <div class="col-md-3">
-                                <div class="form-group">
+                <div class="row">
+                    <div class="col-md-12">
+                        <fieldset
+                            style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px;">
+                            <legend>Total Amount</legend>
+                            <div class="row">
+                                <div class="col-md-3 form-group">
                                     <label for="fix_theamount_total">Fix The Amount</label>
 
                                     <div class="checkbox">
                                         <label>
-                                            <input type="checkbox"
-                                                name="fix_theamount_total"
-                                                id="fix_theamount_total"
-                                                value="1"
-                                                <?php if($header['fix_theamount_total'] == 1){ echo 'checked'; } ?>>
+                                            <input type="checkbox" name="fix_theamount_total" id="fix_theamount_total"
+                                                value="1" <?php if($header['fix_theamount_total'] == 1){ echo 'checked'; } ?> >
 
                                             Fix The Amount
                                         </label>
                                     </div>
 
                                 </div>
+                                <div class="form-group col-md-3">
+                                    <label>Bayan Charges</label>
+                                    <input type="number" step="any" name="bayan_charges" id="bayan_charges" value="<?php echo $header['bayan_charges']?>"
+                                        class="form-control">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <!-- Total Amount WO Tax -->
+                                <div class="col-md-3 ">
+                                    <div class="form-group total-box shadow-sm">
+                                        <label>
+                                            <i class="fa fa-calculator text-success"></i>
+                                            Total Amount WO Tax
+                                        </label>
+                                        <input type="number" step="any" name="total_amount_wo_tax"
+                                            id="total_amount_wo_tax" class="form-control text-right" value="<?php echo $header['total_amount_wo_tax']?>"
+                                            readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 ">
+                                    <div class="form-group total-box shadow-sm">
+                                        <label>
+                                            <i class="fa fa-calculator text-success"></i>
+                                            Total Duty Amount
+                                        </label>
+                                        <input type="number" name="total_duty_amount" step="any" id="total_duty_amount"
+                                            class="form-control text-right total_duty_amount" value="<?php echo $header['total_duty_amount']?>" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 ">
+                                    <div class="form-group total-box shadow-sm">
+                                        <label>
+                                            <i class="fa fa-calculator text-success"></i>
+                                            Total VAT Amount
+                                        </label>
+                                        <input type="number" name="total_vat_amount" step="any" id="total_vat_amount"
+                                            class="form-control text-right" value="<?php echo $header['tax_amount']?>" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 ">
+                                    <div class="form-group total-box shadow-sm">
+                                        <label>
+                                            <i class="fa fa-calculator text-success"></i>
+                                            Total Amount With Tax
+                                        </label>
+                                        <input type="number" name="total_amount" step="any" id="total_amount"
+                                            class="form-control text-right font-weight-bold" value="<?php echo $header['total_amount'] ?>" readonly>
+                                    </div>
+                                </div>
+
+
                             </div>
 
-                            <!-- Total With Tax -->
-                            <div class="col-md-3 pull-right">
-                                <div class="form-group total-box shadow-sm">
-                                    <label>
-                                        <i class="fa fa-calculator text-success"></i>
-                                        Total Amount With Tax
-                                    </label>
-                                    <input type="number"
-                                        name="total_amount" step="any"
-                                        id="total_amount"
-                                        class="form-control text-right font-weight-bold" value="<?php echo $header['total_amount'];?>" readonly>
-                                </div>
-                            </div>
-                             <div class="col-md-3 pull-right">
-                                <div class="form-group total-box shadow-sm">
-                                    <label>
-                                        <i class="fa fa-calculator text-success"></i>
-                                        Total VAT Amount
-                                    </label>
-                                    <input type="number"
-                                        name="total_vat_amount" step="any"
-                                        id="total_vat_amount"
-                                        class="form-control text-right" value="<?php echo $header['tax_amount'];?>" readonly>
-                                </div>
-                            </div> 
-                            <!-- Total Amount WO Tax -->
-                            <div class="col-md-3 pull-right">
-                                <div class="form-group total-box shadow-sm">
-                                    <label>
-                                        <i class="fa fa-calculator text-success"></i>
-                                        Total Amount WO Tax
-                                    </label>
-                                    <input type="number" step="any"
-                                        name="total_amount_wo_tax"
-                                        id="total_amount_wo_tax"
-                                        class="form-control text-right" value="<?php echo $header['total_amount_wo_tax'];?>" readonly> 
-                                </div>
-                            </div>
+                        </fieldset>
 
-                            <!-- Total VAT -->
-                           
-                        </div>
+
+                        <fieldset
+                            style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px;">
+                            <legend>For Bank Book</legend>
+                            <div class="row">
+
+                                <div class="col-md-3">
+                                    <div class="form-group total-box shadow-sm">
+                                        <label>
+                                            <i class="fa fa-calculator text-success"></i>
+                                            Total Amount Before Coversion
+                                        </label>
+                                        <input type="number" step="any" name="total_amount_wo_convert"
+                                            id="total_amount_wo_convert" class="form-control text-right" value="<?php echo $header['total_amount_wo_convert'] ?>"
+                                            readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group total-box shadow-sm">
+                                        <label>
+                                            <i class="fa fa-calculator text-success"></i>
+                                            Coversion Rate
+                                        </label>
+                                        <input type="number" step="any" name="total_convert_amount"
+                                            id="total_convert_amount" class="form-control text-right" value="<?php echo $header['total_convert_amount'] ?>"
+                                            readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group total-box shadow-sm">
+                                        <label>
+                                            <i class="fa fa-calculator text-success"></i>
+                                            Total Amount After Coversion
+                                        </label>
+                                        <input type="number" step="any" name="total_amount_after_convert"
+                                            id="total_amount_after_convert" class="form-control text-right"
+                                            value="<?php echo $header['total_amount_after_convert'] ?>" readonly>
+                                    </div>
+                                </div>
+
+                            </div>
                         </fieldset>
                     </div>
                 </div>
+
             </div>
 
             <div class="box-footer text-right">
@@ -373,6 +559,51 @@
         </form>
     </div>
 </section>
+
+<div class="modal fade" id="add_modal" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <form method="post" action="" id="frmadd_dp">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h3 class="modal-title" id="scrollmodalLabel"><strong>Add Delivery Partner Info</strong></h3>
+                    <input type="hidden" name="mode" value="Add DP" />
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label>Delivery Partner Name</label>
+                            <input class="form-control" type="text" name="delivery_partner_name"
+                                id="delivery_partner_name" value="" placeholder="Delivery Partner Name"
+                                required="true">
+                        </div>
+
+                        <div class="form-group col-md-12">
+                            <label>Status</label>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="status" value="Active" checked="true" />
+                                    Active
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="status" value="InActive" /> InActive
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <input type="submit" name="Save" value="Save" class="btn btn-primary btn_dp_save" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
 <script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
@@ -436,217 +667,286 @@ legend {
 </style>
 
 <script>
-$(document).ready(function () {
+$(document).ready(function() {
 
-/* =====================================================
-   INITIAL TOTAL LOAD
-=====================================================*/
-setTimeout(function () {
-    $(".item-row").each(function () {
-        calculateRow($(this));
-    });
-    calculateTotalAmount();
-    toggleFixAmount(); // ✅ AUTO LOAD FIX AMOUNT
-}, 500);
-
-
-/* =====================================================
-   AUTOCOMPLETE ENQUIRY
-=====================================================*/
-$(".srch_enq_id").autocomplete({
-    source: function (request, response) {
-        $.ajax({
-            url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
-            type: "POST",
-            data: { search: request.term },
-            dataType: "json",
-            success: response
+    /* =====================================================
+       INITIAL TOTAL LOAD
+    =====================================================*/
+    setTimeout(function() {
+        $(".item-row").each(function() {
+            calculateRow($(this));
         });
-    },
-    minLength: 1,
-    select: function (event, ui) {
-        $("#srch_company_id").val(ui.item.company_id);
-        $("#srch_customer_id")
-            .val(ui.item.customer_id)
-            .trigger("change");
-
-        load_tender_enq(ui.item.tender_enquiry_id);
-    }
-});
-
-
-/* =====================================================
-   LOAD TENDER ENQUIRY
-=====================================================*/
-function load_tender_enq(t_enq_id="") {
-
-    const customer_id = $("#srch_customer_id").val();
-    const company_id  = $("#srch_company_id").val();
-    const $drop = $("#srch_tender_enquiry_id");
-
-    $drop.html('<option value="">Select Enquiry</option>')
-         .prop("disabled", true);
-
-    if(!customer_id || !company_id) return;
-
-    $.post(
-        "<?php echo site_url('vendor/get_tender_enquiries_by_customer');?>",
-        {company_id,customer_id},
-        function(res){
-
-            $drop.prop("disabled",false);
-
-            $.each(res,function(i,row){
-                $drop.append(
-                    `<option value="${row.tender_enquiry_id}">
-                        ${row.display}
-                     </option>`
-                );
-            });
-
-            if(t_enq_id){
-                $drop.val(t_enq_id).trigger("change");
-            }
-        },
-        "json"
-    );
-}
-
-
-/* =====================================================
-   ROW INPUT CHANGE
-=====================================================*/
-$(document).on(
-"input change",
-".rate-input,.gst-input,.qty-input,.item-check,.conversion_rate,.duty",
-function () {
-
-    const $row = $(this).closest(".item-row");
-
-    calculateRow($row);
-    calculateTotalAmount();
-});
-
-
-/* =====================================================
-   FIX AMOUNT CHECKBOX
-=====================================================*/
-$(document).on("change","#fix_theamount_total",function(){
-    toggleFixAmount();
-});
-
-
-/* =====================================================
-   FIX AMOUNT FUNCTION (AUTO + CHANGE)
-=====================================================*/
-function toggleFixAmount(){
-
-    if($("#fix_theamount_total").is(":checked")){
-
-        $("#total_amount").data("fixed",true);
-        $("#total_vat_amount").data("fixed",true);
-        $("#total_amount_wo_tax").data("fixed",true);
-
-        $("#total_amount,#total_vat_amount,#total_amount_wo_tax")
-            .prop("readonly",false)
-            .css("background","#fff");
-
-    }else{
-
-        $("#total_amount").data("fixed",false);
-        $("#total_vat_amount").data("fixed",false);
-        $("#total_amount_wo_tax").data("fixed",false);
-
-        $("#total_amount,#total_vat_amount,#total_amount_wo_tax")
-            .prop("readonly",true)
-            .css("background","#eee");
-
         calculateTotalAmount();
-    }
-}
+        toggleFixAmount(); // ✅ AUTO LOAD FIX AMOUNT
+    }, 500);
 
 
-/* =====================================================
-   ROW CALCULATION
-=====================================================*/
-function calculateRow($row){
+    /* =====================================================
+       AUTOCOMPLETE ENQUIRY
+    =====================================================*/
+    $(".srch_enq_id").autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
+                type: "POST",
+                data: {
+                    search: request.term
+                },
+                dataType: "json",
+                success: response
+            });
+        },
+        minLength: 1,
+        select: function(event, ui) {
+            $("#srch_company_id").val(ui.item.company_id);
+            $("#srch_customer_id")
+                .val(ui.item.customer_id)
+                .trigger("change");
 
-    const qty   = parseFloat($row.find(".qty-input").val())||0;
-    const rate  = parseFloat($row.find(".rate-input").val())||0;
-    const gst   = parseFloat($row.find(".gst-input").val())||0;
-    const cRate = parseFloat($row.find(".conversion_rate").val())||1;
-    const duty  = parseFloat($row.find(".duty").val())||0;
-
-    let ac_amt = qty*rate*cRate;
-
-    let amountWithoutTax =
-        ac_amt + ((ac_amt*duty)/100);
-
-    let amountWithTax =
-        amountWithoutTax +
-        (amountWithoutTax*gst/100);
-
-    let gstAmount =
-        amountWithTax-amountWithoutTax;
-
-    $row.find(".act_amt")
-        .val(ac_amt.toFixed(3));
-
-    $row.find(".amountwotx")
-        .val(amountWithoutTax.toFixed(3));
-
-    $row.find(".gst-amount-input")
-        .val(gstAmount.toFixed(3));
-
-    $row.find(".amount-input")
-        .val(amountWithTax.toFixed(3));
-}
-
-
-/* =====================================================
-   TOTAL CALCULATION
-=====================================================*/
-function calculateTotalAmount(){
-
-    if($("#fix_theamount_total").is(":checked")){
-        return;
-    }
-
-    let total=0;
-    let total_wot=0;
-
-    $(".item-row").each(function(){
-
-        if($(this).find(".item-check").is(":checked")){
-
-            total+=parseFloat(
-                $(this).find(".amount-input").val()
-            )||0;
-
-            total_wot+=parseFloat(
-                $(this).find(".amountwotx").val()
-            )||0;
+            load_tender_enq(ui.item.tender_enquiry_id);
         }
     });
 
-    let totalVat = total-total_wot;
 
-    $("#total_amount").val(total.toFixed(3));
-    $("#total_amount_wo_tax").val(total_wot.toFixed(3));
-    $("#total_vat_amount").val(totalVat.toFixed(3));
+    /* =====================================================
+       LOAD TENDER ENQUIRY
+    =====================================================*/
+    function load_tender_enq(t_enq_id = "") {
 
-    $(".total_amount_hidden")
-        .val(total.toFixed(3));
+        const customer_id = $("#srch_customer_id").val();
+        const company_id = $("#srch_company_id").val();
+        const $drop = $("#srch_tender_enquiry_id");
 
-    $(".total_amount_wo_tax_hidden")
-        .val(total_wot.toFixed(3));
+        $drop.html('<option value="">Select Enquiry</option>')
+            .prop("disabled", true);
 
-    $(".total_vat_amount_hidden")
-        .val(totalVat.toFixed(3));
-}
+        if (!customer_id || !company_id) return;
+
+        $.post(
+            "<?php echo site_url('vendor/get_tender_enquiries_by_customer');?>", {
+                company_id,
+                customer_id
+            },
+            function(res) {
+
+                $drop.prop("disabled", false);
+
+                $.each(res, function(i, row) {
+                    $drop.append(
+                        `<option value="${row.tender_enquiry_id}">
+                        ${row.display}
+                     </option>`
+                    );
+                });
+
+                if (t_enq_id) {
+                    $drop.val(t_enq_id).trigger("change");
+                }
+            },
+            "json"
+        );
+    }
 
 
- 
+    /* =====================================================
+       ROW INPUT CHANGE
+    =====================================================*/
+    $(document).on(
+        "input change",
+        ".rate-input,.gst-input,.qty-input,.item-check,.conversion_rate,.duty",
+        function() {
+
+            const $row = $(this).closest(".item-row");
+
+            calculateRow($row);
+            calculateTotalAmount();
+        });
+
+
+    /* =====================================================
+       FIX AMOUNT CHECKBOX
+    =====================================================*/
+    $(document).on("change", "#fix_theamount_total", function() {
+        toggleFixAmount();
+    });
+
+
+    /* =====================================================
+       FIX AMOUNT FUNCTION (AUTO + CHANGE)
+    =====================================================*/
+    function toggleFixAmount() {
+
+        if ($("#fix_theamount_total").is(":checked")) {
+
+            $("#total_amount").data("fixed", true);
+            $("#total_vat_amount").data("fixed", true);
+            $("#total_amount_wo_tax").data("fixed", true);
+
+            $("#total_amount,#total_vat_amount,#total_amount_wo_tax")
+                .prop("readonly", false)
+                .css("background", "#fff");
+
+        } else {
+
+            $("#total_amount").data("fixed", false);
+            $("#total_vat_amount").data("fixed", false);
+            $("#total_amount_wo_tax").data("fixed", false);
+
+            $("#total_amount,#total_vat_amount,#total_amount_wo_tax")
+                .prop("readonly", true)
+                .css("background", "#eee");
+
+            calculateTotalAmount();
+        }
+    }
+
+
+    /* =====================================================
+       ROW CALCULATION
+    =====================================================*/
+    function calculateRow($row) {
+
+        const qty = parseFloat($row.find(".qty-input").val()) || 0;
+        const rate = parseFloat($row.find(".rate-input").val()) || 0;
+        const gst = parseFloat($row.find(".gst-input").val()) || 0;
+        const cRate = parseFloat($row.find(".conversion_rate").val()) || 1;
+        const duty = parseFloat($row.find(".duty").val()) || 0;
+
+        let duty_amt = 0;
+        
+
+        let ac_amt = qty * rate * cRate;
+
+        duty_amt = ((ac_amt * duty) / 100);
+
+        let amountWithoutTax =
+            ac_amt + ((ac_amt * duty) / 100);
+
+        let amountWithTax =
+            amountWithoutTax +
+            (amountWithoutTax * gst / 100);
+
+        let gstAmount =
+            amountWithTax - amountWithoutTax;
+
+        $row.find(".act_amt")
+            .val(ac_amt.toFixed(3));
+
+        $row.find(".amountwotx")
+            .val(amountWithoutTax.toFixed(3));
+
+        $row.find(".gst-amount-input")
+            .val(gstAmount.toFixed(3));
+
+        $row.find(".amount-input")
+            .val(amountWithTax.toFixed(3));
+        
+        $row.find(".duty_amount").val(duty_amt.toFixed(3));
+            
+    }
+
+
+    /* =====================================================
+       TOTAL CALCULATION
+    =====================================================*/
+    function calculateTotalAmount() {
+
+        if ($("#fix_theamount_total").is(":checked")) {
+            return;
+        }
+
+        let total = 0;
+        let total_wot = 0;
+        let total_duty_amt = 0;
+        let c_rate = 0;
+        let bf_c_amt = 0;
+
+        $(".item-row").each(function() {
+
+            if ($(this).find(".item-check").is(":checked")) {
+
+                total += parseFloat(
+                    $(this).find(".amount-input").val()
+                ) || 0;
+
+                total_wot += parseFloat(
+                    $(this).find(".amountwotx").val()
+                ) || 0;
+
+                total_duty_amt += parseFloat($(this).find(".duty").val()) || 0; 
+                bf_c_amt += (parseFloat($(this).find(".qty-input").val()) * parseFloat($(this).find(".rate-input").val()));
+                c_rate = parseFloat($(this).find(".conversion_rate").val()) || 1;
+            }
+        });
+
+        let totalVat = total - total_wot;
+
+        $("#total_amount").val(total.toFixed(3));
+        $("#total_amount_wo_tax").val(total_wot.toFixed(3));
+        $("#total_vat_amount").val(totalVat.toFixed(3));
+
+        $(".total_amount_hidden")
+            .val(total.toFixed(3));
+
+        $(".total_amount_wo_tax_hidden")
+            .val(total_wot.toFixed(3));
+
+        $(".total_vat_amount_hidden")
+            .val(totalVat.toFixed(3));
+
+        $(".total_duty_amount").val(total_duty_amt.toFixed(3)); 
+
+        $("#total_amount_wo_convert").val(bf_c_amt.toFixed(3)); 
+
+        $("#total_convert_amount").val(c_rate.toFixed(4)); 
+
+        $("#total_amount_after_convert").val((bf_c_amt * c_rate).toFixed(3));     
+    }
+
+
+    $("#frmadd_dp").on("submit", function (e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: "<?= base_url('vendor/delivery_partner_add_ajax'); ?>",
+            type: "POST",
+            data: $(this).serialize(),
+            dataType: "json",
+            beforeSend: function () {
+                $(".btn_dp_save").prop("disabled", true).val("Saving...");
+            },
+            success: function (response) {
+
+                if (response.status == "success") {
+
+                    // ✅ Add new option into dropdown
+                    $("#delivery_partner_id").append(
+                        $("<option>", {
+                            value: response.id,
+                            text: response.name
+                        })
+                    );
+
+                    // ✅ Select newly added option
+                    $("#delivery_partner_id").val(response.id);
+
+                    // Close modal
+                    $("#add_modal").modal("hide");
+
+                    // Reset form
+                    $("#frmadd_dp")[0].reset();
+
+                } else {
+                    alert(response.message);
+                }
+
+                $(".btn_dp_save").prop("disabled", false).val("Save");
+            }
+        });
+
+    });
+
+
 
 });
 </script>

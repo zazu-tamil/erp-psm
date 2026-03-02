@@ -448,6 +448,12 @@
                   name="duty[]"
                   class="form-control duty"
                   value="0">
+                  <i class="text-sm">Duty Amt</i>
+                  <input type="number"
+                    step="any"
+                    name="duty_amount[]"
+                    class="form-control duty_amount"
+                    value="0" readonly>
               </td>
               <td>
                   <input type="number"
@@ -487,7 +493,7 @@
     });
 
     // Form submit validation
-    $("form").on("submit", function () {
+    $("#frmadd").on("submit", function () {
       if ($(".item-check:checked").length === 0) {
         alert("Please select at least one item");
         return false;
@@ -512,18 +518,20 @@
     function toggleFixAmount() {
       if ($("#fix_theamount_total").is(":checked")) {
         $("#total_amount").data("fixed", true);
+        $("#total_duty_amount").data("fixed", true);
         $("#total_vat_amount").data("fixed", true);
         $("#total_amount_wo_tax").data("fixed", true);
 
-        $("#total_amount,#total_vat_amount,#total_amount_wo_tax")
+        $("#total_amount,#total_vat_amount,#total_amount_wo_tax,#total_duty_amount")
           .prop("readonly", false)
           .css("background", "#fff");
       } else {
         $("#total_amount").data("fixed", false);
+        $("#total_duty_amount").data("fixed", false);
         $("#total_vat_amount").data("fixed", false);
         $("#total_amount_wo_tax").data("fixed", false);
 
-        $("#total_amount,#total_vat_amount,#total_amount_wo_tax")
+        $("#total_amount,#total_vat_amount,#total_amount_wo_tax,#total_duty_amount")
           .prop("readonly", true)
           .css("background", "#eee");
 
@@ -537,8 +545,12 @@
       const gst = parseFloat($row.find(".gst-input").val()) || 0;
       const cRate = parseFloat($row.find(".conversion_rate").val()) || 1;
       const duty = parseFloat($row.find(".duty").val()) || 0;
+      let duty_amt = 0;
 
       let ac_amt = qty * rate * cRate;
+
+      duty_amt = ((ac_amt * duty) / 100);
+
 
       let amountWithoutTax = ac_amt + (ac_amt * duty) / 100;
 
@@ -553,6 +565,8 @@
       $row.find(".gst-amount-input").val(gstAmount.toFixed(3));
 
       $row.find(".amount-input").val(amountWithTax.toFixed(3));
+
+      $row.find(".duty_amount").val(duty_amt.toFixed(3));
     }
 
     function calculateTotalAmount() {
@@ -562,12 +576,19 @@
 
       let total = 0;
       let total_wot = 0;
+      let total_duty_amt = 0;
+      let c_rate = 0;
+      let bf_c_amt = 0;
 
       $(".item-row").each(function () {
         if ($(this).find(".item-check").is(":checked")) {
           total += parseFloat($(this).find(".amount-input").val()) || 0;
 
           total_wot += parseFloat($(this).find(".amountwotx").val()) || 0;
+
+          total_duty_amt += parseFloat($(this).find(".duty_amount").val()) || 0; 
+          bf_c_amt += (parseFloat($(this).find(".qty-input").val()) * parseFloat($(this).find(".rate-input").val()));
+          c_rate = parseFloat($(this).find(".conversion_rate").val()) || 1;
         }
       });
 
@@ -582,6 +603,72 @@
       $(".total_amount_wo_tax_hidden").val(total_wot.toFixed(3));
 
       $(".total_vat_amount_hidden").val(totalVat.toFixed(3));
+
+      $(".total_duty_amount").val(total_duty_amt.toFixed(3)); 
+
+      $("#total_amount_wo_convert").val(bf_c_amt.toFixed(3)); 
+
+      $("#total_convert_amount").val(c_rate.toFixed(4)); 
+
+      $("#total_amount_after_convert").val((bf_c_amt * c_rate).toFixed(3)); 
+
+
     }
+
+
+
+    $("#frmadd_dp").on("submit", function (e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: "<?= base_url('vendor/delivery_partner_add_ajax'); ?>",
+            type: "POST",
+            data: $(this).serialize(),
+            dataType: "json",
+            beforeSend: function () {
+                $(".btn_dp_save").prop("disabled", true).val("Saving...");
+            },
+            success: function (response) {
+
+                if (response.status == "success") {
+
+                    // ✅ Add new option into dropdown
+                    $("#delivery_partner_id").append(
+                        $("<option>", {
+                            value: response.id,
+                            text: response.name
+                        })
+                    );
+
+                    // ✅ Select newly added option
+                    $("#delivery_partner_id").val(response.id);
+
+                    // Close modal
+                    $("#add_modal").modal("hide");
+
+                    // Reset form
+                    $("#frmadd_dp")[0].reset();
+
+                } else {
+                    alert(response.message);
+                }
+
+                $(".btn_dp_save").prop("disabled", false).val("Save");
+            }
+        });
+
+    });
+
+    $("#toggle_dp_bill").change(function () {
+        if ($(this).is(":checked")) {
+            $(this).closest(".box").find(".box-body").slideDown();
+        } else {
+            $(this).closest(".box").find(".box-body").slideUp();
+        }
+    });
+
+    $("#toggle_dp_bill").trigger("change");
+
+
   });
 </script>

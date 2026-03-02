@@ -3768,6 +3768,23 @@ class Vendor extends CI_Controller
             }
 
 
+          /*  ALTER TABLE `vendor_purchase_invoice_info`
+                ADD COLUMN `total_duty_amount` DECIMAL(14,3) NULL DEFAULT NULL AFTER `total_amount_wo_tax`,
+                ADD COLUMN `delivery_partner_id` INT NULL DEFAULT NULL AFTER `door_delivery`,
+                ADD COLUMN `delivery_partner_bill_no` VARCHAR(50) NULL DEFAULT NULL AFTER `delivery_partner_id`,
+                ADD COLUMN `delivery_partner_bill_date` DATE NULL DEFAULT NULL AFTER `delivery_partner_bill_no`,
+                ADD COLUMN `dp_bill_entry_date` DATE NULL DEFAULT NULL AFTER `delivery_partner_bill_date`,
+                ADD COLUMN `dp_vat_payer_purchase_grp` VARCHAR(200) NULL DEFAULT NULL AFTER `dp_bill_entry_date`,
+                ADD COLUMN `dp_declaration_no` VARCHAR(50) NULL DEFAULT NULL AFTER `dp_vat_payer_purchase_grp`,
+                ADD COLUMN `dp_vat_amount` DECIMAL(10,3) NULL DEFAULT NULL AFTER `dp_declaration_no`,
+                ADD COLUMN `dp_duty_amount` DECIMAL(10,3) NULL DEFAULT NULL AFTER `dp_vat_amount`,
+                ADD COLUMN `dp_admin_other_fee` DECIMAL(10,3) NULL DEFAULT NULL AFTER `dp_duty_amount`,
+                ADD COLUMN `dp_admin_other_fee_vat_amount` DECIMAL(10,3) NULL DEFAULT NULL AFTER `dp_admin_other_fee`,
+                ADD COLUMN `bayan_charges` DECIMAL(10,3) NULL DEFAULT NULL AFTER `dp_admin_other_fee_vat_amount`,
+                ADD COLUMN `total_amount_wo_convert` DECIMAL(10,3) NULL DEFAULT NULL AFTER `bayan_charges`,
+                ADD COLUMN `total_convert_amount` DECIMAL(10,5) NULL DEFAULT NULL AFTER `total_amount_wo_convert`,
+                ADD COLUMN `total_amount_after_convert` DECIMAL(10,3) NULL DEFAULT NULL AFTER `total_convert_amount`; */
+
             $header = [
                 'company_id' => $this->input->post('srch_company_id'),
                 'customer_id' => $this->input->post('srch_customer_id'),
@@ -3782,12 +3799,27 @@ class Vendor extends CI_Controller
                 'declaration_no' => $this->input->post('declaration_no'),
                 'declaration_date' => $this->input->post('declaration_date'),
                 'total_amount_wo_tax' => $this->input->post('total_amount_wo_tax'),
+                'total_duty_amount' => $this->input->post('total_duty_amount'),
                 'tax_amount' => $this->input->post('total_vat_amount'),
                 'total_amount' => $this->input->post('total_amount'),
                 'door_delivery' => $this->input->post('door_delivery'),
+                'delivery_partner_id' => $this->input->post('delivery_partner_id'),
+                'delivery_partner_bill_no' => $this->input->post('delivery_partner_bill_no'),
+                'delivery_partner_bill_date' => $this->input->post('delivery_partner_bill_date'),
+                'dp_bill_entry_date' => $this->input->post('dp_bill_entry_date'),
+                'dp_vat_payer_purchase_grp' => $this->input->post('dp_vat_payer_purchase_grp'),
+                'dp_declaration_no' => $this->input->post('dp_declaration_no'),
+                'dp_vat_amount' => $this->input->post('dp_vat_amount'),
+                'dp_duty_amount' => $this->input->post('dp_duty_amount'),
+                'dp_admin_other_fee' => $this->input->post('dp_admin_other_fee'),
+                'dp_admin_other_fee_vat_amount' => $this->input->post('dp_admin_other_fee_vat_amount'),
+                'bayan_charges' => $this->input->post('bayan_charges'),
+                'total_amount_wo_convert' => $this->input->post('total_amount_wo_convert'),
+                'total_convert_amount' => $this->input->post('total_convert_amount'),
+                'total_amount_after_convert' => $this->input->post('total_amount_after_convert'),
                 'fix_theamount_total' => $this->input->post('fix_theamount_total'),
                 'remarks' => $this->input->post('remarks'),
-                'purchase_bill_upload' => 'vendor-pur-invoice-documents/' . $purchase_bill_upload,
+                'purchase_bill_upload' => ($purchase_bill_upload != '' ? 'vendor-pur-invoice-documents/' . $purchase_bill_upload : ''),
                 'status' => $this->input->post('status'),
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s'),
@@ -3919,7 +3951,19 @@ class Vendor extends CI_Controller
             $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
         }
 
-
+        $data['delivery_partner_opt'] = [];
+        $sql = "
+            SELECT 
+            delivery_partner_id,
+            delivery_partner_name 
+            FROM delivery_partner_info 
+            WHERE status = 'Active' 
+            ORDER BY delivery_partner_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['delivery_partner_opt'][$row['delivery_partner_id']] = $row['delivery_partner_name'];
+        }
 
         $this->load->view('page/vendor/vendor-purchase-bill-add', $data);
     }
@@ -4224,6 +4268,21 @@ class Vendor extends CI_Controller
                 'total_amount_wo_tax' => $this->input->post('total_amount_wo_tax'),
                 'tax_amount' => $this->input->post('total_vat_amount'),
                 'total_amount' => $this->input->post('total_amount'),
+                'total_duty_amount' => $this->input->post('total_duty_amount'),
+                'delivery_partner_id' => $this->input->post('delivery_partner_id'),
+                'delivery_partner_bill_no' => $this->input->post('delivery_partner_bill_no'),
+                'delivery_partner_bill_date' => $this->input->post('delivery_partner_bill_date'),
+                'dp_bill_entry_date' => $this->input->post('dp_bill_entry_date'),
+                'dp_vat_payer_purchase_grp' => $this->input->post('dp_vat_payer_purchase_grp'),
+                'dp_declaration_no' => $this->input->post('dp_declaration_no'),
+                'dp_vat_amount' => $this->input->post('dp_vat_amount'),
+                'dp_duty_amount' => $this->input->post('dp_duty_amount'),
+                'dp_admin_other_fee' => $this->input->post('dp_admin_other_fee'),
+                'dp_admin_other_fee_vat_amount' => $this->input->post('dp_admin_other_fee_vat_amount'),
+                'bayan_charges' => $this->input->post('bayan_charges'),
+                'total_amount_wo_convert' => $this->input->post('total_amount_wo_convert'),
+                'total_convert_amount' => $this->input->post('total_convert_amount'),
+                'total_amount_after_convert' => $this->input->post('total_amount_after_convert'),
                 'fix_theamount_total' => $this->input->post('fix_theamount_total'),
                 'door_delivery' => $this->input->post('door_delivery'),
                 'remarks' => $this->input->post('remarks'),
@@ -4532,6 +4591,20 @@ class Vendor extends CI_Controller
             $data['vendor_po_opt'][$row['vendor_po_id']] = $row['po_no'];
         }
 
+        $data['delivery_partner_opt'] = [];
+        $sql = "
+            SELECT 
+            delivery_partner_id,
+            delivery_partner_name 
+            FROM delivery_partner_info 
+            WHERE status = 'Active' 
+            ORDER BY delivery_partner_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['delivery_partner_opt'][$row['delivery_partner_id']] = $row['delivery_partner_name'];
+        }
+
         $this->load->view('page/vendor/vendor-purchase-bill-edit', $data);
     }
 
@@ -4710,5 +4783,31 @@ class Vendor extends CI_Controller
         $query = $this->db->query($sql, [$vendor_quote_id]);
         $result = $query->result_array();
         echo json_encode($result);
+    }
+
+    public function delivery_partner_add_ajax()
+    {
+         $data = array(
+            'delivery_partner_name' => $this->input->post('delivery_partner_name'),
+            'status' => $this->input->post('status'), 
+        );
+
+        $this->db->insert('delivery_partner_info', $data);
+
+        if ($this->db->affected_rows() > 0) {
+
+            $insert_id = $this->db->insert_id();
+
+            echo json_encode([
+                'status' => 'success',
+                'id'     => $insert_id,
+                'name'   => $data['delivery_partner_name']
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Database Error'
+            ]);
+        }
     }
 }
