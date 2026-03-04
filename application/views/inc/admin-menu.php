@@ -187,14 +187,14 @@ $vendor_m_grp = [
 ?>
 
 <!-- Vendor -->
-<li class="header">VENDOR</li>
+<li class="header">SUPPLIER</li>
 
 <li class="treeview 
     <?= in_array($current_page, $vendor_m_grp) ? 'active' : '' ?>">
 
     <a href="#">
         <i class="fa fa-industry"></i>
-        <span>Vendor</span>
+        <span>Supplier</span>
         <span class="pull-right-container">
             <i class="fa fa-angle-left pull-right"></i>
         </span>
@@ -206,16 +206,16 @@ $vendor_m_grp = [
         <li
             class="treeview <?= in_array($current_page, ['vendor-rate-enquiry', 'vendor-rate-enquiry-list', 'vendor-rate-enquiry-edit']) ? 'active' : '' ?>">
             <a href="#">
-                <i class="fa fa-envelope"></i> Vendor Enquiry
+                <i class="fa fa-envelope"></i> Supplier Enquiry
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
             </a>
             <ul class="treeview-menu">
                 <li class="<?= ($current_page === 'vendor-rate-enquiry') ? 'active' : '' ?>">
-                    <a href="<?= site_url('vendor-rate-enquiry') ?>"><i class="fa fa-plus-square"></i> Add Vendor
+                    <a href="<?= site_url('vendor-rate-enquiry') ?>"><i class="fa fa-plus-square"></i> Add Supplier Enquiry
                         Enquiry</a>
                 </li>
                 <li class="<?= ($current_page === 'vendor-rate-enquiry-list') ? 'active' : '' ?>">
-                    <a href="<?= site_url('vendor-rate-enquiry-list') ?>"><i class="fa fa-list"></i> Vendor Enquiry
+                    <a href="<?= site_url('vendor-rate-enquiry-list') ?>"><i class="fa fa-list"></i> Supplier Enquiry
                         List</a>
                 </li>
             </ul>
@@ -225,16 +225,16 @@ $vendor_m_grp = [
         <li
             class="treeview <?= in_array($current_page, ['vendor-quotation-add', 'vendor-quotation-list', 'vendor-quotation-edit']) ? 'active' : '' ?>">
             <a href="#">
-                <i class="fa fa-file-text-o"></i> Vendor Quotation
+                <i class="fa fa-file-text-o"></i> Supplier Quotation
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
             </a>
             <ul class="treeview-menu">
                 <li class="<?= ($current_page === 'vendor-quotation-add') ? 'active' : '' ?>">
-                    <a href="<?= site_url('vendor-quotation-add') ?>"><i class="fa fa-plus-square"></i> Add Vendor
+                    <a href="<?= site_url('vendor-quotation-add') ?>"><i class="fa fa-plus-square"></i> Add Supplier
                         Quotation</a>
                 </li>
                 <li class="<?= ($current_page === 'vendor-quotation-list') ? 'active' : '' ?>">
-                    <a href="<?= site_url('vendor-quotation-list') ?>"><i class="fa fa-list"></i> Vendor Quotation
+                    <a href="<?= site_url('vendor-quotation-list') ?>"><i class="fa fa-list"></i> Supplier Quotation
                         List</a>
                 </li>
             </ul>
@@ -244,15 +244,15 @@ $vendor_m_grp = [
         <li
             class="treeview <?= in_array($current_page, ['vendor-po-add', 'vendor-po-list', 'vendor-po-view', 'vendor-po-edit']) ? 'active' : '' ?>">
             <a href="#">
-                <i class="fa fa-files-o"></i> Vendor PO
+                <i class="fa fa-files-o"></i> Supplier PO
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
             </a>
             <ul class="treeview-menu">
                 <li class="<?= ($current_page === 'vendor-po-add') ? 'active' : '' ?>">
-                    <a href="<?= site_url('vendor-po-add') ?>"><i class="fa fa-plus-square"></i> Add Vendor PO</a>
+                    <a href="<?= site_url('vendor-po-add') ?>"><i class="fa fa-plus-square"></i> Add Supplier PO</a>
                 </li>
                 <li class="<?= ($current_page === 'vendor-po-list') ? 'active' : '' ?>">
-                    <a href="<?= site_url('vendor-po-list') ?>"><i class="fa fa-list"></i> Vendor PO List</a>
+                    <a href="<?= site_url('vendor-po-list') ?>"><i class="fa fa-list"></i> Supplier PO List</a>
                 </li>
             </ul>
         </li>
@@ -260,16 +260,16 @@ $vendor_m_grp = [
         <li
             class="treeview <?= in_array($current_page, ['vendor-pur-inward-add', 'vendor-pur-inward-list', 'vendor-pur-inward-edit']) ? 'active' : '' ?>">
             <a href="#">
-                <i class="fa fa-files-o"></i> Vendor Inward
+                <i class="fa fa-files-o"></i> Supplier Inward
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
             </a>
             <ul class="treeview-menu">
                 <li class="<?= ($current_page === 'vendor-pur-inward-add') ? 'active' : '' ?>">
-                    <a href="<?= site_url('vendor-pur-inward-add') ?>"><i class="fa fa-plus-square"></i> Add Vendor
+                    <a href="<?= site_url('vendor-pur-inward-add') ?>"><i class="fa fa-plus-square"></i> Add Supplier
                         Inward</a>
                 </li>
                 <li class="<?= ($current_page === 'vendor-pur-inward-list') ? 'active' : '' ?>">
-                    <a href="<?= site_url('vendor-pur-inward-list') ?>"><i class="fa fa-list"></i> Vendor Inward
+                    <a href="<?= site_url('vendor-pur-inward-list') ?>"><i class="fa fa-list"></i> Supplier Inward
                         List</a>
                 </li>
             </ul>
@@ -278,16 +278,16 @@ $vendor_m_grp = [
         <li
             class="treeview <?= in_array($current_page, ['vendor-purchase-bill-add', 'vendor-purchase-bill-list', 'vendor-purchase-bill-edit']) ? 'active' : '' ?>">
             <a href="#">
-                <i class="fa fa-files-o"></i> Vendor Invoice/Bill
+                <i class="fa fa-files-o"></i> Supplier Invoice/Bill
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
             </a>
             <ul class="treeview-menu">
                 <li class="<?= ($current_page === 'vendor-purchase-bill-add') ? 'active' : '' ?>">
-                    <a href="<?= site_url('vendor-purchase-bill-add') ?>"><i class="fa fa-plus-square"></i> Add Vendor
+                    <a href="<?= site_url('vendor-purchase-bill-add') ?>"><i class="fa fa-plus-square"></i> Add Supplier
                         Bill Entry</a>
                 </li>
                 <li class="<?= ($current_page === 'vendor-purchase-bill-list') ? 'active' : '' ?>">
-                    <a href="<?= site_url('vendor-purchase-bill-list') ?>"><i class="fa fa-list"></i> Vendor Bill
+                    <a href="<?= site_url('vendor-purchase-bill-list') ?>"><i class="fa fa-list"></i> Supplier Bill
                         List</a>
                 </li>
             </ul>

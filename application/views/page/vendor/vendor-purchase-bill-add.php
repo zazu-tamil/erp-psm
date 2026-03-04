@@ -205,7 +205,7 @@
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label>VAT Payer Purchase</label>
-                                    <?php echo form_dropdown('dp_vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('dp_vat_payer_purchase_grp'), 'id="vat_payer_purchase_grp" class="form-control" required'); ?>
+                                    <?php echo form_dropdown('dp_vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('dp_vat_payer_purchase_grp'), 'id="vat_payer_purchase_grp" class="form-control"'); ?>
                                 </div>
 
                                 <div class="form-group col-md-3">

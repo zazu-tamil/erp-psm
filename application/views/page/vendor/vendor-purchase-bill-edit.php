@@ -234,7 +234,7 @@
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label>VAT Payer Purchase</label>
-                                    <?php echo form_dropdown('dp_vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('dp_vat_payer_purchase_grp', $header['dp_vat_payer_purchase_grp']), 'id="vat_payer_purchase_grp" class="form-control" required'); ?>
+                                    <?php echo form_dropdown('dp_vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('dp_vat_payer_purchase_grp', $header['dp_vat_payer_purchase_grp']), 'id="vat_payer_purchase_grp" class="form-control"'); ?>
                                 </div>
 
                                 <div class="form-group col-md-3">
@@ -781,8 +781,9 @@ $(document).ready(function() {
             $("#total_amount").data("fixed", true);
             $("#total_vat_amount").data("fixed", true);
             $("#total_amount_wo_tax").data("fixed", true);
+            
 
-            $("#total_amount,#total_vat_amount,#total_amount_wo_tax")
+            $("#total_amount,#total_vat_amount,#total_amount_wo_tax,#total_duty_amount,#total_amount_wo_convert,#total_convert_amount,#total_amount_after_convert")
                 .prop("readonly", false)
                 .css("background", "#fff");
 
@@ -792,7 +793,8 @@ $(document).ready(function() {
             $("#total_vat_amount").data("fixed", false);
             $("#total_amount_wo_tax").data("fixed", false);
 
-            $("#total_amount,#total_vat_amount,#total_amount_wo_tax")
+            //$("#total_amount,#total_vat_amount,#total_amount_wo_tax")
+            $("#total_amount,#total_vat_amount,#total_amount_wo_tax,#total_duty_amount,#total_amount_wo_convert,#total_convert_amount,#total_amount_after_convert")
                 .prop("readonly", true)
                 .css("background", "#eee");
 

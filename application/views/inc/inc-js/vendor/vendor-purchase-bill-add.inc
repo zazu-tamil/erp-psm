@@ -522,7 +522,11 @@
         $("#total_vat_amount").data("fixed", true);
         $("#total_amount_wo_tax").data("fixed", true);
 
-        $("#total_amount,#total_vat_amount,#total_amount_wo_tax,#total_duty_amount")
+        $("#total_amount_wo_convert").data("fixed", true);
+        $("#total_convert_amount").data("fixed", true);
+        $("#total_amount_after_convert").data("fixed", true);
+
+        $("#total_amount,#total_vat_amount,#total_amount_wo_tax,#total_duty_amount,#total_amount_wo_convert,#total_convert_amount,#total_amount_after_convert")
           .prop("readonly", false)
           .css("background", "#fff");
       } else {
@@ -531,7 +535,11 @@
         $("#total_vat_amount").data("fixed", false);
         $("#total_amount_wo_tax").data("fixed", false);
 
-        $("#total_amount,#total_vat_amount,#total_amount_wo_tax,#total_duty_amount")
+        $("#total_amount_wo_convert").data("fixed", false);
+        $("#total_convert_amount").data("fixed", false);
+        $("#total_amount_after_convert").data("fixed", false);
+
+        $("#total_amount,#total_vat_amount,#total_amount_wo_tax,#total_duty_amount,#total_amount_wo_convert,#total_convert_amount,#total_amount_after_convert")
           .prop("readonly", true)
           .css("background", "#eee");
 
@@ -662,8 +670,10 @@
     $("#toggle_dp_bill").change(function () {
         if ($(this).is(":checked")) {
             $(this).closest(".box").find(".box-body").slideDown();
+            $('#dp_vat_payer_purchase_grp').attr('required', true);
         } else {
             $(this).closest(".box").find(".box-body").slideUp();
+            $('#dp_vat_payer_purchase_grp').removeAttr('required');
         }
     });
 

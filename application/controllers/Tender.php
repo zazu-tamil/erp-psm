@@ -553,7 +553,7 @@ class Tender extends CI_Controller
                 ON a.customer_contact_id = d.customer_contact_id AND d.status = 'Active'
             WHERE a.status != 'Delete' 
             AND $where    
-            ORDER BY a.tender_enquiry_id DESC
+            ORDER BY a.enquiry_date desc , a.tender_enquiry_id DESC
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
         $query = $this->db->query($sql);
@@ -1482,7 +1482,7 @@ class Tender extends CI_Controller
             LEFT JOIN tender_enquiry_info d ON a.tender_enquiry_id = d.tender_enquiry_id AND d.status = 'Active'
             WHERE  a.status != 'Delete'
             and  $where 
-            ORDER BY a.tender_quotation_id DESC
+            ORDER BY a.quote_date desc , a.tender_quotation_id DESC
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
         $query = $this->db->query($sql);
@@ -2595,7 +2595,7 @@ class Tender extends CI_Controller
             LEFT JOIN tender_quotation_info tq ON tq.tender_quotation_id = a.tender_quotation_id AND c.status='Active'
             WHERE a.status != 'Delete'
             and $where
-            ORDER BY a.tender_po_id DESC
+            ORDER BY a.po_date desc , a.tender_po_id DESC
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
         $query = $this->db->query($sql);
@@ -2952,7 +2952,7 @@ class Tender extends CI_Controller
             LEFT JOIN tender_enquiry_info d ON a.tender_enquiry_id = d.tender_enquiry_id AND d.status = 'Active'
             WHERE a.status != 'Delete' 
             and $where
-            ORDER BY a.tender_po_id DESC
+            ORDER BY  a.invoice_date desc , tender_enq_invoice_id DESC
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
         $query = $this->db->query($sql);
@@ -4078,7 +4078,7 @@ class Tender extends CI_Controller
             left join company_info as ci on t.company_id = ci.company_id and ci.status = 'Active'
             WHERE a.status != 'Delete' 
             AND $where 
-            ORDER BY a.tender_dc_id DESC
+            ORDER BY a.dc_date desc, a.tender_dc_id DESC
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
         $query = $this->db->query($sql);
@@ -4123,6 +4123,7 @@ class Tender extends CI_Controller
             left join customer_tender_po_info as po on dc.tender_po_id = po.tender_po_id and po.status='Active'
             WHERE dc.status != 'Delete'
             AND dc.tender_dc_id = ?
+            order by dc.tender_dc_id 
         ";
         $query = $this->db->query($sql, [$tender_dc_id]);
         $data['record'] = $query->row_array();

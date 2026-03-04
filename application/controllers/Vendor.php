@@ -15,7 +15,7 @@ class Vendor extends CI_Controller
         }
 
         $data['js'] = 'vendor/vendor-rate-enquiry.inc';
-        $data['title'] = 'Vendor Rate Enquiry';
+        $data['title'] = 'Supplier Rate Enquiry';
 
         if ($this->input->post('mode') == 'Add') {
             $this->db->trans_start();
@@ -209,7 +209,7 @@ class Vendor extends CI_Controller
             redirect('vendor-rate-enquiry-list');
 
         $data['js'] = 'vendor/vendor-rate-enquiry-edit.inc';
-        $data['title'] = 'Edit Vendor Rate Enquiry';
+        $data['title'] = 'Edit Supplier Rate Enquiry';
 
         if ($this->input->post('mode') == 'Edit') {
             $this->db->trans_start();
@@ -487,7 +487,7 @@ class Vendor extends CI_Controller
             redirect();
         }
 
-        $data['title'] = 'Vendor Rate Enquiry Print';
+        $data['title'] = 'Supplier Rate Enquiry Print';
 
         if (!$vendor_rate_enquiry_id) {
             show_404();
@@ -558,7 +558,7 @@ class Vendor extends CI_Controller
         }
 
         $data['js'] = 'vendor/vendor-po-add.inc';
-        $data['title'] = 'Add Vendor PO';
+        $data['title'] = 'Add Supplier PO';
 
         if ($this->input->post('mode') == 'Add') {
             $this->db->trans_start();
@@ -708,7 +708,7 @@ class Vendor extends CI_Controller
         $data = array();
         $data['js'] = 'vendor/vendor-po-list.inc';
         $data['s_url'] = 'vendor-po-list';
-        $data['title'] = 'Vendor PO List';
+        $data['title'] = 'Supplier PO List';
 
         $where = "1=1";
 
@@ -919,7 +919,7 @@ class Vendor extends CI_Controller
             left join company_info as ci on t.company_id = ci.company_id and ci.status = 'Active'
             WHERE a.status != 'Delete' 
             AND $where 
-            ORDER BY a.vendor_po_id DESC
+            ORDER BY a.po_date desc, a.vendor_po_id DESC
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
         $query = $this->db->query($sql);
@@ -944,7 +944,7 @@ class Vendor extends CI_Controller
         }
 
         $data['js'] = 'vendor/vendor-po-edit.inc';
-        $data['title'] = 'Edit Vendor PO';
+        $data['title'] = 'Edit Supplier PO';
 
         // ==================== UPDATE MODE ====================
         if ($this->input->post('mode') == 'Edit') {
@@ -1392,7 +1392,7 @@ class Vendor extends CI_Controller
             exit;
         }
         $data['js'] = 'vendor/vendor-pur-inward-add.inc';
-        $data['title'] = 'Add Vendor Purchase Inward';
+        $data['title'] = 'Add Supplier Purchase Inward';
 
         if ($this->input->post('mode') == 'Add') {
             // echo "<pre>";
@@ -1546,7 +1546,7 @@ class Vendor extends CI_Controller
         $data = array();
         $data['js'] = 'vendor/vendor-pur-inward-list.inc';
         $data['s_url'] = 'vendor-pur-inward-list';
-        $data['title'] = 'Vendor Purchase Inward List';
+        $data['title'] = 'Supplier Purchase Inward List';
 
         $where = "1=1";
 
@@ -1770,13 +1770,11 @@ class Vendor extends CI_Controller
             LEFT JOIN tender_enquiry_info t ON a.tender_enquiry_id = t.tender_enquiry_id AND t.status != 'Delete'
             left join company_info as ci on t.company_id = ci.company_id and ci.status = 'Active'
             WHERE a.status != 'Delete' AND $where 
-            ORDER BY a.vendor_pur_inward_id  DESC
+            ORDER BY a.inward_date desc, a.vendor_pur_inward_id  DESC
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
         $query = $this->db->query($sql);
-        $data['record_list'] = $query->result_array();
-
-
+        $data['record_list'] = $query->result_array(); 
 
         $this->load->view('page/vendor/vendor-pur-inward-list', $data);
     }
@@ -1795,7 +1793,7 @@ class Vendor extends CI_Controller
         }
 
         $data['js'] = 'vendor/vendor-pur-inward-edit.inc';
-        $data['title'] = ' Edit Vendor Purchase Inward';
+        $data['title'] = ' Edit Supplier Purchase Inward';
 
         // ==================== UPDATE ====================
         if ($this->input->post('mode') == 'Edit') {
@@ -2148,7 +2146,7 @@ class Vendor extends CI_Controller
         }
 
         $data['js'] = 'vendor/vendor-quotation-add.inc';
-        $data['title'] = 'Vendor Quotation Add';
+        $data['title'] = 'Supplier Quotation Add';
 
         if ($this->input->post('mode') == 'Add') {
 
@@ -2344,7 +2342,7 @@ class Vendor extends CI_Controller
         $data = array();
         $data['js'] = 'vendor/vendor-quotation-list.inc';
         $data['s_url'] = 'vendor-quotation-list';
-        $data['title'] = 'Vendor Quotation List';
+        $data['title'] = 'Supplier Quotation List';
 
         $where = "1=1";
 
@@ -2532,7 +2530,7 @@ class Vendor extends CI_Controller
             left join vendor_info as e on a.vendor_id = e.vendor_id and e.`status`='Active'
             where a.`status`='Active'
             AND $where 
-            order by a.vendor_quote_id desc 
+            order by a.quote_date desc, a.vendor_quote_id desc 
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
         $query = $this->db->query($sql);
@@ -2557,7 +2555,7 @@ class Vendor extends CI_Controller
         }
 
         $data['js'] = 'vendor/vendor-quotation-edit.inc';
-        $data['title'] = 'Edit Vendor Quotation Details';
+        $data['title'] = 'Edit Supplier Quotation Details';
 
         if ($this->input->post('mode') == 'Edit') {
             $this->db->trans_start();
@@ -3416,7 +3414,7 @@ class Vendor extends CI_Controller
         $data = array();
         $data['js'] = 'vendor/vendor-rate-enquiry-list.inc';
         $data['s_url'] = 'vendor-rate-enquiry-list';
-        $data['title'] = 'Vendor Rate Enquiry List';
+        $data['title'] = 'Supplier Rate Enquiry List';
 
         $where = "1=1";
 
@@ -3567,7 +3565,7 @@ class Vendor extends CI_Controller
             left join company_info com  on t.company_id = com.company_id and com.`status`='Active'
             WHERE a.status != 'Delete'  
             AND $where
-            ORDER BY a.vendor_rate_enquiry_id DESC
+            ORDER BY a.enquiry_date desc, a.vendor_rate_enquiry_id DESC
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
         $query = $this->db->query($sql);
@@ -3736,7 +3734,7 @@ class Vendor extends CI_Controller
             exit;
         }
         $data['js'] = 'vendor/vendor-purchase-bill-add.inc';
-        $data['title'] = 'Add Vendor Purchase Bill Entry';
+        $data['title'] = 'Add Supplier Purchase Bill Entry';
 
         if ($this->input->post('mode') == 'Add') {
             // echo "<pre>";
@@ -3977,7 +3975,7 @@ class Vendor extends CI_Controller
         $data = array();
         $data['js'] = 'vendor/vendor-purchase-bill-list.inc';
         $data['s_url'] = 'vendor-purchase-bill-list';
-        $data['title'] = 'Vendor Purchase Invoice List';
+        $data['title'] = 'Supplier Purchase Invoice List';
 
         $where = "1=1";
 
@@ -4200,7 +4198,7 @@ class Vendor extends CI_Controller
             LEFT JOIN tender_enquiry_info t ON a.tender_enquiry_id = t.tender_enquiry_id AND t.status != 'Delete'
             left join company_info as ci on t.company_id = ci.company_id and ci.status = 'Active'
             WHERE a.status != 'Delete' AND $where 
-            ORDER BY a.vendor_purchase_invoice_id  DESC
+            ORDER BY a.invoice_date desc, a.vendor_purchase_invoice_id  DESC
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
         $query = $this->db->query($sql);
@@ -4226,7 +4224,7 @@ class Vendor extends CI_Controller
         }
 
         $data['js'] = 'vendor/vendor-purchase-bill-edit.inc';
-        $data['title'] = ' Edit Vendor Purchase Invoice';
+        $data['title'] = ' Edit Supplier Purchase Invoice';
 
         // ==================== UPDATE ====================
         if ($this->input->post('mode') == 'Edit') {

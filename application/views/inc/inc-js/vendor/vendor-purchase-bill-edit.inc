@@ -8,8 +8,12 @@
     $("#toggle_dp_bill").change(function () {
         if ($(this).is(":checked")) {
             $(this).closest(".box").find(".box-body").slideDown();
+            $('#dp_vat_payer_purchase_grp').attr('required', true);
+
+            
         } else {
             $(this).closest(".box").find(".box-body").slideUp();
+            $('#dp_vat_payer_purchase_grp').removeAttr('required');
         }
     });
 
