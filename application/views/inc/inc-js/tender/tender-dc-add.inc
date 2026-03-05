@@ -1,35 +1,37 @@
 <script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
-<link  rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+<link
+  rel="stylesheet"
+  href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
+/>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 
 <script>
   $(document).ready(function () {
-
     $(".srch_enq_id").autocomplete({
-        source: function (request, response) {
-          $.ajax({
-            url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
-            type: "POST",
-            data: { search: request.term },
-            dataType: "json",
-            success: function (data) {
-              //console.log(data);
-              response(data);
-            },
-          });
-        },
+      source: function (request, response) {
+        $.ajax({
+          url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
+          type: "POST",
+          data: { search: request.term },
+          dataType: "json",
+          success: function (data) {
+            //console.log(data);
+            response(data);
+          },
+        });
+      },
 
-        minLength: 1,
-         
-        select: function (event, ui) {
-           console.log(ui);
-            $("#srch_company_id").val(ui.item.company_id);
-            $("#srch_customer_id").val(ui.item.customer_id).change();
-            //$("#srch_tender_enquiry_id").val(ui.item.tender_enquiry_id); 
-            load_tender_enq(ui.item.tender_enquiry_id); 
-        }, 
-      });
-    
+      minLength: 1,
+
+      select: function (event, ui) {
+        console.log(ui);
+        $("#srch_company_id").val(ui.item.company_id);
+        $("#srch_customer_id").val(ui.item.customer_id).change();
+        //$("#srch_tender_enquiry_id").val(ui.item.tender_enquiry_id);
+        load_tender_enq(ui.item.tender_enquiry_id);
+      },
+    });
+
     /*
     $("#srch_company_id").on("change", function () {
       const company_id = $(this).val();
@@ -79,64 +81,61 @@
     });
     */
 
-
-    function load_tender_enq(t_enq_id = '') {
-
+    function load_tender_enq(t_enq_id = "") {
       const customer_id = $("#srch_customer_id").val(); // <-- IMPORTANT
-      const company_id  = $("#srch_company_id").val();
+      const company_id = $("#srch_company_id").val();
       const $enquiryDropdown = $("#srch_tender_enquiry_id");
-      const $container = $("#item_container");  
+      const $container = $("#item_container");
 
       // Reset
       $enquiryDropdown
-          .html('<option value="">Select Enquiry</option>')
-          .prop('disabled', true);
+        .html('<option value="">Select Enquiry</option>')
+        .prop("disabled", true);
 
-       
-      $container.html('');
+      $container.html("");
 
       if (!customer_id || !company_id) return;
 
       $.ajax({
-          url: "<?php echo site_url('vendor/get_tender_enquiries_by_customer'); ?>",
-          type: "POST",
-          data: { 
-              company_id: company_id,
-              customer_id: customer_id 
-          },
-          dataType: "json",
-          success: function (res) {
+        url: "<?php echo site_url('vendor/get_tender_enquiries_by_customer'); ?>",
+        type: "POST",
+        data: {
+          company_id: company_id,
+          customer_id: customer_id,
+        },
+        dataType: "json",
+        success: function (res) {
+          if (res.length > 0) {
+            $enquiryDropdown.prop("disabled", false);
 
-              if (res.length > 0) {
-                  $enquiryDropdown.prop('disabled', false);
+            $.each(res, function (i, row) {
+              $enquiryDropdown.append(
+                $("<option>", {
+                  value: row.tender_enquiry_id,
+                  text: row.display,
+                }),
+              );
+            });
 
-                  $.each(res, function (i, row) {
-                      $enquiryDropdown.append(
-                          $('<option>', {
-                              value: row.tender_enquiry_id,
-                              text: row.display
-                          })
-                      );
-                  });
-
-                  // ✅ SET SELECTED VALUE HERE
-                  if (t_enq_id) {
-                      $enquiryDropdown.val(t_enq_id).trigger('change');
-                  }
-
-              } else {
-                  $enquiryDropdown.html('<option value="">No enquiries found</option>');
-              }
-          },
-          error: function () {
-              alert('Error loading enquiries');
+            // ✅ SET SELECTED VALUE HERE
+            if (t_enq_id) {
+              $enquiryDropdown.val(t_enq_id).trigger("change");
+            }
+          } else {
+            $enquiryDropdown.html(
+              '<option value="">No enquiries found</option>',
+            );
           }
+        },
+        error: function () {
+          alert("Error loading enquiries");
+        },
       });
-    }   
-       
+    }
+
     $("#srch_customer_id").on("change", function () {
-      load_tender_enq('');
-     });   
+      load_tender_enq("");
+    });
 
     $("#srch_customer_id1").on("change", function () {
       const customer_id = $(this).val();
@@ -167,12 +166,12 @@
               $enquiryDropdown.append(
                 $("<option></option>")
                   .attr("value", row.tender_enquiry_id)
-                  .text(row.display)
+                  .text(row.display),
               );
             });
           } else {
             $enquiryDropdown.html(
-              '<option value="">No enquiries found</option>'
+              '<option value="">No enquiries found</option>',
             );
           }
         },
@@ -182,31 +181,30 @@
       });
     });
 
-    function load_tender_po(tender_enquiry_id) 
-    {
+    function load_tender_po(tender_enquiry_id) {
       //alert(tender_enquiry_id);
-       $("#tender_po_id > option").remove();
+      $("#tender_po_id > option").remove();
 
-        $.ajax({
-          url: "<?php echo site_url('tender/get_data');?>",
-          type: "post",
-          data: { tbl: "get-tender-po-list", id: tender_enquiry_id },
-          success: function (res) {
-            console.log(res);
+      $.ajax({
+        url: "<?php echo site_url('tender/get_data');?>",
+        type: "post",
+        data: { tbl: "get-tender-po-list", id: tender_enquiry_id },
+        success: function (res) {
+          console.log(res);
 
-           /* var opt1 = $("<option />");
+          /* var opt1 = $("<option />");
             opt1.val("");
             opt1.text("Select");
             $("#tender_po_id").append(opt1);*/
 
-            $.each(res, function (key, info) {
-              var opt1 = $("<option />");
-              opt1.val(info.tender_po_id);
-              opt1.text(info.customer_po_no + " [ "+ info.po_date +" ]");
-              $("#tender_po_id").append(opt1);
-            }); 
-          }
-        });
+          $.each(res, function (key, info) {
+            var opt1 = $("<option />");
+            opt1.val(info.tender_po_id);
+            opt1.text(info.customer_po_no + " [ " + info.po_date + " ]");
+            $("#tender_po_id").append(opt1);
+          });
+        },
+      });
     }
 
     $("#srch_tender_enquiry_id").on("change", function () {
@@ -215,9 +213,9 @@
       $container.html("");
 
       if (!tender_enquiry_id) return;
-      
+
       load_tender_po(tender_enquiry_id);
-       
+
       $.ajax({
         url: "<?php echo site_url('tender/get_data'); ?>",
         type: "POST",
@@ -229,20 +227,20 @@
         success: function (res) {
           let html = "";
 
-            if (res.length > 0) {
-              $.each(res, function (i, row) {
-                const hiddenFields = `
+          if (res.length > 0) {
+            $.each(res, function (i, row) {
+              const hiddenFields = `
                     <input type="hidden" name="category_id[]" value="${row.category_id}">
                     <input type="hidden" name="vendor_pur_inward_item_id[]" value="${row.vendor_pur_inward_item_id}">
                     <input type="hidden" name="vendor_pur_inward_id[]" value="${row.vendor_pur_inward_id}">
                     <input type="hidden" name="item_code[]" value="${row.item_code}">
                   `;
 
-                const formattedDate = new Date(row.inward_date)
-                  .toLocaleDateString("en-GB")
-                  .replace(/\//g, "-");
+              const formattedDate = new Date(row.inward_date)
+                .toLocaleDateString("en-GB")
+                .replace(/\//g, "-");
 
-                html += `
+              html += `
                     
                   <tr>
                     <td>
@@ -276,11 +274,11 @@
                     ${hiddenFields}
                   </tr>
                 `;
-                      });
+            });
 
-                      $container.html(html);
-                    } else {
-                      $container.html(`
+            $container.html(html);
+          } else {
+            $container.html(`
                 <div class="alert alert-warning">No items found for this tender enquiry.</div>
               `);
           }
@@ -290,7 +288,6 @@
           alert("Error loading items");
         },
       });
-      
     });
 
     $(document).on("change", ".item-check", function () {
@@ -299,125 +296,56 @@
         $card
           .find(
             "input[type=hidden][name^='vendor_pur_inward_id'], " +
-            "input[type=hidden][name^='vendor_pur_inward_item_id'], " +
+              "input[type=hidden][name^='vendor_pur_inward_item_id'], " +
               "input[type=hidden][name^='category_id'], " +
-              "input[type=hidden][name^='item_id']"
+              "input[type=hidden][name^='item_id']",
           )
           .remove();
       }
     });
   });
+</script>
 
-  $(function () {
-    CKEDITOR.replace("editor1", {
-      height: 80,
+<script>
+  $(document).ready(function () {
+    var editorConfig = {
+      height: 120,
       extraPlugins: "justify,colorbutton,font,table",
-      removeButtons: "",
-      toolbar: [
-        {
-          name: "clipboard",
-          items: [
-            "Cut",
-            "Copy",
-            "Paste",
-            "PasteText",
-            "PasteFromWord",
-            "-",
-            "Undo",
-            "Redo",
-          ],
-        },
-        {
-          name: "basicstyles",
-          items: [
-            "Bold",
-            "Italic",
-            "Underline",
-            "Strike",
-            "RemoveFormat",
-            "CopyFormatting",
-          ],
-        },
-        {
-          name: "paragraph",
-          items: [
-            "NumberedList",
-            "BulletedList",
-            "-",
-            "Outdent",
-            "Indent",
-            "-",
-            "Blockquote",
-            "JustifyLeft",
-            "JustifyCenter",
-            "JustifyRight",
-            "JustifyBlock",
-          ],
-        },
-        { name: "links", items: ["Link", "Unlink", "Anchor"] },
-        {
-          name: "insert",
-          items: ["Image", "Table", "HorizontalRule", "SpecialChar"],
-        },
-        { name: "styles", items: ["Format", "Font", "FontSize"] },
-        { name: "colors", items: ["TextColor", "BGColor"] },
-        { name: "tools", items: ["Maximize", "ShowBlocks"] },
-      ],
-    });
-    CKEDITOR.replace("editor2", {
-      height: 80,
-      extraPlugins: "justify,colorbutton,font,table",
-      removeButtons: "",
-      toolbar: [
-        {
-          name: "clipboard",
-          items: [
-            "Cut",
-            "Copy",
-            "Paste",
-            "PasteText",
-            "PasteFromWord",
-            "-",
-            "Undo",
-            "Redo",
-          ],
-        },
-        {
-          name: "basicstyles",
-          items: [
-            "Bold",
-            "Italic",
-            "Underline",
-            "Strike",
-            "RemoveFormat",
-            "CopyFormatting",
-          ],
-        },
-        {
-          name: "paragraph",
-          items: [
-            "NumberedList",
-            "BulletedList",
-            "-",
-            "Outdent",
-            "Indent",
-            "-",
-            "Blockquote",
-            "JustifyLeft",
-            "JustifyCenter",
-            "JustifyRight",
-            "JustifyBlock",
-          ],
-        },
-        { name: "links", items: ["Link", "Unlink", "Anchor"] },
-        {
-          name: "insert",
-          items: ["Image", "Table", "HorizontalRule", "SpecialChar"],
-        },
-        { name: "styles", items: ["Format", "Font", "FontSize"] },
-        { name: "colors", items: ["TextColor", "BGColor"] },
-        { name: "tools", items: ["Maximize", "ShowBlocks"] },
-      ],
+    };
+
+    CKEDITOR.replace("editor1", editorConfig);
+    CKEDITOR.replace("editor2", editorConfig);
+
+    CKEDITOR.instances.editor1.on("instanceReady", function () {
+      let companyId = $("#srch_company_id").val();
+
+      if (companyId) {
+        load_terms_and_conditions(companyId);
+      }
     });
   });
+
+  function load_terms_and_conditions(companyId) {
+    $.ajax({
+      url: "<?php echo site_url('get-data'); ?>",
+      type: "POST",
+      dataType: "json",
+      data: {
+        tbl: "get-company-terms-and-conditions-list",
+        id: companyId,
+      },
+      success: function (res) {
+        console.log("Response:", res);
+
+        if (res && res.length > 0) {
+          CKEDITOR.instances.editor1.setData(res[0].dn_terms || "");
+        } else {
+          CKEDITOR.instances.editor1.setData("");
+        }
+      },
+      error: function (xhr) {
+        console.log(xhr.responseText);
+      },
+    });
+  }
 </script>

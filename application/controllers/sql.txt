@@ -431,3 +431,13 @@ ALTER TABLE `vendor_purchase_invoice_info`
 
 ALTER TABLE `vendor_purchase_invoice_item_info`
 	CHANGE COLUMN `conversion_rate` `conversion_rate` DECIMAL(10,5) NULL DEFAULT '1' AFTER `rate`;
+
+
+
+
+05-03-2026
+
+
+ALTER TABLE `company_info`
+	ADD COLUMN `dn_terms` TEXT NOT NULL AFTER `invoice_terms`,
+	ADD COLUMN `vendor_po_terms` TEXT NOT NULL AFTER `dn_terms`;

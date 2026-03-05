@@ -42,6 +42,10 @@ class General extends CI_Controller
                 SELECT *
                 FROM company_info
                 WHERE company_id = '" . $rec_id . "'
+                and `status` = 'Active'
+                order by company_id asc
+                limit 1
+
             ");
 
             $rec_list = $query->result_array();

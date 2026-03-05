@@ -220,19 +220,12 @@
       );
     });
   });
-
-  // CKEditor
-  window.onload = function () {
-    CKEDITOR.replace("editor1", { height: 120 });
-    CKEDITOR.replace("editor2", { height: 120 });
-  };
 </script>
 
 <script>
   $(document).ready(function () {
     let rowIndex = 0;
 
-  
     $("#srch_vendor_quote_id").on("change", function () {
       const srch_vendor_quote_id = $(this).val();
       const $container = $("#item_container");
@@ -474,4 +467,48 @@
       "json",
     );
   });
+</script>
+<script>
+  $(document).ready(function () {
+    var editorConfig = {
+      height: 120,
+      extraPlugins: "justify,colorbutton,font,table",
+    };
+
+    CKEDITOR.replace("editor1", editorConfig);
+    CKEDITOR.replace("editor2", editorConfig);
+
+    CKEDITOR.instances.editor2.on("instanceReady", function () {
+      let companyId = $("#srch_company_id").val();
+
+      if (companyId) {
+        load_terms_and_conditions(companyId);
+      }
+    });
+  });
+
+
+  function load_terms_and_conditions(companyId) {
+    $.ajax({
+      url: "<?php echo site_url('get-data'); ?>",
+      type: "POST",
+      dataType: "json",
+      data: {
+        tbl: "get-company-terms-and-conditions-list",
+        id: companyId,
+      },
+      success: function (res) {
+        console.log("Response:", res);
+
+        if (res && res.length > 0) {
+          CKEDITOR.instances.editor2.setData(res[0].vendor_po_terms || "");
+        } else {
+          CKEDITOR.instances.editor2.setData("");
+        }
+      },
+      error: function (xhr) {
+        console.log(xhr.responseText);
+      },
+    });
+  }
 </script>

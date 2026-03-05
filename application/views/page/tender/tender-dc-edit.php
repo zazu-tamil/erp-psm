@@ -27,7 +27,7 @@
 
                 <fieldset class="tender-inward">
                     <legend class="text-light-blue">
-                        <i class="fa fa-file-text-o"></i> Tender DC
+                        <i class="fa fa-file-text-o"></i> Tender DN
                     </legend>
 
                     <div class="row">
@@ -84,7 +84,7 @@
                         </div>
 
                         <div class="form-group col-md-4">
-                            <label for="dc_no">Tender DC No <span style="color:red;">*</span></label>
+                            <label for="dc_no">Tender DN No <span style="color:red;">*</span></label>
                             <input type="text" name="dc_no" id="dc_no" class="form-control"
                                 value="<?php echo set_value('dc_no', $header['dc_no']); ?>">
 
@@ -137,7 +137,7 @@
                                     <th style="width: 10%;">Vendor / Inward No</th>
                                     <th style="width: 60%;">Item Code / Item Description</th>
                                     <th style="width: 10%;">UOM / Available Qty</th>
-                                    <th style="width: 10%;">Dc Qty</th>
+                                    <th style="width: 10%;">DN Qty</th>
                                 </tr>
                             </thead>
                           <tbody id="item_container">

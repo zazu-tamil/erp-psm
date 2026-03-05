@@ -18,21 +18,23 @@
             <div class="box-body">
                 <input type="hidden" name="mode" value="Add" />
                 <fieldset class="tender-inward">
-                    <legend class="text-light-blue"><i class="fa fa-file-text-o"></i> Tender DC </legend>
+                    <legend class="text-light-blue"><i class="fa fa-file-text-o"></i> Tender DN </legend>
 
-                    <div style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
+                    <div
+                        style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
                         <div class="row">
                             <div class="col-md-4 form-group">
                                 <label for="srch_enq_id">Search Enquiry No</label>
-                                <input type="text" name="srch_enq_id" class="form-control srch_enq_id" value="" placeholder="Search Enquiry No" />
+                                <input type="text" name="srch_enq_id" class="form-control srch_enq_id" value=""
+                                    placeholder="Search Enquiry No" />
                             </div>
-                        </div> 
+                        </div>
                     </div>
 
                     <div class="row">
                         <div class="form-group col-md-4">
                             <label for="srch_company_id">Company <span style="color:red;">*</span></label>
-                            <?php echo form_dropdown('srch_company_id',   $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
+                            <?php echo form_dropdown('srch_company_id', $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
@@ -46,14 +48,13 @@
                             <?php echo form_dropdown('srch_tender_enquiry_id', ['' => 'Select Enquiry'], set_value('srch_tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" required'); ?>
                         </div>
 
-                         <div class="form-group col-md-4">
-                            <label for="tender_po_id">Tender PO No <span
-                                    style="color:red;">*</span></label>
+                        <div class="form-group col-md-4">
+                            <label for="tender_po_id">Tender PO No <span style="color:red;">*</span></label>
                             <?php echo form_dropdown('tender_po_id', ['' => 'Select PO'], set_value('tender_po_id'), 'id="tender_po_id" class="form-control" required'); ?>
                         </div>
 
                         <div class="form-group col-md-4">
-                            <label>DC Date</label>
+                            <label>DN Date</label>
                             <input type="date" name="dc_date" id="dc_date" class="form-control"
                                 value="<?php echo set_value('dc_date', date('Y-m-d')); ?>">
                         </div>
@@ -75,7 +76,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Quotation Terms</label>
+                                <label>DN Terms & Conditions</label>
                                 <textarea id="editor1" name="terms" class="form-control custom-textarea"
                                     placeholder="Enter quotation terms" required></textarea>
                             </div>
@@ -94,7 +95,7 @@
                                     <th style="width: 10%;">Vendor / Inward No</th>
                                     <th style="width: 60%;">Item Code / Item Description</th>
                                     <th style="width: 10%;">UOM / Available Qty</th>
-                                    <th style="width: 10%;">Dc Qty</th>
+                                    <th style="width: 10%;">DN Qty</th>
                                 </tr>
                             </thead>
 

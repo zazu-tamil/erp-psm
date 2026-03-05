@@ -110,7 +110,7 @@
         }
 
         .items-table thead {
-           
+
             border: 1px solid #000;
         }
 
@@ -384,7 +384,7 @@
     //         'Eight Hundred',
     //         'Nine Hundred'
     //     ];
-
+    
     //     function convertNumberToWords($number, $ones, $tens, $hundreds)
     //     {
     //         if ($number == 0)
@@ -413,18 +413,18 @@
     //         }
     //         return trim($words);
     //     }
-
+    
     //     $amount = floatval($amount);
     //     $integer_part = floor($amount);
     //     $multiplier = pow(10, $decimal_point);
     //     $decimal_part = round(($amount - $integer_part) * $multiplier);
-
+    
     //     $words = $integer_part > 0 ? convertNumberToWords($integer_part, $ones, $tens, $hundreds) : 'Zero';
-
+    
     //     if ($decimal_part > 0) {
     //         $words .= ' & Fils ' . $decimal_part . '/' . $multiplier;
     //     }
-
+    
     //     return $words . ' Only.';
     // }
     ?>
@@ -443,15 +443,15 @@
                 Date : <?php echo htmlspecialchars(date('d/m/Y', strtotime($record['quote_date']))); ?><br>
                 Quote No: <?php echo htmlspecialchars($record['tender_quotation_no'] ?? 'N/A'); ?>
             </div>
-            
+
         </div>
-       
+
 
         <!-- Reference -->
         <div class="reference-section">
             <div class="reference-line">
                 <span class="label-bold">Our Ref No:</span> <?php echo $record['our_enq_ref_details'] ?? '-'; ?>
-                 
+
             </div>
         </div>
 
@@ -469,14 +469,16 @@
                 <?php endif; ?>
             </div>
         </div>
-        <?php if(!empty($record['contact_person'])): ?>           
-        <div>
-           <b> Attn: <?php echo htmlspecialchars($record['contact_person']); ?></b>
-        </div>
+        <?php if (!empty($record['contact_person'])): ?>
+            <div>
+                <b> Attn: <?php echo htmlspecialchars($record['contact_person']); ?></b>
+            </div>
         <?php endif; ?>
         <div> Dear Sir, </div>
-        <div style="text-align: center; font-weight: bold;"><u>SUB: Your Enquiry Ref: <?php echo htmlspecialchars($record['tender_ref_no']); ?>, Dated: <?php echo date('d/m/Y', strtotime($record['tender_enquiry_date'] ?? '')); ?>.</u></div>
-`       <div>Thank you for your enquiry, we are pleased to offer our best price with terms and conditions below.</div>
+        <div style="text-align: center; font-weight: bold;"><u>SUB: Your Enquiry Ref:
+                <?php echo htmlspecialchars($record['tender_ref_no']); ?>, Dated:
+                <?php echo date('d/m/Y', strtotime($record['tender_enquiry_date'] ?? '')); ?>.</u></div>
+        ` <div>Thank you for your enquiry, we are pleased to offer our best price with terms and conditions below.</div>
         <!-- Currency -->
         <?php
         $decimal_point = isset($record['decimal_point']) ? intval($record['decimal_point']) : 3;
@@ -546,30 +548,33 @@
                 <tr>
                     <td colspan="5" class="text-right"><strong>TOTAL EXCL. VAT</strong></td>
                     <td colspan="2" class="text-right">
-                        <strong><?php echo number_format($total_net_amount, $decimal_point); ?></strong></td>
+                        <strong><?php echo number_format($total_net_amount, $decimal_point); ?></strong>
+                    </td>
                 </tr>
                 <tr>
                     <td colspan="5" class="text-right"><strong>VAT
                             <?php echo number_format($vat_percentage ?? 0, 0); ?>%</strong></td>
                     <td colspan="2" class="text-right">
-                        <strong><?php echo number_format($total_vat_amount, $decimal_point); ?></strong></td>
+                        <strong><?php echo number_format($total_vat_amount, $decimal_point); ?></strong>
+                    </td>
                 </tr>
                 <tr style="background:#ffff; color:#000;">
                     <td colspan="5" class="text-right"><strong>TOTAL
                             <?php echo htmlspecialchars($currency_code); ?></strong></td>
                     <td colspan="2" class="text-right">
-                        <strong><?php echo number_format($grand_total, $decimal_point); ?></strong></td>
+                        <strong><?php echo number_format($grand_total, $decimal_point); ?></strong>
+                    </td>
                 </tr>
             </tbody>
         </table>
-         <?php  /*          
-        <!-- Amount in Words --> 
-        //$amount_in_words = convertAmountToWords($grand_total, $currency_code, $decimal_point); ?>
-        <!-- <div class="amount-in-words1">
-            <strong>Total <?php echo htmlspecialchars($currency_code); ?>:</strong><br>
-            <?php echo $amount_in_words; ?>
-        </div> -->
-        */ 
+        <?php  /*          
+<!-- Amount in Words --> 
+//$amount_in_words = convertAmountToWords($grand_total, $currency_code, $decimal_point); ?>
+<!-- <div class="amount-in-words1">
+<strong>Total <?php echo htmlspecialchars($currency_code); ?>:</strong><br>
+<?php echo $amount_in_words; ?>
+</div> -->
+*/
         ?>
 
         <!-- Payment Terms -->
@@ -589,10 +594,10 @@
 
         <!-- Terms & Conditions -->
         <?php if (!empty($record['terms'])): ?>
-                <div style="padding:1px; ">
-                 <div style="font-weight:bold; margin-bottom:5px;">Terms & Conditions:</div>
+            <div style="padding:1px; ">
+                <div style="font-weight:bold; margin-bottom:5px;">Terms & Conditions:</div>
                 <?php echo ($record['terms']); ?>
-                </div> 
+            </div>
         <?php endif; ?>
 
         <!-- Signature -->
@@ -617,8 +622,41 @@
         <button type="button" class="btn btn-success" onclick="window.print()">
             🖨️ Print
         </button>
+        <button type="button" class="btn btn-success" id="click_export_excel_file">
+            Export Excel
+        </button>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script>
+        document.getElementById("click_export_excel_file").addEventListener("click", function () {
+
+            var element = document.querySelector(".page");
+
+            var html = element.outerHTML;
+
+            var fileName = "Quotation_<?php echo $record['tender_quotation_no'] ?? 'export'; ?>.xls";
+
+            var blob = new Blob(
+                ['\ufeff<html xmlns:o="urn:schemas-microsoft-com:office:office" ' +
+                    'xmlns:x="urn:schemas-microsoft-com:office:excel" ' +
+                    'xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body>'
+                    + html +
+                    '</body></html>'],
+                { type: "application/vnd.ms-excel" }
+            );
+
+            var link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+        });
+    </script>
 </body>
 
 </html>

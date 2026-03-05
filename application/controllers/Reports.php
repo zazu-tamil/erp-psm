@@ -840,6 +840,173 @@ class Reports extends CI_Controller
 
     }
 
+
+
+    public function item_rate_report()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data = array();
+        $data['js'] = 'summary/tender-enquiry-summary-report.inc';
+        $data['s_url'] = 'tender-quotation-list';
+        $data['title'] = 'Tender Enquiry Summary Report';
+
+        $where = "1=1";
+
+
+
+
+        $this->load->view('page/reports/item-rate-report', $data);
+    }
+
+
+    public function item_search_v2()
+    {
+        $term = $this->input->post('search');
+        $srch_typ = $this->input->post('srch_typ');
+
+        if ($srch_typ == 'desc') {
+            $sql = "
+           
+            select 
+            p.* 
+            from 
+            (
+                (
+                select 
+                'Customer PO' as tbl, 
+                date_format(a.po_date,'%d-%m-%Y') as po_date,
+                b.item_code,
+                b.item_desc,
+                b.uom 
+                from customer_tender_po_info as a
+                left join tender_po_item_info as b on b.tender_po_id = a.tender_po_id 
+                where a.`status` = 'Active'
+                and b.`status` = 'Active'
+                and ( b.item_code like '%" . $this->db->escape_like_str($term) . "%' )
+                order by b.item_code asc , a.po_date  desc
+                )  union all (
+                select 
+                'Vendor PO' as tbl,
+                date_format(q.po_date,'%d-%m-%Y') as po_date,
+                w.item_code,
+                w.item_desc,
+                w.uom 
+                from vendor_po_info as q 
+                left join vendor_po_item_info as w on w.vendor_po_id = q.vendor_po_id
+                where q.`status` = 'Active'
+                and w.`status` = 'Active'
+                and ( w.item_desc like '%" . $this->db->escape_like_str($term) . "%' )
+                order by w.item_code , q.po_date desc
+                ) union all (
+                select 
+                'Tender Enquiry' as tbl, 
+                date_format(a.enquiry_date,'%d-%m-%Y') as po_date,
+                b.item_code,
+                b.item_desc,
+                b.uom 
+                from tender_enquiry_info as a
+                left join tender_enquiry_item_info as b on b.tender_enquiry_id = a.tender_enquiry_id
+                where a.`status` = 'Active'
+                and b.`status` = 'Active'
+                and (  b.item_desc like '%" . $this->db->escape_like_str($term) . "%' )
+                order by b.item_code asc,  a.enquiry_date desc 
+                ) union all (
+                select 
+                'Tender Quotation' as tbl, 
+                date_format(a.quote_date,'%d-%m-%Y') as po_date,
+                b.item_code,
+                b.item_desc,
+                b.uom 
+                from tender_quotation_info as a
+                left join tender_quotation_item_info as b on b.tender_quotation_id = a.tender_quotation_id
+                where a.`status` = 'Active'
+                and b.`status` = 'Active'
+                and ( b.item_desc like '%" . $this->db->escape_like_str($term) . "%' )
+                order by b.item_code asc,  a.quote_date  desc 
+                )
+            ) as p
+            order by p.tbl , p.item_code , p.po_date desc 
+        ";
+        } else {
+
+            $sql = "
+           
+            select 
+            p.* 
+            from 
+            (
+                (
+                select 
+                'Customer PO' as tbl, 
+                date_format(a.po_date,'%d-%m-%Y') as po_date,
+                b.item_code,
+                b.item_desc,
+                b.uom 
+                from customer_tender_po_info as a
+                left join tender_po_item_info as b on b.tender_po_id = a.tender_po_id 
+                where a.`status` = 'Active'
+                and b.`status` = 'Active'
+                and ( b.item_code like '%" . $this->db->escape_like_str($term) . "%')
+                order by b.item_code asc , a.po_date  desc
+                )  union all (
+                select 
+                'Vendor PO' as tbl, 
+                date_format(q.po_date,'%d-%m-%Y') as po_date,
+                w.item_code,
+                w.item_desc,
+                w.uom 
+                from vendor_po_info as q 
+                left join vendor_po_item_info as w on w.vendor_po_id = q.vendor_po_id
+                where q.`status` = 'Active'
+                and w.`status` = 'Active'
+                and ( w.item_code like '%" . $this->db->escape_like_str($term) . "%' )
+                order by w.item_code , q.po_date desc
+                ) union all (
+                select 
+                'Tender Enquiry' as tbl, 
+                date_format(a.enquiry_date,'%d-%m-%Y') as po_date,
+                b.item_code,
+                b.item_desc,
+                b.uom 
+                from tender_enquiry_info as a
+                left join tender_enquiry_item_info as b on b.tender_enquiry_id = a.tender_enquiry_id
+                where a.`status` = 'Active'
+                and b.`status` = 'Active'
+                and ( b.item_code like '%" . $this->db->escape_like_str($term) . "%' )
+                order by b.item_code asc,  a.enquiry_date desc 
+                ) union all (
+                select 
+                'Tender Quotation' as tbl, 
+                date_format(a.quote_date,'%d-%m-%Y') as po_date,
+                b.item_code,
+                b.item_desc,
+                b.uom 
+                from tender_quotation_info as a
+                left join tender_quotation_item_info as b on b.tender_quotation_id = a.tender_quotation_id
+                where a.`status` = 'Active'
+                and b.`status` = 'Active'
+                and ( b.item_code like '%" . $this->db->escape_like_str($term) . "%' )
+                order by b.item_code asc,  a.quote_date  desc 
+                )
+            ) as p
+            order by p.tbl , p.item_code , p.po_date desc 
+        ";
+        }
+
+        $query = $this->db->query($sql);
+
+        $result = [];
+        $result = $query->result_array();
+
+        echo json_encode($result);
+
+
+
+    }
+
 }
 
 ?>

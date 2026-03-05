@@ -11,7 +11,7 @@
     <div class="box box-info">
         <div class="box-header with-border">
             <h3 class="box-title"><i class="fa fa-plus-circle"></i> Add Tender Enquiry</h3>
-        </div> 
+        </div>
         <form method="post" action="" id="frmadd" enctype="multipart/form-data">
             <div class="box-body">
                 <input type="hidden" name="mode" value="Add" />
@@ -22,7 +22,7 @@
                     <div class="row">
                         <div class="form-group col-md-4">
                             <label>Company <span class="text-danger">*</span></label>
-                            <?php echo form_dropdown('company_id',$company_opt, set_value('company_id'), 'id="srch_company_id" class="form-control select2" required'); ?>
+                            <?php echo form_dropdown('company_id', $company_opt, set_value('company_id'), 'id="srch_company_id" class="form-control select2" required'); ?>
                         </div>
                         <div class="form-group col-md-4">
                             <label>Customer <span class="text-danger">*</span></label>
@@ -150,7 +150,7 @@
                         <!-- Dynamic Rows -->
                         <div id="item_rows"></div>
                         <div id="item_rows_add">
-                            
+
                         </div>
 
                         <button type="button" class="btn btn-primary" id="add_more_added" style="margin-top:10px;">
@@ -269,20 +269,26 @@
 
                 <div class="modal-body">
                     <div class="row">
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-6">
                             <label>Customer Name <span class="text-danger">*</span></label>
                             <input class="form-control" type="text" name="customer_name" id="customer_name"
                                 placeholder="Customer Name">
                         </div>
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-6">
                             <label>Contact Name</label>
                             <input class="form-control" type="text" name="contact_name" id="contact_name"
                                 placeholder="Contact Person">
                         </div>
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-6">
                             <label>CR No</label>
                             <input class="form-control" type="text" name="crno" id="crno"
                                 placeholder="Commercial Registration No">
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label>Customer Code</label>
+                            <input class="form-control" type="text" name="customer_code" id="customer_code"
+                                placeholder="Enter your Customer Code" required="true">
                         </div>
                     </div>
 

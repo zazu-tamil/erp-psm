@@ -3527,7 +3527,7 @@ class Tender extends CI_Controller
         }
 
         $data['js'] = 'tender/tender-dc-add.inc';
-        $data['title'] = 'Add Tender DC';
+        $data['title'] = 'Add Tender DN';
 
         if ($this->input->post('mode') == 'Add') {
             $this->db->trans_start();
@@ -3630,7 +3630,7 @@ class Tender extends CI_Controller
         }
 
         $data['js'] = 'tender/tender-dc-edit.inc';
-        $data['title'] = 'Edit Tender DC';
+        $data['title'] = 'Edit Tender DN';
 
         // Load existing DC header
         $header = $this->db->get_where('tender_dc_info', ['tender_dc_id' => $tender_dc_id])->row_array();
@@ -3906,7 +3906,7 @@ class Tender extends CI_Controller
         $data = array();
         $data['js'] = 'tender/tender-dc-list.inc';
         $data['s_url'] = 'tender-dc-list/';
-        $data['title'] = 'Tender DC List';
+        $data['title'] = 'Tender DN List';
         $where = "1 = 1";
 
         // === FILTERS ===
@@ -4799,6 +4799,7 @@ class Tender extends CI_Controller
                 'contact_name' => $this->input->post('contact_name'),
                 'crno' => $this->input->post('crno'),
                 'country' => $this->input->post('country'),
+                'customer_code' => $this->input->post('customer_code'),
                 'address' => $this->input->post('address'),
                 'mobile' => $this->input->post('mobile'),
                 'mobile_alt' => $this->input->post('mobile_alt'),

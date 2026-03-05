@@ -55,7 +55,7 @@
                             placeholder="Search the our Enquiry No">
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="srch_tender_dc_no">Dc No</label>
+                        <label for="srch_tender_dc_no">DN No</label>
                         <input type="text" name="srch_tender_dc_no" id="srch_tender_dc_no" class="form-control"
                             value="<?php echo set_value('srch_tender_dc_no', $srch_tender_dc_no); ?>"
                             placeholder="Search the our Po no">
@@ -98,7 +98,7 @@
                     <tr>
                         <th class="text-center">S.No</th>
                         <th>DC Date</th>
-                        <th>DC No</th>
+                        <th>DN No</th>
                         <th>Company / RFQ No</th>
                         <th>Customer</th>
 

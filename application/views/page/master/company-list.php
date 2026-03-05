@@ -149,6 +149,12 @@
                                             <li>
                                                 <a href="#tab_2" data-toggle="tab">Terms & Conditions Invoice</a>
                                             </li>
+                                            <li>
+                                                <a href="#tab_3" data-toggle="tab"> DN Terms & Conditions</a>
+                                            </li>
+                                            <li>
+                                                <a href="#tab_4" data-toggle="tab"> Vendor PO Terms & Conditions</a>
+                                            </li>
                                         </ul>
 
                                         <div class="tab-content">
@@ -179,6 +185,34 @@
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            <div class="tab-pane" id="tab_3">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>DN Terms & Conditions</label>
+                                                            <textarea id="editor3" name="dn_terms"
+                                                                class="form-control custom-textarea"
+                                                                placeholder="Enter DN terms and conditions"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="tab-pane" id="tab_4">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Vendor PO Terms & Conditions</label>
+                                                            <textarea id="editor4" name="vendor_po_terms"
+                                                                class="form-control custom-textarea"
+                                                                placeholder="Enter vendor PO terms and conditions"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>
@@ -309,6 +343,13 @@
                                             <li>
                                                 <a href="#edit_tab_2" data-toggle="tab">Terms & Conditions Invoice</a>
                                             </li>
+                                            <li>
+                                                <a href="#edit_tab_3" data-toggle="tab"> DN Terms & Conditions</a>
+                                            </li>
+                                            <li>
+                                                <a href="#edit_tab_4" data-toggle="tab"> Vendor PO Terms &
+                                                    Conditions</a>
+                                            </li>
                                         </ul>
 
                                         <div class="tab-content">
@@ -339,6 +380,32 @@
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            <div class="tab-pane" id="edit_tab_3">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>DN Terms & Conditions</label>
+                                                            <textarea id="editor3_edit_modal" name="dn_terms"
+                                                                class="form-control custom-textarea"
+                                                                placeholder="Enter DN terms and conditions"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="tab-pane" id="edit_tab_4">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Vendor PO Terms & Conditions</label>
+                                                            <textarea id="editor4_edit_modal" name="vendor_po_terms"
+                                                                class="form-control custom-textarea"
+                                                                placeholder="Enter vendor PO terms and conditions"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>

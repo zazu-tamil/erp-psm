@@ -154,14 +154,14 @@
                             <div class="form-group">
                                 <label>Remarks</label>
                                 <textarea id="editor1" name="remarks" class="form-control"
-                                    placeholder="Enter remarks"><?php echo set_value('remarks'); ?></textarea>
+                                    placeholder="Enter remarks"></textarea>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Terms & Conditions</label>
                                 <textarea id="editor2" name="terms" class="form-control"
-                                    placeholder="Enter terms"><?php echo set_value('terms'); ?></textarea>
+                                    placeholder="Enter terms"></textarea>
                             </div>
                         </div>
                     </div>
