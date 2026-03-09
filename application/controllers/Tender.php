@@ -1871,7 +1871,94 @@ class Tender extends CI_Controller
         $query = $this->db->query($sql, [$tender_quotation_id]);
         $data['item_list'] = $query->result_array();
 
-        $this->load->view('page/tender/tender-quotation-print', $data);
+        if(isset($_POST['export_xls'])) {
+
+            header("Content-Type: application/xls");
+            header("Content-Disposition: attachment; filename=Quotation-".$data['record']['tender_quotation_no'] .".xls");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+            //$this->load->view('page/tender/tender-quotation-print', $data);
+            $this->load->view('page/tender/tender-quotation-print-v2', $data);
+            
+        }
+
+        $this->load->view('page/tender/tender-quotation-print-v2', $data);
+    }
+
+    public function tender_quotation_xls_export($tender_quotation_id = 0)
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        if (!$tender_quotation_id) {
+            show_404();
+        }
+
+        // === MAIN RECORD ===
+        $sql = "
+         SELECT
+            tqi.*,
+            c.customer_name,
+            c.address,
+            c.country AS customer_country,
+            ci.company_name AS our_company,
+            te.enquiry_no AS tender_enquiry_no,
+            te.enquiry_date AS tender_enquiry_date,
+            tqi.quotation_no as tender_quotation_no,
+            ci.ltr_header_img,
+            curr.currency_code,
+            curr.decimal_point,
+            get_tender_info(tqi.tender_enquiry_id) as our_enq_ref_details
+        FROM
+            tender_quotation_info tqi
+        LEFT JOIN customer_info c ON
+            tqi.customer_id = c.customer_id AND c.status = 'Active'
+        LEFT JOIN company_info ci ON
+            tqi.company_id = ci.company_id AND ci.status = 'Active'
+        LEFT JOIN tender_enquiry_info te ON
+            tqi.tender_enquiry_id = te.tender_enquiry_id AND te.status = 'Active'
+        left join currencies_info as curr on tqi.currency_id= curr.currency_id and curr.status='Active'
+        WHERE
+            tqi.tender_quotation_id = ? AND tqi.status != 'Delete'
+        ";
+        $query = $this->db->query($sql, [$tender_quotation_id]);
+        $data['record'] = $query->row_array();
+
+        if (!$data['record']) {
+            show_404();
+        }
+
+        // === ITEMS WITH RATE CALCULATION ===
+        $sql = "
+           select
+            a.tender_quotation_id,
+            b.item_code,
+            b.item_desc,
+            b.uom,
+            b.qty,
+            b.rate,
+            b.gst,
+            b.amount,
+            (b.rate * b.qty) AS Net_amount
+            from tender_quotation_info as a  
+            left join tender_quotation_item_info as b on a.tender_quotation_id = b.tender_quotation_id and a.`status`='Active'
+            where a.`status`='Active'
+            and a.tender_quotation_id = ?
+        ";
+        $query = $this->db->query($sql, [$tender_quotation_id]);
+        $data['item_list'] = $query->result_array();
+
+        
+            
+        header("Content-Type: application/xls");
+        header("Content-Disposition: attachment; filename=Quotation.xls");
+        header("Pragma: no-cache");
+        header("Expires: 0");
+        //$this->load->view('page/tender/tender-quotation-print', $data);
+        $this->load->view('page/tender/tender-quotation-print-v2', $data);
+            
+        
     }
 
     public function tender_quotation_po()
@@ -2667,7 +2754,11 @@ class Tender extends CI_Controller
             // echo "<pre>";
             // print_r($this->input->post());
             // echo "</pre>";
-            //exit;
+            // $selected_items = $this->input->post('selected_items') ?? [];
+            // foreach ($selected_items as $idx ) {
+            //     echo $idx . "<br>";
+            // }
+            // exit;
 
             $this->db->trans_start();
 

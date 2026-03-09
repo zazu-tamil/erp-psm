@@ -466,14 +466,17 @@ class Vendor extends CI_Controller
         c.`status`
         from tender_enquiry_info as a
         left join tender_enquiry_item_info as b on b.tender_enquiry_id = a.tender_enquiry_id 
-        left join vendor_rate_enquiry_item_info as c on c.tender_enquiry_item_id = b.tender_enquiry_item_id and c.`status` = 'Active'
+        left join vendor_rate_enquiry_item_info as c 
+            on c.tender_enquiry_item_id = b.tender_enquiry_item_id 
+            and c.`status` = 'Active'
+            and c.vendor_rate_enquiry_id = '". $id ."'
         where a.`status` = 'Active'
         and b.`status` = 'Active'
-        and a.tender_enquiry_id = ?
+        and a.tender_enquiry_id = '". $data['main']['tender_enquiry_id'] ."'
         order by c.vendor_rate_enquiry_item_id desc  
         ";
         //$query = $this->db->query($sql, array($id));
-        $query = $this->db->query($sql, array($data['main']['tender_enquiry_id']));
+        $query = $this->db->query($sql);
         $data['item_rows'] = $query->result_array();
 
         $this->load->view('page/vendor/vendor-rate-enquiry-edit', $data);

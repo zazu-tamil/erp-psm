@@ -333,7 +333,7 @@
                             <input type="checkbox"
                                 class="item-check"
                                 name="selected_items[${i}]"    
-                                value="${row.tender_po_item_id || 0}"
+                                value="${i}"
                                 checked>
                         </td>
 
