@@ -491,7 +491,11 @@
                 $total_vat_amount += $vat;
             }
         }
-        $grand_total = $total_net_amount + $total_vat_amount;
+        //$grand_total = $total_net_amount + $total_vat_amount;
+
+        $total_vat_amount = (($total_net_amount + $record['transport_charges'] + $record['other_charges'] ) * $vat_rate /100);
+        $grand_total = ($total_net_amount + $record['transport_charges'] + $record['other_charges'] ) + $total_vat_amount;
+                    
         ?>
         <div class="currency-badge">
             <span>Currency: <?php echo htmlspecialchars($currency_code); ?></span>
@@ -542,6 +546,22 @@
                     <td colspan="2" class="text-right">
                         <strong><?php echo number_format($total_net_amount, $decimal_point); ?></strong></td>
                 </tr>
+                <?php if($record['transport_charges'] > 0 ) { ?>
+                <tr class="items-table">
+                    <td colspan="5" class="text-right"><strong>TRANSPORT CHARGES</strong></td>
+                    <td colspan="2" class="text-right">
+                        <strong><?php echo number_format($record['transport_charges'], $decimal_point); ?></strong>
+                    </td>
+                </tr>
+                    <?php } ?>
+                    <?php if($record['other_charges'] > 0 ) { ?>
+                <tr class="items-table">
+                    <td colspan="5" class="text-right"><strong>OTHER CHARGES</strong></td>
+                    <td colspan="2" class="text-right">
+                        <strong><?php echo number_format($record['other_charges'], $decimal_point); ?></strong>
+                    </td>
+                </tr>
+                <?php } ?>
                 <tr>
                     <td colspan="5" class="text-right"><strong>VAT
                             <?php echo number_format($vat_percentage ?? 0, 0); ?>%</strong></td>

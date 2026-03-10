@@ -186,7 +186,7 @@
 
                    $("#item_container").append(newRow);
 
-                    newRow.find(".qty-input").change();
+                    newRow.find(".rate-input").change();
                    i++;
                });
            };

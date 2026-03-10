@@ -89,6 +89,18 @@
                             <label>Quotation Status <span style="color:red;">*</span></label>
                             <?php echo form_dropdown('quote_status', $quotation_status_opt, $header['quote_status'], 'id="quote_status" class="form-control" required'); ?>
                         </div>
+                         <div class="form-group col-md-4">
+                            <label>Transport Charges</label>
+                            <input type="number" step="any" name="transport_charges" id="transport_charges"
+                                class="form-control" value="<?php echo set_value('transport_charges',$header['transport_charges']); ?>"
+                                placeholder="0.00">
+                        </div>  
+                        <div class="form-group col-md-4">
+                            <label>Other Charges</label>
+                            <input type="number" step="any" name="other_charges" id="other_charges"
+                                class="form-control" value="<?php echo set_value('other_charges',$header['other_charges']); ?>"
+                                placeholder="0.00">
+                        </div>  
                         <div class="form-group col-md-4">
                             <label>Upload Quotation Document</label>
 

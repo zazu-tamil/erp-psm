@@ -173,9 +173,7 @@
                                 <div class="col-md-1 d-flex align-items-center justify-content-center">  
                                              <input type="checkbox" class="form-check-input item-check" 
                                                 name="selected_items[]" value="<?php echo $i; ?>"
-                                                 <?php if (!empty($row['tender_quotation_item_id'])): ?> checked <?php endif; ?>>
-                                                    <input type="hidden" name="tender_quotation_item_id[]"
-                                            value="<?= $row['tender_quotation_item_id']; ?>">
+                                                 <?php if (!empty($row['tender_quotation_item_id'])): ?> checked <?php endif; ?>> 
 
 
                                          <input type="hidden" name="tender_quotation_item_id[]" class="tender_quotation_item_id" value="<?php echo htmlspecialchars($row['tender_quotation_item_id']); ?>">

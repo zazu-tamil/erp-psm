@@ -1563,7 +1563,8 @@ class Tender extends CI_Controller
 
         if ($this->input->post('mode') == 'Edit') {
             $this->db->trans_start();
-            /* echo "<pre>";
+            
+            /*echo "<pre>";
             print_r($_POST); 
             echo "</pre>";
             exit; */
@@ -1631,14 +1632,17 @@ class Tender extends CI_Controller
                         $this->db->where('tender_quotation_item_id', $tender_quotation_item_ids[$idx])
                             ->update('tender_quotation_item_info', $item_data);
 
+                         $miss_item_ids[] = $tender_quotation_item_ids[$idx];    
+
                     } else {
                         // INSERT new item
                         $item_data['created_by'] = $this->session->userdata(SESS_HD . 'user_id');
                         $item_data['created_date'] = date('Y-m-d H:i:s');
 
-                        $this->db->insert('tender_quotation_item_info', $item_data);
+                        $this->db->insert('tender_quotation_item_info', $item_data); 
+                        $miss_item_ids[] =  $this->db->insert_id();
                     }
-                    $miss_item_ids[] = $tender_quotation_item_ids[$idx];
+                   
 
                 }
                 // DELETE items which are not in the selected list

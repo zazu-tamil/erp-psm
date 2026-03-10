@@ -98,6 +98,11 @@
         .btn-success:hover {
             background: #218838;
         }
+        @media print {
+            .no-print{
+                display:none ;
+            }
+        }
     </style>
 
 </head>
@@ -240,8 +245,9 @@
                         <td colspan="7" class="text-center" style="padding:30px; color:#999;">No items found</td>
                     </tr>
                     <?php endif; 
-                    
-                    $grand_total = $total_net_amount + $total_vat_amount;
+                    //$total_net_amount += ($record['transport_charges'] + $record['other_charges']);
+                    $total_vat_amount = (($total_net_amount + $record['transport_charges'] + $record['other_charges'] ) * $vat_percentage /100);
+                    $grand_total = ($total_net_amount + $record['transport_charges'] + $record['other_charges'] ) + $total_vat_amount;
                     ?>
 
                     <tr class="items-table">
@@ -250,16 +256,33 @@
                             <strong><?php echo number_format($total_net_amount, $decimal_point); ?></strong>
                         </td>
                     </tr>
+                   
+                    <?php if($record['transport_charges'] > 0 ) { ?>
+                    <tr class="items-table">
+                        <td colspan="5" class="text-right"><strong>TRANSPORT CHARGES</strong></td>
+                        <td colspan="2" class="text-right">
+                            <strong><?php echo number_format($record['transport_charges'], $decimal_point); ?></strong>
+                        </td>
+                    </tr>
+                     <?php } ?>
+                     <?php if($record['other_charges'] > 0 ) { ?>
+                    <tr class="items-table">
+                        <td colspan="5" class="text-right"><strong>OTHER CHARGES</strong></td>
+                        <td colspan="2" class="text-right">
+                            <strong><?php echo number_format($record['other_charges'], $decimal_point); ?></strong>
+                        </td>
+                    </tr>
+                    <?php } ?>
                     <tr class="items-table">
                         <td colspan="5" class="text-right"><strong>VAT
                                 <?php echo number_format($vat_percentage ?? 0, 0); ?>%</strong></td>
                         <td colspan="2" class="text-right">
-                            <strong><?php echo number_format($total_vat_amount, $decimal_point); ?></strong>
+                            <strong><?php echo number_format(($total_vat_amount), $decimal_point); ?></strong>
                         </td>
                     </tr>
                     <tr class="items-table" style="background:#ffff; color:#000;">
-                        <td colspan="5" class="text-right"><strong>TOTAL
-                                <?php echo htmlspecialchars($currency_code); ?></strong></td>
+                        <td colspan="5" class="text-right"><strong>TOTAL </strong> 
+                                <i class="text-sm">in <?php echo htmlspecialchars($currency_code); ?></i></td>
                         <td colspan="2" class="text-right">
                             <strong><?php echo number_format($grand_total, $decimal_point); ?></strong>
                         </td>
@@ -301,7 +324,7 @@
 
     </table>
      <?php if(!isset($_POST['export_xls'])) { ?>       
-    <div class="button-container">
+    <div class="button-container no-print">
         <form action="<?php echo site_url('tender/tender_quotation_xls_export/' . $record['tender_quotation_id']) ?>" method="post">  
         <button type="button" class="btn btn-primary"
             onclick="window.location.href='<?= site_url('tender-quotation-list') ?>'">
