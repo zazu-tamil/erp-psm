@@ -53,22 +53,22 @@ $route['default_controller'] = 'login';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
-$route['logout'] = 'login/logout'; 
-$route['dash'] = 'dashboard'; 
+$route['logout'] = 'login/logout';
+$route['dash'] = 'dashboard';
 
 //$route['add-tender-enquiry']='tender/add_tender_enquiry';
-$route['add-tender-enquiry']='tender/add_tender_enquiry_v2';
+$route['add-tender-enquiry'] = 'tender/add_tender_enquiry_v2';
 $route['tender-enquiry-list'] = 'tender/tender_enquiry_list';
-$route['tender-enquiry-edit/(:num)'] = 'tender/edit_tender_enquiry/$1'; 
- $route['tender-enquiry-list/(:num)'] = 'tender/tender_enquiry_list/$1';
- 
+$route['tender-enquiry-edit/(:num)'] = 'tender/edit_tender_enquiry/$1';
+$route['tender-enquiry-list/(:num)'] = 'tender/tender_enquiry_list/$1';
+
 $route['change-password'] = 'login/change_password';
-$route['dash'] = 'dashboard'; 
+$route['dash'] = 'dashboard';
 $route['get-data'] = 'general/get_data';
 $route['update-data'] = 'general/update_data';
 $route['insert-data'] = 'general/insert_data';
 $route['delete-record'] = 'general/delete_record';
-$route['get-content'] = 'general/get_content';   
+$route['get-content'] = 'general/get_content';
 
 $route['company-list'] = 'master/company_list';
 $route['company-list/(:num)'] = 'master/company_list/$1';
@@ -84,10 +84,10 @@ $route['brand-list/(:num)'] = 'master/brand_list/$1';
 
 $route['uom-list'] = 'master/uom_list';
 $route['uom-list/(:num)'] = 'master/uom_list/$1';
- 
+
 $route['currency-list'] = 'master/currency_list';
 $route['currency-list/(:num)'] = 'master/currency_list/$1';
- 
+
 $route['gst-list'] = 'master/gst_list';
 $route['gst-list/(:num)'] = 'master/gst_list/$1';
 
@@ -151,39 +151,39 @@ $route['vendor-quotation-list/(:num)'] = 'vendor/vendor_quotation_list/$1';
 $route['vendor-quotation-edit/(:num)'] = 'vendor/vendor_quotation_edit/$1';
 $route['vendor-quotation-print/(:num)'] = 'vendor/vendor_quotation_print/$1';
 
-$route['vendor-po-add'] = 'vendor/vendor_po_add'; 
+$route['vendor-po-add'] = 'vendor/vendor_po_add';
 $route['vendor-po-list'] = 'vendor/vendor_po_list';
 $route['vendor-po-list/(:num)'] = 'vendor/vendor_po_list/$1';
 $route['vendor-po-edit/(:num)'] = 'vendor/vendor_po_edit/$1';
 $route['vendor-po-view/(:num)'] = 'vendor/vendor_po_view/$1';
 
-$route['vendor-pur-inward-add'] = 'vendor/vendor_pur_inward_add'; 
+$route['vendor-pur-inward-add'] = 'vendor/vendor_pur_inward_add';
 $route['vendor-pur-inward-list'] = 'vendor/vendor_pur_inward_list';
 $route['vendor-pur-inward-list/(:num)'] = 'vendor/vendor_pur_inward_list/$1';
-$route['vendor-pur-inward-edit/(:num)'] = 'vendor/vendor_pur_inward_edit/$1'; 
+$route['vendor-pur-inward-edit/(:num)'] = 'vendor/vendor_pur_inward_edit/$1';
 
-$route['vendor-purchase-bill-add'] = 'vendor/vendor_purchase_bill_add'; 
-$route['vendor-purchase-bill-add/(:num)'] = 'vendor/vendor_purchase_bill_add/$1'; 
+$route['vendor-purchase-bill-add'] = 'vendor/vendor_purchase_bill_add';
+$route['vendor-purchase-bill-add/(:num)'] = 'vendor/vendor_purchase_bill_add/$1';
 
-$route['vendor-purchase-bill-edit'] = 'vendor/vendor_purchase_bill_edit'; 
-$route['vendor-purchase-bill-edit/(:num)'] = 'vendor/vendor_purchase_bill_edit/$1'; 
+$route['vendor-purchase-bill-edit'] = 'vendor/vendor_purchase_bill_edit';
+$route['vendor-purchase-bill-edit/(:num)'] = 'vendor/vendor_purchase_bill_edit/$1';
 
-$route['vendor-purchase-bill-list'] = 'vendor/vendor_purchase_bill_list'; 
-$route['vendor-purchase-bill-list/(:num)'] = 'vendor/vendor_purchase_bill_list/$1'; 
+$route['vendor-purchase-bill-list'] = 'vendor/vendor_purchase_bill_list';
+$route['vendor-purchase-bill-list/(:num)'] = 'vendor/vendor_purchase_bill_list/$1';
 
-$route['tender-invoice-add'] = 'tender/tender_invoice_add'; 
+$route['tender-invoice-add'] = 'tender/tender_invoice_add';
 $route['tender-invoice-list'] = 'tender/tender_po_invoice_list';
 $route['tender-invoice-list/(:num)'] = 'tender/tender_po_invoice_list/$1';
-$route['tender-po-invoice-edit/(:num)'] = 'tender/tender_po_invoice_edit/$1'; 
-$route['tender-po-invoice-print/(:num)'] = 'tender/tender_po_invoice_print/$1'; 
+$route['tender-po-invoice-edit/(:num)'] = 'tender/tender_po_invoice_edit/$1';
+$route['tender-po-invoice-print/(:num)'] = 'tender/tender_po_invoice_print/$1';
 
-/*Accounts Routes*/ 
+/*Accounts Routes*/
 
-$route['inward-list'] = 'accounts/cash_inward_list'; 
-$route['inward-list/(:num)'] = 'accounts/cash_inward_list/$1'; 
+$route['inward-list'] = 'accounts/cash_inward_list';
+$route['inward-list/(:num)'] = 'accounts/cash_inward_list/$1';
 
-$route['outward-list'] = 'accounts/cash_outward_list'; 
-$route['outward-list/(:num)'] = 'accounts/cash_outward_list/$1'; 
+$route['outward-list'] = 'accounts/cash_outward_list';
+$route['outward-list/(:num)'] = 'accounts/cash_outward_list/$1';
 
 $route['opening-balance-list'] = 'accounts/opening_balance_list';
 $route['opening-balance-list/(:num)'] = 'accounts/opening_balance_list/$1';
@@ -193,8 +193,8 @@ $route['print-receipt/(:num)'] = 'accounts/print_receipt/$1';
 
 $route['cash-ledger'] = 'accounts/cash_ledger';
 
-$route['cash-in-statement'] = 'accounts/cash_in_statement'; 
-$route['na-cash-in-statement'] = 'accounts/na_cash_in_statement'; 
+$route['cash-in-statement'] = 'accounts/cash_in_statement';
+$route['na-cash-in-statement'] = 'accounts/na_cash_in_statement';
 $route['cash-out-statement'] = 'accounts/cash_out_statement';
 $route['na-cash-out-statement'] = 'accounts/na_cash_out_statement';
 $route['outward-summary'] = 'accounts/outward_summary';
@@ -239,11 +239,20 @@ $route['ledger-transactions-report'] = 'audit/ledger_transactions_report';
 $route['ledger-transactions-report/(:num)'] = 'audit/ledger_transactions_report/$1';
 
 
+$route['purchase-bill-entry-list'] = 'vendor/purchase_bill_entry_local';
+$route['purchase-bill-entry-list/(:num)'] = 'vendor/purchase_bill_entry_local/$1';
+
+
+
+
+$route['customer-bill-invoice-entry-list'] = 'tender/customer_bill_invoice_entry_list';
+$route['customer-bill-invoice-entry-list/(:num)'] = 'tender/customer_bill_invoice_entry_list/$1';
+
 
 //trial balance report routes
 $route['trial-balance-list'] = 'audit/trial_balance_list';
 $route['profit-loss-report'] = 'audit/profit_loss_report';
- 
+
 //setting 
 
 $route['settings'] = 'master/settings_list';
@@ -261,12 +270,12 @@ $route['addt-charges-type-list/(:num)'] = 'master/addt_charges_type_list/$1';
 
 
 //report
-$route['tender-enquiry-summary-report'] = 'reports/tender_enquiry_summary_report'; 
+$route['tender-enquiry-summary-report'] = 'reports/tender_enquiry_summary_report';
 
 $route['sales-nbr-report'] = 'reports/sales_nbr_report';
-$route['purchase-nbr-report'] = 'reports/purchase_nbr_report'; 
+$route['purchase-nbr-report'] = 'reports/purchase_nbr_report';
 
-$route['item-rate-report'] = 'reports/item_rate_report'; 
+$route['item-rate-report'] = 'reports/item_rate_report';
 
 $route['tender-enquiry-timeline'] = 'tender/tender_enquiry_timeline';
 $route['tender-enquiry-timeline/(:num)'] = 'tender/tender_enquiry_timeline/$1';
