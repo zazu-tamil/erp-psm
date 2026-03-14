@@ -35,6 +35,23 @@ class General extends CI_Controller
         $table = $this->input->post('tbl');
         $rec_id = $this->input->post('id');
 
+
+        if ($table == 'sub_account_head_info') {
+
+            $query = $this->db->query("
+                SELECT *
+                FROM cb_sub_account_head_info
+                WHERE sub_account_head_id = '" . $rec_id . "'
+                and `status` = 'Active'
+                order by sub_account_head_id asc 
+
+            ");
+
+            $rec_list = $query->result_array();
+
+            
+        }
+
         
         if ($table == 'get-company-terms-and-conditions-list') {
 

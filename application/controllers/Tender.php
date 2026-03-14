@@ -1835,7 +1835,9 @@ class Tender extends CI_Controller
             ci.ltr_header_img,
             curr.currency_code,
             curr.decimal_point,
-            get_tender_info(tqi.tender_enquiry_id) as our_enq_ref_details
+            get_tender_info(tqi.tender_enquiry_id) as our_enq_ref_details,
+            cp.contact_person_name as contact_person,
+            cp.designation
         FROM
             tender_quotation_info tqi
         LEFT JOIN customer_info c ON
@@ -1845,6 +1847,7 @@ class Tender extends CI_Controller
         LEFT JOIN tender_enquiry_info te ON
             tqi.tender_enquiry_id = te.tender_enquiry_id AND te.status = 'Active'
         left join currencies_info as curr on tqi.currency_id= curr.currency_id and curr.status='Active'
+        left join customer_contact_info as cp on cp.customer_contact_id = te.customer_contact_id and cp.status = 'Active'
         WHERE
             tqi.tender_quotation_id = ? AND tqi.status != 'Delete'
         ";

@@ -239,9 +239,14 @@ $route['ledger-transactions-report'] = 'audit/ledger_transactions_report';
 $route['ledger-transactions-report/(:num)'] = 'audit/ledger_transactions_report/$1';
 
 
-$route['purchase-bill-entry-list'] = 'vendor/purchase_bill_entry_local';
-$route['purchase-bill-entry-list/(:num)'] = 'vendor/purchase_bill_entry_local/$1';
+$route['local-purchase-bill-list'] = 'vendor/local_purchase_bill_list';
+$route['local-purchase-bill-list/(:num)'] = 'vendor/local_purchase_bill_list/$1';
 
+$route['delivery-partner-bill-list'] = 'vendor/delivery_partner_bill_list';
+$route['delivery-partner-bill-list/(:num)'] = 'vendor/delivery_partner_bill_list/$1';
+
+$route['customs-bill-list'] = 'vendor/customs_bill_list';
+$route['customs-bill-list/(:num)'] = 'vendor/customs_bill_list/$1';
 
 
 

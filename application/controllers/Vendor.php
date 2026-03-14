@@ -3256,6 +3256,50 @@ class Vendor extends CI_Controller
         $this->db->query('SET SQL_BIG_SELECTS=1');
         $rec_list = array();
 
+        if ($table == 'customs_bill_info') {
+
+            $query = $this->db->query("
+                SELECT 
+                a.*,
+                get_tender_info(a.tender_enquiry_id) as tender_info 
+                FROM
+                    customs_bill_info as a
+                WHERE 
+                    a.customs_bill_id = '". $rec_id."'
+                order by a.customs_bill_id 
+            ");
+            $rec_list = $query->result_array();
+        }
+        
+        if ($table == 'dp_bill_info') {
+
+            $query = $this->db->query("
+                SELECT 
+                a.*,
+                get_tender_info(a.tender_enquiry_id) as tender_info 
+                FROM
+                    dp_bill_info as a
+                WHERE 
+                    a.dp_bill_id = '". $rec_id."'
+                order by a.dp_bill_id 
+            ");
+            $rec_list = $query->result_array();
+        }
+
+        if ($table == 'local_purchase_bill_info') {
+            $query = $this->db->query("
+                SELECT 
+                a.*,
+                get_tender_info(a.tender_enquiry_id) as tender_info 
+                FROM
+                    local_purchase_bill_info as a
+                WHERE 
+                    a.local_purchase_bill_id = '". $rec_id."'
+                order by a.local_purchase_bill_id 
+            ");
+            $rec_list = $query->result_array();
+        }
+
         if ($table == 'get-tender-enquiry-item-list-rate') {
             $query = $this->db->query("
                         SELECT
@@ -3638,6 +3682,36 @@ class Vendor extends CI_Controller
         $table = $this->input->post('tbl');
         $rec_id = $this->input->post('id');
 
+        if ($table == 'customs_bill_info' && !empty($rec_id)) {
+            $this->db->where('customs_bill_id', $rec_id);
+            $this->db->update('customs_bill_info', [
+                'status' => 'Delete',
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            ]);
+            echo 'Custom Bill deleted.';
+        } 
+
+        if ($table == 'dp_bill_info' && !empty($rec_id)) {
+            $this->db->where('dp_bill_id', $rec_id);
+            $this->db->update('dp_bill_info', [
+                'status' => 'Delete',
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            ]);
+            echo 'DP Bill deleted.';
+        } 
+
+        if ($table == 'local_purchase_bill_info' && !empty($rec_id)) {
+            $this->db->where('local_purchase_bill_id', $rec_id);
+            $this->db->update('local_purchase_bill_info', [
+                'status' => 'Delete',
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            ]);
+            echo 'Local Bill deleted.';
+        } 
+
         if ($table == 'vendor_rate_enquiry_info' && !empty($rec_id)) {
             $this->db->where('vendor_rate_enquiry_id', $rec_id);
             $this->db->update('vendor_rate_enquiry_info', [
@@ -3646,9 +3720,9 @@ class Vendor extends CI_Controller
                 'updated_date' => date('Y-m-d H:i:s')
             ]);
             echo 'Vendor Rate Enquiry marked as deleted.';
-        } else {
-            echo 'Invalid request.';
-        }
+        } 
+
+
     }
 
 
@@ -4818,7 +4892,7 @@ class Vendor extends CI_Controller
 
 
 
-    public function purchase_bill_entry_local()
+    public function local_purchase_bill_list()
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
@@ -4828,10 +4902,58 @@ class Vendor extends CI_Controller
             exit;
         }
 
-        $data['js'] = 'vendor/purchase-bill-entry-local.inc';
-        $data['title'] = 'Purchase Bill Entry List';
+        $data['js'] = 'vendor/local-purchase-bill-list.inc';
+        $data['title'] = 'Local Supplier Bill List';
 
 
+        if ($this->input->post('mode') == 'Add') {
+            $ins = array( 
+                'sub_account_head_id' => $this->input->post('sub_account_head_id'), 
+                'customer_id' => $this->input->post('customer_id'),
+                'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
+                'vendor_id' => $this->input->post('vendor_id'),
+                'invoice_date' => $this->input->post('invoice_date'),
+                'invoice_no' => $this->input->post('invoice_no'),
+                'inv_entry_date' => $this->input->post('inv_entry_date'),
+                'vat_payer_purchase_grp' => $this->input->post('vat_payer_purchase_grp'),
+                'tot_amt_wo_tax' => $this->input->post('tot_amt_wo_tax'),
+                'vat' => $this->input->post('vat'),
+                'tot_amt_with_tax' => $this->input->post('tot_amt_with_tax'), 
+                'status' => $this->input->post('status'),
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_date' => date('Y-m-d H:i:s'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            ); 
+
+            $this->db->insert('local_purchase_bill_info', $ins);
+            redirect('local-purchase-bill-list');
+        }
+
+         if ($this->input->post('mode') == 'Edit') {
+
+            $upd = array( 
+                'sub_account_head_id' => $this->input->post('sub_account_head_id'), 
+                'customer_id' => $this->input->post('customer_id'),
+                'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
+                'vendor_id' => $this->input->post('vendor_id'),
+                'invoice_date' => $this->input->post('invoice_date'),
+                'invoice_no' => $this->input->post('invoice_no'),
+                'inv_entry_date' => $this->input->post('inv_entry_date'),
+                'vat_payer_purchase_grp' => $this->input->post('vat_payer_purchase_grp'),
+                'tot_amt_wo_tax' => $this->input->post('tot_amt_wo_tax'),
+                'vat' => $this->input->post('vat'),
+                'tot_amt_with_tax' => $this->input->post('tot_amt_with_tax'), 
+                'status' => $this->input->post('status'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            ); 
+
+            $this->db->where('local_purchase_bill_id',$this->input->post('local_purchase_bill_id'));
+            $this->db->update('local_purchase_bill_info', $upd);
+
+            redirect('local-purchase-bill-list/' . $this->uri->segment(2, 0));
+        }
 
 
         $where = "1=1"; 
@@ -4876,7 +4998,7 @@ class Vendor extends CI_Controller
             $data['srch_invoice_no'] = $srch_invoice_no = '';
         }
         if (!empty($srch_invoice_no)) {
-            $where = " (t.invoice_no = '" . $this->db->escape_str($srch_invoice_no) . "')";
+            $where = " (a.invoice_no = '" . $this->db->escape_str($srch_invoice_no) . "')";
         }
 
 
@@ -4892,8 +5014,8 @@ class Vendor extends CI_Controller
 
 
         if (!empty($srch_enquiry_no)) {
-            $where = " ( concat(ifnull(com.company_code,'') , '/', ifnull(t.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(t.customer_sno,''),  '/' , DATE_FORMAT(t.enquiry_date,'%Y') ) like '%" . $this->db->escape_str($srch_enquiry_no) . "%' ) ";
-
+            //$where = " ( concat(ifnull(com.company_code,'') , '/', ifnull(t.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(t.customer_sno,''),  '/' , DATE_FORMAT(t.enquiry_date,'%Y') ) like '%" . $this->db->escape_str($srch_enquiry_no) . "%' ) ";
+            $where = "(get_tender_info(a.tender_enquiry_id) like '%".  $this->db->escape_str($srch_enquiry_no) ."%') ";
             $data['srch_customer_id'] = $srch_customer_id = '';
         }
 
@@ -4902,12 +5024,12 @@ class Vendor extends CI_Controller
         $this->load->library('pagination');
 
         $this->db->where('status != ', 'Delete');
-        $this->db->from('vendor_rate_enquiry_info');
+        $this->db->from('local_purchase_bill_info as a');
         $data['total_records'] = $cnt = $this->db->count_all_results();
 
         $data['sno'] = $this->uri->segment(2, 0);
 
-        $config['base_url'] = trim(site_url('vendor-rate-enquiry-list') . '/' . $this->uri->segment(2, 0));
+        $config['base_url'] = trim(site_url('local-purchase-bill-list') . '/' . $this->uri->segment(2, 0));
         $config['total_rows'] = $cnt;
         $config['per_page'] = 50;
         $config['uri_segment'] = 2;
@@ -4929,6 +5051,34 @@ class Vendor extends CI_Controller
         $config['prev_link'] = "Prev";
         $config['next_link'] = "Next";
         $this->pagination->initialize($config);
+
+
+       $sql = "
+                select 
+                a.*, 
+                b.sub_account_head_name,
+                c.vendor_name,
+                e.customer_name,
+                get_tender_info(a.tender_enquiry_id) as tender_info 
+                from local_purchase_bill_info as a  
+                left join cb_sub_account_head_info as b on b.sub_account_head_id = a.sub_account_head_id and b.status = 'Active'
+                left join vendor_info as c on c.vendor_id = a.vendor_id and c.status = 'Active' 
+                left JOIN tender_enquiry_info as d on d.tender_enquiry_id = a.tender_enquiry_id and d.status='Active'
+                left join customer_info as e on e.customer_id = a.customer_id and e.status='Active' 
+                where a.status != 'Delete' 
+                and $where   
+                order by a.invoice_date desc , a.local_purchase_bill_id desc
+                limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
+        ";
+
+        $query = $this->db->query($sql);
+
+        $data['record_list'] = array();
+
+        foreach ($query->result_array() as $row) {
+            $data['record_list'][] = $row;
+        }
+
 
         $data['customer_opt'] = [];
         $data['vendor_contact_opt'] = [];
@@ -4976,17 +5126,7 @@ class Vendor extends CI_Controller
         }
 
 
-        $sql = "
-            SELECT * FROM company_info 
-            WHERE status != 'Delete' 
-            order by company_id desc 
-            limit " . $this->uri->segment(2, 0) . "," . $config['per_page']
-        ;
-        $data['record_list'] = array();
-        $query = $this->db->query($sql);
-        foreach ($query->result_array() as $row) {
-            $data['record_list'][] = $row;
-        }
+        
 
         $sql = "
             SELECT 
@@ -5003,16 +5143,595 @@ class Vendor extends CI_Controller
         }
 
 
-        $ac_sub_head_opt = [
-            '' => 'Select Account Sub Head',
-            'Office Expences' => 'Office Expences',
-            'Misllaneous Expences' => 'Mislleaneous Expences',
-            'Other Expences' => 'Other Expences'
-        ]
-        ;
-        $data['ac_sub_head_opt'] = $ac_sub_head_opt;
+        $sql = "
+                select 
+                a.sub_account_head_id,                
+                a.sub_account_head_name             
+                from cb_sub_account_head_info as a  
+                where a.status = 'Active' and a.type = 'Outward'
+                and a.account_head_id = '". INDIRECT_EXPENSES ."'
+                order by a.sub_account_head_name asc                 
+        ";
+
+        $query = $this->db->query($sql);
+
+        $data['ac_sub_head_opt'] = array();
+
+        foreach ($query->result_array() as $row) {
+            $data['ac_sub_head_opt'][$row['sub_account_head_id']] = $row['sub_account_head_name'];
+        } 
 
         $data['pagination'] = $this->pagination->create_links();
-        $this->load->view('page/vendor/purchase-bill-entry-local', $data);
+        
+        $this->load->view('page/vendor/local-purchase-bill-list', $data);
+    }
+
+
+    public function delivery_partner_bill_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        if ($this->session->userdata(SESS_HD . 'level') != 'Admin' && $this->session->userdata(SESS_HD . 'level') != 'Staff') {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+        $data['js'] = 'vendor/delivery-partner-bill-list.inc';
+        $data['title'] = 'Delivery Partner Bill List';
+ 
+
+
+        if ($this->input->post('mode') == 'Add') {
+            $ins = array( 
+                'sub_account_head_id' => $this->input->post('sub_account_head_id'), 
+                'customer_id' => $this->input->post('customer_id'),
+                'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
+                'vendor_id' => $this->input->post('vendor_id'),
+                'invoice_date' => $this->input->post('invoice_date'),
+                'invoice_no' => $this->input->post('invoice_no'),
+                'inv_entry_date' => $this->input->post('inv_entry_date'),
+                'vat_payer_purchase_grp' => $this->input->post('vat_payer_purchase_grp'),
+                'custom_vat_amt' => $this->input->post('custom_vat_amt'),
+                'custom_duty' => $this->input->post('custom_duty'),
+                'custom_stamp_fee' => $this->input->post('custom_stamp_fee'), 
+                'tot_amt_wo_dp' => $this->input->post('tot_amt_wo_dp'), 
+                'dp_charges' => $this->input->post('dp_charges'), 
+                'dp_vat' => $this->input->post('dp_vat'), 
+                'g_total' => $this->input->post('g_total'), 
+                'status' => $this->input->post('status'),
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_date' => date('Y-m-d H:i:s'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            ); 
+
+            $this->db->insert('dp_bill_info', $ins);
+            redirect('delivery-partner-bill-list');
+        }
+
+         if ($this->input->post('mode') == 'Edit') {
+
+            $upd = array( 
+                'sub_account_head_id' => $this->input->post('sub_account_head_id'), 
+                'customer_id' => $this->input->post('customer_id'),
+                'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
+                'vendor_id' => $this->input->post('vendor_id'),
+                'invoice_date' => $this->input->post('invoice_date'),
+                'invoice_no' => $this->input->post('invoice_no'),
+                'inv_entry_date' => $this->input->post('inv_entry_date'),
+                'vat_payer_purchase_grp' => $this->input->post('vat_payer_purchase_grp'),
+                'custom_vat_amt' => $this->input->post('custom_vat_amt'),
+                'custom_duty' => $this->input->post('custom_duty'),
+                'custom_stamp_fee' => $this->input->post('custom_stamp_fee'), 
+                'tot_amt_wo_dp' => $this->input->post('tot_amt_wo_dp'), 
+                'dp_charges' => $this->input->post('dp_charges'), 
+                'dp_vat' => $this->input->post('dp_vat'), 
+                'g_total' => $this->input->post('g_total'), 
+                'status' => $this->input->post('status'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            ); 
+
+            $this->db->where('dp_bill_id',$this->input->post('dp_bill_id'));
+            $this->db->update('dp_bill_info', $upd);
+
+            redirect('delivery-partner-bill-list/' . $this->uri->segment(2, 0));
+        }
+
+
+        $where = "1=1"; 
+
+        // Customer Filter
+        if ($this->input->post('srch_customer_id') !== null) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
+            $this->session->set_userdata('srch_customer_id', $srch_customer_id);
+        } elseif ($this->session->userdata('srch_customer_id')) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->session->userdata('srch_customer_id');
+        } else {
+            $data['srch_customer_id'] = $srch_customer_id = '';
+        }
+        if (!empty($srch_customer_id)) {
+            $where .= " AND a.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
+        }
+
+
+
+
+        // Vendor Filter
+        if ($this->input->post('srch_vendor_id') !== null) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->input->post('srch_vendor_id');
+            $this->session->set_userdata('srch_vendor_id', $srch_vendor_id);
+        } elseif ($this->session->userdata('srch_vendor_id')) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->session->userdata('srch_vendor_id');
+        } else {
+            $data['srch_vendor_id'] = $srch_vendor_id = '';
+        }
+        if (!empty($srch_vendor_id)) {
+            $where .= " AND a.vendor_id = '" . $this->db->escape_str($srch_vendor_id) . "'";
+        }
+
+
+        // Company Filter
+        if ($this->input->post('srch_invoice_no') !== null) {
+            $data['srch_invoice_no'] = $srch_invoice_no = $this->input->post('srch_invoice_no');
+            $this->session->set_userdata('srch_invoice_no', $srch_invoice_no);
+        } elseif ($this->session->userdata('srch_invoice_no')) {
+            $data['srch_invoice_no'] = $srch_invoice_no = $this->session->userdata('srch_invoice_no');
+        } else {
+            $data['srch_invoice_no'] = $srch_invoice_no = '';
+        }
+        if (!empty($srch_invoice_no)) {
+            $where = " (a.invoice_no = '" . $this->db->escape_str($srch_invoice_no) . "')";
+        }
+
+
+
+        if ($this->input->post('srch_enquiry_no') !== null) {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->input->post('srch_enquiry_no');
+            $this->session->set_userdata('srch_enquiry_no', $srch_enquiry_no);
+        } elseif ($this->session->userdata('srch_enquiry_no')) {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->session->userdata('srch_enquiry_no');
+        } else {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = '';
+        }
+
+
+        if (!empty($srch_enquiry_no)) {
+            //$where = " ( concat(ifnull(com.company_code,'') , '/', ifnull(t.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(t.customer_sno,''),  '/' , DATE_FORMAT(t.enquiry_date,'%Y') ) like '%" . $this->db->escape_str($srch_enquiry_no) . "%' ) ";
+            $where = "(get_tender_info(a.tender_enquiry_id) like '%".  $this->db->escape_str($srch_enquiry_no) ."%') ";
+            $data['srch_customer_id'] = $srch_customer_id = '';
+        }
+
+
+
+        $this->load->library('pagination');
+
+        $this->db->where('status != ', 'Delete');
+        $this->db->from('dp_bill_info as a');
+        $data['total_records'] = $cnt = $this->db->count_all_results();
+
+        $data['sno'] = $this->uri->segment(2, 0);
+
+        $config['base_url'] = trim(site_url('delivery-partner-bill-list') . '/' . $this->uri->segment(2, 0));
+        $config['total_rows'] = $cnt;
+        $config['per_page'] = 50;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '<span class="sr-only">(current)</span></a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = "Prev";
+        $config['next_link'] = "Next";
+        $this->pagination->initialize($config);
+
+
+       $sql = "
+                select 
+                a.*, 
+                b.sub_account_head_name,
+                c.vendor_name,
+                e.customer_name,
+                get_tender_info(a.tender_enquiry_id) as tender_info 
+                from dp_bill_info as a  
+                left join cb_sub_account_head_info as b on b.sub_account_head_id = a.sub_account_head_id and b.status = 'Active'
+                left join vendor_info as c on c.vendor_id = a.vendor_id and c.status = 'Active' 
+                left JOIN tender_enquiry_info as d on d.tender_enquiry_id = a.tender_enquiry_id and d.status='Active'
+                left join customer_info as e on e.customer_id = a.customer_id and e.status='Active' 
+                where a.status != 'Delete' 
+                and $where   
+                order by a.invoice_date desc , a.dp_bill_id desc
+                limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
+        ";
+
+        $query = $this->db->query($sql);
+
+        $data['record_list'] = array();
+
+        foreach ($query->result_array() as $row) {
+            $data['record_list'][] = $row;
+        }
+
+
+        $data['customer_opt'] = [];
+        $data['vendor_contact_opt'] = [];
+        $data['vendor_opt'] = [];
+        $data['country_opt'] = [];
+        $data['vendor_RFQ_opt'] = ['Prepared RFQ' => 'Prepared RFQ', 'RFQ Sent' => 'RFQ Sent', 'Quotation Received' => 'Quotation Received'];
+
+        $sql = "
+          SELECT
+                a.country_id,
+                a.country_name
+            FROM
+                country_info AS a
+            WHERE
+                a.status != 'Delete'
+            ORDER BY
+                a.country_name ASC
+         ";
+
+        $query = $this->db->query($sql);
+        $data['country_opt'] = array();
+        foreach ($query->result_array() as $row) {
+            $data['country_opt'][$row['country_name']] = $row['country_name'];
+        }
+
+        $sql = "
+            SELECT vendor_id,vendor_name 
+            FROM vendor_info 
+            WHERE status = 'Active' 
+            ORDER BY vendor_name ASC";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+        }
+
+        $sql = "
+            SELECT customer_id,customer_name
+            FROM customer_info
+            WHERE status = 'Active' 
+            ORDER BY customer_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
+
+        
+
+        $sql = "
+            SELECT 
+            vat_filing_head_name 
+            FROM vat_filing_head_info 
+            WHERE status = 'Active' 
+            and vat_filing_head_type = 'Purchase'
+            ORDER BY vat_filing_head_id ASC
+            ";
+        $query = $this->db->query($sql);
+        $data['vat_payer_purchase_opt'] = ['' => 'Select VAT Payer Purchase Category'];
+        foreach ($query->result_array() as $row) {
+            $data['vat_payer_purchase_opt'][$row['vat_filing_head_name']] = $row['vat_filing_head_name'];
+        }
+
+
+        $sql = "
+                select 
+                a.sub_account_head_id,                
+                a.sub_account_head_name             
+                from cb_sub_account_head_info as a  
+                where a.status = 'Active' and a.type = 'Outward'
+                and a.account_head_id = '". INDIRECT_EXPENSES ."'
+                order by a.sub_account_head_name asc                 
+        ";
+
+        $query = $this->db->query($sql);
+
+        $data['ac_sub_head_opt'] = array();
+
+        foreach ($query->result_array() as $row) {
+            $data['ac_sub_head_opt'][$row['sub_account_head_id']] = $row['sub_account_head_name'];
+        } 
+
+        $data['pagination'] = $this->pagination->create_links();
+        
+        $this->load->view('page/vendor/delivery-partner-bill-list', $data);
+    }
+
+    public function customs_bill_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        if ($this->session->userdata(SESS_HD . 'level') != 'Admin' && $this->session->userdata(SESS_HD . 'level') != 'Staff') {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+        $data['js'] = 'vendor/customs-bill-list.inc';
+        $data['title'] = 'Customs Bill List';
+ 
+
+
+        if ($this->input->post('mode') == 'Add') {
+            $ins = array( 
+                'ac_type_opt' => $this->input->post('ac_type_opt'), 
+                'customer_id' => $this->input->post('customer_id'),
+                'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
+                'vendor_id' => $this->input->post('vendor_id'),
+                'invoice_date' => $this->input->post('invoice_date'),
+                'invoice_no' => $this->input->post('invoice_no'),
+                'inv_entry_date' => $this->input->post('inv_entry_date'),
+                'vat_payer_purchase_grp' => $this->input->post('vat_payer_purchase_grp'),
+                'declaration_no' => $this->input->post('declaration_no'),
+                'declaration_date' => $this->input->post('declaration_date'),
+                'custom_duty' => $this->input->post('custom_duty'),
+                'custom_stamp_fee' => $this->input->post('custom_stamp_fee'), 
+                'bill_amount' => $this->input->post('bill_amount'), 
+                'tot_amt_wo_vat' => $this->input->post('tot_amt_wo_vat'),  
+                'vat' => $this->input->post('vat'), 
+                'vat_amt' => $this->input->post('vat_amt'), 
+                'customs_tot_amt' => $this->input->post('customs_tot_amt'), 
+                'status' => $this->input->post('status'),
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_date' => date('Y-m-d H:i:s'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            ); 
+
+            $this->db->insert('customs_bill_info', $ins);
+            redirect('customs-bill-list');
+        }
+
+         if ($this->input->post('mode') == 'Edit') {
+
+            $upd = array( 
+                'ac_type_opt' => $this->input->post('ac_type_opt'), 
+                'customer_id' => $this->input->post('customer_id'),
+                'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
+                'vendor_id' => $this->input->post('vendor_id'),
+                'invoice_date' => $this->input->post('invoice_date'),
+                'invoice_no' => $this->input->post('invoice_no'),
+                'inv_entry_date' => $this->input->post('inv_entry_date'),
+                'vat_payer_purchase_grp' => $this->input->post('vat_payer_purchase_grp'),
+                'declaration_no' => $this->input->post('declaration_no'),
+                'declaration_date' => $this->input->post('declaration_date'),
+                'custom_duty' => $this->input->post('custom_duty'),
+                'custom_stamp_fee' => $this->input->post('custom_stamp_fee'), 
+                'bill_amount' => $this->input->post('bill_amount'), 
+                'tot_amt_wo_vat' => $this->input->post('tot_amt_wo_vat'),  
+                'vat' => $this->input->post('vat'), 
+                'vat_amt' => $this->input->post('vat_amt'), 
+                'customs_tot_amt' => $this->input->post('customs_tot_amt'), 
+                'status' => $this->input->post('status'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            ); 
+
+            $this->db->where('customs_bill_id',$this->input->post('customs_bill_id'));
+            $this->db->update('customs_bill_info', $upd);
+
+            redirect('customs-bill-list/' . $this->uri->segment(2, 0));
+        }
+
+
+        $where = "1=1"; 
+
+        // Customer Filter
+        if ($this->input->post('srch_customer_id') !== null) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
+            $this->session->set_userdata('srch_customer_id', $srch_customer_id);
+        } elseif ($this->session->userdata('srch_customer_id')) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->session->userdata('srch_customer_id');
+        } else {
+            $data['srch_customer_id'] = $srch_customer_id = '';
+        }
+        if (!empty($srch_customer_id)) {
+            $where .= " AND a.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
+        }
+
+
+
+
+        // Vendor Filter
+        if ($this->input->post('srch_vendor_id') !== null) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->input->post('srch_vendor_id');
+            $this->session->set_userdata('srch_vendor_id', $srch_vendor_id);
+        } elseif ($this->session->userdata('srch_vendor_id')) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->session->userdata('srch_vendor_id');
+        } else {
+            $data['srch_vendor_id'] = $srch_vendor_id = '';
+        }
+        if (!empty($srch_vendor_id)) {
+            $where .= " AND a.vendor_id = '" . $this->db->escape_str($srch_vendor_id) . "'";
+        }
+
+
+        // Company Filter
+        if ($this->input->post('srch_invoice_no') !== null) {
+            $data['srch_invoice_no'] = $srch_invoice_no = $this->input->post('srch_invoice_no');
+            $this->session->set_userdata('srch_invoice_no', $srch_invoice_no);
+        } elseif ($this->session->userdata('srch_invoice_no')) {
+            $data['srch_invoice_no'] = $srch_invoice_no = $this->session->userdata('srch_invoice_no');
+        } else {
+            $data['srch_invoice_no'] = $srch_invoice_no = '';
+        }
+        if (!empty($srch_invoice_no)) {
+            $where = " (a.invoice_no = '" . $this->db->escape_str($srch_invoice_no) . "')";
+        }
+
+
+
+        if ($this->input->post('srch_enquiry_no') !== null) {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->input->post('srch_enquiry_no');
+            $this->session->set_userdata('srch_enquiry_no', $srch_enquiry_no);
+        } elseif ($this->session->userdata('srch_enquiry_no')) {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->session->userdata('srch_enquiry_no');
+        } else {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = '';
+        }
+
+
+        if (!empty($srch_enquiry_no)) {
+            //$where = " ( concat(ifnull(com.company_code,'') , '/', ifnull(t.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(t.customer_sno,''),  '/' , DATE_FORMAT(t.enquiry_date,'%Y') ) like '%" . $this->db->escape_str($srch_enquiry_no) . "%' ) ";
+            $where = "(get_tender_info(a.tender_enquiry_id) like '%".  $this->db->escape_str($srch_enquiry_no) ."%') ";
+            $data['srch_customer_id'] = $srch_customer_id = '';
+        }
+
+
+
+        $this->load->library('pagination');
+
+        $this->db->where('status != ', 'Delete');
+        $this->db->from('dp_bill_info as a');
+        $data['total_records'] = $cnt = $this->db->count_all_results();
+
+        $data['sno'] = $this->uri->segment(2, 0);
+
+        $config['base_url'] = trim(site_url('delivery-partner-bill-list') . '/' . $this->uri->segment(2, 0));
+        $config['total_rows'] = $cnt;
+        $config['per_page'] = 50;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '<span class="sr-only">(current)</span></a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = "Prev";
+        $config['next_link'] = "Next";
+        $this->pagination->initialize($config);
+
+
+       $sql = "
+                select 
+                a.*,  
+                c.vendor_name,
+                e.customer_name,
+                get_tender_info(a.tender_enquiry_id) as tender_info 
+                from customs_bill_info as a   
+                left join vendor_info as c on c.vendor_id = a.vendor_id and c.status = 'Active' 
+                left JOIN tender_enquiry_info as d on d.tender_enquiry_id = a.tender_enquiry_id and d.status='Active'
+                left join customer_info as e on e.customer_id = a.customer_id and e.status='Active' 
+                where a.status != 'Delete' 
+                and $where   
+                order by a.invoice_date desc , a.customs_bill_id desc
+                limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
+        ";
+
+        $query = $this->db->query($sql);
+
+        $data['record_list'] = array();
+
+        foreach ($query->result_array() as $row) {
+            $data['record_list'][] = $row;
+        }
+
+
+        $data['customer_opt'] = [];
+        $data['vendor_contact_opt'] = [];
+        $data['vendor_opt'] = [];
+        $data['country_opt'] = [];
+        //$data['vendor_RFQ_opt'] = ['Prepared RFQ' => 'Prepared RFQ', 'RFQ Sent' => 'RFQ Sent', 'Quotation Received' => 'Quotation Received'];
+
+        $sql = "
+          SELECT
+                a.country_id,
+                a.country_name
+            FROM
+                country_info AS a
+            WHERE
+                a.status != 'Delete'
+            ORDER BY
+                a.country_name ASC
+         ";
+
+        $query = $this->db->query($sql);
+        $data['country_opt'] = array();
+        foreach ($query->result_array() as $row) {
+            $data['country_opt'][$row['country_name']] = $row['country_name'];
+        }
+
+        $sql = "
+            SELECT vendor_id,vendor_name 
+            FROM vendor_info 
+            WHERE status = 'Active' 
+            ORDER BY vendor_name ASC";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+        }
+
+        $sql = "
+            SELECT customer_id,customer_name
+            FROM customer_info
+            WHERE status = 'Active' 
+            ORDER BY customer_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
+
+        
+
+        $sql = "
+            SELECT 
+            vat_filing_head_name 
+            FROM vat_filing_head_info 
+            WHERE status = 'Active' 
+            and vat_filing_head_type = 'Purchase'
+            ORDER BY vat_filing_head_id ASC
+            ";
+        $query = $this->db->query($sql);
+        $data['vat_payer_purchase_opt'] = ['' => 'Select VAT Payer Purchase Category'];
+        foreach ($query->result_array() as $row) {
+            $data['vat_payer_purchase_opt'][$row['vat_filing_head_name']] = $row['vat_filing_head_name'];
+        }
+
+
+        $sql = "
+                select 
+                a.sub_account_head_id,                
+                a.sub_account_head_name             
+                from cb_sub_account_head_info as a  
+                where a.status = 'Active' and a.type = 'Outward'
+                and a.account_head_id = '". INDIRECT_EXPENSES ."'
+                order by a.sub_account_head_name asc                 
+        ";
+
+        $query = $this->db->query($sql);
+
+        $data['ac_sub_head_opt'] = array();
+
+        foreach ($query->result_array() as $row) {
+            $data['ac_sub_head_opt'][$row['sub_account_head_id']] = $row['sub_account_head_name'];
+        } 
+
+        $data['pagination'] = $this->pagination->create_links();
+        
+        $this->load->view('page/vendor/customs-bill-list', $data);
     }
 }

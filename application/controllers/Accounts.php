@@ -3419,5 +3419,53 @@ class Accounts extends CI_Controller
 
     }
 
+    public function get_data()
+    {
+          
+        date_default_timezone_set("Asia/Calcutta"); 
+
+        $table = $this->input->post('tbl');
+        $rec_id = $this->input->post('id');
+
+        $rec_list =[];
+
+        
+        if ($table == 'sub_account_head_info') {
+
+            $query = $this->db->query("
+                SELECT *
+                FROM cb_sub_account_head_info
+                WHERE sub_account_head_id = '" . $rec_id . "'
+                and `status` = 'Active'
+                order by sub_account_head_id asc 
+
+            ");
+
+            $rec_list = $query->result_array();
+
+            
+        }
+
+         if ($table == 'get-account-head-type') {
+            $query = $this->db->query(" 
+                select 
+                a.account_head_id,
+                a.account_head_name 
+                from cb_account_head_info as a
+                where a.type = '" . $rec_id . "' 
+                and a.`status` = 'Active' 
+                order by a.account_head_name asc
+                 
+            "); 
+
+           $rec_list = $query->result_array();
+        }
+
+        // ✅ CLEAN OUTPUT
+        header('Content-Type: application/json');
+        echo json_encode($rec_list);
+        exit;   // ⭐ VERY IMPORTANT
+    }
+
 }
 ?>

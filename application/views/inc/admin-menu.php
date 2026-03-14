@@ -182,7 +182,10 @@ $vendor_m_grp = [
     'vendor-pur-inward-edit',
     'vendor-purchase-bill-add',
     'vendor-purchase-bill-list',
-    'vendor-purchase-bill-edit'
+    'vendor-purchase-bill-edit',
+    'local-purchase-bill-list',
+    'delivery-partner-bill-list',
+    'customs-bill-list'
 ];
 ?>
 
@@ -276,7 +279,7 @@ $vendor_m_grp = [
         </li>
 
         <li
-            class="treeview <?= in_array($current_page, ['vendor-purchase-bill-add', 'vendor-purchase-bill-list', 'vendor-purchase-bill-edit']) ? 'active' : '' ?>">
+            class="treeview <?= in_array($current_page, ['vendor-purchase-bill-add', 'vendor-purchase-bill-list', 'vendor-purchase-bill-edit','local-purchase-bill-list','delivery-partner-bill-list','customs-bill-list']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-files-o"></i> Supplier Invoice/Bill
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
@@ -290,6 +293,19 @@ $vendor_m_grp = [
                     <a href="<?= site_url('vendor-purchase-bill-list') ?>"><i class="fa fa-list"></i> Supplier Bill
                         List</a>
                 </li>
+
+                <li class="<?= ($current_page === 'local-purchase-bill-list') ? 'active' : '' ?>">
+                    <a href="<?= site_url('local-purchase-bill-list') ?>"><i class="fa fa-list"></i> Local Supplier Bill
+                        List</a>
+                </li>
+                <li class="<?= ($current_page === 'delivery-partner-bill-list') ? 'active' : '' ?>">
+                    <a href="<?= site_url('delivery-partner-bill-list') ?>"><i class="fa fa-list"></i> Delivery Partner Bill
+                        List</a>
+                </li>
+                <li class="<?= ($current_page === 'customs-bill-list') ? 'active' : '' ?>">
+                    <a href="<?= site_url('customs-bill-list') ?>"><i class="fa fa-list"></i> Customs Bill List</a>
+                </li>
+                
             </ul>
         </li>
 
@@ -353,7 +369,7 @@ $report_m_grp = [
 </li>
 
 
-<?php /*
+ 
 <li class="header">Acounts Book Info</li>
 
 <li class="treeview <?= in_array($current_page, ['inward-list', 'outward-list']) ? 'active' : '' ?>">
@@ -377,8 +393,7 @@ $report_m_grp = [
     </li>
 
 </ul>
-</li>
-*/ ?>
+</li> 
 <li class="header">AUDIT</li>
 
 <li class="treeview <?= in_array($this->uri->segment(1), [
@@ -445,8 +460,7 @@ $report_m_grp = [
 
     </ul>
 </li>
-
-<?php /*
+ 
 <li class="header">Reports</li>
 <li
 class="treeview <?= in_array($this->uri->segment(1), ['cash-ledger', 'cash-in-statement', 'cash-out-statement', 'inward-summary', 'outward-summary', 'na-cash-in-statement', 'na-cash-out-statement']) ? 'active' : '' ?>">
@@ -504,8 +518,7 @@ class="treeview <?= in_array($this->uri->segment(1), ['cash-ledger', 'cash-in-st
     </li>
 
 </ul>
-</li>
-*/ ?>
+</li> 
 <!-- Master Section -->
 <li class="header">Master</li>
 
@@ -629,7 +642,7 @@ class="treeview <?= in_array($this->uri->segment(1), ['cash-ledger', 'cash-in-st
                 </li>
             </ul>
         </li>
-        <?php /*
+        
 <li
   class="treeview <?= in_array($current_page, ['account-head-list', 'sub-account-head-list', 'account-head-for-list', 'voucher-type-list', 'opening-balance-list']) ? 'active' : '' ?>">
         <a href="#">
@@ -660,7 +673,6 @@ class="treeview <?= in_array($this->uri->segment(1), ['cash-ledger', 'cash-in-st
                     Balance</a>
             </li>
         </ul>
-</li>
-*/ ?>
+</li> 
 </ul>
 </li>

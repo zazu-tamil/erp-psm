@@ -1,3 +1,10 @@
+<!--
+<?php
+// echo "<pre>";
+// print_r($record); 
+// echo "</pre>"; 
+?>
+-->
 <!DOCTYPE html>
 <html>
 
@@ -126,13 +133,7 @@
                 QUOTATION
             </td>
         </tr>
-        <?php if (!empty($record['contact_person'])): ?>
-        <tr>
-            <td colspan="7" class="title">
-                <b> Attn: <?php echo htmlspecialchars($record['contact_person']); ?></b>
-            </td>
-        </tr>
-        <?php endif; ?>
+        
 
         <tr>
             <td colspan="4">
@@ -178,7 +179,13 @@
                  
 
         <!-- Subject -->
-
+        <?php if (!empty($record['contact_person'])): ?>
+        <tr>
+            <td colspan="7" class="title1">
+                <i><b> Attn: <?php echo htmlspecialchars($record['contact_person']); ?> <?php echo ($record['designation']!= '' ? " - ".$record['designation'] : ''); ?></b></i>
+            </td>
+        </tr>
+        <?php endif; ?>                            
         <tr>
             <td colspan="7" align="center">
                 <u>SUB: Your Enquiry Ref:
@@ -230,7 +237,12 @@
                                 <?php if (!empty($item['item_code'])): ?>
                                 <div class="item-code"><?php echo htmlspecialchars($item['item_code']); ?></div>
                                 <?php endif; ?>
-                                <?php echo htmlspecialchars($item['item_desc'] ?? ''); ?>
+                                <?php //echo htmlspecialchars($item['item_desc'] ?? ''); ?>
+                                <?php //echo str_replace("\n",'<br>',$item['item_desc']); ?>
+                                <?php 
+                                if (!empty($item['item_desc'])) {
+                                    echo nl2br(htmlspecialchars($item['item_desc']));
+                                } ?>
                             </div>
                         </td>
                         <td class="text-center"><?php echo number_format($item['qty'] ?? 0, 0); ?></td>

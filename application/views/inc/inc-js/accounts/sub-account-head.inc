@@ -1,31 +1,8 @@
 
-<link
-	rel="stylesheet"
-	href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"
-/>
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<link
-	href="https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css"
-/>
-<script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
-
+ 
 <script>
 jQuery(function($) {    
-
-    // ✅ Initialize DataTable safely
-    if ($.fn.DataTable.isDataTable("#sub_account_head_list")) {
-        $("#sub_account_head_list").DataTable().destroy();
-    }
-
-    var table = $("#sub_account_head_list").DataTable({
-        paging: true,
-        lengthChange: false,
-        searching: true,
-        ordering: true,
-        info: true,
-        autoWidth: true
-    });
+ 
 
     // ---------------------------
     // Populate Account Head based on type (Add Modal)
@@ -60,11 +37,17 @@ jQuery(function($) {
         let $editModal = $("#edit_modal");
 
         $.ajax({
-            url: "<?= site_url('get-data'); ?>",
+            url: "<?= site_url('accounts/get_data'); ?>",
             type: "POST",
             data: { tbl: 'sub_account_head_info', id: subId },
             dataType: "json",
-            success: function(d1) {
+            success: function(res) {
+                let d1 = res[0];
+                //console.log(d1);
+                //alert(d1[0].type);
+
+                $("#edit_modal #type").val(d1.type);
+                
                 $editModal.find("#sub_account_head_id").val(d1.sub_account_head_id);
                 $editModal.find("#type").val(d1.type);
                 $editModal.find("#sub_account_head_name").val(d1.sub_account_head_name);
@@ -75,8 +58,8 @@ jQuery(function($) {
                 let $accountHead = $editModal.find("#account_head_id");
                 $accountHead.empty();
 
-                $.ajax({
-                    url: "<?= site_url('get-data'); ?>",
+                 $.ajax({
+                    url: "<?= site_url('accounts/get_data'); ?>",
                     type: "POST",
                     data: { tbl: 'get-account-head-type', id: d1.type },
                     dataType: "json",
@@ -88,9 +71,9 @@ jQuery(function($) {
                             $accountHead.append(option);
                         });
                     }
-                });
+                }); 
 
-                $editModal.modal('show');
+                //$editModal.modal('show');
             },
             error: function(xhr, status, error) {
                 alert("Error fetching sub-account head: " + error);
@@ -121,6 +104,28 @@ jQuery(function($) {
                 }
             });
         }
+    });
+
+    $(document).on("change", "#edit_modal #type", function() {
+        let typeId = $(this).val();
+        let $accountHead = $("#edit_modal #account_head_id");
+        $accountHead.empty(); // Remove existing options
+
+        $.ajax({
+            url: "<?= site_url('get-data'); ?>",
+            type: "POST",
+            data: { tbl: 'get-account-head-type', id: typeId },
+            dataType: "json",
+            success: function(data) {
+                $accountHead.append($('<option>', { value: '', text: 'Select Account Head' }));
+                $.each(data, function(key, info) {
+                    $accountHead.append($('<option>', { value: info.account_head_id, text: info.account_head_name }));
+                });
+            },
+            error: function(xhr, status, error) {
+                alert("Error fetching account heads: " + error);
+            }
+        });
     });
 
 });

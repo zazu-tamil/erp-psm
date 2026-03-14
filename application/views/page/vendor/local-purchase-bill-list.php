@@ -1,4 +1,6 @@
-<?php include_once(VIEWPATH . '/inc/header.php'); ?>
+<?php include_once(VIEWPATH . '/inc/header.php'); 
+//print_r($record_list);
+?>
 
 <section class="content-header">
     <h1><?php echo $title; ?></h1>
@@ -25,8 +27,8 @@
                         </div>
                     </div>
                     <div class="form-group col-md-3">
-                        <label>Vendor</label>
-                        <?php echo form_dropdown('srch_vendor_id', ['' => 'All'] + $vendor_opt, $srch_vendor_id, 'id="srch_vendor_id" class="form-control select2" style="width:100%"'); ?>
+                        <label>Supplier</label>
+                        <?php echo form_dropdown('srch_vendor_id', ['' => 'All'] + $vendor_opt, $srch_vendor_id, 'id="srch_vendor_id" class="form-control srch_vendor_id select2" style="width:100%"'); ?>
                     </div>
                 </div>
                 <div class="row">
@@ -70,11 +72,13 @@
                 <thead>
                     <tr>
                         <th class="text-center">S.No</th>
-                        <th>A/C Head</th>
-                        <th>Vendor Name</th>
+                        <th>Sub A/C Head</th>
+                        <th>Supplier</th>
+                        <th>Customer</th>
+                        <th>Our Enquiry No</th>
                         <th>Invoice No</th>
-                        <th>Total Amount W/O Tax</th>
-                        <th>Total Amount With Tax</th>
+                        <th>Amt W/O Tax</th> 
+                        <th>Amt With Tax</th>
                         <th colspan="2" class="text-center">Action</th>
                     </tr>
                 </thead>
@@ -82,31 +86,34 @@
                     <?php
                     foreach ($record_list as $j => $ls) {
                         ?>
-                        <tr class="mb-3">
-                            <td class="text-center"><?php echo ($j + 1); ?></td>
-                            <td><?php echo htmlspecialchars($ls['account_head_name'] ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($ls['vendor_name'] ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($ls['invoice_no'] ?? ''); ?></td>
-                            <td class="text-right">
-                                <?php echo number_format((float) ($ls['total_amount_wo_tax'] ?? 0), 3); ?>
-                            </td>
-                            <td class="text-right">
-                                <?php echo number_format((float) ($ls['total_amount_with_tax'] ?? 0), 3); ?>
-                            </td>
-                            <td class="text-center">
-                                <button data-toggle="modal" data-target="#edit_modal"
-                                    class="edit_record btn btn-primary btn-xs" title="Edit">
-                                    <i class="fa fa-edit"></i>
-                                </button>
-                            </td>
-                            <td class="text-center">
-                                <button value="<?php echo $ls['id'] ?? ''; ?>" class="del_record btn btn-danger btn-xs"
-                                    title="Delete">
-                                    <i class="fa fa-remove"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <?php
+                    <tr class="mb-3">
+                        <td class="text-center"><?php echo ($j + 1); ?></td>
+                        <td><?php echo htmlspecialchars($ls['sub_account_head_name'] ?? ''); ?></td>
+                        <td><?php echo htmlspecialchars($ls['vendor_name'] ?? ''); ?></td>
+                        <td><?php echo htmlspecialchars($ls['customer_name'] ?? ''); ?></td>
+                        <td><?php echo htmlspecialchars($ls['tender_info'] ?? ''); ?></td>
+                        <td><?php echo htmlspecialchars($ls['invoice_no'] ?? ''); ?></td>
+                        <td class="text-right">
+                            <?php echo number_format((float) ($ls['tot_amt_wo_tax'] ?? 0), 3); ?>
+                        </td>
+                        <td class="text-right">
+                            <?php echo number_format((float) ($ls['tot_amt_with_tax'] ?? 0), 3); ?>
+                        </td>
+                        <td class="text-center">
+                            <button data-toggle="modal" data-target="#edit_modal"
+                                value="<?php echo $ls['local_purchase_bill_id'] ?? ''; ?>"
+                                class="edit_record btn btn-primary btn-xs" title="Edit">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                        </td>
+                        <td class="text-center">
+                            <button value="<?php echo $ls['local_purchase_bill_id'] ?? ''; ?>" class="del_record btn btn-danger btn-xs"
+                                title="Delete">
+                                <i class="fa fa-remove"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <?php
                     }
                     ?>
                 </tbody>
@@ -116,13 +123,13 @@
             <div class="modal fade" id="add_modal" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
-                        <form method="post" action="<?php echo site_url('purchase-invoice/save'); ?>" id="frmadd"
-                            enctype="multipart/form-data">
+                        <form method="post" action="" id="frmadd" enctype="multipart/form-data">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
-                                <h3 class="modal-title" id="scrollmodalLabel"><strong>Add Purchase Invoice</strong></h3>
+                                <h3 class="modal-title" id="scrollmodalLabel"><strong>Add Local Supplier Bill
+                                        </strong></h3>
                                 <input type="hidden" name="mode" value="Add" />
                             </div>
                             <div class="modal-body">
@@ -135,48 +142,50 @@
                                                 value="" placeholder="Search Enquiry No" />
                                         </div>
                                         <div class="col-md-6 form-group">
-                                            <label for="srch_po_id">A/c Sub Head</label>
-                                            <?php echo form_dropdown('account_head_id', $ac_sub_head_opt, set_value('account_head_id'), 'id="srch_po_id" class="form-control"'); ?>
+                                            <label for="sub_account_head_id">A/c Sub Head</label>
+                                            <?php echo form_dropdown('sub_account_head_id', $ac_sub_head_opt, set_value('sub_account_head_id'), 'id="sub_account_head_id" class="form-control" required'); ?>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="row">
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-6">
                                         <label>Customer <span class="text-red">*</span></label>
                                         <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="srch_customer_id" class="form-control" required'); ?>
                                     </div>
-                                    <div class="form-group col-md-4">
-                                        <label for="srch_tender_enquiry_id">Tender Enquiry No</label>
-                                        <?php echo form_dropdown('tender_enquiry_id', ['' => 'Select Enquiry'], set_value('tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control"'); ?>
-                                    </div>
-                                    <div class="form-group col-md-4">
-                                        <label for="srch_vendor_id">Vendor Name <span class="text-red">*</span></label>
+                                    <div class="form-group col-md-6">
+                                        <label for="tender_enquiry_id">Tender Enquiry No</label>
+                                        <?php echo form_dropdown('tender_enquiry_id', ['' => 'Select Enquiry'], set_value('tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" required'); ?>
+                                    </div> 
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="vendor_id">Supplier Name <span class="text-red">*</span></label>
                                         <div class="input-group">
-                                            <?php echo form_dropdown('vendor_id', ['' => 'Select'] + $vendor_opt, set_value('vendor_id'), 'id="srch_vendor_id" class="form-control" required'); ?>
+                                            <?php echo form_dropdown('vendor_id', ['' => 'Select'] + $vendor_opt, set_value('vendor_id'), 'id="vendor_id" class="form-control srch_vendor_id" required'); ?>
                                             <span class="input-group-btn">
-                                                <button type="button" class="btn btn-info" id="btn_open_add_vendor">Add
+                                                <button type="button" class="btn btn-info" id="btn_open_add_vendor" value="add_modal">Add
                                                     New</button>
                                             </span>
                                         </div>
                                     </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="form-group col-md-4">
-                                        <label>Inward Date</label>
-                                        <input type="date" name="inward_date" id="inward_date" class="form-control"
-                                            value="<?php echo set_value('inward_date'); ?>">
+                                    <div class="form-group col-md-6">
+                                        <label>Invoice Date</label>
+                                        <input type="date" name="invoice_date" id="invoice_date" class="form-control"
+                                            value="<?php echo set_value('invoice_date'); ?>" required>
                                     </div>
-                                    <div class="form-group col-md-4">
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
                                         <label>Invoice No <span class="text-red">*</span></label>
                                         <input type="text" name="invoice_no" id="invoice_no" class="form-control"
                                             placeholder="Invoice No" required>
                                     </div>
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-6">
                                         <label>Entry Date</label>
-                                        <input type="date" name="entry_date" id="entry_date" class="form-control"
-                                            value="<?php echo set_value('entry_date'); ?>">
+                                        <input type="date" name="inv_entry_date" id="inv_entry_date" class="form-control"
+                                            value="<?php echo set_value('inv_entry_date'); ?>">
                                     </div>
                                 </div>
 
@@ -188,22 +197,23 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="form-group col-md-4">
-                                        <label>Tax Percentage</label>
-                                        <input type="number" step="0.01" name="tax_percentage" id="tax_percentage"
-                                            class="form-control" placeholder="Tax Percentage %">
-                                    </div>
+
                                     <div class="form-group col-md-4">
                                         <label>Total Amount W/O Tax</label>
-                                        <input type="number" step="0.001" name="total_amount_wo_tax"
-                                            id="total_amount_wo_tax" class="form-control"
+                                        <input type="number" step="any" name="tot_amt_wo_tax"
+                                            id="tot_amt_wo_tax" class="form-control"
                                             placeholder="Total Amount W/O Tax">
                                     </div>
                                     <div class="form-group col-md-4">
+                                        <label>VAT Percentage</label>
+                                        <input type="number" step="any" name="vat" id="vat"
+                                            class="form-control" placeholder="VAT Percentage %" required>
+                                    </div>
+                                    <div class="form-group col-md-4">
                                         <label>Total Amount With Tax</label>
-                                        <input type="number" step="0.001" name="total_amount_with_tax"
-                                            id="total_amount_with_tax" class="form-control"
-                                            placeholder="Total Amount With Tax" readonly>
+                                        <input type="number" step="any" name="tot_amt_with_tax"
+                                            id="tot_amt_with_tax" class="form-control"
+                                            placeholder="Total Amount With Tax" readonly required>
                                     </div>
                                 </div>
 
@@ -215,10 +225,7 @@
                                         <label class="radio-inline"><input type="radio" name="status" value="InActive">
                                             InActive</label>
                                     </div>
-                                </div>
-
-                                <!-- Alert placeholder inside parent modal body -->
-                                <div id="zazualert"></div>
+                                </div>  
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -233,18 +240,19 @@
             <div class="modal fade" id="edit_modal" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
-                        <form method="post" action="<?php echo site_url('purchase-invoice/save'); ?>" id="frmedit"
+                        <form method="post" action="" id="frmedit"
                             enctype="multipart/form-data">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
-                                <h3 class="modal-title" id="scrollmodalLabel"><strong>Edit Purchase Invoice</strong>
+                                <h3 class="modal-title" id="scrollmodalLabel"><strong>Edit Local Supplier Bill</strong>
                                 </h3>
                                 <input type="hidden" name="mode" value="Edit" />
-                                <input type="hidden" name="id" id="edit_id" value="" />
+                                <input type="hidden" name="local_purchase_bill_id" id="local_purchase_bill_id" value="" />
                             </div>
-                            <div class="modal-body">
+                            <?php /*
+                            <!-- <div class="modal-body">
                                 <div
                                     style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
                                     <div class="row">
@@ -291,12 +299,12 @@
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label>Total Amount W/O Tax</label>
-                                        <input type="number" step="0.001" name="total_amount_wo_tax"
+                                        <input type="number" step="any" name="total_amount_wo_tax"
                                             id="edit_total_amount_wo_tax" class="form-control">
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label>Total Amount With Tax</label>
-                                        <input type="number" step="0.001" name="total_amount_with_tax"
+                                        <input type="number" step="any" name="tot_amt_with_tax"
                                             id="edit_total_amount_with_tax" class="form-control" readonly>
                                     </div>
                                 </div>
@@ -310,6 +318,102 @@
                                                 id="edit_status_inactive"> InActive</label>
                                     </div>
                                 </div>
+                            </div> -->
+                            */ ?>
+                            <div class="modal-body">
+                                <div
+                                    style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
+                                    <div class="row">
+                                        <div class="col-md-6 form-group">
+                                            <label for="srch_enq_id">Search Enquiry No</label>
+                                            <input type="text" name="srch_enq_id" class="form-control srch_enq_id"
+                                                value="" placeholder="Search Enquiry No" />
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label for="sub_account_head_id">A/c Sub Head</label>
+                                            <?php echo form_dropdown('sub_account_head_id', $ac_sub_head_opt, set_value('sub_account_head_id'), 'id="sub_account_head_id" class="form-control" required'); ?>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label>Customer <span class="text-red">*</span></label>
+                                        <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="srch_customer_id" class="form-control" required'); ?>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="tender_enquiry_id">Tender Enquiry No</label>
+                                        <?php echo form_dropdown('tender_enquiry_id', ['' => 'Select Enquiry'], set_value('tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" required'); ?>
+                                    </div> 
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="vendor_id">Supplier Name <span class="text-red">*</span></label>
+                                        <div class="input-group1">
+                                            <?php echo form_dropdown('vendor_id', ['' => 'Select'] + $vendor_opt, set_value('vendor_id'), 'id="vendor_id" class="form-control srch_vendor_id" required'); ?>
+                                            <!-- <span class="input-group-btn">
+                                                <button type="button" class="btn btn-info" id="btn_open_add_vendor" value="edit_modal">Add
+                                                    New</button>
+                                            </span> -->
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Invoice Date</label>
+                                        <input type="date" name="invoice_date" id="invoice_date" class="form-control"
+                                            value="<?php echo set_value('invoice_date'); ?>" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label>Invoice No <span class="text-red">*</span></label>
+                                        <input type="text" name="invoice_no" id="invoice_no" class="form-control"
+                                            placeholder="Invoice No" required>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Entry Date</label>
+                                        <input type="date" name="inv_entry_date" id="inv_entry_date" class="form-control"
+                                            value="<?php echo set_value('inv_entry_date'); ?>">
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label>VAT Payer Sales / Purchase Group</label>
+                                        <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('vat_payer_purchase_grp'), 'id="vat_payer_purchase_grp" class="form-control"'); ?>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="form-group col-md-4">
+                                        <label>Total Amount W/O Tax</label>
+                                        <input type="number" step="any" name="tot_amt_wo_tax"
+                                            id="tot_amt_wo_tax" class="form-control"
+                                            placeholder="Total Amount W/O Tax">
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>VAT Percentage</label>
+                                        <input type="number" step="any" name="vat" id="vat"
+                                            class="form-control" placeholder="VAT Percentage %" required>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Total Amount With Tax</label>
+                                        <input type="number" step="any" name="tot_amt_with_tax"
+                                            id="tot_amt_with_tax" class="form-control"
+                                            placeholder="Total Amount With Tax" readonly required>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-4">
+                                        <label>Status</label><br>
+                                        <label class="radio-inline"><input type="radio" name="status" value="Active"
+                                                checked> Active</label>
+                                        <label class="radio-inline"><input type="radio" name="status" value="InActive">
+                                            InActive</label>
+                                    </div>
+                                </div>  
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -330,15 +434,15 @@
                                 <button type="button" class="close" id="btn_close_vendor_modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
-                                <h3 class="modal-title" id="addVendorLabel">Add Vendor</h3>
+                                <h3 class="modal-title" id="addVendorLabel">Add Supplier</h3>
                                 <input type="hidden" name="mode" value="Add Vendor" />
                             </div>
                             <div class="modal-body">
                                 <div class="row">
                                     <div class="form-group col-md-4">
-                                        <label>Vendor Name</label>
+                                        <label>Supplier Name</label>
                                         <input class="form-control" type="text" name="vendor_name" id="vendor_name"
-                                            placeholder="Vendor Name">
+                                            placeholder="Supplier Name">
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label>Contact Name</label>
@@ -427,328 +531,3 @@
 </section>
 
 <?php include_once(VIEWPATH . '/inc/footer.php'); ?>
-<style>
-    .ui-autocomplete {
-        z-index: 9999999 !important;
-    }
-
-    /* Parent modals */
-    #add_modal,
-    #edit_modal {
-        z-index: 1050 !important;
-    }
-
-    /* Child modal */
-    #add_vendor {
-        z-index: 1080 !important;
-    }
-
-    /* Parent backdrop */
-    .modal-backdrop {
-        z-index: 1040 !important;
-    }
-
-    /* Child backdrop */
-    .modal-backdrop.child-backdrop {
-        z-index: 1070 !important;
-    }
-</style>
-
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-
-<script>
-    $(function () {
-
-        var parentModal = null;
-
-        /* OPEN CHILD MODAL */
-        $('#btn_open_add_vendor').click(function () {
-
-            parentModal = $('#add_modal');
-
-            $('#add_vendor').modal({
-                backdrop: false,
-                keyboard: false,
-                show: true
-            });
-
-            $('<div class="modal-backdrop fade in child-backdrop"></div>').appendTo(document.body);
-        });
-
-        function closeVendorModal() {
-            $('#add_vendor').modal('hide');
-        }
-
-        $('#btn_close_vendor_modal,#btn_cancel_vendor_modal').click(function () {
-            closeVendorModal();
-        });
-
-        $('#add_vendor').on('hidden.bs.modal', function () {
-
-            $('.modal-backdrop.child-backdrop').remove();
-
-            if (parentModal && parentModal.hasClass('in')) {
-                $('body').addClass('modal-open');
-            }
-
-            parentModal = null;
-        });
-
-
-
-
-        $('#frmadd_Vendor').submit(function (e) {
-
-            e.preventDefault();
-
-            var vendor_name = $('#vendor_name').val().trim();
-
-            if (vendor_name == '') {
-                alert('Vendor Name is required');
-                $('#vendor_name').focus();
-                return false;
-            }
-
-            $.ajax({
-
-                url: "<?php echo base_url('vendor/ajax_add_master_inline'); ?>",
-                type: "POST",
-                data: $(this).serialize(),
-                dataType: "json",
-
-                success: function (res) {
-
-                    if (res.status == 'success') {
-
-                        var newOption = new Option(res.name, res.id, true, true);
-
-                        $('#srch_vendor_id').append(newOption).trigger('change');
-
-                        $('#frmadd_Vendor')[0].reset();
-
-                        closeVendorModal();
-
-                        $('#zazualert').html(
-                            '<div class="alert alert-success alert-dismissible">' +
-                            '<button type="button" class="close" data-dismiss="alert">&times;</button>' +
-                            '<strong>Success!</strong> ' + res.message +
-                            '</div>'
-                        );
-
-                    } else {
-                        alert(res.message);
-                    }
-
-                },
-
-                error: function () {
-                    alert('Server Error');
-                }
-
-            });
-
-        });
-
-
-        $('#srch_enquiry_no').autocomplete({
-
-           
-
-            source: function (request, response) {
-
-                $.ajax({
-
-                    url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
-                    type: "POST",
-                    dataType: "json",
-                    data: { search: request.term },
-
-                    success: function (data) {
-                        response(data);
-                    }
-
-                });
-
-            },
-
-            minLength: 1,
-
-            select: function (event, ui) {
-                $("#srch_enquiry_no").val(ui.item.value);
-            }
-
-        });
-
-        $('#add_modal .srch_enq_id').autocomplete({
-
-            appendTo: "#add_modal",
-
-            source: function (request, response) {
-
-                $.ajax({
-
-                    url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
-                    type: "POST",
-                    dataType: "json",
-                    data: { search: request.term },
-
-                    success: function (data) {
-                        response(data);
-                    }
-
-                });
-
-            },
-
-            minLength: 1,
-
-            select: function (event, ui) {
-
-                $('#add_modal #srch_customer_id')
-                    .val(ui.item.customer_id)
-                    .trigger('change');
-
-                load_tender_enq(ui.item.tender_enquiry_id);
-
-            }
-
-        });
-        function load_tender_enq(t_enq_id) {
-
-            t_enq_id = t_enq_id || '';
-
-            var customer_id = $('#add_modal #srch_customer_id').val();
-
-            var dd = $('#add_modal #srch_tender_enquiry_id');
-
-            dd.html('<option value="">Select Enquiry</option>');
-            dd.prop('disabled', true);
-
-            if (!customer_id) return;
-
-            $.ajax({
-
-                url: "<?php echo site_url('vendor/get_vendor_rate_enquiries_by_customer'); ?>",
-                type: "POST",
-                dataType: "json",
-                data: { customer_id: customer_id },
-
-                success: function (res) {
-
-                    if (res.length > 0) {
-
-                        dd.prop('disabled', false);
-
-                        $.each(res, function (i, row) {
-
-                            dd.append(
-                                $('<option>', {
-                                    value: row.tender_enquiry_id,
-                                    text: row.display
-                                })
-                            );
-
-                        });
-
-                        if (t_enq_id != '') {
-                            dd.val(t_enq_id).trigger('change');
-                        }
-
-                    }
-                    else {
-                        dd.html('<option value="">No enquiries found</option>');
-                    }
-
-                },
-
-                error: function () {
-                    alert('Error loading enquiries');
-                }
-
-            });
-
-        }
-
-
-
-        $(document).on('click', '.edit_record', function () {
-
-            var id = $(this).val();
-
-            $.ajax({
-
-                url: "<?php echo site_url('get-data'); ?>",
-                type: "POST",
-                dataType: "json",
-                data: { tbl: "purchase_bill_entry_local", id: id },
-
-                success: function (res) {
-
-                    if (res.status == 'success') {
-
-                        var d = res.data;
-
-                        $('#edit_id').val(d.id || '');
-                        $('#edit_account_head_id').val(d.account_head_id || '');
-                        $('#edit_vendor_id').val(d.vendor_id || '');
-                        $('#edit_inward_date').val(d.inward_date || '');
-                        $('#edit_invoice_no').val(d.invoice_no || '');
-                        $('#edit_entry_date').val(d.entry_date || '');
-                        $('#edit_vat_payer_purchase_grp').val(d.vat_payer_purchase_grp || '');
-                        $('#edit_tax_percentage').val(d.tax_percentage || '');
-                        $('#edit_total_amount_wo_tax').val(d.total_amount_wo_tax || '');
-                        $('#edit_total_amount_with_tax').val(d.total_amount_with_tax || '');
-
-                        if (d.status == 'Active') {
-                            $('#edit_status_active').prop('checked', true);
-                        } else {
-                            $('#edit_status_inactive').prop('checked', true);
-                        }
-
-                    }
-                    else {
-                        alert(res.message);
-                    }
-
-                },
-
-                error: function () {
-                    alert('Ajax Error');
-                }
-
-            });
-
-        });
-
-
-
-        function calculateWithTax(prefix) {
-
-            prefix = prefix || '';
-
-            var base = parseFloat($('#' + prefix + 'total_amount_wo_tax').val()) || 0;
-
-            var rate = parseFloat($('#' + prefix + 'tax_percentage').val()) || 0;
-
-            var total = base + (base * rate / 100);
-
-            $('#' + prefix + 'total_amount_with_tax').val(total.toFixed(3));
-
-        }
-
-
-        $('#tax_percentage,#total_amount_wo_tax').on('input', function () {
-            calculateWithTax('');
-        });
-
-
-        $(document).on('input', '#edit_tax_percentage,#edit_total_amount_wo_tax', function () {
-            calculateWithTax('edit_');
-        });
-
-
-
-
-    });
-</script>
