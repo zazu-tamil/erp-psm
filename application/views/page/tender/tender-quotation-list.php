@@ -93,8 +93,9 @@
                         <th>Customer</th>
                         <th>Customer RFQ No</th>
                         <th>Quotation No</th>
+                        <th>Is Technical BID</th>
                         <th>Quotation Status</th>
-                        <th class="text-center" colspan="3">Action</th>
+                        <th class="text-center" colspan="4">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -107,7 +108,7 @@
                             <span class="label label-success"><?php echo $row['tender_details']; ?></span>
                         </td>
                         <td><?php echo htmlspecialchars($row['customer_name']); ?></td>
-                               <td><?php echo $row['tender_ref_no']; ?></td>
+                        <td><?php echo $row['tender_ref_no']; ?></td>
                         <td><?php echo htmlspecialchars($row['quotation_no']); ?></td>
                         <?php
                                 $status = $row['quotation_status'];
@@ -122,6 +123,7 @@
 
                                 $color = isset($badge_colors[$status]) ? $badge_colors[$status] : 'default';
                                 ?>
+                         <td><?php echo ($row['is_technical_bid'] == '1' ? 'Yes' : 'No'); ?> <?php echo $row['technical_option_name']; ?></td>        
                         <td>
                             <span class="label label-<?php echo $color; ?>">
                                 <?php echo $status; ?>
@@ -137,7 +139,14 @@
                                 <i class="fa fa-print"></i>
                             </a>
                         </td>
-
+                        <td class="text-center">
+                            <?php if($row['is_technical_bid'] == '1' ) { ?>
+                            <a href="<?php echo site_url('tender-quotation-tbid-print/' . $row['tender_quotation_id']); ?>"
+                                target="_blank" class="btn btn-warning btn-xs" title="Print Technical BID">
+                                <i class="fa fa-print"></i>
+                            </a>
+                             <?php } ?>
+                        </td>    
                         <!-- EDIT -->
                         <td class="text-center">
                             <a href="<?php echo site_url('tender-quotation-edit/' . $row['tender_quotation_id']); ?>"

@@ -62,11 +62,22 @@
                             <input type="text" name="tender_ref_no" id="tender_ref_no" class="form-control"
                                 placeholder="e.g., TEN-2025-001" value="<?php echo set_value('tender_ref_no'); ?>">
                         </div>
-
+                    </div>
+                    <div class="row"> 
                         <div class="form-group col-md-3">
                             <label>Quotation Date</label>
                             <input type="date" name="quote_date" id="quote_date" class="form-control"
                                 value="<?php echo set_value('quote_date', date('Y-m-d')); ?>">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="is_technical_bid">Is Technical BID</label>
+                            <br>
+                            <input type="checkbox" name="is_technical_bid" id="is_technical_bid" value="1">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Technical Option Name</label>
+                            <input type="text" name="technical_option_name" id="technical_option_name"
+                                class="form-control" value="" placeholder="Technical Option Name  - OPT1" readonly>
                         </div>
 
                         <div class="form-group col-md-3">
@@ -82,14 +93,10 @@
                             <label class="radio-inline"><input type="radio" name="quotation_status" value="On Hold"> On
                                 Hold</label>
                         </div>
-
-                        <div class="form-group col-md-3">
-                            <label>Status</label><br>
-                            <label class="radio-inline"><input type="radio" name="status" value="Active" checked>
-                                Active</label>
-                            <label class="radio-inline"><input type="radio" name="status" value="Inactive">
-                                Inactive</label>
                         </div>
+                          <div class="row">
+
+
                         <div class="form-group col-md-3">
                             <label for="transport_charges">Transport Charges</label>
                             <input type="number" step="any" name="transport_charges" id="transport_charges"
@@ -101,6 +108,13 @@
                             <input type="number" step="any" name="other_charges" id="other_charges" class="form-control"
                                 placeholder="Enter other charges"
                                 value="<?php echo set_value('other_charges', '0.00'); ?>">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Status</label><br>
+                            <label class="radio-inline"><input type="radio" name="status" value="Active" checked>
+                                Active</label>
+                            <label class="radio-inline"><input type="radio" name="status" value="Inactive">
+                                Inactive</label>
                         </div>
 
                         <div class="col-md-3">

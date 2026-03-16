@@ -196,20 +196,24 @@
                                     </div>
                                 </div>
 
-                                <div class="row">
-
-                                    <div class="form-group col-md-4">
+                                <div class="row"> 
+                                    <div class="form-group col-md-3">
                                         <label>Total Amount W/O Tax</label>
                                         <input type="number" step="any" name="tot_amt_wo_tax"
                                             id="tot_amt_wo_tax" class="form-control"
                                             placeholder="Total Amount W/O Tax">
                                     </div>
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
                                         <label>VAT Percentage</label>
                                         <input type="number" step="any" name="vat" id="vat"
                                             class="form-control" placeholder="VAT Percentage %" required>
                                     </div>
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
+                                        <label>VAT Amount</label>
+                                        <input type="number" step="any" name="vat_amt" id="vat_amt"
+                                            class="form-control" placeholder="VAT Amount" required>
+                                    </div>
+                                    <div class="form-group col-md-3">
                                         <label>Total Amount With Tax</label>
                                         <input type="number" step="any" name="tot_amt_with_tax"
                                             id="tot_amt_with_tax" class="form-control"
@@ -384,20 +388,24 @@
                                     </div>
                                 </div>
 
-                                <div class="row">
-
-                                    <div class="form-group col-md-4">
+                                <div class="row"> 
+                                    <div class="form-group col-md-3">
                                         <label>Total Amount W/O Tax</label>
                                         <input type="number" step="any" name="tot_amt_wo_tax"
                                             id="tot_amt_wo_tax" class="form-control"
                                             placeholder="Total Amount W/O Tax">
                                     </div>
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
                                         <label>VAT Percentage</label>
                                         <input type="number" step="any" name="vat" id="vat"
                                             class="form-control" placeholder="VAT Percentage %" required>
                                     </div>
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
+                                        <label>VAT Amount</label>
+                                        <input type="number" step="any" name="vat_amt" id="vat_amt"
+                                            class="form-control" placeholder="VAT Amount" required>
+                                    </div>
+                                    <div class="form-group col-md-3">
                                         <label>Total Amount With Tax</label>
                                         <input type="number" step="any" name="tot_amt_with_tax"
                                             id="tot_amt_with_tax" class="form-control"

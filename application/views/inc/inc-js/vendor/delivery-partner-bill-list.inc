@@ -373,9 +373,11 @@ $(function() {
                 $("#edit_modal #custom_vat_amt").val(res.custom_vat_amt);
                 $("#edit_modal #custom_duty").val(res.custom_duty);
                 $("#edit_modal #custom_stamp_fee").val(res.custom_stamp_fee);
+                $("#edit_modal #custom_bill_amt").val(res.custom_bill_amt);
                 $("#edit_modal #tot_amt_wo_dp").val(res.tot_amt_wo_dp);
                 $("#edit_modal #dp_charges").val(res.dp_charges);
                 $("#edit_modal #dp_vat").val(res.dp_vat);
+                $("#edit_modal #dp_vat_amt").val(res.dp_vat_amt);
                 $("#edit_modal #g_total").val(res.g_total);
                 $(`#edit_modal input[name="status"][value="${res.status}"]`).prop('checked', true);
             } 
@@ -392,12 +394,12 @@ $(function() {
     function calcTotals() {
         let custom_vat_amt   = parseFloat($('#custom_vat_amt').val()) || 0;
         let custom_duty      = parseFloat($('#custom_duty').val()) || 0;
-        let custom_stamp_fee = parseFloat($('#custom_stamp_fee').val()) || 0;
+        let custom_bill_amt = parseFloat($('#custom_bill_amt').val()) || 0;
         let dp_charges       = parseFloat($('#dp_charges').val()) || 0;
         let dp_vat           = parseFloat($('#dp_vat').val()) || 0;
 
         // Total Amount W/O DP
-        let tot_amt_wo_dp = custom_vat_amt + custom_duty + custom_stamp_fee;
+        let tot_amt_wo_dp = custom_vat_amt + custom_duty + custom_bill_amt;
         $('#tot_amt_wo_dp').val(tot_amt_wo_dp.toFixed(3));
 
         // Base amount
@@ -405,6 +407,7 @@ $(function() {
 
         // VAT amount
         let vat_amt = base_amt * (dp_vat / 100);
+         $('#dp_vat_amt').val(vat_amt.toFixed(3));
 
         // Grand Total
         let g_total = base_amt + vat_amt;
@@ -414,7 +417,7 @@ $(function() {
 
 
     // Trigger calculation when fields change
-    $('#custom_vat_amt, #custom_duty, #custom_stamp_fee, #dp_charges, #dp_vat').on('keyup change', function () {
+    $('#custom_vat_amt, #custom_duty, #custom_bill_amt, #dp_charges, #dp_vat').on('keyup change', function () {
         calcTotals();
     });
 
@@ -422,12 +425,12 @@ $(function() {
     function calcTotals1() {
         let custom_vat_amt   = parseFloat($('#edit_modal #custom_vat_amt').val()) || 0;
         let custom_duty      = parseFloat($('#edit_modal #custom_duty').val()) || 0;
-        let custom_stamp_fee = parseFloat($('#edit_modal #custom_stamp_fee').val()) || 0;
+        let custom_bill_amt = parseFloat($('#edit_modal #custom_bill_amt').val()) || 0;
         let dp_charges       = parseFloat($('#edit_modal #dp_charges').val()) || 0;
         let dp_vat           = parseFloat($('#edit_modal #dp_vat').val()) || 0;
 
         // Total Amount W/O DP
-        let tot_amt_wo_dp = custom_vat_amt + custom_duty + custom_stamp_fee;
+        let tot_amt_wo_dp = custom_vat_amt + custom_duty + custom_bill_amt;
         $('#edit_modal #tot_amt_wo_dp').val(tot_amt_wo_dp.toFixed(3));
 
         // Base amount
@@ -435,6 +438,7 @@ $(function() {
 
         // VAT amount
         let vat_amt = base_amt * (dp_vat / 100);
+        $('#edit_modal #dp_vat_amt').val(vat_amt.toFixed(3));
 
         // Grand Total
         let g_total = base_amt + vat_amt;
@@ -444,7 +448,7 @@ $(function() {
 
 
     // Trigger calculation when fields change
-    $('#edit_modal #custom_vat_amt, #edit_modal #custom_duty, #edit_modal #custom_stamp_fee, #edit_modal #dp_charges, #edit_modal #dp_vat').on('keyup change', function () {
+    $('#edit_modal #custom_vat_amt, #edit_modal #custom_duty, #edit_modal #custom_bill_amt, #edit_modal #dp_charges, #edit_modal #dp_vat').on('keyup change', function () {
         calcTotals1();
     });
 

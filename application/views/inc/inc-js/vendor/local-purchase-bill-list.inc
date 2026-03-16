@@ -372,6 +372,7 @@ $(function() {
                 $("#edit_modal #vat_payer_purchase_grp").val(res.vat_payer_purchase_grp);
                 $("#edit_modal #tot_amt_wo_tax").val(res.tot_amt_wo_tax);
                 $("#edit_modal #vat").val(res.vat);
+                $("#edit_modal #vat_amt").val(res.vat_amt);
                 $("#edit_modal #tot_amt_with_tax").val(res.tot_amt_with_tax);
                 $("#edit_modal #tot_amt_with_tax").val(res.tot_amt_with_tax);
                 $(`#edit_modal input[name="status"][value="${res.status}"]`).prop('checked', true);
@@ -392,7 +393,8 @@ $(function() {
         var rate = parseFloat($('#' + prefix + ' #vat').val()) || 0;
 
         var total = base + (base * rate / 100);
-
+        var vat_amt = (base * rate / 100); 
+        $('#' + prefix + ' #vat_amt').val(vat_amt.toFixed(3));
         $('#' + prefix + ' #tot_amt_with_tax').val(total.toFixed(3));
 
     }

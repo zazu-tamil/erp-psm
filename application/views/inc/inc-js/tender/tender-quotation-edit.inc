@@ -353,7 +353,30 @@
          ],
        });
      });
+
+
+  $(document).ready(function () {
+
+      function toggleTechnicalOption() {
+          if ($('#is_technical_bid').is(':checked')) {
+              $('#technical_option_name').prop('readonly', false);
+          } else {
+              $('#technical_option_name').prop('readonly', true).val('');
+          }
+      }
+
+      // Run on page load
+      toggleTechnicalOption();
+
+      // Run when checkbox changes
+      $('#is_technical_bid').change(function () {
+          toggleTechnicalOption();
+      });
+
+  });
+
 </script>
+
 <style>
   .total-wrapper {
     display: flex;

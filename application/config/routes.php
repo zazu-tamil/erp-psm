@@ -121,6 +121,7 @@ $route['tender-quotation-edit/(:num)'] = 'tender/tender_quotation_edit/$1';
 $route['tender-quotation-list'] = 'tender/tender_quotation_list';
 $route['tender-quotation-list/(:num)'] = 'tender/tender_quotation_list/$1';
 $route['tender-quotation-print/(:num)'] = 'tender/tender_quotation_print/$1';
+$route['tender-quotation-tbid-print/(:num)'] = 'tender/tender_quotation_tbid_print/$1';
 
 
 $route['tender-dc-add'] = 'tender/tender_dc_add';
