@@ -1845,6 +1845,7 @@ class Master extends CI_Controller
         if ($this->input->post('mode') == 'Add') {
             $ins = array(
                 'addt_charges_type_name' => $this->input->post('addt_charges_type_name'),
+                'vat' => $this->input->post('vat'),
                 'status' => $this->input->post('status')
             );
 
@@ -1855,6 +1856,7 @@ class Master extends CI_Controller
         if ($this->input->post('mode') == 'Edit') {
             $upd = array(
                 'addt_charges_type_name' => $this->input->post('addt_charges_type_name'),
+                'vat' => $this->input->post('vat'),
                 'status' => $this->input->post('status')
             );
 

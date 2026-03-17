@@ -156,11 +156,11 @@
                                 <div class="row">
                                     <div class="form-group col-md-6">
                                         <label>Customer <span class="text-red">*</span></label>
-                                        <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="srch_customer_id" class="form-control" required'); ?>
+                                        <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="srch_customer_id" class="form-control" '); ?>
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label for="tender_enquiry_id">Tender Enquiry No</label>
-                                        <?php echo form_dropdown('tender_enquiry_id', ['' => 'Select Enquiry'], set_value('tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" required'); ?>
+                                        <?php echo form_dropdown('tender_enquiry_id', ['' => 'Select Enquiry'], set_value('tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" '); ?>
                                     </div> 
                                 </div>
 
@@ -204,7 +204,7 @@
                                     <div class="form-group col-md-6">
                                         <label>Declaration No <span class="text-red">*</span></label>
                                         <input type="text" name="declaration_no" id="declaration_no" class="form-control"
-                                            placeholder="Declaration No" required>
+                                            placeholder="Declaration No" >
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Declaration Date</label>
@@ -311,11 +311,11 @@
                                 <div class="row">
                                     <div class="form-group col-md-6">
                                         <label>Customer <span class="text-red">*</span></label>
-                                        <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="srch_customer_id" class="form-control" required'); ?>
+                                        <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="srch_customer_id" class="form-control" '); ?>
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label for="tender_enquiry_id">Tender Enquiry No</label>
-                                        <?php echo form_dropdown('tender_enquiry_id', ['' => 'Select Enquiry'], set_value('tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" required'); ?>
+                                        <?php echo form_dropdown('tender_enquiry_id', ['' => 'Select Enquiry'], set_value('tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" '); ?>
                                     </div> 
                                 </div>
 
@@ -356,7 +356,7 @@
                                     <div class="form-group col-md-6">
                                         <label>Declaration No <span class="text-red">*</span></label>
                                         <input type="text" name="declaration_no" id="declaration_no" class="form-control"
-                                            placeholder="Declaration No" required>
+                                            placeholder="Declaration No" >
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Declaration Date</label>

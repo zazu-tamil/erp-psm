@@ -397,6 +397,7 @@ $(function() {
         let custom_bill_amt = parseFloat($('#custom_bill_amt').val()) || 0;
         let dp_charges       = parseFloat($('#dp_charges').val()) || 0;
         let dp_vat           = parseFloat($('#dp_vat').val()) || 0;
+        let custom_stamp_fee  = parseFloat($('#custom_stamp_fee').val()) || 0;
 
         // Total Amount W/O DP
         let tot_amt_wo_dp = custom_vat_amt + custom_duty + custom_bill_amt;
@@ -410,14 +411,14 @@ $(function() {
          $('#dp_vat_amt').val(vat_amt.toFixed(3));
 
         // Grand Total
-        let g_total = base_amt + vat_amt;
+        let g_total = base_amt + vat_amt + custom_stamp_fee;
 
         $('#g_total').val(g_total.toFixed(3));
     }
 
 
     // Trigger calculation when fields change
-    $('#custom_vat_amt, #custom_duty, #custom_bill_amt, #dp_charges, #dp_vat').on('keyup change', function () {
+    $('#custom_stamp_fee , #custom_vat_amt, #custom_duty, #custom_bill_amt, #dp_charges, #dp_vat').on('keyup change', function () {
         calcTotals();
     });
 
@@ -428,6 +429,7 @@ $(function() {
         let custom_bill_amt = parseFloat($('#edit_modal #custom_bill_amt').val()) || 0;
         let dp_charges       = parseFloat($('#edit_modal #dp_charges').val()) || 0;
         let dp_vat           = parseFloat($('#edit_modal #dp_vat').val()) || 0;
+        let custom_stamp_fee = parseFloat($('#edit_modal #custom_stamp_fee').val()) || 0;
 
         // Total Amount W/O DP
         let tot_amt_wo_dp = custom_vat_amt + custom_duty + custom_bill_amt;
@@ -441,14 +443,14 @@ $(function() {
         $('#edit_modal #dp_vat_amt').val(vat_amt.toFixed(3));
 
         // Grand Total
-        let g_total = base_amt + vat_amt;
+        let g_total = base_amt + vat_amt + custom_stamp_fee;
 
         $('#edit_modal #g_total').val(g_total.toFixed(3));
     }
 
 
     // Trigger calculation when fields change
-    $('#edit_modal #custom_vat_amt, #edit_modal #custom_duty, #edit_modal #custom_bill_amt, #edit_modal #dp_charges, #edit_modal #dp_vat').on('keyup change', function () {
+    $('#edit_modal #custom_stamp_fee #edit_modal #custom_vat_amt, #edit_modal #custom_duty, #edit_modal #custom_bill_amt, #edit_modal #dp_charges, #edit_modal #dp_vat').on('keyup change', function () {
         calcTotals1();
     });
 

@@ -63,7 +63,7 @@
                                 placeholder="e.g., TEN-2025-001" value="<?php echo set_value('tender_ref_no'); ?>">
                         </div>
                     </div>
-                    <div class="row"> 
+                    <div class="row">
                         <div class="form-group col-md-3">
                             <label>Quotation Date</label>
                             <input type="date" name="quote_date" id="quote_date" class="form-control"
@@ -75,9 +75,9 @@
                             <input type="checkbox" name="is_technical_bid" id="is_technical_bid" value="1">
                         </div>
                         <div class="form-group col-md-3">
-                            <label>Technical Option Name</label>
+                            <label>Quotation Option </label>
                             <input type="text" name="technical_option_name" id="technical_option_name"
-                                class="form-control" value="" placeholder="Technical Option Name  - OPT1" readonly>
+                                class="form-control" value="" placeholder="Quotation Option - OPT1">
                         </div>
 
                         <div class="form-group col-md-3">
@@ -93,17 +93,17 @@
                             <label class="radio-inline"><input type="radio" name="quotation_status" value="On Hold"> On
                                 Hold</label>
                         </div>
-                        </div>
-                          <div class="row">
+                    </div>
+                    <div class="row">
 
 
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-3 hide">
                             <label for="transport_charges">Transport Charges</label>
                             <input type="number" step="any" name="transport_charges" id="transport_charges"
                                 class="form-control" placeholder="Enter transport charges"
                                 value="<?php echo set_value('transport_charges', '0.00'); ?>">
                         </div>
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-3 hide">
                             <label for="other_charges">Other Charges</label>
                             <input type="number" step="any" name="other_charges" id="other_charges" class="form-control"
                                 placeholder="Enter other charges"
@@ -174,17 +174,16 @@
                     </div>
                     <div id="item_container"></div>
 
+
+                </fieldset>
+
+                <div
+                    style="border-radius:10px; padding:30px; background-color:#f8f9fa; border:2px solid blue; margin-top:30px;margin-bottom:30px;">
                     <div class="row">
-                        <div class="col-md-3 pull-right ">
-                            <div class="total-box shadow-sm">
-                                <h5 class="mb-0">
-                                    <i class="fa fa-calculator text-success me-2"></i>
-                                    <strong>Total Amount With Tax:</strong>
-                                    <span class="text-primary"><span id="total_amount">0.000</span></span>
-                                </h5>
+                        <div class="col-md-3 text-right ">
+                                <h3 class="text-red">Total Excl Addt Charges</h3>
                             </div>
-                        </div>
-                        <div class="col-md-3 pull-right">
+                        <div class="col-md-3 text-right">
                             <div class="total-box shadow-sm">
                                 <h5 class="mb-0">
                                     <i class="fa fa-calculator text-success me-2"></i>
@@ -193,8 +192,116 @@
                                 </h5>
                             </div>
                         </div>
+                       <div class="col-md-3 text-right">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total TAX Amount :</strong>
+                                        <span class="text-primary"><span id="total_tax_amount">0.000</span></span>
+                                    </h5>
+                                </div>
+                            </div>
+                        <div class="col-md-3 text-right ">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount With Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div>
+
                     </div>
+                </div>
+
+
+                <fieldset class="mt-4">
+                    <legend class="text-light-blue"><i class="fa fa-list"></i> Addtional Charges (If any)</legend>
+                    <table class="table table-bordered table-striped">
+                        <tr>
+                            <th>#</th>
+                            <th>Addt.Charges Type</th>
+                            <th>Addt.Charges Amt</th>
+                            <th>VAT %</th>
+                            <th>VAT Amt</th>
+                            <th>Total Amt</th>
+                        </tr>
+                        <?php foreach($addt_charges_list as $i => $info) { ?>
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="chk_addt_charges_type_id"
+                                    id="chk_addt_charges_type_id_<?php echo $info['addt_charges_type_id'] ?>"
+                                    name="chk_addt_charges_type_id[]"
+                                    value="<?php echo $info['addt_charges_type_id'] ?>">
+                            </td>
+                            <td><label
+                                    for="chk_addt_charges_type_id_<?php echo $info['addt_charges_type_id'] ?>"><?php echo $info['addt_charges_type_name'] ?></label>
+                            </td>
+                            <td>
+                                <input type="number" step="any" class="form-control addt_charges_amt"
+                                    name="addt_charges_amt[<?php echo $info['addt_charges_type_id'] ?>]" value="">
+                            </td>
+                            <td>
+                                <input type="number" step="any" class="form-control addt_charges_vat"
+                                    name="addt_charges_vat[<?php echo $info['addt_charges_type_id'] ?>]"
+                                    value="<?php echo $info['vat'] ?>">
+                            </td>
+                            <td>
+                                <input type="number" step="any" class="form-control addt_charges_vat_amt"
+                                    name="addt_charges_vat_amt[<?php echo $info['addt_charges_type_id'] ?>]" value=""
+                                    readonly>
+                            </td>
+                            <td>
+                                <input type="number" step="any" class="form-control addt_charges_tot_amt"
+                                    name="addt_charges_tot_amt[<?php echo $info['addt_charges_type_id'] ?>]" value=""
+                                    readonly>
+                            </td>
+                        </tr>
+                        <?php } ?>
+                    </table>
                 </fieldset>
+                <div
+                        style="border-radius:10px; padding:30px; background-color:#f8f9fa; border:2px solid blue; margin-top:30px;margin-bottom:30px;">
+                        <div class="row">
+                            <div class="col-md-3 text-right ">
+                                <h3 class="text-red">Total Inc Addt Charges</h3>
+                            </div>
+
+                            <div class="col-md-3 text-right">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total Amount WO Tax :</strong>
+                                        <span class="text-primary text-bold"><span
+                                                id="total_amount_wo_tax_addt">0.000</span></span>
+                                        <br><i>Inc Addt Charges</i>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-right">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total Tax Amount :</strong>
+                                        <span class="text-primary text-bold"><span
+                                                id="total_tax_amount_addt">0.000</span></span>
+                                        <br><i>Inc Addt Charges</i>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-right ">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total Amount With Tax :</strong>
+                                        <span class="text-primary text-bold"><span
+                                                id="total_amount_addt">0.000</span></span>
+                                        <br><i>Inc Addt Charges</i>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
             </div>
 
             <div class="box-footer">

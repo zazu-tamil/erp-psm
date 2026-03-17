@@ -157,7 +157,7 @@
                                     <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, $header['vat_payer_purchase_grp'], 'id="vat_payer_purchase_grp" class="form-control" required'); ?>
                                 </div>
 
-                                <div class="form-group col-md-3">
+                                <!-- <div class="form-group col-md-3">
                                     <label>Declaration Number</label>
                                     <input type="text" name="declaration_no" id="declaration_no" class="form-control"
                                         value="<?php echo htmlspecialchars($header['declaration_no']); ?>">
@@ -167,7 +167,7 @@
                                     <label>Declaration Date</label>
                                     <input type="date" name="declaration_date" id="declaration_date"
                                         class="form-control" value="<?php echo $header['declaration_date']; ?>">
-                                </div>
+                                </div> -->
                             </fieldset>
                         </div>
                     </div>
@@ -183,7 +183,7 @@
                     </div>
                 </fieldset>
 
-                <div class="box box-warning ">
+                <div class="box box-warning " style="display:none;">
                     <div class="box-header with-border bg-warning">
                         <h3 class="box-title">
                             <i class="fa fa-truck"></i> Delivery Partner Bill Details
@@ -281,7 +281,7 @@
                                         <th style="width:40%;">Item Code & Description</th>
                                         <th style="width:10%;">UOM & Qty</th>
                                         <th style="width:10%;">Rate & Conversion</th>
-                                        <th style="width:10%;">Amount & Duty %</th>
+                                        <th style="width:10%;">Amount <!--& Duty %--></th>
                                         <th style="width:8%;">VAT %</th>
                                         <th style="width:11%;">In BHD <br>Amt (W/O Tax) & <br> Amt (With Tax)</th>
                                     </tr>
@@ -345,9 +345,9 @@
                                             <input type="number" step="any" name="act_amt[]"
                                                 class="form-control act_amt" value="<?php echo $item_act_amt; ?>"
                                                 readonly>
-                                            <i class="text-sm">Duty %</i>
+                                            <!-- <i class="text-sm">Duty %</i>
                                             <input type="number" step="any" name="duty[]" class="form-control duty"
-                                                value="<?php echo $item_duty; ?>">
+                                                value="<?php echo $item_duty; ?>"> -->
                                         </td>
                                         <td>
                                             <input type="number" step="any" name="gst[]" class="form-control gst-input"
@@ -448,14 +448,15 @@
                                     </div>
 
                                 </div>
-                                <div class="form-group col-md-3">
+                                <!-- <div class="form-group col-md-3">
                                     <label>Bayan Charges</label>
                                     <input type="number" step="any" name="bayan_charges" id="bayan_charges" value="<?php echo $header['bayan_charges']?>"
                                         class="form-control">
-                                </div>
+                                </div> -->
                             </div>
                             <div class="row">
                                 <!-- Total Amount WO Tax -->
+                                <div class="col-md-3 "></div>
                                 <div class="col-md-3 ">
                                     <div class="form-group total-box shadow-sm">
                                         <label>
@@ -467,7 +468,7 @@
                                             readonly>
                                     </div>
                                 </div>
-                                <div class="col-md-3 ">
+                                <!-- <div class="col-md-3 ">
                                     <div class="form-group total-box shadow-sm">
                                         <label>
                                             <i class="fa fa-calculator text-success"></i>
@@ -476,7 +477,7 @@
                                         <input type="number" name="total_duty_amount" step="any" id="total_duty_amount"
                                             class="form-control text-right total_duty_amount" value="<?php echo $header['total_duty_amount']?>" readonly>
                                     </div>
-                                </div>
+                                </div> -->
                                 <div class="col-md-3 ">
                                     <div class="form-group total-box shadow-sm">
                                         <label>
@@ -505,7 +506,7 @@
 
 
                         <fieldset
-                            style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px;">
+                            style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px; display:none;">
                             <legend>For Bank Book</legend>
                             <div class="row">
 

@@ -396,6 +396,7 @@ $(function() {
         let custom_duty      = parseFloat($('#custom_duty').val()) || 0;
         let bill_amount = parseFloat($('#bill_amount').val()) || 0; 
         let vat           = parseFloat($('#vat').val()) || 0;
+        let custom_stamp_fee   = parseFloat($('#custom_stamp_fee').val()) || 0;
 
         // Total Amount W/O VAT
         let tot_amt_wo_vat = custom_duty + bill_amount;
@@ -407,14 +408,14 @@ $(function() {
         $('#vat_amt').val(vat_amt.toFixed(3));  
 
         // Customs Total
-        let customs_tot_amt = tot_amt_wo_vat + vat_amt;
+        let customs_tot_amt = tot_amt_wo_vat + vat_amt + custom_stamp_fee;
 
         $('#customs_tot_amt').val(customs_tot_amt.toFixed(3));
     }
 
 
     // Trigger calculation when fields change
-    $(' #custom_duty, #bill_amount,  #vat').on('keyup change', function () {
+    $(' #custom_duty, #bill_amount,  #vat ,#custom_stamp_fee').on('keyup change', function () {
         calcTotals();
     });
 
@@ -423,6 +424,7 @@ $(function() {
         let custom_duty      = parseFloat($('#edit_modal #custom_duty').val()) || 0;
         let bill_amount = parseFloat($('#edit_modal #bill_amount').val()) || 0;  
         let vat           = parseFloat($('#edit_modal #vat').val()) || 0;
+        let custom_stamp_fee  = parseFloat($('#edit_modal #custom_stamp_fee').val()) || 0;
 
         // Total Amount W/O DP
         let tot_amt_wo_vat =  custom_duty + bill_amount;
@@ -433,14 +435,14 @@ $(function() {
         $('#edit_modal #vat_amt').val(vat_amt.toFixed(3));  
 
         // Customs Total
-        let customs_tot_amt = tot_amt_wo_vat + vat_amt;
+        let customs_tot_amt = tot_amt_wo_vat + vat_amt + custom_stamp_fee;
 
         $('#edit_modal #customs_tot_amt').val(customs_tot_amt.toFixed(3));
     }
 
 
     // Trigger calculation when fields change
-    $('#edit_modal #custom_duty, #edit_modal #bill_amount,  #edit_modal #vat').on('keyup change', function () {
+    $('#edit_modal #custom_duty, #edit_modal #bill_amount,  #edit_modal #vat , #edit_modal #custom_stamp_fee').on('keyup change', function () {
         calcTotals1();
     });
 

@@ -104,23 +104,81 @@
     }
 </style>
 <script>
+
+
+ 
     $(document).ready(function () {
 
-         function toggleTechnicalOption() {
-            if ($('#is_technical_bid').is(':checked')) {
-                $('#technical_option_name').prop('readonly', false);
-            } else {
-                $('#technical_option_name').prop('readonly', true).val('');
-            }
+         
+
+        // Enable / Disable on checkbox change
+    $('.chk_addt_charges_type_id').on('change', function() {
+
+        let row = $(this).closest('tr');
+
+        if ($(this).is(':checked')) {
+            row.find(
+                    '.addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt'
+                )
+                .prop('disabled', false);
+        } else {
+            row.find(
+                    '.addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt'
+                )
+                .prop('disabled', true);
+            // .val('0'); // clear values
         }
 
-        // Run on page load
-        toggleTechnicalOption();
+        calculateTotalAmount_addt();
+    });
 
-        // Run when checkbox changes
-        $('#is_technical_bid').change(function () {
-            toggleTechnicalOption();
+    $('.chk_addt_charges_type_id').change();
+
+
+    // Calculation on change
+    $(document).on('input', '.addt_charges_amt, .addt_charges_vat', function() {
+
+        let row = $(this).closest('tr');
+
+        let amt = parseFloat(row.find('.addt_charges_amt').val()) || 0;
+        let vat = parseFloat(row.find('.addt_charges_vat').val()) || 0;
+
+        let vat_amt = (amt * vat) / 100;
+        let total = amt + vat_amt;
+
+        row.find('.addt_charges_vat_amt').val(vat_amt.toFixed(2));
+        row.find('.addt_charges_tot_amt').val(total.toFixed(2));
+
+        calculateTotalAmount_addt();
+    });
+
+
+    function calculateTotalAmount_addt() {
+        let total_addt_amt_wo_tax = 0;
+        $(".addt_charges_amt").each(function() {
+            if ($(this).closest('tr').find('.chk_addt_charges_type_id').is(':checked')) {
+                total_addt_amt_wo_tax += parseFloat($(this).val()) || 0;
+            }
         });
+        total_addt_amt_wo_tax = parseFloat($("#total_amount_wo_tax").text()) + parseFloat(
+            total_addt_amt_wo_tax);
+        $("#total_amount_wo_tax_addt").text(total_addt_amt_wo_tax.toFixed(3));
+
+
+        let total_addt_amt_w_tax = 0;
+        $(".addt_charges_tot_amt").each(function() {
+            if ($(this).closest('tr').find('.chk_addt_charges_type_id').is(':checked')) {
+                total_addt_amt_w_tax += parseFloat($(this).val()) || 0;
+            }
+        });
+        total_addt_amt_w_tax = parseFloat($("#total_amount").text()) + parseFloat(total_addt_amt_w_tax);
+        $("#total_amount_addt").text(total_addt_amt_w_tax.toFixed(3));
+
+
+        $("#total_tax_amount_addt").text((total_addt_amt_w_tax - total_addt_amt_wo_tax).toFixed(3));
+
+    }
+
 
 
         $(".srch_enq_id").autocomplete({
@@ -147,6 +205,8 @@
                 load_tender_enq(ui.item.tender_enquiry_id);
             },
         });
+
+       
 
     /* ================================================================
        1. COMPANY CHANGE - Load ALL Customers (no filtering by company)
@@ -538,6 +598,7 @@
         $row.find(".amountwotx").val((qty * rate).toFixed(3));
 
         calculateTotalAmount();
+        calculateTotalAmount_addt();
     });
 
     function calculateTotalAmount() {
@@ -552,6 +613,8 @@
             total_wot += parseFloat($(this).val()) || 0;
         });
         $("#total_amount_wo_tax").text(total_wot.toFixed(3));
+
+        $("#total_tax_amount").text((total - total_wot).toFixed(3));
     }
 
     $(document).on("change", ".item-check", function () {

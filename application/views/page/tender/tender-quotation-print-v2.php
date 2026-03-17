@@ -1,8 +1,8 @@
 <!--
 <?php
-// echo "<pre>";
-// print_r($record); 
-// echo "</pre>"; 
+echo "<pre>";
+print_r($addt_chrg_list); 
+echo "</pre>"; 
 ?>
 -->
 <!DOCTYPE html>
@@ -130,7 +130,7 @@
 
         <tr>
             <td colspan="7" class="title">
-                QUOTATION
+                QUOTATION <?php echo ($record['technical_option_name'] != '' ? ' - ' . $record['technical_option_name'] : '' )?>
             </td>
         </tr>
         
@@ -221,6 +221,7 @@
 
                     <?php if (!empty($item_list)): 
                     $tot_vat = [];    
+                    //echo "floatval" . floatval('5.9');
                     ?>
                     <?php foreach ($item_list as $i => $item):
                         $net_amount = floatval($item['Net_amount'] ?? 0);
@@ -261,10 +262,10 @@
                         <td colspan="7" class="text-center" style="padding:30px; color:#999;">No items found</td>
                     </tr>
                     <?php endif; 
-                    //$total_net_amount += ($record['transport_charges'] + $record['other_charges']);
-                    $total_vat_amount = $total_vat_amount + (($record['transport_charges'] + $record['other_charges'] ) * 10 /100); 
-                    $tot_vat['10'] += (($record['transport_charges'] + $record['other_charges'] ) * 10 /100);
-                    $grand_total = ($total_net_amount + $record['transport_charges'] + $record['other_charges'] ) + $total_vat_amount;
+                    
+                    // $total_vat_amount = $total_vat_amount + (($record['transport_charges'] + $record['other_charges'] ) * 10 /100); 
+                    // $tot_vat['10'] += (($record['transport_charges'] + $record['other_charges'] ) * 10 /100);
+                    // $grand_total = ($total_net_amount + $record['transport_charges'] + $record['other_charges'] ) + $total_vat_amount;
                     ?>
 
                     <tr class="items-table">
@@ -274,6 +275,21 @@
                         </td>
                     </tr>
                    
+                    <?php 
+                    $grand_total = $total_net_amount;
+                    foreach($addt_chrg_list as $i => $addt_chrg): 
+                        $total_vat_amount += $addt_chrg['addt_charges_vat_amt']; 
+                        $tot_vat[floatval($addt_chrg['addt_charges_vat'])] += $addt_chrg['addt_charges_vat_amt'];
+                        $grand_total +=  $total_vat_amount;
+                    ?>
+                    <tr class="items-table">
+                        <td colspan="5" class="text-right"><strong><?php echo htmlspecialchars($addt_chrg['addt_charges_type_name']); ?></strong></td>
+                        <td colspan="2" class="text-right">
+                            <strong><?php echo number_format($addt_chrg['addt_charges_amt'], $decimal_point); ?></strong>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                    <?php   /*     
                     <?php if($record['transport_charges'] > 0 ) { ?>
                     <tr class="items-table">
                         <td colspan="5" class="text-right"><strong>TRANSPORT CHARGES</strong></td>
@@ -289,7 +305,8 @@
                             <strong><?php echo number_format($record['other_charges'], $decimal_point); ?></strong>
                         </td>
                     </tr>
-                    <?php } ?>
+                    <?php }  ?>
+                     */ ?>
                     <?php foreach($tot_vat as $vat_prt => $amt) { 
                     if($amt > 0 ) {
                     ?>

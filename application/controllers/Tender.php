@@ -1278,6 +1278,33 @@ class Tender extends CI_Controller
                 }
             }
 
+            /* ---- 3. ONLY SELECTED Addt charges ---- */
+
+             $chk_addt_charges_type_id = $this->input->post('chk_addt_charges_type_id') ?? [];
+
+             if(!empty($chk_addt_charges_type_id)){
+
+                 $addt_charges_amt = $this->input->post('addt_charges_amt') ?? [];
+                 $addt_charges_vat = $this->input->post('addt_charges_vat') ?? [];
+                 $addt_charges_vat_amt = $this->input->post('addt_charges_vat_amt') ?? []; 
+                 $addt_charges_tot_amt = $this->input->post('addt_charges_tot_amt') ?? [];
+
+                 foreach ($chk_addt_charges_type_id as $j => $addt_charges_type_id) {
+                    $addt_charges_data = [
+                        'tender_quotation_id' => $tender_quotation_id,
+                        'addt_charges_type_id' => $addt_charges_type_id ?? 0,
+                        'addt_charges_amt' => $addt_charges_amt[$addt_charges_type_id] ?? 0, 
+                        'addt_charges_vat' => $addt_charges_vat[$addt_charges_type_id] ?? 0, 
+                        'addt_charges_vat_amt' => $addt_charges_vat_amt[$addt_charges_type_id] ?? 0, 
+                        'addt_charges_tot_amt' => $addt_charges_tot_amt[$addt_charges_type_id] ?? 0, 
+                        'status' => 'Active'
+                    ];
+                    $this->db->insert('tender_quote_addtchrg_info', $addt_charges_data);
+                } 
+             }
+
+
+
             $this->db->trans_complete();
 
             if ($this->db->trans_status() === FALSE) {
@@ -1324,6 +1351,18 @@ class Tender extends CI_Controller
                 $data['default_currency_id'] = $row['currency_id'];
             }
         }
+
+
+         $sql = "
+            SELECT 
+            *
+            FROM addt_charges_type_info
+            WHERE status = 'Active'
+            ORDER BY addt_charges_type_name ASC
+        ";
+        $query = $this->db->query($sql);
+
+        $data['addt_charges_list'] = $query->result_array();
 
         // // Get GST options
         // $sql = "SELECT gst_id, gst_percentage FROM gst_info WHERE status = 'Active' ORDER BY gst_percentage ASC";
@@ -1565,13 +1604,14 @@ class Tender extends CI_Controller
         $data['js'] = 'tender/tender-quotation-edit.inc';
         $data['title'] = 'Edit Tender Quotation';
 
-        if ($this->input->post('mode') == 'Edit') {
+        if ($this->input->post('mode') == 'Edit') 
+        {
             $this->db->trans_start();
 
-            /*echo "<pre>";
-            print_r($_POST); 
-            echo "</pre>";
-            exit; */
+            // echo "<pre>";
+            // print_r($_POST); 
+            // echo "</pre>";
+            // exit; 
 
             /* ---- 1. Header record ------------------------------------------------ */
             $header = [
@@ -1657,7 +1697,55 @@ class Tender extends CI_Controller
                     $this->db->where_not_in('tender_quotation_item_id', $miss_item_ids);
                     $this->db->update('tender_quotation_item_info', ['status' => 'Deleted', 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'), 'updated_date' => date('Y-m-d H:i:s')]);
                 }
+            } else {
+               $this->db->where('tender_quotation_id', $tender_quotation_id);
+               $this->db->update('tender_quotation_item_info', ['status' => 'Deleted', 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'), 'updated_date' => date('Y-m-d H:i:s')]);     
             }
+
+
+                /* ---- 3. ONLY SELECTED Addt charges ---- */
+
+             $chk_addt_charges_type_id = $this->input->post('chk_addt_charges_type_id') ?? [];
+
+             if(!empty($chk_addt_charges_type_id)){
+
+                 $addt_charges_amt = $this->input->post('addt_charges_amt') ?? [];
+                 $addt_charges_vat = $this->input->post('addt_charges_vat') ?? [];
+                 $addt_charges_vat_amt = $this->input->post('addt_charges_vat_amt') ?? []; 
+                 $addt_charges_tot_amt = $this->input->post('addt_charges_tot_amt') ?? [];
+                 $tender_quote_addtchrg_id = $this->input->post('tender_quote_addtchrg_id') ?? [];
+                 $miss_addt_charges_id = [];
+
+                 foreach ($chk_addt_charges_type_id as $j => $addt_charges_type_id) {
+                    $addt_charges_data = [
+                        'tender_quotation_id' => $tender_quotation_id,
+                        'addt_charges_type_id' => $addt_charges_type_id ?? 0,
+                        'addt_charges_amt' => $addt_charges_amt[$addt_charges_type_id] ?? 0, 
+                        'addt_charges_vat' => $addt_charges_vat[$addt_charges_type_id] ?? 0, 
+                        'addt_charges_vat_amt' => $addt_charges_vat_amt[$addt_charges_type_id] ?? 0, 
+                        'addt_charges_tot_amt' => $addt_charges_tot_amt[$addt_charges_type_id] ?? 0, 
+                        'status' => 'Active'
+                    ];
+                    if(!empty($tender_quote_addtchrg_id[$addt_charges_type_id]) && $tender_quote_addtchrg_id[$addt_charges_type_id] > 0 ) {
+                        $this->db->where('tender_quote_addtchrg_id', $tender_quote_addtchrg_id[$addt_charges_type_id]); 
+                        $this->db->update('tender_quote_addtchrg_info', $addt_charges_data);
+                        $miss_addt_charges_id[] = $$tender_quote_addtchrg_id[$addt_charges_type_id];
+                    } else {
+                        $this->db->insert('tender_quote_addtchrg_info', $addt_charges_data);
+                        $miss_addt_charges_id[] = $this->db->insert_id();
+                    }
+                } 
+                 if(!empty($miss_addt_charges_id)){
+                    $this->db->where('tender_quotation_id', $tender_quotation_id);
+                    $this->db->where_not_in('tender_quote_addtchrg_id', $miss_addt_charges_id);
+                    $this->db->update('tender_quote_addtchrg_info', ['status' => 'Deleted']);
+                 }
+
+            } else {
+                $this->db->where('tender_quotation_id', $tender_quotation_id); 
+                $this->db->update('tender_quote_addtchrg_info', ['status' => 'Deleted']);
+            } 
+
 
             $this->db->trans_complete();
 
@@ -1808,8 +1896,51 @@ class Tender extends CI_Controller
                 AND a.status = 'Active'
                 order by a.tender_quotation_item_id 
         ";
-        $query = $this->db->query($sql, [$tender_quotation_id]);
+
+        $sql=  "
+        select 
+            b.tender_quotation_item_id as tender_quotation_item_id,
+            a.tender_enquiry_item_id as tender_enquiry_item_id,
+            if(b.tender_quotation_item_id is null , a.item_code, b.item_code) as item_code,
+            if(b.tender_quotation_item_id is null , a.item_desc, b.item_desc) as item_desc, 
+            a.uom,
+            if(b.tender_quotation_item_id is null , a.qty, b.qty) as qty,  
+            b.rate,
+            b.gst as vat, 
+            b.amount
+            from tender_enquiry_item_info as a
+            left join tender_quotation_item_info as b 
+                on b.tender_enquiry_item_id = a.tender_enquiry_item_id 
+                and b.`status` = 'Active' 
+                and b.tender_quotation_id = ?
+            where a.`status` = 'Active'
+            and a.tender_enquiry_id = ?
+            order by a.tender_enquiry_item_id 
+        ";
+        $query = $this->db->query($sql, [$tender_quotation_id , $data['header']['tender_enquiry_id']]);
         $data['items'] = $query->result_array();  // FIXED: row_array() → result_array()
+
+
+         $sql = "
+            SELECT 
+            a.*,
+            b.tender_quote_addtchrg_id,
+            b.addt_charges_amt,
+            b.addt_charges_vat,
+            b.addt_charges_vat,
+            b.addt_charges_vat_amt,
+            b.addt_charges_tot_amt
+            FROM addt_charges_type_info as a
+            left join tender_quote_addtchrg_info as b 
+                on b.addt_charges_type_id = a.addt_charges_type_id 
+                and b.status='Active'
+                and b.tender_quotation_id = ?
+            WHERE a.status = 'Active'
+            ORDER BY a.addt_charges_type_name ASC
+        ";
+        $query = $this->db->query($sql, [$tender_quotation_id]);    
+
+        $data['addt_charges_list'] = $query->result_array();
 
 
         $data['pagination'] = $this->pagination->create_links();
@@ -1878,13 +2009,32 @@ class Tender extends CI_Controller
             (b.rate * b.qty) AS Net_amount,
             ((b.rate * b.qty) * b.gst /100) as vat_amt
             from tender_quotation_info as a  
-            left join tender_quotation_item_info as b on a.tender_quotation_id = b.tender_quotation_id and a.`status`='Active'
+            left join tender_quotation_item_info as b on a.tender_quotation_id = b.tender_quotation_id 
             where a.`status`='Active'
+            and b.`status`='Active'
             and a.tender_quotation_id = ?
             order by b.tender_enquiry_item_id ,  b.tender_quotation_item_id asc
         ";
         $query = $this->db->query($sql, [$tender_quotation_id]);
         $data['item_list'] = $query->result_array();
+
+        
+        $sql = "
+           SELECT 
+            a.*,
+            b.addt_charges_type_name
+            FROM tender_quote_addtchrg_info as a
+            left join addt_charges_type_info as b 
+                on b.addt_charges_type_id = a.addt_charges_type_id  
+            WHERE a.status = 'Active'
+            and b.status='Active' 
+            and a.tender_quotation_id = ?
+            ORDER BY b.addt_charges_type_name ASC   
+        ";
+         $query = $this->db->query($sql, [$tender_quotation_id]);
+         $data['addt_chrg_list'] = $query->result_array();
+
+
 
         if (isset($_POST['export_xls'])) {
 

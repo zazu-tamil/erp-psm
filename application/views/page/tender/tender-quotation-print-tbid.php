@@ -130,7 +130,7 @@
 
         <tr>
             <td colspan="7" class="title">
-                QUOTATION - <?php echo $record['technical_option_name']?> - TECHNICAL BID
+                QUOTATION - <?php echo ($record['technical_option_name'] != '' ? $record['technical_option_name'] . ' - ': '' )?> TECHNICAL BID 
             </td>
         </tr>
         

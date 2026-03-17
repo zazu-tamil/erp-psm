@@ -143,7 +143,7 @@
                                         </div>
                                         <div class="col-md-6 form-group">
                                             <label for="sub_account_head_id">A/c Sub Head</label>
-                                            <?php echo form_dropdown('sub_account_head_id', $ac_sub_head_opt, set_value('sub_account_head_id'), 'id="sub_account_head_id" class="form-control" required'); ?>
+                                            <?php echo form_dropdown('sub_account_head_id', $ac_sub_head_opt, set_value('sub_account_head_id'), 'id="sub_account_head_id" class="form-control" '); ?>
                                         </div>
                                     </div>
                                 </div>
@@ -151,11 +151,11 @@
                                 <div class="row">
                                     <div class="form-group col-md-6">
                                         <label>Customer <span class="text-red">*</span></label>
-                                        <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="srch_customer_id" class="form-control" required'); ?>
+                                        <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="srch_customer_id" class="form-control" '); ?>
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label for="tender_enquiry_id">Tender Enquiry No</label>
-                                        <?php echo form_dropdown('tender_enquiry_id', ['' => 'Select Enquiry'], set_value('tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" required'); ?>
+                                        <?php echo form_dropdown('tender_enquiry_id', ['' => 'Select Enquiry'], set_value('tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" '); ?>
                                     </div> 
                                 </div>
 
@@ -296,7 +296,7 @@
                                         </div>
                                         <div class="col-md-6 form-group">
                                             <label for="sub_account_head_id">A/c Sub Head</label>
-                                            <?php echo form_dropdown('sub_account_head_id', $ac_sub_head_opt, set_value('sub_account_head_id'), 'id="sub_account_head_id" class="form-control" required'); ?>
+                                            <?php echo form_dropdown('sub_account_head_id', $ac_sub_head_opt, set_value('sub_account_head_id'), 'id="sub_account_head_id" class="form-control" '); ?>
                                         </div>
                                     </div>
                                 </div>
@@ -304,11 +304,11 @@
                                 <div class="row">
                                     <div class="form-group col-md-6">
                                         <label>Customer <span class="text-red">*</span></label>
-                                        <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="srch_customer_id" class="form-control" required'); ?>
+                                        <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="srch_customer_id" class="form-control" '); ?>
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label for="tender_enquiry_id">Tender Enquiry No</label>
-                                        <?php echo form_dropdown('tender_enquiry_id', ['' => 'Select Enquiry'], set_value('tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" required'); ?>
+                                        <?php echo form_dropdown('tender_enquiry_id', ['' => 'Select Enquiry'], set_value('tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" '); ?>
                                     </div> 
                                 </div>
 

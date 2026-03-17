@@ -442,18 +442,18 @@
                   name="act_amt[]"
                   class="form-control act_amt"
                   value="" readonly>
-                <i class="text-sm">Duty %</i>
-                <input type="number"
+                <!--<i class="text-sm">Duty %</i>
+                <input type="hidden"
                   step="any"
                   name="duty[]"
                   class="form-control duty"
                   value="0">
                   <i class="text-sm">Duty Amt</i>
-                  <input type="number"
+                  <input type="hidden"
                     step="any"
                     name="duty_amount[]"
                     class="form-control duty_amount"
-                    value="0" readonly>
+                    value="0" readonly>-->
               </td>
               <td>
                   <input type="number"

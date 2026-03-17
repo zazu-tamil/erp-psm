@@ -12,6 +12,7 @@
 
           $("#edit_modal #addt_charges_type_id").val(d.addt_charges_type_id);
           $("#edit_modal #addt_charges_type_name").val(d.addt_charges_type_name);
+          $("#edit_modal #vat").val(d.vat);
           $('#edit_modal input:radio[value="' + d.status + '"]').prop("checked", true);
 
           $("#edit_modal").modal("show");

@@ -20,6 +20,7 @@
                     <tr>
                         <th class="text-center">S.No</th>
                         <th>Additional Charges Type Name</th>
+                        <th>VAT %</th>
                         <th>Status</th>
                         <th colspan="2" class="text-center">Action</th>
                     </tr>
@@ -31,6 +32,7 @@
                         <tr class="mb-3">
                             <td class="text-center"><?php echo ($j + 1); ?></td>
                             <td><?php echo $ls['addt_charges_type_name'] ?></td>
+                            <td><?php echo $ls['vat'] ?></td>
                             <td><?php echo $ls['status'] ?></td>
                             <td class="text-center">
                                 <button data-toggle="modal" data-target="#edit_modal"
@@ -67,6 +69,14 @@
                                         <label>Additional Charges Type Name</label>
                                         <input class="form-control" type="text" name="addt_charges_type_name"
                                             id="addt_charges_type_name" value="" placeholder="Additional Charges Type Name"
+                                            required="true">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label>VAT %</label>
+                                        <input class="form-control" type="number" step="any" name="vat"
+                                            id="vat" value="" placeholder="VAT %"
                                             required="true">
                                     </div>
                                 </div>
@@ -116,6 +126,14 @@
                                         <label>Additional Charges Type Name</label>
                                         <input class="form-control" type="text" name="addt_charges_type_name"
                                             id="addt_charges_type_name" value="" placeholder="Additional Charges Type Name"
+                                            required="true">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label>VAT %</label>
+                                        <input class="form-control" type="number" step="any" name="vat"
+                                            id="vat" value="" placeholder="VAT %"
                                             required="true">
                                     </div>
                                 </div>
