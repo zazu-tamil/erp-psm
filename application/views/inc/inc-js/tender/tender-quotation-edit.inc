@@ -73,71 +73,73 @@ $(document).ready(function() {
 
     }
 
-});
+    //calculateTotalAmount_addt();
 
 
 
-function exportJSONToExcel1(JSONData, fileName = "export.xls") {
 
-    let data = typeof JSONData != "string" ? JSON.stringify(JSONData) : JSONData;
-    data = JSON.parse(data);
 
-    let table = "<table border='1'><tr>";
+    function exportJSONToExcel1(JSONData, fileName = "export.xls") {
 
-    // Headers
-    for (let key in data[0]) {
-        table += "<th>" + key.toUpperCase() + "</th>";
-    }
-    table += "</tr>";
+        let data = typeof JSONData != "string" ? JSON.stringify(JSONData) : JSONData;
+        data = JSON.parse(data);
 
-    // Rows
-    data.forEach(row => {
-        table += "<tr>";
-        for (let key in row) {
-            table += "<td>" + row[key] + "</td>";
+        let table = "<table border='1'><tr>";
+
+        // Headers
+        for (let key in data[0]) {
+            table += "<th>" + key.toUpperCase() + "</th>";
         }
         table += "</tr>";
+
+        // Rows
+        data.forEach(row => {
+            table += "<tr>";
+            for (let key in row) {
+                table += "<td>" + row[key] + "</td>";
+            }
+            table += "</tr>";
+        });
+        table += "</table>";
+
+        // Create Excel Blob
+        let blob = new Blob([table], {
+            type: "application/vnd.ms-excel"
+        });
+
+        // Download
+        let a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = fileName;
+        a.click();
+    }
+
+    function exportJSONToXLSX(data, fileName = "export.xlsx") {
+
+        // Convert JSON to worksheet
+        const worksheet = XLSX.utils.json_to_sheet(data);
+
+        // Create workbook
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+        // Export XLSX
+        XLSX.writeFile(workbook, fileName);
+    }
+
+    /*$("#btnExport").click(function () {
+        let jsonData = <?php  echo json_encode($items); ?>;
+        exportJSONToExcel(jsonData, $(this).val() + ".xls");
+    });*/
+
+    $(document).on("click", "#btnExport", function() {
+
+        let jsonData = <?php  echo json_encode($items); ?>;
+        exportJSONToXLSX(jsonData, $(this).val() + ".xlsx");
     });
-    table += "</table>";
-
-    // Create Excel Blob
-    let blob = new Blob([table], {
-        type: "application/vnd.ms-excel"
-    });
-
-    // Download
-    let a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = fileName;
-    a.click();
-}
-
-function exportJSONToXLSX(data, fileName = "export.xlsx") {
-
-    // Convert JSON to worksheet
-    const worksheet = XLSX.utils.json_to_sheet(data);
-
-    // Create workbook
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-
-    // Export XLSX
-    XLSX.writeFile(workbook, fileName);
-}
-
-/*$("#btnExport").click(function () {
-    let jsonData = <?php  echo json_encode($items); ?>;
-    exportJSONToExcel(jsonData, $(this).val() + ".xls");
-});*/
-
-$(document).on("click", "#btnExport", function() {
-
-    let jsonData = <?php  echo json_encode($items); ?>;
-    exportJSONToXLSX(jsonData, $(this).val() + ".xlsx");
-});
 
 
-const rowTemplate = `
+    const rowTemplate = `
         <div class="item-card border p-3 mb-3" style="background-color:#f9f9f9; border-radius:8px;">
              <h5 class="text-primary mb-3">Item Details <span class="cnt"></span></h5>
              <div class="row">
@@ -218,105 +220,109 @@ const rowTemplate = `
          </div>
 
         `;
-calculateTotalAmount();
+    //calculateTotalAmount();
 
-$("#excelFile").on("change", function(e) {
+    $("#excelFile").on("change", function(e) {
 
-    const file = e.target.files[0];
-    if (!file) return;
+        const file = e.target.files[0];
+        if (!file) return;
 
-    const reader = new FileReader();
+        const reader = new FileReader();
 
-    reader.onload = function(e) {
+        reader.onload = function(e) {
 
-        const workbook = XLSX.read(e.target.result, {
-            type: "binary"
+            const workbook = XLSX.read(e.target.result, {
+                type: "binary"
+            });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+            // JSON with headers
+            const rows = XLSX.utils.sheet_to_json(sheet, {
+                defval: ""
+            });
+
+            console.log(rows);
+
+            $("#item_container").empty();
+            let i = 0;
+            rows.forEach(function(r) {
+
+                let newRow = $(rowTemplate);
+
+                newRow.find(".cnt").html((i + 1));
+                newRow.find(".item-check").val(i);
+                newRow.find(".tender_quotation_item_id").val(r.tender_quotation_item_id);
+                newRow.find(".tender_enquiry_item_id").val(r.tender_enquiry_item_id);
+                newRow.find(".item_code").val(r.item_code);
+                newRow.find(".desc-textarea").val(r.item_desc);
+                newRow.find(".uom").val(r.uom);
+                newRow.find(".qty-input").val(r.qty);
+                newRow.find(".vat-dropdown").val(r.vat);
+                newRow.find(".rate-input").val(r.rate);
+                newRow.find(".amount").val(r.amount);
+
+
+
+                $("#item_container").append(newRow);
+
+                newRow.find(".rate-input").change();
+                i++;
+            });
+        };
+
+        reader.readAsBinaryString(file);
+    });
+
+    /* ================================================================
+          5. Amount Calculation (Rate / VAT change)
+          ================================================================ */
+    $(document).on("input change", ".rate-input, .vat-dropdown", function() {
+        const $row = $(this).closest(".item-card");
+        const qty = parseFloat($row.find(".qty-input").val()) || 0;
+        const rate = parseFloat($row.find(".rate-input").val()) || 0;
+        const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
+
+        const amount = qty * rate * (1 + gst / 100);
+        $row.find(".amount-input").val(amount.toFixed(3));
+        $row.find(".amountwotx").val((qty * rate).toFixed(3));
+
+        calculateTotalAmount();
+    });
+
+    function calculateTotalAmount() {
+        let total = 0;
+        $(".amount-input").each(function() {
+            total += parseFloat($(this).val()) || 0;
         });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        $("#total_amount").text(total.toFixed(3));
 
-        // JSON with headers
-        const rows = XLSX.utils.sheet_to_json(sheet, {
-            defval: ""
+        let total_wot = 0;
+        $(".amountwotx").each(function() {
+            total_wot += parseFloat($(this).val()) || 0;
         });
+        $("#total_amount_wo_tax").text(total_wot.toFixed(3));
 
-        console.log(rows);
+        $("#total_tax_amount").text((total - total_wot).toFixed(3));
 
-        $("#item_container").empty();
-        let i = 0;
-        rows.forEach(function(r) {
-
-            let newRow = $(rowTemplate);
-
-            newRow.find(".cnt").html((i + 1));
-            newRow.find(".item-check").val(i);
-            newRow.find(".tender_quotation_item_id").val(r.tender_quotation_item_id);
-            newRow.find(".tender_enquiry_item_id").val(r.tender_enquiry_item_id);
-            newRow.find(".item_code").val(r.item_code);
-            newRow.find(".desc-textarea").val(r.item_desc);
-            newRow.find(".uom").val(r.uom);
-            newRow.find(".qty-input").val(r.qty);
-            newRow.find(".vat-dropdown").val(r.vat);
-            newRow.find(".rate-input").val(r.rate);
-            newRow.find(".amount").val(r.amount);
-
-
-
-            $("#item_container").append(newRow);
-
-            newRow.find(".rate-input").change();
-            i++;
-        });
-    };
-
-    reader.readAsBinaryString(file);
-});
-
-/* ================================================================
-      5. Amount Calculation (Rate / VAT change)
-      ================================================================ */
-$(document).on("input change", ".rate-input, .vat-dropdown", function() {
-    const $row = $(this).closest(".item-card");
-    const qty = parseFloat($row.find(".qty-input").val()) || 0;
-    const rate = parseFloat($row.find(".rate-input").val()) || 0;
-    const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
-
-    const amount = qty * rate * (1 + gst / 100);
-    $row.find(".amount-input").val(amount.toFixed(3));
-    $row.find(".amountwotx").val((qty * rate).toFixed(3));
+        calculateTotalAmount_addt();    
+    }
 
     calculateTotalAmount();
-});
 
-function calculateTotalAmount() {
-    let total = 0;
-    $(".amount-input").each(function() {
-        total += parseFloat($(this).val()) || 0;
+
+    $(document).on("change", ".item-check", function() {
+        const $card = $(this).closest(".item-card");
+        if (!$(this).is(":checked")) {
+            $card
+                .find(
+                    "input[type=hidden][name^='tender_enquiry_item_id'], " +
+                    "input[type=hidden][name^='category_id'], " +
+                    "input[type=hidden][name^='item_id']",
+                )
+                .remove();
+        }
     });
-    $("#total_amount").text(total.toFixed(3));
 
-    let total_wot = 0;
-    $(".amountwotx").each(function() {
-        total_wot += parseFloat($(this).val()) || 0;
-    });
-    $("#total_amount_wo_tax").text(total_wot.toFixed(3));
-
-    $("#total_tax_amount").text((total - total_wot).toFixed(3));
-}
-
-calculateTotalAmount();
-
-
-$(document).on("change", ".item-check", function() {
-    const $card = $(this).closest(".item-card");
-    if (!$(this).is(":checked")) {
-        $card
-            .find(
-                "input[type=hidden][name^='tender_enquiry_item_id'], " +
-                "input[type=hidden][name^='category_id'], " +
-                "input[type=hidden][name^='item_id']",
-            )
-            .remove();
-    }
 });
 
 

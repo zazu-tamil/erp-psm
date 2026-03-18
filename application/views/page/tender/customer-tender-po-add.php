@@ -158,17 +158,10 @@
                     </div>
 
                     <div id="item_container"></div>
-                    <div class="row">
-                        <div class="col-md-3 pull-right ">
-                            <div class="total-box shadow-sm">
-                                <h5 class="mb-0">
-                                    <i class="fa fa-calculator text-success me-2"></i>
-                                    <strong>Total Amount With Tax:</strong>
-                                    <span class="text-primary"><span id="total_amount">0.000</span></span>
-                                </h5>
-                            </div>
+                    <!-- <div class="row">
+                        <div class="col-md-3 text-right">
                         </div>
-                        <div class="col-md-3 pull-right">
+                        <div class="col-md-3 text-right">
                             <div class="total-box shadow-sm">
                                 <h5 class="mb-0">
                                     <i class="fa fa-calculator text-success me-2"></i>
@@ -177,19 +170,128 @@
                                 </h5>
                             </div>
                         </div>
-                    </div>
-                    <!-- <div class="total-wrapper mt-4 mb-4">
-                        <div class="total-box shadow-sm">
-                            <h5 class="mb-0">
-                                <i class="fa fa-calculator text-success me-2"></i>
-                                <strong>Total Amount:</strong>
-                                <span class="text-primary"><span id="total_amount">0.00</span></span>
-                            </h5>
+                        <div class="col-md-3 text-right">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total TAX Amount :</strong>
+                                    <span class="text-primary"><span id="total_tax_amount">0.000</span></span>
+                                </h5>
+                            </div>
                         </div>
-                    </div> -->
+                        <div class="col-md-3 text-right ">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount With Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div>
+                    </div>  -->
 
+                    <div
+                        style="border-radius:10px; padding:30px; background-color:#f8f9fa; border:2px solid blue; margin-top:30px;margin-bottom:30px;">
+                        <div class="row">
+                            <div class="col-md-3 text-right ">
+                                <h3 class="text-red">Total Excl Addt Charges</h3>
+                            </div>
+                            <div class="col-md-3 text-right">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total Amount WO Tax:</strong>
+                                        <span class="text-primary"><span id="total_amount_wo_tax">0.000</span></span>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-right">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total TAX Amount :</strong>
+                                        <span class="text-primary"><span id="total_tax_amount">0.000</span></span>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-right ">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total Amount With Tax:</strong>
+                                        <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                    </h5>
+                                </div>
+                            </div>
 
+                        </div>
+                    </div>
                 </fieldset>
+
+                <div id="div_addt_chrg" class="hide">
+                    <fieldset class="mt-4 pt-4">
+                        <legend class="text-light-blue"><i class="fa fa-list"></i> Addtional Charges (If any)</legend>
+                        <table class="table table-bordered table-striped">
+                            <tr>
+                                <th>#</th>
+                                <th>Addt.Charges Type</th>
+                                <th>Addt.Charges Amt</th>
+                                <th>VAT %</th>
+                                <th>VAT Amt</th>
+                                <th>Total Amt</th>
+                            </tr>
+                            <tbody id="tb_addt_chrg_list"></tbody>
+
+                        </table>
+                    </fieldset>
+
+                    <div
+                        style="border-radius:10px; padding:30px; background-color:#f8f9fa; border:2px solid blue; margin-top:30px;margin-bottom:30px;">
+                        <div class="row">
+                            <div class="col-md-3 text-right ">
+                                <h3 class="text-red">Total Inc Addt Charges</h3>
+                            </div>
+
+                            <div class="col-md-3 text-right">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total Amount WO Tax :</strong>
+                                        <span class="text-primary text-bold"><span
+                                                id="total_amount_wo_tax_addt">0.000</span></span>
+                                        <br><i>Inc Addt Charges</i>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-right">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total Tax Amount :</strong>
+                                        <span class="text-primary text-bold"><span
+                                                id="total_tax_amount_addt">0.000</span></span>
+                                        <br><i>Inc Addt Charges</i>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-right ">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total Amount With Tax :</strong>
+                                        <span class="text-primary text-bold"><span
+                                                id="total_amount_addt">0.000</span></span>
+                                        <br><i>Inc Addt Charges</i>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+
+
             </div>
 
             <div class="box-footer text-right">
@@ -201,19 +303,4 @@
     </div>
 </section>
 
-<?php include_once(VIEWPATH . 'inc/footer.php');
-
-
-
-/*
- <div class="col-md-3">
-                     <div class="form-group">
-                        <label>Category Name</label>
-                        <input type="text" class="form-control" value="${row.category_name || ''}" readonly>
-                      </div>
-                      <div class="form-group">
-                        <label>Item Name</label>
-                        <input type="text" class="form-control" value="${row.item_name || ''}" readonly>
-                      </div>
-                    </div>*/
-?>
+<?php include_once(VIEWPATH . 'inc/footer.php'); ?>

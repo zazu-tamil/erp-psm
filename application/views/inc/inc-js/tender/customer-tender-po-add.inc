@@ -53,6 +53,80 @@
 </style>
 <script>
   $(document).ready(function () {
+
+    // Enable / Disable on checkbox change
+     $(document).on("change", ".chk_tender_quote_addtchrg_id", function () { 
+      
+      //alert('CHK Box');
+
+        let row = $(this).closest('tr');
+
+        if ($(this).is(':checked')) {
+            row.find(
+                    '.addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt'
+                )
+                .prop('disabled', false);
+        } else {
+            row.find(
+                    '.addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt'
+                )
+                .prop('disabled', true);
+            // .val('0'); // clear values
+        }
+
+        calculateTotalAmount_addt();
+    });
+
+    $('#tb_addt_chrg_list .chk_tender_quote_addtchrg_id').change();
+
+
+    // Calculation on change
+    $(document).on('input', '.addt_charges_amt, .addt_charges_vat', function() {
+
+        let row = $(this).closest('tr');
+
+        let amt = parseFloat(row.find('.addt_charges_amt').val()) || 0;
+        let vat = parseFloat(row.find('.addt_charges_vat').val()) || 0;
+
+        let vat_amt = (amt * vat) / 100;
+        let total = amt + vat_amt;
+
+        row.find('.addt_charges_vat_amt').val(vat_amt.toFixed(2));
+        row.find('.addt_charges_tot_amt').val(total.toFixed(2));
+
+        calculateTotalAmount_addt();
+    });
+
+
+    function calculateTotalAmount_addt() {
+        let total_addt_amt_wo_tax = 0;
+        $(".addt_charges_amt").each(function() {  
+            if ($(this).closest('tr').find('.chk_tender_quote_addtchrg_id').is(':checked')) {
+                total_addt_amt_wo_tax += parseFloat($(this).val()) || 0;
+            }
+        });
+        //alert("TEST" + $("#total_amount_wo_tax").text());
+        total_addt_amt_wo_tax = parseFloat($("#total_amount_wo_tax").text()) + parseFloat(total_addt_amt_wo_tax);
+        $("#total_amount_wo_tax_addt").text(total_addt_amt_wo_tax.toFixed(3));
+
+
+        let total_addt_amt_w_tax = 0;
+        $(".addt_charges_tot_amt").each(function() {
+            if ($(this).closest('tr').find('.chk_tender_quote_addtchrg_id').is(':checked')) {
+                total_addt_amt_w_tax += parseFloat($(this).val()) || 0;
+            }
+        });
+        total_addt_amt_w_tax = parseFloat($("#total_amount").text()) + parseFloat(total_addt_amt_w_tax);
+        $("#total_amount_addt").text(total_addt_amt_w_tax.toFixed(3));
+
+
+        $("#total_tax_amount_addt").text((total_addt_amt_w_tax - total_addt_amt_wo_tax).toFixed(3));
+
+    }
+
+
+
+
     $(".srch_enq_id").autocomplete({
       source: function (request, response) {
         $.ajax({
@@ -328,16 +402,56 @@
         },
         dataType: "json",
         success: function (res) {
-          if (res.length > 0) {
+
+          //console.log(res);
+            //alert(res['addt_chrg_list'].length);
+            //div_addt_chrg
+            if(res['addt_chrg_list'].length > 0 ){
+                $("#div_addt_chrg").removeClass("hide");
+                $('#tb_addt_chrg_list').html('');
+                let ctnt_html = ``;
+                  $.each(res['addt_chrg_list'], function(i, row) {
+                     // let amtwotx = (row.qty * row.rate).toFixed(3);
+                     ctnt_html += `
+                     <tr> 
+                        <td>
+                             <input type="checkbox" class="chk_tender_quote_addtchrg_id"
+                                    id="chk_tender_quote_addtchrg_id_${row.tender_quote_addtchrg_id}"
+                                    name="chk_tender_quote_addtchrg_id[]"
+                                    value="${row.tender_quote_addtchrg_id}" checked> 
+                        </td>
+                        <td>  
+                        <input type="hidden" class="form-control addt_charges_type_id" name="addt_charges_type_id[${row.tender_quote_addtchrg_id}]" value="${row.addt_charges_type_id}">
+                        ${row.addt_charges_type_name}
+                        </td>
+                        <td><input type="number" step="any" class="form-control addt_charges_amt" name="addt_charges_amt[${row.tender_quote_addtchrg_id}]" value="${row.addt_charges_amt}"></td>
+                        <td><input type="number" step="any" class="form-control addt_charges_vat" name="addt_charges_vat[${row.tender_quote_addtchrg_id}]" value="${row.addt_charges_vat}">    </td>
+                        <td><input type="number" step="any" class="form-control addt_charges_vat_amt" name="addt_charges_vat_amt[${row.tender_quote_addtchrg_id}]" value="${row.addt_charges_vat_amt}" readonly></td>
+                        <td><input type="number" step="any" class="form-control addt_charges_tot_amt" name="addt_charges_tot_amt[${row.tender_quote_addtchrg_id}]" value="${row.addt_charges_tot_amt}" readonly></td>
+                      </tr>
+                     `;
+                     
+                  })
+                  $('#tb_addt_chrg_list').html(ctnt_html);
+                  //calculateTotalAmount_addt();   
+
+            } else {
+                $("#div_addt_chrg").addClass("hide");
+            }
+
+
+
+          if (res['items'].length > 0) {
             $(".cls_export").show();
             $("#btnExport").attr("data-xls", JSON.stringify(res));
             $("#btnExport").val(
               "Quotation-" + $("#srch_quotation_no option:selected").text(),
             );
             //console.log(res);
+            
 
-            $.each(res, function (i, row) {
-              let amtwotx = row.qty * row.rate;
+            $.each(res['items'], function (i, row) {
+              let amtwotx = (row.qty * row.rate).toFixed(3);
 
               const hiddenFields = `
                 <input type="hidden" name="tender_quotation_item_id[${i}]" value="${row.tender_quotation_item_id}"> 
@@ -607,6 +721,8 @@
         total_wot += parseFloat($(this).val()) || 0;
       });
       $("#total_amount_wo_tax").text(total_wot.toFixed(3));
+      $("#total_tax_amount").text((total - total_wot).toFixed(3));
+      calculateTotalAmount_addt();
     }
 
     /* ================================================================
@@ -624,6 +740,7 @@
           .remove();
       }
     });
+
   });
 
   $(function () {
@@ -739,3 +856,5 @@
     });
   });
 </script>
+
+ 
