@@ -44,7 +44,8 @@
 
 
                         <div class="form-group col-md-3">
-                            <label for="srch_tender_enquiry_id">Tender Enquiry No <span style="color:red;">*</span></label>
+                            <label for="srch_tender_enquiry_id">Tender Enquiry No <span
+                                    style="color:red;">*</span></label>
                             <?php echo form_dropdown('srch_tender_enquiry_id', $tender_enquiry_opt, set_value('srch_tender_enquiry_id', $header['tender_enquiry_id']), 'id="srch_tender_enquiry_id" class="form-control readonly" readonly'); ?>
 
                         </div>
@@ -99,16 +100,20 @@
 
                         <div class="form-group col-md-3">
                             <label>Invoice Status</label><br>
-                            <label class="radio-inline"><input type="radio" name="invoice_status" value="Pending" <?php echo set_value('invoice_status', $header['invoice_status']) == 'Pending' ? 'checked' : ''; ?>>Pending</label>
+                            <label class="radio-inline"><input type="radio" name="invoice_status" value="Pending"
+                                    <?php echo set_value('invoice_status', $header['invoice_status']) == 'Pending' ? 'checked' : ''; ?>>Pending</label>
                             <label class="radio-inline"><input type="radio" name="invoice_status" value="Payment Paid"
-                                    <?php echo set_value('invoice_status', $header['invoice_status']) == 'Payment Paid' ? 'checked' : ''; ?>>Payment Paid</label>
+                                    <?php echo set_value('invoice_status', $header['invoice_status']) == 'Payment Paid' ? 'checked' : ''; ?>>Payment
+                                Paid</label>
                         </div>
 
                         <div class="form-group col-md-3">
                             <label>Status</label><br>
-                            <label class="radio-inline"><input type="radio" name="status" value="Active" <?php echo set_value('status', $header['status']) == 'Active' ? 'checked' : ''; ?>>
+                            <label class="radio-inline"><input type="radio" name="status" value="Active"
+                                    <?php echo set_value('status', $header['status']) == 'Active' ? 'checked' : ''; ?>>
                                 Active</label>
-                            <label class="radio-inline"><input type="radio" name="status" value="Inactive" <?php echo set_value('status', $header['status']) == 'Inactive' ? 'checked' : ''; ?>>
+                            <label class="radio-inline"><input type="radio" name="status" value="Inactive"
+                                    <?php echo set_value('status', $header['status']) == 'Inactive' ? 'checked' : ''; ?>>
                                 Inactive</label>
                         </div>
                     </div>
@@ -172,7 +177,7 @@
                     </table>
 
                 </fieldset>
-                <div class="row">
+                <!-- <div class="row">
                     <div class="col-md-3 pull-right ">
                         <div class="total-box shadow-sm">
                             <h5 class="mb-0">
@@ -195,14 +200,170 @@
                             </h5>
                         </div>
                     </div>
+                </div> -->
+                <div
+                    style="border-radius:10px; padding:30px; background-color:#f8f9fa; border:2px solid blue; margin-top:30px;margin-bottom:30px;">
+                    <div class="row">
+                        <div class="col-md-3 text-right ">
+                            <h3 class="text-red">Total Excl Addt Charges</h3>
+                        </div>
+                        <div class="col-md-3 text-right">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount WO Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount_wo_tax">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-right">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total TAX Amount :</strong>
+                                    <span class="text-primary text-bold"><span id="total_tax_amount">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-right ">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount With Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <div id="div_addt_chrg">
+                    <fieldset class="mt-4 pt-4">
+                        <legend class="text-light-blue"><i class="fa fa-list"></i> Addtional Charges (If any)</legend>
+                        <table class="table table-bordered table-striped">
+                            <tr>
+                                <th>#</th>
+                                <th>Addt.Charges Type</th>
+                                <th>Addt.Charges Amt</th>
+                                <th>VAT %</th>
+                                <th>VAT Amt</th>
+                                <th>Total Amt</th>
+                            </tr>
+                            <tbody id="tb_addt_chrg_list">
+                                <?php foreach($addt_charges_list as $key => $row): ?>
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="chk_tender_po_addtchrg_id"
+                                            id="chk_tender_po_addtchrg_id_<?php echo $row['tender_po_addtchrg_id']; ?>"
+                                            name="chk_tender_po_addtchrg_id[]"
+                                            value="<?php echo $row['tender_po_addtchrg_id']; ?>"
+                                            <?php echo ($row['tender_po_addtchrg_id'] != '') ? 'checked' : ''; ?>>  
+                                    </td>
+                                    <td>
+                                        <input type="hidden" class="form-control addt_charges_type_id"
+                                            name="addt_charges_type_id[<?php echo $row['tender_po_addtchrg_id']; ?>]"
+                                            value="<?php echo $row['addt_charges_type_id']; ?>">
+                                        <input type="hidden" class="form-control tender_po_addtchrg_id"
+                                            name="tender_po_addtchrg_id[<?php echo $row['tender_po_addtchrg_id']; ?>]"
+                                            value="<?php echo $row['tender_po_addtchrg_id']; ?>">
+                                        <label for="chk_tender_po_addtchrg_id_<?php echo $row['tender_po_addtchrg_id']; ?>"><?php echo $row['addt_charges_type_name']; ?></label>
+                                    </td>
+                                    <td>
+                                        <input type="number" step="any" class="form-control addt_charges_amt"
+                                            name="addt_charges_amt[<?php echo $row['tender_po_addtchrg_id']; ?>]"
+                                            value="<?php echo $row['addt_charges_amt']; ?>">
+                                    </td>
+                                    <td>
+                                        <input type="number" step="any" class="form-control addt_charges_vat"
+                                            name="addt_charges_vat[<?php echo $row['tender_po_addtchrg_id']; ?>]"
+                                            value="<?php echo $row['addt_charges_vat']; ?>">
+                                    </td>
+                                    <td>
+                                        <input type="number" step="any" class="form-control addt_charges_vat_amt"
+                                            name="addt_charges_vat_amt[<?php echo $row['tender_po_addtchrg_id']; ?>]"
+                                            value="<?php echo $row['addt_charges_vat_amt']; ?>" readonly>
+
+                                    </td>
+                                    <td>
+                                        <input type="number" step="any" class="form-control addt_charges_tot_amt"
+                                            name="addt_charges_tot_amt[<?php echo $row['tender_po_addtchrg_id']; ?>]"
+                                            value="<?php echo $row['addt_charges_tot_amt']; ?>" readonly>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+
+                            </tbody>
+
+                        </table>
+                    </fieldset>
+
+                    <div
+                        style="border-radius:10px; padding:30px; background-color:#f8f9fa; border:2px solid blue; margin-top:30px;margin-bottom:30px;">
+                        <div class="row">
+                            <div class="col-md-3 text-right ">
+                                <h3 class="text-red">Total Inc Addt Charges</h3>
+                            </div>
+
+                            <div class="col-md-3 text-right">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total Amount WO Tax :</strong>
+                                        <span class="text-primary text-bold"><span
+                                                id="total_amount_wo_tax_addt">0.000</span></span>
+                                        <br><i>Inc Addt Charges</i>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-right">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total Tax Amount :</strong>
+                                        <span class="text-primary text-bold"><span
+                                                id="total_tax_amount_addt">0.000</span></span>
+                                        <br><i>Inc Addt Charges</i>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-right ">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total Amount With Tax :</strong>
+                                        <span class="text-primary text-bold"><span
+                                                id="total_amount_addt">0.000</span></span>
+                                        <br><i>Inc Addt Charges</i>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
             </div>
 
-            <div class="box-footer text-right">
+            <!-- <div class="box-footer text-right">
                 <a href="<?php echo site_url('tender-invoice-list'); ?>" class="btn btn-default"><i
                         class="fa fa-arrow-left"></i> Back To List</a>
                 <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
+            </div> -->
+
+            <div class="box-footer">
+                <div class="row">
+                    <div class="text-left col-md-6">
+                        <input type="hidden" name="total_amount" id="total_amount_hidden" value="">
+                        <input type="hidden" name="tax_amount" id="tax_amount_hidden" value="">
+                        <a href="<?php echo site_url('customer-tender-po-list'); ?>" class="btn btn-default"><i
+                                class="fa fa-arrow-left"></i> Back To List</a>
+                    </div>
+                    <div class="text-right col-md-6">
+                        <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
+                    </div>
+                </div> 
             </div>
         </form>
     </div>
@@ -210,49 +371,55 @@
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
 <style>
-   .readonly  { 
-         pointer-events: none;
-    }
+.readonly {
+    pointer-events: none;
+}
 </style>
 <script>
-    $(document).ready(function () {
+$(document).ready(function() {
 
-        const dc_ids = "<?php echo $header['tender_dc_id']; ?>";
+    const dc_ids = "<?php echo $header['tender_dc_id']; ?>";
 
-        const $container = $("#item_container");
+    const $container = $("#item_container");
 
-        /* ===============================
-           LOAD DC LIST WHEN PO CHANGES
-        =============================== */
-        $("#srch_tender_po_id").on("change", function () {
+    /* ===============================
+       LOAD DC LIST WHEN PO CHANGES
+    =============================== */
+    $("#srch_tender_po_id").on("change", function() {
 
-            const tender_po_id = $(this).val();
+        const tender_po_id = $(this).val();
 
-            $("#dc_list_container").html("");
-            $container.html("");
+        //alert(tender_po_id);
 
-            if (!tender_po_id) return;
+        $("#dc_list_container").html("");
+        $container.html("");
 
-            // ---- Load DC list ----
-            $.ajax({
-                url: "<?php echo site_url('tender/get_tender_po_DC_list'); ?>",
-                type: "POST",
-                data: { tender_po_id: tender_po_id },
-                dataType: "json",
-                success: function (res) {
+        if (!tender_po_id) return;
 
-                    let html = "";
+        // ---- Load DC list ----
+        $.ajax({
+            url: "<?php echo site_url('tender/get_tender_po_DC_list'); ?>",
+            type: "POST",
+            data: {
+                tender_po_id: tender_po_id
+            },
+            dataType: "json",
+            success: function(res) {
 
-                    if (res.length > 0) {
+            //console.log("DC LIST" + res);
 
-                        $.each(res, function (i, row) {
-                            if (dc_ids.includes(row.tender_dc_id)) {
-                                chk = "checked";
-                            } else {
-                                chk = "";
-                            }
+                let html = "";
 
-                            html += `
+                if (res['dc_list'].length > 0) {
+
+                    $.each(res['dc_list'], function(i, row) {   
+                        if (dc_ids.includes(row.tender_dc_id)) {
+                            chk = "checked";
+                        } else {
+                            chk = "";
+                        }
+
+                        html += `
                             <div class="col-md-3">
                                 <div class="checkbox">
                                     <label>
@@ -267,95 +434,95 @@
                                     </label>
                                 </div>
                             </div>`;
-                        });
+                    });
 
-                    } else {
-                        html = `<div class="col-md-12 text-danger">No DC Found</div>`;
-                    }
-
-                    $("#dc_list_container").html(html);
-
-
-                    loadItemsByDC(dc_ids.split(","));  
+                } else {
+                    html = `<div class="col-md-12 text-danger">No DC Found</div>`;
                 }
-            });
 
-            // ---- Load currency ----
-           /* $.ajax({
-                url: "<?php echo site_url('tender/get_tender_po_currency_id'); ?>",
-                type: "POST",
-                data: { tender_po_id: tender_po_id },
-                dataType: "json",
-                success: function (res) {
-                    if (res.length > 0) {
-                        $("#currency_id").val(res[0].currency_id).trigger("change");
-                    }
-                }
-            });*/
+                $("#dc_list_container").html(html);
 
+
+                loadItemsByDC(dc_ids.split(","));
+            }
         });
 
-        $("#srch_tender_po_id").trigger("change");
+        // ---- Load currency ----
+        /* $.ajax({
+             url: "<?php echo site_url('tender/get_tender_po_currency_id'); ?>",
+             type: "POST",
+             data: { tender_po_id: tender_po_id },
+             dataType: "json",
+             success: function (res) {
+                 if (res.length > 0) {
+                     $("#currency_id").val(res[0].currency_id).trigger("change");
+                 }
+             }
+         });*/
+
+    });
+
+    $("#srch_tender_po_id").trigger("change");
 
 
-        /* ===============================
-           LOAD ITEMS WHEN DC SELECTED
-        =============================== */
-        $(document).on("change", ".dc_list", function () {
+    /* ===============================
+       LOAD ITEMS WHEN DC SELECTED
+    =============================== */
+    $(document).on("change", ".dc_list", function() {
 
-            let dc_ids = [];
+        let dc_ids = [];
 
-            $(".dc_list:checked").each(function () {
-                dc_ids.push($(this).val());
-            }); 
-            loadItemsByDC(dc_ids);
+        $(".dc_list:checked").each(function() {
+            dc_ids.push($(this).val());
         });
+        loadItemsByDC(dc_ids);
+    });
 
-        function loadItemsByDC(dc_ids) {
+    function loadItemsByDC(dc_ids) {
 
-            $container.html("");
+        $container.html("");
 
-            if (dc_ids.length === 0) {
-                $container.html(`
+        if (dc_ids.length === 0) {
+            $container.html(`
                 <tr>
                     <td colspan="7" class="text-danger text-center">
                         Select DC to load items
                     </td>
                 </tr>`);
-                return;
-            }
+            return;
+        }
 
-            $.ajax({
-                url: "<?php echo site_url('tender/get_tender_po_invoice_edit_load_items_dc_id'); ?>",
-                type: "POST",
-                data: {
-                    dc_id:  dc_ids.join(","),
-                    tender_po_id: $("#srch_tender_po_id").val(),
-                    tender_enq_invoice_id: '<?php echo $header['tender_enq_invoice_id']; ?>',
-                },
-                dataType: "json",
+        $.ajax({
+            url: "<?php echo site_url('tender/get_tender_po_invoice_edit_load_items_dc_id'); ?>",
+            type: "POST",
+            data: {
+                dc_id: dc_ids.join(","),
+                tender_po_id: $("#srch_tender_po_id").val(),
+                tender_enq_invoice_id: '<?php echo $header['tender_enq_invoice_id']; ?>',
+            },
+            dataType: "json",
 
-                success: function (res) {
+            success: function(res) {
                 //console.log(res);
 
-                    if (!res || res.length === 0) {
-                        $container.html(`
+                if (!res || res.length === 0) {
+                    $container.html(`
                         <tr>
                             <td colspan="7" class="text-danger text-center">
                                 No items found
                             </td>
                         </tr>`);
-                        return;
+                    return;
+                }
+
+                $.each(res, function(i, row) {
+                    if (row.tender_enq_invoice_item_id) {
+                        $chked = "checked";
+                    } else {
+                        $chked = "";
                     }
 
-                    $.each(res, function (i, row) {
-                        if(row.tender_enq_invoice_item_id) {
-                             $chked = "checked";    
-                        } else {
-                            $chked = "";
-                        }
-
-                        const html = `
+                    const html = `
                     <tr class="item-row">
 
                         <td>
@@ -433,74 +600,111 @@
 
                     </tr>`;
 
-                        const $row = $(html);
-                        $container.append($row);
+                    const $row = $(html);
+                    $container.append($row);
 
-                        calculateRow($row);
-                    });
+                    calculateRow($row);
+                });
 
-                    calculateTotals();
-                }
-            });
-        }
-
-        /* ===============================
-           CALCULATIONS
-        =============================== */
-        $(document).on("input change",
-            ".rate-input,.gst-input,.item-check",
-            function () {
-                const $row = $(this).closest(".item-row");
-                calculateRow($row);
                 calculateTotals();
-            });
-
-        function calculateRow($row) {
-
-            if (!$row.find(".item-check").is(":checked")) {
-                $row.find(".amount-input").val("0.000");
-                $row.find(".gst-amount-input").val("0.000");
-                return;
             }
+        });
+    }
 
-            const qty = parseFloat($row.find(".qty-input").val()) || 0;
-            const rate = parseFloat($row.find(".rate-input").val()) || 0;
-            const gst = parseFloat($row.find(".gst-input").val()) || 0;
+    /* ===============================
+       CALCULATIONS
+    =============================== */
+    $(document).on("input change",
+        ".rate-input,.gst-input,.item-check",
+        function() {
+            const $row = $(this).closest(".item-row");
+            calculateRow($row);
+            calculateTotals();
+        });
 
-            const base = qty * rate;
-            const gstAmt = (base * gst) / 100;
-            const total = base + gstAmt;
+    function calculateRow($row) {
 
-            $row.find(".gst-amount-input").val(gstAmt.toFixed(3));
-            $row.find(".amount-input").val(total.toFixed(3));
+        if (!$row.find(".item-check").is(":checked")) {
+            $row.find(".amount-input").val("0.000");
+            $row.find(".gst-amount-input").val("0.000");
+            return;
         }
 
-        function calculateTotals() {
+        const qty = parseFloat($row.find(".qty-input").val()) || 0;
+        const rate = parseFloat($row.find(".rate-input").val()) || 0;
+        const gst = parseFloat($row.find(".gst-input").val()) || 0;
 
-            let total = 0;
-            let gstOnly = 0;
-            let withoutTax = 0;
+        const base = qty * rate;
+        const gstAmt = (base * gst) / 100;
+        const total = base + gstAmt;
 
-            $(".item-row").each(function () {
+        $row.find(".gst-amount-input").val(gstAmt.toFixed(3));
+        $row.find(".amount-input").val(total.toFixed(3));
+    }
 
-                if ($(this).find(".item-check").is(":checked")) {
+    function calculateTotals() {
 
-                    const amt = parseFloat($(this).find(".amount-input").val()) || 0;
-                    const gst = parseFloat($(this).find(".gst-amount-input").val()) || 0;
+        let total = 0;
+        let gstOnly = 0;
+        let withoutTax = 0;
 
-                    total += amt;
-                    gstOnly += gst;
-                    withoutTax += (amt - gst);
-                }
-            });
+        $(".item-row").each(function() {
 
-            $("#total_amount").text(total.toFixed(3));
-            $("#total_amount_wo_tax").text(withoutTax.toFixed(3));
+            if ($(this).find(".item-check").is(":checked")) {
 
-            $(".total_amount_hidden").val(total.toFixed(3));
-            $(".total_gst_amount_hidden").val(withoutTax.toFixed(3));
-            $(".gst_amount_only_hidden").val(gstOnly.toFixed(3));
-        }
+                const amt = parseFloat($(this).find(".amount-input").val()) || 0;
+                const gst = parseFloat($(this).find(".gst-amount-input").val()) || 0;
 
-    });
+                total += amt;
+                gstOnly += gst;
+                withoutTax += (amt - gst);
+            }
+        });
+
+        $("#total_amount").text(total.toFixed(3));
+        $("#total_amount_wo_tax").text(withoutTax.toFixed(3));
+
+        $(".total_amount_hidden").val(total.toFixed(3));
+        $(".total_gst_amount_hidden").val(withoutTax.toFixed(3));
+        $(".gst_amount_only_hidden").val(gstOnly.toFixed(3));
+
+        $("#total_tax_amount").text((total - withoutTax).toFixed(3));
+
+        calculateTotalAmount_addt();                            
+
+    }
+
+
+    function calculateTotalAmount_addt() {
+        let total_addt_amt_wo_tax = 0;
+        $(".addt_charges_amt").each(function() {
+            if ($(this).closest('tr').find('.chk_tender_po_addtchrg_id').is(':checked')) {
+                total_addt_amt_wo_tax += parseFloat($(this).val()) || 0;
+            }
+        });
+        //alert("TEST" + $("#total_amount_wo_tax").text());
+        total_addt_amt_wo_tax = parseFloat($("#total_amount_wo_tax").text()) + parseFloat(
+            total_addt_amt_wo_tax);
+        $("#total_amount_wo_tax_addt").text(total_addt_amt_wo_tax.toFixed(3));
+
+
+        let total_addt_amt_w_tax = 0;
+        $(".addt_charges_tot_amt").each(function() {
+            if ($(this).closest('tr').find('.chk_tender_po_addtchrg_id').is(':checked')) {
+                total_addt_amt_w_tax += parseFloat($(this).val()) || 0;
+            }
+        });
+        total_addt_amt_w_tax = parseFloat($("#total_amount").text()) + parseFloat(total_addt_amt_w_tax);
+        $("#total_amount_addt").text(total_addt_amt_w_tax.toFixed(3));
+
+
+        $("#total_tax_amount_addt").text((total_addt_amt_w_tax - total_addt_amt_wo_tax).toFixed(3));
+
+
+        $("#total_amount_hidden").val(total_addt_amt_w_tax.toFixed(3)); 
+        $("#tax_amount_hidden").val((total_addt_amt_w_tax - total_addt_amt_wo_tax).toFixed(3));
+
+    }
+
+});
 </script>
