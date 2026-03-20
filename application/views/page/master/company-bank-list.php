@@ -85,6 +85,11 @@
                             <div class="modal-body">
                                 <div class="row">
 
+                                    <div class="form-group col-md-12">
+                                        <label for="srch_company_id">Company <span style="color:red;">*</span></label>
+                                        <?php echo form_dropdown('company_id', $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
+                                    </div>
+
                                     <div class="form-group col-md-6 mb-3">
                                         <label>Account Name <span style="color:red;">*</span></label>
                                         <input class="form-control" type="text" name="account_name" id="account_name"
@@ -131,9 +136,7 @@
                         </form>
                     </div>
                 </div>
-            </div>
-
-            <!-- Edit Modal -->
+            </div> 
             <div class="modal fade" id="edit_modal" role="dialog" aria-hidden="true">
                 <div class="modal-dialog modal-md">
                     <div class="modal-content">
@@ -147,6 +150,11 @@
                             </div>
                             <div class="modal-body">
                                 <div class="row">
+
+                                    <div class="form-group col-md-12">
+                                        <label for="srch_company_id">Company <span style="color:red;">*</span></label>
+                                        <?php echo form_dropdown('company_id', $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
+                                    </div>
 
                                     <div class="form-group col-md-6 mb-3">
                                         <label>Account Name <span style="color:red;">*</span></label>
@@ -212,6 +220,7 @@
                 data: { tbl: "company_bank_info", id: id },
                 dataType: "json",
                 success: function (d) {
+                    $("#edit_modal #bank_id").val(d.bank_id);
                     $("#edit_modal #bank_id").val(d.bank_id);
                     $("#edit_modal #account_name").val(d.account_name);
                     $("#edit_modal #bank_name").val(d.bank_name);

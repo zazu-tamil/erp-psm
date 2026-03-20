@@ -1939,6 +1939,7 @@ class Master extends CI_Controller
 
             $ins = array(
                 'account_name' => $this->input->post('account_name'),
+                'company_id' => $this->input->post('company_id'),
                 'bank_name' => $this->input->post('bank_name'),
                 'account_number' => $this->input->post('account_number'),
                 'iban_no' => $this->input->post('iban_no'),
@@ -1952,11 +1953,11 @@ class Master extends CI_Controller
         }
 
         // Handle Edit
-        if ($this->input->post('mode') == 'Edit') {
-
+        if ($this->input->post('mode') == 'Edit') { 
             $upd = array(
                 'account_name' => $this->input->post('account_name'),
                 'bank_name' => $this->input->post('bank_name'),
+                'company_id' => $this->input->post('company_id'),
                 'account_number' => $this->input->post('account_number'),
                 'iban_no' => $this->input->post('iban_no'),
                 'swift_code' => $this->input->post('swift_code'),
@@ -1969,12 +1970,24 @@ class Master extends CI_Controller
             redirect('company-bank-list');
         }
 
+        $data['company_opt'] = array();
+        $query = $this->db->query("
+            SELECT 
+            company_id, 
+            company_name 
+            FROM company_info 
+            WHERE status = 'Active' 
+            ORDER BY company_name");
+        foreach ($query->result_array() as $row) {
+            $data['company_opt'][$row['company_id']] = $row['company_name'];
+        }
+
         $sql = "
-        SELECT *
-        FROM company_bank_info
-        WHERE status != 'Delete'
-        ORDER BY bank_name ASC
-    ";
+            SELECT *
+            FROM company_bank_info
+            WHERE status != 'Delete'
+            ORDER BY bank_name ASC
+        ";
 
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();

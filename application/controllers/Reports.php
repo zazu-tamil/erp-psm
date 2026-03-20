@@ -1007,6 +1007,217 @@ class Reports extends CI_Controller
 
     }
 
+
+    public function customer_invoice_pending_report()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data = array();
+        $data['js'] = 'reports/reports.inc';
+        $data['s_url'] = 'customer-invoice-pending-report';
+        $data['title'] = 'Customer Invoice Pending Report';
+
+
+
+        $where = "1=1";
+
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $this->session->set_userdata('srch_from_date', $this->input->post('srch_from_date'));
+            $this->session->set_userdata('srch_to_date', $this->input->post('srch_to_date'));
+        } elseif ($this->session->userdata('srch_from_date')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_to_date');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = '';
+            $data['srch_to_date'] = $srch_to_date = '';
+        }
+
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $where .= " AND  ( a.invoice_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "') ";
+        }
+
+
+        // Customer Filter
+        if ($this->input->post('srch_customer_id') !== null) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
+            $this->session->set_userdata('srch_customer_id', $srch_customer_id);
+        } elseif ($this->session->userdata('srch_customer_id')) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->session->userdata('srch_customer_id');
+        } else {
+            $data['srch_customer_id'] = $srch_customer_id = '';
+        }
+        if (!empty($srch_customer_id)) {
+            $where .= " AND a.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
+        }
+
+
+        $sql = "
+            SELECT company_id, company_name 
+            FROM company_info 
+            WHERE status = 'Active' 
+            ORDER BY company_name ASC";
+        $query = $this->db->query($sql);
+        $data['company_opt'] = [];
+        foreach ($query->result_array() as $row) {
+            $data['company_opt'][$row['company_id']] = $row['company_name'];
+        }
+        $sql = "
+            SELECT  customer_id, customer_name
+            FROM customer_info 
+            WHERE status = 'Active' 
+            ORDER BY customer_name ASC";
+        $query = $this->db->query($sql);
+        $data['customer_opt'] = [];
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
+
+        $sql = "
+            SELECT 
+                DATE_FORMAT(a.invoice_date, '%d-%m-%Y') AS invoice_date,
+                a.invoice_no,
+                a.total_amount,
+                b.customer_name
+            FROM tender_enq_invoice_info AS a
+            LEFT JOIN customer_info AS b 
+                ON a.customer_id = b.customer_id 
+                AND b.status = 'Active'
+            WHERE a.status = 'Active'
+            AND " . $where . "
+            ORDER BY a.invoice_date ASC, a.invoice_no ASC
+        ";
+
+        $query = $this->db->query($sql);
+        $data['record_list'] = $query->result_array();
+
+        $this->load->view('page/reports/customer-invoice-pending-report', $data);
+    }
+    public function vendor_invoice_pending_report()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data = array();
+        $data['js'] = 'reports/reports.inc';
+        $data['s_url'] = 'customer-invoice-pending-report';
+        $data['title'] = 'Customer Invoice Pending Report';
+
+
+
+        $where = "";
+
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $this->session->set_userdata('srch_from_date', $this->input->post('srch_from_date'));
+            $this->session->set_userdata('srch_to_date', $this->input->post('srch_to_date'));
+        } elseif ($this->session->userdata('srch_from_date')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_to_date');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = '';
+            $data['srch_to_date'] = $srch_to_date = '';
+        }
+
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $where .= " AND  ( a.invoice_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "') ";
+        }
+
+
+        // Customer Filter
+        if ($this->input->post('vendor_id') !== null) {
+            $data['vendor_id'] = $vendor_id = $this->input->post('vendor_id');
+            $this->session->set_userdata('vendor_id', $vendor_id);
+        } elseif ($this->session->userdata('vendor_id')) {
+            $data['vendor_id'] = $vendor_id = $this->session->userdata('vendor_id');
+        } else {
+            $data['vendor_id'] = $vendor_id = '';
+        }
+        if (!empty($vendor_id)) {
+            $where .= " AND a.vendor_id = '" . $this->db->escape_str($vendor_id) . "'";
+        }
+ 
+        $sql = "
+            SELECT vendor_id, vendor_name 
+            FROM vendor_info 
+            WHERE status = 'Active' 
+            ORDER BY vendor_name ASC";
+        $query = $this->db->query($sql);
+        $data['customer_opt'] = [];
+        foreach ($query->result_array() as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+        }
+
+
+        $sql = "
+            SELECT * FROM (
+                
+                SELECT 
+                    a.invoice_date,
+                    a.invoice_no,
+                    b.vendor_name,
+                    a.total_amount AS total_amount,
+                    'Purchase Bill' AS bill_type
+                FROM vendor_purchase_invoice_info AS a
+                LEFT JOIN vendor_info AS b 
+                    ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active' $where
+
+                UNION ALL
+
+                SELECT
+                    a.invoice_date,
+                    a.invoice_no,
+                    b.vendor_name,
+                    a.tot_amt_with_tax AS total_amount,
+                    'Local Bill' AS bill_type
+                FROM local_purchase_bill_info AS a
+                LEFT JOIN vendor_info AS b 
+                    ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active' $where
+
+                UNION ALL
+
+                SELECT 
+                    a.invoice_date,
+                    a.invoice_no,
+                    b.vendor_name,
+                    a.g_total AS total_amount,
+                    'Delivery Bill' AS bill_type
+                FROM dp_bill_info AS a
+                LEFT JOIN vendor_info AS b 
+                    ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active' $where
+
+                UNION ALL
+
+                SELECT 
+                    a.invoice_date,
+                    a.invoice_no,
+                    b.vendor_name,
+                    a.customs_tot_amt AS total_amount,
+                    'Customer Bill' AS bill_type
+                FROM customs_bill_info AS a
+                LEFT JOIN vendor_info AS b 
+                    ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active' $where
+
+            ) AS final_table
+
+            ORDER BY invoice_date DESC
+        ";
+        $query = $this->db->query($sql);
+        $data['record_list'] = $query->result_array();
+
+        $this->load->view('page/reports/vendor-invoice-pending-report', $data);
+    }
+
 }
 
 ?>

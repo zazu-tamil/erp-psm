@@ -288,3 +288,10 @@ $route['tender-enquiry-timeline/(:num)'] = 'tender/tender_enquiry_timeline/$1';
 
 $route['company-bank-list'] = 'master/company_bank_list';
 $route['company-bank-list/(:num)'] = 'master/company_bank_list/$1';
+
+
+$route['customer-invoice-receipt'] = 'payment/customer_invoice_recipt';
+$route['customer-invoice-receipt/(:num)'] = 'payment/customer_invoice_recipt/$1';
+
+$route['supplier-invoice-receipt'] = 'payment/supplier_invoice_recipt';
+$route['supplier-invoice-receipt/(:num)'] = 'payment/supplier_invoice_recipt/$1';
