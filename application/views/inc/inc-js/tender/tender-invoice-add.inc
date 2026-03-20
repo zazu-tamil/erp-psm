@@ -252,7 +252,7 @@
         data: { srch_tender_enquiry_id: tender_enquiry_id },
         dataType: "json",
         success: function (res) {
-          console.log(res);
+         // console.log(res);
 
           let html = '<option value="">Select Tender PO</option>';
 

@@ -441,3 +441,63 @@ ALTER TABLE `vendor_purchase_invoice_item_info`
 ALTER TABLE `company_info`
 	ADD COLUMN `dn_terms` TEXT NOT NULL AFTER `invoice_terms`,
 	ADD COLUMN `vendor_po_terms` TEXT NOT NULL AFTER `dn_terms`;
+
+
+
+	---------------------------------------------
+
+	20-03-2026
+
+	ALTER TABLE `tender_enquiry_item_info`
+	ADD COLUMN `serial_no` INT(11) NULL DEFAULT NULL AFTER `tender_enquiry_id`;
+
+	UPDATE tender_enquiry_item_info t
+	JOIN (
+		SELECT 
+			tei.tender_enquiry_item_id,
+			ROW_NUMBER() OVER (
+				PARTITION BY tei.tender_enquiry_id 
+				ORDER BY tei.tender_enquiry_item_id
+			) AS rn
+		FROM tender_enquiry_item_info tei
+		JOIN tender_enquiry_info te 
+			ON te.tender_enquiry_id = tei.tender_enquiry_id
+		WHERE LOWER(te.status) = 'active'
+		AND LOWER(tei.status) = 'active'
+	) x 
+	ON t.tender_enquiry_item_id = x.tender_enquiry_item_id
+	SET t.serial_no = x.rn;
+
+
+DELIMITER $$
+
+CREATE TRIGGER before_insert_tender_item
+BEFORE INSERT ON tender_enquiry_item_info
+FOR EACH ROW
+BEGIN
+    DECLARE parent_status VARCHAR(50);
+
+    -- Get parent status
+    SELECT status 
+    INTO parent_status
+    FROM tender_enquiry_info
+    WHERE tender_enquiry_id = NEW.tender_enquiry_id;
+
+    -- Check both parent & child status
+    IF LOWER(parent_status) = 'active' 
+       AND LOWER(NEW.status) = 'active' THEN
+
+        SET NEW.serial_no = (
+            SELECT IFNULL(MAX(serial_no), 0) + 1
+            FROM tender_enquiry_item_info
+            WHERE tender_enquiry_id = NEW.tender_enquiry_id
+              AND LOWER(status) = 'active'
+        );
+
+    ELSE
+        SET NEW.serial_no = NULL;
+    END IF;
+
+END$$
+
+DELIMITER ;

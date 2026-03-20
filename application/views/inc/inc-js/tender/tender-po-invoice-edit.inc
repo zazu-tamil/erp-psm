@@ -379,7 +379,7 @@
     function calculateItemAmount(row) {
       let qty = parseFloat(row.find(".qty-input").val()) || 0;
       let rate = parseFloat(row.find(".rate-input").val()) || 0;
-      let gst = parseFloat(row.find(".gst-select").val()) || 0;
+      let gst = parseFloat(row.find(".gst-input").val()) || 0;
 
       let base_amount = qty * rate;
       let gst_amount = (base_amount * gst) / 100;
@@ -424,12 +424,14 @@
       $(".total_amount_hidden").val(total_amount.toFixed(3));
       $(".total_without_tax_hidden").val(total_wo_tax.toFixed(3));
       $(".gst_amount_only_hidden").val(total_gst_only.toFixed(3));
+
+       $("#total_tax_amount").text((total_amount - total_wo_tax).toFixed(3));
     }
 
     // Trigger on change
     $(document).on(
       "input change",
-      ".rate-input, .gst-select, .qty-input, .item-check",
+      ".rate-input, .gst-input, .qty-input, .item-check",
       function () {
         let row = $(this).closest(".item-row");
         calculateItemAmount(row);
@@ -442,6 +444,8 @@
       calculateItemAmount($(this));
     });
 
+    //$('.rate-input').change();
+    $('.rate-input').trigger('change');
     calculateTotals();
   });
 </script>

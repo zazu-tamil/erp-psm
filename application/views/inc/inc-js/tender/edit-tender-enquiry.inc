@@ -208,7 +208,7 @@
           $.each(data, function (i, item) {
             tbody.append(`
                           <tr>
-                              <td>${item.item_code}</td>
+                              <td>${item.serial_no} <br> ${item.item_code}</td>
                               <td>${item.item_desc}</td>
                               <td>${item.uom}</td>
                               <td>${item.tbl}</td>
@@ -233,6 +233,8 @@
 
                 <div class="item-row">
                     <div class="cat-item-block"> 
+                        <input type="text" name="serial_no[]" class="form-control serial_no" value="${item.serial_no}"> 
+                        <br>
                         <input type="text" name="item_code[]" class="form-control item_code" value="${item.item_code}"> 
                          
                     </div>
@@ -260,6 +262,8 @@
     const rowTemplate = `
         <div class="item-row">
             <div class="cat-item-block">
+                <input type="text" name="serial_no[]" class="form-control serial_no"> 
+                <br>
                 <input type="text" name="item_code[]" class="form-control item_code"> 
             </div>
             <div class="item-desc-block">
@@ -290,6 +294,7 @@
         rows.forEach(function (r) {
           let newRow = $(rowTemplate);
           //alert(r.item_desc);
+          newRow.find(".serial_no").val(r.serial_no); 
           newRow.find(".item_code").val(r.item_code);
           newRow.find(".item_desc").val(r.item_desc);
           newRow.find(".uom").val(r.uom); // Should match option value
@@ -331,6 +336,8 @@
         const row = `
             <div class="item-row">
                 <div class="cat-item-block">
+                     <input type="text" name="serial_no[]" class="form-control serial_no">
+                    <br>
                     <input type="text" name="item_code[]" class="form-control">
                 </div>
 

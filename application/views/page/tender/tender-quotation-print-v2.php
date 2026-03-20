@@ -182,7 +182,7 @@ echo "</pre>";
 
         <!-- Screen Header (hidden during print; replaced by fixed #print-header above) -->
         <tr id="screen-header-row">
-            <td colspan="7" height="200px;" style="border:0px solid red;">
+            <td colspan="8" height="200px;" style="border:0px solid red;">
                 <?php if (!empty($record['ltr_header_img'])): ?>
                     <img src="<?php echo base_url('') . $record['ltr_header_img']; ?>" alt="Company Header"
                         class="header-img">
@@ -191,7 +191,7 @@ echo "</pre>";
         </tr>
 
         <tr>
-            <td colspan="7" class="title">
+            <td colspan="8" class="title">
                 QUOTATION
                 <?php echo ($record['technical_option_name'] != '' ? ' - ' . $record['technical_option_name'] : '') ?>
             </td>
@@ -201,7 +201,7 @@ echo "</pre>";
             <td colspan="4">
                 <span class="label-bold">Our Ref No:</span> <?php echo $record['our_enq_ref_details'] ?? '-'; ?>
             </td>
-            <td align="right" colspan="3">
+            <td align="right" colspan="4">
                 Date : <?php echo htmlspecialchars(date('d/m/Y', strtotime($record['quote_date']))); ?><br>
                 Quote No : <?php echo htmlspecialchars($record['tender_quotation_no'] ?? 'N/A'); ?>
             </td>
@@ -228,14 +228,14 @@ echo "</pre>";
                     <?php endif; ?>
                 </span>
             </td>
-            <td colspan="2" align="right">
+            <td colspan="3" align="right">
                 <span>Currency: <?php echo htmlspecialchars($currency_code); ?></span>
             </td>
         </tr>
 
         <?php if (!empty($record['contact_person'])): ?>
             <tr>
-                <td colspan="7" class="title1">
+                <td colspan="8" class="title1">
                     <i><b>Attn: <?php echo htmlspecialchars($record['contact_person']); ?>
                             <?php echo ($record['designation'] != '' ? " - " . $record['designation'] : ''); ?></b></i>
                 </td>
@@ -243,7 +243,7 @@ echo "</pre>";
         <?php endif; ?>
 
         <tr>
-            <td colspan="7" align="center">
+            <td colspan="8" align="center">
                 <u>SUB: Your Enquiry Ref:
                     <?php echo htmlspecialchars($record['tender_ref_no']); ?>, Dated:
                     <?php echo date('d/m/Y', strtotime($record['tender_enquiry_date'] ?? '')); ?>.</u>
@@ -251,7 +251,7 @@ echo "</pre>";
         </tr>
 
         <tr>
-            <td colspan="7">
+            <td colspan="8">
                 Dear Sir,<br><br>
                 Thank you for your enquiry, we are pleased to offer our best price with terms and conditions below.
             </td>
@@ -259,7 +259,8 @@ echo "</pre>";
 
         <!-- Items Table Header -->
         <tr class="items-table">
-            <th width="8%">Item No</th>
+            <th width="8%">#</th>
+            <th width="8%">Serial No</th>
             <th width="40%" align="left">Description</th>
             <th width="8%">Qty</th>
             <th width="8%">Unit</th>
@@ -284,6 +285,7 @@ echo "</pre>";
                 ?>
                 <tr class="items-table">
                     <td class="text-center"><?php echo $i + 1; ?></td>
+                    <td class="text-center"><?php echo $item['serial_no']; ?></td>
                     <td class="text-left">
                         <div class="item-description">
                             <?php if (!empty($item['item_code'])): ?>
@@ -307,7 +309,7 @@ echo "</pre>";
 
         <!-- Total Excl. VAT -->
         <tr class="items-table">
-            <td colspan="5" class="text-right"><strong>TOTAL EXCL. VAT</strong></td>
+            <td colspan="6" class="text-right"><strong>TOTAL EXCL. VAT</strong></td>
             <td colspan="2" class="text-right">
                 <strong><?php echo number_format($total_net_amount, $decimal_point); ?></strong>
             </td>
@@ -324,7 +326,7 @@ echo "</pre>";
             $grand_total += $addt_chrg['addt_charges_amt'] + $total_vat_amount;
         ?>
             <tr class="items-table">
-                <td colspan="5" class="text-right">
+                <td colspan="6" class="text-right">
                     <strong><?php echo htmlspecialchars($addt_chrg['addt_charges_type_name']); ?></strong>
                 </td>
                 <td colspan="2" class="text-right">
@@ -337,7 +339,7 @@ echo "</pre>";
         <?php foreach ($tot_vat as $vat_prt => $amt):
             if ($amt > 0): ?>
                 <tr class="items-table">
-                    <td colspan="5" class="text-right"><strong>VAT <?php echo $vat_prt; ?>%</strong></td>
+                    <td colspan="6" class="text-right"><strong>VAT <?php echo $vat_prt; ?>%</strong></td>
                     <td colspan="2" class="text-right">
                         <strong><?php echo number_format($amt, $decimal_point); ?></strong>
                     </td>
@@ -347,7 +349,7 @@ echo "</pre>";
 
         <!-- Grand Total -->
         <tr class="items-table" style="background:#ffff; color:#000;">
-            <td colspan="5" class="text-right">
+            <td colspan="6" class="text-right">
                 <strong>TOTAL</strong>
                 <i class="text-sm"> in <?php echo htmlspecialchars($currency_code); ?></i>
             </td>
@@ -359,7 +361,7 @@ echo "</pre>";
         <!-- Remarks -->
         <?php if (!empty($record['remarks'])): ?>
             <tr>
-                <td colspan="7">
+                <td colspan="8">
                     <div style="font-weight:bold; margin-bottom:5px;">Notes:</div>
                     <?php echo ($record['remarks']); ?>
                 </td>
@@ -369,7 +371,7 @@ echo "</pre>";
         <!-- Terms & Conditions -->
         <?php if (!empty($record['terms'])): ?>
             <tr>
-                <td colspan="7">
+                <td colspan="8">
                     <div style="padding:1px;">
                         <div style="font-weight:bold; margin-bottom:5px;">Terms &amp; Conditions:</div>
                         <?php echo ($record['terms']); ?>
@@ -379,11 +381,11 @@ echo "</pre>";
         <?php endif; ?>
 
         <tr>
-            <td colspan="7" height="80"></td>
+            <td colspan="8" height="80"></td>
         </tr>
 
         <tr>
-            <td colspan="7" align="right">
+            <td colspan="8" align="right">
                 For <?php echo htmlspecialchars($record['our_company'] ?? $record['company_name'] ?? 'Our Company'); ?>
                 <br><br>
                 ____________________________

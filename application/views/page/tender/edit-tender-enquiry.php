@@ -201,7 +201,13 @@
 
                             <?php foreach ($item_list as $items) { ?>
                             <div class="item-row">
+                               
                                 <div class="cat-item-block">
+                                    <i>Serial No</i>
+                                    <input type="number" name="serial_no[]" class="form-control serial_no col-2" step="1" style="width:100px;"
+                                         placeholder="Serial No" value="<?php echo $items['serial_no'] ?>">
+                                     
+                                    <i>Item Code</i>
                                     <input type="text" name="item_code[]" class="form-control item_code"
                                         autocomplete="off" placeholder="Item Code"
                                         value="<?php echo $items['item_code'] ?>">
