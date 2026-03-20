@@ -501,3 +501,86 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+
+
+20-03-2026
+
+ALTER TABLE `company_bank_info`
+	ADD COLUMN `company_id` INT(10) NULL DEFAULT NULL AFTER `bank_id`;
+
+	CREATE TABLE `vendor_receipt_info` (
+	`vendor_receipt_id` INT(11) NOT NULL AUTO_INCREMENT,
+	`receipt_no` VARCHAR(50) NULL DEFAULT NULL,
+	`receipt_date` DATE NULL DEFAULT NULL,
+	`customer_id` INT(11) NULL DEFAULT NULL,
+	`tender_enquiry_id` INT(11) NULL DEFAULT NULL,
+	`vendor_id` INT(11) NULL DEFAULT NULL,
+	`receipt_mode` VARCHAR(50) NULL DEFAULT NULL,
+	`bank_id` INT(11) NULL DEFAULT NULL,
+	`amount` DECIMAL(14,3) NULL DEFAULT NULL,
+	`remarks` TEXT NULL DEFAULT NULL,
+	`status` VARCHAR(50) NULL DEFAULT 'Active',
+	`created_by` INT(11) NULL DEFAULT NULL,
+	`created_date` DATETIME NULL DEFAULT NULL,
+	`updated_by` INT(11) NULL DEFAULT NULL,
+	`updated_date` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`vendor_receipt_id`)
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1
+;
+
+
+CREATE TABLE `vendor_receipt_bill_info` (
+	`vendor_receipt_bill_id` INT(11) NOT NULL AUTO_INCREMENT,
+	`vendor_receipt_id` INT(11) NULL DEFAULT NULL,
+	`bill_id` INT(11) NULL DEFAULT NULL,
+	`bill_type` TINYTEXT NULL DEFAULT NULL,
+	`bill_amount` DECIMAL(10,3) NULL DEFAULT NULL,
+	`status` VARCHAR(50) NULL DEFAULT NULL,
+	PRIMARY KEY (`vendor_receipt_bill_id`)
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1
+;
+
+
+CREATE TABLE `tender_receipt_info` (
+	`tender_receipt_id` INT(11) NOT NULL AUTO_INCREMENT,
+	`receipt_no` VARCHAR(50) NULL DEFAULT NULL,
+	`receipt_date` DATE NULL DEFAULT NULL,
+	`customer_id` INT(11) NULL DEFAULT NULL,
+	`tender_enquiry_id` INT(11) NULL DEFAULT NULL,
+	`receipt_mode` VARCHAR(50) NULL DEFAULT NULL,
+	`bank_id` INT(11) NULL DEFAULT NULL,
+	`amount` DECIMAL(14,3) NULL DEFAULT NULL,
+	`remarks` TEXT NULL DEFAULT NULL,
+	`status` VARCHAR(50) NULL DEFAULT 'Active',
+	`created_by` INT(11) NULL DEFAULT NULL,
+	`created_date` DATETIME NULL DEFAULT NULL,
+	`updated_by` INT(11) NULL DEFAULT NULL,
+	`updated_date` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`tender_receipt_id`)
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1
+;
+
+CREATE TABLE `tender_receipt_invoice_info` (
+	`tender_receipt_invoice_id` INT(11) NOT NULL AUTO_INCREMENT,
+	`tender_receipt_id` INT(11) NULL DEFAULT NULL,
+	`tender_enq_invoice_id` INT(11) NULL DEFAULT NULL,
+	`inv_amount` DECIMAL(10,3) NULL DEFAULT NULL,
+	`status` VARCHAR(50) NULL DEFAULT NULL,
+	PRIMARY KEY (`tender_receipt_invoice_id`)
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1
+;
+
+
