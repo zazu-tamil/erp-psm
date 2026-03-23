@@ -583,4 +583,18 @@ ENGINE=InnoDB
 AUTO_INCREMENT=1
 ;
 
+23-03-2026
 
+ALTER TABLE `tender_receipt_info`
+	ADD COLUMN `receipt_type` VARCHAR(50) NULL DEFAULT NULL AFTER `amount`,
+	ADD COLUMN `cheque_date` DATE NULL DEFAULT NULL AFTER `remarks`,
+	ADD COLUMN `cheque_no` VARCHAR(50) NULL DEFAULT NULL AFTER `cheque_date`,
+	ADD COLUMN `cheque_bank` VARCHAR(100) NULL DEFAULT NULL AFTER `checque_no`; 
+
+
+ALTER TABLE `tender_receipt_invoice_info`
+	ADD COLUMN `tender_enquiry_id` INT(11) NULL DEFAULT NULL AFTER `tender_receipt_id`;
+
+	
+ALTER TABLE `tender_receipt_info`
+	DROP COLUMN `tender_enquiry_id`;

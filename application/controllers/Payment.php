@@ -24,9 +24,12 @@ class Payment extends CI_Controller
             $ins = array(
                 'receipt_date' => $this->input->post('receipt_date'),
                 'customer_id' => $this->input->post('customer_id'),
-                'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
                 'receipt_mode' => $this->input->post('receipt_mode'),
                 'bank_id' => $this->input->post('bank_id'),
+                'receipt_type' => $this->input->post('receipt_type'),
+                'cheque_date' => $this->input->post('cheque_date'),
+                'cheque_no' => $this->input->post('cheque_no'),
+                'cheque_bank' => $this->input->post('cheque_bank'),
                 'amount' => $this->input->post('amount'),
                 'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
@@ -38,12 +41,14 @@ class Payment extends CI_Controller
 
             $selected_idxs = $this->input->post('selected_items') ?? [];
             $tender_enq_invoice_id = $this->input->post('tender_enq_invoice_id') ?? [];
+            $tender_enquiry_id = $this->input->post('tender_enquiry_id') ?? [];
             $inv_amount = $this->input->post('inv_amount') ?? [];
 
             if (!empty($selected_idxs)) {
                 foreach ($selected_idxs as $idx) {
                     $item_data = [
                         'tender_receipt_id' => $tender_receipt_id,
+                        'tender_enquiry_id' => $tender_enquiry_id[$idx] ?? 0,
                         'tender_enq_invoice_id' => $tender_enq_invoice_id[$idx] ?? 0,
                         'inv_amount' => $inv_amount[$idx] ?? 0.000,
                         'status' => 'Active',
@@ -66,68 +71,74 @@ class Payment extends CI_Controller
         // ===================== EDIT =====================
         if ($this->input->post('mode') == 'Edit') {
 
-            // echo '<pre>';
-            // print_r($_POST);
-            // echo '</pre>';
-            // exit;
-
             $this->db->trans_start();
 
-            $tender_receipt_id = $this->input->post('tender_receipt_id');
+            $tender_receipt_id = $this->input->post('tender_receipt_id'); // ✅ SINGLE VALUE
 
             $upd = array(
                 'receipt_date' => $this->input->post('receipt_date'),
                 'customer_id' => $this->input->post('customer_id'),
-                'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
                 'receipt_mode' => $this->input->post('receipt_mode'),
                 'bank_id' => $this->input->post('bank_id'),
+                'receipt_type' => $this->input->post('receipt_type'),
+                'cheque_date' => $this->input->post('cheque_date'),
+                'cheque_no' => $this->input->post('cheque_no'),
+                'cheque_bank' => $this->input->post('cheque_bank'),
                 'amount' => $this->input->post('amount'),
                 'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
-                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
-                'created_date' => date('Y-m-d H:i:s')
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
             );
+
             $this->db->where('tender_receipt_id', $tender_receipt_id);
             $this->db->update('tender_receipt_info', $upd);
 
+            // ✅ POST ARRAYS
             $selected_idxs = $this->input->post('selected_items') ?? [];
             $tender_receipt_invoice_id = $this->input->post('tender_receipt_invoice_id') ?? [];
             $tender_enq_invoice_id = $this->input->post('tender_enq_invoice_id') ?? [];
+            $tender_enquiry_id = $this->input->post('tender_enquiry_id') ?? [];
             $inv_amount = $this->input->post('inv_amount') ?? [];
 
-            // Collect the IDs that were checked (selected) and already exist in DB
             $checked_existing_ids = [];
 
+            // ✅ LOOP ONLY SELECTED ITEMS
             foreach ($selected_idxs as $idx) {
+
                 $item_data = [
-                    'tender_receipt_id' => $tender_receipt_id,
+                    'tender_receipt_id' => $tender_receipt_id, // ✅ FIXED
+                    'tender_enquiry_id' => $tender_enquiry_id[$idx] ?? 0,
                     'tender_enq_invoice_id' => $tender_enq_invoice_id[$idx] ?? 0,
                     'inv_amount' => $inv_amount[$idx] ?? 0.000,
                     'status' => 'Active',
                 ];
 
                 if (!empty($tender_receipt_invoice_id[$idx])) {
-                    // Existing row → UPDATE
+
+                    // ✅ UPDATE
                     $this->db->where('tender_receipt_invoice_id', $tender_receipt_invoice_id[$idx]);
                     $this->db->update('tender_receipt_invoice_info', $item_data);
 
                     $checked_existing_ids[] = $tender_receipt_invoice_id[$idx];
+
                 } else {
-                    // New row → INSERT
+
+                    // ✅ INSERT
                     $this->db->insert('tender_receipt_invoice_info', $item_data);
                 }
             }
 
-            // Soft-delete rows that exist in DB but were UNCHECKED
-            // Collect ALL tender_receipt_invoice_ids sent from the form (includes unchecked rows)
+            // ✅ GET ALL EXISTING IDS (FROM FORM)
             $all_existing_ids = array_filter($tender_receipt_invoice_id, function ($v) {
-                return !empty($v);
+                return !empty($v) && $v != 'null';
             });
 
+            // ✅ FIND UNCHECKED → DELETE
             $ids_to_delete = array_diff($all_existing_ids, $checked_existing_ids);
 
             if (!empty($ids_to_delete)) {
-                $this->db->where_in('tender_receipt_invoice_id', array_values($ids_to_delete));
+                $this->db->where_in('tender_receipt_invoice_id', $ids_to_delete);
                 $this->db->update('tender_receipt_invoice_info', ['status' => 'Deleted']);
             }
 
@@ -278,17 +289,16 @@ class Payment extends CI_Controller
     {
 
         $customer_id = $this->input->post('customer_id');
-        $tender_enquiry_id = $this->input->post('tender_enquiry_id');
-
         $sql = "
            SELECT
             a.tender_enq_invoice_id,
             a.tender_enquiry_id,
             DATE_FORMAT(a.invoice_date, '%d-%m-%Y') AS invoice_date,
             a.invoice_no,
+            get_tender_info(a.tender_enquiry_id) as tender_details,
             a.total_amount,
             b.customer_name, 
-            c.inv_amount as paid ,
+            c.inv_amount as paid,
             (a.total_amount - IFNULL(SUM(c.inv_amount), 0)) AS balance_amount,
             CASE 
                 WHEN a.total_amount = IFNULL(c.inv_amount, 0) THEN 'Paid'
@@ -300,13 +310,13 @@ class Payment extends CI_Controller
             AND b.status = 'Active'
         left join tender_receipt_invoice_info as c on a.tender_enq_invoice_id = c.tender_enq_invoice_id and c.`status`='Active'
         WHERE a.status = 'Active' 
-        AND a.customer_id = ?
-        and a.tender_enquiry_id = ?
+        AND a.customer_id = ? 
         group by a.tender_enq_invoice_id
+       HAVING (a.total_amount - IFNULL(SUM(c.inv_amount), 0)) > 0
         ORDER BY a.invoice_date ASC, a.invoice_no ASC
         ";
 
-        $query = $this->db->query($sql, array($customer_id, $tender_enquiry_id));
+        $query = $this->db->query($sql, array($customer_id));
         $data['record_list'] = $query->result_array();
         echo json_encode($data['record_list']);
     }
@@ -316,48 +326,57 @@ class Payment extends CI_Controller
     {
         $tender_receipt_id = $this->input->post('tender_receipt_id');
         $customer_id = $this->input->post('customer_id');
-        $tender_enquiry_id = $this->input->post('tender_enquiry_id');
 
         $sql = "
             SELECT
                 a.tender_enq_invoice_id,
-                b_current.tender_receipt_invoice_id,
+                a.tender_enquiry_id,
+
+                br.tender_receipt_id,
+                br.tender_receipt_invoice_id,
+
+                get_tender_info(a.tender_enquiry_id) AS tender_details,
                 a.customer_id,
                 a.invoice_no,
                 DATE_FORMAT(a.invoice_date, '%d-%m-%Y') AS invoice_date,
-                a.total_amount, 
-                IFNULL(SUM(b_total.inv_amount), 0) AS paid_amount,  
-                (a.total_amount - IFNULL(SUM(b_total.inv_amount), 0)) AS balance_amount, 
-                IFNULL((b_current.inv_amount), 0) AS current_paid_amount, 
-                CASE 
-                    WHEN a.total_amount = IFNULL(SUM(b_total.inv_amount), 0) THEN 'Paid'
-                    WHEN IFNULL(SUM(b_total.inv_amount), 0) = 0 THEN 'Unpaid'
-                    ELSE 'Partial'
-                END AS payment_status,
-                b_current.inv_amount 
-            FROM tender_enq_invoice_info AS a
-            LEFT JOIN tender_receipt_invoice_info AS b_total
-                ON a.tender_enq_invoice_id = b_total.tender_enq_invoice_id
-                AND b_total.status = 'Active'
+                a.total_amount,
 
-            LEFT JOIN tender_receipt_invoice_info AS b_current
-                ON a.tender_enq_invoice_id = b_current.tender_enq_invoice_id
-                AND b_current.status = 'Active'
-                AND b_current.tender_receipt_id = ?
+             
+                IFNULL(SUM(b.inv_amount), 0) AS paid_amount,
+
+               
+                IFNULL(br.inv_amount, 0) AS current_paid_amount,
+
+               
+               (a.total_amount - IFNULL(SUM(b.inv_amount), 0)) AS balance
+
+            FROM tender_enq_invoice_info AS a
+
+
+            LEFT JOIN tender_receipt_invoice_info AS b 
+                ON a.tender_enq_invoice_id = b.tender_enq_invoice_id 
+                AND b.status = 'Active'
+
+
+            LEFT JOIN tender_receipt_invoice_info AS br 
+                ON a.tender_enq_invoice_id = br.tender_enq_invoice_id 
+                AND br.tender_receipt_id = ?
+                AND br.status = 'Active'
 
             WHERE
                 a.status = 'Active'
                 AND a.customer_id = ?
-                AND a.tender_enquiry_id = ?
-
+               
+           
             GROUP BY
-                a.tender_enq_invoice_id
+                a.tender_enq_invoice_id 
 
+             HAVING balance > 0 or br.tender_receipt_id = ?
             ORDER BY
                 a.tender_enq_invoice_id DESC;
         ";
 
-        $query = $this->db->query($sql, array($tender_receipt_id, $customer_id, $tender_enquiry_id));
+        $query = $this->db->query($sql, array($tender_receipt_id, $customer_id , $tender_receipt_id));
         $data['data'] = $query->result_array();
         echo json_encode($data['data']);
     }
@@ -380,8 +399,8 @@ class Payment extends CI_Controller
                     a.vendor_receipt_id,
                     a.receipt_no,
                     a.receipt_date,
-                    a.customer_id,
-                    a.tender_enquiry_id,
+                    a.customer_id, 
+                     a.tender_enquiry_id,
                     a.vendor_id,
                     a.receipt_mode,
                     a.bank_id,
@@ -407,12 +426,16 @@ class Payment extends CI_Controller
                     a.receipt_no,
                     a.receipt_date,
                     a.customer_id,
-                    a.tender_enquiry_id,
+                   
                     a.receipt_mode,
                     a.bank_id,
                     a.amount,
                     a.remarks,
-                    a.status
+                    a.status,
+                    a.receipt_type,
+                    a.cheque_date,
+                    a.cheque_no,
+                    a.cheque_bank
                 FROM tender_receipt_info AS a
                 WHERE a.status = 'Active'
                 AND a.tender_receipt_id = ?
@@ -1065,7 +1088,7 @@ class Payment extends CI_Controller
 
 
         if ($table == 'vendor_invoice_receipt_info') {
-            
+
             $this->db->where('vendor_receipt_id', $rec_id);
             $this->db->update('vendor_receipt_info', array('status' => 'Delete'));
 
