@@ -191,7 +191,7 @@ $vendor_m_grp = [
     'local-purchase-bill-list',
     'delivery-partner-bill-list',
     'customs-bill-list',
-    'supplier-invoice-receipt'
+    'vendor-payment-list'
 ];
 ?>
 
@@ -316,8 +316,8 @@ $vendor_m_grp = [
 
             </ul>
         </li>
-        <li class="<?= ($current_page === 'supplier-invoice-receipt') ? 'active' : '' ?>">
-            <a href="<?= site_url('supplier-invoice-receipt') ?>">
+        <li class="<?= ($current_page === 'vendor-payment-list') ? 'active' : '' ?>">
+            <a href="<?= site_url('vendor-payment-list') ?>">
                 <i class="fa fa-list"></i> Supplier Payment List
             </a>
         </li>
