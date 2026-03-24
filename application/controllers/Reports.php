@@ -203,7 +203,7 @@ class Reports extends CI_Controller
         $data = array();
         $data['js'] = 'summary/tender-enquiry-summary-report.inc';
         $data['s_url'] = 'tender-quotation-list';
-        $data['title'] = 'Tender Enquiry Summary Report';
+        $data['title'] = 'Tender Info Report';
 
         $where = "1=1";
 
@@ -263,6 +263,8 @@ class Reports extends CI_Controller
                     c.company_name,
                     d.customer_name,
 
+                    b.serial_no,
+
                     b.item_code,
                     b.item_desc,
                     b.uom,
@@ -306,6 +308,7 @@ class Reports extends CI_Controller
                     b.item_code,
                     b.item_desc,
                     b.uom,
+                    f.serial_no,
                     b.qty,
                     b.rate,
                     b.gst,
@@ -327,6 +330,7 @@ class Reports extends CI_Controller
                     ON a.customer_id = d.customer_id 
                     AND d.status='Active'
                 left join currencies_info as e on a.currency_id = e.currency_id and e.`status`='Active'
+                left join tender_enquiry_item_info as f on b.tender_enquiry_item_id = f.tender_enquiry_item_id and f.`status`='Active'
 
                 WHERE a.status='Active'
                 AND a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
@@ -360,6 +364,7 @@ class Reports extends CI_Controller
 
                     b.tender_po_item_id,
                     b.item_code,
+                    b.serial_no,
                     b.item_desc,
                     b.uom,
                     b.qty,
@@ -416,7 +421,8 @@ class Reports extends CI_Controller
                     b.item_code,
                     b.item_desc,
                     b.uom,    
-                    b.qty  
+                    b.qty,
+                    item.serial_no
                 FROM tender_dc_info as a
                 LEFT JOIN tender_dc_item_info as b 
                     ON a.tender_dc_id = b.tender_dc_id 
@@ -430,9 +436,11 @@ class Reports extends CI_Controller
                     ON a.customer_id = d.customer_id 
                     AND d.status='Active' 
                 left join tender_enquiry_info as f on a.tender_enquiry_id = f.tender_enquiry_id and f.`status`='Active'
+                left join tender_enquiry_item_info as item on a.tender_enquiry_id = item.tender_enquiry_id and item.status='Active'
 
                 WHERE a.status='Active'
                 AND a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
+                group by b.tender_dc_item_id 
 
                 ORDER BY a.tender_dc_id ASC, b.tender_dc_item_id ASC
             ";
@@ -447,7 +455,7 @@ class Reports extends CI_Controller
 
             //tender invoice list
             $sql = "
-                SELECT 
+              SELECT 
                     a.tender_enq_invoice_id,
                     a.invoice_no,
                     a.invoice_date,
@@ -465,11 +473,12 @@ class Reports extends CI_Controller
                     b.gst,
                     b.amount,
                     e.currency_code,
-                    e.decimal_point
+                    e.decimal_point,
+                    tpo.serial_no
 
                 FROM tender_enq_invoice_info as a
                 LEFT JOIN tender_enq_invoice_item_info as b 
-                    ON a.tender_enq_invoice_id = b.tender_enq_invoice_id 
+                    ON a.tender_enq_invoice_id = b.tender_enq_invoice_id  
                     AND b.status='Active'
 
                 LEFT JOIN company_info as c 
@@ -481,10 +490,13 @@ class Reports extends CI_Controller
                     AND d.status='Active'
                 left join currencies_info as e on a.currency_id = e.currency_id and e.`status`='Active'
                 left join tender_enquiry_info as f on a.tender_enquiry_id = f.tender_enquiry_id and f.`status`='Active'
+                left join customer_tender_po_info as po on a.tender_po_id = po.tender_po_id and po.`status`='Active'
+                left join tender_po_item_info  as tpo on b.tender_po_item_id = tpo.tender_po_item_id and tpo.`status`='Active'
+              
 
                 WHERE a.status='Active'
                 AND a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
-
+                group by b.tender_enq_invoice_item_id
                 ORDER BY a.tender_enq_invoice_id ASC, b.tender_enq_invoice_item_id ASC
             ";
 
@@ -495,6 +507,45 @@ class Reports extends CI_Controller
                 $data['tender_invoice_list'][$row['tender_enq_invoice_id']]['info'] = $row;
                 $data['tender_invoice_list'][$row['tender_enq_invoice_id']]['items'][] = $row;
             }
+
+
+            // tender invoice receipt list
+
+            $sql = "
+                select
+                a.tender_receipt_invoice_id,
+                b.tender_receipt_id,
+                a.tender_enquiry_id,
+                a.tender_enq_invoice_id,
+                b.receipt_no,
+                DATE_FORMAT(b.receipt_date,'%d-%m-%Y') as receipt_date,
+                c.customer_name, 
+                a.inv_amount,
+                d.invoice_no ,
+                b.receipt_mode,
+                b.receipt_type,
+                b.cheque_date,
+                b.cheque_no,
+                b.cheque_bank 
+
+                from tender_receipt_invoice_info as  a 
+                left join tender_receipt_info as b on a.tender_receipt_id = b.tender_receipt_id and b.`status`='Active'
+                left join customer_info as c on b.customer_id = c.customer_id and c.`status`='Active'
+                left join tender_enq_invoice_info as d on a.tender_enq_invoice_id = d.tender_enq_invoice_id and d.`status`='Active'
+                left join company_bank_info as e on b.bank_id = e.bank_id and e.`status`='Active'
+                where a.`status`='Active'
+                AND a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
+            ";
+
+            $query = $this->db->query($sql);
+
+            // GROUP DATA BY INVOICE
+            foreach ($query->result_array() as $row) {
+                $data['tender_receipt_invoice_list'][$row['tender_receipt_id']]['info'] = $row;
+                $data['tender_receipt_invoice_list'][$row['tender_receipt_id']]['items'][] = $row;
+            }
+
+
 
             //vendor_rate_enquiry_list 
             $sql = "
@@ -516,9 +567,7 @@ class Reports extends CI_Controller
                     b.qty,
                     b.rate,
                     b.gst,
-                    b.amount,
-
-
+                    b.amount,  
                     e.vendor_name,
                     f.contact_person_name as vendor_contact_person
 
@@ -790,6 +839,140 @@ class Reports extends CI_Controller
             foreach ($query->result_array() as $row) {
                 $data['vendor_invoice_list'][$row['vendor_purchase_invoice_id']]['info'] = $row;
                 $data['vendor_invoice_list'][$row['vendor_purchase_invoice_id']]['items'][] = $row;
+            }
+
+
+            $sql = "
+                select
+                a.vendor_purchase_invoice_id, 
+                a.tender_enquiry_id,
+                c.payment_no,
+                DATE_FORMAT(c.payment_date, '%d-%m-%Y') as payment_date ,
+                d.vendor_name,
+                c.payment_mode,
+                c.payment_type,
+                c.amount,
+
+                b.vendor_payment_id,
+                b.bill_id,
+                b.bill_type,
+                b.bill_amount
+                from vendor_purchase_invoice_info as a 
+                left join vendor_payment_bill_info as b on a.vendor_purchase_invoice_id = b.bill_id  and b.`status`='Active'
+                left join vendor_payment_info as c on b.vendor_payment_id = c.vendor_payment_id and c.`status`='Active'
+                left join vendor_info as d on c.vendor_id = d.vendor_id and d.`status`='Active'
+                where a.`status`='Active'
+                and b.bill_type ='Purchase Invoice'
+                and a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
+                order by c.payment_date
+            ";
+
+            $query = $this->db->query($sql);
+
+            // GROUP DATA BY INVOICE
+            foreach ($query->result_array() as $row) {
+                $data['vendor_payment_list'][$row['vendor_payment_id']]['info'] = $row;
+                $data['vendor_payment_list'][$row['vendor_payment_id']]['items'][] = $row;
+            }
+
+
+            $sql = "
+                select
+                a.local_purchase_bill_id, 
+                a.tender_enquiry_id,
+                c.payment_no,
+                DATE_FORMAT(c.payment_date, '%d-%m-%Y') as payment_date ,
+                d.vendor_name,
+                c.payment_mode,
+                c.payment_type,
+                c.amount,
+
+                b.vendor_payment_id,
+                b.bill_id,
+                b.bill_type,
+                b.bill_amount   
+                from local_purchase_bill_info as a 
+                left join vendor_payment_bill_info as b on a.local_purchase_bill_id = b.bill_id  and b.`status`='Active'
+                left join vendor_payment_info as c on b.vendor_payment_id = c.vendor_payment_id and c.`status`='Active'
+                left join vendor_info as d on c.vendor_id = d.vendor_id and d.`status`='Active'
+                where a.`status`='Active'
+                and b.bill_type ='Local Bill'
+                and a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
+                order by c.payment_date asc
+            ";
+
+            $query = $this->db->query($sql);
+
+            // GROUP DATA BY INVOICE
+            foreach ($query->result_array() as $row) {
+                $data['vendor_payment_local_bill_list'][$row['vendor_payment_id']]['info'] = $row;
+                $data['vendor_payment_local_bill_list'][$row['vendor_payment_id']]['items'][] = $row;
+            }
+            $sql = "
+                select
+                a.dp_bill_id, 
+                a.tender_enquiry_id,
+                c.payment_no,
+                DATE_FORMAT(c.payment_date, '%d-%m-%Y') as payment_date ,
+                d.vendor_name,
+                c.payment_mode,
+                c.payment_type,
+                c.amount,
+
+                b.vendor_payment_id,
+                b.bill_id,
+                b.bill_type,
+                b.bill_amount   
+                from dp_bill_info  as a 
+                left join vendor_payment_bill_info as b on a.dp_bill_id = b.bill_id  and b.`status`='Active'
+                left join vendor_payment_info as c on b.vendor_payment_id = c.vendor_payment_id and c.`status`='Active'
+                left join vendor_info as d on c.vendor_id = d.vendor_id and d.`status`='Active'
+                where a.`status`='Active'
+                and b.bill_type ='Delivery Bill'
+                and a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
+                order by c.payment_date asc
+            ";
+
+            $query = $this->db->query($sql);
+
+            // GROUP DATA BY INVOICE
+            foreach ($query->result_array() as $row) {
+                $data['vendor_payment_delivery_bill_list'][$row['vendor_payment_id']]['info'] = $row;
+                $data['vendor_payment_delivery_bill_list'][$row['vendor_payment_id']]['items'][] = $row;
+            }
+
+
+            $sql = "
+                select
+                a.customs_bill_id, 
+                a.tender_enquiry_id,
+                c.payment_no,
+                DATE_FORMAT(c.payment_date, '%d-%m-%Y') as payment_date ,
+                d.vendor_name,
+                c.payment_mode,
+                c.payment_type,
+                c.amount,
+
+                b.vendor_payment_id,
+                b.bill_id,
+                b.bill_type,
+                b.bill_amount   
+                from customs_bill_info  as a 
+                left join vendor_payment_bill_info as b on a.customs_bill_id = b.bill_id  and b.`status`='Active'
+                left join vendor_payment_info as c on b.vendor_payment_id = c.vendor_payment_id and c.`status`='Active'
+                left join vendor_info as d on c.vendor_id = d.vendor_id and d.`status`='Active'
+                where a.`status`='Active'
+                and b.bill_type ='Customs Bill'
+                and a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
+                order by c.payment_date asc
+            ";
+
+            $query = $this->db->query($sql);
+
+            // GROUP DATA BY INVOICE
+            foreach ($query->result_array() as $row) {
+                $data['vendor_payment_customer_bill_list'][$row['vendor_payment_id']]['info'] = $row;
+                $data['vendor_payment_customer_bill_list'][$row['vendor_payment_id']]['items'][] = $row;
             }
         }
 
@@ -1142,7 +1325,7 @@ class Reports extends CI_Controller
         if (!empty($vendor_id)) {
             $where .= " AND a.vendor_id = '" . $this->db->escape_str($vendor_id) . "'";
         }
- 
+
         $sql = "
             SELECT vendor_id, vendor_name 
             FROM vendor_info 
@@ -1163,7 +1346,7 @@ class Reports extends CI_Controller
                     a.invoice_no,
                     b.vendor_name,
                     a.total_amount AS total_amount,
-                    'Purchase Bill' AS bill_type
+                    'Purchase Invoice' AS bill_type
                 FROM vendor_purchase_invoice_info AS a
                 LEFT JOIN vendor_info AS b 
                     ON a.vendor_id = b.vendor_id AND b.status = 'Active'
