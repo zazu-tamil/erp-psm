@@ -598,3 +598,47 @@ ALTER TABLE `tender_receipt_invoice_info`
 	
 ALTER TABLE `tender_receipt_info`
 	DROP COLUMN `tender_enquiry_id`;
+
+
+24-03-2026
+
+
+CREATE TABLE `vendor_payment_info` (
+	`vendor_payment_id` INT(11) NOT NULL AUTO_INCREMENT,
+	`payment_no` VARCHAR(50) NULL DEFAULT NULL,
+	`payment_date` DATE NULL DEFAULT NULL,
+	`vendor_id` INT(11) NULL DEFAULT NULL,
+	`payment_mode` VARCHAR(50) NULL DEFAULT NULL,
+	`bank_id` INT(11) NULL DEFAULT NULL,
+	`payment_type` VARCHAR(50) NULL DEFAULT NULL,
+	`cheque_date` DATE NULL DEFAULT NULL,
+	`cheque_no` VARCHAR(50) NULL DEFAULT NULL,
+	`cheque_bank` VARCHAR(50) NULL DEFAULT NULL,
+	`amount` DECIMAL(14,3) NULL DEFAULT NULL,
+	`remarks` TEXT NULL DEFAULT NULL,
+	`status` VARCHAR(50) NULL DEFAULT 'Active',
+	`created_by` INT(11) NULL DEFAULT NULL,
+	`created_date` DATETIME NULL DEFAULT NULL,
+	`updated_by` INT(11) NULL DEFAULT NULL,
+	`updated_date` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`vendor_payment_id`)
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1
+;
+
+CREATE TABLE `vendor_payment_bill_info` (
+	`vendor_payment_bill_id` INT(11) NOT NULL AUTO_INCREMENT,
+	`vendor_payment_id` INT(11) NULL DEFAULT NULL,
+	`bill_id` INT(11) NULL DEFAULT NULL,
+	`bill_type` TINYTEXT NULL DEFAULT NULL,
+	`bill_amount` DECIMAL(10,3) NULL DEFAULT NULL,
+	`status` VARCHAR(50) NULL DEFAULT NULL,
+	PRIMARY KEY (`vendor_payment_bill_id`)
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1
+;
+
