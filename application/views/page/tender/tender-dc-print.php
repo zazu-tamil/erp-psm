@@ -507,7 +507,7 @@
                         <table class="items-table">
                             <thead>
                                 <tr>
-                                    <th style="width:6%;">Item<br>No.</th>
+                                    <th style="width:6%;">Serial<br>No.</th>
                                     <th style="width:74%; text-align:left;">Description</th>
                                     <th style="width:10%;">Unit</th>
                                     <th style="width:10%;">Qty</th>
@@ -523,7 +523,8 @@
                                         $total_qty_ordered += $qty;
                                     ?>
                                         <tr>
-                                            <td class="text-center"><?php echo $i + 1; ?></td>
+                                            <!-- <td class="text-center"><?php echo $i + 1; ?></td> -->
+                                            <td class="text-center"><?php echo $item['serial_no'] ?></td>
                                             <td class="text-left">
                                                 <div class="item-description">
                                                     <?php if (!empty($item['item_code'])): ?>

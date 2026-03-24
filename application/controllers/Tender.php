@@ -2625,6 +2625,7 @@ class Tender extends CI_Controller
             $rates = $this->input->post('rate') ?: [];
             $gsts = $this->input->post('gst') ?: [];
             $amounts = $this->input->post('amount') ?: [];
+            $serial_nos = $this->input->post('serial_no') ?: [];
 
             foreach ($selected_idxs as $idx) {
                 // Get existing PO item ID if it exists (from hidden field)
@@ -2633,6 +2634,7 @@ class Tender extends CI_Controller
                 if ($existing_po_item_id) {
                     // UPDATE existing item
                     $item_data = [
+                        'serial_no' => $serial_nos[$idx] ?? '',
                         'item_code' => $item_codes[$idx] ?? 0,
                         'item_desc' => $item_descs[$idx] ?? '',
                         'rate' => $rates[$idx] ?? 0,
@@ -2650,6 +2652,7 @@ class Tender extends CI_Controller
                     $item_data = [
                         'tender_po_id' => $tender_po_id,
                         'tender_quotation_item_id' => $tender_quotation_item_ids[$idx] ?? 0,
+                        'serial_no' => $serial_nos[$idx] ?? '',
                         'item_code' => $item_codes[$idx] ?? 0,
                         'item_desc' => $item_descs[$idx] ?? '',
                         'uom' => $uoms[$idx] ?? '',
@@ -2814,6 +2817,7 @@ class Tender extends CI_Controller
 
         $sql = "
             select 
+            c.serial_no,
             b.tender_quotation_item_id,
             c.tender_po_item_id,
             if(c.tender_po_item_id is null , b.item_code , c.item_code) as item_code,
@@ -2828,7 +2832,7 @@ class Tender extends CI_Controller
             left join tender_po_item_info as c on c.tender_quotation_item_id = b.tender_quotation_item_id and c.tender_po_id = ? and c.`status` = 'Active'
             where a.`status` = 'Active' and b.`status` = 'Active'
             and a.tender_quotation_id = ?
-            order by c.tender_po_item_id desc ,  b.tender_quotation_item_id asc 
+            order by c.serial_no asc , c.tender_po_item_id asc ,  b.tender_quotation_item_id asc 
         ";
         $query = $this->db->query($sql, [$tender_po_id, $tender_quotation_id]);
 
@@ -4711,7 +4715,7 @@ class Tender extends CI_Controller
         //     order by b.tender_dc_item_id asc
         // ";
 
-         $sql = "
+        /*  $sql = "
            select
             a.tender_dc_id,
             b.tender_dc_item_id,
@@ -4724,7 +4728,34 @@ class Tender extends CI_Controller
             where a.`status`='Active'
             and a.tender_dc_id = ?
             order by b.vendor_pur_inward_item_id ,b.tender_dc_item_id asc
+        "; */
+
+        $sql ="
+        select
+        f.serial_no,
+        e.tender_enquiry_item_id,
+        d.vendor_rate_enquiry_item_id,
+        c.vendor_po_item_id,
+        b.vendor_pur_inward_item_id,
+        a.tender_dc_id,
+        b.tender_dc_item_id,
+        b.item_code,
+        b.item_desc,
+        b.uom,
+        b.qty
+        from tender_dc_info as a 
+        left join tender_dc_item_info as b on a.tender_dc_id = b.tender_dc_id and b.`status`='Active'  
+        left join vendor_pur_inward_item_info as c on c.vendor_pur_inward_item_id = b.vendor_pur_inward_item_id and c.`status` = 'Active'
+        left join vendor_po_item_info as d on d.vendor_po_item_id = c.vendor_po_item_id and d.`status` = 'Active'
+        left join vendor_rate_enquiry_item_info as e on e.vendor_rate_enquiry_item_id = d.vendor_rate_enquiry_item_id and e.`status` = 'Active'
+        left join tender_enquiry_item_info as f on f.tender_enquiry_item_id = e.tender_enquiry_item_id and f.`status` = 'Active'
+        where a.`status`='Active'
+        and a.tender_dc_id = ?
+        group by a.tender_dc_id , b.tender_dc_item_id , f.tender_enquiry_item_id
+
+        order by f.serial_no asc, b.vendor_pur_inward_item_id ,b.tender_dc_item_id asc ;
         ";
+
         $query = $this->db->query($sql, [$tender_dc_id]);
         $data['item_list'] = $query->result_array();
 

@@ -193,6 +193,9 @@
                                         value="<?php echo $row['tender_quotation_item_id']; ?>">
                                     <input type="hidden" name="tender_po_item_id[]>"
                                         value="<?php echo $row['tender_po_item_id']; ?>">
+                                       <br>     <i class="text-sm text-red">Serial no</i>
+                                     <input type="text" name="serial_no[]" class="form-control serial_no col-md-2"
+                                        value="<?php echo $row['serial_no']; ?>">    
 
                                 </div>
 
@@ -200,7 +203,7 @@
                                 <div class="col-md-2">
                                     <div class="form-group">
                                         <label>Item Code</label>
-                                        <input type="text" class="form-control item_code" name="item_code[]"
+                                        <input type="text" class="form-control item_code col-md-2" name="item_code[]"
                                             value="<?php echo htmlspecialchars($row['item_code']); ?>" readonly>
                                     </div>
                                 </div>
