@@ -1260,7 +1260,7 @@ class Tender extends CI_Controller
                 $amounts = $this->input->post('amount') ?? [];
 
                 foreach ($selected_idxs as $idx) {
-                    if($tender_enquiry_item_ids[$idx] > 0){
+                    if ($tender_enquiry_item_ids[$idx] > 0) {
                         $item_data = [
                             'tender_quotation_id' => $tender_quotation_id,
                             'tender_enquiry_item_id' => $tender_enquiry_item_ids[$idx] ?? 0,
@@ -1284,28 +1284,28 @@ class Tender extends CI_Controller
 
             /* ---- 3. ONLY SELECTED Addt charges ---- */
 
-             $chk_addt_charges_type_id = $this->input->post('chk_addt_charges_type_id') ?? [];
+            $chk_addt_charges_type_id = $this->input->post('chk_addt_charges_type_id') ?? [];
 
-             if(!empty($chk_addt_charges_type_id)){
+            if (!empty($chk_addt_charges_type_id)) {
 
-                 $addt_charges_amt = $this->input->post('addt_charges_amt') ?? [];
-                 $addt_charges_vat = $this->input->post('addt_charges_vat') ?? [];
-                 $addt_charges_vat_amt = $this->input->post('addt_charges_vat_amt') ?? []; 
-                 $addt_charges_tot_amt = $this->input->post('addt_charges_tot_amt') ?? [];
+                $addt_charges_amt = $this->input->post('addt_charges_amt') ?? [];
+                $addt_charges_vat = $this->input->post('addt_charges_vat') ?? [];
+                $addt_charges_vat_amt = $this->input->post('addt_charges_vat_amt') ?? [];
+                $addt_charges_tot_amt = $this->input->post('addt_charges_tot_amt') ?? [];
 
-                 foreach ($chk_addt_charges_type_id as $j => $addt_charges_type_id) {
+                foreach ($chk_addt_charges_type_id as $j => $addt_charges_type_id) {
                     $addt_charges_data = [
                         'tender_quotation_id' => $tender_quotation_id,
                         'addt_charges_type_id' => $addt_charges_type_id ?? 0,
-                        'addt_charges_amt' => $addt_charges_amt[$addt_charges_type_id] ?? 0, 
-                        'addt_charges_vat' => $addt_charges_vat[$addt_charges_type_id] ?? 0, 
-                        'addt_charges_vat_amt' => $addt_charges_vat_amt[$addt_charges_type_id] ?? 0, 
-                        'addt_charges_tot_amt' => $addt_charges_tot_amt[$addt_charges_type_id] ?? 0, 
+                        'addt_charges_amt' => $addt_charges_amt[$addt_charges_type_id] ?? 0,
+                        'addt_charges_vat' => $addt_charges_vat[$addt_charges_type_id] ?? 0,
+                        'addt_charges_vat_amt' => $addt_charges_vat_amt[$addt_charges_type_id] ?? 0,
+                        'addt_charges_tot_amt' => $addt_charges_tot_amt[$addt_charges_type_id] ?? 0,
                         'status' => 'Active'
                     ];
                     $this->db->insert('tender_quote_addtchrg_info', $addt_charges_data);
-                } 
-             }
+                }
+            }
 
 
 
@@ -1357,7 +1357,7 @@ class Tender extends CI_Controller
         }
 
 
-         $sql = "
+        $sql = "
             SELECT 
             *
             FROM addt_charges_type_info
@@ -1608,8 +1608,7 @@ class Tender extends CI_Controller
         $data['js'] = 'tender/tender-quotation-edit.inc';
         $data['title'] = 'Edit Tender Quotation';
 
-        if ($this->input->post('mode') == 'Edit') 
-        {
+        if ($this->input->post('mode') == 'Edit') {
             $this->db->trans_start();
 
             // echo "<pre>";
@@ -1702,53 +1701,53 @@ class Tender extends CI_Controller
                     $this->db->update('tender_quotation_item_info', ['status' => 'Deleted', 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'), 'updated_date' => date('Y-m-d H:i:s')]);
                 }
             } else {
-               $this->db->where('tender_quotation_id', $tender_quotation_id);
-               $this->db->update('tender_quotation_item_info', ['status' => 'Deleted', 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'), 'updated_date' => date('Y-m-d H:i:s')]);     
+                $this->db->where('tender_quotation_id', $tender_quotation_id);
+                $this->db->update('tender_quotation_item_info', ['status' => 'Deleted', 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'), 'updated_date' => date('Y-m-d H:i:s')]);
             }
 
 
-             /* ---- 3. ONLY SELECTED Addt charges ---- */
+            /* ---- 3. ONLY SELECTED Addt charges ---- */
 
-             $chk_addt_charges_type_id = $this->input->post('chk_addt_charges_type_id') ?? [];
+            $chk_addt_charges_type_id = $this->input->post('chk_addt_charges_type_id') ?? [];
 
-             if(!empty($chk_addt_charges_type_id)){
+            if (!empty($chk_addt_charges_type_id)) {
 
-                 $addt_charges_amt = $this->input->post('addt_charges_amt') ?? [];
-                 $addt_charges_vat = $this->input->post('addt_charges_vat') ?? [];
-                 $addt_charges_vat_amt = $this->input->post('addt_charges_vat_amt') ?? []; 
-                 $addt_charges_tot_amt = $this->input->post('addt_charges_tot_amt') ?? [];
-                 $tender_quote_addtchrg_id = $this->input->post('tender_quote_addtchrg_id') ?? [];
-                 $miss_addt_charges_id = [];
+                $addt_charges_amt = $this->input->post('addt_charges_amt') ?? [];
+                $addt_charges_vat = $this->input->post('addt_charges_vat') ?? [];
+                $addt_charges_vat_amt = $this->input->post('addt_charges_vat_amt') ?? [];
+                $addt_charges_tot_amt = $this->input->post('addt_charges_tot_amt') ?? [];
+                $tender_quote_addtchrg_id = $this->input->post('tender_quote_addtchrg_id') ?? [];
+                $miss_addt_charges_id = [];
 
-                 foreach ($chk_addt_charges_type_id as $j => $addt_charges_type_id) {
+                foreach ($chk_addt_charges_type_id as $j => $addt_charges_type_id) {
                     $addt_charges_data = [
                         'tender_quotation_id' => $tender_quotation_id,
                         'addt_charges_type_id' => $addt_charges_type_id ?? 0,
-                        'addt_charges_amt' => $addt_charges_amt[$addt_charges_type_id] ?? 0, 
-                        'addt_charges_vat' => $addt_charges_vat[$addt_charges_type_id] ?? 0, 
-                        'addt_charges_vat_amt' => $addt_charges_vat_amt[$addt_charges_type_id] ?? 0, 
-                        'addt_charges_tot_amt' => $addt_charges_tot_amt[$addt_charges_type_id] ?? 0, 
+                        'addt_charges_amt' => $addt_charges_amt[$addt_charges_type_id] ?? 0,
+                        'addt_charges_vat' => $addt_charges_vat[$addt_charges_type_id] ?? 0,
+                        'addt_charges_vat_amt' => $addt_charges_vat_amt[$addt_charges_type_id] ?? 0,
+                        'addt_charges_tot_amt' => $addt_charges_tot_amt[$addt_charges_type_id] ?? 0,
                         'status' => 'Active'
                     ];
-                    if(!empty($tender_quote_addtchrg_id[$addt_charges_type_id]) && $tender_quote_addtchrg_id[$addt_charges_type_id] > 0 ) {
-                        $this->db->where('tender_quote_addtchrg_id', $tender_quote_addtchrg_id[$addt_charges_type_id]); 
+                    if (!empty($tender_quote_addtchrg_id[$addt_charges_type_id]) && $tender_quote_addtchrg_id[$addt_charges_type_id] > 0) {
+                        $this->db->where('tender_quote_addtchrg_id', $tender_quote_addtchrg_id[$addt_charges_type_id]);
                         $this->db->update('tender_quote_addtchrg_info', $addt_charges_data);
                         $miss_addt_charges_id[] = $$tender_quote_addtchrg_id[$addt_charges_type_id];
                     } else {
                         $this->db->insert('tender_quote_addtchrg_info', $addt_charges_data);
                         $miss_addt_charges_id[] = $this->db->insert_id();
                     }
-                } 
-                 if(!empty($miss_addt_charges_id)){
+                }
+                if (!empty($miss_addt_charges_id)) {
                     $this->db->where('tender_quotation_id', $tender_quotation_id);
                     $this->db->where_not_in('tender_quote_addtchrg_id', $miss_addt_charges_id);
                     $this->db->update('tender_quote_addtchrg_info', ['status' => 'Deleted']);
-                 }
+                }
 
             } else {
-                $this->db->where('tender_quotation_id', $tender_quotation_id); 
+                $this->db->where('tender_quotation_id', $tender_quotation_id);
                 $this->db->update('tender_quote_addtchrg_info', ['status' => 'Deleted']);
-            } 
+            }
 
 
             $this->db->trans_complete();
@@ -1882,26 +1881,26 @@ class Tender extends CI_Controller
 
         /* ---- Load existing record for edit ---- */
         $data['header'] = $this->db->where('tender_quotation_id', $tender_quotation_id)->get('tender_quotation_info')->row_array();
-       /*  $sql = "
-            SELECT
-                a.tender_quotation_item_id as tender_quotation_item_id,
-                a.tender_enquiry_item_id as tender_enquiry_item_id,
-                a.item_code,
-                a.item_desc,
-                a.uom,
-                a.qty,
-                a.rate,
-                a.gst as vat, 
-                a.amount
-            FROM
-                tender_quotation_item_info a 
-            WHERE
-                a.tender_quotation_id = ? 
-                AND a.status = 'Active'
-                order by a.tender_quotation_item_id 
-        "; */
+        /*  $sql = "
+             SELECT
+                 a.tender_quotation_item_id as tender_quotation_item_id,
+                 a.tender_enquiry_item_id as tender_enquiry_item_id,
+                 a.item_code,
+                 a.item_desc,
+                 a.uom,
+                 a.qty,
+                 a.rate,
+                 a.gst as vat, 
+                 a.amount
+             FROM
+                 tender_quotation_item_info a 
+             WHERE
+                 a.tender_quotation_id = ? 
+                 AND a.status = 'Active'
+                 order by a.tender_quotation_item_id 
+         "; */
 
-        $sql=  "
+        $sql = "
         select 
             IF(b.tender_enquiry_item_id IS NOT NULL, 'Checked', '') AS chked,
             a.serial_no,
@@ -1923,11 +1922,11 @@ class Tender extends CI_Controller
             and a.tender_enquiry_id = ?
             order by a.tender_enquiry_item_id 
         ";
-        $query = $this->db->query($sql, [$tender_quotation_id , $data['header']['tender_enquiry_id']]);
+        $query = $this->db->query($sql, [$tender_quotation_id, $data['header']['tender_enquiry_id']]);
         $data['items'] = $query->result_array();  // FIXED: row_array() → result_array()
 
 
-         $sql = "
+        $sql = "
             SELECT 
             a.*,
             b.tender_quote_addtchrg_id,
@@ -1944,7 +1943,7 @@ class Tender extends CI_Controller
             WHERE a.status = 'Active'
             ORDER BY a.addt_charges_type_name ASC
         ";
-        $query = $this->db->query($sql, [$tender_quotation_id]);    
+        $query = $this->db->query($sql, [$tender_quotation_id]);
 
         $data['addt_charges_list'] = $query->result_array();
 
@@ -2027,7 +2026,7 @@ class Tender extends CI_Controller
         $query = $this->db->query($sql, [$tender_quotation_id]);
         $data['item_list'] = $query->result_array();
 
-        
+
         $sql = "
            SELECT 
             a.*,
@@ -2040,8 +2039,8 @@ class Tender extends CI_Controller
             and a.tender_quotation_id = ?
             ORDER BY b.addt_charges_type_name ASC   
         ";
-         $query = $this->db->query($sql, [$tender_quotation_id]);
-         $data['addt_chrg_list'] = $query->result_array();
+        $query = $this->db->query($sql, [$tender_quotation_id]);
+        $data['addt_chrg_list'] = $query->result_array();
 
 
 
@@ -2101,7 +2100,7 @@ class Tender extends CI_Controller
             tqi.tender_quotation_id = ? 
             and tqi.is_technical_bid = '1' 
             AND tqi.status != 'Delete'
-        "; 
+        ";
 
         $query = $this->db->query($sql, [$tender_quotation_id]);
         $data['record'] = $query->row_array();
@@ -2475,32 +2474,32 @@ class Tender extends CI_Controller
                 }
             }
 
-             /* ---- 3. ONLY SELECTED Addt charges ---- */
+            /* ---- 3. ONLY SELECTED Addt charges ---- */
 
-             $chk_tender_quote_addtchrg_id = $this->input->post('chk_tender_quote_addtchrg_id') ?? [];
+            $chk_tender_quote_addtchrg_id = $this->input->post('chk_tender_quote_addtchrg_id') ?? [];
 
-             if(!empty($chk_tender_quote_addtchrg_id)){
+            if (!empty($chk_tender_quote_addtchrg_id)) {
 
-                 $addt_charges_type_id = $this->input->post('addt_charges_type_id') ?? [];
-                 $addt_charges_amt = $this->input->post('addt_charges_amt') ?? [];
-                 $addt_charges_vat = $this->input->post('addt_charges_vat') ?? [];
-                 $addt_charges_vat_amt = $this->input->post('addt_charges_vat_amt') ?? []; 
-                 $addt_charges_tot_amt = $this->input->post('addt_charges_tot_amt') ?? [];
+                $addt_charges_type_id = $this->input->post('addt_charges_type_id') ?? [];
+                $addt_charges_amt = $this->input->post('addt_charges_amt') ?? [];
+                $addt_charges_vat = $this->input->post('addt_charges_vat') ?? [];
+                $addt_charges_vat_amt = $this->input->post('addt_charges_vat_amt') ?? [];
+                $addt_charges_tot_amt = $this->input->post('addt_charges_tot_amt') ?? [];
 
-                 foreach ($chk_tender_quote_addtchrg_id as $j => $tender_quote_addtchrg_id) {
+                foreach ($chk_tender_quote_addtchrg_id as $j => $tender_quote_addtchrg_id) {
                     $addt_charges_data = [
                         'tender_po_id' => $tender_po_id,
                         'tender_quote_addtchrg_id' => $tender_quote_addtchrg_id ?? 0,
-                        'addt_charges_type_id' => $addt_charges_type_id[$tender_quote_addtchrg_id] ?? 0, 
-                        'addt_charges_amt' => $addt_charges_amt[$tender_quote_addtchrg_id] ?? 0, 
-                        'addt_charges_vat' => $addt_charges_vat[$tender_quote_addtchrg_id] ?? 0, 
-                        'addt_charges_vat_amt' => $addt_charges_vat_amt[$tender_quote_addtchrg_id] ?? 0, 
-                        'addt_charges_tot_amt' => $addt_charges_tot_amt[$tender_quote_addtchrg_id] ?? 0, 
+                        'addt_charges_type_id' => $addt_charges_type_id[$tender_quote_addtchrg_id] ?? 0,
+                        'addt_charges_amt' => $addt_charges_amt[$tender_quote_addtchrg_id] ?? 0,
+                        'addt_charges_vat' => $addt_charges_vat[$tender_quote_addtchrg_id] ?? 0,
+                        'addt_charges_vat_amt' => $addt_charges_vat_amt[$tender_quote_addtchrg_id] ?? 0,
+                        'addt_charges_tot_amt' => $addt_charges_tot_amt[$tender_quote_addtchrg_id] ?? 0,
                         'status' => 'Active'
                     ];
                     $this->db->insert('tender_po_addtchrg_info', $addt_charges_data);
-                } 
-             }
+                }
+            }
 
 
 
@@ -2682,52 +2681,51 @@ class Tender extends CI_Controller
             $this->db->update('tender_po_item_info', ['status' => 'Delete']);
 
 
-             /* ---- 3. ONLY SELECTED Addt charges ---- */
+            /* ---- 3. ONLY SELECTED Addt charges ---- */
 
-             $chk_tender_quote_addtchrg_id = $this->input->post('chk_tender_quote_addtchrg_id') ?? [];
+            $chk_tender_quote_addtchrg_id = $this->input->post('chk_tender_quote_addtchrg_id') ?? [];
 
-            if(!empty($chk_tender_quote_addtchrg_id))
-            {
+            if (!empty($chk_tender_quote_addtchrg_id)) {
 
-                 $tender_po_addtchrg_id = $this->input->post('tender_po_addtchrg_id') ?? [];
-                 $addt_charges_type_id = $this->input->post('addt_charges_type_id') ?? [];
-                 $addt_charges_amt = $this->input->post('addt_charges_amt') ?? [];
-                 $addt_charges_vat = $this->input->post('addt_charges_vat') ?? [];
-                 $addt_charges_vat_amt = $this->input->post('addt_charges_vat_amt') ?? []; 
-                 $addt_charges_tot_amt = $this->input->post('addt_charges_tot_amt') ?? [];
-                 $tender_quote_addtchrg_id = $this->input->post('tender_quote_addtchrg_id') ?? [];
-                 $miss_addt_charges_id = [];
+                $tender_po_addtchrg_id = $this->input->post('tender_po_addtchrg_id') ?? [];
+                $addt_charges_type_id = $this->input->post('addt_charges_type_id') ?? [];
+                $addt_charges_amt = $this->input->post('addt_charges_amt') ?? [];
+                $addt_charges_vat = $this->input->post('addt_charges_vat') ?? [];
+                $addt_charges_vat_amt = $this->input->post('addt_charges_vat_amt') ?? [];
+                $addt_charges_tot_amt = $this->input->post('addt_charges_tot_amt') ?? [];
+                $tender_quote_addtchrg_id = $this->input->post('tender_quote_addtchrg_id') ?? [];
+                $miss_addt_charges_id = [];
 
-                 foreach ($chk_tender_quote_addtchrg_id as $j => $tender_quote_addtchrg_id) {
+                foreach ($chk_tender_quote_addtchrg_id as $j => $tender_quote_addtchrg_id) {
                     $addt_charges_data = [
                         'tender_po_id' => $tender_po_id,
                         'tender_quote_addtchrg_id' => $tender_quote_addtchrg_id,
                         'addt_charges_type_id' => $addt_charges_type_id[$tender_quote_addtchrg_id] ?? 0,
-                        'addt_charges_amt' => $addt_charges_amt[$tender_quote_addtchrg_id] ?? 0, 
-                        'addt_charges_vat' => $addt_charges_vat[$tender_quote_addtchrg_id] ?? 0, 
-                        'addt_charges_vat_amt' => $addt_charges_vat_amt[$tender_quote_addtchrg_id] ?? 0, 
-                        'addt_charges_tot_amt' => $addt_charges_tot_amt[$tender_quote_addtchrg_id] ?? 0, 
+                        'addt_charges_amt' => $addt_charges_amt[$tender_quote_addtchrg_id] ?? 0,
+                        'addt_charges_vat' => $addt_charges_vat[$tender_quote_addtchrg_id] ?? 0,
+                        'addt_charges_vat_amt' => $addt_charges_vat_amt[$tender_quote_addtchrg_id] ?? 0,
+                        'addt_charges_tot_amt' => $addt_charges_tot_amt[$tender_quote_addtchrg_id] ?? 0,
                         'status' => 'Active'
                     ];
-                    if(!empty($tender_po_addtchrg_id[$tender_quote_addtchrg_id]) && $tender_po_addtchrg_id[$tender_quote_addtchrg_id] > 0 ) {
-                        $this->db->where('tender_po_addtchrg_id', $tender_po_addtchrg_id[$tender_quote_addtchrg_id]); 
+                    if (!empty($tender_po_addtchrg_id[$tender_quote_addtchrg_id]) && $tender_po_addtchrg_id[$tender_quote_addtchrg_id] > 0) {
+                        $this->db->where('tender_po_addtchrg_id', $tender_po_addtchrg_id[$tender_quote_addtchrg_id]);
                         $this->db->update('tender_po_addtchrg_info', $addt_charges_data);
                         $miss_addt_charges_id[] = $tender_po_addtchrg_id[$tender_quote_addtchrg_id];
                     } else {
                         $this->db->insert('tender_po_addtchrg_info', $addt_charges_data);
                         $miss_addt_charges_id[] = $this->db->insert_id();
                     }
-                } 
-                 if(!empty($miss_addt_charges_id)){
+                }
+                if (!empty($miss_addt_charges_id)) {
                     $this->db->where('tender_po_id', $tender_po_id);
                     $this->db->where_not_in('tender_po_addtchrg_id', $miss_addt_charges_id);
                     $this->db->update('tender_po_addtchrg_info', ['status' => 'Deleted']);
-                 }
+                }
 
             } else {
-                $this->db->where('tender_po_id', $tender_po_id); 
+                $this->db->where('tender_po_id', $tender_po_id);
                 $this->db->update('tender_po_addtchrg_info', ['status' => 'Deleted']);
-            }  
+            }
 
 
 
@@ -2838,7 +2836,7 @@ class Tender extends CI_Controller
 
         $data['merged_items'] = $query->result_array();
 
-         $sql = "
+        $sql = "
             SELECT 
             a.tender_quote_addtchrg_id,
             a.addt_charges_type_id,
@@ -2858,7 +2856,7 @@ class Tender extends CI_Controller
             and a.tender_quotation_id = ?
             ORDER BY a.tender_quote_addtchrg_id ,  b.addt_charges_type_name ASC
         ";
-        $query = $this->db->query($sql, [$tender_po_id, $tender_quotation_id]);    
+        $query = $this->db->query($sql, [$tender_po_id, $tender_quotation_id]);
 
         $data['addt_charges_list'] = $query->result_array();
 
@@ -3198,32 +3196,32 @@ class Tender extends CI_Controller
                 }
             }
 
-             /* ---- 3. ONLY SELECTED Addt charges ---- */
+            /* ---- 3. ONLY SELECTED Addt charges ---- */
 
-             $chk_tender_po_addtchrg_id = $this->input->post('chk_tender_po_addtchrg_id') ?? [];
+            $chk_tender_po_addtchrg_id = $this->input->post('chk_tender_po_addtchrg_id') ?? [];
 
-             if(!empty($chk_tender_po_addtchrg_id)){
+            if (!empty($chk_tender_po_addtchrg_id)) {
 
-                 $addt_charges_type_id = $this->input->post('addt_charges_type_id') ?? [];
-                 $addt_charges_amt = $this->input->post('addt_charges_amt') ?? [];
-                 $addt_charges_vat = $this->input->post('addt_charges_vat') ?? [];
-                 $addt_charges_vat_amt = $this->input->post('addt_charges_vat_amt') ?? []; 
-                 $addt_charges_tot_amt = $this->input->post('addt_charges_tot_amt') ?? [];
+                $addt_charges_type_id = $this->input->post('addt_charges_type_id') ?? [];
+                $addt_charges_amt = $this->input->post('addt_charges_amt') ?? [];
+                $addt_charges_vat = $this->input->post('addt_charges_vat') ?? [];
+                $addt_charges_vat_amt = $this->input->post('addt_charges_vat_amt') ?? [];
+                $addt_charges_tot_amt = $this->input->post('addt_charges_tot_amt') ?? [];
 
-                 foreach ($chk_tender_po_addtchrg_id as $j => $tender_po_addtchrg_id) {
+                foreach ($chk_tender_po_addtchrg_id as $j => $tender_po_addtchrg_id) {
                     $addt_charges_data = [
                         'tender_enq_invoice_id' => $invoice_id,
                         'tender_po_addtchrg_id' => $tender_po_addtchrg_id ?? 0,
-                        'addt_charges_type_id' => $addt_charges_type_id[$tender_po_addtchrg_id] ?? 0, 
-                        'addt_charges_amt' => $addt_charges_amt[$tender_po_addtchrg_id] ?? 0, 
-                        'addt_charges_vat' => $addt_charges_vat[$tender_po_addtchrg_id] ?? 0, 
-                        'addt_charges_vat_amt' => $addt_charges_vat_amt[$tender_po_addtchrg_id] ?? 0, 
-                        'addt_charges_tot_amt' => $addt_charges_tot_amt[$tender_po_addtchrg_id] ?? 0, 
+                        'addt_charges_type_id' => $addt_charges_type_id[$tender_po_addtchrg_id] ?? 0,
+                        'addt_charges_amt' => $addt_charges_amt[$tender_po_addtchrg_id] ?? 0,
+                        'addt_charges_vat' => $addt_charges_vat[$tender_po_addtchrg_id] ?? 0,
+                        'addt_charges_vat_amt' => $addt_charges_vat_amt[$tender_po_addtchrg_id] ?? 0,
+                        'addt_charges_tot_amt' => $addt_charges_tot_amt[$tender_po_addtchrg_id] ?? 0,
                         'status' => 'Active'
                     ];
                     $this->db->insert('tender_invoice_addtchrg_info', $addt_charges_data);
-                } 
-             }
+                }
+            }
 
 
             $this->db->trans_complete();
@@ -3629,50 +3627,49 @@ class Tender extends CI_Controller
 
             /* ---- 3. ONLY SELECTED Addt charges ---- */
 
-             $chk_tender_po_addtchrg_id = $this->input->post('chk_tender_po_addtchrg_id') ?? [];
+            $chk_tender_po_addtchrg_id = $this->input->post('chk_tender_po_addtchrg_id') ?? [];
 
-            if(!empty($chk_tender_po_addtchrg_id))
-            {
+            if (!empty($chk_tender_po_addtchrg_id)) {
 
-                 $tender_invoice_addtchrg_id = $this->input->post('tender_invoice_addtchrg_id') ?? [];
-                 $addt_charges_type_id = $this->input->post('addt_charges_type_id') ?? [];
-                 $addt_charges_amt = $this->input->post('addt_charges_amt') ?? [];
-                 $addt_charges_vat = $this->input->post('addt_charges_vat') ?? [];
-                 $addt_charges_vat_amt = $this->input->post('addt_charges_vat_amt') ?? []; 
-                 $addt_charges_tot_amt = $this->input->post('addt_charges_tot_amt') ?? [];
-                 $tender_quote_addtchrg_id = $this->input->post('tender_quote_addtchrg_id') ?? [];
-                 $miss_addt_charges_id = [];
+                $tender_invoice_addtchrg_id = $this->input->post('tender_invoice_addtchrg_id') ?? [];
+                $addt_charges_type_id = $this->input->post('addt_charges_type_id') ?? [];
+                $addt_charges_amt = $this->input->post('addt_charges_amt') ?? [];
+                $addt_charges_vat = $this->input->post('addt_charges_vat') ?? [];
+                $addt_charges_vat_amt = $this->input->post('addt_charges_vat_amt') ?? [];
+                $addt_charges_tot_amt = $this->input->post('addt_charges_tot_amt') ?? [];
+                $tender_quote_addtchrg_id = $this->input->post('tender_quote_addtchrg_id') ?? [];
+                $miss_addt_charges_id = [];
 
-                 foreach ($chk_tender_po_addtchrg_id as $j => $tender_po_addtchrg_id) {
+                foreach ($chk_tender_po_addtchrg_id as $j => $tender_po_addtchrg_id) {
                     $addt_charges_data = [
                         'tender_enq_invoice_id' => $tender_enq_invoice_id,
                         'tender_po_addtchrg_id' => $tender_po_addtchrg_id,
                         'addt_charges_type_id' => $addt_charges_type_id[$tender_po_addtchrg_id] ?? 0,
-                        'addt_charges_amt' => $addt_charges_amt[$tender_po_addtchrg_id] ?? 0, 
-                        'addt_charges_vat' => $addt_charges_vat[$tender_po_addtchrg_id] ?? 0,   
-                        'addt_charges_vat_amt' => $addt_charges_vat_amt[$tender_po_addtchrg_id] ?? 0, 
-                        'addt_charges_tot_amt' => $addt_charges_tot_amt[$tender_po_addtchrg_id] ?? 0, 
+                        'addt_charges_amt' => $addt_charges_amt[$tender_po_addtchrg_id] ?? 0,
+                        'addt_charges_vat' => $addt_charges_vat[$tender_po_addtchrg_id] ?? 0,
+                        'addt_charges_vat_amt' => $addt_charges_vat_amt[$tender_po_addtchrg_id] ?? 0,
+                        'addt_charges_tot_amt' => $addt_charges_tot_amt[$tender_po_addtchrg_id] ?? 0,
                         'status' => 'Active'
                     ];
-                    if(!empty($tender_invoice_addtchrg_id[$tender_po_addtchrg_id]) && $tender_invoice_addtchrg_id[$tender_po_addtchrg_id] > 0 ) {
-                        $this->db->where('tender_invoice_addtchrg_id', $tender_invoice_addtchrg_id[$tender_po_addtchrg_id]); 
-                        $this->db->update('tender_invoice_addtchrg_info', $addt_charges_data);   
+                    if (!empty($tender_invoice_addtchrg_id[$tender_po_addtchrg_id]) && $tender_invoice_addtchrg_id[$tender_po_addtchrg_id] > 0) {
+                        $this->db->where('tender_invoice_addtchrg_id', $tender_invoice_addtchrg_id[$tender_po_addtchrg_id]);
+                        $this->db->update('tender_invoice_addtchrg_info', $addt_charges_data);
                         $miss_addt_charges_id[] = $tender_invoice_addtchrg_id[$tender_po_addtchrg_id];
                     } else {
                         $this->db->insert('tender_invoice_addtchrg_info', $addt_charges_data);
                         $miss_addt_charges_id[] = $this->db->insert_id();
                     }
-                } 
-                 if(!empty($miss_addt_charges_id)){ 
+                }
+                if (!empty($miss_addt_charges_id)) {
                     $this->db->where('tender_enq_invoice_id', $tender_enq_invoice_id);
                     $this->db->where_not_in('tender_invoice_addtchrg_id', $miss_addt_charges_id);
                     $this->db->update('tender_invoice_addtchrg_info', ['status' => 'Deleted']);
-                 }
+                }
 
             } else {
-                $this->db->where('tender_enq_invoice_id', $tender_enq_invoice_id); 
+                $this->db->where('tender_enq_invoice_id', $tender_enq_invoice_id);
                 $this->db->update('tender_invoice_addtchrg_info', ['status' => 'Deleted']);
-            }  
+            }
 
 
 
@@ -3839,7 +3836,7 @@ class Tender extends CI_Controller
         /* ---- Load existing record for edit ---- */
         $data['header'] = $this->db->where('tender_enq_invoice_id ', $tender_enq_invoice_id)->get('tender_enq_invoice_info')->row_array();
         $tender_po_id = $data['header']['tender_po_id'];
-        $data['item_list'] = []; 
+        $data['item_list'] = [];
 
 
         $sql = "
@@ -3856,7 +3853,7 @@ class Tender extends CI_Controller
         $data['item_list'] = $query->result_array();
 
 
-         $sql = "
+        $sql = "
             SELECT 
             a.tender_po_addtchrg_id,
             a.addt_charges_type_id,
@@ -3877,10 +3874,10 @@ class Tender extends CI_Controller
             ORDER BY a.tender_po_addtchrg_id ,  b.addt_charges_type_name ASC
         ";
 
-       
 
 
-        $query = $this->db->query($sql, [$tender_enq_invoice_id, $tender_po_id]);    
+
+        $query = $this->db->query($sql, [$tender_enq_invoice_id, $tender_po_id]);
 
         $data['addt_charges_list'] = $query->result_array();
 
@@ -4733,7 +4730,7 @@ class Tender extends CI_Controller
             order by b.vendor_pur_inward_item_id ,b.tender_dc_item_id asc
         "; */
 
-        $sql ="
+        $sql = "
         select
         f.serial_no,
         e.tender_enquiry_item_id,
@@ -4884,7 +4881,7 @@ class Tender extends CI_Controller
         ";
         $query = $this->db->query($sql, [$tender_po_id]);
 
-        $result['addt_chrg_list'] = $query->result_array(); 
+        $result['addt_chrg_list'] = $query->result_array();
 
 
         echo json_encode($result);
@@ -5178,8 +5175,8 @@ class Tender extends CI_Controller
         ";
         $query = $this->db->query($sql, [$tender_quotation_id]);
 
-        $result['addt_chrg_list'] = $query->result_array(); 
-        
+        $result['addt_chrg_list'] = $query->result_array();
+
         echo json_encode($result);
     }
 
@@ -6603,9 +6600,9 @@ class Tender extends CI_Controller
 
         $data['js'] = 'tender/customer-bill-invoice-entry-list.inc';
         $data['title'] = 'Customer Bill Invoice Entry List';
- 
-        $where = "1=1"; 
-       
+
+        $where = "1=1";
+
         if ($this->input->post('srch_customer_id') !== null) {
             $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
             $this->session->set_userdata('srch_customer_id', $srch_customer_id);
@@ -6702,7 +6699,7 @@ class Tender extends CI_Controller
         $data['customer_opt'] = [];
         $data['vendor_contact_opt'] = [];
         $data['vendor_opt'] = [];
-        $data['country_opt'] = []; 
+        $data['country_opt'] = [];
         $sql = "
           SELECT
                 a.country_id,
@@ -6780,6 +6777,126 @@ class Tender extends CI_Controller
 
         $data['pagination'] = $this->pagination->create_links();
         $this->load->view('page/tender/customer-bill-invoice-entry-list', $data);
+    }
+
+
+    public function in_stock_item_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        if (
+            $this->session->userdata(SESS_HD . 'level') != 'Admin'
+            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
+        ) {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+        $data['js'] = 'tender/in-stock-item-list.inc';
+
+        $data['title'] = 'In Stock Item List';
+
+        if ($this->input->post('mode') == 'Add') {
+            $ins = array(
+                'item_code' => $this->input->post('item_code'),
+                'item_desc' => $this->input->post('item_desc'),
+                'uom' => $this->input->post('uom'),
+                'qty' => $this->input->post('qty'),
+                'rate' => $this->input->post('rate'),
+                'vat' => $this->input->post('vat'),
+                'amount' => $this->input->post('amount'),
+                'vendor_id' => $this->input->post('vendor_id'),
+                'status' => $this->input->post('status'),
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_date' => date('Y-m-d H:i:s'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            );
+
+            $this->db->insert('in_stock_item_info', $ins);
+            redirect('in-stock-item-list/');
+        }
+
+        if ($this->input->post('mode') == 'Edit') {
+            $upd = array(
+                'item_code' => $this->input->post('item_code'),
+                'item_desc' => $this->input->post('item_desc'),
+                'uom' => $this->input->post('uom'),
+                'qty' => $this->input->post('qty'),
+                'rate' => $this->input->post('rate'),
+                'vat' => $this->input->post('vat'),
+                'amount' => $this->input->post('amount'),
+                'vendor_id' => $this->input->post('vendor_id'),
+                'status' => $this->input->post('status'),
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_date' => date('Y-m-d H:i:s'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            );
+
+            $this->db->where('in_stock_item_id', $this->input->post('in_stock_item_id'));
+            $this->db->update('in_stock_item_info', $upd);
+
+            redirect('in-stock-item-list/');
+        }
+
+        $this->load->library('pagination');
+
+        $this->db->where('status != ', 'Delete');
+        $this->db->from('in_stock_item_info');
+        $data['total_records'] = $cnt = $this->db->count_all_results();
+        $data['sno'] = $this->uri->segment(2, 0);
+        $config['base_url'] = trim(site_url('in-stock-item-list/'), '/' . $this->uri->segment(2, 0));
+        $config['total_rows'] = $cnt;
+        $config['per_page'] = 10;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '<span class="sr-only">(current)</span></a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = "Prev";
+        $config['next_link'] = "Next";
+        $this->pagination->initialize($config);
+
+
+        //vendor opt
+
+        $sql = "SELECT * FROM vendor_info WHERE status != 'Delete' ORDER BY vendor_name ASC";
+        $query = $this->db->query($sql);
+        $data['vendor_opt'] = array();
+        foreach ($query->result_array() as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+        }
+
+        $sql = "
+            SELECT *
+            FROM in_stock_item_info
+            WHERE status != 'Delete'
+            ORDER BY in_stock_item_id desc
+            LIMIT " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
+        ";
+
+        $data['record_list'] = array();
+
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['record_list'][] = $row;
+        }
+
+        $data['pagination'] = $this->pagination->create_links();
+        $this->load->view('page/tender/in-stock-item-list', $data);
     }
 
 }
