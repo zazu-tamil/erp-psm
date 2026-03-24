@@ -3975,11 +3975,14 @@ class Tender extends CI_Controller
             b.rate,
             b.gst,
             b.amount,
-            (b.qty * b.rate) as Net_Amount
+            (b.qty * b.rate) as Net_Amount,
+            c.serial_no
             from tender_enq_invoice_info as a 
             left join tender_enq_invoice_item_info as b on a.tender_enq_invoice_id = b.tender_enq_invoice_id and b.`status`='Active'
+            left join tender_po_item_info as c on c.tender_po_item_id = b.tender_po_item_id and c.tender_po_id = a.tender_po_id and c.`status` = 'Active'
             where a.`status`='Active'
             and a.tender_enq_invoice_id = ?
+            order by c.serial_no , c.tender_po_item_id asc
         ";
         $query = $this->db->query($sql, [$tender_enq_invoice_id]);
         $data['item_list'] = $query->result_array();

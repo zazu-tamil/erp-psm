@@ -450,7 +450,7 @@
                         <table class="items-table">
                             <thead>
                                 <tr>
-                                    <th style="width:6%;  text-align:center;">Item<br>No.</th>
+                                    <th style="width:6%;  text-align:center;">Serial<br>No.</th>
                                     <th style="width:40%; text-align:left;">Description</th>
                                     <th style="width:5%;  text-align:center;">Qty</th>
                                     <th style="width:5%;  text-align:center;">Unit</th>
@@ -478,7 +478,8 @@
                                         $total_vat_amount += $vat_amount;
                                 ?>
                                         <tr>
-                                            <td class="text-center"><?= $i + 1 ?></td>
+                                            <!-- <td class="text-center"><?= $i + 1 ?></td> -->
+                                            <td class="text-center"><?php echo $item['serial_no']; ?></td>
                                             <td class="text-left">
                                                 <?php if (!empty($item['item_code'])): ?>
                                                     <div><strong><?= htmlspecialchars($item['item_code']) ?></strong></div>
