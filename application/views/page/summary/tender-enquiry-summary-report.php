@@ -761,7 +761,7 @@
     <!-- Tender Invoice Receipt List -->
     <div class="box box-success collapsed-box">
         <div class="box-header with-border clearfix">
-            <h3 class="box-title">Tender Invoice Receipt List</h3>
+            <h3 class="box-title">Tender Receipt List</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse">
                     <i class="fa fa-plus"></i>
@@ -871,7 +871,7 @@
     <!-- Vendor rate enquiry List -->
     <div class="box box-success collapsed-box">
         <div class="box-header with-border clearfix">
-            <h3 class="box-title">Vendor Rate Enquiry List</h3>
+            <h3 class="box-title">Supplier Enquiry List</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse">
                     <i class="fa fa-plus"></i>
@@ -890,21 +890,21 @@
 
                                 <!-- ================= QUOTATION HEADER ================= -->
                                 <tr class="bg_top_header">
-                                    <th colspan="2">Vendor Name</th>
+                                    <th colspan="2">Supplier Name</th>
                                     <td><?= htmlspecialchars($info['vendor_name'] ?? ''); ?></td>
 
                                     <th colspan="2">Customer Name</th>
                                     <td><?= htmlspecialchars($info['customer_name'] ?? ''); ?></td>
 
-                                    <th colspan="2">Vendor Rate Enquiry No</th>
+                                    <th colspan="2">Supplier Rate Enquiry No</th>
                                     <td><?= htmlspecialchars($info['vendor_rate_enquiry_no'] ?? ''); ?></td>
                                 </tr>
 
                                 <tr class="bg_top_header">
-                                    <th colspan="2">Vendor Contact Person</th>
+                                    <th colspan="2">Supplier Contact Person</th>
                                     <td><?= htmlspecialchars($info['vendor_contact_person'] ?? ''); ?></td>
 
-                                    <th colspan="2">Vendor Rate Enquiry Date</th>
+                                    <th colspan="2">Supplier Rate Enquiry Date</th>
                                     <td>
                                         <?= !empty($info['vendor_rate_enquiry_date'])
                                             ? date('d-m-Y', strtotime($info['vendor_rate_enquiry_date']))
@@ -937,9 +937,9 @@
                                 <!-- ================= ITEM HEADER ================= -->
                                 <tr class="bg_table_header">
                                     <th width="5%">S.No</th>
-                                    <th width="10%">Vendor Rate Enquiry Id</th>
-                                    <th width="12%">Vendor Rate Enquiry Item Id</th>
-                                    <th width="12%">Tender Enquiry Item Id</th>
+                                    <th width="10%">Supplier Rate Enquiry Id</th>
+                                    <th width="12%">Supplier Rate Enquiry Item Id</th>
+                                    <th width="12%">Supplier Enquiry Item Id</th>
                                     <th width="12%">Item Code</th>
                                     <th width="29%" colspan="2">Item Description</th>
                                     <th width="8%">UOM</th>
@@ -1022,10 +1022,10 @@
         </div>
     </div>
 
-    <!-- Vendor Quotation List -->
+    <!-- Supplier Quotation List -->
     <div class="box box-success collapsed-box">
         <div class="box-header with-border clearfix">
-            <h3 class="box-title">Vendor Quotation List</h3>
+            <h3 class="box-title">Supplier Quotation List</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse">
                     <i class="fa fa-plus"></i>
@@ -1044,7 +1044,7 @@
 
                                 <!-- ================= QUOTATION HEADER ================= -->
                                 <tr class="bg_top_header">
-                                    <th colspan="2">Vendor Name</th>
+                                    <th colspan="2">Supplier Name</th>
                                     <td colspan="2"><?= htmlspecialchars($info['vendor_name'] ?? ''); ?></td>
 
                                     <th colspan="2">Contact Person</th>
@@ -1055,7 +1055,7 @@
                                 </tr>
 
                                 <tr class="bg_top_header">
-                                    <th colspan="2">Vendor Quotation No</th>
+                                    <th colspan="2">Supplier Quotation No</th>
                                     <td colspan="2"><?= htmlspecialchars($info['quote_no'] ?? ''); ?></td>
 
                                     <th colspan="2">Quotation Date</th>
@@ -1083,9 +1083,9 @@
                                 <!-- ================= ITEM HEADER ================= -->
                                 <tr class="bg_table_header">
                                     <th width="4%">S.No</th>
-                                    <th width="8%">Vendor Quotation Id</th>
-                                    <th width="10%">Vendor Quote Item Id</th>
-                                    <th width="10%">Vendor Rate Enquiry Item Id</th>
+                                    <th width="8%">Supplier Quotation Id</th>
+                                    <th width="10%">Supplier Quote Item Id</th>
+                                    <th width="10%">Supplier Rate Enquiry Item Id</th>
                                     <th width="10%">Item Code</th>
                                     <th width="22%">Item Description</th>
                                     <th width="6%">UOM</th>
@@ -1152,10 +1152,10 @@
 
 
 
-    <!-- Vendor Po List -->
+    <!-- Supplier Po List -->
     <div class="box box-success collapsed-box">
         <div class="box-header with-border clearfix">
-            <h3 class="box-title">Vendor Po List</h3>
+            <h3 class="box-title">Supplier Po List</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse">
                     <i class="fa fa-plus"></i>
@@ -1174,7 +1174,7 @@
 
                                 <!-- ================= QUOTATION HEADER ================= -->
                                 <tr class="bg_top_header">
-                                    <th colspan="2">Vendor Name</th>
+                                    <th colspan="2">Supplier Name</th>
                                     <td colspan="2"><?= htmlspecialchars($info['vendor_name'] ?? ''); ?></td>
 
                                     <th colspan="2">Contact Person</th>
@@ -1185,7 +1185,7 @@
                                 </tr>
 
                                 <tr class="bg_top_header">
-                                    <th colspan="2">Vendor PO No</th>
+                                    <th colspan="2">Supplier PO No</th>
                                     <td colspan="2"><?= htmlspecialchars($info['po_no'] ?? ''); ?></td>
 
                                     <th colspan="2">PO Date</th>
@@ -1213,9 +1213,9 @@
                                 <!-- ================= ITEM HEADER ================= -->
                                 <tr class="bg_table_header">
                                     <th width="4%">S.No</th>
-                                    <th width="8%">Vendor PO Id</th>
-                                    <th width="10%">Vendor PO Item Id</th>
-                                    <th width="10%">Vendor Quotation Item Id</th>
+                                    <th width="8%">Supplier PO Id</th>
+                                    <th width="10%">Supplier PO Item Id</th>
+                                    <th width="10%">Supplier Quotation Item Id</th>
                                     <th width="10%">Item Code</th>
                                     <th width="22%">Item Description</th>
                                     <th width="6%">UOM</th>
@@ -1284,10 +1284,10 @@
     </div>
 
 
-    <!-- Vendor Purchase Inward List -->
+    <!-- Supplier Inward List -->
     <div class="box box-success collapsed-box">
         <div class="box-header with-border clearfix">
-            <h3 class="box-title">Vendor Purchase Inward List</h3>
+            <h3 class="box-title">Supplier Inward List</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse">
                     <i class="fa fa-plus"></i>
@@ -1304,7 +1304,7 @@
                             ?>
                             <thead>
                                 <tr class="bg_top_header">
-                                    <th colspan="2">Vendor Name</th>
+                                    <th colspan="2">Supplier Name</th>
                                     <td colspan="2"><?= htmlspecialchars($info['vendor_name'] ?? ''); ?></td>
 
                                     <th colspan="2">Contact Person</th>
@@ -1315,7 +1315,7 @@
                                 </tr>
 
                                 <tr class="bg_top_header">
-                                    <th colspan="2">Vendor Inward No</th>
+                                    <th colspan="2">Supplier Inward No</th>
                                     <td><?= htmlspecialchars($info['inward_no'] ?? ''); ?></td>
 
                                     <th colspan="2">Inward Date</th>
@@ -1332,7 +1332,7 @@
                                 <tr class="bg_top_header">
                                     <th colspan="2">Tender Enquiry Id</th>
                                     <td><?= htmlspecialchars($info['tender_enquiry_id'] ?? ''); ?></td>
-                                    <th colspan="2">Vendor Po Id</th>
+                                    <th colspan="2">Supplier Po Id</th>
                                     <td><?= htmlspecialchars($info['vendor_po_id'] ?? ''); ?></td>
 
                                     <th>Other Charges</th>
@@ -1341,9 +1341,9 @@
 
                                 <tr class="bg_table_header">
                                     <th width="5%">S.No</th>
-                                    <th width="5%">Vendor Purchase Inward Id</th>
-                                    <th width="5%">Vendor Purchase Inward Item Id</th>
-                                    <th width="5%">Vendor PO Item Id</th>
+                                    <th width="5%">Supplier Purchase Inward Id</th>
+                                    <th width="5%">Supplier Purchase Inward Item Id</th>
+                                    <th width="5%">Supplier PO Item Id</th>
                                     <th width="15%">Item Code</th>
                                     <th width="40%" colspan="2">Item Description</th>
                                     <th width="10%">UOM</th>
@@ -1407,7 +1407,7 @@
     <!-- Vendor Purchase Invoice List -->
     <div class="box box-success collapsed-box">
         <div class="box-header with-border clearfix">
-            <h3 class="box-title">Vendor Purchase Invoice List</h3>
+            <h3 class="box-title">Supplier Invoice Bill List</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse">
                     <i class="fa fa-plus"></i>
@@ -1430,7 +1430,7 @@
                             ?>
                             <thead>
                                 <tr class="bg_top_header">
-                                    <th colspan="2">Vendor Name</th>
+                                    <th colspan="2">Supplier Name</th>
                                     <td colspan="2"><?= htmlspecialchars($info['vendor_name'] ?? ''); ?></td>
 
                                     <th colspan="2">Contact Person</th>
@@ -1441,7 +1441,7 @@
                                 </tr>
 
                                 <tr class="bg_top_header">
-                                    <th colspan="2">Vendor Invoice No</th>
+                                    <th colspan="2">Supplier Invoice No</th>
                                     <td><?= htmlspecialchars($info['invoice_no'] ?? ''); ?></td>
 
                                     <th colspan="2">Invoice Date</th>
@@ -1477,7 +1477,7 @@
                                 <tr class="bg_top_header">
                                     <th colspan="2">Tender Enquiry Id</th>
                                     <td><?= htmlspecialchars($info['tender_enquiry_id'] ?? ''); ?></td>
-                                    <th colspan="2">Vendor Po Id</th>
+                                    <th colspan="2">Supplier Po Id</th>
                                     <td><?= htmlspecialchars($info['vendor_po_id'] ?? ''); ?></td>
 
                                     <th>Invoice Total</th>
@@ -1486,9 +1486,9 @@
 
                                 <tr class="bg_table_header">
                                     <th width="5%">S.No</th>
-                                    <th width="5%">Vendor Purchase Invoice Id</th>
-                                    <th width="5%">Vendor Purchase Invoice Item Id</th>
-                                    <th width="5%">Vendor PO Item Id</th>
+                                    <th width="5%">Supplier Purchase Invoice Id</th>
+                                    <th width="5%">Supplier Purchase Invoice Item Id</th>
+                                    <th width="5%">Supplier PO Item Id</th>
                                     <th width="15%">Item Code</th>
                                     <th width="40%">Item Description</th>
                                     <th width="10%">UOM</th>
@@ -1558,10 +1558,10 @@
     </div>
 
 
-    <!-- Vendor Payment Bill List -->
+    <!-- Supplier Payment Bill List -->
     <div class="box box-success collapsed-box">
         <div class="box-header with-border clearfix">
-            <h3 class="box-title">Vendor Payment Purchase Invoice List</h3>
+            <h3 class="box-title">Supplier Bill List</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse">
                     <i class="fa fa-plus"></i>
@@ -1585,7 +1585,7 @@
                                     <th>Payment Mode</th>
                                     <td><?= htmlspecialchars($info['payment_mode'] ?? '') ?></td>
 
-                                    <th>Vendor Name</th>
+                                    <th>Supplier Name</th>
                                     <td><?= htmlspecialchars($info['vendor_name'] ?? '') ?></td>
 
                                     <th>Payment No</th>
@@ -1667,10 +1667,10 @@
     </div>
 
 
-    <!-- Vendor Payment Local  Bill List -->
+    <!-- Supplier Payment Local  Bill List -->
     <div class="box box-success collapsed-box">
         <div class="box-header with-border clearfix">
-            <h3 class="box-title">Vendor Payment Local Bill List</h3>
+            <h3 class="box-title">Local Supplier Bill List</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse">
                     <i class="fa fa-plus"></i>
@@ -1694,7 +1694,7 @@
                                     <th>Payment Mode</th>
                                     <td><?= htmlspecialchars($info['payment_mode'] ?? '') ?></td>
 
-                                    <th>Vendor Name</th>
+                                    <th>Supplier Name</th>
                                     <td><?= htmlspecialchars($info['vendor_name'] ?? '') ?></td>
 
                                     <th>Payment No</th>
@@ -1776,10 +1776,10 @@
 
 
 
-    <!-- Vendor Payment Delivery  Bill List -->
+    <!--  Delivery  Bill List -->
     <div class="box box-success collapsed-box">
         <div class="box-header with-border clearfix">
-            <h3 class="box-title">Vendor Payment Delivery Bill List</h3>
+            <h3 class="box-title">Delivery Partner List</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse">
                     <i class="fa fa-plus"></i>
@@ -1802,7 +1802,7 @@
                                     <th>Payment Mode</th>
                                     <td><?= htmlspecialchars($info['payment_mode'] ?? '') ?></td>
 
-                                    <th>Vendor Name</th>
+                                    <th>Supplier Name</th>
                                     <td><?= htmlspecialchars($info['vendor_name'] ?? '') ?></td>
 
                                     <th>Payment No</th>
@@ -1884,10 +1884,10 @@
     </div>
 
 
-    <!-- Vendor Payment Customer  Bill List -->
+    <!-- Customs Bill List -->
     <div class="box box-success collapsed-box">
         <div class="box-header with-border clearfix">
-            <h3 class="box-title">Vendor Payment Customer Bill List</h3>
+            <h3 class="box-title">Customs Bill List</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse">
                     <i class="fa fa-plus"></i>
@@ -1910,7 +1910,7 @@
                                     <th>Payment Mode</th>
                                     <td><?= htmlspecialchars($info['payment_mode'] ?? '') ?></td>
 
-                                    <th>Vendor Name</th>
+                                    <th>Supplier  Name</th>
                                     <td><?= htmlspecialchars($info['vendor_name'] ?? '') ?></td>
 
                                     <th>Payment No</th>
