@@ -289,12 +289,15 @@
                       <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="" checked>
                        <input type="hidden" name="tender_po_item_id[]" class="form-control tender_po_item_id" value="">
                       <input type="hidden" name="tender_quotation_item_id[]" class="form-control tender_quotation_item_id" value="">
+                      <br><i class="text-sm text-red">Serial no</i>
+                      <input type="text" name="serial_no[]" class="form-control serial_no col-md-2" value="">
+                      
                     </div>
 
                     <div class="col-md-3">
                       <div class="form-group">
                         <label>Item Code</label>
-                        <input type="text" class="form-control item_code" name="item_code[]" value="" readonly>
+                        <input type="text" class="form-control item_code col-md-2" name="item_code[]" value="" readonly>
                       </div>
                     </div>
 
@@ -380,6 +383,7 @@
                 newRow.find(".item-check").val(i);
                 newRow.find(".tender_quotation_item_id").val(r.tender_quotation_item_id);
                 newRow.find(".tender_po_item_id").val(r.tender_po_item_id);
+                newRow.find(".serial_no").val(r.serial_no);
                 newRow.find(".item_code").val(r.item_code);
                 newRow.find(".desc-textarea").val(r.item_desc);
                 newRow.find(".uom").val(r.uom);
