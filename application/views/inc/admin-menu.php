@@ -1,6 +1,6 @@
 <?php
 // Define master menu pages
-$g_master = ['company-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list', 'customer-list', 'customer-contact-list', 'vendor-contact-list', 'currency-list', 'account-head-list', 'country-list', 'addt-charges-type-list', 'sub-account-head-list', 'account-head-for-list', 'voucher-type-list', 'opening-balance-list', 'settings','company-bank-list'];
+$g_master = ['company-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list', 'customer-list', 'customer-contact-list', 'vendor-contact-list', 'currency-list', 'account-head-list', 'country-list', 'addt-charges-type-list', 'sub-account-head-list', 'account-head-for-list', 'voucher-type-list', 'opening-balance-list', 'settings', 'company-bank-list'];
 
 // Get current page
 $current_page = $this->uri->segment(1, 0);
@@ -286,7 +286,7 @@ $vendor_m_grp = [
         </li>
 
         <li
-            class="treeview <?= in_array($current_page, ['vendor-purchase-bill-add', 'vendor-purchase-bill-list', 'vendor-purchase-bill-edit','local-purchase-bill-list','delivery-partner-bill-list','customs-bill-list']) ? 'active' : '' ?>">
+            class="treeview <?= in_array($current_page, ['vendor-purchase-bill-add', 'vendor-purchase-bill-list', 'vendor-purchase-bill-edit', 'local-purchase-bill-list', 'delivery-partner-bill-list', 'customs-bill-list']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-files-o"></i> Supplier Invoice/Bill
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
@@ -331,8 +331,10 @@ $report_m_grp = [
     'sales-nbr-report',
     'purchase-nbr-report',
     'tender-enquiry-timeline',
-    'tender-enquiry-summary-report'
-]; 
+    'tender-enquiry-summary-report',
+    'customer-invoice-pending-report',
+    'vendor-invoice-pending-report'
+];
 ?>
 <li class="header">REPORTS</li>
 
@@ -349,20 +351,38 @@ $report_m_grp = [
 
     <ul class="treeview-menu">
         <li
-            class="treeview <?= in_array($current_page, ['sales-nbr-report', 'purchase-nbr-report','tender-enquiry-timeline','tender-enquiry-summary-report']) ? 'active' : '' ?>">
+            class="treeview <?= in_array($current_page, ['sales-nbr-report', 'purchase-nbr-report', 'tender-enquiry-timeline', 'tender-enquiry-summary-report','customer-invoice-pending-report','vendor-invoice-pending-report']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-envelope"></i> Tender Info Report
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
             </a>
             <ul class="treeview-menu">
+
                 <li class="<?= ($current_page === 'tender-enquiry-timeline') ? 'active' : '' ?>">
-                    <a href="<?= site_url('tender-enquiry-timeline') ?>"><i class="fa fa-list"></i> Tender Timeline
-                        Report</a>
+                    <a href="<?= site_url('tender-enquiry-timeline') ?>">
+                        <i class="fa fa-list"></i> Tender Timeline Report
+                    </a>
                 </li>
+
                 <li class="<?= ($current_page === 'tender-enquiry-summary-report') ? 'active' : '' ?>">
-                    <a href="<?= site_url('tender-enquiry-summary-report') ?>"><i class="fa fa-list"></i> Tender Info
-                        Report</a>
+                    <a href="<?= site_url('tender-enquiry-summary-report') ?>">
+                        <i class="fa fa-list"></i> Tender Info Report
+                    </a>
                 </li>
+
+                <!-- NEW MENU -->
+                <li class="<?= ($current_page === 'customer-invoice-pending-report') ? 'active' : '' ?>">
+                    <a href="<?= site_url('customer-invoice-pending-report') ?>">
+                        <i class="fa fa-file-text"></i> Customer Invoice Report
+                    </a>
+                </li>
+
+                <li class="<?= ($current_page === 'vendor-invoice-pending-report') ? 'active' : '' ?>">
+                    <a href="<?= site_url('vendor-invoice-pending-report') ?>">
+                        <i class="fa fa-file-text"></i> Vendor Invoice Report
+                    </a>
+                </li>
+
             </ul>
         </li>
         <li
@@ -602,7 +622,7 @@ $report_m_grp = [
 
         <!-- Company Info -->
         <li
-            class="treeview <?= in_array($current_page, ['company-list', 'user-list','company-bank-list']) ? 'active' : '' ?>">
+            class="treeview <?= in_array($current_page, ['company-list', 'user-list', 'company-bank-list']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-building"></i> Company Info
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>

@@ -295,3 +295,7 @@ $route['customer-invoice-receipt/(:num)'] = 'payment/customer_invoice_recipt/$1'
 
 $route['vendor-payment-list'] = 'payment/vendor_payment_list';
 $route['vendor-payment-list/(:num)'] = 'payment/vendor_payment_list/$1';
+
+
+$route['customer-invoice-pending-report'] = 'reports/customer_invoice_pending_report';
+$route['vendor-invoice-pending-report'] = 'reports/vendor_invoice_pending_report';
