@@ -642,3 +642,52 @@ ENGINE=InnoDB
 AUTO_INCREMENT=1
 ;
 
+---------------------------------------
+
+24-03-2026
+
+ALTER TABLE `tender_po_item_info`
+	ADD COLUMN `serial_no` INT(11) NULL DEFAULT NULL AFTER `tender_quotation_item_id`; 
+
+
+UPDATE tender_po_item_info t
+JOIN (
+    SELECT 
+        tpi.tender_po_item_id,
+        ROW_NUMBER() OVER (
+            PARTITION BY tpi.tender_po_id 
+            ORDER BY tpi.tender_po_item_id
+        ) AS rn
+    FROM tender_po_item_info tpi
+    JOIN customer_tender_po_info tp  
+        ON tp.tender_po_id = tpi.tender_po_id
+    WHERE LOWER(tp.status) = 'active'
+      AND LOWER(tpi.status) = 'active'
+) x 
+ON t.tender_po_item_id = x.tender_po_item_id
+SET t.serial_no = x.rn;
+
+DELIMITER $$
+
+CREATE TRIGGER before_insert_po_item
+BEFORE INSERT ON tender_po_item_info
+FOR EACH ROW
+BEGIN
+
+    -- Only check child status
+    IF LOWER(NEW.status) = 'active' THEN
+
+        SET NEW.serial_no = (
+            SELECT IFNULL(MAX(serial_no), 0) + 1
+            FROM tender_po_item_info
+            WHERE tender_po_id = NEW.tender_po_id
+              AND LOWER(status) = 'active'
+        );
+
+    ELSE
+        SET NEW.serial_no = NULL;
+    END IF;
+
+END$$
+
+DELIMITER ;
