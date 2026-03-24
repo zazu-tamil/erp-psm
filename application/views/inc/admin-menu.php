@@ -170,6 +170,31 @@ echo "<br> dsfsdfsdf" . $current_page;
 </li>
   -->
 
+
+<li class="header">In Stock Report</li>
+
+<li class="treeview <?= in_array($current_page, ['in-stock-item-list']) ? 'active' : '' ?>">
+    <a href="#">
+        <i class="fa fa-file-text"></i>
+        <span>In Stock Report</span>
+        <span class="pull-right-container">
+            <i class="fa fa-angle-left pull-right"></i>
+        </span>
+    </a>
+
+    <ul class="treeview-menu">
+
+        <li class="<?= ($current_page === 'in-stock-item-list') ? 'active' : '' ?>">
+            <a href="<?= site_url('in-stock-item-list') ?>">
+                <i class="fa fa-plus-circle"></i> In Stock Item List
+            </a>
+        </li>
+
+    </ul>
+</li>
+
+
+
 <?php
 $vendor_m_grp = [
     'vendor-rate-enquiry',
@@ -351,7 +376,7 @@ $report_m_grp = [
 
     <ul class="treeview-menu">
         <li
-            class="treeview <?= in_array($current_page, ['sales-nbr-report', 'purchase-nbr-report', 'tender-enquiry-timeline', 'tender-enquiry-summary-report','customer-invoice-pending-report','vendor-invoice-pending-report']) ? 'active' : '' ?>">
+            class="treeview <?= in_array($current_page, ['sales-nbr-report', 'purchase-nbr-report', 'tender-enquiry-timeline', 'tender-enquiry-summary-report', 'customer-invoice-pending-report', 'vendor-invoice-pending-report']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-envelope"></i> Tender Info Report
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
@@ -429,6 +454,7 @@ $report_m_grp = [
 
     </ul>
 </li>
+
 <li class="header">AUDIT</li>
 
 <li class="treeview <?= in_array($this->uri->segment(1), [
