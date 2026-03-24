@@ -393,6 +393,20 @@ class General extends CI_Controller
             }
 
         }
+        if ($table == 'in_stock_item_info') {
+            $query = $this->db->query(" 
+                select 
+                a.* 
+                from in_stock_item_info as a  
+                where a.in_stock_item_id = '" . $rec_id . "'
+            ");
+            $rec_list = array();
+
+            foreach ($query->result_array() as $row) {
+                $rec_list = $row;
+            }
+
+        }
 
         $this->db->close();
 
@@ -564,6 +578,11 @@ class General extends CI_Controller
         if ($table == 'company_bank_info') {
             $this->db->where('bank_id', $rec_id);
             $this->db->update('company_bank_info', array('status' => 'Delete'));
+            echo "Record Deleted Successfully";
+        }
+        if ($table == 'in_stock_item_info') {
+            $this->db->where('in_stock_item_id', $rec_id);
+            $this->db->update('in_stock_item_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
         }
 
