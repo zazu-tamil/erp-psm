@@ -335,7 +335,6 @@
 
     $(".cls_export").hide();
 
-    
     function getRowTemplate(index) {
       return `
           <tr class="item-row">
@@ -496,9 +495,7 @@
       });
     });
 
-    /* =====================================================
-   SELECT ALL
-===================================================== */
+   
     $(document).on("change", "#selectall", function () {
       $(".item-check").prop("checked", this.checked);
     });
@@ -510,48 +507,145 @@
       );
     });
 
-    /* =====================================================
-   AUTO CALCULATION
-===================================================== */
-    $(document).on("input change", ".qty,.rate,.vat", function () {
+    $(document).on("input change", ".qty, .rate, .vat", function () {
       calculateRow($(this).closest(".item-row"));
     });
 
-    function calculateRow(row) {
-      const qty = parseFloat(row.find(".qty").val()) || 0;
-      const rate = parseFloat(row.find(".rate").val()) || 0;
-      const gst = parseFloat(row.find(".vat").val()) || 0;
+    $(document).on("input change", ".rate-input, .vat-dropdown", function () {
+      const $row = $(this).closest(".item-card");
+      const qty = parseFloat($row.find(".qty-input").val()) || 0;
+      const rate = parseFloat($row.find(".rate-input").val()) || 0;
+      const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
 
-      const base = qty * rate;
-      const gstAmt = (base * gst) / 100;
-      const total = base + gstAmt;
+      const amount = qty * rate * (1 + gst / 100);
+      $row.find(".amount-input").val(amount.toFixed(3));
+      $row.find(".amountwotx").val((qty * rate).toFixed(3));
 
-      row.find(".amount_wo_tax").val(base.toFixed(3));
-      row.find(".amount").val(total.toFixed(3));
+      const totals = calculateTotalAmount();
+      calculateTotalAmount_addt(totals.wot, totals.wt);
+    });
 
-      calculateTotals();
+    function calculateRow($row) {
+      const qty = parseFloat($row.find(".qty").val()) || 0;
+      const rate = parseFloat($row.find(".rate").val()) || 0;
+      const vat = parseFloat($row.find(".vat").val()) || 0;
+
+      const amountWoTax = qty * rate;
+      const amount = amountWoTax * (1 + vat / 100);
+
+      $row.find(".amount").val(amount.toFixed(3));
+      $row.find(".amount_wo_tax").val(amountWoTax.toFixed(3));
+
+      const totals = calculateTotalAmount();
+      calculateTotalAmount_addt(totals.wot, totals.wt);
     }
 
     function calculateAllRows() {
       $(".item-row").each(function () {
-        calculateRow($(this));
+        const $row = $(this);
+        const qty = parseFloat($row.find(".qty").val()) || 0;
+        const rate = parseFloat($row.find(".rate").val()) || 0;
+        const vat = parseFloat($row.find(".vat").val()) || 0;
+
+        const amountWoTax = qty * rate;
+        const amount = amountWoTax * (1 + vat / 100);
+
+        $row.find(".amount").val(amount.toFixed(3));
+        $row.find(".amount_wo_tax").val(amountWoTax.toFixed(3));
       });
+
+      // After all rows calculated, update totals once
+      const totals = calculateTotalAmount();
+      calculateTotalAmount_addt(totals.wot, totals.wt);
     }
 
-    function calculateTotals() {
-      let wo = 0;
+    function calculateTotalAmount() {
       let wt = 0;
-
-      $(".amount_wo_tax").each(function () {
-        wo += parseFloat($(this).val()) || 0;
-      });
-
-      $(".amount").each(function () {
+      $(".amount-input, .amount").each(function () {
         wt += parseFloat($(this).val()) || 0;
       });
 
-      $("#total_amount_wo_tax").text(wo.toFixed(3));
+      let wot = 0;
+      $(".amountwotx, .amount_wo_tax").each(function () {
+        wot += parseFloat($(this).val()) || 0;
+      });
+
+      $("#total_amount_wo_tax").text(wot.toFixed(3));
       $("#total_amount").text(wt.toFixed(3));
+      $("#tax_amount").text((wt - wot).toFixed(3)); // FIX: was #total_tax_amount
+
+      return { wot, wt };
+    }
+
+    $(".chk_addt_charges_type_id").on("change", function () {
+      const row = $(this).closest("tr");
+      const enabled = $(this).is(":checked");
+
+      row
+        .find(
+          ".addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt",
+        )
+        .prop("disabled", !enabled);
+
+      calculateTotalAmount_addt();
+    });
+
+    // Trigger on page load to set initial disabled states
+    $(".chk_addt_charges_type_id").change();
+
+    $(document).on(
+      "input",
+      ".addt_charges_amt, .addt_charges_vat",
+      function () {
+        const row = $(this).closest("tr");
+
+        const amt = parseFloat(row.find(".addt_charges_amt").val()) || 0;
+        const vat = parseFloat(row.find(".addt_charges_vat").val()) || 0;
+
+        const vat_amt = (amt * vat) / 100;
+        const total = amt + vat_amt;
+
+        row.find(".addt_charges_vat_amt").val(vat_amt.toFixed(2));
+        row.find(".addt_charges_tot_amt").val(total.toFixed(2));
+
+        calculateTotalAmount_addt();
+      },
+    );
+
+    function calculateTotalAmount_addt(base_wot, base_wt) {
+      base_wot =
+        base_wot !== undefined
+          ? base_wot
+          : parseFloat($("#total_amount_wo_tax").text()) || 0;
+      base_wt =
+        base_wt !== undefined
+          ? base_wt
+          : parseFloat($("#total_amount").text()) || 0;
+
+      let addt_wot = 0;
+      $(".addt_charges_amt").each(function () {
+        if (
+          $(this).closest("tr").find(".chk_addt_charges_type_id").is(":checked")
+        ) {
+          addt_wot += parseFloat($(this).val()) || 0;
+        }
+      });
+
+      let addt_wt = 0;
+      $(".addt_charges_tot_amt").each(function () {
+        if (
+          $(this).closest("tr").find(".chk_addt_charges_type_id").is(":checked")
+        ) {
+          addt_wt += parseFloat($(this).val()) || 0;
+        }
+      });
+
+      const total_wot = base_wot + addt_wot;
+      const total_wt = base_wt + addt_wt;
+
+      $("#total_amount_wo_tax_addt").text(total_wot.toFixed(3));
+      $("#total_amount_addt").text(total_wt.toFixed(3));
+      $("#total_tax_amount_addt").text((total_wt - total_wot).toFixed(3));
     }
   });
 </script>

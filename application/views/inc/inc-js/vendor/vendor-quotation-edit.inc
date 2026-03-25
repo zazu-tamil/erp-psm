@@ -392,9 +392,12 @@
     });
   });
 </script>
+
 <script>
   $(document).ready(function () {
-    // ===== ROW CALCULATION =====
+    /* =====================================================
+       ROW CALCULATION
+    ===================================================== */
     function calculateRow($row) {
       const isChecked = $row.find(".item-check").is(":checked");
 
@@ -415,37 +418,88 @@
       $row.find(".amount").val(amountWithTax.toFixed(3));
     }
 
-    // ===== TOTAL CALCULATION =====
+    /* =====================================================
+       BASE TOTALS — returns { wot, wt } to avoid stale DOM reads
+    ===================================================== */
     function calculateTotalAmount() {
-      let total = 0;
-      let totalWOT = 0;
+      let wt = 0;
+      let wot = 0;
 
       $(".item-card").each(function () {
         const $row = $(this);
-
         if ($row.find(".item-check").is(":checked")) {
-          total += parseFloat($row.find(".amount").val()) || 0;
-          totalWOT += parseFloat($row.find(".amountwotx").val()) || 0;
+          wt += parseFloat($row.find(".amount").val()) || 0;
+          wot += parseFloat($row.find(".amountwotx").val()) || 0;
         }
       });
 
-      $("#total_amount").text(total.toFixed(3));
-      $("#total_amount_wo_tax").text(totalWOT.toFixed(3));
+      $("#total_amount").text(wt.toFixed(3));
+      $("#total_amount_wo_tax").text(wot.toFixed(3));
+      // FIX 1: was missing — your HTML has id="total_tax_amount"
+      $("#total_tax_amount").text((wt - wot).toFixed(3));
+
+      return { wot, wt };
     }
 
-    // ===== INPUT CHANGE =====
+    /* =====================================================
+       ADDITIONAL CHARGES TOTALS
+       Accepts base totals as params — avoids stale DOM reads
+    ===================================================== */
+    function calculateTotalAmount_addt(base_wot, base_wt) {
+      // FIX 2: use passed values if available, else read DOM as fallback
+      base_wot =
+        base_wot !== undefined
+          ? base_wot
+          : parseFloat($("#total_amount_wo_tax").text()) || 0;
+      base_wt =
+        base_wt !== undefined
+          ? base_wt
+          : parseFloat($("#total_amount").text()) || 0;
+
+      let addt_wot = 0;
+      $(".addt_charges_amt").each(function () {
+        if (
+          $(this).closest("tr").find(".chk_addt_charges_type_id").is(":checked")
+        ) {
+          addt_wot += parseFloat($(this).val()) || 0;
+        }
+      });
+
+      let addt_wt = 0;
+      $(".addt_charges_tot_amt").each(function () {
+        if (
+          $(this).closest("tr").find(".chk_addt_charges_type_id").is(":checked")
+        ) {
+          addt_wt += parseFloat($(this).val()) || 0;
+        }
+      });
+
+      const total_wot = base_wot + addt_wot;
+      const total_wt = base_wt + addt_wt;
+
+      $("#total_amount_wo_tax_addt").text(total_wot.toFixed(3));
+      $("#total_amount_addt").text(total_wt.toFixed(3));
+      $("#total_tax_amount_addt").text((total_wt - total_wot).toFixed(3));
+    }
+
+    /* =====================================================
+       INPUT CHANGE — qty / rate / vat
+    ===================================================== */
     $(document).on("input change", ".qty, .rate, .vat", function () {
       const $row = $(this).closest(".item-card");
       calculateRow($row);
-      calculateTotalAmount();
+      const totals = calculateTotalAmount();
+      calculateTotalAmount_addt(totals.wot, totals.wt);
     });
 
-    // ===== CHECKBOX CHANGE =====
+    /* =====================================================
+       ITEM CHECKBOX CHANGE
+    ===================================================== */
     $(document).on("change", ".item-check", function () {
       const $row = $(this).closest(".item-card");
-
       calculateRow($row);
-      calculateTotalAmount();
+      const totals = calculateTotalAmount();
+      calculateTotalAmount_addt(totals.wot, totals.wt);
 
       $("#selectall").prop(
         "checked",
@@ -453,7 +507,9 @@
       );
     });
 
-    // ===== SELECT ALL =====
+    /* =====================================================
+       SELECT ALL CHECKBOX
+    ===================================================== */
     $("#selectall").on("change", function () {
       $(".item-check").prop("checked", this.checked);
 
@@ -461,14 +517,66 @@
         calculateRow($(this));
       });
 
-      calculateTotalAmount();
+      const totals = calculateTotalAmount();
+      calculateTotalAmount_addt(totals.wot, totals.wt);
     });
 
-    // ===== EDIT MODE INITIAL LOAD =====
+    /* =====================================================
+       ADDITIONAL CHARGES — enable / disable row on checkbox
+    ===================================================== */
+    $(".chk_addt_charges_type_id").on("change", function () {
+      const row = $(this).closest("tr");
+      const enabled = $(this).is(":checked");
+
+      // FIX 4: simplified if/else to single prop call
+      row
+        .find(
+          ".addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt",
+        )
+        .prop("disabled", !enabled);
+
+      const totals = calculateTotalAmount();
+      calculateTotalAmount_addt(totals.wot, totals.wt);
+    });
+
+    /* =====================================================
+       ADDITIONAL CHARGES — row amount calculation
+    ===================================================== */
+    $(document).on(
+      "input",
+      ".addt_charges_amt, .addt_charges_vat",
+      function () {
+        const row = $(this).closest("tr");
+
+        const amt = parseFloat(row.find(".addt_charges_amt").val()) || 0;
+        const vat = parseFloat(row.find(".addt_charges_vat").val()) || 0;
+
+        const vat_amt = (amt * vat) / 100;
+        const total = amt + vat_amt;
+
+        row.find(".addt_charges_vat_amt").val(vat_amt.toFixed(2));
+        row.find(".addt_charges_tot_amt").val(total.toFixed(2));
+
+        const totals = calculateTotalAmount();
+        calculateTotalAmount_addt(totals.wot, totals.wt);
+      },
+    );
+
+    /* =====================================================
+       EDIT MODE — INITIAL PAGE LOAD
+       Recalculate all rows then both total sections
+    ===================================================== */
     $(".item-card").each(function () {
       calculateRow($(this));
     });
 
-    calculateTotalAmount();
+    // FIX 3: also call addt totals on load so edit mode shows correct values
+    const initTotals = calculateTotalAmount();
+
+    // Trigger disable/enable states for addt charges rows
+    $(".chk_addt_charges_type_id").change();
+
+    // Now calculate addt totals with correct base values
+    calculateTotalAmount_addt(initTotals.wot, initTotals.wt);
   });
 </script>
