@@ -170,10 +170,9 @@ echo "<br> dsfsdfsdf" . $current_page;
 </li>
   -->
 
-
 <li class="header">In Stock Items</li>
 
-<li class="treeview <?= in_array($current_page, ['in-stock-item-list']) ? 'active' : '' ?>">
+<li class="treeview <?= in_array($current_page, ['in-stock-item-list', 'in-stock-item-report']) ? 'active' : '' ?>">
     <a href="#">
         <i class="fa fa-file-text"></i>
         <span>In Stock Items</span>
@@ -190,9 +189,14 @@ echo "<br> dsfsdfsdf" . $current_page;
             </a>
         </li>
 
+        <li class="<?= ($current_page === 'in-stock-item-report') ? 'active' : '' ?>">
+            <a href="<?= site_url('in-stock-item-report') ?>">
+                <i class="fa fa-list"></i> In Stock Item Report
+            </a>
+        </li>
+
     </ul>
 </li>
-
 
 
 <?php

@@ -1401,6 +1401,115 @@ class Reports extends CI_Controller
         $this->load->view('page/reports/vendor-invoice-pending-report', $data);
     }
 
+    public function in_stock_item_report()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data['title'] = 'In Stock Item Report';
+        $data['js'] = 'reports/in-stock-item-report.inc'; // ← your custom js if any
+
+
+
+
+        $where = "1=1";
+
+        // ===================== SEARCH FILTERS =====================
+        if ($this->input->post('srch_vendor_id') !== null) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->input->post('srch_vendor_id');
+            $this->session->set_userdata('srch_vendor_id', $srch_vendor_id);
+        } elseif ($this->session->userdata('srch_vendor_id')) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->session->userdata('srch_vendor_id');
+        } else {
+            $data['srch_vendor_id'] = $srch_vendor_id = '';
+        }
+
+        if (!empty($srch_vendor_id)) {
+            $where .= " AND aii_stock.vendor_id = '" . $this->db->escape_str($srch_vendor_id) . "'";
+        }
+
+
+        //vendor_opt
+
+        $sql = "
+            SELECT vendor_id, vendor_name 
+            FROM vendor_info 
+            WHERE status = 'Active' 
+            ORDER BY vendor_name ASC";
+        $query = $this->db->query($sql);
+        $data['vendor_opt'] = [];
+        foreach ($query->result_array() as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+        }
+
+        $data['record_list'] = [];
+
+        $sql = "
+          SELECT *
+            FROM 
+            (
+                SELECT 
+                    a.vendor_pur_inward_item_id, 
+                    a.item_code,
+                    a.item_desc,
+                    a.uom,
+                    b.vendor_id,                     
+                    c.vendor_name,
+                    a.qty AS inward_qty, 
+                    IFNULL(dc.total_dc_qty, 0) AS dc_qty, 
+                    '' AS instock,
+                    (a.qty - IFNULL(dc.total_dc_qty, 0)) AS instock_item_qty 
+                FROM vendor_pur_inward_item_info AS a 
+                LEFT JOIN vendor_pur_inward_info AS b 
+                    ON a.vendor_pur_inward_id = b.vendor_pur_inward_id 
+                    AND b.status = 'Active' 
+                LEFT JOIN vendor_info AS c 
+                    ON b.vendor_id = c.vendor_id 
+                    AND c.status = 'Active' 
+                LEFT JOIN (
+                    SELECT 
+                        tdc.vendor_pur_inward_item_id,
+                        SUM(tdc.qty) AS total_dc_qty
+                    FROM tender_dc_item_info AS tdc
+                    WHERE tdc.status = 'Active'
+                    GROUP BY tdc.vendor_pur_inward_item_id
+                ) dc 
+                    ON dc.vendor_pur_inward_item_id = a.vendor_pur_inward_item_id
+                WHERE a.status = 'Active' 
+
+                UNION ALL
+
+                SELECT
+                    0 AS vendor_pur_inward_item_id,
+                    a.item_code,
+                    a.item_desc,
+                    a.uom,
+                    a.vendor_id,                    
+                    b.vendor_name,
+                    a.qty AS inward_qty, 
+                    0 AS dc_qty, 
+                    'instock' AS instock,
+                    a.qty AS instock_item_qty
+                FROM in_stock_item_info AS a 
+                LEFT JOIN vendor_info AS b 
+                    ON a.vendor_id = b.vendor_id 
+                    AND b.status = 'Active'
+                WHERE a.status = 'Active' 
+
+            ) AS aii_stock 
+
+            WHERE instock_item_qty > 0 
+            AND $where
+            ORDER BY item_code ASC;
+        ";
+
+        $query = $this->db->query($sql);
+        $data['record_list'] = $query->result_array();
+
+        $this->load->view('page/reports/in-stock-item-report', $data);
+    }
+
 }
 
 ?>

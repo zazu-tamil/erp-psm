@@ -299,6 +299,9 @@ $route['vendor-payment-list/(:num)'] = 'payment/vendor_payment_list/$1';
 
 $route['customer-invoice-pending-report'] = 'reports/customer_invoice_pending_report';
 $route['vendor-invoice-pending-report'] = 'reports/vendor_invoice_pending_report';
+
 //in_stock_item_info
 $route['in-stock-item-list'] = 'tender/in_stock_item_list';
 $route['in-stock-item-list/(:num)'] = 'tender/in_stock_item_list/$1';
+
+$route['in-stock-item-report'] = 'reports/in_stock_item_report';
