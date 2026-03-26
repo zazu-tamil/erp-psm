@@ -209,8 +209,7 @@
                                 <h5 class="mb-0">
                                     <i class="fa fa-calculator text-success me-2"></i>
                                     <strong>Total TAX Amount :</strong>
-                                    <span class="text-primary"><span id="tax_amount">0.000</span></span>
-                                    <input type="text" class="tax_amount" value="0">
+                                    <span class="text-primary"><span id="tax_amount">0.000</span></span> 
                                 </h5>
                             </div>
                         </div>

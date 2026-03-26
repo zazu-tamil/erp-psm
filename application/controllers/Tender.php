@@ -2489,7 +2489,7 @@ class Tender extends CI_Controller
                 foreach ($chk_tender_quote_addtchrg_id as $j => $tender_quote_addtchrg_id) {
                     $addt_charges_data = [
                         'tender_po_id' => $tender_po_id,
-                        'tender_quote_addtchrg_id' => $tender_quote_addtchrg_id ?? 0,
+                        'vendor_quote_addtchrg_id' => $tender_quote_addtchrg_id ?? 0,
                         'addt_charges_type_id' => $addt_charges_type_id[$tender_quote_addtchrg_id] ?? 0,
                         'addt_charges_amt' => $addt_charges_amt[$tender_quote_addtchrg_id] ?? 0,
                         'addt_charges_vat' => $addt_charges_vat[$tender_quote_addtchrg_id] ?? 0,

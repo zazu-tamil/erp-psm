@@ -1,14 +1,10 @@
-<?php include_once(VIEWPATH . 'inc/header.php');
-// echo '<pre>';
-// print_r($_FILES);
-// echo '</pre>'; 
-?>
+<?php include_once(VIEWPATH . 'inc/header.php'); ?>
 
 <section class="content-header">
     <h1><?php echo htmlspecialchars($title); ?></h1>
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-file-text"></i>Vendor</a></li>
-        <li class="active"> <?php echo htmlspecialchars($title); ?></li>
+        <li class="active"><?php echo htmlspecialchars($title); ?></li>
     </ol>
 </section>
 
@@ -29,17 +25,15 @@
             <h3 class="box-title">
                 <i class="fa fa-plus-circle"></i> Add Vendor PO
             </h3>
-
-
             <a href="<?php echo site_url('vendor-po-list'); ?>" class="btn btn-warning pull-right">
                 <i class="fa fa-arrow-left"></i> Back To List
             </a>
         </div>
 
-
         <form method="post" action="" id="frmadd" enctype="multipart/form-data">
             <div class="box-body">
                 <input type="hidden" name="mode" value="Add" />
+
                 <fieldset class="tender-inward">
                     <legend class="text-light-blue">
                         <i class="fa fa-file-text-o"></i> PO Details
@@ -49,13 +43,11 @@
                         </small>
                     </legend>
 
-                    <div
-                        style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
+                    <div style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
                         <div class="row">
                             <div class="col-md-4 form-group">
                                 <label for="srch_enq_id">Search Enquiry No</label>
-                                <input type="text" name="srch_enq_id" class="form-control srch_enq_id" value=""
-                                    placeholder="Search Enquiry No" />
+                                <input type="text" name="srch_enq_id" class="form-control srch_enq_id" value="" placeholder="Search Enquiry No" />
                             </div>
                         </div>
                     </div>
@@ -82,12 +74,8 @@
                         </div>
 
                         <div class="form-group col-md-4">
-                            <label>Vendor Quotation No <span style="color:red;">*</span>
-
-                            </label>
-                            <select name="srch_vendor_quote_id" id="srch_vendor_quote_id"
-                                class="form-control "></select>
-
+                            <label>Vendor Quotation No <span style="color:red;">*</span></label>
+                            <select name="srch_vendor_quote_id" id="srch_vendor_quote_id" class="form-control"></select>
                         </div>
 
                         <div class="form-group col-md-4">
@@ -117,9 +105,9 @@
                         <div class="form-group col-md-4">
                             <label>Transport Charges</label>
                             <input type="number" step="any" name="transport_charges" id="transport_charges"
-                                class="form-control" value="<?php echo set_value('transport_charges'); ?>"
-                                placeholder="0.00">
+                                class="form-control" value="<?php echo set_value('transport_charges'); ?>" placeholder="0.00">
                         </div>
+
                         <div class="form-group col-md-4">
                             <label>Other Charges</label>
                             <input type="number" step="any" name="other_charges" id="other_charges" class="form-control"
@@ -129,18 +117,9 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label for="currency_id">Currency</label>
-                                <?php
-                                echo form_dropdown(
-                                    'currency_id',
-                                    ['' => 'Select Currency'] + $currency_opt,
-                                    set_value('currency_id'),
-                                    'id="currency_id" class="form-control" required'
-                                );
-
-                                ?>
+                                <?php echo form_dropdown('currency_id', ['' => 'Select Currency'] + $currency_opt, set_value('currency_id'), 'id="currency_id" class="form-control" required'); ?>
                             </div>
                         </div>
-
 
                         <div class="form-group col-md-4">
                             <label>Status</label><br>
@@ -153,21 +132,16 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Remarks</label>
-                                <textarea id="editor1" name="remarks" class="form-control"
-                                    placeholder="Enter remarks"></textarea>
+                                <textarea id="editor1" name="remarks" class="form-control" placeholder="Enter remarks"></textarea>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Terms & Conditions</label>
-                                <textarea id="editor2" name="terms" class="form-control"
-                                    placeholder="Enter terms"></textarea>
+                                <textarea id="editor2" name="terms" class="form-control" placeholder="Enter terms"></textarea>
                             </div>
                         </div>
                     </div>
-
-
-
                 </fieldset>
 
                 <fieldset class="mt-4">
@@ -175,54 +149,129 @@
                     <table class="table table-bordered table-sm">
                         <thead>
                             <tr>
-                                <th style="width:5%;">✔</th>
+                                <th style="width:5%;">
+                                    <input type="checkbox" id="selectall" title="Select All">
+                                </th>
                                 <th style="width:10%;">Item Code</th>
                                 <th style="width:35%;">Description</th>
-                                <th style="width:10%;">UOM & Qty</th>
+                                <th style="width:10%;">UOM &amp; Qty</th>
                                 <th style="width:10%;">Rate</th>
                                 <th style="width:8%;">VAT %</th>
                                 <th style="width:11%;">Amt (W/O Tax)</th>
                                 <th style="width:11%;">Amt (With Tax)</th>
                             </tr>
                         </thead>
-
                         <tbody id="item_container"></tbody>
-
                     </table>
-                    <div class="row">
-                        <div class="col-md-3 pull-right ">
-                            <div class="total-box shadow-sm">
-                                <h5 class="mb-0">
-                                    <i class="fa fa-calculator text-success me-2"></i>
-                                    <strong>Total Amount With Tax:</strong>
-                                    <span class="text-primary"><span id="total_amount">0.000</span></span>
-                                </h5>
+
+                    <div style="border-radius:10px; padding:30px; background-color:#f8f9fa; border:2px solid blue; margin-top:30px; margin-bottom:30px;">
+                        <div class="row">
+                            <div class="col-md-3 text-right">
+                                <h3 class="text-red">Total Excl Addt Charges</h3>
                             </div>
-                        </div>
-                        <div class="col-md-3 pull-right">
-                            <div class="total-box shadow-sm">
-                                <h5 class="mb-0">
-                                    <i class="fa fa-calculator text-success me-2"></i>
-                                    <strong>Total Amount WO Tax:</strong>
-                                    <span class="text-primary"><span id="total_amount_wo_tax">0.000</span></span>
-                                </h5>
+                            <div class="col-md-3 text-right">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total Amount WO Tax:</strong>
+                                        <span class="text-primary"><span id="total_amount_wo_tax">0.000</span></span>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-right">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total TAX Amount:</strong>
+                                        <span class="text-primary"><span id="total_tax_amount">0.000</span></span>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-right">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total Amount With Tax:</strong>
+                                        <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                    </h5>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </fieldset>
-            </div>
+
+                <div id="div_addt_chrg" class="hide">
+                    <fieldset class="mt-4 pt-4">
+                        <legend class="text-light-blue"><i class="fa fa-list"></i> Additional Charges (If any)</legend>
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Addt. Charges Type</th>
+                                    <th>Addt. Charges Amt</th>
+                                    <th>VAT %</th>
+                                    <th>VAT Amt</th>
+                                    <th>Total Amt</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tb_addt_chrg_list"></tbody>
+                        </table>
+                    </fieldset>
+
+                    <div style="border-radius:10px; padding:30px; background-color:#f8f9fa; border:2px solid blue; margin-top:30px; margin-bottom:30px;">
+                        <div class="row">
+                            <div class="col-md-3 text-right">
+                                <h3 class="text-red">Total Inc Addt Charges</h3>
+                            </div>
+                            <div class="col-md-3 text-right">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total Amount WO Tax:</strong>
+                                        <span class="text-primary text-bold"><span id="total_amount_wo_tax_addt">0.000</span></span>
+                                        <br><i>Inc Addt Charges</i>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-right">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total Tax Amount:</strong>
+                                        <span class="text-primary text-bold"><span id="total_tax_amount_addt">0.000</span></span>
+                                        <br><i>Inc Addt Charges</i>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-right">
+                                <div class="total-box shadow-sm">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calculator text-success me-2"></i>
+                                        <strong>Total Amount With Tax:</strong>
+                                        <span class="text-primary text-bold"><span id="total_amount_addt">0.000</span></span>
+                                        <br><i>Inc Addt Charges</i>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /.box-body -->
 
             <div class="box-footer text-right">
                 <a href="<?php echo site_url('vendor-po-list'); ?>" class="btn btn-warning pull-left">
                     <i class="fa fa-arrow-left"></i> Back To List
                 </a>
-                <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
+                <button type="submit" class="btn btn-success">
+                    <i class="fa fa-save"></i> Save
+                </button>
             </div>
         </form>
     </div>
 </section>
 
 
-
-
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
+
+

@@ -629,6 +629,32 @@ class Vendor extends CI_Controller
                 }
             }
 
+
+            $chk_vendor_quote_addtchrg_id = $this->input->post('chk_vendor_quote_addtchrg_id') ?? [];
+
+            if (!empty($chk_vendor_quote_addtchrg_id)) {
+
+                $addt_charges_type_id = $this->input->post('addt_charges_type_id') ?? [];
+                $addt_charges_amt = $this->input->post('addt_charges_amt') ?? [];
+                $addt_charges_vat = $this->input->post('addt_charges_vat') ?? [];
+                $addt_charges_vat_amt = $this->input->post('addt_charges_vat_amt') ?? [];
+                $addt_charges_tot_amt = $this->input->post('addt_charges_tot_amt') ?? [];
+
+                foreach ($chk_vendor_quote_addtchrg_id as $vendor_quote_addtchrg_id) {
+                    $addt_charges_data = [
+                        'vendor_po_id' => $vendor_po_id,
+                        'vendor_quote_addtchrg_id' => $vendor_quote_addtchrg_id ?? 0,
+                        'addt_charges_type_id' => $addt_charges_type_id[$vendor_quote_addtchrg_id] ?? 0,
+                        'addt_charges_amt' => $addt_charges_amt[$vendor_quote_addtchrg_id] ?? 0,
+                        'addt_charges_vat' => $addt_charges_vat[$vendor_quote_addtchrg_id] ?? 0,
+                        'addt_charges_vat_amt' => $addt_charges_vat_amt[$vendor_quote_addtchrg_id] ?? 0,
+                        'addt_charges_tot_amt' => $addt_charges_tot_amt[$vendor_quote_addtchrg_id] ?? 0,
+                        'status' => 'Active'
+                    ];
+                    $this->db->insert('vendor_po_addtchrg_info', $addt_charges_data);
+                }
+            }
+
             $this->db->trans_complete();
             if ($this->db->trans_status() === FALSE) {
                 $this->session->set_flashdata('error', 'Error saving Vendor PO. Please try again.');
@@ -699,6 +725,19 @@ class Vendor extends CI_Controller
         foreach ($query->result_array() as $row) {
             $data['currency_opt'][$row['currency_id']] = $row['currency_code'];
         }
+
+
+        $sql = "
+            SELECT 
+            *
+            FROM addt_charges_type_info
+            WHERE status = 'Active'
+            ORDER BY addt_charges_type_name ASC
+        ";
+        $query = $this->db->query($sql);
+
+        $data['addt_charges_list'] = $query->result_array();
+
         $this->load->view('page/vendor/vendor-po-add', $data);
     }
 
@@ -1085,6 +1124,49 @@ class Vendor extends CI_Controller
                 'updated_date' => date('Y-m-d H:i:s')
             ]);
 
+
+
+
+            $chk_vendor_quote_addtchrg_id = $this->input->post('chk_vendor_quote_addtchrg_id') ?? [];
+
+            if (!empty($chk_vendor_quote_addtchrg_id)) {
+
+                $vendor_po_addtchrg_id = $this->input->post('vendor_po_addtchrg_id') ?? [];
+                $addt_charges_type_id = $this->input->post('addt_charges_type_id') ?? [];
+                $addt_charges_amt = $this->input->post('addt_charges_amt') ?? [];
+                $addt_charges_vat = $this->input->post('addt_charges_vat') ?? [];
+                $addt_charges_vat_amt = $this->input->post('addt_charges_vat_amt') ?? [];
+                $addt_charges_tot_amt = $this->input->post('addt_charges_tot_amt') ?? [];
+                $vendor_quote_addtchrg_id = $this->input->post('vendor_quote_addtchrg_id') ?? [];
+                $miss_addt_charges_id = [];
+
+                foreach ($chk_vendor_quote_addtchrg_id as $j => $vendor_quote_addtchrg_id) {
+                    $addt_charges_data = [
+                        'vendor_po_id' => $vendor_po_id,
+                        'vendor_quote_addtchrg_id' => $vendor_quote_addtchrg_id,
+                        'addt_charges_type_id' => $addt_charges_type_id[$vendor_quote_addtchrg_id] ?? 0,
+                        'addt_charges_amt' => $addt_charges_amt[$vendor_quote_addtchrg_id] ?? 0,
+                        'addt_charges_vat' => $addt_charges_vat[$vendor_quote_addtchrg_id] ?? 0,
+                        'addt_charges_vat_amt' => $addt_charges_vat_amt[$vendor_quote_addtchrg_id] ?? 0,
+                        'addt_charges_tot_amt' => $addt_charges_tot_amt[$vendor_quote_addtchrg_id] ?? 0,
+                        'status' => 'Active'
+                    ];
+                    if (!empty($vendor_po_addtchrg_id[$vendor_quote_addtchrg_id]) && $vendor_po_addtchrg_id[$vendor_quote_addtchrg_id] > 0) {
+                        $this->db->where('vendor_po_addtchrg_id', $vendor_po_addtchrg_id[$vendor_quote_addtchrg_id]);
+                        $this->db->update('vendor_po_addtchrg_info', $addt_charges_data);
+                        $miss_addt_charges_id[] = $vendor_po_addtchrg_id[$vendor_quote_addtchrg_id];
+                    } else {
+                        $this->db->insert('vendor_po_addtchrg_info', $addt_charges_data);
+                        $miss_addt_charges_id[] = $this->db->insert_id();
+                    }
+                }
+                if (!empty($miss_addt_charges_id)) {
+                    $this->db->where('vendor_po_id', $vendor_po_id);
+                    $this->db->where_not_in('vendor_po_addtchrg_id', $miss_addt_charges_id);
+                    $this->db->update('vendor_po_addtchrg_info', ['status' => 'Deleted']);
+                }
+
+            }
             $this->db->trans_complete();
 
             if ($this->db->trans_status() === FALSE) {
@@ -1093,9 +1175,9 @@ class Vendor extends CI_Controller
                 $this->session->set_flashdata('success', 'Vendor Quotation updated successfully.');
             }
 
-
             redirect('vendor-po-edit/' . $vendor_po_id);
         }
+
         // Load dependent dropdowns (same AJAX will refill others)
         $data['customer_opt'] = ['' => 'Select Customer'];
         $data['tender_enquiry_opt'] = ['' => 'Select Enquiry'];
@@ -1298,6 +1380,33 @@ class Vendor extends CI_Controller
             $data['currency_opt'][$row['currency_id']] = $row['currency_code'];
 
         }
+
+
+        $sql = "
+           SELECT 
+            a.vendor_quote_addtchrg_id,
+            a.addt_charges_type_id,
+            c.vendor_po_addtchrg_id,
+            b.addt_charges_type_name,
+            if(c.vendor_po_addtchrg_id is null , a.addt_charges_amt, c.addt_charges_amt) as addt_charges_amt,   
+            if(c.vendor_po_addtchrg_id is null , a.addt_charges_vat, c.addt_charges_vat) as addt_charges_vat,   
+            if(c.vendor_po_addtchrg_id is null , a.addt_charges_vat_amt, c.addt_charges_vat_amt) as addt_charges_vat_amt,   
+            if(c.vendor_po_addtchrg_id is null , a.addt_charges_tot_amt, c.addt_charges_tot_amt) as addt_charges_tot_amt    
+            FROM vendor_quote_addtchrg_info as a
+            left join addt_charges_type_info as b on b.addt_charges_type_id = a.addt_charges_type_id and b.status='Active' 
+            left join vendor_po_addtchrg_info as c on c.vendor_quote_addtchrg_id = a.vendor_quote_addtchrg_id 
+                and c.addt_charges_type_id = a.addt_charges_type_id 
+                and c.`status` = 'Active' 
+                and c.vendor_po_id = ?
+            WHERE a.status = 'Active'
+            and a.vendor_quote_id =?
+            ORDER BY a.vendor_quote_addtchrg_id,  b.addt_charges_type_name ASC
+        ";
+        $query = $this->db->query($sql, [$vendor_po_id, $data['header']['vendor_quote_id']]);
+
+        $data['addt_charges_list'] = $query->result_array();
+
+
 
         $this->load->view('page/vendor/vendor-po-edit', $data);
     }
@@ -3121,7 +3230,31 @@ class Vendor extends CI_Controller
         ";
 
         $query = $this->db->query($sql, [$srch_vendor_quote_id]);
-        echo json_encode($query->result_array());
+
+        $result['items'] = [];
+        $result['addt_chrg_list'] = [];
+
+        $result['items'] = $query->result_array();
+
+
+        $sql = "
+          SELECT 
+            a.*,
+            b.addt_charges_type_name
+            FROM vendor_quote_addtchrg_info as a
+            left join addt_charges_type_info as b 
+                on b.addt_charges_type_id = a.addt_charges_type_id  
+            WHERE a.status = 'Active'
+            and b.status='Active' 
+            and a.vendor_quote_id =  ?
+            ORDER BY b.addt_charges_type_name ASC 
+        ";
+        $query = $this->db->query($sql, [$srch_vendor_quote_id]);
+
+        $result['addt_chrg_list'] = $query->result_array();
+
+        echo json_encode($result);
+
     }
 
     public function get_vendor_pur_inward_item_load()

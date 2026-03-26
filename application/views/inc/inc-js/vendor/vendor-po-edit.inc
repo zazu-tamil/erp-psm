@@ -191,6 +191,7 @@
     CKEDITOR.replace("editor2", { height: 120 });
   };
 </script>
+
 <script>
   $(document).ready(function () {
     // ===============================
@@ -280,6 +281,7 @@
           });
 
           recalculateAll();
+          calculateTotalAmount();
         },
 
         error: function () {
@@ -288,9 +290,80 @@
       });
     });
 
-    // ===============================
-    // ROW CALCULATION
-    // ===============================
+    /* =====================================================
+   ADDITIONAL CHARGES ENABLE / DISABLE
+===================================================== */
+    $(document).on("change", ".chk_vendor_quote_addtchrg_id", function () {
+      let row = $(this).closest("tr");
+
+      if ($(this).is(":checked")) {
+        row
+          .find(
+            ".addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt",
+          )
+          .prop("disabled", false);
+      } else {
+        row
+          .find(
+            ".addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt",
+          )
+          .prop("disabled", true)
+          .val("0.000"); // ✅ clear values
+      }
+
+      calculateTotalAmount_addt();
+    });
+
+    /* Trigger on load */
+    $("#tb_addt_chrg_list .chk_vendor_quote_addtchrg_id").trigger("change");
+
+    /* =====================================================
+   ADDITIONAL CHARGES CALCULATION
+===================================================== */
+    $(document).on(
+      "input",
+      ".addt_charges_amt, .addt_charges_vat",
+      function () {
+        let row = $(this).closest("tr");
+
+        let amt = parseFloat(row.find(".addt_charges_amt").val()) || 0;
+        let vat = parseFloat(row.find(".addt_charges_vat").val()) || 0;
+
+        let vat_amt = (amt * vat) / 100;
+        let total = amt + vat_amt;
+
+        row.find(".addt_charges_vat_amt").val(vat_amt.toFixed(3));
+        row.find(".addt_charges_tot_amt").val(total.toFixed(3));
+
+        calculateTotalAmount_addt();
+      },
+    );
+
+    function calculateTotalAmount_addt() {
+      let addt_wo_tax = 0;
+      let addt_w_tax = 0;
+
+      $(".chk_vendor_quote_addtchrg_id:checked").each(function () {
+        let row = $(this).closest("tr");
+
+        addt_wo_tax += parseFloat(row.find(".addt_charges_amt").val()) || 0;
+        addt_w_tax += parseFloat(row.find(".addt_charges_tot_amt").val()) || 0;
+      });
+
+      let item_wo_tax = parseFloat($("#total_amount_wo_tax").text()) || 0;
+      let item_w_tax = parseFloat($("#total_amount").text()) || 0;
+
+      let final_wo_tax = item_wo_tax + addt_wo_tax;
+      let final_w_tax = item_w_tax + addt_w_tax;
+
+      $("#total_amount_wo_tax_addt").text(final_wo_tax.toFixed(3));
+      $("#total_amount_addt").text(final_w_tax.toFixed(3));
+      $("#total_tax_amount_addt").text((final_w_tax - final_wo_tax).toFixed(3));
+    }
+
+    /* =====================================================
+   ROW CALCULATION
+===================================================== */
     function calculateRow($row) {
       const checked = $row.find(".item-check").is(":checked");
 
@@ -311,9 +384,9 @@
       $row.find(".amount").val(withTax.toFixed(3));
     }
 
-    // ===============================
-    // TOTAL CALCULATION
-    // ===============================
+    /* =====================================================
+   TOTAL ITEM CALCULATION
+===================================================== */
     function calculateTotalAmount() {
       let total = 0;
       let totalWOT = 0;
@@ -329,34 +402,42 @@
 
       $("#total_amount").text(total.toFixed(3));
       $("#total_amount_wo_tax").text(totalWOT.toFixed(3));
+
+      // ✅ FIX: update tax
+      $("#total_tax_amount").text((total - totalWOT).toFixed(3));
+
+      // ✅ already correct
+      calculateTotalAmount_addt();
     }
 
-    // ===============================
-    // RECALCULATE ALL ROWS
-    // ===============================
+    /* =====================================================
+   RECALCULATE ALL
+===================================================== */
     function recalculateAll() {
       $(".item-row").each(function () {
         calculateRow($(this));
       });
+
       calculateTotalAmount();
     }
 
-    // ===============================
-    // INPUT CHANGE EVENTS
-    // ===============================
+    /* =====================================================
+   INPUT CHANGE EVENTS
+===================================================== */
     $(document).on(
       "input change",
       ".qty-input, .rate-input, .vat",
       function () {
         const $row = $(this).closest(".item-row");
+
         calculateRow($row);
         calculateTotalAmount();
       },
     );
 
-    // ===============================
-    // CHECKBOX CHANGE
-    // ===============================
+    /* =====================================================
+   CHECKBOX CHANGE
+===================================================== */
     $(document).on("change", ".item-check", function () {
       const $row = $(this).closest(".item-row");
 
@@ -369,18 +450,20 @@
       );
     });
 
-    // ===============================
-    // SELECT ALL
-    // ===============================
+    /* =====================================================
+   SELECT ALL
+===================================================== */
     $("#selectall").on("change", function () {
       $(".item-check").prop("checked", this.checked);
       recalculateAll();
     });
 
-    // ===============================
-    // EDIT MODE INITIAL LOAD
-    // ===============================
-    recalculateAll();
+    /* =====================================================
+   INITIAL LOAD
+===================================================== */
+    $(document).ready(function () {
+      recalculateAll();
+    });
   });
 </script>
 
