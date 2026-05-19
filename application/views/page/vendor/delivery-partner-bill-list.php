@@ -150,7 +150,7 @@
 
                                 <div class="row">
                                     <div class="form-group col-md-6">
-                                        <label>Customer <span class="text-red">*</span></label>
+                                        <label>Customer </label>
                                         <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="srch_customer_id" class="form-control" '); ?>
                                     </div>
                                     <div class="form-group col-md-6">
@@ -202,12 +202,12 @@
                                             id="custom_stamp_fee" class="form-control"
                                             placeholder="Custom Stamp Fee" value="" >
                                     </div>
-                                    <div class="form-group col-md-3">
+                                    <!-- <div class="form-group col-md-3">
                                         <label>Custom Bill Amount</label>
                                         <input type="number" step="any" name="custom_bill_amt"
                                             id="custom_bill_amt" class="form-control"
                                             placeholder="Custom Bill Amount" value="" >
-                                    </div>
+                                    </div> -->
                                     <div class="form-group col-md-3">
                                         <label>Custom Duty</label>
                                         <input type="number" step="any" name="custom_duty" id="custom_duty"
@@ -219,31 +219,36 @@
                                             id="custom_vat_amt" class="form-control"
                                             placeholder="Custom VAT Amount">
                                     </div> 
-                                    
-                                    
-                                </div>
-                                <div class="row">
                                     <div class="form-group col-md-3">
                                         <label>Total Amount <i class="text-sm">W/O DP Chrg & VAT</i> </label>
                                         <input type="number" step="any" name="tot_amt_wo_dp"
                                             id="tot_amt_wo_dp" class="form-control"
                                             placeholder="Total Amount W/O DP">
                                     </div>
+                                    
+                                </div>
+                                <div class="row">
+                                    
                                    <div class="form-group col-md-3">
                                         <label>DP Charges</label>
                                         <input type="number" step="any" name="dp_charges"
                                             id="dp_charges" class="form-control"
                                             placeholder="DP Charges" value="0">
                                     </div>
-                                    <div class="form-group col-md-3">
+                                    <!-- <div class="form-group col-md-3">
                                         <label>DP VAT %</label>
                                         <input type="number" step="any" name="dp_vat" id="dp_vat"
                                             class="form-control" placeholder="DP VAT">
-                                    </div>
+                                    </div> -->
                                     <div class="form-group col-md-3">
                                         <label>DP VAT Amt</label>
                                         <input type="number" step="any" name="dp_vat_amt" id="dp_vat_amt"
-                                            class="form-control" placeholder="DP VAT Amount" readonly>
+                                            class="form-control" placeholder="DP VAT Amount">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>DP Total Amt</label>
+                                        <input type="number" step="any" name="dp_total_amt" id="dp_total_amt"
+                                            class="form-control" placeholder="DP Total Amount" readonly>
                                     </div>
                                      <div class="form-group col-md-3">
                                         <label>Grand Total</label>
@@ -345,19 +350,19 @@
                                         <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('vat_payer_purchase_grp'), 'id="vat_payer_purchase_grp" class="form-control"'); ?>
                                     </div>
                                 </div>
-                                <div class="row">
+                                 <div class="row">
                                     <div class="form-group col-md-3">
                                         <label>Custom Stamp Fee</label>
                                         <input type="number" step="any" name="custom_stamp_fee"
                                             id="custom_stamp_fee" class="form-control"
                                             placeholder="Custom Stamp Fee" value="" >
                                     </div>
-                                    <div class="form-group col-md-3">
+                                    <!-- <div class="form-group col-md-3">
                                         <label>Custom Bill Amount</label>
                                         <input type="number" step="any" name="custom_bill_amt"
                                             id="custom_bill_amt" class="form-control"
                                             placeholder="Custom Bill Amount" value="" >
-                                    </div>
+                                    </div> -->
                                     <div class="form-group col-md-3">
                                         <label>Custom Duty</label>
                                         <input type="number" step="any" name="custom_duty" id="custom_duty"
@@ -369,31 +374,36 @@
                                             id="custom_vat_amt" class="form-control"
                                             placeholder="Custom VAT Amount">
                                     </div> 
-                                    
-                                    
-                                </div>
-                                <div class="row">
                                     <div class="form-group col-md-3">
                                         <label>Total Amount <i class="text-sm">W/O DP Chrg & VAT</i> </label>
                                         <input type="number" step="any" name="tot_amt_wo_dp"
                                             id="tot_amt_wo_dp" class="form-control"
                                             placeholder="Total Amount W/O DP">
                                     </div>
+                                    
+                                </div>
+                                <div class="row">
+                                    
                                    <div class="form-group col-md-3">
                                         <label>DP Charges</label>
                                         <input type="number" step="any" name="dp_charges"
                                             id="dp_charges" class="form-control"
                                             placeholder="DP Charges" value="0">
                                     </div>
-                                    <div class="form-group col-md-3">
+                                    <!-- <div class="form-group col-md-3">
                                         <label>DP VAT %</label>
                                         <input type="number" step="any" name="dp_vat" id="dp_vat"
                                             class="form-control" placeholder="DP VAT">
-                                    </div>
+                                    </div> -->
                                     <div class="form-group col-md-3">
                                         <label>DP VAT Amt</label>
                                         <input type="number" step="any" name="dp_vat_amt" id="dp_vat_amt"
-                                            class="form-control" placeholder="DP VAT Amount" readonly>
+                                            class="form-control" placeholder="DP VAT Amount">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>DP Total Amt</label>
+                                        <input type="number" step="any" name="dp_total_amt" id="dp_total_amt"
+                                            class="form-control" placeholder="DP Total Amount" readonly>
                                     </div>
                                      <div class="form-group col-md-3">
                                         <label>Grand Total</label>
@@ -408,7 +418,7 @@
                                         <label class="radio-inline"><input type="radio" name="status" value="InActive">
                                             InActive</label>
                                     </div> 
-                                </div>  
+                                </div>   
                                  
                             </div>
                             <div class="modal-footer">
