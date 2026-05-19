@@ -354,17 +354,25 @@
       const srch_vendor_po_id = $(this).val();
       const $container = $("#item_container");
       $container.empty();
+      $("#tb_addt_chrg_list").empty();
+      $("#div_addt_chrg").hide();
 
-      if (!srch_vendor_po_id) return;
+      if (!srch_vendor_po_id) {
+        calculateTotalAmount();
+        return;
+      }
 
       $.ajax({
-        url: "<?= site_url('vendor/get_vendor_pur_inward_item_load'); ?>",
+        url: "<?= site_url('vendor/get_vendor_po_data_load_bill'); ?>",
         type: "POST",
         data: { srch_vendor_po_id: srch_vendor_po_id },
         dataType: "json",
 
         success: function (res) {
-          if (!res || res.length === 0) {
+          const items = res.items || [];
+          const addt_chrg_list = res.addt_chrg_list || [];
+
+          if (!items || items.length === 0) {
             $container.html(`
             <tr>
               <td colspan="8" class="text-center text-danger">
@@ -372,10 +380,11 @@
               </td>
             </tr>
           `);
+            calculateTotalAmount();
             return;
           }
 
-          $.each(res, function (i, row) {
+          $.each(items, function (i, row) {
             // default values
             const qty = parseFloat(row.qty) || 0;
             const rate = parseFloat(row.rate) || 0;
@@ -433,8 +442,6 @@
                   name="conversion_rate[]"
                   class="form-control conversion_rate"
                   value="1"> 
-                
-                
               </td>
               <td>
                 <input type="number"
@@ -442,18 +449,6 @@
                   name="act_amt[]"
                   class="form-control act_amt"
                   value="" readonly>
-                <!--<i class="text-sm">Duty %</i>
-                <input type="hidden"
-                  step="any"
-                  name="duty[]"
-                  class="form-control duty"
-                  value="0">
-                  <i class="text-sm">Duty Amt</i>
-                  <input type="hidden"
-                    step="any"
-                    name="duty_amount[]"
-                    class="form-control duty_amount"
-                    value="0" readonly>-->
               </td>
               <td>
                   <input type="number"
@@ -482,8 +477,60 @@
             $container.append(html);
           });
 
+          // Render Additional Charges
+          if (addt_chrg_list && addt_chrg_list.length > 0) {
+            $("#div_addt_chrg").show();
+            $.each(addt_chrg_list, function (i, row) {
+              const vendor_po_addtchrg_id = row.vendor_po_addtchrg_id;
+              const type_id = row.addt_charges_type_id;
+              const type_name = row.addt_charges_type_name || "";
+              const amt = parseFloat(row.addt_charges_amt) || 0;
+              const vat = parseFloat(row.addt_charges_vat) || 0;
+              const vat_amt = parseFloat(row.addt_charges_vat_amt) || 0;
+              const tot_amt = parseFloat(row.addt_charges_tot_amt) || 0;
+
+              const html_addt = `
+                <tr>
+                  <td>
+                    <input type="checkbox" class="chk_vendor_po_addtchrg_id"
+                      id="chk_vendor_po_addtchrg_id${vendor_po_addtchrg_id}"
+                      name="chk_vendor_po_addtchrg_id[]"
+                      value="${vendor_po_addtchrg_id}" checked>
+                  </td>
+                  <td>
+                    <input type="hidden" class="form-control addt_charges_type_id"
+                      name="addt_charges_type_id[${vendor_po_addtchrg_id}]"
+                      value="${type_id}">
+                    <label for="chk_vendor_po_addtchrg_id${vendor_po_addtchrg_id}">${type_name}</label>
+                  </td>
+                  <td>
+                    <input type="number" step="any" class="form-control addt_charges_amt"
+                      name="addt_charges_amt[${vendor_po_addtchrg_id}]"
+                      value="${amt.toFixed(3)}">
+                  </td>
+                  <td>
+                    <input type="number" step="any" class="form-control addt_charges_vat"
+                      name="addt_charges_vat[${vendor_po_addtchrg_id}]"
+                      value="${vat.toFixed(2)}">
+                  </td>
+                  <td>
+                    <input type="number" step="any" class="form-control addt_charges_vat_amt"
+                      name="addt_charges_vat_amt[${vendor_po_addtchrg_id}]"
+                      value="${vat_amt.toFixed(3)}" readonly>
+                  </td>
+                  <td>
+                    <input type="number" step="any" class="form-control addt_charges_tot_amt"
+                      name="addt_charges_tot_amt[${vendor_po_addtchrg_id}]"
+                      value="${tot_amt.toFixed(3)}" readonly>
+                  </td>
+                </tr>
+              `;
+              $("#tb_addt_chrg_list").append(html_addt);
+            });
+          }
+
           $(".conversion_rate").change();
-          //calculateTotalAmount();
+          $("#tb_addt_chrg_list .chk_vendor_po_addtchrg_id").trigger("change");
         },
 
         error: function () {
@@ -491,6 +538,70 @@
         },
       });
     });
+
+    // Additional charges enable/disable
+    $(document).on("change", ".chk_vendor_po_addtchrg_id", function () {
+      let row = $(this).closest("tr");
+
+      if ($(this).is(":checked")) {
+        row
+          .find(
+            ".addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt",
+          )
+          .prop("disabled", false);
+      } else {
+        row
+          .find(
+            ".addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt",
+          )
+          .prop("disabled", true)
+          .val("0.000"); // clear values
+      }
+
+      calculateTotalAmount_addt();
+    });
+
+    // Additional charges input change
+    $(document).on(
+      "input",
+      ".addt_charges_amt, .addt_charges_vat",
+      function () {
+        let row = $(this).closest("tr");
+
+        let amt = parseFloat(row.find(".addt_charges_amt").val()) || 0;
+        let vat = parseFloat(row.find(".addt_charges_vat").val()) || 0;
+
+        let vat_amt = (amt * vat) / 100;
+        let total = amt + vat_amt;
+
+        row.find(".addt_charges_vat_amt").val(vat_amt.toFixed(3));
+        row.find(".addt_charges_tot_amt").val(total.toFixed(3));
+
+        calculateTotalAmount_addt();
+      },
+    );
+
+    function calculateTotalAmount_addt() {
+      let addt_wo_tax = 0;
+      let addt_w_tax = 0;
+
+      $(".chk_vendor_po_addtchrg_id:checked").each(function () {
+        let row = $(this).closest("tr");
+
+        addt_wo_tax += parseFloat(row.find(".addt_charges_amt").val()) || 0;
+        addt_w_tax += parseFloat(row.find(".addt_charges_tot_amt").val()) || 0;
+      });
+
+      let item_wo_tax = parseFloat($("#total_amount_wo_tax").val()) || 0;
+      let item_w_tax = parseFloat($("#total_amount").val()) || 0;
+
+      let final_wo_tax = item_wo_tax + addt_wo_tax;
+      let final_w_tax = item_w_tax + addt_w_tax;
+
+      $("#total_amount_wo_tax_addt").text(final_wo_tax.toFixed(3));
+      $("#total_amount_addt").text(final_w_tax.toFixed(3));
+      $("#total_tax_amount_addt").text((final_w_tax - final_wo_tax).toFixed(3));
+    }
 
     // Form submit validation
     $("#frmadd").on("submit", function () {
@@ -620,7 +731,7 @@
 
       $("#total_amount_after_convert").val((bf_c_amt * c_rate).toFixed(3)); 
 
-
+      calculateTotalAmount_addt();
     }
 
 

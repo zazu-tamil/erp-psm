@@ -504,6 +504,94 @@
 
                         </fieldset>
 
+                        <div id="div_addt_chrg">
+                            <fieldset style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px;">
+                                <legend class="text-light-blue"><i class="fa fa-list"></i> Additional Charges (If any)</legend>
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Addt.Charges Type</th>
+                                            <th>Addt.Charges Amt</th>
+                                            <th>VAT %</th>
+                                            <th>VAT Amt</th>
+                                            <th>Total Amt</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tb_addt_chrg_list">
+                                        <?php if (!empty($addt_charges_list)): ?>
+                                        <?php foreach($addt_charges_list as $row): ?>
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" class="chk_vendor_po_addtchrg_id"
+                                                    id="chk_vendor_po_addtchrg_id<?php echo $row['vendor_po_addtchrg_id']; ?>"
+                                                    name="chk_vendor_po_addtchrg_id[]"
+                                                    value="<?php echo $row['vendor_po_addtchrg_id']; ?>"
+                                                    <?php echo (!empty($row['vendor_purchase_invoice_addtchrg_id'])) ? 'checked' : ''; ?>>
+                                            </td>
+                                            <td>
+                                                <input type="hidden" class="form-control addt_charges_type_id"
+                                                    name="addt_charges_type_id[<?php echo $row['vendor_po_addtchrg_id']; ?>]"
+                                                    value="<?php echo $row['addt_charges_type_id']; ?>">
+                                                <input type="hidden" class="form-control vendor_purchase_invoice_addtchrg_id"
+                                                    name="vendor_purchase_invoice_addtchrg_id[<?php echo $row['vendor_po_addtchrg_id']; ?>]"
+                                                    value="<?php echo $row['vendor_purchase_invoice_addtchrg_id'] ?? ''; ?>">
+                                                <label for="chk_vendor_po_addtchrg_id<?php echo $row['vendor_po_addtchrg_id']; ?>"><?php echo $row['addt_charges_type_name']; ?></label>
+                                            </td>
+                                            <td>
+                                                <input type="number" step="any" class="form-control addt_charges_amt"
+                                                    name="addt_charges_amt[<?php echo $row['vendor_po_addtchrg_id']; ?>]"
+                                                    value="<?php echo number_format($row['addt_charges_amt'], 3, '.', ''); ?>">
+                                            </td>
+                                            <td>
+                                                <input type="number" step="any" class="form-control addt_charges_vat"
+                                                    name="addt_charges_vat[<?php echo $row['vendor_po_addtchrg_id']; ?>]"
+                                                    value="<?php echo number_format($row['addt_charges_vat'], 2, '.', ''); ?>">
+                                            </td>
+                                            <td>
+                                                <input type="number" step="any" class="form-control addt_charges_vat_amt"
+                                                    name="addt_charges_vat_amt[<?php echo $row['vendor_po_addtchrg_id']; ?>]"
+                                                    value="<?php echo number_format($row['addt_charges_vat_amt'], 3, '.', ''); ?>" readonly>
+                                            </td>
+                                            <td>
+                                                <input type="number" step="any" class="form-control addt_charges_tot_amt"
+                                                    name="addt_charges_tot_amt[<?php echo $row['vendor_po_addtchrg_id']; ?>]"
+                                                    value="<?php echo number_format($row['addt_charges_tot_amt'], 3, '.', ''); ?>" readonly>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </fieldset>
+
+                            <fieldset style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px;">
+                                <legend>Total Amount Including Additional Charges</legend>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <h4 class="text-red" style="margin-top: 25px;">Total Inc Addt Charges</h4>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group total-box shadow-sm">
+                                            <label>Total Amount WO Tax</label>
+                                            <span class="form-control text-right" style="background: #eee; font-weight: bold; height: 34px; line-height: 20px; display: block; padding: 6px 12px;" id="total_amount_wo_tax_addt">0.000</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group total-box shadow-sm">
+                                            <label>Total Tax Amount</label>
+                                            <span class="form-control text-right" style="background: #eee; font-weight: bold; height: 34px; line-height: 20px; display: block; padding: 6px 12px;" id="total_tax_amount_addt">0.000</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group total-box shadow-sm">
+                                            <label>Total Amount With Tax</label>
+                                            <span class="form-control text-right" style="background: #eee; font-weight: bold; height: 34px; line-height: 20px; display: block; padding: 6px 12px;" id="total_amount_addt">0.000</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
 
                         <fieldset
                             style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px; display:none;">
@@ -904,7 +992,68 @@ $(document).ready(function() {
         $("#total_convert_amount").val(c_rate.toFixed(4)); 
 
         $("#total_amount_after_convert").val((bf_c_amt * c_rate).toFixed(3));     
+
+        calculateTotalAmount_addt();
     }
+
+
+    // Additional charges enable/disable
+    $(document).on("change", ".chk_vendor_po_addtchrg_id", function () {
+        let row = $(this).closest("tr");
+
+        if ($(this).is(":checked")) {
+            row.find(".addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt").prop("disabled", false);
+        } else {
+            row.find(".addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt")
+                .prop("disabled", true)
+                .val("0.000");
+        }
+
+        calculateTotalAmount_addt();
+    });
+
+    // Additional charges input change
+    $(document).on("input", ".addt_charges_amt, .addt_charges_vat", function () {
+        let row = $(this).closest("tr");
+
+        let amt = parseFloat(row.find(".addt_charges_amt").val()) || 0;
+        let vat = parseFloat(row.find(".addt_charges_vat").val()) || 0;
+
+        let vat_amt = (amt * vat) / 100;
+        let total = amt + vat_amt;
+
+        row.find(".addt_charges_vat_amt").val(vat_amt.toFixed(3));
+        row.find(".addt_charges_tot_amt").val(total.toFixed(3));
+
+        calculateTotalAmount_addt();
+    });
+
+    function calculateTotalAmount_addt() {
+        let addt_wo_tax = 0;
+        let addt_w_tax = 0;
+
+        $(".chk_vendor_po_addtchrg_id:checked").each(function () {
+            let row = $(this).closest("tr");
+
+            addt_wo_tax += parseFloat(row.find(".addt_charges_amt").val()) || 0;
+            addt_w_tax += parseFloat(row.find(".addt_charges_tot_amt").val()) || 0;
+        });
+
+        let item_wo_tax = parseFloat($("#total_amount_wo_tax").val()) || 0;
+        let item_w_tax = parseFloat($("#total_amount").val()) || 0;
+
+        let final_wo_tax = item_wo_tax + addt_wo_tax;
+        let final_w_tax = item_w_tax + addt_w_tax;
+
+        $("#total_amount_wo_tax_addt").text(final_wo_tax.toFixed(3));
+        $("#total_amount_addt").text(final_w_tax.toFixed(3));
+        $("#total_tax_amount_addt").text((final_w_tax - final_wo_tax).toFixed(3));
+    }
+
+    // Trigger on page load
+    setTimeout(function() {
+        $("#tb_addt_chrg_list .chk_vendor_po_addtchrg_id").trigger("change");
+    }, 100);
 
 
     $("#frmadd_dp").on("submit", function (e) {

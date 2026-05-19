@@ -354,6 +354,52 @@
 
                         </fieldset>
 
+                        <div id="div_addt_chrg" style="display:none;">
+                            <fieldset style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px;">
+                                <legend class="text-light-blue"><i class="fa fa-list"></i> Additional Charges (If any)</legend>
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Addt.Charges Type</th>
+                                            <th>Addt.Charges Amt</th>
+                                            <th>VAT %</th>
+                                            <th>VAT Amt</th>
+                                            <th>Total Amt</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tb_addt_chrg_list">
+                                    </tbody>
+                                </table>
+                            </fieldset>
+
+                            <fieldset style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px;">
+                                <legend>Total Amount Including Additional Charges</legend>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <h4 class="text-red" style="margin-top: 25px;">Total Inc Addt Charges</h4>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group total-box shadow-sm">
+                                            <label>Total Amount WO Tax</label>
+                                            <span class="form-control text-right" style="background: #eee; font-weight: bold; height: 34px; line-height: 20px; display: block; padding: 6px 12px;" id="total_amount_wo_tax_addt">0.000</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group total-box shadow-sm">
+                                            <label>Total Tax Amount</label>
+                                            <span class="form-control text-right" style="background: #eee; font-weight: bold; height: 34px; line-height: 20px; display: block; padding: 6px 12px;" id="total_tax_amount_addt">0.000</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group total-box shadow-sm">
+                                            <label>Total Amount With Tax</label>
+                                            <span class="form-control text-right" style="background: #eee; font-weight: bold; height: 34px; line-height: 20px; display: block; padding: 6px 12px;" id="total_amount_addt">0.000</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
 
                         <fieldset
                             style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px; display:none;">
