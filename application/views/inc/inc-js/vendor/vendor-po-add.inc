@@ -344,7 +344,7 @@
         dataType: "json",
         data: { srch_vendor_quote_id: srch_vendor_quote_id },
         success: function (res) {
-          console.log("Quotation data:", res);
+          //console.log("Quotation data:", res);
 
           // Additional Charges
           if (res.addt_chrg_list && res.addt_chrg_list.length > 0) {
@@ -428,7 +428,7 @@
                                 value="${rowIndex}"
                                 checked>
                             <input type="hidden" name="vendor_po_item_id[${rowIndex}]" value="">
-                            <input type="hidden" name="vendor_rate_enquiry_id[${rowIndex}]" value="${row.vendor_rate_enquiry_id || ""}">
+                            <input type="hidden" name="vendor_rate_enquiry_id" value="${row.vendor_rate_enquiry_id || ""}">
                             <input type="hidden" name="vendor_rate_enquiry_item_id[${rowIndex}]" value="${row.vendor_rate_enquiry_item_id || ""}">
                             <input type="hidden" name="vendor_quote_item_id[${rowIndex}]" value="${row.vendor_quote_item_id || ""}">
                         </td>
