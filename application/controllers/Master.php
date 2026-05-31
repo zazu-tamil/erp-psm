@@ -1995,5 +1995,7 @@ class Master extends CI_Controller
         $this->load->view('page/master/company-bank-list', $data);
     }
 
+    
+
 }
 

@@ -151,7 +151,16 @@
                             <fieldset
                                 style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px;">
                                 <legend class="text-info">For Purchase NBR - VAT Filing </legend>
-
+                                <div class="col-md-4">
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" name="only_accounting_entry"
+                                                id="only_accounting_entry" value="1"
+                                                <?php echo ($header['only_accounting_entry'] == 1) ? 'checked' : ''; ?>>
+                                            Only For Accounting Entry (Not For VAT Filing)
+                                        </label>
+                                    </div>
+                                </div>
                                 <div class="form-group col-md-6">
                                     <label>VAT Payer Purchase</label>
                                     <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, $header['vat_payer_purchase_grp'], 'id="vat_payer_purchase_grp" class="form-control" required'); ?>

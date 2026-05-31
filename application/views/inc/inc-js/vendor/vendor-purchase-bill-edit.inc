@@ -18,6 +18,16 @@
     });
 
     $("#toggle_dp_bill").trigger("change");
+
+    $('#only_accounting_entry').change(function () {
+        if ($(this).is(":checked")) {
+            $('#vat_payer_purchase_grp').prop('disabled', true);
+        } else {
+            $('#vat_payer_purchase_grp').prop('disabled', false);
+        }
+    }); 
+
+    $('#only_accounting_entry').change();
     
   </script>
   <script>

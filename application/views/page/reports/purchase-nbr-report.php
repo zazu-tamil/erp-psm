@@ -44,6 +44,11 @@
                         <!-- /.input group -->
                     </div>
 
+                    <div class="form-group col-md-3">
+                        <label>VAT Payer Purchase Category</label> 
+                        <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('vat_payer_purchase_grp',$vat_payer_purchase_grp),'class="form-control" id="vat_payer_purchase_grp"'); ?> 
+                    </div>
+
                     <div class="form-group col-md-2 text-left">
                         <br />
                         <button class="btn btn-success" name="btn_show" value="Show'"><i class="fa fa-search"></i>

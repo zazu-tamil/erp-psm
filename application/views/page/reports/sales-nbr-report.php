@@ -40,8 +40,11 @@
                             </div>
                             <input type="date" class="form-control pull-right " id="srch_to_date" name="srch_to_date"
                                 value="<?php echo set_value('srch_to_date',$srch_to_date);?>" required="true">
-                        </div>
-                        <!-- /.input group -->
+                        </div> 
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label>VAT Payer Sales Category</label> 
+                                <?php echo form_dropdown('vat_payer_sales_grp', $vat_payer_sales_opt, set_value('vat_payer_sales_grp',$vat_payer_sales_grp),'class="form-control" id="vat_payer_sales_grp"'); ?> 
                     </div>
 
                     <div class="form-group col-md-2 text-left">
