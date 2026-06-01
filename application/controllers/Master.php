@@ -1995,7 +1995,145 @@ class Master extends CI_Controller
         $this->load->view('page/master/company-bank-list', $data);
     }
 
-    
+    public function vendor_opening_balance_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        if (
+            $this->session->userdata(SESS_HD . 'level') != 'Admin'
+            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
+        ) {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+        $data['js'] = 'master/vendor-opening-balance-list.inc';
+
+        if ($this->input->post('mode') == 'Add') {
+            $ins = array(
+                'vendor_id' => $this->input->post('vendor_id'),
+                'opening_date' => $this->input->post('opening_date'),
+                'balance_type' => $this->input->post('balance_type'),
+                'opening_amount' => $this->input->post('opening_amount'),
+                'remarks' => $this->input->post('remarks'),
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_at' => date('Y-m-d H:i:s')
+            );
+
+            // Handle unique constraint gracefully
+            $exists = $this->db->get_where('vendor_opening_balance_info', ['vendor_id' => $ins['vendor_id']])->num_rows();
+            if ($exists > 0) {
+                $this->session->set_flashdata('error', 'Opening balance already exists for this vendor!');
+            } else {
+                $this->db->insert('vendor_opening_balance_info', $ins);
+                $this->session->set_flashdata('success', 'Opening balance added successfully.');
+            }
+            redirect('vendor-opening-balance-list');
+        }
+
+        if ($this->input->post('mode') == 'Edit') {
+            $upd = array(
+                'vendor_id' => $this->input->post('vendor_id'),
+                'opening_date' => $this->input->post('opening_date'),
+                'balance_type' => $this->input->post('balance_type'),
+                'opening_amount' => $this->input->post('opening_amount'),
+                'remarks' => $this->input->post('remarks'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_at' => date('Y-m-d H:i:s')
+            );
+
+            $this->db->where('opening_id', $this->input->post('opening_id'));
+            $this->db->update('vendor_opening_balance_info', $upd);
+            $this->session->set_flashdata('success', 'Opening balance updated successfully.');
+            redirect('vendor-opening-balance-list');
+        }
+
+        // Dropdown of active vendors
+        $sql = "
+            SELECT vendor_id, vendor_name 
+            FROM vendor_info 
+            WHERE status = 'Active' 
+            ORDER BY vendor_name ASC";
+        $query = $this->db->query($sql);
+        $data['vendor_opt'] = [];
+        foreach ($query->result_array() as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+        }
+
+        // Handle search filter reset
+        if ($this->input->post('btn_reset')) {
+            $this->session->unset_userdata('srch_vendor_id');
+            redirect('vendor-opening-balance-list');
+        }
+
+        // Handle search filter submission and persistent session state
+        if ($this->input->post('srch_vendor_id') !== NULL) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->input->post('srch_vendor_id');
+            $this->session->set_userdata('srch_vendor_id', $srch_vendor_id);
+        } elseif ($this->session->userdata('srch_vendor_id') !== NULL) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->session->userdata('srch_vendor_id');
+        } else {
+            $data['srch_vendor_id'] = $srch_vendor_id = '';
+        }
+
+        $this->load->library('pagination');
+
+        $this->db->from('vendor_opening_balance_info');
+        if (!empty($srch_vendor_id)) {
+            $this->db->where('vendor_id', $srch_vendor_id);
+        }
+        $data['total_records'] = $cnt = $this->db->count_all_results();
+
+        $data['sno'] = $this->uri->segment(2, 0);
+
+        $config['base_url'] = trim(site_url('vendor-opening-balance-list') . '/' . $this->uri->segment(2, 0));
+        $config['total_rows'] = $cnt;
+        $config['per_page'] = 50;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '<span class="sr-only">(current)</span></a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = "Prev";
+        $config['next_link'] = "Next";
+        $this->pagination->initialize($config);
+
+        $where = "1=1";
+        if (!empty($srch_vendor_id)) {
+            $where .= " AND a.vendor_id = " . $this->db->escape($srch_vendor_id);
+        }
+
+        $sql = "
+            SELECT a.*, b.vendor_name
+            FROM vendor_opening_balance_info a
+            LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+            WHERE " . $where . "
+            ORDER BY a.opening_id DESC
+            limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
+        ";
+
+        $data['record_list'] = array();
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['record_list'][] = $row;
+        }
+
+        $data['pagination'] = $this->pagination->create_links();
+
+        $this->load->view('page/master/vendor-opening-balance-list', $data);
+    }
 
 }
 

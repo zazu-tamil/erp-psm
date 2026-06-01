@@ -305,3 +305,10 @@ $route['in-stock-item-list'] = 'tender/in_stock_item_list';
 $route['in-stock-item-list/(:num)'] = 'tender/in_stock_item_list/$1';
 
 $route['in-stock-item-report'] = 'reports/in_stock_item_report';
+
+
+$route['vendor-statement-report'] = 'reports/vendor_statement_report'; 
+$route['get-vendor-opening-balance'] = 'reports/get_vendor_opening_balance_ajax';
+
+$route['vendor-opening-balance-list'] = 'master/vendor_opening_balance_list';
+$route['vendor-opening-balance-list/(:num)'] = 'master/vendor_opening_balance_list/$1';

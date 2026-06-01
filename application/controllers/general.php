@@ -407,6 +407,20 @@ class General extends CI_Controller
             }
 
         }
+        if ($table == 'vendor_opening_balance_info') {
+            $query = $this->db->query(" 
+                select 
+                a.* 
+                from vendor_opening_balance_info as a  
+                where a.opening_id = '" . $rec_id . "'
+            ");
+            $rec_list = array();
+
+            foreach ($query->result_array() as $row) {
+                $rec_list = $row;
+            }
+
+        }
 
         $this->db->close();
 
@@ -560,6 +574,7 @@ class General extends CI_Controller
             $this->db->update('vendor_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
         }
+        
         if ($table == 'customer_info') {
             $this->db->where('customer_id', $rec_id);
             $this->db->update('customer_info', array('status' => 'Delete'));
@@ -583,6 +598,11 @@ class General extends CI_Controller
         if ($table == 'in_stock_item_info') {
             $this->db->where('in_stock_item_id', $rec_id);
             $this->db->update('in_stock_item_info', array('status' => 'Delete'));
+            echo "Record Deleted Successfully";
+        }
+        if ($table == 'vendor_opening_balance_info') {
+            $this->db->where('opening_id', $rec_id);
+            $this->db->delete('vendor_opening_balance_info');
             echo "Record Deleted Successfully";
         }
 

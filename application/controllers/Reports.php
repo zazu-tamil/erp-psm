@@ -24,7 +24,7 @@ class Reports extends CI_Controller
             $data['vat_payer_sales_grp'] = $vat_payer_sales_grp = $this->input->post('vat_payer_sales_grp');
         } else {
             $data['vat_payer_sales_grp'] = $vat_payer_sales_grp = '';
-        }   
+        }
 
         $data['record_list'] = [];
 
@@ -134,9 +134,9 @@ class Reports extends CI_Controller
             $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
         }
 
-        if(isset($_POST['vat_payer_purchase_grp'])){
-           $data['vat_payer_purchase_grp'] = $vat_payer_purchase_grp = $this->input->post('vat_payer_purchase_grp');
-        }else{
+        if (isset($_POST['vat_payer_purchase_grp'])) {
+            $data['vat_payer_purchase_grp'] = $vat_payer_purchase_grp = $this->input->post('vat_payer_purchase_grp');
+        } else {
             $data['vat_payer_purchase_grp'] = $vat_payer_purchase_grp = '';
         }
 
@@ -301,7 +301,7 @@ class Reports extends CI_Controller
          order by c.s_order asc , c.vat_filing_head_name ,  a1.inv_date ,  a1.v_type 
         ";
 
-        
+
         $query = $this->db->query($sql);
         $rec = $query->result_array();
 
@@ -315,7 +315,7 @@ class Reports extends CI_Controller
         $data['record_list'] = $grouped;
 
 
-         $sql = "
+        $sql = "
             SELECT 
             vat_filing_head_name 
             FROM vat_filing_head_info 
@@ -1651,6 +1651,308 @@ class Reports extends CI_Controller
         $this->load->view('page/reports/in-stock-item-report', $data);
     }
 
-}
 
-?>
+
+
+    public function vendor_statement_report()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data['title'] = 'Vendor Statement Report';
+        $data['js'] = 'reports/reports.inc';
+
+        // Fetch inputs from either GET or POST
+        $vendor_id = $this->input->get_post('vendor_id');
+        $from_date = $this->input->get_post('from_date');
+        $to_date = $this->input->get_post('to_date');
+
+        // Store / Retrieve from session for sticky behavior
+        if ($vendor_id !== null) {
+            $this->session->set_userdata('stmt_vendor_id', $vendor_id);
+        } else {
+            $vendor_id = $this->session->userdata('stmt_vendor_id') ?? '';
+        }
+
+        if ($from_date !== null) {
+            $this->session->set_userdata('stmt_from_date', $from_date);
+        } else {
+            $from_date = $this->session->userdata('stmt_from_date') ?? '';
+        }
+
+        if ($to_date !== null) {
+            $this->session->set_userdata('stmt_to_date', $to_date);
+        } else {
+            $to_date = $this->session->userdata('stmt_to_date') ?? '';
+        }
+
+        $data['vendor_id'] = $vendor_id;
+        $data['from_date'] = $from_date;
+        $data['to_date'] = $to_date;
+
+        // Fetch active vendors mapped as 'id' and 'vendor_name' to perfectly match the user's view
+        $sql = "
+            SELECT vendor_id AS id, vendor_name 
+            FROM vendor_info 
+            WHERE status = 'Active' 
+            ORDER BY vendor_name ASC";
+        $query = $this->db->query($sql);
+        $data['vendors'] = $query->result_array();
+
+        $data['opening_balance'] = 0.000;
+        $data['record_list'] = [];
+        $data['op_exists'] = false;
+        $data['op_details'] = null;
+
+        $esc_vendor = !empty($vendor_id) ? $this->db->escape_str($vendor_id) : '';
+
+        if (!empty($vendor_id)) {
+            // Check if vendor opening balance is configured
+            $op_query = $this->db->get_where('vendor_opening_balance_info', ['vendor_id' => $vendor_id]);
+            $op_exists = $op_query->num_rows() > 0;
+            $data['op_exists'] = $op_exists;
+
+            if ($op_exists) {
+                $op_row = $op_query->row_array();
+                $data['op_details'] = $op_row;
+                $op_date = $op_row['opening_date'];
+                $op_amount = (float)$op_row['opening_amount'];
+                $op_type = $op_row['balance_type'];
+                
+                $signed_op_amount = ($op_type === 'CR') ? $op_amount : -$op_amount;
+
+                // Adjust from_date if it is empty or prior to opening_date
+                if (empty($from_date) || $from_date < $op_date) {
+                    $from_date = $op_date;
+                    $data['from_date'] = $from_date;
+                }
+                $esc_from = $this->db->escape_str($from_date);
+                $esc_op = $this->db->escape_str($op_date);
+
+                // Calculate in-between purchases and payments from opening date to from_date
+                $purchase_sql = "
+                    SELECT IFNULL(SUM(total_amount), 0) AS total_purchases
+                    FROM (
+                        SELECT total_amount FROM vendor_purchase_invoice_info
+                        WHERE status = 'Active' AND vendor_id = '$esc_vendor' AND invoice_date >= '$esc_op' AND invoice_date < '$esc_from'
+                        
+                        UNION ALL
+                        
+                        SELECT tot_amt_with_tax AS total_amount FROM local_purchase_bill_info
+                        WHERE status = 'Active' AND vendor_id = '$esc_vendor' AND invoice_date >= '$esc_op' AND invoice_date < '$esc_from'
+                        
+                        UNION ALL
+                        
+                        SELECT g_total AS total_amount FROM dp_bill_info
+                        WHERE status = 'Active' AND vendor_id = '$esc_vendor' AND invoice_date >= '$esc_op' AND invoice_date < '$esc_from'
+                        
+                        UNION ALL
+                        
+                        SELECT customs_tot_amt AS total_amount FROM customs_bill_info
+                        WHERE status = 'Active' AND vendor_id = '$esc_vendor' AND invoice_date >= '$esc_op' AND invoice_date < '$esc_from'
+                    ) AS prev_purchases
+                ";
+                $p_query = $this->db->query($purchase_sql);
+                $p_row = $p_query->row_array();
+                $total_purchases = (float)($p_row['total_purchases'] ?? 0);
+
+                $payment_sql = "
+                    SELECT IFNULL(SUM(amount), 0) AS total_payments
+                    FROM vendor_payment_info
+                    WHERE status = 'Active' AND vendor_id = '$esc_vendor' AND payment_date >= '$esc_op' AND payment_date < '$esc_from'
+                ";
+                $pay_query = $this->db->query($payment_sql);
+                $pay_row = $pay_query->row_array();
+                $total_payments = (float)($pay_row['total_payments'] ?? 0);
+
+                $data['opening_balance'] = $signed_op_amount + $total_purchases - $total_payments;
+            } else {
+                $data['opening_balance'] = 0.000;
+            }
+        } else {
+            // General logic for "All Vendors" or when no vendor is selected
+            if (!empty($from_date)) {
+                $esc_from = $this->db->escape_str($from_date);
+
+                // Total Purchases before from_date
+                $purchase_sql = "
+                    SELECT IFNULL(SUM(total_amount), 0) AS total_purchases
+                    FROM (
+                        SELECT total_amount FROM vendor_purchase_invoice_info
+                        WHERE status = 'Active' AND invoice_date < '$esc_from'
+                        
+                        UNION ALL
+                        
+                        SELECT tot_amt_with_tax AS total_amount FROM local_purchase_bill_info
+                        WHERE status = 'Active' AND invoice_date < '$esc_from'
+                        
+                        UNION ALL
+                        
+                        SELECT g_total AS total_amount FROM dp_bill_info
+                        WHERE status = 'Active' AND invoice_date < '$esc_from'
+                        
+                        UNION ALL
+                        
+                        SELECT customs_tot_amt AS total_amount FROM customs_bill_info
+                        WHERE status = 'Active' AND invoice_date < '$esc_from'
+                    ) AS prev_purchases
+                ";
+                $p_query = $this->db->query($purchase_sql);
+                $p_row = $p_query->row_array();
+                $total_purchases = $p_row['total_purchases'] ?? 0;
+
+                // Total Payments before from_date
+                $payment_sql = "
+                    SELECT IFNULL(SUM(amount), 0) AS total_payments
+                    FROM vendor_payment_info
+                    WHERE status = 'Active' AND payment_date < '$esc_from'
+                ";
+                $pay_query = $this->db->query($payment_sql);
+                $pay_row = $pay_query->row_array();
+                $total_payments = $pay_row['total_payments'] ?? 0;
+
+                $data['opening_balance'] = $total_purchases - $total_payments;
+            }
+        }
+
+        // Re-escape just to make sure
+        $esc_from = !empty($from_date) ? $this->db->escape_str($from_date) : '';
+
+        // 2. Fetch all chronological transactions (Purchases & Payments) in range
+        $txn_sql = "
+            SELECT 
+                tr_date,
+                voucher_no,
+                description,
+                purchase_amt,
+                paid_amt,
+                type,
+                vendor_name
+            FROM (
+                SELECT 
+                    a.invoice_date AS tr_date,
+                    a.invoice_no AS voucher_no,
+                    'Purchase Invoice' AS description,
+                    a.total_amount AS purchase_amt,
+                    0.000 AS paid_amt,
+                    'purchase' AS type,
+                    v.vendor_name
+                FROM vendor_purchase_invoice_info a
+                LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
+                WHERE a.status = 'Active'
+                  " . (!empty($vendor_id) ? "AND a.vendor_id = '$esc_vendor'" : "") . "
+                  " . (!empty($from_date) ? "AND a.invoice_date >= '$esc_from'" : "") . "
+                  " . (!empty($to_date) ? "AND a.invoice_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
+                  
+                UNION ALL
+                
+                SELECT 
+                    a.invoice_date AS tr_date,
+                    a.invoice_no AS voucher_no,
+                    'Local Bill' AS description,
+                    a.tot_amt_with_tax AS purchase_amt,
+                    0.000 AS paid_amt,
+                    'purchase' AS type,
+                    v.vendor_name
+                FROM local_purchase_bill_info a
+                LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
+                WHERE a.status = 'Active'
+                  " . (!empty($vendor_id) ? "AND a.vendor_id = '$esc_vendor'" : "") . "
+                  " . (!empty($from_date) ? "AND a.invoice_date >= '$esc_from'" : "") . "
+                  " . (!empty($to_date) ? "AND a.invoice_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
+                  
+                UNION ALL
+                
+                SELECT 
+                    a.invoice_date AS tr_date,
+                    a.invoice_no AS voucher_no,
+                    'Delivery Bill' AS description,
+                    a.g_total AS purchase_amt,
+                    0.000 AS paid_amt,
+                    'purchase' AS type,
+                    v.vendor_name
+                FROM dp_bill_info a
+                LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
+                WHERE a.status = 'Active'
+                  " . (!empty($vendor_id) ? "AND a.vendor_id = '$esc_vendor'" : "") . "
+                  " . (!empty($from_date) ? "AND a.invoice_date >= '$esc_from'" : "") . "
+                  " . (!empty($to_date) ? "AND a.invoice_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
+                  
+                UNION ALL
+                
+                SELECT 
+                    a.invoice_date AS tr_date,
+                    a.invoice_no AS voucher_no,
+                    'Customer Bill' AS description,
+                    a.customs_tot_amt AS purchase_amt,
+                    0.000 AS paid_amt,
+                    'purchase' AS type,
+                    v.vendor_name
+                FROM customs_bill_info a
+                LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
+                WHERE a.status = 'Active'
+                  " . (!empty($vendor_id) ? "AND a.vendor_id = '$esc_vendor'" : "") . "
+                  " . (!empty($from_date) ? "AND a.invoice_date >= '$esc_from'" : "") . "
+                  " . (!empty($to_date) ? "AND a.invoice_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
+                  
+                UNION ALL
+                
+                SELECT 
+                    a.payment_date AS tr_date,
+                    a.payment_no AS voucher_no,
+                    'Vendor Payment' AS description,
+                    0.000 AS purchase_amt,
+                    a.amount AS paid_amt,
+                    'payment' AS type,
+                    v.vendor_name
+                FROM vendor_payment_info a
+                LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
+                WHERE a.status = 'Active'
+                  " . (!empty($vendor_id) ? "AND a.vendor_id = '$esc_vendor'" : "") . "
+                  " . (!empty($from_date) ? "AND a.payment_date >= '$esc_from'" : "") . "
+                  " . (!empty($to_date) ? "AND a.payment_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
+            ) AS transactions
+            ORDER BY tr_date ASC, voucher_no ASC
+        ";
+        
+        $query = $this->db->query($txn_sql);
+        $data['record_list'] = $query->result_array();
+
+        $this->load->view('page/reports/vendor-statement-report', $data);
+    }
+
+    public function get_vendor_opening_balance_ajax()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        $vendor_id = $this->input->post('vendor_id');
+        if (empty($vendor_id)) {
+            echo json_encode(['status' => 'error', 'message' => 'Invalid Vendor ID']);
+            exit;
+        }
+
+        $query = $this->db->get_where('vendor_opening_balance_info', ['vendor_id' => $vendor_id]);
+        if ($query->num_rows() > 0) {
+            $row = $query->row_array();
+            echo json_encode([
+                'status' => 'success',
+                'exists' => true,
+                'opening_date' => $row['opening_date'],
+                'opening_amount' => $row['opening_amount'],
+                'balance_type' => $row['balance_type']
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'success',
+                'exists' => false
+            ]);
+        }
+        exit;
+    }
+
+}
+
