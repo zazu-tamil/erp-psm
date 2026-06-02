@@ -2043,13 +2043,23 @@ class Master extends CI_Controller
                 'updated_at' => date('Y-m-d H:i:s')
             );
 
-            $this->db->where('opening_id', $this->input->post('opening_id'));
-            $this->db->update('vendor_opening_balance_info', $upd);
-            $this->session->set_flashdata('success', 'Opening balance updated successfully.');
+            // Handle unique constraint on edit
+            $exists = $this->db->get_where('vendor_opening_balance_info', [
+                'vendor_id' => $upd['vendor_id'],
+                'opening_id !=' => $this->input->post('opening_id')
+            ])->num_rows();
+
+            if ($exists > 0) {
+                $this->session->set_flashdata('error', 'Opening balance already exists for the selected vendor!');
+            } else {
+                $this->db->where('opening_id', $this->input->post('opening_id'));
+                $this->db->update('vendor_opening_balance_info', $upd);
+                $this->session->set_flashdata('success', 'Opening balance updated successfully.');
+            }
             redirect('vendor-opening-balance-list');
         }
 
-        // Dropdown of active vendors
+        // Dropdown of active vendors (for edit and filter)
         $sql = "
             SELECT vendor_id, vendor_name 
             FROM vendor_info 
@@ -2059,6 +2069,19 @@ class Master extends CI_Controller
         $data['vendor_opt'] = [];
         foreach ($query->result_array() as $row) {
             $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+        }
+
+        // Dropdown of active vendors who do not have an opening balance yet (for add)
+        $sql_add = "
+            SELECT vendor_id, vendor_name 
+            FROM vendor_info 
+            WHERE status = 'Active' 
+            AND vendor_id NOT IN (SELECT vendor_id FROM vendor_opening_balance_info)
+            ORDER BY vendor_name ASC";
+        $query_add = $this->db->query($sql_add);
+        $data['vendor_opt_add'] = [];
+        foreach ($query_add->result_array() as $row) {
+            $data['vendor_opt_add'][$row['vendor_id']] = $row['vendor_name'];
         }
 
         // Handle search filter reset
@@ -2133,6 +2156,187 @@ class Master extends CI_Controller
         $data['pagination'] = $this->pagination->create_links();
 
         $this->load->view('page/master/vendor-opening-balance-list', $data);
+    }
+
+    public function customer_opening_balance_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        if (
+            $this->session->userdata(SESS_HD . 'level') != 'Admin'
+            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
+        ) {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+        // Auto-create customer_opening_balance_info if not exists
+        $this->db->query("
+            CREATE TABLE IF NOT EXISTS `customer_opening_balance_info` (
+              `opening_id` int(11) NOT NULL AUTO_INCREMENT,
+              `customer_id` int(11) NOT NULL,
+              `opening_date` date NOT NULL,
+              `balance_type` varchar(10) NOT NULL,
+              `opening_amount` decimal(15,3) NOT NULL,
+              `remarks` text DEFAULT NULL,
+              `created_by` int(11) DEFAULT NULL,
+              `created_at` datetime DEFAULT NULL,
+              `updated_by` int(11) DEFAULT NULL,
+              `updated_at` datetime DEFAULT NULL,
+              PRIMARY KEY (`opening_id`),
+              UNIQUE KEY `customer_id` (`customer_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        ");
+
+        $data['js'] = 'master/customer-opening-balance-list.inc';
+
+        if ($this->input->post('mode') == 'Add') {
+            $ins = array(
+                'customer_id' => $this->input->post('customer_id'),
+                'opening_date' => $this->input->post('opening_date'),
+                'balance_type' => $this->input->post('balance_type'),
+                'opening_amount' => $this->input->post('opening_amount'),
+                'remarks' => $this->input->post('remarks'),
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_at' => date('Y-m-d H:i:s')
+            );
+
+            // Handle unique constraint gracefully
+            $exists = $this->db->get_where('customer_opening_balance_info', ['customer_id' => $ins['customer_id']])->num_rows();
+            if ($exists > 0) {
+                $this->session->set_flashdata('error', 'Opening balance already exists for this customer!');
+            } else {
+                $this->db->insert('customer_opening_balance_info', $ins);
+                $this->session->set_flashdata('success', 'Opening balance added successfully.');
+            }
+            redirect('customer-opening-balance-list');
+        }
+
+        if ($this->input->post('mode') == 'Edit') {
+            $upd = array(
+                'customer_id' => $this->input->post('customer_id'),
+                'opening_date' => $this->input->post('opening_date'),
+                'balance_type' => $this->input->post('balance_type'),
+                'opening_amount' => $this->input->post('opening_amount'),
+                'remarks' => $this->input->post('remarks'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_at' => date('Y-m-d H:i:s')
+            );
+
+            // Handle unique constraint on edit
+            $exists = $this->db->get_where('customer_opening_balance_info', [
+                'customer_id' => $upd['customer_id'],
+                'opening_id !=' => $this->input->post('opening_id')
+            ])->num_rows();
+
+            if ($exists > 0) {
+                $this->session->set_flashdata('error', 'Opening balance already exists for the selected customer!');
+            } else {
+                $this->db->where('opening_id', $this->input->post('opening_id'));
+                $this->db->update('customer_opening_balance_info', $upd);
+                $this->session->set_flashdata('success', 'Opening balance updated successfully.');
+            }
+            redirect('customer-opening-balance-list');
+        }
+
+        // Dropdown of active customers (for edit and filter)
+        $sql = "
+            SELECT customer_id, customer_name 
+            FROM customer_info 
+            WHERE status = 'Active' 
+            ORDER BY customer_name ASC";
+        $query = $this->db->query($sql);
+        $data['customer_opt'] = [];
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
+        // Dropdown of active customers who do not have an opening balance yet (for add)
+        $sql_add = "
+            SELECT customer_id, customer_name 
+            FROM customer_info 
+            WHERE status = 'Active' 
+            AND customer_id NOT IN (SELECT customer_id FROM customer_opening_balance_info)
+            ORDER BY customer_name ASC";
+        $query_add = $this->db->query($sql_add);
+        $data['customer_opt_add'] = [];
+        foreach ($query_add->result_array() as $row) {
+            $data['customer_opt_add'][$row['customer_id']] = $row['customer_name'];
+        }
+
+        // Handle search filter reset
+        if ($this->input->post('btn_reset')) {
+            $this->session->unset_userdata('srch_customer_id');
+            redirect('customer-opening-balance-list');
+        }
+
+        // Handle search filter submission and persistent session state
+        if ($this->input->post('srch_customer_id') !== NULL) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
+            $this->session->set_userdata('srch_customer_id', $srch_customer_id);
+        } elseif ($this->session->userdata('srch_customer_id') !== NULL) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->session->userdata('srch_customer_id');
+        } else {
+            $data['srch_customer_id'] = $srch_customer_id = '';
+        }
+
+        $this->load->library('pagination');
+
+        $this->db->from('customer_opening_balance_info');
+        if (!empty($srch_customer_id)) {
+            $this->db->where('customer_id', $srch_customer_id);
+        }
+        $data['total_records'] = $cnt = $this->db->count_all_results();
+
+        $data['sno'] = $this->uri->segment(2, 0);
+
+        $config['base_url'] = trim(site_url('customer-opening-balance-list') . '/' . $this->uri->segment(2, 0));
+        $config['total_rows'] = $cnt;
+        $config['per_page'] = 50;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '<span class="sr-only">(current)</span></a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = "Prev";
+        $config['next_link'] = "Next";
+        $this->pagination->initialize($config);
+
+        $where = "1=1";
+        if (!empty($srch_customer_id)) {
+            $where .= " AND a.customer_id = " . $this->db->escape($srch_customer_id);
+        }
+
+        $sql = "
+            SELECT a.*, b.customer_name
+            FROM customer_opening_balance_info a
+            LEFT JOIN customer_info b ON a.customer_id = b.customer_id AND b.status = 'Active'
+            WHERE " . $where . "
+            ORDER BY a.opening_id DESC
+            limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
+        ";
+
+        $data['record_list'] = array();
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['record_list'][] = $row;
+        }
+
+        $data['pagination'] = $this->pagination->create_links();
+
+        $this->load->view('page/master/customer-opening-balance-list', $data);
     }
 
 }

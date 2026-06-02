@@ -1,6 +1,6 @@
 <?php
 // Define master menu pages
-$g_master = ['company-list', 'vendor-opening-balance-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list', 'customer-list', 'customer-contact-list', 'vendor-contact-list', 'currency-list', 'account-head-list', 'country-list', 'addt-charges-type-list', 'sub-account-head-list', 'account-head-for-list', 'voucher-type-list', 'opening-balance-list', 'settings', 'company-bank-list'];
+$g_master = ['company-list', 'vendor-opening-balance-list', 'customer-opening-balance-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list', 'customer-list', 'customer-contact-list', 'vendor-contact-list', 'currency-list', 'account-head-list', 'country-list', 'addt-charges-type-list', 'sub-account-head-list', 'account-head-for-list', 'voucher-type-list', 'opening-balance-list', 'settings', 'company-bank-list'];
 
 // Get current page
 $current_page = $this->uri->segment(1, 0);
@@ -363,7 +363,8 @@ $report_m_grp = [
     'tender-enquiry-summary-report',
     'customer-invoice-pending-report',
     'vendor-invoice-pending-report',
-    'vendor-statement-report'
+    'vendor-statement-report',
+    'customer-statement-report'
 ];
 ?>
 <li class="header">REPORTS</li>
@@ -381,7 +382,7 @@ $report_m_grp = [
 
     <ul class="treeview-menu">
         <li
-            class="treeview <?= in_array($current_page, ['sales-nbr-report', 'purchase-nbr-report', 'tender-enquiry-timeline', 'tender-enquiry-summary-report', 'customer-invoice-pending-report', 'vendor-invoice-pending-report', 'vendor-statement-report']) ? 'active' : '' ?>">
+            class="treeview <?= in_array($current_page, ['sales-nbr-report', 'purchase-nbr-report', 'tender-enquiry-timeline', 'tender-enquiry-summary-report', 'customer-invoice-pending-report', 'vendor-invoice-pending-report', 'vendor-statement-report', 'customer-statement-report']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-envelope"></i> Tender Info Report
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
@@ -413,11 +414,11 @@ $report_m_grp = [
                     </a>
                 </li>
 
-                <!-- <li class="<?= ($current_page === 'customer-statement-report') ? 'active' : '' ?>">
+                <li class="<?= ($current_page === 'customer-statement-report') ? 'active' : '' ?>">
                     <a href="<?= site_url('customer-statement-report') ?>">
                         <i class="fa fa-file-text"></i> Customer Statement Report
                     </a>
-                </li> -->
+                </li>
                 <li class="<?= ($current_page === 'vendor-statement-report') ? 'active' : '' ?>">
                     <a href="<?= site_url('vendor-statement-report') ?>">
                         <i class="fa fa-file-text"></i> Vendor Statement Report
@@ -685,7 +686,7 @@ $report_m_grp = [
         </li>
 
         <!-- Customer Info -->
-        <li class="treeview <?= in_array($current_page, ['customer-list', 'customer-contact-list']) ? 'active' : '' ?>">
+        <li class="treeview <?= in_array($current_page, ['customer-list', 'customer-contact-list', 'customer-opening-balance-list']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-address-book"></i> Customer Info
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
@@ -699,6 +700,11 @@ $report_m_grp = [
                 <li class="<?= ($current_page === 'customer-contact-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('customer-contact-list') ?>"><i class="fa fa-building"></i> Customer Contact
                         Info</a>
+                </li>
+
+                <li class="<?= ($current_page === 'customer-opening-balance-list') ? 'active' : '' ?>">
+                    <a href="<?= site_url('customer-opening-balance-list') ?>"><i class="fa fa-balance-scale"></i> Customer
+                        Opening Balance</a>
                 </li>
             </ul>
         </li>

@@ -43,24 +43,24 @@
 
 <script>
   jQuery(function ($) {
-    // Initialize Select2 on the vendor selection dropdown
-    $("#stmt_vendor_select").select2({
+    // Initialize Select2 on the customer selection dropdown
+    $("#stmt_customer_select").select2({
       width: '100%'
     });
 
-    // Check if initial vendor has opening balance
-    function checkVendorOpening(vendor_id, isInitialLoad) {
-      if (!vendor_id) {
-        // No vendor selected (All Vendors / initial state)
+    // Check if initial customer has opening balance
+    function checkCustomerOpening(customer_id, isInitialLoad) {
+      if (!customer_id) {
+        // No customer selected (All Customers / initial state)
         $("#div-from-date, #div-to-date, #div-submit").hide();
         $(".opening-balance-warning").remove();
         return;
       }
 
       $.ajax({
-        url: "<?php echo site_url('get-vendor-opening-balance'); ?>",
+        url: "<?php echo site_url('get-customer-opening-balance'); ?>",
         type: "post",
-        data: { vendor_id: vendor_id },
+        data: { customer_id: customer_id },
         dataType: "json",
         success: function (res) {
           $(".opening-balance-warning").remove();
@@ -87,14 +87,14 @@
               // Opening balance is empty! Hide date inputs and alert user
               $("#div-from-date, #div-to-date, #div-submit").hide();
               
-              //alert("Vendor opening balance is empty. Please enter the opening balance first!");
+              //alert("Customer opening balance is empty. Please enter the opening balance first!");
               
               // Display premium alert card at the top
               let alertHtml = `
                 <div class="alert alert-warning alert-dismissible opening-balance-warning" style="border-radius: 8px; margin-bottom: 20px;">
                     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
                     <h4><i class="icon fa fa-warning"></i> Attention!</h4>
-                    Vendor opening balance is empty. Please enter the opening balance first!
+                    Customer opening balance is empty. Please enter the opening balance first!
                 </div>
               `;
               $("#stmt-report-container").prepend(alertHtml);
@@ -108,19 +108,19 @@
     }
 
     // Trigger on drop-down change
-    $("#stmt_vendor_select").on("change", function () {
+    $("#stmt_customer_select").on("change", function () {
       let val = $(this).val();
-      checkVendorOpening(val, false);
+      checkCustomerOpening(val, false);
     });
 
     // Run once on load to establish correct state
-    let initialVendor = $("#stmt_vendor_select").val();
-    if (initialVendor) {
+    let initialCustomer = $("#stmt_customer_select").val();
+    if (initialCustomer) {
       // Just set attributes but don't force-hide on page-load if it was validated by PHP
       $.ajax({
-        url: "<?php echo site_url('get-vendor-opening-balance'); ?>",
+        url: "<?php echo site_url('get-customer-opening-balance'); ?>",
         type: "post",
-        data: { vendor_id: initialVendor },
+        data: { customer_id: initialCustomer },
         dataType: "json",
         success: function (res) {
           if (res.status === 'success' && res.exists) {

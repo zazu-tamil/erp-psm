@@ -1954,5 +1954,222 @@ class Reports extends CI_Controller
         exit;
     }
 
+    public function customer_statement_report()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data['title'] = 'Customer Statement Report';
+        $data['js'] = 'reports/customer-reports.inc';
+
+        // Fetch inputs from either GET or POST
+        $customer_id = $this->input->get_post('customer_id');
+        $from_date = $this->input->get_post('from_date');
+        $to_date = $this->input->get_post('to_date');
+
+        // Store / Retrieve from session for sticky behavior
+        if ($customer_id !== null) {
+            $this->session->set_userdata('stmt_customer_id', $customer_id);
+        } else {
+            $customer_id = $this->session->userdata('stmt_customer_id') ?? '';
+        }
+
+        if ($from_date !== null) {
+            $this->session->set_userdata('stmt_cust_from_date', $from_date);
+        } else {
+            $from_date = $this->session->userdata('stmt_cust_from_date') ?? '';
+        }
+
+        if ($to_date !== null) {
+            $this->session->set_userdata('stmt_cust_to_date', $to_date);
+        } else {
+            $to_date = $this->session->userdata('stmt_cust_to_date') ?? '';
+        }
+
+        $data['customer_id'] = $customer_id;
+        $data['from_date'] = $from_date;
+        $data['to_date'] = $to_date;
+
+        // Fetch active customers
+        $sql = "
+            SELECT customer_id AS id, customer_name 
+            FROM customer_info 
+            WHERE status = 'Active' 
+            ORDER BY customer_name ASC";
+        $query = $this->db->query($sql);
+        $data['customers'] = $query->result_array();
+
+        $data['opening_balance'] = 0.000;
+        $data['record_list'] = [];
+        $data['op_exists'] = false;
+        $data['op_details'] = null;
+
+        $esc_customer = !empty($customer_id) ? $this->db->escape_str($customer_id) : '';
+
+        if (!empty($customer_id)) {
+            // Check if customer opening balance is configured
+            $op_query = $this->db->get_where('customer_opening_balance_info', ['customer_id' => $customer_id]);
+            $op_exists = $op_query->num_rows() > 0;
+            $data['op_exists'] = $op_exists;
+
+            if ($op_exists) {
+                $op_row = $op_query->row_array();
+                $data['op_details'] = $op_row;
+                $op_date = $op_row['opening_date'];
+                $op_amount = (float)$op_row['opening_amount'];
+                $op_type = $op_row['balance_type'];
+                
+                // For customer: Debit (DR) is positive (receivable/debit), Credit (CR) is negative (advance received/credit)
+                $signed_op_amount = ($op_type === 'DR') ? $op_amount : -$op_amount;
+
+                // Adjust from_date if it is empty or prior to opening_date
+                if (empty($from_date) || $from_date < $op_date) {
+                    $from_date = $op_date;
+                    $data['from_date'] = $from_date;
+                }
+                $esc_from = $this->db->escape_str($from_date);
+                $esc_op = $this->db->escape_str($op_date);
+
+                // Calculate in-between invoices and receipts from opening date to from_date
+                $invoice_sql = "
+                    SELECT IFNULL(SUM(total_amount), 0) AS total_invoices
+                    FROM tender_enq_invoice_info
+                    WHERE status = 'Active' AND customer_id = '$esc_customer' AND invoice_date >= '$esc_op' AND invoice_date < '$esc_from'
+                ";
+                $inv_query = $this->db->query($invoice_sql);
+                $inv_row = $inv_query->row_array();
+                $total_invoices = (float)($inv_row['total_invoices'] ?? 0);
+
+                $receipt_sql = "
+                    SELECT IFNULL(SUM(amount), 0) AS total_receipts
+                    FROM tender_receipt_info
+                    WHERE status = 'Active' AND customer_id = '$esc_customer' AND receipt_date >= '$esc_op' AND receipt_date < '$esc_from'
+                ";
+                $rec_query = $this->db->query($receipt_sql);
+                $rec_row = $rec_query->row_array();
+                $total_receipts = (float)($rec_row['total_receipts'] ?? 0);
+
+                $data['opening_balance'] = $signed_op_amount + $total_invoices - $total_receipts;
+            } else {
+                $data['opening_balance'] = 0.000;
+            }
+        } else {
+            // General logic for "All Customers"
+            if (!empty($from_date)) {
+                $esc_from = $this->db->escape_str($from_date);
+
+                // Total Invoices before from_date
+                $invoice_sql = "
+                    SELECT IFNULL(SUM(total_amount), 0) AS total_invoices
+                    FROM tender_enq_invoice_info
+                    WHERE status = 'Active' AND invoice_date < '$esc_from'
+                ";
+                $inv_query = $this->db->query($invoice_sql);
+                $inv_row = $inv_query->row_array();
+                $total_invoices = $inv_row['total_invoices'] ?? 0;
+
+                // Total Receipts before from_date
+                $receipt_sql = "
+                    SELECT IFNULL(SUM(amount), 0) AS total_receipts
+                    FROM tender_receipt_info
+                    WHERE status = 'Active' AND receipt_date < '$esc_from'
+                ";
+                $rec_query = $this->db->query($receipt_sql);
+                $rec_row = $rec_query->row_array();
+                $total_receipts = $rec_row['total_receipts'] ?? 0;
+
+                $data['opening_balance'] = $total_invoices - $total_receipts;
+            }
+        }
+
+        // Re-escape just to make sure
+        $esc_from = !empty($from_date) ? $this->db->escape_str($from_date) : '';
+
+        // 2. Fetch all chronological transactions (Invoices & Receipts) in range
+        $txn_sql = "
+            SELECT 
+                tr_date,
+                voucher_no,
+                description,
+                debit_amt,
+                credit_amt,
+                type,
+                customer_name
+            FROM (
+                SELECT 
+                    a.invoice_date AS tr_date,
+                    a.invoice_no AS voucher_no,
+                    'Sales Invoice' AS description,
+                    a.total_amount AS debit_amt,
+                    0.000 AS credit_amt,
+                    'invoice' AS type,
+                    c.customer_name
+                FROM tender_enq_invoice_info a
+                LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
+                WHERE a.status = 'Active'
+                  " . (!empty($customer_id) ? "AND a.customer_id = '$esc_customer'" : "") . "
+                  " . (!empty($from_date) ? "AND a.invoice_date >= '$esc_from'" : "") . "
+                  " . (!empty($to_date) ? "AND a.invoice_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
+                  
+                UNION ALL
+                
+                SELECT 
+                    a.receipt_date AS tr_date,
+                    a.receipt_no AS voucher_no,
+                    'Customer Payment' AS description,
+                    0.000 AS debit_amt,
+                    a.amount AS credit_amt,
+                    'receipt' AS type,
+                    c.customer_name
+                FROM tender_receipt_info a
+                LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
+                WHERE a.status = 'Active'
+                  " . (!empty($customer_id) ? "AND a.customer_id = '$esc_customer'" : "") . "
+                  " . (!empty($from_date) ? "AND a.receipt_date >= '$esc_from'" : "") . "
+                  " . (!empty($to_date) ? "AND a.receipt_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
+            ) AS transactions
+            ORDER BY tr_date ASC, voucher_no ASC
+        ";
+        
+        $query = $this->db->query($txn_sql);
+        $data['record_list'] = $query->result_array();
+
+        $this->load->view('page/reports/customer-statement-report', $data);
+    }
+
+    public function get_customer_opening_balance_ajax()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        $customer_id = $this->input->post('customer_id');
+        if (empty($customer_id)) {
+            echo json_encode(['status' => 'error', 'message' => 'Invalid Customer ID']);
+            exit;
+        }
+
+        $query = $this->db->get_where('customer_opening_balance_info', ['customer_id' => $customer_id]);
+        if ($query->num_rows() > 0) {
+            $row = $query->row_array();
+            echo json_encode([
+                'status' => 'success',
+                'exists' => true,
+                'opening_date' => $row['opening_date'],
+                'opening_amount' => $row['opening_amount'],
+                'balance_type' => $row['balance_type']
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'success',
+                'exists' => false
+            ]);
+        }
+        exit;
+    }
+
 }
+
 

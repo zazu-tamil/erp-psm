@@ -421,6 +421,20 @@ class General extends CI_Controller
             }
 
         }
+        if ($table == 'customer_opening_balance_info') {
+            $query = $this->db->query(" 
+                select 
+                a.* 
+                from customer_opening_balance_info as a  
+                where a.opening_id = '" . $rec_id . "'
+            ");
+            $rec_list = array();
+
+            foreach ($query->result_array() as $row) {
+                $rec_list = $row;
+            }
+
+        }
 
         $this->db->close();
 
@@ -603,6 +617,11 @@ class General extends CI_Controller
         if ($table == 'vendor_opening_balance_info') {
             $this->db->where('opening_id', $rec_id);
             $this->db->delete('vendor_opening_balance_info');
+            echo "Record Deleted Successfully";
+        }
+        if ($table == 'customer_opening_balance_info') {
+            $this->db->where('opening_id', $rec_id);
+            $this->db->delete('customer_opening_balance_info');
             echo "Record Deleted Successfully";
         }
 
