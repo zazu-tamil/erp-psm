@@ -577,8 +577,8 @@ class Vendor extends CI_Controller
                 'currency_id' => $this->input->post('currency_id'),
                 'po_date' => $this->input->post('po_date'),
                 'delivery_date' => $this->input->post('delivery_date'),
-                'transport_charges' => $this->input->post('transport_charges'),
-                'other_charges' => $this->input->post('other_charges'),
+                // 'transport_charges' => $this->input->post('transport_charges'),
+                // 'other_charges' => $this->input->post('other_charges'),
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
                 'po_status' => $this->input->post('po_status'),
@@ -1003,8 +1003,8 @@ class Vendor extends CI_Controller
                 'po_no' => $this->input->post('po_no'),
                 'po_date' => $this->input->post('po_date'),
                 'delivery_date' => $this->input->post('delivery_date'),
-                'transport_charges' => $this->input->post('transport_charges'),
-                'other_charges' => $this->input->post('other_charges'),
+                // 'transport_charges' => $this->input->post('transport_charges'),
+                // 'other_charges' => $this->input->post('other_charges'),
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
                 'po_status' => $this->input->post('po_status'),
@@ -1487,6 +1487,21 @@ class Vendor extends CI_Controller
         $query = $this->db->query($sql, [$vendor_po_id]);
         $data['item_list'] = $query->result_array();
 
+         $sql = "
+           SELECT 
+            a.*,
+            b.addt_charges_type_name
+            FROM vendor_po_addtchrg_info as a
+            left join addt_charges_type_info as b 
+                on b.addt_charges_type_id = a.addt_charges_type_id  
+            WHERE a.status = 'Active'
+            and b.status='Active' 
+            and a.vendor_po_id = ?
+            ORDER BY b.addt_charges_type_name ASC   
+        ";
+        $query = $this->db->query($sql, [$vendor_po_id]);
+        $data['addt_chrg_list'] = $query->result_array();
+
 
         $this->load->view('page/vendor/vendor-po-print', $data);
     }
@@ -1545,8 +1560,8 @@ class Vendor extends CI_Controller
                 'vendor_contact_person_id' => $this->input->post('srch_vendor_contact_person_id'),
                 'inward_date' => $this->input->post('inward_date'),
                 'inward_no' => $this->input->post('inward_no'),
-                'transport_charges' => $this->input->post('transport_charges'),
-                'other_charges' => $this->input->post('other_charges'),
+                //'transport_charges' => $this->input->post('transport_charges'),
+                //'other_charges' => $this->input->post('other_charges'),
                 'remarks' => $this->input->post('remarks'),
                 'dc_upload' => 'vendor-pur-inward-documents/' . $dc_upload,
                 'status' => $this->input->post('status'),
@@ -1940,8 +1955,8 @@ class Vendor extends CI_Controller
                 'vendor_contact_person_id' => $this->input->post('srch_vendor_contact_person_id'),
                 'inward_no' => $this->input->post('inward_no'),
                 'inward_date' => $this->input->post('inward_date'),
-                'transport_charges' => $this->input->post('transport_charges'),
-                'other_charges' => $this->input->post('other_charges'),
+                // 'transport_charges' => $this->input->post('transport_charges'),
+                // 'other_charges' => $this->input->post('other_charges'),
                 'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
@@ -2303,8 +2318,8 @@ class Vendor extends CI_Controller
                 'currency_id' => $this->input->post('currency_id'),
                 'quote_date' => $this->input->post('quote_date'),
                 'quote_no' => $this->input->post('quote_no'),
-                'transport_charges' => $this->input->post('transport_charges'),
-                'other_charges' => $this->input->post('other_charges'),
+                // 'transport_charges' => $this->input->post('transport_charges'),
+                // 'other_charges' => $this->input->post('other_charges'),
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
                 'quote_doc_upload' => $quote_doc_upload,
@@ -2739,8 +2754,8 @@ class Vendor extends CI_Controller
                 'currency_id' => $this->input->post('currency_id'),
                 'quote_date' => $this->input->post('quote_date'),
                 'quote_no' => $this->input->post('quote_no'),
-                'transport_charges' => $this->input->post('transport_charges'),
-                'other_charges' => $this->input->post('other_charges'),
+                // 'transport_charges' => $this->input->post('transport_charges'),
+                // 'other_charges' => $this->input->post('other_charges'),
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
                 'quote_status' => $this->input->post('quote_status'),

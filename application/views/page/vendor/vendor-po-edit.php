@@ -95,7 +95,7 @@
                             <?php echo form_dropdown('po_status', ['' => 'Select Status'] + $po_status_opt, set_value('po_status', $header['po_status']), 'id="po_status" class="form-control" required="true"'); ?>
                         </div>
 
-                        <div class="form-group col-md-3">
+                        <!-- <div class="form-group col-md-3">
                             <label>Transport Charges</label>
                             <input type="number" step="any" name="transport_charges" id="transport_charges"
                                 class="form-control"
@@ -107,7 +107,7 @@
                             <input type="number" step="any" name="other_charges" id="other_charges" class="form-control"
                                 value="<?php echo set_value('other_charges', $header['other_charges']); ?>"
                                 placeholder="0.00">
-                        </div>
+                        </div> -->
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label for="currency_id">Currency</label>

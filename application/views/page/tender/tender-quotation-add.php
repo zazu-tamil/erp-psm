@@ -44,7 +44,7 @@
                             <label for="srch_customer_id">Customer <span style="color:red;">*</span></label>
                             <?php echo form_dropdown('srch_customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('srch_customer_id'), 'id="srch_customer_id" class="form-control" required '); ?>
                         </div>
-
+                        
                         <div class="form-group col-md-3">
                             <label for="srch_tender_enquiry_id">Tender Enquiry No <span
                                     style="color:red;">*</span></label>
@@ -128,6 +128,23 @@
                                     'id="currency_id" class="form-control" required'
                                 );
                                 ?>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Customer Contact Person </label>
+                            <div class="input-group1">
+                                <?php
+                                echo form_dropdown(
+                                    'customer_contact_id',
+                                    ['' => 'Select Contact Person'],
+                                    set_value('customer_contact_id'),
+                                    'id="srch_customer_contact_id" class="form-control" '
+                                );
+                                ?>
+                                <!-- <span class="input-group-btn">
+                                    <button type="button" class="btn btn-info" data-toggle="modal"
+                                        data-target="#add_customer_contact_id">Add New</button>
+                                </span> -->
                             </div>
                         </div>
 

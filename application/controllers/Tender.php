@@ -1225,6 +1225,7 @@ class Tender extends CI_Controller
             $header = [
                 'company_id' => $this->input->post('srch_company_id'),
                 'customer_id' => $this->input->post('srch_customer_id'),
+                'customer_contact_id' => $this->input->post('srch_customer_contact_id'),
                 'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
                 'quotation_no' => $this->input->post('quotation_no'),
                 'tender_ref_no' => $this->input->post('tender_ref_no'),
@@ -1620,6 +1621,7 @@ class Tender extends CI_Controller
             $header = [
                 'company_id' => $this->input->post('srch_company_id'),
                 'customer_id' => $this->input->post('srch_customer_id'),
+                'customer_contact_id' => $this->input->post('srch_customer_contact_id'),
                 // 'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
                 'quotation_no' => $this->input->post('quotation_no'),
                 'tender_ref_no' => $this->input->post('tender_ref_no'),
@@ -1946,6 +1948,22 @@ class Tender extends CI_Controller
         $query = $this->db->query($sql, [$tender_quotation_id]);
 
         $data['addt_charges_list'] = $query->result_array();
+
+
+        $sql = "
+          SELECT 
+            a.customer_contact_id,
+            a.contact_person_name
+            FROM customer_contact_info as a  
+            WHERE a.status = 'Active'  
+            and a.customer_id = '" . $data['header']['customer_id'] . "'
+            ORDER BY a.customer_contact_id desc
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['customer_contact_opt'][$row['customer_contact_id']] = $row['contact_person_name'];
+        }
+
 
 
         $data['pagination'] = $this->pagination->create_links();
@@ -3858,19 +3876,22 @@ class Tender extends CI_Controller
             a.tender_po_addtchrg_id,
             a.addt_charges_type_id,
             c.tender_invoice_addtchrg_id,
-            b.addt_charges_type_name,
+            b.addt_charges_type_name, 
+            if(c.`status` = 'Active' , 1, 0) as is_checked,
             if(c.tender_invoice_addtchrg_id is null , a.addt_charges_amt, c.addt_charges_amt) as addt_charges_amt,   
             if(c.tender_invoice_addtchrg_id is null , a.addt_charges_vat, c.addt_charges_vat) as addt_charges_vat,   
             if(c.tender_invoice_addtchrg_id is null , a.addt_charges_vat_amt, c.addt_charges_vat_amt) as addt_charges_vat_amt,   
             if(c.tender_invoice_addtchrg_id is null , a.addt_charges_tot_amt, c.addt_charges_tot_amt) as addt_charges_tot_amt    
+            
             FROM tender_po_addtchrg_info as a
             left join addt_charges_type_info as b on b.addt_charges_type_id = a.addt_charges_type_id and b.status='Active' 
             left join tender_invoice_addtchrg_info as c on c.tender_po_addtchrg_id = a.tender_po_addtchrg_id 
-                and c.addt_charges_type_id = a.addt_charges_type_id 
-                and c.`status` = 'Active' 
+                and c.addt_charges_type_id = a.addt_charges_type_id   
+                and c.`status` = 'Active'               
                 and c.tender_enq_invoice_id = ?
             WHERE a.status = 'Active'
             and a.tender_po_id  = ?
+            
             ORDER BY a.tender_po_addtchrg_id ,  b.addt_charges_type_name ASC
         ";
 
@@ -3983,6 +4004,22 @@ class Tender extends CI_Controller
         ";
         $query = $this->db->query($sql, [$tender_enq_invoice_id]);
         $data['item_list'] = $query->result_array();
+
+
+         $sql = "
+           SELECT 
+            a.*,
+            b.addt_charges_type_name
+            FROM tender_invoice_addtchrg_info as a
+            left join addt_charges_type_info as b 
+                on b.addt_charges_type_id = a.addt_charges_type_id  
+            WHERE a.status = 'Active'
+            and b.status='Active' 
+            and a.tender_enq_invoice_id = ?
+            ORDER BY b.addt_charges_type_name ASC   
+        ";
+        $query = $this->db->query($sql, [$tender_enq_invoice_id]);
+        $data['addt_chrg_list'] = $query->result_array();
 
         $this->load->view('page/tender/tender-po-invoice-print-v2', $data);
     }
@@ -5089,7 +5126,7 @@ class Tender extends CI_Controller
             h.tender_po_id,
             h.tender_po_item_id,
             h.rate,
-            h.gst,
+            i.gst,
             h.qty as order_qty,
             sum(b.qty) as del_qty,
             i.tender_enq_invoice_item_id,
@@ -5861,7 +5898,8 @@ class Tender extends CI_Controller
             a.customer_id,
             a.tender_enquiry_id,
             c.customer_name,
-            a.enquiry_no
+            a.enquiry_no,
+            a.customer_contact_id
             FROM tender_enquiry_info AS a
             LEFT JOIN company_info AS b ON a.company_id = b.company_id AND b.status = 'Active'
             LEFT JOIN customer_info AS c ON a.customer_id = c.customer_id AND c.status = 'Active'
@@ -5884,7 +5922,8 @@ class Tender extends CI_Controller
                 'customer_id' => $row->customer_id,
                 'tender_enquiry_id' => $row->tender_enquiry_id,
                 'customer_name' => $row->customer_name,
-                'enquiry_no' => $row->enquiry_no
+                'enquiry_no' => $row->enquiry_no,
+                'customer_contact_id' => $row->customer_contact_id
             ];
         }
         echo json_encode($result);

@@ -259,7 +259,7 @@
                                             id="chk_tender_po_addtchrg_id_<?php echo $row['tender_po_addtchrg_id']; ?>"
                                             name="chk_tender_po_addtchrg_id[]"
                                             value="<?php echo $row['tender_po_addtchrg_id']; ?>"
-                                            <?php echo ($row['tender_po_addtchrg_id'] != '') ? 'checked' : ''; ?>>  
+                                            <?php echo ($row['is_checked'] == 1) ? 'checked' : ''; ?>>  
                                     </td>
                                     <td>
                                         <input type="hidden" class="form-control addt_charges_type_id"
@@ -357,7 +357,7 @@
                     <div class="text-left col-md-6">
                         <input type="hidden" name="total_amount" id="total_amount_hidden" value="">
                         <input type="hidden" name="tax_amount" id="tax_amount_hidden" value="">
-                        <a href="<?php echo site_url('customer-tender-po-list'); ?>" class="btn btn-default"><i
+                        <a href="<?php echo site_url('tender-invoice-list'); ?>" class="btn btn-default"><i
                                 class="fa fa-arrow-left"></i> Back To List</a>
                     </div>
                     <div class="text-right col-md-6">
@@ -615,7 +615,7 @@ $(document).ready(function() {
        CALCULATIONS
     =============================== */
     $(document).on("input change",
-        ".rate-input,.gst-input,.item-check",
+        ".rate-input,.gst-input,.item-check, .chk_tender_po_addtchrg_id, .addt_charges_amt, .addt_charges_vat",
         function() {
             const $row = $(this).closest(".item-row");
             calculateRow($row);

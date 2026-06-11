@@ -569,7 +569,7 @@ function convertAmountToWords($amount, $currency = 'BHD', $decimal_point = 3)
                                     </td>
                                 </tr>
 
-                                <?php if ($record['transport_charges'] > 0): ?>
+                                <?php /* if ($record['transport_charges'] > 0): ?>
                                     <tr>
                                         <td colspan="5" class="text-right"><strong>TRANSPORT CHARGES</strong></td>
                                         <td colspan="2" class="text-right">
@@ -585,7 +585,27 @@ function convertAmountToWords($amount, $currency = 'BHD', $decimal_point = 3)
                                             <strong><?php echo number_format($record['other_charges'], $decimal_point); ?></strong>
                                         </td>
                                     </tr>
-                                <?php endif; ?>
+                                <?php endif; */ ?>
+
+                                <!-- Additional Charges -->
+                                <?php
+                                $grand_total = $total_net_amount;
+                                foreach ($addt_chrg_list as $i => $addt_chrg):
+                                    $total_vat_amount += $addt_chrg['addt_charges_vat_amt'];
+                                    if (!isset($tot_vat[floatval($addt_chrg['addt_charges_vat'])]))
+                                        $tot_vat[floatval($addt_chrg['addt_charges_vat'])] = 0;
+                                    $tot_vat[floatval($addt_chrg['addt_charges_vat'])] += $addt_chrg['addt_charges_vat_amt'];
+                                    $grand_total += $addt_chrg['addt_charges_amt'] + $total_vat_amount;
+                                ?>
+                                    <tr class="items-table">
+                                        <td colspan="5" class="text-right">
+                                            <strong><?php echo htmlspecialchars($addt_chrg['addt_charges_type_name']); ?></strong>
+                                        </td>
+                                        <td colspan="2" class="text-right">
+                                            <strong><?php echo number_format($addt_chrg['addt_charges_amt'], $decimal_point); ?></strong>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
 
                                 <tr>
                                     <td colspan="5" class="text-right">

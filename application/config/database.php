@@ -75,9 +75,13 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => '192.168.0.37', 
-	'username' => 'zazu',
-	'password' => 'zazu@123', 
+	//'hostname' => '192.168.0.37', 
+	//'hostname' => '192.168.1.55', 
+	// 'username' => 'zazu',
+	// 'password' => 'zazu@123', 
+	'hostname' => 'localhost',
+	'username' => 'root',
+	'password' => '',
 	'database' => 'erp_psm_db', 
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',

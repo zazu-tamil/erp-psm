@@ -337,7 +337,7 @@ echo "</pre>";
 
         <!-- VAT Breakdown -->
         <?php foreach ($tot_vat as $vat_prt => $amt):
-            if ($amt > 0): ?>
+            if ($amt > 0):  $grand_total += $amt; ?>
                 <tr class="items-table">
                     <td colspan="5" class="text-right"><strong>VAT <?php echo $vat_prt; ?>%</strong></td>
                     <td colspan="2" class="text-right">

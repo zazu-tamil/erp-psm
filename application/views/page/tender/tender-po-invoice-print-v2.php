@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <?php
 // echo "<pre>";
-// print_r($item_list);
+// print_r($addt_chrg_list);
 // echo "</pre>";
 ?>
 <html>
@@ -473,9 +473,11 @@
                                         $net            = $item['Net_Amount'] ?? ($qty * $rate);
                                         $vat_percentage = $item['gst']  ?? 0;
                                         $vat_amount     = ($net * $vat_percentage) / 100;
-
+                                        $vat           = $net * $vat_percentage / 100;
                                         $total_net_amount += $net;
                                         $total_vat_amount += $vat_amount;
+                                         if (!isset($tot_vat[$vat_percentage])) $tot_vat[$vat_percentage] = 0;
+                                            $tot_vat[$vat_percentage] += $vat;
                                 ?>
                                         <tr>
                                             <!-- <td class="text-center"><?= $i + 1 ?></td> -->
@@ -533,6 +535,23 @@
                                                     <span>TOTAL EXCL. VAT</span>
                                                     <span><?php echo number_format($total_net_amount, $decimal_point); ?></span>
                                                 </div>
+
+                                                <!-- Additional Charges -->
+                                                <?php
+                                                $grand_total = $total_net_amount;
+                                                foreach ($addt_chrg_list as $i => $addt_chrg):
+                                                    $total_vat_amount += $addt_chrg['addt_charges_vat_amt'];
+                                                    if (!isset($tot_vat[floatval($addt_chrg['addt_charges_vat'])]))
+                                                        $tot_vat[floatval($addt_chrg['addt_charges_vat'])] = 0;
+                                                    $tot_vat[floatval($addt_chrg['addt_charges_vat'])] += $addt_chrg['addt_charges_vat_amt'];
+                                                    $grand_total += $addt_chrg['addt_charges_amt'] + $total_vat_amount;
+                                                ?>
+                                                    <div class="summary-row" style="border-bottom:1px solid #000;">
+                                                        <span><?php echo htmlspecialchars($addt_chrg['addt_charges_type_name']); ?></span>
+                                                        <span><?php echo number_format($addt_chrg['addt_charges_amt'], $decimal_point); ?></span>
+                                                    </div>
+                                                     
+                                                <?php endforeach; ?>
                                                 <div class="summary-row" style="border-bottom:1px solid #000;">
                                                     <span>VAT <?php echo number_format($vat_percentage ?? 0, 0); ?>%</span>
                                                     <span><?php echo number_format($total_vat_amount, $decimal_point); ?></span>
@@ -553,6 +572,25 @@
                                             <strong><?php echo number_format($total_net_amount, $decimal_point); ?></strong>
                                         </td>
                                     </tr>
+                                    <!-- Additional Charges -->
+                                    <?php
+                                    $grand_total = $total_net_amount;
+                                    foreach ($addt_chrg_list as $i => $addt_chrg):
+                                        $total_vat_amount += $addt_chrg['addt_charges_vat_amt'];
+                                        if (!isset($tot_vat[floatval($addt_chrg['addt_charges_vat'])]))
+                                            $tot_vat[floatval($addt_chrg['addt_charges_vat'])] = 0;
+                                        $tot_vat[floatval($addt_chrg['addt_charges_vat'])] += $addt_chrg['addt_charges_vat_amt'];
+                                        $grand_total += $addt_chrg['addt_charges_amt'] + $total_vat_amount;
+                                    ?>
+                                        <tr class="items-table">
+                                            <td colspan="5" class="text-right">
+                                                <strong><?php echo htmlspecialchars($addt_chrg['addt_charges_type_name']); ?></strong>
+                                            </td>
+                                            <td colspan="2" class="text-right">
+                                                <strong><?php echo number_format($addt_chrg['addt_charges_amt'], $decimal_point); ?></strong>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
                                     <tr>
                                         <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
                                             <strong>VAT <?php echo number_format($vat_percentage ?? 0, 0); ?>%</strong>

@@ -442,9 +442,9 @@
                     <div class="col-md-12">
                         <fieldset
                             style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px;">
-                            <legend>Total Amount</legend>
+                            <legend>Total Amount Excluding Additional Charges</legend>
                             <div class="row">
-                                <div class="col-md-3 form-group">
+                                <!-- <div class="col-md-3 form-group">
                                     <label for="fix_theamount_total">Fix The Amount</label>
 
                                     <div class="checkbox">
@@ -456,7 +456,7 @@
                                         </label>
                                     </div>
 
-                                </div>
+                                </div> -->
                                 <!-- <div class="form-group col-md-3">
                                     <label>Bayan Charges</label>
                                     <input type="number" step="any" name="bayan_charges" id="bayan_charges" value="<?php echo $header['bayan_charges']?>"
@@ -579,11 +579,24 @@
                                 <div class="row">
                                     <div class="col-md-3">
                                         <h4 class="text-red" style="margin-top: 25px;">Total Inc Addt Charges</h4>
+                                 
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" name="fix_theamount_total" id="fix_theamount_total"
+                                                value="1" <?php if($header['fix_theamount_total'] == 1){ echo 'checked'; } ?> >
+
+                                            Fix Total Amount <i class="text-sm text-info">(manually)</i>
+                                        </label>
+                                    </div>    
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group total-box shadow-sm">
                                             <label>Total Amount WO Tax</label>
-                                            <span class="form-control text-right" style="background: #eee; font-weight: bold; height: 34px; line-height: 20px; display: block; padding: 6px 12px;" id="total_amount_wo_tax_addt">0.000</span>
+                                             <input type="number" step="any" name="total_amount_wo_tax"
+                                            id="total_amount_wo_tax_inc_addl" class="form-control text-right" value="<?php echo ($header['total_amount_wo_tax_inc_addl'] ?? 0)?>"
+                                            readonly>
+                                            <!--<span class="form-control text-right" style="background: #eee; font-weight: bold; height: 34px; 
+                                            line-height: 20px; display: block; padding: 6px 12px;" id="total_amount_wo_tax_addt">0.000</span> -->
                                         </div>
                                     </div>
                                     <div class="col-md-3">
@@ -877,22 +890,23 @@ $(document).ready(function() {
         if ($("#fix_theamount_total").is(":checked")) {
 
             $("#total_amount").data("fixed", true);
-            $("#total_vat_amount").data("fixed", true);
+            //$("#total_vat_amount").data("fixed", true);
+            $("#total_amount_wo_tax_inc_addl").data("fixed", true);
             $("#total_amount_wo_tax").data("fixed", true);
             
 
-            $("#total_amount,#total_vat_amount,#total_amount_wo_tax,#total_duty_amount,#total_amount_wo_convert,#total_convert_amount,#total_amount_after_convert")
+            $("#total_amount,#total_amount_wo_tax_inc_addl,#total_amount_wo_tax,#total_duty_amount,#total_amount_wo_convert,#total_convert_amount,#total_amount_after_convert")
                 .prop("readonly", false)
                 .css("background", "#fff");
 
         } else {
 
             $("#total_amount").data("fixed", false);
-            $("#total_vat_amount").data("fixed", false);
+            $("#total_amount_wo_tax_inc_addl").data("fixed", false);
             $("#total_amount_wo_tax").data("fixed", false);
 
             //$("#total_amount,#total_vat_amount,#total_amount_wo_tax")
-            $("#total_amount,#total_vat_amount,#total_amount_wo_tax,#total_duty_amount,#total_amount_wo_convert,#total_convert_amount,#total_amount_after_convert")
+            $("#total_amount,#total_amount_wo_tax_inc_addl,#total_amount_wo_tax,#total_duty_amount,#total_amount_wo_convert,#total_convert_amount,#total_amount_after_convert")
                 .prop("readonly", true)
                 .css("background", "#eee");
 
@@ -1054,7 +1068,8 @@ $(document).ready(function() {
         let final_wo_tax = item_wo_tax + addt_wo_tax;
         let final_w_tax = item_w_tax + addt_w_tax;
 
-        $("#total_amount_wo_tax_addt").text(final_wo_tax.toFixed(3));
+        //$("#total_amount_wo_tax_addt").text(final_wo_tax.toFixed(3));
+        $("#total_amount_wo_tax_inc_addl").text(final_wo_tax.toFixed(3));
         $("#total_amount_addt").text(final_w_tax.toFixed(3));
         $("#total_tax_amount_addt").text((final_w_tax - final_wo_tax).toFixed(3));
     }

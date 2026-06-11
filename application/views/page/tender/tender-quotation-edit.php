@@ -129,6 +129,23 @@
                             <label for="currency_id">Currency <span style="color:red;">*</span></label>
                             <?php echo form_dropdown('currency_id', ['' => 'Select Currency'] + $currency_opt, set_value('currency_id' , $header['currency_id']), 'id="currency_id" class="form-control" required '); ?>
                         </div>
+                        <div class="form-group col-md-4">
+                            <label>Customer Contact Person </label>
+                            <div class="input-group1">
+                                <?php
+                                echo form_dropdown(
+                                    'customer_contact_id',
+                                    ['' => 'Select Contact Person'] + $customer_contact_opt,
+                                    set_value('customer_contact_id',$header['customer_contact_id']),
+                                    'id="srch_customer_contact_id" class="form-control" '
+                                );
+                                ?>
+                                <!-- <span class="input-group-btn">
+                                    <button type="button" class="btn btn-info" data-toggle="modal"
+                                        data-target="#add_customer_contact_id">Add New</button>
+                                </span> -->
+                            </div>
+                        </div>
                         <div class="form-group col-md-2">
                             <label>Status</label><br>
 
