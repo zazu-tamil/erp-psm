@@ -372,6 +372,7 @@
                                     </tbody>
                                 </table>
                             </fieldset>
+                        </div>
 
                             <fieldset style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px;">
                                 <legend>Total Amount Including Additional Charges</legend>
@@ -414,7 +415,6 @@
                                     </div>
                                 </div>
                             </fieldset>
-                        </div>
 
                         <fieldset
                             style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px; display:none;">
