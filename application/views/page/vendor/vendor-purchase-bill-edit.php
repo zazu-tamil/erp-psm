@@ -521,7 +521,9 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Addt.Charges Type</th>
-                                            <th>Addt.Charges Amt</th>
+                                             <th>Addt.Charges Amt</th>
+                                            <th>Conversion Rate</th> 
+                                            <th>Conversion Amt</th>
                                             <th>VAT %</th>
                                             <th>VAT Amt</th>
                                             <th>Total Amt</th>
@@ -546,11 +548,21 @@
                                                     name="vendor_purchase_invoice_addtchrg_id[<?php echo $row['vendor_po_addtchrg_id']; ?>]"
                                                     value="<?php echo $row['vendor_purchase_invoice_addtchrg_id'] ?? ''; ?>">
                                                 <label for="chk_vendor_po_addtchrg_id<?php echo $row['vendor_po_addtchrg_id']; ?>"><?php echo $row['addt_charges_type_name']; ?></label>
-                                            </td>
+                                            </td> 
                                             <td>
                                                 <input type="number" step="any" class="form-control addt_charges_amt"
                                                     name="addt_charges_amt[<?php echo $row['vendor_po_addtchrg_id']; ?>]"
                                                     value="<?php echo number_format($row['addt_charges_amt'], 3, '.', ''); ?>">
+                                            </td>
+                                            <td>
+                                                <input type="number" step="any" class="form-control addt_charges_conversion_rate"
+                                                     name="addt_charges_conversion_rate[<?php echo $row['vendor_po_addtchrg_id']; ?>]"
+                                                     value="<?php echo number_format($row['conversion_rate'] > 0 ? $row['conversion_rate'] : 1.000, 3, '.', ''); ?>">     
+                                            </td>
+                                            <td>
+                                                <input type="number" step="any" class="form-control addt_charges_conversion_amt"
+                                                     name="addt_charges_conversion_amt[<?php echo $row['vendor_po_addtchrg_id']; ?>]"
+                                                     value="<?php echo number_format($row['conversion_amt'] > 0 ? $row['conversion_amt'] : $row['addt_charges_amt'], 3, '.', ''); ?>" readonly>     
                                             </td>
                                             <td>
                                                 <input type="number" step="any" class="form-control addt_charges_vat"
@@ -592,7 +604,7 @@
                                     <div class="col-md-3">
                                         <div class="form-group total-box shadow-sm">
                                             <label>Total Amount WO Tax</label>
-                                             <input type="number" step="any" name="total_amount_wo_tax"
+                                             <input type="number" step="any" name="total_amount_wo_tax_inc_addl"
                                             id="total_amount_wo_tax_inc_addl" class="form-control text-right" value="<?php echo ($header['total_amount_wo_tax_inc_addl'] ?? 0)?>"
                                             readonly>
                                             <!--<span class="form-control text-right" style="background: #eee; font-weight: bold; height: 34px; 
@@ -602,13 +614,17 @@
                                     <div class="col-md-3">
                                         <div class="form-group total-box shadow-sm">
                                             <label>Total Tax Amount</label>
-                                            <span class="form-control text-right" style="background: #eee; font-weight: bold; height: 34px; line-height: 20px; display: block; padding: 6px 12px;" id="total_tax_amount_addt">0.000</span>
+                                            <input type="number" step="any" name="total_tax_amount_inc_addl"
+                                            id="total_tax_amount_inc_addl" class="form-control text-right" value="<?php echo ($header['total_tax_amount_inc_addl'] ?? 0)?>"
+                                            readonly>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group total-box shadow-sm">
                                             <label>Total Amount With Tax</label>
-                                            <span class="form-control text-right" style="background: #eee; font-weight: bold; height: 34px; line-height: 20px; display: block; padding: 6px 12px;" id="total_amount_addt">0.000</span>
+                                            <input type="number" step="any" name="total_amount_inc_addl"
+                                            id="total_amount_inc_addl" class="form-control text-right" value="<?php echo ($header['total_amount_inc_addl'] ?? 0)?>"
+                                            readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -787,6 +803,11 @@ $(document).ready(function() {
         $(".item-row").each(function() {
             calculateRow($(this));
         });
+        $("#tb_addt_chrg_list tr").each(function() {
+            if ($(this).find(".chk_vendor_po_addtchrg_id").is(":checked")) {
+                calculateRowAddt($(this));
+            }
+        });
         calculateTotalAmount();
         toggleFixAmount(); // ✅ AUTO LOAD FIX AMOUNT
     }, 500);
@@ -888,25 +909,20 @@ $(document).ready(function() {
     function toggleFixAmount() {
 
         if ($("#fix_theamount_total").is(":checked")) {
-
-            $("#total_amount").data("fixed", true);
-            //$("#total_vat_amount").data("fixed", true);
             $("#total_amount_wo_tax_inc_addl").data("fixed", true);
-            $("#total_amount_wo_tax").data("fixed", true);
-            
+            $("#total_tax_amount_inc_addl").data("fixed", true);
+            $("#total_amount_inc_addl").data("fixed", true);
 
-            $("#total_amount,#total_amount_wo_tax_inc_addl,#total_amount_wo_tax,#total_duty_amount,#total_amount_wo_convert,#total_convert_amount,#total_amount_after_convert")
+            $("#total_amount_wo_tax_inc_addl,#total_tax_amount_inc_addl,#total_amount_inc_addl,#total_duty_amount,#total_amount_wo_convert,#total_convert_amount,#total_amount_after_convert")
                 .prop("readonly", false)
                 .css("background", "#fff");
 
         } else {
-
-            $("#total_amount").data("fixed", false);
             $("#total_amount_wo_tax_inc_addl").data("fixed", false);
-            $("#total_amount_wo_tax").data("fixed", false);
+            $("#total_tax_amount_inc_addl").data("fixed", false);
+            $("#total_amount_inc_addl").data("fixed", false);
 
-            //$("#total_amount,#total_vat_amount,#total_amount_wo_tax")
-            $("#total_amount,#total_amount_wo_tax_inc_addl,#total_amount_wo_tax,#total_duty_amount,#total_amount_wo_convert,#total_convert_amount,#total_amount_after_convert")
+            $("#total_amount_wo_tax_inc_addl,#total_tax_amount_inc_addl,#total_amount_inc_addl,#total_duty_amount,#total_amount_wo_convert,#total_convert_amount,#total_amount_after_convert")
                 .prop("readonly", true)
                 .css("background", "#eee");
 
@@ -965,10 +981,6 @@ $(document).ready(function() {
     =====================================================*/
     function calculateTotalAmount() {
 
-        if ($("#fix_theamount_total").is(":checked")) {
-            return;
-        }
-
         let total = 0;
         let total_wot = 0;
         let total_duty_amt = 0;
@@ -1008,57 +1020,71 @@ $(document).ready(function() {
         $(".total_vat_amount_hidden")
             .val(totalVat.toFixed(3));
 
-        $(".total_duty_amount").val(total_duty_amt.toFixed(3)); 
+        if (!$("#fix_theamount_total").is(":checked")) {
+            $(".total_duty_amount").val(total_duty_amt.toFixed(3)); 
 
-        $("#total_amount_wo_convert").val(bf_c_amt.toFixed(3)); 
+            $("#total_amount_wo_convert").val(bf_c_amt.toFixed(3)); 
 
-        $("#total_convert_amount").val(c_rate.toFixed(4)); 
+            $("#total_convert_amount").val(c_rate.toFixed(4)); 
 
-        $("#total_amount_after_convert").val((bf_c_amt * c_rate).toFixed(3));     
+            $("#total_amount_after_convert").val((bf_c_amt * c_rate).toFixed(3));     
+        }
 
         calculateTotalAmount_addt();
     }
 
+
+    function calculateRowAddt(row) {
+        let amt = parseFloat(row.find(".addt_charges_amt").val()) || 0;
+        let rate = parseFloat(row.find(".addt_charges_conversion_rate").val());
+        if (isNaN(rate) || rate <= 0) rate = 1;
+        let vat = parseFloat(row.find(".addt_charges_vat").val()) || 0;
+
+        let conversion_amt = amt * rate;
+        let vat_amt = (conversion_amt * vat) / 100;
+        let total = conversion_amt + vat_amt;
+
+        row.find(".addt_charges_conversion_amt").val(conversion_amt.toFixed(3));
+        row.find(".addt_charges_vat_amt").val(vat_amt.toFixed(3));
+        row.find(".addt_charges_tot_amt").val(total.toFixed(3));
+    }
 
     // Additional charges enable/disable
     $(document).on("change", ".chk_vendor_po_addtchrg_id", function () {
         let row = $(this).closest("tr");
 
         if ($(this).is(":checked")) {
-            row.find(".addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt").prop("disabled", false);
+            row.find(".addt_charges_amt, .addt_charges_conversion_rate, .addt_charges_conversion_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt").prop("disabled", false);
+            calculateRowAddt(row);
         } else {
-            row.find(".addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt")
+            row.find(".addt_charges_amt, .addt_charges_conversion_rate, .addt_charges_conversion_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt")
                 .prop("disabled", true)
                 .val("0.000");
+            row.find(".addt_charges_conversion_rate").val("1.000");
         }
 
         calculateTotalAmount_addt();
     });
 
     // Additional charges input change
-    $(document).on("input", ".addt_charges_amt, .addt_charges_vat", function () {
+    $(document).on("input", ".addt_charges_amt, .addt_charges_conversion_rate, .addt_charges_vat", function () {
         let row = $(this).closest("tr");
-
-        let amt = parseFloat(row.find(".addt_charges_amt").val()) || 0;
-        let vat = parseFloat(row.find(".addt_charges_vat").val()) || 0;
-
-        let vat_amt = (amt * vat) / 100;
-        let total = amt + vat_amt;
-
-        row.find(".addt_charges_vat_amt").val(vat_amt.toFixed(3));
-        row.find(".addt_charges_tot_amt").val(total.toFixed(3));
-
+        calculateRowAddt(row);
         calculateTotalAmount_addt();
     });
 
     function calculateTotalAmount_addt() {
+        if ($("#fix_theamount_total").is(":checked")) {
+            return;
+        }
+
         let addt_wo_tax = 0;
         let addt_w_tax = 0;
 
         $(".chk_vendor_po_addtchrg_id:checked").each(function () {
             let row = $(this).closest("tr");
 
-            addt_wo_tax += parseFloat(row.find(".addt_charges_amt").val()) || 0;
+            addt_wo_tax += parseFloat(row.find(".addt_charges_conversion_amt").val()) || 0;
             addt_w_tax += parseFloat(row.find(".addt_charges_tot_amt").val()) || 0;
         });
 
@@ -1068,11 +1094,18 @@ $(document).ready(function() {
         let final_wo_tax = item_wo_tax + addt_wo_tax;
         let final_w_tax = item_w_tax + addt_w_tax;
 
-        //$("#total_amount_wo_tax_addt").text(final_wo_tax.toFixed(3));
-        $("#total_amount_wo_tax_inc_addl").text(final_wo_tax.toFixed(3));
-        $("#total_amount_addt").text(final_w_tax.toFixed(3));
-        $("#total_tax_amount_addt").text((final_w_tax - final_wo_tax).toFixed(3));
+        $("#total_amount_wo_tax_inc_addl").val(final_wo_tax.toFixed(3));
+        $("#total_amount_inc_addl").val(final_w_tax.toFixed(3));
+        $("#total_tax_amount_inc_addl").val((final_w_tax - final_wo_tax).toFixed(3));
     }
+
+    $(document).on("input change", "#total_amount_wo_tax_inc_addl, #total_tax_amount_inc_addl", function() {
+        if ($("#fix_theamount_total").is(":checked")) {
+            let wo_tax = parseFloat($("#total_amount_wo_tax_inc_addl").val()) || 0;
+            let tax = parseFloat($("#total_tax_amount_inc_addl").val()) || 0;
+            $("#total_amount_inc_addl").val((wo_tax + tax).toFixed(3));
+        }
+    });
 
     // Trigger on page load
     setTimeout(function() {

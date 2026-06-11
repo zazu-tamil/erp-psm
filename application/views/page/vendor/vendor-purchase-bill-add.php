@@ -283,9 +283,9 @@
                     
                         <fieldset
                             style="border:1px solid #081979; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:2px;">
-                            <legend>Total Amount</legend>
+                            <legend>Total Amount Excluding Additional Charges</legend>
                             <div class="row">
-                                <div class="col-md-3 form-group">
+                                <!-- <div class="col-md-3 form-group">
                                     <label for="fix_theamount_total">Fix The Amount</label>
 
                                     <div class="checkbox">
@@ -296,7 +296,7 @@
                                         </label>
                                     </div>
 
-                                </div>
+                                </div> -->
                                 <!-- <div class="form-group col-md-3">
                                     <label>Bayan Charges</label>
                                     <input type="number" step="any" name="bayan_charges" id="bayan_charges"
@@ -378,23 +378,38 @@
                                 <div class="row">
                                     <div class="col-md-3">
                                         <h4 class="text-red" style="margin-top: 25px;">Total Inc Addt Charges</h4>
+                                  
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" name="fix_theamount_total" id="fix_theamount_total"
+                                                value="1"> 
+
+                                            Fix Total Amount <i class="text-sm text-info">(manually)</i>
+                                        </label>
+                                    </div>    
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group total-box shadow-sm">
                                             <label>Total Amount WO Tax</label>
-                                            <span class="form-control text-right" style="background: #eee; font-weight: bold; height: 34px; line-height: 20px; display: block; padding: 6px 12px;" id="total_amount_wo_tax_addt">0.000</span>
+                                             <input type="number" step="any" name="total_amount_wo_tax_inc_addl"
+                                            id="total_amount_wo_tax_inc_addl" class="form-control text-right" value="0.000"
+                                            readonly>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group total-box shadow-sm">
                                             <label>Total Tax Amount</label>
-                                            <span class="form-control text-right" style="background: #eee; font-weight: bold; height: 34px; line-height: 20px; display: block; padding: 6px 12px;" id="total_tax_amount_addt">0.000</span>
+                                            <input type="number" step="any" name="total_tax_amount_inc_addl"
+                                            id="total_tax_amount_inc_addl" class="form-control text-right" value="0.000"
+                                            readonly>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group total-box shadow-sm">
                                             <label>Total Amount With Tax</label>
-                                            <span class="form-control text-right" style="background: #eee; font-weight: bold; height: 34px; line-height: 20px; display: block; padding: 6px 12px;" id="total_amount_addt">0.000</span>
+                                            <input type="number" step="any" name="total_amount_inc_addl"
+                                            id="total_amount_inc_addl" class="form-control text-right" value="0.000"
+                                            readonly>
                                         </div>
                                     </div>
                                 </div>

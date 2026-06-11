@@ -4203,6 +4203,9 @@ class Vendor extends CI_Controller
                 // 'declaration_no' => $this->input->post('declaration_no'),
                 // 'declaration_date' => $this->input->post('declaration_date'),
                 'total_amount_wo_tax' => $this->input->post('total_amount_wo_tax'),
+                'total_amount_wo_tax_inc_addl' => $this->input->post('total_amount_wo_tax_inc_addl'),
+                'total_tax_amount_inc_addl' => $this->input->post('total_tax_amount_inc_addl'),
+                'total_amount_inc_addl' => $this->input->post('total_amount_inc_addl'),
                 'total_duty_amount' => $this->input->post('total_duty_amount'),
                 'tax_amount' => $this->input->post('total_vat_amount'),
                 'total_amount' => $this->input->post('total_amount'),
@@ -4696,6 +4699,9 @@ class Vendor extends CI_Controller
                 'declaration_no' => $this->input->post('declaration_no'),
                 'declaration_date' => $this->input->post('declaration_date'),
                 'total_amount_wo_tax' => $this->input->post('total_amount_wo_tax'),
+                'total_amount_wo_tax_inc_addl' => $this->input->post('total_amount_wo_tax_inc_addl'),
+                'total_tax_amount_inc_addl' => $this->input->post('total_tax_amount_inc_addl'),
+                'total_amount_inc_addl' => $this->input->post('total_amount_inc_addl'),
                 'tax_amount' => $this->input->post('total_vat_amount'),
                 'total_amount' => $this->input->post('total_amount'),
                 // 'total_duty_amount' => $this->input->post('total_duty_amount'),
@@ -4831,6 +4837,8 @@ class Vendor extends CI_Controller
             $vendor_purchase_invoice_addtchrg_id_post = $this->input->post('vendor_purchase_invoice_addtchrg_id') ?? [];
             $addt_charges_type_id = $this->input->post('addt_charges_type_id') ?? [];
             $addt_charges_amt = $this->input->post('addt_charges_amt') ?? [];
+            $addt_charges_conversion_rate = $this->input->post('addt_charges_conversion_rate') ?? [];
+            $addt_charges_conversion_amt = $this->input->post('addt_charges_conversion_amt') ?? [];
             $addt_charges_vat = $this->input->post('addt_charges_vat') ?? [];
             $addt_charges_vat_amt = $this->input->post('addt_charges_vat_amt') ?? [];
             $addt_charges_tot_amt = $this->input->post('addt_charges_tot_amt') ?? [];
@@ -4847,6 +4855,8 @@ class Vendor extends CI_Controller
                         'addt_charges_vat' => $addt_charges_vat[$vendor_po_addtchrg_id] ?? 0,
                         'addt_charges_vat_amt' => $addt_charges_vat_amt[$vendor_po_addtchrg_id] ?? 0,
                         'addt_charges_tot_amt' => $addt_charges_tot_amt[$vendor_po_addtchrg_id] ?? 0,
+                        'conversion_rate' => $addt_charges_conversion_rate[$vendor_po_addtchrg_id] ?? 1.000,
+                        'conversion_amt' => $addt_charges_conversion_amt[$vendor_po_addtchrg_id] ?? 0.000,
                         'status' => 'Active'
                     ];
 
@@ -5090,7 +5100,9 @@ class Vendor extends CI_Controller
                 COALESCE(inv_ac.addt_charges_amt, po_ac.addt_charges_amt) as addt_charges_amt,
                 COALESCE(inv_ac.addt_charges_vat, po_ac.addt_charges_vat) as addt_charges_vat,
                 COALESCE(inv_ac.addt_charges_vat_amt, po_ac.addt_charges_vat_amt) as addt_charges_vat_amt,
-                COALESCE(inv_ac.addt_charges_tot_amt, po_ac.addt_charges_tot_amt) as addt_charges_tot_amt
+                COALESCE(inv_ac.addt_charges_tot_amt, po_ac.addt_charges_tot_amt) as addt_charges_tot_amt,
+                inv_ac.conversion_rate as conversion_rate,
+                inv_ac.conversion_amt as conversion_amt 
             FROM vendor_po_addtchrg_info as po_ac
             LEFT JOIN vendor_purchase_invoice_addtchrg_info as inv_ac
                 ON inv_ac.vendor_po_addtchrg_id = po_ac.vendor_po_addtchrg_id

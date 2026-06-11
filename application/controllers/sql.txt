@@ -691,3 +691,13 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+
+
+
+
+11-06-2026
+
+ALTER TABLE `vendor_purchase_invoice_addtchrg_info`
+	ADD COLUMN `conversion_rate` DECIMAL(10,3) NULL DEFAULT NULL AFTER `addt_charges_tot_amt`,
+	ADD COLUMN `conversion_amt` DECIMAL(10,3) NULL DEFAULT NULL AFTER `conversion_rate`;

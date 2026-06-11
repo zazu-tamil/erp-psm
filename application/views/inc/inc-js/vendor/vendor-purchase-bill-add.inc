@@ -582,6 +582,10 @@
     );
 
     function calculateTotalAmount_addt() {
+      if ($("#fix_theamount_total").is(":checked")) {
+        return;
+      }
+
       let addt_wo_tax = 0;
       let addt_w_tax = 0;
 
@@ -598,9 +602,9 @@
       let final_wo_tax = item_wo_tax + addt_wo_tax;
       let final_w_tax = item_w_tax + addt_w_tax;
 
-      $("#total_amount_wo_tax_addt").text(final_wo_tax.toFixed(3));
-      $("#total_amount_addt").text(final_w_tax.toFixed(3));
-      $("#total_tax_amount_addt").text((final_w_tax - final_wo_tax).toFixed(3));
+      $("#total_amount_wo_tax_inc_addl").val(final_wo_tax.toFixed(3));
+      $("#total_amount_inc_addl").val(final_w_tax.toFixed(3));
+      $("#total_tax_amount_inc_addl").val((final_w_tax - final_wo_tax).toFixed(3));
     }
 
     // Form submit validation
@@ -628,29 +632,19 @@
 
     function toggleFixAmount() {
       if ($("#fix_theamount_total").is(":checked")) {
-        $("#total_amount").data("fixed", true);
-        $("#total_duty_amount").data("fixed", true);
-        $("#total_vat_amount").data("fixed", true);
-        $("#total_amount_wo_tax").data("fixed", true);
+        $("#total_amount_wo_tax_inc_addl").data("fixed", true);
+        $("#total_tax_amount_inc_addl").data("fixed", true);
+        $("#total_amount_inc_addl").data("fixed", true);
 
-        $("#total_amount_wo_convert").data("fixed", true);
-        $("#total_convert_amount").data("fixed", true);
-        $("#total_amount_after_convert").data("fixed", true);
-
-        $("#total_amount,#total_vat_amount,#total_amount_wo_tax,#total_duty_amount,#total_amount_wo_convert,#total_convert_amount,#total_amount_after_convert")
+        $("#total_amount_wo_tax_inc_addl,#total_tax_amount_inc_addl,#total_amount_inc_addl,#total_duty_amount,#total_amount_wo_convert,#total_convert_amount,#total_amount_after_convert")
           .prop("readonly", false)
           .css("background", "#fff");
       } else {
-        $("#total_amount").data("fixed", false);
-        $("#total_duty_amount").data("fixed", false);
-        $("#total_vat_amount").data("fixed", false);
-        $("#total_amount_wo_tax").data("fixed", false);
+        $("#total_amount_wo_tax_inc_addl").data("fixed", false);
+        $("#total_tax_amount_inc_addl").data("fixed", false);
+        $("#total_amount_inc_addl").data("fixed", false);
 
-        $("#total_amount_wo_convert").data("fixed", false);
-        $("#total_convert_amount").data("fixed", false);
-        $("#total_amount_after_convert").data("fixed", false);
-
-        $("#total_amount,#total_vat_amount,#total_amount_wo_tax,#total_duty_amount,#total_amount_wo_convert,#total_convert_amount,#total_amount_after_convert")
+        $("#total_amount_wo_tax_inc_addl,#total_tax_amount_inc_addl,#total_amount_inc_addl,#total_duty_amount,#total_amount_wo_convert,#total_convert_amount,#total_amount_after_convert")
           .prop("readonly", true)
           .css("background", "#eee");
 
@@ -689,9 +683,6 @@
     }
 
     function calculateTotalAmount() {
-      if ($("#fix_theamount_total").is(":checked")) {
-        return;
-      }
 
       let total = 0;
       let total_wot = 0;
@@ -723,13 +714,15 @@
 
       $(".total_vat_amount_hidden").val(totalVat.toFixed(3));
 
-      $(".total_duty_amount").val(total_duty_amt.toFixed(3)); 
+      if (!$("#fix_theamount_total").is(":checked")) {
+        $(".total_duty_amount").val(total_duty_amt.toFixed(3)); 
 
-      $("#total_amount_wo_convert").val(bf_c_amt.toFixed(3)); 
+        $("#total_amount_wo_convert").val(bf_c_amt.toFixed(3)); 
 
-      $("#total_convert_amount").val(c_rate.toFixed(4)); 
+        $("#total_convert_amount").val(c_rate.toFixed(4)); 
 
-      $("#total_amount_after_convert").val((bf_c_amt * c_rate).toFixed(3)); 
+        $("#total_amount_after_convert").val((bf_c_amt * c_rate).toFixed(3)); 
+      }
 
       calculateTotalAmount_addt();
     }
