@@ -701,3 +701,8 @@ DELIMITER ;
 ALTER TABLE `vendor_purchase_invoice_addtchrg_info`
 	ADD COLUMN `conversion_rate` DECIMAL(10,3) NULL DEFAULT NULL AFTER `addt_charges_tot_amt`,
 	ADD COLUMN `conversion_amt` DECIMAL(10,3) NULL DEFAULT NULL AFTER `conversion_rate`;
+
+ALTER TABLE `vendor_purchase_invoice_info`
+	ADD COLUMN `total_amount_wo_tax_inc_addl` DECIMAL(14,3) NULL DEFAULT NULL AFTER `total_amount_after_convert`,
+	ADD COLUMN `total_tax_amount_inc_addl` DECIMAL(14,3) NULL DEFAULT NULL AFTER `total_amount_wo_tax_inc_addl`,
+	ADD COLUMN `total_amount_inc_addl` DECIMAL(14,3) NULL DEFAULT NULL AFTER `total_tax_amount_inc_addl`;
