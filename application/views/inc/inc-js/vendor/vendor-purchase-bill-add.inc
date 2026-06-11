@@ -427,7 +427,7 @@
                   step="any"
                   name="qty[]"
                   class="form-control qty-input"
-                  value="${qty}" readonly>
+                  value="${qty}" >
               </td>
 
               <td>

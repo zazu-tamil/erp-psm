@@ -340,7 +340,7 @@
                                                 value="<?php echo htmlspecialchars($po_item['uom']); ?>" readonly>
                                             <i class="text-sm">Qty</i>
                                             <input type="number" step="any" name="qty[]" class="form-control qty-input"
-                                                value="<?php echo $item_qty; ?>" readonly>
+                                                value="<?php echo $item_qty; ?>">
                                         </td>
                                         <td>
                                             <input type="number" step="any" name="rate[]"
