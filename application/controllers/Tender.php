@@ -1734,7 +1734,7 @@ class Tender extends CI_Controller
                     if (!empty($tender_quote_addtchrg_id[$addt_charges_type_id]) && $tender_quote_addtchrg_id[$addt_charges_type_id] > 0) {
                         $this->db->where('tender_quote_addtchrg_id', $tender_quote_addtchrg_id[$addt_charges_type_id]);
                         $this->db->update('tender_quote_addtchrg_info', $addt_charges_data);
-                        $miss_addt_charges_id[] = $$tender_quote_addtchrg_id[$addt_charges_type_id];
+                        $miss_addt_charges_id[] = $tender_quote_addtchrg_id[$addt_charges_type_id];
                     } else {
                         $this->db->insert('tender_quote_addtchrg_info', $addt_charges_data);
                         $miss_addt_charges_id[] = $this->db->insert_id();

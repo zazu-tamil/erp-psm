@@ -636,13 +636,17 @@
     function calculateTotalAmount() {
         let total = 0;
         $(".amount-input").each(function () {
-            total += parseFloat($(this).val()) || 0;
+            if ($(this).closest(".item-card").find(".item-check").is(":checked")) {
+                total += parseFloat($(this).val()) || 0;
+            }
         });
         $("#total_amount").text(total.toFixed(3));
 
         let total_wot = 0;
         $(".amountwotx").each(function () {
-            total_wot += parseFloat($(this).val()) || 0;
+            if ($(this).closest(".item-card").find(".item-check").is(":checked")) {
+                total_wot += parseFloat($(this).val()) || 0;
+            }
         });
         $("#total_amount_wo_tax").text(total_wot.toFixed(3));
 
@@ -660,6 +664,8 @@
                 )
                 .remove();
         }
+        calculateTotalAmount();
+        calculateTotalAmount_addt();
     });
   });
 
