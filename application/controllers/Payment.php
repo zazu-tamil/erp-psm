@@ -816,7 +816,7 @@ class Payment extends CI_Controller
                     a.tender_enquiry_id,
                     a.invoice_no,
                     b.vendor_name,
-                    a.total_amount,
+                    COALESCE(a.total_amount_inc_addl, a.total_amount) AS total_amount,
                     'Purchase Invoice' AS bill_type
                 FROM vendor_purchase_invoice_info a
                 LEFT JOIN vendor_info b 
@@ -925,7 +925,7 @@ class Payment extends CI_Controller
                     a.tender_enquiry_id,
                     a.invoice_no, 
                     b.vendor_name,
-                    a.total_amount,
+                    COALESCE(a.total_amount_inc_addl, a.total_amount) AS total_amount,
                     'Purchase Invoice' AS bill_type
                 FROM vendor_purchase_invoice_info a
                 LEFT JOIN vendor_info b 

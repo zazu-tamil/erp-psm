@@ -216,7 +216,9 @@ class Reports extends CI_Controller
         b.vendor_name supplier_name,
         b.crno,
         a1.g_desc,
-        a1.total_amount_wo_tax as tot_amt_ex_tax,
+        a1.items_tot_ex_tax,
+        a1.addl_amt_ex_tax,
+        (a1.items_tot_ex_tax + a1.addl_amt_ex_tax) as tot_amt_ex_tax,
         a1.tax_amount as vat_amt,
         a1.total_amount as tot_amt_inc_tax,
         a1.declaration_date,
@@ -231,9 +233,10 @@ class Reports extends CI_Controller
             a.entry_date as inv_date,  
             a.vat_payer_purchase_grp,
             'General trading' g_desc,
-            a.total_amount_wo_tax,
-            a.tax_amount,
-            a.total_amount,
+            a.total_amount_wo_tax as items_tot_ex_tax,
+            (coalesce(a.total_amount_wo_tax_inc_addl, a.total_amount_wo_tax) - a.total_amount_wo_tax) as addl_amt_ex_tax,
+            coalesce(a.total_tax_amount_inc_addl, a.tax_amount) as tax_amount,
+            coalesce(a.total_amount_inc_addl, a.total_amount) as total_amount,
             a.declaration_date,
             a.declaration_no
             from vendor_purchase_invoice_info as a  
@@ -249,7 +252,8 @@ class Reports extends CI_Controller
             a.inv_entry_date as inv_date,
             a.vat_payer_purchase_grp,
             'General trading' g_desc,
-            a.tot_amt_wo_tax as total_amount_wo_tax,
+            a.tot_amt_wo_tax as items_tot_ex_tax,
+            0.000 as addl_amt_ex_tax,
             a.vat_amt as tax_amount,
             a.tot_amt_with_tax as total_amount,
             '' as declaration_date,
@@ -266,7 +270,8 @@ class Reports extends CI_Controller
             a.inv_entry_date as inv_date,
             a.vat_payer_purchase_grp,
             'Service' g_desc,
-            a.dp_charges as total_amount_wo_tax,
+            a.dp_charges as items_tot_ex_tax,
+            0.000 as addl_amt_ex_tax,
             a.dp_vat_amt as tax_amount,
             (a.dp_charges + a.dp_vat_amt) as total_amount,
             '' as declaration_date,
@@ -283,7 +288,8 @@ class Reports extends CI_Controller
             a.inv_entry_date as inv_date,
             a.vat_payer_purchase_grp,
             'Service' g_desc,
-            a.tot_amt_wo_vat as total_amount_wo_tax,
+            a.tot_amt_wo_vat as items_tot_ex_tax,
+            0.000 as addl_amt_ex_tax,
             a.vat_amt as tax_amount,
             a.customs_tot_amt as total_amount,
             '' as declaration_date,
@@ -327,13 +333,11 @@ class Reports extends CI_Controller
         $data['vat_payer_purchase_opt'] = ['' => 'All VAT Payer Purchase Category'];
         foreach ($query->result_array() as $row) {
             $data['vat_payer_purchase_opt'][$row['vat_filing_head_name']] = $row['vat_filing_head_name'];
-        }
-
-
-
+        } 
         $this->load->view('page/reports/purchase-nbr-report', $data);
     }
 
+    
 
     public function tender_enquiry_summary_report()
     {
@@ -1486,7 +1490,7 @@ class Reports extends CI_Controller
                     a.invoice_date,
                     a.invoice_no,
                     b.vendor_name,
-                    a.total_amount AS total_amount,
+                    COALESCE(a.total_amount_inc_addl, a.total_amount) AS total_amount,
                     'Purchase Invoice' AS bill_type
                 FROM vendor_purchase_invoice_info AS a
                 LEFT JOIN vendor_info AS b 
@@ -1650,10 +1654,7 @@ class Reports extends CI_Controller
 
         $this->load->view('page/reports/in-stock-item-report', $data);
     }
-
-
-
-
+ 
     public function vendor_statement_report()
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in')) {
@@ -1734,7 +1735,7 @@ class Reports extends CI_Controller
                 $purchase_sql = "
                     SELECT IFNULL(SUM(total_amount), 0) AS total_purchases
                     FROM (
-                        SELECT total_amount FROM vendor_purchase_invoice_info
+                        SELECT COALESCE(total_amount_inc_addl, total_amount) AS total_amount FROM vendor_purchase_invoice_info
                         WHERE status = 'Active' AND vendor_id = '$esc_vendor' AND invoice_date >= '$esc_op' AND invoice_date < '$esc_from'
                         
                         UNION ALL
@@ -1779,7 +1780,7 @@ class Reports extends CI_Controller
                 $purchase_sql = "
                     SELECT IFNULL(SUM(total_amount), 0) AS total_purchases
                     FROM (
-                        SELECT total_amount FROM vendor_purchase_invoice_info
+                        SELECT COALESCE(total_amount_inc_addl, total_amount) AS total_amount FROM vendor_purchase_invoice_info
                         WHERE status = 'Active' AND invoice_date < '$esc_from'
                         
                         UNION ALL
@@ -1834,7 +1835,7 @@ class Reports extends CI_Controller
                     a.invoice_date AS tr_date,
                     a.invoice_no AS voucher_no,
                     'Purchase Invoice' AS description,
-                    a.total_amount AS purchase_amt,
+                    COALESCE(a.total_amount_inc_addl, a.total_amount) AS purchase_amt,
                     0.000 AS paid_amt,
                     'purchase' AS type,
                     v.vendor_name
@@ -2172,4 +2173,4 @@ class Reports extends CI_Controller
 
 }
 
-
+
