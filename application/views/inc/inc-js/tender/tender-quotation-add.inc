@@ -654,16 +654,6 @@
     }
 
     $(document).on("change", ".item-check", function () {
-        const $card = $(this).closest(".item-card");
-        if (!$(this).is(":checked")) {
-            $card
-                .find(
-                    "input[type=hidden][name^='tender_enquiry_item_id'], " +
-                    "input[type=hidden][name^='category_id'], " +
-                    "input[type=hidden][name^='item_id']",
-                )
-                .remove();
-        }
         calculateTotalAmount();
         calculateTotalAmount_addt();
     });
