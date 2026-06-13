@@ -509,6 +509,16 @@
                       value="${amt.toFixed(3)}">
                   </td>
                   <td>
+                    <input type="number" step="any" class="form-control addt_charges_conversion_rate"
+                      name="addt_charges_conversion_rate[${vendor_po_addtchrg_id}]"
+                      value="0.000">
+                  </td>
+                  <td>
+                    <input type="number" step="any" class="form-control addt_charges_conversion_amt"
+                      name="addt_charges_conversion_amt[${vendor_po_addtchrg_id}]"
+                      value="${amt.toFixed(3)}" readonly>
+                  </td>
+                  <td>
                     <input type="number" step="any" class="form-control addt_charges_vat"
                       name="addt_charges_vat[${vendor_po_addtchrg_id}]"
                       value="${vat.toFixed(2)}">
@@ -546,37 +556,45 @@
       if ($(this).is(":checked")) {
         row
           .find(
-            ".addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt",
+            ".addt_charges_amt, .addt_charges_conversion_rate, .addt_charges_conversion_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt",
           )
           .prop("disabled", false);
+        calculateRowAddt(row);
       } else {
         row
           .find(
-            ".addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt",
+            ".addt_charges_amt, .addt_charges_conversion_rate, .addt_charges_conversion_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt",
           )
           .prop("disabled", true)
           .val("0.000"); // clear values
+        row.find(".addt_charges_conversion_rate").val("1.000");
       }
 
       calculateTotalAmount_addt();
     });
 
+    function calculateRowAddt(row) {
+      let amt = parseFloat(row.find(".addt_charges_amt").val()) || 0;
+      let rate = parseFloat(row.find(".addt_charges_conversion_rate").val());
+      if (isNaN(rate) || rate <= 0) rate = 1;
+      let vat = parseFloat(row.find(".addt_charges_vat").val()) || 0;
+
+      let conversion_amt = amt * rate;
+      let vat_amt = (conversion_amt * vat) / 100;
+      let total = conversion_amt + vat_amt;
+
+      row.find(".addt_charges_conversion_amt").val(conversion_amt.toFixed(3));
+      row.find(".addt_charges_vat_amt").val(vat_amt.toFixed(3));
+      row.find(".addt_charges_tot_amt").val(total.toFixed(3));
+    }
+
     // Additional charges input change
     $(document).on(
       "input",
-      ".addt_charges_amt, .addt_charges_vat",
+      ".addt_charges_amt, .addt_charges_conversion_rate, .addt_charges_vat",
       function () {
         let row = $(this).closest("tr");
-
-        let amt = parseFloat(row.find(".addt_charges_amt").val()) || 0;
-        let vat = parseFloat(row.find(".addt_charges_vat").val()) || 0;
-
-        let vat_amt = (amt * vat) / 100;
-        let total = amt + vat_amt;
-
-        row.find(".addt_charges_vat_amt").val(vat_amt.toFixed(3));
-        row.find(".addt_charges_tot_amt").val(total.toFixed(3));
-
+        calculateRowAddt(row);
         calculateTotalAmount_addt();
       },
     );
@@ -592,7 +610,7 @@
       $(".chk_vendor_po_addtchrg_id:checked").each(function () {
         let row = $(this).closest("tr");
 
-        addt_wo_tax += parseFloat(row.find(".addt_charges_amt").val()) || 0;
+        addt_wo_tax += parseFloat(row.find(".addt_charges_conversion_amt").val()) || 0;
         addt_w_tax += parseFloat(row.find(".addt_charges_tot_amt").val()) || 0;
       });
 
@@ -789,6 +807,9 @@
     });
 
     $("#toggle_dp_bill").trigger("change");
+
+ 
+
 
 
   });

@@ -4281,6 +4281,8 @@ class Vendor extends CI_Controller
             if (!empty($chk_vendor_po_addtchrg_id)) {
                 $addt_charges_type_id = $this->input->post('addt_charges_type_id') ?? [];
                 $addt_charges_amt = $this->input->post('addt_charges_amt') ?? [];
+                $addt_charges_conversion_rate = $this->input->post('addt_charges_conversion_rate') ?? [];
+                $addt_charges_conversion_amt = $this->input->post('addt_charges_conversion_amt') ?? [];
                 $addt_charges_vat = $this->input->post('addt_charges_vat') ?? [];
                 $addt_charges_vat_amt = $this->input->post('addt_charges_vat_amt') ?? [];
                 $addt_charges_tot_amt = $this->input->post('addt_charges_tot_amt') ?? [];
@@ -4291,6 +4293,8 @@ class Vendor extends CI_Controller
                         'vendor_po_addtchrg_id' => $vendor_po_addtchrg_id,
                         'addt_charges_type_id' => $addt_charges_type_id[$vendor_po_addtchrg_id] ?? 0,
                         'addt_charges_amt' => $addt_charges_amt[$vendor_po_addtchrg_id] ?? 0,
+                        'conversion_rate' => $addt_charges_conversion_rate[$vendor_po_addtchrg_id] ?? 0.000,
+                        'conversion_amt' => $addt_charges_conversion_amt[$vendor_po_addtchrg_id] ?? 0.000,
                         'addt_charges_vat' => $addt_charges_vat[$vendor_po_addtchrg_id] ?? 0,
                         'addt_charges_vat_amt' => $addt_charges_vat_amt[$vendor_po_addtchrg_id] ?? 0,
                         'addt_charges_tot_amt' => $addt_charges_tot_amt[$vendor_po_addtchrg_id] ?? 0,

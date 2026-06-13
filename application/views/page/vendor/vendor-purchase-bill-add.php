@@ -363,6 +363,8 @@
                                             <th>#</th>
                                             <th>Addt.Charges Type</th>
                                             <th>Addt.Charges Amt</th>
+                                            <th>Conversion Rate</th>
+                                            <th>Conversion Amt</th>
                                             <th>VAT %</th>
                                             <th>VAT Amt</th>
                                             <th>Total Amt</th>
