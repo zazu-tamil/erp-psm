@@ -1,4 +1,4 @@
-<?php include_once(VIEWPATH . '/inc/header.php'); 
+<?php include_once(VIEWPATH . '/inc/header.php');
 //print_r($record_list);
 ?>
 
@@ -78,7 +78,8 @@
                         <th>Customer</th>
                         <th>Our Enquiry No</th>
                         <th>Invoice No</th>
-                        <th class="text-right">Amt W/O VAT</th> 
+                        <th class="text-right">Amt W/O VAT</th>
+                        <th class="text-right">Customs Payable</th>
                         <th class="text-right">Customs Total</th>
                         <th colspan="2" class="text-center">Action</th>
                     </tr>
@@ -87,41 +88,44 @@
                     <?php
                     foreach ($record_list as $j => $ls) {
                         ?>
-                    <tr class="mb-3">
-                        <td class="text-center"><?php echo ($j + 1); ?></td>
-                        <td><?php echo date('d-m-Y',strtotime($ls['invoice_date'])) ; ?></td>
-                        <td><?php echo htmlspecialchars($ls['ac_type_opt'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($ls['vendor_name'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($ls['customer_name'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($ls['tender_info'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($ls['invoice_no'] ?? ''); ?></td>
-                        <td class="text-right">
-                            <?php echo number_format((float) ($ls['tot_amt_wo_vat'] ?? 0), 3); ?>
-                        </td>
-                        <td class="text-right">
-                            <?php echo number_format((float) ($ls['customs_tot_amt'] ?? 0), 3); ?>
-                        </td>
-                        <td class="text-center">
-                            <button data-toggle="modal" data-target="#edit_modal"
-                                value="<?php echo $ls['customs_bill_id'] ?? ''; ?>"
-                                class="edit_record btn btn-primary btn-xs" title="Edit">
-                                <i class="fa fa-edit"></i>
-                            </button>
-                        </td>
-                        <td class="text-center">
-                            <button value="<?php echo $ls['customs_bill_id'] ?? ''; ?>" class="del_record btn btn-danger btn-xs"
-                                title="Delete">
-                                <i class="fa fa-remove"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    <?php
+                        <tr class="mb-3">
+                            <td class="text-center"><?php echo ($j + 1); ?></td>
+                            <td><?php echo date('d-m-Y', strtotime($ls['invoice_date'])); ?></td>
+                            <td><?php echo htmlspecialchars($ls['ac_type_opt'] ?? ''); ?></td>
+                            <td><?php echo htmlspecialchars($ls['vendor_name'] ?? ''); ?></td>
+                            <td><?php echo htmlspecialchars($ls['customer_name'] ?? ''); ?></td>
+                            <td><?php echo htmlspecialchars($ls['tender_info'] ?? ''); ?></td>
+                            <td><?php echo htmlspecialchars($ls['invoice_no'] ?? ''); ?></td>
+                            <td class="text-right">
+                                <?php echo number_format((float) ($ls['tot_amt_wo_vat'] ?? 0), 3); ?>
+                            </td>
+                            <td class="text-right">
+                                <?php echo number_format((float) ($ls['customs_payable'] ?? 0), 3); ?>
+                            </td>
+                            <td class="text-right">
+                                <?php echo number_format((float) ($ls['customs_tot_amt'] ?? 0), 3); ?>
+                            </td>
+                            <td class="text-center">    
+                                <button data-toggle="modal" data-target="#edit_modal"
+                                    value="<?php echo $ls['customs_bill_id'] ?? ''; ?>"
+                                    class="edit_record btn btn-primary btn-xs" title="Edit">
+                                    <i class="fa fa-edit"></i>
+                                </button>
+                            </td>
+                            <td class="text-center">
+                                <button value="<?php echo $ls['customs_bill_id'] ?? ''; ?>"
+                                    class="del_record btn btn-danger btn-xs" title="Delete">
+                                    <i class="fa fa-remove"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <?php
                     }
                     ?>
                 </tbody>
             </table>
 
-           
+
             <div class="modal fade" id="add_modal" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
@@ -131,7 +135,7 @@
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                                 <h3 class="modal-title" id="scrollmodalLabel"><strong>Add Custom's Bill
-                                        </strong></h3>
+                                    </strong></h3>
                                 <input type="hidden" name="mode" value="Add" />
                             </div>
                             <div class="modal-body">
@@ -145,10 +149,11 @@
                                         </div>
                                         <div class="col-md-6 form-group">
                                             <label>Is Bill</label><br>
-                                            <label class="radio-inline"><input type="radio" name="ac_type_opt" value="Accountable"
-                                                    checked> Accountable</label>
-                                            <label class="radio-inline"><input type="radio" name="ac_type_opt" value="Not-Accountable">
-                                                Not-Accountable</label> 
+                                            <label class="radio-inline"><input type="radio" name="ac_type_opt"
+                                                    value="Accountable" checked> Accountable</label>
+                                            <label class="radio-inline"><input type="radio" name="ac_type_opt"
+                                                    value="Not-Accountable">
+                                                Not-Accountable</label>
                                         </div>
                                     </div>
                                 </div>
@@ -161,7 +166,7 @@
                                     <div class="form-group col-md-6">
                                         <label for="tender_enquiry_id">Tender Enquiry No</label>
                                         <?php echo form_dropdown('tender_enquiry_id', ['' => 'Select Enquiry'], set_value('tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" '); ?>
-                                    </div> 
+                                    </div>
                                 </div>
 
                                 <div class="row">
@@ -170,7 +175,8 @@
                                         <div class="input-group">
                                             <?php echo form_dropdown('vendor_id', ['' => 'Select'] + $vendor_opt, set_value('vendor_id'), 'id="vendor_id" class="form-control srch_vendor_id" required'); ?>
                                             <span class="input-group-btn">
-                                                <button type="button" class="btn btn-info" id="btn_open_add_vendor" value="add_modal">Add
+                                                <button type="button" class="btn btn-info" id="btn_open_add_vendor"
+                                                    value="add_modal">Add
                                                     New</button>
                                             </span>
                                         </div>
@@ -189,11 +195,11 @@
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Entry Date</label>
-                                        <input type="date" name="inv_entry_date" id="inv_entry_date" class="form-control"
-                                            value="<?php echo set_value('inv_entry_date'); ?>">
+                                        <input type="date" name="inv_entry_date" id="inv_entry_date"
+                                            class="form-control" value="<?php echo set_value('inv_entry_date'); ?>">
                                     </div>
                                 </div>
-                                
+
                                 <div class="row">
                                     <div class="form-group col-md-12">
                                         <label>VAT Payer Sales / Purchase Group</label>
@@ -203,57 +209,60 @@
                                 <div class="row">
                                     <div class="form-group col-md-6">
                                         <label>Declaration No <span class="text-red">*</span></label>
-                                        <input type="text" name="declaration_no" id="declaration_no" class="form-control"
-                                            placeholder="Declaration No" >
+                                        <input type="text" name="declaration_no" id="declaration_no"
+                                            class="form-control" placeholder="Declaration No">
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Declaration Date</label>
-                                        <input type="date" name="declaration_date" id="declaration_date" class="form-control"
-                                            value="<?php echo set_value('declaration_date'); ?>">
+                                        <input type="date" name="declaration_date" id="declaration_date"
+                                            class="form-control" value="<?php echo set_value('declaration_date'); ?>">
                                     </div>
                                 </div>
                                 <div class="row">
-                                     
+
                                     <div class="form-group col-md-3">
                                         <label>Custom Stamp Fee</label>
-                                        <input type="number" step="any" name="custom_stamp_fee"
-                                            id="custom_stamp_fee" class="form-control"
-                                            placeholder="Custom Stamp Fee" value="0" >
+                                        <input type="number" step="any" name="custom_stamp_fee" id="custom_stamp_fee"
+                                            class="form-control" placeholder="Custom Stamp Fee" value="0">
                                     </div>
-                                   <div class="form-group col-md-3">
+                                    <div class="form-group col-md-3">
                                         <label>Bill Amount</label>
-                                        <input type="number" step="any" name="bill_amount"
-                                            id="bill_amount" class="form-control"
-                                            placeholder="Bill Amount">
+                                        <input type="number" step="any" name="bill_amount" id="bill_amount"
+                                            class="form-control" placeholder="Bill Amount">
                                     </div>
                                     <div class="form-group col-md-3">
                                         <label>Custom Duty</label>
                                         <input type="number" step="any" name="custom_duty" id="custom_duty"
                                             class="form-control" placeholder="Custom Duty">
                                     </div>
-                                    
+
                                     <div class="form-group col-md-3">
                                         <label>Total Amount <i class="text-sm">W/O VAT</i> </label>
-                                        <input type="number" step="any" name="tot_amt_wo_vat"  id="tot_amt_wo_vat" class="form-control" placeholder="Total Amount W/O VAT">
+                                        <input type="number" step="any" name="tot_amt_wo_vat" id="tot_amt_wo_vat"
+                                            class="form-control" placeholder="Total Amount W/O VAT">
                                     </div>
                                 </div>
                                 <div class="row">
-                                    
-                                    <div class="form-group col-md-4">
+
+                                    <div class="form-group col-md-3">
                                         <label>VAT %</label>
-                                        <input type="number" step="any" name="vat" id="vat"
-                                            class="form-control" placeholder="VAT %">
+                                        <input type="number" step="any" name="vat" id="vat" class="form-control"
+                                            placeholder="VAT %">
                                     </div>
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
                                         <label>VAT Amount</label>
-                                        <input type="number" step="any" name="vat_amt" id="vat_amt"
-                                            class="form-control" placeholder="VAT Amount">
+                                        <input type="number" step="any" name="vat_amt" id="vat_amt" class="form-control"
+                                            placeholder="VAT Amount">
                                     </div>
-                                     <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
+                                        <label>Customs Payable</label>
+                                        <input type="number" step="any" name="customs_payable" id="customs_payable"
+                                            class="form-control" placeholder="Customs Payable">
+                                    </div>
+                                    <div class="form-group col-md-3">
                                         <label>Customs Total Amount</label>
-                                        <input type="number" step="any" name="customs_tot_amt"
-                                            id="customs_tot_amt" class="form-control"
-                                            placeholder="Customs Total Amount">
+                                        <input type="number" step="any" name="customs_tot_amt" id="customs_tot_amt"
+                                            class="form-control" placeholder="Customs Total Amount">
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label>Status</label><br>
@@ -261,8 +270,8 @@
                                                 checked> Active</label>
                                         <label class="radio-inline"><input type="radio" name="status" value="InActive">
                                             InActive</label>
-                                    </div> 
-                                </div>  
+                                    </div>
+                                </div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -277,8 +286,7 @@
             <div class="modal fade" id="edit_modal" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
-                        <form method="post" action="" id="frmedit"
-                            enctype="multipart/form-data">
+                        <form method="post" action="" id="frmedit" enctype="multipart/form-data">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
@@ -288,7 +296,7 @@
                                 <input type="hidden" name="mode" value="Edit" />
                                 <input type="hidden" name="customs_bill_id" id="customs_bill_id" value="" />
                             </div>
-                             
+
                             <div class="modal-body">
                                 <div
                                     style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
@@ -300,10 +308,11 @@
                                         </div>
                                         <div class="col-md-6 form-group">
                                             <label>Is Bill</label><br>
-                                            <label class="radio-inline"><input type="radio" name="ac_type_opt" value="Accountable"
-                                                    checked> Accountable</label>
-                                            <label class="radio-inline"><input type="radio" name="ac_type_opt" value="Not-Accountable">
-                                                Not-Accountable</label> 
+                                            <label class="radio-inline"><input type="radio" name="ac_type_opt"
+                                                    value="Accountable" checked> Accountable</label>
+                                            <label class="radio-inline"><input type="radio" name="ac_type_opt"
+                                                    value="Not-Accountable">
+                                                Not-Accountable</label>
                                         </div>
                                     </div>
                                 </div>
@@ -316,7 +325,7 @@
                                     <div class="form-group col-md-6">
                                         <label for="tender_enquiry_id">Tender Enquiry No</label>
                                         <?php echo form_dropdown('tender_enquiry_id', ['' => 'Select Enquiry'], set_value('tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" '); ?>
-                                    </div> 
+                                    </div>
                                 </div>
 
                                 <div class="row">
@@ -324,7 +333,7 @@
                                         <label for="vendor_id">Supplier Name <span class="text-red">*</span></label>
                                         <div class="input-group1">
                                             <?php echo form_dropdown('vendor_id', ['' => 'Select'] + $vendor_opt, set_value('vendor_id'), 'id="vendor_id" class="form-control srch_vendor_id" required'); ?>
-                                           
+
                                         </div>
                                     </div>
                                     <div class="form-group col-md-6">
@@ -341,8 +350,8 @@
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Entry Date</label>
-                                        <input type="date" name="inv_entry_date" id="inv_entry_date" class="form-control"
-                                            value="<?php echo set_value('inv_entry_date'); ?>">
+                                        <input type="date" name="inv_entry_date" id="inv_entry_date"
+                                            class="form-control" value="<?php echo set_value('inv_entry_date'); ?>">
                                     </div>
                                 </div>
 
@@ -355,57 +364,60 @@
                                 <div class="row">
                                     <div class="form-group col-md-6">
                                         <label>Declaration No <span class="text-red">*</span></label>
-                                        <input type="text" name="declaration_no" id="declaration_no" class="form-control"
-                                            placeholder="Declaration No" >
+                                        <input type="text" name="declaration_no" id="declaration_no"
+                                            class="form-control" placeholder="Declaration No">
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Declaration Date</label>
-                                        <input type="date" name="declaration_date" id="declaration_date" class="form-control"
-                                            value="<?php echo set_value('declaration_date'); ?>">
+                                        <input type="date" name="declaration_date" id="declaration_date"
+                                            class="form-control" value="<?php echo set_value('declaration_date'); ?>">
                                     </div>
                                 </div>
-                                 <div class="row">
-                                     
+                                <div class="row">
+
                                     <div class="form-group col-md-3">
                                         <label>Custom Stamp Fee</label>
-                                        <input type="number" step="any" name="custom_stamp_fee"
-                                            id="custom_stamp_fee" class="form-control"
-                                            placeholder="Custom Stamp Fee" value="0" >
+                                        <input type="number" step="any" name="custom_stamp_fee" id="custom_stamp_fee"
+                                            class="form-control" placeholder="Custom Stamp Fee" value="0">
                                     </div>
-                                   <div class="form-group col-md-3">
+                                    <div class="form-group col-md-3">
                                         <label>Bill Amount</label>
-                                        <input type="number" step="any" name="bill_amount"
-                                            id="bill_amount" class="form-control"
-                                            placeholder="Bill Amount">
+                                        <input type="number" step="any" name="bill_amount" id="bill_amount"
+                                            class="form-control" placeholder="Bill Amount">
                                     </div>
                                     <div class="form-group col-md-3">
                                         <label>Custom Duty</label>
                                         <input type="number" step="any" name="custom_duty" id="custom_duty"
                                             class="form-control" placeholder="Custom Duty">
                                     </div>
-                                    
+
                                     <div class="form-group col-md-3">
                                         <label>Total Amount <i class="text-sm">W/O VAT</i> </label>
-                                        <input type="number" step="any" name="tot_amt_wo_vat"  id="tot_amt_wo_vat" class="form-control" placeholder="Total Amount W/O VAT">
+                                        <input type="number" step="any" name="tot_amt_wo_vat" id="tot_amt_wo_vat"
+                                            class="form-control" placeholder="Total Amount W/O VAT">
                                     </div>
                                 </div>
                                 <div class="row">
-                                    
-                                    <div class="form-group col-md-4">
+
+                                    <div class="form-group col-md-3">
                                         <label>VAT %</label>
-                                        <input type="number" step="any" name="vat" id="vat"
-                                            class="form-control" placeholder="VAT %">
+                                        <input type="number" step="any" name="vat" id="vat" class="form-control"
+                                            placeholder="VAT %">
                                     </div>
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
                                         <label>VAT Amount</label>
-                                        <input type="number" step="any" name="vat_amt" id="vat_amt"
-                                            class="form-control" placeholder="VAT Amount">
+                                        <input type="number" step="any" name="vat_amt" id="vat_amt" class="form-control"
+                                            placeholder="VAT Amount">
                                     </div>
-                                     <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
+                                        <label>Customs Payable</label>
+                                        <input type="number" step="any" name="customs_payable" id="customs_payable"
+                                            class="form-control" placeholder="Customs Payable">
+                                    </div>
+                                    <div class="form-group col-md-3">
                                         <label>Customs Total Amount</label>
-                                        <input type="number" step="any" name="customs_tot_amt"
-                                            id="customs_tot_amt" class="form-control"
-                                            placeholder="Customs Total Amount">
+                                        <input type="number" step="any" name="customs_tot_amt" id="customs_tot_amt"
+                                            class="form-control" placeholder="Customs Total Amount">
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label>Status</label><br>
@@ -413,9 +425,9 @@
                                                 checked> Active</label>
                                         <label class="radio-inline"><input type="radio" name="status" value="InActive">
                                             InActive</label>
-                                    </div> 
-                                </div> 
-                                 
+                                    </div>
+                                </div>
+
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>

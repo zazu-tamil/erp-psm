@@ -360,26 +360,41 @@ $(function() {
             success: function(res_ar) {
                 //console.log(res_ar);
                 let res = res_ar[0];
-                $("#edit_modal #customs_bill_id").val(res.customs_bill_id);
-                $(`#edit_modal input[name="ac_type_opt"][value="${res.ac_type_opt}"]`).prop('checked', true); 
-                $("#edit_modal #srch_customer_id").val(res.customer_id);
+                if (!res) return;
+
+                $('#edit_modal #customs_bill_id').val(res.customs_bill_id);
+
+                // Use .filter() for radio buttons to avoid jQuery selector issues with special characters
+                $('#edit_modal input[name="ac_type_opt"]').filter(function() {
+                    return $(this).val() === res.ac_type_opt;
+                }).prop('checked', true);
+
+                $('#edit_modal #srch_customer_id').val(res.customer_id).trigger('change');
                 edit_load_tender_enq(res.tender_enquiry_id);
-                $("#edit_modal #tender_enquiry_id").val(res.tender_enquiry_id);
-                $("#edit_modal #vendor_id").val(res.vendor_id);
-                $("#edit_modal #invoice_date").val(res.invoice_date);
-                $("#edit_modal #invoice_no").val(res.invoice_no);
-                $("#edit_modal #inv_entry_date").val(res.inv_entry_date);
-                $("#edit_modal #vat_payer_purchase_grp").val(res.vat_payer_purchase_grp);
-                $("#edit_modal #declaration_no").val(res.declaration_no);
-                $("#edit_modal #declaration_date").val(res.declaration_date);
-                $("#edit_modal #custom_duty").val(res.custom_duty);
-                $("#edit_modal #custom_stamp_fee").val(res.custom_stamp_fee);
-                $("#edit_modal #bill_amount").val(res.bill_amount);
-                $("#edit_modal #tot_amt_wo_vat").val(res.tot_amt_wo_vat); 
-                $("#edit_modal #vat").val(res.vat);
-                $("#edit_modal #vat_amt").val(res.vat_amt);
-                $("#edit_modal #customs_tot_amt").val(res.customs_tot_amt);
-                $(`#edit_modal input[name="status"][value="${res.status}"]`).prop('checked', true);
+                $('#edit_modal #srch_tender_enquiry_id').val(res.tender_enquiry_id).trigger('change');
+                $('#edit_modal #vendor_id').val(res.vendor_id).trigger('change');
+                $('#edit_modal #invoice_date').val(res.invoice_date);
+                $('#edit_modal #invoice_no').val(res.invoice_no);
+                $('#edit_modal #inv_entry_date').val(res.inv_entry_date);
+                $('#edit_modal #vat_payer_purchase_grp').val(res.vat_payer_purchase_grp);
+                $('#edit_modal #declaration_no').val(res.declaration_no);
+                $('#edit_modal #declaration_date').val(res.declaration_date);
+                $('#edit_modal #custom_duty').val(res.custom_duty);
+                $('#edit_modal #custom_stamp_fee').val(res.custom_stamp_fee);
+                $('#edit_modal #bill_amount').val(res.bill_amount);
+                $('#edit_modal #tot_amt_wo_vat').val(res.tot_amt_wo_vat);
+                $('#edit_modal #vat').val(res.vat);
+                $('#edit_modal #vat_amt').val(res.vat_amt);
+                $('#edit_modal #customs_payable').val(res.customs_payable);
+                $('#edit_modal #customs_tot_amt').val(res.customs_tot_amt);
+
+                // Use .filter() for status radio buttons too
+                $('#edit_modal input[name="status"]').filter(function() {
+                    return $(this).val() === res.status;
+                }).prop('checked', true);
+
+                // Recalculate totals after populating fields
+                calcTotals1();
             } 
 
         });
@@ -407,9 +422,12 @@ $(function() {
         let vat_amt = tot_amt_wo_vat * (vat / 100);
         $('#vat_amt').val(vat_amt.toFixed(3));  
 
+        // Customs Payable = Custom Stamp Fee + Custom Duty + VAT Amount
+        let customs_payable = custom_stamp_fee + custom_duty + vat_amt;
+        $('#customs_payable').val(customs_payable.toFixed(3));
+
         // Customs Total
         let customs_tot_amt = tot_amt_wo_vat + vat_amt + custom_stamp_fee;
-
         $('#customs_tot_amt').val(customs_tot_amt.toFixed(3));
     }
 
@@ -434,9 +452,12 @@ $(function() {
         let vat_amt = tot_amt_wo_vat * (vat / 100);
         $('#edit_modal #vat_amt').val(vat_amt.toFixed(3));  
 
+        // Customs Payable = Custom Stamp Fee + Custom Duty + VAT Amount
+        let customs_payable = custom_stamp_fee + custom_duty + vat_amt;
+        $('#edit_modal #customs_payable').val(customs_payable.toFixed(3));
+
         // Customs Total
         let customs_tot_amt = tot_amt_wo_vat + vat_amt + custom_stamp_fee;
-
         $('#edit_modal #customs_tot_amt').val(customs_tot_amt.toFixed(3));
     }
 

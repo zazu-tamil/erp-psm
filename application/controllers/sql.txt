@@ -706,3 +706,9 @@ ALTER TABLE `vendor_purchase_invoice_info`
 	ADD COLUMN `total_amount_wo_tax_inc_addl` DECIMAL(14,3) NULL DEFAULT NULL AFTER `total_amount_after_convert`,
 	ADD COLUMN `total_tax_amount_inc_addl` DECIMAL(14,3) NULL DEFAULT NULL AFTER `total_amount_wo_tax_inc_addl`,
 	ADD COLUMN `total_amount_inc_addl` DECIMAL(14,3) NULL DEFAULT NULL AFTER `total_tax_amount_inc_addl`;
+
+
+16-06-2026 
+
+ALTER TABLE `customs_bill_info`
+	ADD COLUMN `customs_payable` DECIMAL(10,3) NULL DEFAULT NULL AFTER `vat_amt`;
