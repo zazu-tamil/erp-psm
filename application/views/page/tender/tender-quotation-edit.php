@@ -446,9 +446,13 @@
 
             <div class="box-footer">
                 <div class="row">
-                    <div class="col-md-6"><a href="<?php echo site_url('tender-quotation-list'); ?>"
+                    <div class="col-md-4"><a href="<?php echo site_url('tender-quotation-list'); ?>"
                             class="btn btn-default"><i class="fa fa-arrow-left"></i> Back To List</a></div>
-                    <div class="col-md-6 text-right"><button type="submit" class="btn btn-success"><i
+                    <div class="col-md-4 text-center">
+                          <a href="<?php echo site_url('tender-quotation-print/' . $header['tender_quotation_id']); ?>" target="_blank" class="btn btn-info"><i class="fa fa-print"></i> Print</a>        
+
+                    </div>
+                    <div class="col-md-4 text-right"><button type="submit" class="btn btn-success"><i
                                 class="fa fa-save"></i> Update</button></div>
                 </div>
             </div>

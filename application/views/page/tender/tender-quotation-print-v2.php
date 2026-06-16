@@ -92,7 +92,7 @@ echo "</pre>";
         }
 
         .items-table {
-            width: 100%;
+            width: 95%;
             border-collapse: collapse;
             margin-top: 10px;
         }
@@ -323,7 +323,7 @@ echo "</pre>";
             if (!isset($tot_vat[floatval($addt_chrg['addt_charges_vat'])]))
                 $tot_vat[floatval($addt_chrg['addt_charges_vat'])] = 0;
             $tot_vat[floatval($addt_chrg['addt_charges_vat'])] += $addt_chrg['addt_charges_vat_amt'];
-            $grand_total += $addt_chrg['addt_charges_amt'] + $total_vat_amount;
+            $grand_total += $addt_chrg['addt_charges_amt']  ;
         ?>
             <tr class="items-table">
                 <td colspan="5" class="text-right">
@@ -380,9 +380,9 @@ echo "</pre>";
             </tr>
         <?php endif; ?>
 
-        <tr>
+        <!-- <tr>
             <td colspan="7" height="80"></td>
-        </tr>
+        </tr> -->
 
         <tr>
             <td colspan="7" align="right">
