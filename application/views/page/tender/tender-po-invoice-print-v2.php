@@ -544,7 +544,7 @@
                                                     if (!isset($tot_vat[floatval($addt_chrg['addt_charges_vat'])]))
                                                         $tot_vat[floatval($addt_chrg['addt_charges_vat'])] = 0;
                                                     $tot_vat[floatval($addt_chrg['addt_charges_vat'])] += $addt_chrg['addt_charges_vat_amt'];
-                                                    $grand_total += $addt_chrg['addt_charges_amt'] + $total_vat_amount;
+                                                    $grand_total += $addt_chrg['addt_charges_amt'];
                                                 ?>
                                                     <div class="summary-row" style="border-bottom:1px solid #000;">
                                                         <span><?php echo htmlspecialchars($addt_chrg['addt_charges_type_name']); ?></span>
@@ -558,7 +558,7 @@
                                                 </div>
                                                 <div class="summary-row">
                                                     <span>TOTAL <?php echo htmlspecialchars($currency_code); ?></span>
-                                                    <span><?php echo number_format($grand_total, $decimal_point); ?></span>
+                                                    <span><?php echo number_format(($grand_total + $total_vat_amount), $decimal_point); ?></span>
                                                 </div>
                                             </div>
                                         </td>
@@ -580,7 +580,7 @@
                                         if (!isset($tot_vat[floatval($addt_chrg['addt_charges_vat'])]))
                                             $tot_vat[floatval($addt_chrg['addt_charges_vat'])] = 0;
                                         $tot_vat[floatval($addt_chrg['addt_charges_vat'])] += $addt_chrg['addt_charges_vat_amt'];
-                                        $grand_total += $addt_chrg['addt_charges_amt'] + $total_vat_amount;
+                                        $grand_total += $addt_chrg['addt_charges_amt'];
                                     ?>
                                         <tr class="items-table">
                                             <td colspan="5" class="text-right">
@@ -596,7 +596,7 @@
                                             <strong>VAT <?php echo number_format($vat_percentage ?? 0, 0); ?>%</strong>
                                         </td>
                                         <td colspan="2" class="text-right" style="padding:10px; border:1px solid #000;">
-                                            <strong><?php echo number_format($total_vat_amount, $decimal_point); ?></strong>
+                                            <strong><?php echo number_format(($total_vat_amount), $decimal_point); ?></strong>
                                         </td>
                                     </tr>
                                     <tr>
@@ -604,7 +604,7 @@
                                             <strong>TOTAL <?php echo htmlspecialchars($currency_code); ?></strong>
                                         </td>
                                         <td colspan="2" class="text-right" style="padding:12px; border:1px solid #000; font-size:11pt;">
-                                            <strong><?php echo number_format($grand_total, $decimal_point); ?></strong>
+                                            <strong><?php echo number_format(($grand_total + $total_vat_amount), $decimal_point); ?></strong>
                                         </td>
                                     </tr>
                                 <?php endif; ?>
@@ -612,7 +612,7 @@
                         </table>
 
                         <!-- Total in Words -->
-                        <?php $amount_in_words = convertAmountToWords($grand_total, $currency_code, $decimal_point); ?>
+                        <?php $amount_in_words = convertAmountToWords(($grand_total + $total_vat_amount), $currency_code, $decimal_point); ?>
                         <div class="amount-in-words">
                             <strong>Total <?php echo htmlspecialchars($currency_code); ?>:</strong>
                             <?php echo $amount_in_words; ?> Only.

@@ -939,7 +939,7 @@
                                     <th width="5%">S.No</th>
                                     <th width="10%">Supplier Rate Enquiry Id</th>
                                     <th width="12%">Supplier Rate Enquiry Item Id</th>
-                                    <th width="12%">Supplier Enquiry Item Id</th>
+                                    <th width="12%">Tender Enquiry Item Id</th>
                                     <th width="12%">Item Code</th>
                                     <th width="29%" colspan="2">Item Description</th>
                                     <th width="8%">UOM</th>
