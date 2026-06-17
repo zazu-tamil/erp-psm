@@ -1960,6 +1960,7 @@ class Tender extends CI_Controller
             ORDER BY a.customer_contact_id desc
         ";
         $query = $this->db->query($sql);
+        $data['customer_contact_opt'] = ['' => 'Select'];
         foreach ($query->result_array() as $row) {
             $data['customer_contact_opt'][$row['customer_contact_id']] = $row['contact_person_name'];
         }
