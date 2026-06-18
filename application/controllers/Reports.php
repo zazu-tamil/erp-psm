@@ -1760,8 +1760,13 @@ class Reports extends CI_Controller
 
                 $payment_sql = "
                     SELECT IFNULL(SUM(amount), 0) AS total_payments
-                    FROM vendor_payment_info
-                    WHERE status = 'Active' AND vendor_id = '$esc_vendor' AND payment_date >= '$esc_op' AND payment_date < '$esc_from'
+                    FROM (
+                        SELECT amount FROM vendor_payment_info
+                        WHERE status = 'Active' AND vendor_id = '$esc_vendor' AND payment_date >= '$esc_op' AND payment_date < '$esc_from'
+                        UNION ALL
+                        SELECT adv_payment_amt AS amount FROM vendor_advance_payment_info
+                        WHERE status = 'Active' AND vendor_id = '$esc_vendor' AND adv_payment_date >= '$esc_op' AND adv_payment_date < '$esc_from'
+                    ) AS pay_adv
                 ";
                 $pay_query = $this->db->query($payment_sql);
                 $pay_row = $pay_query->row_array();
@@ -1806,8 +1811,13 @@ class Reports extends CI_Controller
                 // Total Payments before from_date
                 $payment_sql = "
                     SELECT IFNULL(SUM(amount), 0) AS total_payments
-                    FROM vendor_payment_info
-                    WHERE status = 'Active' AND payment_date < '$esc_from'
+                    FROM (
+                        SELECT amount FROM vendor_payment_info
+                        WHERE status = 'Active' AND payment_date < '$esc_from'
+                        UNION ALL
+                        SELECT adv_payment_amt AS amount FROM vendor_advance_payment_info
+                        WHERE status = 'Active' AND adv_payment_date < '$esc_from'
+                    ) AS pay_adv
                 ";
                 $pay_query = $this->db->query($payment_sql);
                 $pay_row = $pay_query->row_array();
@@ -1913,6 +1923,23 @@ class Reports extends CI_Controller
                   " . (!empty($vendor_id) ? "AND a.vendor_id = '$esc_vendor'" : "") . "
                   " . (!empty($from_date) ? "AND a.payment_date >= '$esc_from'" : "") . "
                   " . (!empty($to_date) ? "AND a.payment_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
+                  
+                UNION ALL
+                
+                SELECT 
+                    a.adv_payment_date AS tr_date,
+                    CONCAT('ADV-', a.adv_payment_id) AS voucher_no,
+                    'Vendor Advance Payment' AS description,
+                    0.000 AS purchase_amt,
+                    a.adv_payment_amt AS paid_amt,
+                    'payment' AS type,
+                    v.vendor_name
+                FROM vendor_advance_payment_info a
+                LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
+                WHERE a.status = 'Active'
+                  " . (!empty($vendor_id) ? "AND a.vendor_id = '$esc_vendor'" : "") . "
+                  " . (!empty($from_date) ? "AND a.adv_payment_date >= '$esc_from'" : "") . "
+                  " . (!empty($to_date) ? "AND a.adv_payment_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
             ) AS transactions
             ORDER BY tr_date ASC, voucher_no ASC
         ";

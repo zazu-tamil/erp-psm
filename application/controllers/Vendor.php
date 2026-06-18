@@ -1487,7 +1487,7 @@ class Vendor extends CI_Controller
         $query = $this->db->query($sql, [$vendor_po_id]);
         $data['item_list'] = $query->result_array();
 
-         $sql = "
+        $sql = "
            SELECT 
             a.*,
             b.addt_charges_type_name
@@ -6177,5 +6177,241 @@ class Vendor extends CI_Controller
         $data['pagination'] = $this->pagination->create_links();
 
         $this->load->view('page/vendor/customs-bill-list', $data);
+    }
+
+    public function vendor_adv_payment_list($sno = 0)
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+        $data['js'] = 'vendor/vendor-advance-payment.inc';
+        $data['title'] = 'Vendor Advance Payment';
+
+        if ($this->input->post('mode') == 'Add') {
+            $ins = array(
+                'ac_type_opt' => $this->input->post('ac_type_opt'),
+                'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
+                'vendor_id' => $this->input->post('vendor_id'),
+                'vendor_po_id' => $this->input->post('vendor_po_id'),
+                'adv_payment_date' => $this->input->post('adv_payment_date') ? date('Y-m-d', strtotime($this->input->post('adv_payment_date'))) : null,
+                'adv_payment_amt' => $this->input->post('adv_payment_amt'),
+                'status' => $this->input->post('status') ? $this->input->post('status') : 'Active',
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_date' => date('Y-m-d H:i:s'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            );
+
+            $this->db->insert('vendor_advance_payment_info', $ins);
+            $this->session->set_flashdata('success', 'Advance Payment added successfully.');
+            redirect('vendor-adv-payment');
+        }
+
+        if ($this->input->post('mode') == 'Edit') {
+            $upd = array(
+                'ac_type_opt' => $this->input->post('ac_type_opt'),
+                'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
+                'vendor_id' => $this->input->post('vendor_id'),
+                'vendor_po_id' => $this->input->post('vendor_po_id'),
+                'adv_payment_date' => $this->input->post('adv_payment_date') ? date('Y-m-d', strtotime($this->input->post('adv_payment_date'))) : null,
+                'adv_payment_amt' => $this->input->post('adv_payment_amt'),
+                'status' => $this->input->post('status') ? $this->input->post('status') : 'Active',
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            );
+
+            $this->db->where('adv_payment_id', $this->input->post('adv_payment_id'));
+            $this->db->update('vendor_advance_payment_info', $upd);
+            $this->session->set_flashdata('success', 'Advance Payment updated successfully.');
+            redirect('vendor-adv-payment');
+        }
+
+        if ($this->input->post('mode') == 'Delete') {
+            $id = $this->input->post('del_id');
+            $this->db->where('adv_payment_id', $id)->update('vendor_advance_payment_info', ['status' => 'Delete']);
+            echo json_encode(['status' => true]);
+            exit;
+        }
+
+        $where = "1=1";
+
+        if ($this->uri->segment(2) == 'clear_filter') {
+            $this->session->unset_userdata('srch_vendor_id');
+            $this->session->unset_userdata('srch_from_date');
+            $this->session->unset_userdata('srch_to_date');
+            redirect('vendor-adv-payment');
+        }
+
+        // Date Filter
+        if ($this->input->post('srch_from_date') !== null) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $this->session->set_userdata('srch_from_date', $srch_from_date);
+            $this->session->set_userdata('srch_to_date', $srch_to_date);
+        } elseif ($this->session->userdata('srch_from_date')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_to_date');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = '';
+            $data['srch_to_date'] = $srch_to_date = '';
+        }
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $where .= " AND a.adv_payment_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'";
+        }
+
+        if ($this->input->post('srch_vendor_id') !== null) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->input->post('srch_vendor_id');
+            $this->session->set_userdata('srch_vendor_id', $srch_vendor_id);
+        } elseif ($this->session->userdata('srch_vendor_id')) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->session->userdata('srch_vendor_id');
+        } else {
+            $data['srch_vendor_id'] = $srch_vendor_id = '';
+        }
+        if (!empty($srch_vendor_id)) {
+            $where .= " AND a.vendor_id = '" . $this->db->escape_str($srch_vendor_id) . "'";
+        }
+
+        $this->load->library('pagination');
+
+        $this->db->where('status != ', 'Delete');
+        if (!empty($srch_vendor_id)) {
+            $this->db->where('vendor_id', $srch_vendor_id);
+        }
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $this->db->where('adv_payment_date >=', $srch_from_date);
+            $this->db->where('adv_payment_date <=', $srch_to_date);
+        }
+        $this->db->from('vendor_advance_payment_info as a');
+        $data['total_records'] = $cnt = $this->db->count_all_results();
+
+        $data['sno'] = $this->uri->segment(2, 0);
+
+        $config['base_url'] = trim(site_url('vendor-adv-payment') . '/' . $this->uri->segment(2, 0));
+        $config['total_rows'] = $cnt;
+        $config['per_page'] = 50;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '<span class="sr-only">(current)</span></a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = "Prev";
+        $config['next_link'] = "Next";
+        $this->pagination->initialize($config);
+
+        $sql = "
+                select 
+                a.*,  
+                c.vendor_name,
+                po.po_no,
+                get_tender_info(a.tender_enquiry_id) as tender_info 
+                from vendor_advance_payment_info as a   
+                left join vendor_info as c on c.vendor_id = a.vendor_id and c.status = 'Active' 
+                left join vendor_po_info as po on po.vendor_po_id = a.vendor_po_id
+                where a.status != 'Delete' 
+                and $where   
+                order by a.adv_payment_id desc
+                limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
+        ";
+
+        $query = $this->db->query($sql);
+
+        $data['record_list'] = array();
+
+        foreach ($query->result_array() as $row) {
+            $data['record_list'][] = $row;
+        }
+
+        $sql = "
+            SELECT vendor_id,vendor_name 
+            FROM vendor_info 
+            WHERE status = 'Active' 
+            ORDER BY vendor_name ASC";
+        $query = $this->db->query($sql);
+        $data['vendor_opt'] = ['' => 'Select Vendor'];
+        foreach ($query->result_array() as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+        }
+
+        $sql = "
+            SELECT 
+                a.tender_enquiry_id, 
+                get_tender_info(a.tender_enquiry_id) as tender_details
+            FROM tender_enquiry_info AS a 
+            WHERE a.status = 'Active'  
+            ORDER BY a.tender_enquiry_id DESC
+        ";
+        $query = $this->db->query($sql);
+        $data['tender_enquiry_opt'] = ['' => 'Select Tender Enquiry'];
+        foreach ($query->result_array() as $row) {
+            $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_details'];
+        }
+
+        $data['ac_type_opt_list'] = [
+            '' => 'Select Account Type',
+            'Bank' => 'Bank',
+            'Cash' => 'Cash'
+        ];
+
+        $data['pagination'] = $this->pagination->create_links();
+
+        $this->load->view('page/vendor/vendor-adv-payment-list', $data);
+    }
+
+    public function get_vendor_by_tender_id_ajax()
+    {
+        $tender_enquiry_id = $this->input->post('tender_enquiry_id');
+        $sql = "
+            SELECT DISTINCT v.vendor_id, v.vendor_name 
+            FROM vendor_po_info po
+            JOIN vendor_info v ON po.vendor_id = v.vendor_id
+            WHERE po.tender_enquiry_id = ? AND po.status != 'Delete' AND v.status = 'Active'
+        ";
+        $query = $this->db->query($sql, [$tender_enquiry_id]);
+        $vendors = $query->result_array();
+
+        if(empty($vendors)) {
+            $sql = "
+                SELECT DISTINCT v.vendor_id, v.vendor_name 
+                FROM vendor_rate_enquiry_info r
+                JOIN vendor_info v ON r.vendor_id = v.vendor_id
+                WHERE r.tender_enquiry_id = ? AND r.status != 'Delete' AND v.status = 'Active'
+            ";
+            $query = $this->db->query($sql, [$tender_enquiry_id]);
+            $vendors = $query->result_array();
+        }
+
+        echo json_encode($vendors);
+        exit;
+    }
+
+    public function get_vendor_po_by_vendor_ajax()
+    {
+        $tender_enquiry_id = $this->input->post('tender_enquiry_id');
+        $vendor_id = $this->input->post('vendor_id');
+
+        $sql = "
+            SELECT vendor_po_id, po_no 
+            FROM vendor_po_info 
+            WHERE tender_enquiry_id = ? AND vendor_id = ? AND status != 'Delete'
+        ";
+        $query = $this->db->query($sql, [$tender_enquiry_id, $vendor_id]);
+        $pos = $query->result_array();
+
+        echo json_encode($pos);
+        exit;
     }
 }

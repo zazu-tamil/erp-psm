@@ -220,7 +220,8 @@ $vendor_m_grp = [
     'local-purchase-bill-list',
     'delivery-partner-bill-list',
     'customs-bill-list',
-    'vendor-payment-list'
+    'vendor-payment-list',
+    'vendor-adv-payment'
 ];
 ?>
 
@@ -344,6 +345,11 @@ $vendor_m_grp = [
                 </li>
 
             </ul>
+        </li>
+        <li class="<?= ($current_page === 'vendor-adv-payment') ? 'active' : '' ?>">
+            <a href="<?= site_url('vendor-adv-payment') ?>">
+                <i class="fa fa-list"></i> Supplier Advance Payment
+            </a>
         </li>
         <li class="<?= ($current_page === 'vendor-payment-list') ? 'active' : '' ?>">
             <a href="<?= site_url('vendor-payment-list') ?>">

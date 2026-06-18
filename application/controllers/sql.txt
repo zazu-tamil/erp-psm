@@ -712,3 +712,26 @@ ALTER TABLE `vendor_purchase_invoice_info`
 
 ALTER TABLE `customs_bill_info`
 	ADD COLUMN `customs_payable` DECIMAL(10,3) NULL DEFAULT NULL AFTER `vat_amt`;
+
+
+18-06-2026 
+
+CREATE TABLE `vendor_advance_payment_info` (
+	`adv_payment_id` INT(11) NOT NULL AUTO_INCREMENT,
+	`ac_type_opt` VARCHAR(50) NULL DEFAULT NULL,
+	`tender_enquiry_id` INT(11) NULL DEFAULT NULL,
+	`vendor_id` INT(11) NULL DEFAULT NULL,
+	`vendor_po_id` INT(11) NULL DEFAULT NULL,
+	`adv_payment_date` DATE NULL DEFAULT NULL,
+	`adv_payment_amt` DECIMAL(15,2) NULL DEFAULT '0',
+	`status` ENUM('Active','Inactive','Delete') NULL DEFAULT 'Active',
+	`created_by` INT(11) NULL DEFAULT NULL,
+	`created_date` DATETIME NULL DEFAULT NULL,
+	`updated_by` INT(11) NULL DEFAULT NULL,
+	`updated_date` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`adv_payment_id`)
+)	
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1
+;

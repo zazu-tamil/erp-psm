@@ -319,3 +319,8 @@ $route['customer-opening-balance-list/(:num)'] = 'master/customer_opening_balanc
 //customer statement
 $route['customer-statement-report'] = 'reports/customer_statement_report'; 
 $route['get-customer-opening-balance'] = 'reports/get_customer_opening_balance_ajax';
+
+
+//vendor adv payment
+$route['vendor-adv-payment'] = 'vendor/vendor_adv_payment_list';
+$route['vendor-adv-payment/(:any)'] = 'vendor/vendor_adv_payment_list/$1';
