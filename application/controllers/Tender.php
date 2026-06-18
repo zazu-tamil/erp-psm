@@ -5150,7 +5150,7 @@ class Tender extends CI_Controller
             where a.status = 'Active' 
             and b.status = 'Active'
             and a.tender_po_id = '" . $tender_po_id . "' 
-            and a.tender_dc_id in (" . $dc_ids . ")
+            and a.tender_dc_id in (" . implode(',', $dc_ids) . ")
             group by b.tender_dc_item_id 
             order by b.tender_dc_item_id asc
         ";
