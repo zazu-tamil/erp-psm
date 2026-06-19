@@ -333,11 +333,11 @@ class Reports extends CI_Controller
         $data['vat_payer_purchase_opt'] = ['' => 'All VAT Payer Purchase Category'];
         foreach ($query->result_array() as $row) {
             $data['vat_payer_purchase_opt'][$row['vat_filing_head_name']] = $row['vat_filing_head_name'];
-        } 
+        }
         $this->load->view('page/reports/purchase-nbr-report', $data);
     }
 
-    
+
 
     public function tender_enquiry_summary_report()
     {
@@ -1177,9 +1177,9 @@ class Reports extends CI_Controller
         }
 
         $data = array();
-        $data['js'] = 'summary/tender-enquiry-summary-report.inc';
-        $data['s_url'] = 'tender-quotation-list';
-        $data['title'] = 'Tender Enquiry Summary Report';
+        $data['js'] = 'reports/reports.inc';
+        $data['s_url'] = 'item-rate-report';
+        $data['title'] = 'Item Rate Report';
 
         $where = "1=1";
 
@@ -1333,6 +1333,154 @@ class Reports extends CI_Controller
 
 
 
+    }
+
+
+    public function item_search_v3()
+    {
+        $term = $this->input->post('search');
+        $srch_typ = $this->input->post('srch_typ');
+
+        $term_esc = $this->db->escape_like_str($term);
+        if ($srch_typ == 'desc') {
+            $cond = "item_desc LIKE '%" . $term_esc . "%'";
+        } else {
+            $cond = "item_code LIKE '%" . $term_esc . "%'";
+        }
+
+        $sql = "
+            SELECT * FROM (
+                -- Customer Quotation (Tender Quotation)
+                SELECT 
+                    'Customer Quotation' AS tbl,
+                    b.item_code,
+                    b.item_desc,
+                    b.uom,
+                    DATE_FORMAT(a.quote_date, '%d-%m-%Y') AS doc_date,
+                    a.quote_date AS raw_date,
+                    b.rate,
+                    b.qty,
+                    a.tender_enquiry_id,
+                    get_tender_info(a.tender_enquiry_id) AS tender_details
+                FROM tender_quotation_info a 
+                JOIN tender_quotation_item_info b ON a.tender_quotation_id = b.tender_quotation_id 
+                WHERE a.status = 'Active' AND b.status = 'Active' AND b.{$cond}
+
+                UNION ALL
+
+                -- Customer PO (Tender PO)
+                SELECT 
+                    'Customer PO' AS tbl,
+                    b.item_code,
+                    b.item_desc,
+                    b.uom,
+                    DATE_FORMAT(a.po_date, '%d-%m-%Y') AS doc_date,
+                    a.po_date AS raw_date,
+                    b.rate,
+                    b.qty,
+                    a.tender_enquiry_id,
+                    get_tender_info(a.tender_enquiry_id) AS tender_details
+                FROM customer_tender_po_info a 
+                JOIN tender_po_item_info b ON a.tender_po_id = b.tender_po_id 
+                WHERE a.status = 'Active' AND b.status = 'Active' AND b.{$cond}
+
+                UNION ALL
+
+                -- Vendor Quotation
+                SELECT 
+                    'Vendor Quotation' AS tbl,
+                    b.item_code,
+                    b.item_desc,
+                    b.uom,
+                    DATE_FORMAT(a.quote_date, '%d-%m-%Y') AS doc_date,
+                    a.quote_date AS raw_date,
+                    b.rate,
+                    b.qty,
+                    a.tender_enquiry_id,
+                    get_tender_info(a.tender_enquiry_id) AS tender_details
+                FROM vendor_quotation_info a 
+                JOIN vendor_quote_item_info b ON a.vendor_quote_id = b.vendor_quote_id 
+                WHERE a.status = 'Active' AND b.status = 'Active' AND b.{$cond}
+
+                UNION ALL
+
+                -- Vendor PO
+                SELECT 
+                    'Vendor PO' AS tbl,
+                    b.item_code,
+                    b.item_desc,
+                    b.uom,
+                    DATE_FORMAT(a.po_date, '%d-%m-%Y') AS doc_date,
+                    a.po_date AS raw_date,
+                    b.rate,
+                    b.qty,
+                    a.tender_enquiry_id,
+                    get_tender_info(a.tender_enquiry_id) AS tender_details
+                FROM vendor_po_info a 
+                JOIN vendor_po_item_info b ON a.vendor_po_id = b.vendor_po_id 
+                WHERE a.status = 'Active' AND b.status = 'Active' AND b.{$cond}
+            ) AS p
+            ORDER BY p.item_code ASC, p.raw_date DESC
+        ";
+
+        $query = $this->db->query($sql);
+        $results = $query->result_array();
+
+        $grouped = [];
+        foreach ($results as $row) {
+            $item_code = $row['item_code'];
+            $enq_id = $row['tender_enquiry_id'] ? $row['tender_enquiry_id'] : 0;
+            $key = $item_code . '_' . $enq_id;
+
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'item_code' => $item_code,
+                    'item_desc' => $row['item_desc'],
+                    'uom' => $row['uom'],
+                    'tender_enquiry_id' => $enq_id,
+                    'enquiry_no' => $row['tender_details'] ? $row['tender_details'] : '',
+                    'cust_quote' => null,
+                    'cust_po' => null,
+                    'vend_quote' => null,
+                    'vend_po' => null
+                ];
+            }
+
+            if (empty($grouped[$key]['item_desc'])) {
+                $grouped[$key]['item_desc'] = $row['item_desc'];
+            }
+            if (empty($grouped[$key]['uom'])) {
+                $grouped[$key]['uom'] = $row['uom'];
+            }
+
+            $type = $row['tbl'];
+            $tx = [
+                'date' => $row['doc_date'],
+                'rate' => $row['rate'],
+                'qty' => $row['qty'],
+                'enq_no' => $row['tender_details'] ? $row['tender_details'] : ''
+            ];
+
+            if ($type === 'Customer Quotation') {
+                if ($grouped[$key]['cust_quote'] === null) {
+                    $grouped[$key]['cust_quote'] = $tx;
+                }
+            } elseif ($type === 'Customer PO') {
+                if ($grouped[$key]['cust_po'] === null) {
+                    $grouped[$key]['cust_po'] = $tx;
+                }
+            } elseif ($type === 'Vendor Quotation') {
+                if ($grouped[$key]['vend_quote'] === null) {
+                    $grouped[$key]['vend_quote'] = $tx;
+                }
+            } elseif ($type === 'Vendor PO') {
+                if ($grouped[$key]['vend_po'] === null) {
+                    $grouped[$key]['vend_po'] = $tx;
+                }
+            }
+        }
+
+        echo json_encode(array_values($grouped));
     }
 
 
@@ -1654,7 +1802,7 @@ class Reports extends CI_Controller
 
         $this->load->view('page/reports/in-stock-item-report', $data);
     }
- 
+
     public function vendor_statement_report()
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in')) {
@@ -1718,9 +1866,9 @@ class Reports extends CI_Controller
                 $op_row = $op_query->row_array();
                 $data['op_details'] = $op_row;
                 $op_date = $op_row['opening_date'];
-                $op_amount = (float)$op_row['opening_amount'];
+                $op_amount = (float) $op_row['opening_amount'];
                 $op_type = $op_row['balance_type'];
-                
+
                 $signed_op_amount = ($op_type === 'CR') ? $op_amount : -$op_amount;
 
                 // Adjust from_date if it is empty or prior to opening_date
@@ -1756,7 +1904,7 @@ class Reports extends CI_Controller
                 ";
                 $p_query = $this->db->query($purchase_sql);
                 $p_row = $p_query->row_array();
-                $total_purchases = (float)($p_row['total_purchases'] ?? 0);
+                $total_purchases = (float) ($p_row['total_purchases'] ?? 0);
 
                 $payment_sql = "
                     SELECT IFNULL(SUM(amount), 0) AS total_payments
@@ -1770,7 +1918,7 @@ class Reports extends CI_Controller
                 ";
                 $pay_query = $this->db->query($payment_sql);
                 $pay_row = $pay_query->row_array();
-                $total_payments = (float)($pay_row['total_payments'] ?? 0);
+                $total_payments = (float) ($pay_row['total_payments'] ?? 0);
 
                 $data['opening_balance'] = $signed_op_amount + $total_purchases - $total_payments;
             } else {
@@ -1943,7 +2091,7 @@ class Reports extends CI_Controller
             ) AS transactions
             ORDER BY tr_date ASC, voucher_no ASC
         ";
-        
+
         $query = $this->db->query($txn_sql);
         $data['record_list'] = $query->result_array();
 
@@ -2045,9 +2193,9 @@ class Reports extends CI_Controller
                 $op_row = $op_query->row_array();
                 $data['op_details'] = $op_row;
                 $op_date = $op_row['opening_date'];
-                $op_amount = (float)$op_row['opening_amount'];
+                $op_amount = (float) $op_row['opening_amount'];
                 $op_type = $op_row['balance_type'];
-                
+
                 // For customer: Debit (DR) is positive (receivable/debit), Credit (CR) is negative (advance received/credit)
                 $signed_op_amount = ($op_type === 'DR') ? $op_amount : -$op_amount;
 
@@ -2067,7 +2215,7 @@ class Reports extends CI_Controller
                 ";
                 $inv_query = $this->db->query($invoice_sql);
                 $inv_row = $inv_query->row_array();
-                $total_invoices = (float)($inv_row['total_invoices'] ?? 0);
+                $total_invoices = (float) ($inv_row['total_invoices'] ?? 0);
 
                 $receipt_sql = "
                     SELECT IFNULL(SUM(amount), 0) AS total_receipts
@@ -2076,7 +2224,7 @@ class Reports extends CI_Controller
                 ";
                 $rec_query = $this->db->query($receipt_sql);
                 $rec_row = $rec_query->row_array();
-                $total_receipts = (float)($rec_row['total_receipts'] ?? 0);
+                $total_receipts = (float) ($rec_row['total_receipts'] ?? 0);
 
                 $data['opening_balance'] = $signed_op_amount + $total_invoices - $total_receipts;
             } else {
@@ -2159,7 +2307,7 @@ class Reports extends CI_Controller
             ) AS transactions
             ORDER BY tr_date ASC, voucher_no ASC
         ";
-        
+
         $query = $this->db->query($txn_sql);
         $data['record_list'] = $query->result_array();
 
