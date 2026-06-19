@@ -2346,6 +2346,40 @@ class Reports extends CI_Controller
         exit;
     }
 
+     public function pl_report()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data['title'] = 'Profit & Loss Report';
+        $data['js'] = 'reports/pl-report.inc';
+
+       // Date Filter
+        if ($this->input->post('srch_from_date')) {
+            $srch_from_date = $this->input->post('srch_from_date');
+            $srch_to_date = $this->input->post('srch_to_date'); 
+        } else {
+            $srch_from_date = date('Y-m-01');
+            $srch_to_date = date('Y-m-d');
+        }
+
+        $data['srch_from_date'] = $srch_from_date;
+        $data['srch_to_date'] = $srch_to_date;
+
+
+        $this->load->model('Pl_model');
+        $data['sales'] = $this->Pl_model->get_sales_summary($srch_from_date, $srch_to_date);
+        $data['other_income'] = $this->Pl_model->get_otherincome_summary($srch_from_date, $srch_to_date);
+        $data['purchases'] = $this->Pl_model->get_purchases_summary($srch_from_date, $srch_to_date);
+        $data['indirect_expenses'] = $this->Pl_model->get_indirect_expenses_summary($srch_from_date, $srch_to_date);
+
+        print_r($data['other_income']);
+
+        // For now, we'll just load the view. The actual P&L logic can be implemented later.
+        $this->load->view('page/reports/pl-report', $data);
+    }
+
 }
 
 

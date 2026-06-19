@@ -371,7 +371,8 @@ $report_m_grp = [
     'vendor-invoice-pending-report',
     'vendor-statement-report',
     'customer-statement-report',
-    'item-rate-report'
+    'item-rate-report',
+    'pl-report'
 ];
 ?>
 <li class="header">REPORTS</li>
@@ -455,6 +456,11 @@ $report_m_grp = [
                 </li>
             </ul>
         </li>
+         <li class="<?= ($this->uri->segment(1) == 'pl-report') ? 'active' : '' ?>">
+            <a href="<?= site_url('pl-report') ?>">
+                <i class="fa fa-line-chart"></i> Profit &amp; Loss
+            </a>
+        </li>
     </ul>
 </li>
 
@@ -484,7 +490,7 @@ $report_m_grp = [
 
     </ul>
 </li>
-
+<?php /*
 <li class="header">AUDIT</li>
 
 <li class="treeview <?= in_array($this->uri->segment(1), [
@@ -552,6 +558,7 @@ $report_m_grp = [
     </ul>
 </li>
 
+
 <li class="header">Reports</li>
 <li
     class="treeview <?= in_array($this->uri->segment(1), ['cash-ledger', 'cash-in-statement', 'cash-out-statement', 'inward-summary', 'outward-summary', 'na-cash-in-statement', 'na-cash-out-statement']) ? 'active' : '' ?>">
@@ -610,6 +617,7 @@ $report_m_grp = [
 
     </ul>
 </li>
+*/ ?>
 <!-- Master Section -->
 <li class="header">Master</li>
 
