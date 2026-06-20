@@ -16,9 +16,17 @@
         <div class="box-body">
             <form method="post" action="<?php echo site_url('sub-account-head-list') ?>" id="frmsearch">
                 <div class="row">
-                    <div class="form-group col-md-4">
-                        <label>Type</label>
+                    <div class="form-group col-md-3">
+                        <label>Account Type</label>
                         <?php echo form_dropdown('srch_type', array('' => 'All', 'Inward' => 'Inward', 'Outward' => 'Outward'), set_value('srch_type', $srch_type), ' id="srch_type" class="form-control"'); ?>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label>Nature</label>
+                        <?php echo form_dropdown('nature_type', $nature_opt, set_value('nature_type'), ' id="nature_type_id" class="form-control"'); ?>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label>Account Head</label>
+                        <?php echo form_dropdown('srch_account_head_id', array('' => 'All') + $account_head_opt, set_value('srch_account_head_id', $srch_account_head_id), ' id="srch_account_head_id" class="form-control"'); ?>
                     </div>
                     <div class="form-group col-md-2 text-left">
                         <br />

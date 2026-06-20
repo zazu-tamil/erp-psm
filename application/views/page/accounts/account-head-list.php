@@ -21,6 +21,10 @@
                         <label>Type</label>
                         <?php echo form_dropdown('srch_type', array('' => 'All', 'Inward' => 'Inward', 'Outward' => 'Outward'), set_value('srch_type'), ' id="srch_type" class="form-control"'); ?>
                     </div>
+                    <div class="form-group col-md-4">
+                        <label>Nature</label>
+                        <?php echo form_dropdown('nature_type', $nature_opt, set_value('nature_type'), ' id="nature_type_id" class="form-control"'); ?>
+                    </div>
                     <div class="form-group col-md-2 text-left">
                         <br />
                         <button class="btn btn-success" name="btn_show" value="Show'"><i class="fa fa-search"></i>

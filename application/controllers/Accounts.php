@@ -165,11 +165,25 @@ class Accounts extends CI_Controller
             $data['srch_type'] = $srch_type = '';
         }
 
+        if (isset($_POST['nature_type'])) {
+            $data['nature_type'] = $nature_type = $this->input->post('nature_type');
+            $this->session->set_userdata('nature_type', $this->input->post('nature_type'));
+        } elseif ($this->session->userdata('nature_type')) {
+            $data['nature_type'] = $nature_type = $this->session->userdata('nature_type');
+        } else {
+            $data['nature_type'] = $nature_type = '';
+        }
+
         if ($srch_type != '') {
             $where = 'a.type = "' . $srch_type . '"';
         } else {
             $where = "1=1";
         }
+
+        if ($nature_type != '') {
+            $where .= ' and a.nature_type = "' . $nature_type . '"';
+        }
+
         $this->db->where('a.status != ', 'Delete');
         if ($srch_type != '')
             $this->db->where($where);
@@ -206,7 +220,6 @@ class Accounts extends CI_Controller
 
         $this->load->view('page/accounts/account-head-list', $data);
     }
-
 
     public function sub_account_head_list()
     {
@@ -268,11 +281,38 @@ class Accounts extends CI_Controller
             $data['srch_type'] = $srch_type = '';
         }
 
-        if ($srch_type != '') {
-            $where = 'a.type = "' . $srch_type . '"';
+        if (isset($_POST['nature_type'])) {
+            $data['nature_type'] = $nature_type = $this->input->post('nature_type');
+            $this->session->set_userdata('nature_type', $this->input->post('nature_type'));
+        } elseif ($this->session->userdata('nature_type')) {
+            $data['nature_type'] = $nature_type = $this->session->userdata('nature_type');
         } else {
-            $where = "1=1";
+            $data['nature_type'] = $nature_type = '';
         }
+        if (isset($_POST['srch_account_head_id'])) {
+            $data['srch_account_head_id'] = $srch_account_head_id = $this->input->post('srch_account_head_id');
+            $this->session->set_userdata('srch_account_head_id', $this->input->post('srch_account_head_id'));
+        } elseif ($this->session->userdata('srch_account_head_id')) {
+            $data['srch_account_head_id'] = $srch_account_head_id = $this->session->userdata('srch_account_head_id');
+        } else {
+            $data['srch_account_head_id'] = $srch_account_head_id = '';
+        }
+
+        $where = "1=1";
+        if ($srch_account_head_id != '') {
+            $where .= ' and a.account_head_id = "' . $srch_account_head_id . '"';
+        }  
+
+        if ($nature_type != '') {
+            $where .= ' and a.nature_type = "' . $nature_type . '"';
+        }
+
+        if ($srch_type != '') {
+            $where .= ' and a.type = "' . $srch_type . '"';
+        }
+
+
+
 
 
 
@@ -283,7 +323,23 @@ class Accounts extends CI_Controller
             'Income' => 'Income',
             'Expense' => 'Expense'
         );
+    
+        $sql = "
+                select 
+                a.account_head_id,                
+                a.account_head_name             
+                from cb_account_head_info as a  
+                where a.status = 'Active'  
+                 order by a.account_head_name asc                 
+        ";
 
+        $query = $this->db->query($sql);
+
+        $data['account_head_opt'] = array();
+
+        foreach ($query->result_array() as $row) {
+            $data['account_head_opt'][$row['account_head_id']] = $row['account_head_name'];
+        }
 
 
 

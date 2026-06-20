@@ -757,3 +757,11 @@ ALTER TABLE `cb_account_head_info`
 
 ALTER TABLE `cb_sub_account_head_info`
 	ADD COLUMN `nature_type` VARCHAR(100) NULL DEFAULT NULL AFTER `type`;
+
+
+CREATE DEFINER=`zazu`@`%` TRIGGER `cb_cash_inward_info_before_insert` BEFORE INSERT ON `cb_cash_inward_info` FOR EACH ROW BEGIN/*
+declare v_no int default 0;
+select max(a.vno) into v_no from cb_cash_inward_info as a where a.status != 'Delete' and a.voucher_type_id = new.voucher_type_id and fiscal_year(a.inward_date) = fiscal_year(new.inward_date);
+set new.vno = ifnull(v_no , 0 ) + 1 ;*/
+
+END; 
