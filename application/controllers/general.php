@@ -49,10 +49,10 @@ class General extends CI_Controller
 
             $rec_list = $query->result_array();
 
-            
+
         }
 
-        
+
         if ($table == 'get-company-terms-and-conditions-list') {
 
             $query = $this->db->query("
@@ -147,7 +147,7 @@ class General extends CI_Controller
             $query = $this->db->query("
               SELECT
                     a.tender_enquiry_id,
-                    enquiry_no
+                    get_tender_info(a.tender_enquiry_id) as tender_details
                 FROM
                     tender_enquiry_info AS a
                 LEFT JOIN customer_info AS b
@@ -180,6 +180,35 @@ class General extends CI_Controller
                 $rec_list[] = $row;
             }
         }
+
+        if ($table == 'cash_inward_info') {
+            $query = $this->db->query("
+                SELECT 
+                    a.*,
+                    concat(ifnull(b.company_code,'') , '/', ifnull(g.company_sno,'') ,  '/' , ifnull(h.customer_code,'') ,  '/' , ifnull(g.customer_sno,''),  '/' , DATE_FORMAT(g.enquiry_date,'%Y') ) as enquiry_name
+                FROM cb_cash_inward_info as a
+                LEFT JOIN company_info as b ON a.company_id = b.company_id
+                LEFT JOIN tender_enquiry_info as g ON a.tender_enquiry_id = g.tender_enquiry_id
+                LEFT JOIN customer_info as h ON g.customer_id = h.customer_id
+                WHERE a.cash_inward_id = '" . $this->db->escape_str($rec_id) . "'
+            ");
+            $rec_list = $query->row_array();
+        }
+
+        if ($table == 'cash_outward_info') {
+            $query = $this->db->query("
+                SELECT 
+                    a.*,
+                    concat(ifnull(b.company_code,'') , '/', ifnull(g.company_sno,'') ,  '/' , ifnull(h.customer_code,'') ,  '/' , ifnull(g.customer_sno,''),  '/' , DATE_FORMAT(g.enquiry_date,'%Y') ) as enquiry_name
+                FROM cb_cash_outward_info as a
+                LEFT JOIN company_info as b ON a.company_id = b.company_id
+                LEFT JOIN tender_enquiry_info as g ON a.tender_enquiry_id = g.tender_enquiry_id
+                LEFT JOIN customer_info as h ON g.customer_id = h.customer_id
+                WHERE a.cash_outward_id = '" . $this->db->escape_str($rec_id) . "'
+            ");
+            $rec_list = $query->row_array();
+        }
+
 
         if ($table == 'vendor_contact_info') {
             $query = $this->db->query(" 
@@ -588,7 +617,7 @@ class General extends CI_Controller
             $this->db->update('vendor_info', array('status' => 'Delete'));
             echo "Record Deleted Successfully";
         }
-        
+
         if ($table == 'customer_info') {
             $this->db->where('customer_id', $rec_id);
             $this->db->update('customer_info', array('status' => 'Delete'));
@@ -623,6 +652,26 @@ class General extends CI_Controller
             $this->db->where('opening_id', $rec_id);
             $this->db->delete('customer_opening_balance_info');
             echo "Record Deleted Successfully";
+        }
+
+        if ($table == 'cash_intward_info_delet') {
+            $this->db->where('cash_inward_id', $rec_id);
+            $this->db->update('cb_cash_inward_info', array(
+                'status' => 'Delete',
+                'updated_by' => $this->session->userdata('cr_user_id'),
+                'updated_datetime' => date('Y-m-d H:i:s')
+            ));
+            echo 'Record Successfully deleted';
+        }
+
+        if ($table == 'cash_outward_info_delet') {
+            $this->db->where('cash_outward_id', $rec_id);
+            $this->db->update('cb_cash_outward_info', array(
+                'status' => 'Delete',
+                'updated_by' => $this->session->userdata('cr_user_id'),
+                'updated_datetime' => date('Y-m-d H:i:s')
+            ));
+            echo 'Record Successfully deleted';
         }
 
     }

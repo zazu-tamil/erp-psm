@@ -1,6 +1,6 @@
 <?php
 // Define master menu pages
-$g_master = ['company-list', 'vendor-opening-balance-list', 'customer-opening-balance-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list', 'customer-list', 'customer-contact-list', 'vendor-contact-list', 'currency-list', 'account-head-list', 'country-list', 'addt-charges-type-list', 'sub-account-head-list', 'account-head-for-list', 'voucher-type-list', 'opening-balance-list', 'settings', 'company-bank-list'];
+$g_master = ['company-list', 'vendor-opening-balance-list', 'customer-opening-balance-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list', 'customer-list', 'customer-contact-list', 'vendor-contact-list', 'currency-list', 'account-head-list', 'country-list', 'addt-charges-type-list', 'sub-account-head-list',   'voucher-type-list', 'opening-balance-list', 'settings', 'company-bank-list'];
 
 // Get current page
 $current_page = $this->uri->segment(1, 0);
@@ -758,7 +758,7 @@ $report_m_grp = [
         </li>
 
         <li
-            class="treeview <?= in_array($current_page, ['account-head-list', 'sub-account-head-list', 'account-head-for-list', 'voucher-type-list', 'opening-balance-list']) ? 'active' : '' ?>">
+            class="treeview <?= in_array($current_page, ['account-head-list', 'sub-account-head-list',   'voucher-type-list', 'opening-balance-list']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-money"></i> Accounts
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
@@ -772,15 +772,15 @@ $report_m_grp = [
                 <li class="<?= ($current_page === 'sub-account-head-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('sub-account-head-list') ?>"><i class="fa fa-bank"></i> Sub-Account Head</a>
                 </li>
-
-                <li class="<?= ($current_page === 'account-head-for-list') ? 'active' : '' ?>">
+<!-- 
+                <li class=" //<?= ($current_page === 'account-head-for-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('account-head-for-list') ?>"><i class="fa fa-inbox"></i> A/c In From / Out
                         For</a>
-                </li>
-
+                </li> -->
+<!-- 
                 <li class="<?= ($current_page === 'voucher-type-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('voucher-type-list') ?>"><i class="fa fa-file-text"></i> Voucher Type</a>
-                </li>
+                </li> -->
 
                 <li class="<?= ($current_page === 'opening-balance-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('opening-balance-list') ?>"><i class="fa fa-balance-scale"></i> Opening

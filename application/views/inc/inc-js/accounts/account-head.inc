@@ -36,6 +36,7 @@ jQuery(function($) {
 
         $('#edit_modal #account_head_id').val($(this).val());
         $('#edit_modal #account_head_name').val(c_name);
+        $('#edit_modal #nature_type').val(nature_type);
         $('#edit_modal input:radio[value="'+ c_type +'"]').prop('checked', true);
         $('#edit_modal #ac_table').prop('checked', c_ac === 'Yes');
         $('#edit_modal input:radio[name="status"][value="'+ c_status +'"]').prop('checked', true);

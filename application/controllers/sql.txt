@@ -735,3 +735,25 @@ COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1
 ;
+
+
+
+19-06-2026  
+ALTER TABLE `cb_cash_inward_info`
+	CHANGE COLUMN `project_id` `tender_enquiry_id` INT(10) NOT NULL DEFAULT '0' AFTER `company_id`;
+
+
+ALTER TABLE `cb_cash_inward_info`
+	DROP COLUMN `voucher_type_id`
+
+
+ALTER TABLE `cb_cash_outward_info`
+	CHANGE COLUMN `project_id` `tender_enquiry_id` INT(10) NOT NULL DEFAULT '0' AFTER `company_id`;
+
+
+ALTER TABLE `cb_account_head_info`
+	ADD COLUMN `nature_type` VARCHAR(100) NULL DEFAULT NULL AFTER `type`;
+
+
+ALTER TABLE `cb_sub_account_head_info`
+	ADD COLUMN `nature_type` VARCHAR(100) NULL DEFAULT NULL AFTER `type`;

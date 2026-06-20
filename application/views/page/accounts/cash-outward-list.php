@@ -43,6 +43,12 @@
                         </div>
                         <!-- /.input group -->
                     </div>
+                    <div class="form-group col-md-3">
+                        <label>Search Enquiry No</label>
+                        <input type="text" class="form-control" id="srch_enquiry_no" name="srch_enquiry_no"
+                            value="<?php echo set_value('srch_enquiry_no', $srch_enquiry_no); ?>"
+                            placeholder="Search Enquiry No">
+                    </div>
 
                     <div class="form-group col-md-2 text-left">
                         <br />
@@ -63,8 +69,8 @@
             <table class="table table-hover table-bordered table-striped">
                 <thead>
                     <tr>
-                        <th>S.No</th>
-                        <th>V.No</th>
+                        <th class="text-center">S.No</th>
+                        <th class="text-center">Enquiry Num </th>
                         <th>Outward Date</th>
                         <th>Account Head</th>
                         <th>Sub Account Head</th>
@@ -79,9 +85,8 @@
                     <?php foreach ($record_list as $j => $ls) { ?>
                         <tr>
                             <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
-                            <td class="text-center"><?php echo $ls['prefix'] . $ls['vno']; ?><br /><i
-                                    class="label label-info"><?php echo $ls['voucher_type_name'] ?></i><br><i
-                                    class="label label-success"><?php echo $ls['enquiry_no'] ?></i></td>
+                            <td class="text-center">  
+                                    <i class="label label-success"><?php echo $ls['tender_details'] ?></i></td>
                             <td><?php echo date('d-m-Y', strtotime($ls['outward_date'])) ?><br /><?php echo $ls['ac_type'] ?>
                             </td>
                             <td><?php echo $ls['account_head_name'] ?></td>
@@ -95,7 +100,7 @@
                             </td>
 
                             <td class="text-center">
-                                <?php if (($this->session->userdata(SESS_HD . 'user_type') == "Admin") || (($this->session->userdata(SESS_HD . 'user_type') != 'Admin') && ($ls['days'] <= EDIT_ALLOW_DAYS) && ($this->session->userdata('cr_edit_flg') == '1'))) { ?>
+                                <?php if (($this->session->userdata(SESS_HD . 'level') == "Admin")) { ?>
                                     <button data-toggle="modal" data-target="#edit_modal"
                                         value="<?php echo $ls['cash_outward_id'] ?>" class="edit_record btn btn-primary btn-xs"
                                         title="Edit"><i class="fa fa-edit"></i></button>
@@ -108,7 +113,7 @@
                             </td>
 
                             <td class="text-center">
-                                <?php if (($this->session->userdata('cr_user_type') == "Admin") || (($this->session->userdata('cr_user_type') != 'Admin') && ($ls['days'] <= EDIT_ALLOW_DAYS))) { ?>
+                                <?php if (($this->session->userdata(SESS_HD . 'level') == "Admin")) { ?>
                                     <button value="<?php echo $ls['cash_outward_id'] ?>" class="del_record btn btn-danger btn-xs"
                                         title="Delete"><i class="fa fa-remove"></i></button>
                                 <?php } ?>
@@ -147,12 +152,15 @@
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Company</label>
-                                        <?php echo form_dropdown('company_id', array('' => 'Select') + $company_name_opt, set_value('company_id'), 'id="company_id" class="form-control" required'); ?>
+                                        <?php echo form_dropdown('company_id',$company_name_opt, set_value('company_id', 1), 'id="company_id" class="form-control select2" required'); ?>
                                     </div>
 
-                                    <div class="form-group col-md-6">
-                                        <label>Project</label>
-                                        <?php echo form_dropdown('project_id', array('' => 'Select'), set_value('project_id'), 'id="project_id" class="form-control" required'); ?>
+                                    <div class="form-group col-md-12">
+                                        <label>Tender Enquiry Id</label>
+                                        <input type="text" class="form-control" id="tender_enquiry_id"
+                                            value="<?php echo set_value('tender_enquiry_id'); ?>"
+                                            placeholder="Search Enquiry No" required>
+                                        <input type="hidden" name="tender_enquiry_id" id="tender_enquiry_hidden">
                                     </div>
 
                                     <div class="form-group col-md-6">
@@ -166,20 +174,12 @@
                                     <div class="form-group col-md-6">
                                         <label>Sub-Account Head</label>
                                         <?php echo form_dropdown('sub_account_head_id', array('' => 'Select'), set_value('sub_account_head_id'), ' id="sub_account_head_id" class="form-control" required="true"'); ?>
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label>Outward For</label>
-                                        <?php echo form_dropdown('sub_account_headlvl3_id', array('' => 'Select'), set_value('sub_account_headlvl3_id'), ' id="sub_account_headlvl3_id" class="form-control" '); ?>
-                                    </div>
+                                    </div> 
                                     <div class="form-group col-md-6">
                                         <label>Amount</label>
                                         <input class="form-control text-right" type="number" step="any" name="amount"
                                             id="amount" value="">
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label>Voucher Type</label>
-                                        <?php echo form_dropdown('voucher_type_id', array('' => 'Select') + $voucher_type_opt, set_value('voucher_type_id'), ' id="voucher_type_id" class="form-control" required="true"'); ?>
-                                    </div>
+                                    </div> 
                                     <div class="form-group col-md-6">
                                         <label>Bill Photo Upload</label>
                                         <input class="form-control" type="file" name="bill_photo" id="bill_photo" acc accept="image/*">
@@ -241,7 +241,7 @@
                             </div>
                             <div class="modal-body">
                                 <div class="row">
-                                    <div class="form-group col-md-3">
+                                    <div class="form-group col-md-6">
                                         <label>Date</label>
                                         <div class="input-group date">
                                             <div class="input-group-addon">
@@ -251,10 +251,16 @@
                                                 id="outward_date" value="" required="true">
                                         </div>
                                     </div>
-                                    <div class="form-group col-md-3">
-                                        <label>V.No</label>
-                                        <input class="form-control text-right" type="number" step="any" name="vno"
-                                            id="vno" value="" required="true">
+                                    <div class="form-group col-md-6">
+                                        <label>Company</label>
+                                        <?php echo form_dropdown('company_id',  $company_name_opt, set_value('company_id'), 'id="company_id" class="form-control select2" required'); ?>
+                                    </div>
+
+                                    <div class="form-group col-md-12">
+                                        <label>Tender Enquiry Id</label>
+                                        <input type="text" class="form-control" id="edit_tender_enquiry_id"
+                                            placeholder="Search Enquiry No" required>
+                                        <input type="hidden" name="tender_enquiry_id" id="edit_tender_enquiry_hidden">
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Account Group</label>
@@ -267,11 +273,7 @@
                                     <div class="form-group col-md-6">
                                         <label>Sub-Account Head</label>
                                         <?php echo form_dropdown('sub_account_head_id', array('' => 'Select'), set_value('sub_account_head_id'), ' id="sub_account_head_id" class="form-control" required="true"'); ?>
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label>Outward For</label>
-                                        <?php echo form_dropdown('sub_account_headlvl3_id', array('' => 'Select Outward For'), set_value('sub_account_headlvl3_id'), ' id="sub_account_headlvl3_id" class="form-control" '); ?>
-                                    </div>
+                                    </div> 
                                     <div class="form-group col-md-6">
                                         <label>Amount</label>
                                         <input class="form-control text-right" type="number" step="any" name="amount"
@@ -282,11 +284,7 @@
                                         <input class="form-control" type="file" name="bill_photo" id="bill_photo">
                                         <input class="form-control" type="hidden" name="bill_photo_path"
                                             id="bill_photo_path">
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label>Voucher Type</label>
-                                        <?php echo form_dropdown('voucher_type_id', array('' => 'Select') + $voucher_type_opt, set_value('voucher_type_id'), ' id="voucher_type_id" class="form-control" required="true"'); ?>
-                                    </div>
+                                    </div> 
                                     <div class="form-group col-md-6">
                                         <label>Bill Type</label>
                                         <div class="radio">
@@ -300,10 +298,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                    <div class="form-group col-md-6">
-                                        <label>Project</label>
-                                        <?php echo form_dropdown('project_id', array('' => 'Select') + $project_opt, set_value('project_id'), ' id="project_id" class="form-control" '); ?>
-                                    </div>
+                                  
                                     <div class="form-group col-md-4 hide">
                                         <label>Status</label>
                                         <div class="radio">

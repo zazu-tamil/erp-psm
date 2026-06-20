@@ -123,6 +123,7 @@ class Accounts extends CI_Controller
             $ins = array(
                 'franchise_id' => ($this->session->userdata('cr_franchise_id') == '' ? 0 : $this->session->userdata('cr_franchise_id')),
                 'account_head_name' => $this->input->post('account_head_name'),
+                'nature_type' => $this->input->post('nature_type'),
                 'type' => $this->input->post('type'),
                 'ac_table' => ($this->input->post('ac_table') == 1 ? '1' : '0'),
                 'status' => $this->input->post('status'),
@@ -140,6 +141,7 @@ class Accounts extends CI_Controller
             $upd = array(
                 'franchise_id' => ($this->session->userdata('cr_franchise_id') == '' ? 0 : $this->session->userdata('cr_franchise_id')),
                 'account_head_name' => $this->input->post('account_head_name'),
+                'nature_type' => $this->input->post('nature_type'),
                 'type' => $this->input->post('type'),
                 'ac_table' => ($this->input->post('ac_table') == 1 ? '1' : '0'),
                 'status' => $this->input->post('status'),
@@ -193,6 +195,15 @@ class Accounts extends CI_Controller
         }
 
 
+        $data['nature_opt'] = array(
+            '' => 'All',
+            'Asset' => 'Asset',
+            'Liability' => 'Liability',
+            'Income' => 'Income',
+            'Expense' => 'Expense'
+        );
+
+
         $this->load->view('page/accounts/account-head-list', $data);
     }
 
@@ -215,6 +226,7 @@ class Accounts extends CI_Controller
                 'account_head_id' => $this->input->post('account_head_id'),
                 'sub_account_head_name' => $this->input->post('sub_account_head_name'),
                 'type' => $this->input->post('type'),
+                'nature_type' => $this->input->post('nature_type'),
                 'ac_table' => ($this->input->post('ac_table') == 1 ? '1' : '0'),
                 'status' => $this->input->post('status'),
                 'created_by' => $this->session->userdata('cr_user_id'),
@@ -233,6 +245,7 @@ class Accounts extends CI_Controller
                 'account_head_id' => $this->input->post('account_head_id'),
                 'sub_account_head_name' => $this->input->post('sub_account_head_name'),
                 'type' => $this->input->post('type'),
+                'nature_type' => $this->input->post('nature_type'),
                 'ac_table' => ($this->input->post('ac_table') == 1 ? '1' : '0'),
                 'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata('cr_user_id'),
@@ -263,6 +276,13 @@ class Accounts extends CI_Controller
 
 
 
+        $data['nature_opt'] = array(
+            '' => 'All',
+            'Asset' => 'Asset',
+            'Liability' => 'Liability',
+            'Income' => 'Income',
+            'Expense' => 'Expense'
+        );
 
 
 
@@ -383,9 +403,9 @@ class Accounts extends CI_Controller
                 'franchise_id' => ($this->session->userdata('cr_franchise_id') == '' ? 0 : $this->session->userdata('cr_franchise_id')),
                 'cash_inward_id ' => $this->input->post('cash_inward_id '),
                 'company_id' => $this->input->post('company_id'),
-                'project_id' => $this->input->post('project_id'),
+                'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
                 'agent_id' => $this->input->post('agent_id'),
-                'voucher_type_id' => $this->input->post('voucher_type_id'),
+
                 'vno' => $this->input->post('vno'),
                 'ac_type' => $this->input->post('ac_type'),
                 'inward_date' => $this->input->post('inward_date'),
@@ -410,9 +430,9 @@ class Accounts extends CI_Controller
                 'franchise_id' => ($this->session->userdata('cr_franchise_id') == '' ? 0 : $this->session->userdata('cr_franchise_id')),
                 'cash_inward_id ' => $this->input->post('cash_inward_id'),
                 'company_id' => $this->input->post('company_id'),
-                'project_id' => $this->input->post('project_id'),
+                'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
                 'agent_id' => $this->input->post('agent_id'),
-                'voucher_type_id' => $this->input->post('voucher_type_id'),
+
                 'vno' => $this->input->post('vno'),
                 'ac_type' => $this->input->post('ac_type'),
                 'inward_date' => $this->input->post('inward_date'),
@@ -438,19 +458,27 @@ class Accounts extends CI_Controller
         if (isset($_POST['srch_from_date'])) {
             $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
             $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->input->post('srch_enquiry_no');
             $this->session->set_userdata('srch_from_date', $this->input->post('srch_from_date'));
             $this->session->set_userdata('srch_to_date', $this->input->post('srch_to_date'));
+            $this->session->set_userdata('srch_enquiry_no', $this->input->post('srch_enquiry_no'));
 
-        } elseif ($this->session->userdata('srch_from_date')) {
+        } elseif ($this->session->userdata('srch_from_date') || $this->session->userdata('srch_enquiry_no')) {
             $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_from_date');
             $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_to_date');
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->session->userdata('srch_enquiry_no');
         } else {
             $data['srch_from_date'] = $srch_from_date = date('Y-m-') . '01';
             $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
+            $data['srch_enquiry_no'] = $srch_enquiry_no = '';
         }
 
         if (!empty($srch_from_date) && !empty($srch_to_date)) {
             $where .= " and a.inward_date between '" . $srch_from_date . "' and  '" . $srch_to_date . "'";
+        }
+
+        if (!empty($srch_enquiry_no)) {
+            $where .= " and ( concat(ifnull(f.company_code,'') , '/', ifnull(g.company_sno,'') ,  '/' , ifnull(h.customer_code,'') ,  '/' , ifnull(g.customer_sno,''),  '/' , DATE_FORMAT(g.enquiry_date,'%Y') ) like '%" . $this->db->escape_str($srch_enquiry_no) . "%' ) ";
         }
 
 
@@ -458,6 +486,9 @@ class Accounts extends CI_Controller
 
 
         $this->db->where('a.status != ', 'Delete');
+        $this->db->join('company_info as f', "f.company_id = a.company_id and f.status='Active'", 'left');
+        $this->db->join('tender_enquiry_info as g', "g.tender_enquiry_id = a.tender_enquiry_id and f.status='Active'", 'left');
+        $this->db->join('customer_info as h', "h.customer_id = g.customer_id and h.status='Active'", 'left');
         $this->db->where($where);
         $this->db->from('cb_cash_inward_info as a');
         $data['total_records'] = $cnt = $this->db->count_all_results();
@@ -497,16 +528,14 @@ class Accounts extends CI_Controller
                 c.sub_account_head_name,
                 g.enquiry_no,
                 DATEDIFF(current_date(), a.inward_date) as days,
-                d.voucher_type_name,
-                d.prefix,
+                get_tender_info(a.tender_enquiry_id) as tender_details,
                 e.sub_account_headlvl3_name as in_from
                 from cb_cash_inward_info as a 
                 left join cb_account_head_info as b on b.account_head_id = a.account_head_id and b.status != 'Delete'
-                left join cb_sub_account_head_info as c on c.sub_account_head_id = a.sub_account_head_id and c.status != 'Delete'
-                left join cb_voucher_type_info as d on d.voucher_type_id = a.voucher_type_id and d.status != 'Delete'
+                left join cb_sub_account_head_info as c on c.sub_account_head_id = a.sub_account_head_id and c.status != 'Delete' 
                 left join cb_sub_account_head_lvl3_info as e on e.sub_account_headlvl3_id = a.sub_account_headlvl3_id and e.status != 'Delete'
                 left JOIN company_info as f on f.company_id = a.company_id and f.status='Active'
-                left JOIN tender_enquiry_info as g on g.tender_enquiry_id = a.project_id and f.status='Active'
+                left JOIN tender_enquiry_info as g on g.tender_enquiry_id = a.tender_enquiry_id and f.status='Active'
                 left join customer_info as h on h.customer_id = g.customer_id and h.status='Active'
                  
                 where a.status != 'Delete' and $where   
@@ -605,6 +634,48 @@ class Accounts extends CI_Controller
         $this->load->view('page/accounts/cash-inward-list', $data);
     }
 
+
+    public function tender_enquiry_id_search()
+    {
+        $term = $this->input->post('search');
+        $company_id = $this->input->post('company_id');
+
+        $where = "a.status = 'Active'";
+        if (!empty($company_id)) {
+            $where .= " AND a.company_id = '" . $this->db->escape_str($company_id) . "'";
+        }
+
+        $sql = "      
+            SELECT 
+            concat(ifnull(b.company_code,'') , '/', ifnull(a.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(a.customer_sno,''),  '/' , DATE_FORMAT(a.enquiry_date,'%Y') ) as enq,
+            a.company_id,
+            a.customer_id,
+            a.tender_enquiry_id,
+            c.customer_name,
+            a.enquiry_no,
+            a.customer_contact_id
+            FROM tender_enquiry_info AS a
+            LEFT JOIN company_info AS b ON a.company_id = b.company_id AND b.status = 'Active'
+            LEFT JOIN customer_info AS c ON a.customer_id = c.customer_id AND c.status = 'Active'
+            WHERE $where 
+            having enq like '%" . $this->db->escape_like_str($term) . "%'
+            ORDER BY a.tender_enquiry_id desc, a.enquiry_no ASC  
+        ";
+
+        $query = $this->db->query($sql);
+
+        $result = [];
+
+        foreach ($query->result() as $row) {
+            $result[] = [
+                'label' => $row->enq,
+                'value' => $row->tender_enquiry_id,
+                'company_id' => $row->company_id
+            ];
+        }
+        echo json_encode($result);
+
+    }
     public function cash_outward_list()
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
@@ -633,7 +704,7 @@ class Accounts extends CI_Controller
             if (!empty($_FILES['bill_photo']['name'])) {
 
                 $config['upload_path'] = $upload_path;
-                $config['file_name'] = $this->input->post('project_id') . "_bill_" . date('YmdHis');
+                $config['file_name'] = $this->input->post('tender_enquiry_id') . "_bill_" . date('YmdHis');
                 $config['allowed_types'] = 'gif|jpg|png|jpeg';
 
                 $this->load->library('upload', $config);
@@ -651,7 +722,7 @@ class Accounts extends CI_Controller
             // Prepare data for insert
             $ins = array(
                 'franchise_id' => ($this->session->userdata('cr_franchise_id') == '' ? 0 : $this->session->userdata('cr_franchise_id')),
-                'project_id' => $this->input->post('project_id'),
+                'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
                 'company_id' => $this->input->post('company_id'),
                 'voucher_type_id' => $this->input->post('voucher_type_id'),
                 'outward_date' => $this->input->post('outward_date'),
@@ -689,7 +760,7 @@ class Accounts extends CI_Controller
             if (!empty($_FILES['bill_photo']['name'])) {
 
                 $config['upload_path'] = $upload_path;
-                $config['file_name'] = $this->input->post('project_id') . "_bill_" . date('YmdHis');
+                $config['file_name'] = $this->input->post('tender_enquiry_id') . "_bill_" . date('YmdHis');
                 $config['allowed_types'] = 'gif|jpg|png|jpeg|pdf';
 
                 $this->load->library('upload', $config);
@@ -706,7 +777,7 @@ class Accounts extends CI_Controller
             // Prepare data for update
             $upd = array(
                 'franchise_id' => ($this->session->userdata('cr_franchise_id') == '' ? 0 : $this->session->userdata('cr_franchise_id')),
-                'project_id' => $this->input->post('project_id'),
+                'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
                 'company_id' => $this->input->post('company_id'),
                 'voucher_type_id' => $this->input->post('voucher_type_id'),
                 'outward_date' => $this->input->post('outward_date'),
@@ -737,19 +808,27 @@ class Accounts extends CI_Controller
         if (isset($_POST['srch_from_date'])) {
             $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
             $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->input->post('srch_enquiry_no');
             $this->session->set_userdata('srch_from_date', $this->input->post('srch_from_date'));
             $this->session->set_userdata('srch_to_date', $this->input->post('srch_to_date'));
+            $this->session->set_userdata('srch_enquiry_no', $this->input->post('srch_enquiry_no'));
 
-        } elseif ($this->session->userdata('srch_from_date')) {
+        } elseif ($this->session->userdata('srch_from_date') || $this->session->userdata('srch_enquiry_no')) {
             $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_from_date');
             $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_to_date');
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->session->userdata('srch_enquiry_no');
         } else {
-            $data['srch_from_date'] = $srch_from_date = date('Y-m-' . '01');
+            $data['srch_from_date'] = $srch_from_date = date('Y-m-') . '01';
             $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
+            $data['srch_enquiry_no'] = $srch_enquiry_no = '';
         }
 
         if (!empty($srch_from_date) && !empty($srch_to_date)) {
             $where .= " and a.outward_date between '" . $srch_from_date . "' and  '" . $srch_to_date . "'";
+        }
+
+        if (!empty($srch_enquiry_no)) {
+            $where .= " and ( concat(ifnull(f.company_code,'') , '/', ifnull(g.company_sno,'') ,  '/' , ifnull(h.customer_code,'') ,  '/' , ifnull(g.customer_sno,''),  '/' , DATE_FORMAT(g.enquiry_date,'%Y') ) like '%" . $this->db->escape_str($srch_enquiry_no) . "%' ) ";
         }
 
 
@@ -757,6 +836,9 @@ class Accounts extends CI_Controller
 
 
         $this->db->where('a.status != ', 'Delete');
+        $this->db->join('company_info as f', "f.company_id = a.company_id and f.status='Active'", 'left');
+        $this->db->join('tender_enquiry_info as g', "g.tender_enquiry_id = a.tender_enquiry_id and f.status='Active'", 'left');
+        $this->db->join('customer_info as h', "h.customer_id = g.customer_id and h.status='Active'", 'left');
         $this->db->where($where);
         $this->db->from('cb_cash_outward_info as a');
         $data['total_records'] = $cnt = $this->db->count_all_results();
@@ -796,13 +878,16 @@ class Accounts extends CI_Controller
                 d.voucher_type_name,
                 d.prefix,
                 e.sub_account_headlvl3_name as out_for, 
-                f.enquiry_no
+                g.enquiry_no,
+                get_tender_info(a.tender_enquiry_id) as tender_details
                 from cb_cash_outward_info as a 
                 left join cb_account_head_info as b on b.account_head_id = a.account_head_id and b.status != 'Delete'
                 left join cb_sub_account_head_info as c on c.sub_account_head_id = a.sub_account_head_id and c.status != 'Delete'
                 left join cb_voucher_type_info as d on d.voucher_type_id = a.voucher_type_id and d.status != 'Delete'
                 left join cb_sub_account_head_lvl3_info as e on e.sub_account_headlvl3_id = a.sub_account_headlvl3_id and e.status != 'Delete'
-                left join tender_enquiry_info as f on f.tender_enquiry_id = a.project_id and f.status != 'Delete'
+                left JOIN company_info as f on f.company_id = a.company_id and f.status='Active'
+                left JOIN tender_enquiry_info as g on g.tender_enquiry_id = a.tender_enquiry_id and g.status != 'Delete'
+                left join customer_info as h on h.customer_id = g.customer_id and h.status='Active'
                 where a.status != 'Delete' and $where  
                 order by a.outward_date desc , a.cash_outward_id desc
                 limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
@@ -816,7 +901,7 @@ class Accounts extends CI_Controller
             $data['record_list'][] = $row;
         }
 
-         $sql = "
+        $sql = "
               SELECT a.tender_enquiry_id, a.enquiry_no
                 FROM tender_enquiry_info AS a
                 INNER JOIN company_info as b
@@ -890,7 +975,7 @@ class Accounts extends CI_Controller
             $data['company_name_opt'][$row['company_id']] = $row['company_name'];
         }
 
-       
+
 
         $data['pagination'] = $this->pagination->create_links();
 
@@ -2008,7 +2093,7 @@ class Accounts extends CI_Controller
         }
 
         if (!empty($srch_project_id)) {
-            $where .= " and a.project_id = '" . $srch_project_id . "'";
+            $where .= " and a.tender_enquiry_id = '" . $srch_project_id . "'";
         } else {
             $where .= " and 1=1 ";
         }
@@ -2034,7 +2119,7 @@ class Accounts extends CI_Controller
             left join cb_sub_account_head_info as c on c.sub_account_head_id = a.sub_account_head_id
             left join cb_voucher_type_info as d on d.voucher_type_id  = a.voucher_type_id
             left join cb_sub_account_head_lvl3_info as e on e.sub_account_headlvl3_id  = a.sub_account_headlvl3_id
-            left join tender_enquiry_info as f on f.tender_enquiry_id  = a.project_id
+            left join tender_enquiry_info as f on f.tender_enquiry_id  = a.tender_enquiry_id
             where a.`status` = 'Active'
             and b.ac_table = '1'
             and c.ac_table = '1'
@@ -3344,9 +3429,9 @@ class Accounts extends CI_Controller
         $table = $this->input->post('tbl');
         $rec_id = $this->input->post('id');
 
-        if ($table == 'cash_inward_info') {
+        if ($table == 'cash_inward_info' || $table == 'cash_intward_info_delet') {
             $this->db->where('cash_inward_id', $rec_id);
-            $this->db->update('crit_cash_inward_info', array(
+            $this->db->update('cb_cash_inward_info', array(
                 'status' => 'Delete',
                 'updated_by' => $this->session->userdata('cr_user_id'),
                 'updated_datetime' => date('Y-m-d H:i:s')
@@ -3354,9 +3439,9 @@ class Accounts extends CI_Controller
             echo 'Record Successfully deleted';
         }
 
-        if ($table == 'cash_outward_info') {
+        if ($table == 'cash_outward_info' || $table == 'cash_outward_info_delet') {
             $this->db->where('cash_outward_id', $rec_id);
-            $this->db->update('crit_cash_outward_info', array(
+            $this->db->update('cb_cash_outward_info', array(
                 'status' => 'Delete',
                 'updated_by' => $this->session->userdata('cr_user_id'),
                 'updated_datetime' => date('Y-m-d H:i:s')
@@ -3415,21 +3500,21 @@ class Accounts extends CI_Controller
 
             echo 'Record Successfully deleted';
         }
-         
+
 
     }
 
     public function get_data()
     {
-          
-        date_default_timezone_set("Asia/Calcutta"); 
+
+        date_default_timezone_set("Asia/Calcutta");
 
         $table = $this->input->post('tbl');
         $rec_id = $this->input->post('id');
 
-        $rec_list =[];
+        $rec_list = [];
 
-        
+
         if ($table == 'sub_account_head_info') {
 
             $query = $this->db->query("
@@ -3443,10 +3528,38 @@ class Accounts extends CI_Controller
 
             $rec_list = $query->result_array();
 
-            
+
         }
 
-         if ($table == 'get-account-head-type') {
+        if ($table == 'cash_inward_info') {
+            $query = $this->db->query("
+                SELECT 
+                    a.*,
+                    concat(ifnull(b.company_code,'') , '/', ifnull(g.company_sno,'') ,  '/' , ifnull(h.customer_code,'') ,  '/' , ifnull(g.customer_sno,''),  '/' , DATE_FORMAT(g.enquiry_date,'%Y') ) as enquiry_name
+                FROM cb_cash_inward_info as a
+                LEFT JOIN company_info as b ON a.company_id = b.company_id
+                LEFT JOIN tender_enquiry_info as g ON a.tender_enquiry_id = g.tender_enquiry_id
+                LEFT JOIN customer_info as h ON g.customer_id = h.customer_id
+                WHERE a.cash_inward_id = '" . $this->db->escape_str($rec_id) . "'
+            ");
+            $rec_list = $query->row_array();
+        }
+
+        if ($table == 'cash_outward_info') {
+            $query = $this->db->query("
+                SELECT 
+                    a.*,
+                    concat(ifnull(b.company_code,'') , '/', ifnull(g.company_sno,'') ,  '/' , ifnull(h.customer_code,'') ,  '/' , ifnull(g.customer_sno,''),  '/' , DATE_FORMAT(g.enquiry_date,'%Y') ) as enquiry_name
+                FROM cb_cash_outward_info as a
+                LEFT JOIN company_info as b ON a.company_id = b.company_id
+                LEFT JOIN tender_enquiry_info as g ON a.tender_enquiry_id = g.tender_enquiry_id
+                LEFT JOIN customer_info as h ON g.customer_id = h.customer_id
+                WHERE a.cash_outward_id = '" . $this->db->escape_str($rec_id) . "'
+            ");
+            $rec_list = $query->row_array();
+        }
+
+        if ($table == 'get-account-head-type') {
             $query = $this->db->query(" 
                 select 
                 a.account_head_id,
@@ -3456,9 +3569,9 @@ class Accounts extends CI_Controller
                 and a.`status` = 'Active' 
                 order by a.account_head_name asc
                  
-            "); 
+            ");
 
-           $rec_list = $query->result_array();
+            $rec_list = $query->result_array();
         }
 
         // ✅ CLEAN OUTPUT

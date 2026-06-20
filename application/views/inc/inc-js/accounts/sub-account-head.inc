@@ -50,6 +50,7 @@ jQuery(function($) {
                 
                 $editModal.find("#sub_account_head_id").val(d1.sub_account_head_id);
                 $editModal.find("#type").val(d1.type);
+                $editModal.find("#nature_type").val(d1.nature_type);
                 $editModal.find("#sub_account_head_name").val(d1.sub_account_head_name);
                 $editModal.find('input:radio[name="status"][value="'+d1.status+'"]').prop('checked', true);
                 $editModal.find("#ac_table").prop('checked', d1.ac_table == '1');
