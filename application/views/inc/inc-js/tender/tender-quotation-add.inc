@@ -198,10 +198,41 @@
             minLength: 1,
 
             select: function (event, ui) {
-                console.log(ui);
+                //console.log(ui);
                 $("#srch_company_id").val(ui.item.company_id);
                 $("#srch_customer_id").val(ui.item.customer_id);
-                $("#srch_customer_contact_id").val(ui.item.customer_contact_id);
+
+                 var $contact = $("#srch_customer_contact_id");
+                $contact.html('<option value="">Select Contact Person</option>');
+                $.ajax({
+                    url: "<?php echo site_url('tender/get_data'); ?>",
+                    type: "POST",
+                    data: { tbl: "get-customer-contacts", id: ui.item.customer_id },
+                    dataType: "json",
+                    success: function (data) {
+                    $.each(data, function (i, item) {
+                        if(item.customer_contact_id == ui.item.customer_contact_id) {
+                            $contact.append(
+                                $("<option>")
+                                    .val(item.customer_contact_id)
+                                    .text(item.contact_person_name)
+                                    .prop("selected", true)
+                            );
+                        } else {    
+                        $contact.append(
+                        $("<option>")
+                            .val(item.customer_contact_id)
+                            .text(item.contact_person_name)
+                        );
+                        }
+                    });
+                    },
+                    error: function (xhr) {
+                    console.error(xhr.responseText);
+                    alert("Failed to load contact persons");
+                    },
+                });
+                //$("#srch_customer_contact_id").val(ui.item.customer_contact_id);
                 //$("#srch_tender_enquiry_id").val(ui.item.tender_enquiry_id);
                 load_tender_enq(ui.item.tender_enquiry_id);
             },
