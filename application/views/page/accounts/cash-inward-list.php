@@ -97,10 +97,10 @@
                                         title="Edit"><i class="fa fa-edit"></i></button>
                                 <?php } ?>
                             </td>
-                            <td class="text-center">
-                                <a href="<?php echo site_url('print-receipt/' . $ls['cash_inward_id']); ?>" target="_blank"
+                            <!-- <td class="text-center">
+                                <a href="<?php //echo site_url('print-receipt/' . $ls['cash_inward_id']); ?>" target="_blank"
                                     class="btn btn-success btn-xs" title="Print Receipt"><i class="fa fa-print"></i></a>
-                            </td>
+                            </td> -->
                             <td class="text-center">
                                 <?php if (($this->session->userdata(SESS_HD . 'level') == "Admin")) { ?>
                                     <button value="<?php echo $ls['cash_inward_id'] ?>" class="del_record btn btn-danger btn-xs"
