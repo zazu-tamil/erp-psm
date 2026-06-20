@@ -111,16 +111,14 @@
                                     <?php echo form_dropdown('account_head_id', array('' => 'Select'), set_value('account_head_id'), ' id="account_head_id" class="form-control"'); ?>
                                 </div>
                                 <div class="form-group">
+                                    <label>Nature Type </label>
+                                    <?php echo form_dropdown('nature_type', array('' => 'Select Nature '), set_value('nature_type'), ' id="nature_type" class="form-control" required="true"'); ?>
+                                </div>
+                                <div class="form-group">
                                     <label>Sub Account Head Name</label>
                                     <input class="form-control" type="text" name="sub_account_head_name"
-                                        id="sub_account_head_name" value="">
+                                        id="sub_account_head_name" value="" placeholder="Enter Your Sub Account Head ">
                                 </div>
-
-                                <div class="form-group">
-                                    <label>Nature Type </label>
-                                    <?php echo form_dropdown('nature_type', array('' => 'Select') + $nature_opt, set_value('nature_type'), ' id="nature_type" class="form-control" required="true"'); ?>
-                                </div>
-
                                 <div class="form-group">
                                     <div class="checkbox">
                                         <label>
@@ -175,14 +173,15 @@
                                     <?php echo form_dropdown('account_head_id', array('' => 'Select'), set_value('account_head_id'), ' id="account_head_id" class="form-control"'); ?>
                                 </div>
                                 <div class="form-group">
-                                    <label>Sub Account Head Name</label>
-                                    <input class="form-control" type="text" name="sub_account_head_name"
-                                        id="sub_account_head_name" value="">
+                                    <label>Nature Type </label>
+                                    <?php echo form_dropdown('nature_type', array('' => 'Select Nature '), set_value('nature_type'), ' id="nature_type" class="form-control" required="true"'); ?>
                                 </div>
                                 <div class="form-group">
-                                    <label>Nature Type </label>
-                                    <?php echo form_dropdown('nature_type', array('' => 'Select') + $nature_opt, set_value('nature_type'), ' id="nature_type" class="form-control" required="true"'); ?>
+                                    <label>Sub Account Head Name</label>
+                                    <input class="form-control" type="text" name="sub_account_head_name"
+                                        id="sub_account_head_name" value="" placeholder="Enter Your Sub Account Head ">
                                 </div>
+
                                 <div class="form-group">
                                     <div class="checkbox">
                                         <label>

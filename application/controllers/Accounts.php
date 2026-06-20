@@ -3587,6 +3587,16 @@ class Accounts extends CI_Controller
 
         }
 
+        if ($table == 'account_head_info') {
+            $query = $this->db->query("
+                SELECT *
+                FROM cb_account_head_info
+                WHERE account_head_id = '" . $this->db->escape_str($rec_id) . "'
+                LIMIT 1
+            ");
+            $rec_list = $query->row_array();
+        }
+
         if ($table == 'cash_inward_info') {
             $query = $this->db->query("
                 SELECT 

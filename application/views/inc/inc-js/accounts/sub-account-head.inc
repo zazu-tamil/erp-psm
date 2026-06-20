@@ -50,7 +50,17 @@ jQuery(function($) {
                 
                 $editModal.find("#sub_account_head_id").val(d1.sub_account_head_id);
                 $editModal.find("#type").val(d1.type);
-                $editModal.find("#nature_type").val(d1.nature_type);
+                
+                let $natureDropdownEdit = $editModal.find("#nature_type");
+                if (d1.nature_type) {
+                    if ($natureDropdownEdit.find("option[value='" + d1.nature_type + "']").length === 0) {
+                        $natureDropdownEdit.append($('<option>', { value: d1.nature_type, text: d1.nature_type }));
+                    }
+                    $natureDropdownEdit.val(d1.nature_type);
+                } else {
+                    $natureDropdownEdit.val('');
+                }
+
                 $editModal.find("#sub_account_head_name").val(d1.sub_account_head_name);
                 $editModal.find('input:radio[name="status"][value="'+d1.status+'"]').prop('checked', true);
                 $editModal.find("#ac_table").prop('checked', d1.ac_table == '1');
@@ -127,6 +137,39 @@ jQuery(function($) {
                 alert("Error fetching account heads: " + error);
             }
         });
+    });
+
+    // ---------------------------
+    // Auto-load Nature Type based on selected Account Head
+    // ---------------------------
+    $(document).on("change", "#add_modal #account_head_id, #edit_modal #account_head_id, #srch_account_head_id", function() {
+        let accountHeadId = $(this).val();
+        let modal = $(this).closest('.modal');
+        let $natureDropdown = modal.length ? modal.find("#nature_type") : $("#nature_type_id");
+
+        if (accountHeadId) {
+            $.ajax({
+                url: "<?= site_url('accounts/get_data'); ?>",
+                type: "POST",
+                data: { tbl: 'account_head_info', id: accountHeadId },
+                dataType: "json",
+                success: function(data) {
+                    if (data && data.nature_type) {
+                        if ($natureDropdown.find("option[value='" + data.nature_type + "']").length === 0) {
+                            $natureDropdown.append($('<option>', { value: data.nature_type, text: data.nature_type }));
+                        }
+                        $natureDropdown.val(data.nature_type);
+                    } else {
+                        $natureDropdown.val('');
+                    }
+                },
+                error: function() {
+                    $natureDropdown.val('');
+                }
+            });
+        } else {
+            $natureDropdown.val('');
+        }
     });
 
 });
