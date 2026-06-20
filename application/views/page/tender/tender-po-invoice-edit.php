@@ -259,7 +259,7 @@
                                             id="chk_tender_po_addtchrg_id_<?php echo $row['tender_po_addtchrg_id']; ?>"
                                             name="chk_tender_po_addtchrg_id[]"
                                             value="<?php echo $row['tender_po_addtchrg_id']; ?>"
-                                            <?php echo ($row['is_checked'] == 1) ? 'checked' : ''; ?>>  
+                                            <?php echo ($row['is_checked'] == 1) ? 'checked' : ''; ?>>
                                     </td>
                                     <td>
                                         <input type="hidden" class="form-control addt_charges_type_id"
@@ -268,7 +268,8 @@
                                         <input type="hidden" class="form-control tender_po_addtchrg_id"
                                             name="tender_po_addtchrg_id[<?php echo $row['tender_po_addtchrg_id']; ?>]"
                                             value="<?php echo $row['tender_po_addtchrg_id']; ?>">
-                                        <label for="chk_tender_po_addtchrg_id_<?php echo $row['tender_po_addtchrg_id']; ?>"><?php echo $row['addt_charges_type_name']; ?></label>
+                                        <label
+                                            for="chk_tender_po_addtchrg_id_<?php echo $row['tender_po_addtchrg_id']; ?>"><?php echo $row['addt_charges_type_name']; ?></label>
                                     </td>
                                     <td>
                                         <input type="number" step="any" class="form-control addt_charges_amt"
@@ -354,16 +355,22 @@
 
             <div class="box-footer">
                 <div class="row">
-                    <div class="text-left col-md-6">
+                    <div class="text-left col-md-4">
                         <input type="hidden" name="total_amount" id="total_amount_hidden" value="">
                         <input type="hidden" name="tax_amount" id="tax_amount_hidden" value="">
                         <a href="<?php echo site_url('tender-invoice-list'); ?>" class="btn btn-default"><i
                                 class="fa fa-arrow-left"></i> Back To List</a>
                     </div>
-                    <div class="text-right col-md-6">
+                    <div class="text-center col-md-4">
+                        <a href="<?php echo site_url('tender-po-invoice-print/' . $header['tender_enq_invoice_id']); ?>"
+                            target="_blank" class="btn btn-info btn-md" title="Print / View">
+                            <i class="fa fa-print"></i> Print
+                        </a>
+                    </div>
+                    <div class="text-right col-md-4">
                         <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
                     </div>
-                </div> 
+                </div>
             </div>
         </form>
     </div>
@@ -406,13 +413,13 @@ $(document).ready(function() {
             dataType: "json",
             success: function(res) {
 
-            //console.log("DC LIST" + res);
+                //console.log("DC LIST" + res);
 
                 let html = "";
 
                 if (res['dc_list'].length > 0) {
 
-                    $.each(res['dc_list'], function(i, row) {   
+                    $.each(res['dc_list'], function(i, row) {
                         if (dc_ids.includes(row.tender_dc_id)) {
                             chk = "checked";
                         } else {
@@ -670,7 +677,7 @@ $(document).ready(function() {
 
         $("#total_tax_amount").text((total - withoutTax).toFixed(3));
 
-        calculateTotalAmount_addt();                            
+        calculateTotalAmount_addt();
 
     }
 
@@ -701,7 +708,7 @@ $(document).ready(function() {
         $("#total_tax_amount_addt").text((total_addt_amt_w_tax - total_addt_amt_wo_tax).toFixed(3));
 
 
-        $("#total_amount_hidden").val(total_addt_amt_w_tax.toFixed(3)); 
+        $("#total_amount_hidden").val(total_addt_amt_w_tax.toFixed(3));
         $("#tax_amount_hidden").val((total_addt_amt_w_tax - total_addt_amt_wo_tax).toFixed(3));
 
     }

@@ -66,8 +66,7 @@
                             ?>
                         </div>
                         <div class="form-group col-md-4">
-                            <label for="tender_po_id">Tender PO No <span
-                                    style="color:red;">*</span></label>
+                            <label for="tender_po_id">Tender PO No <span style="color:red;">*</span></label>
                             <?php
                             echo form_dropdown(
                                 'tender_po_id',
@@ -93,12 +92,14 @@
                             <label>Status</label><br>
 
                             <label class="radio-inline">
-                                <input type="radio" name="status" value="Active" <?php echo set_value('status', $header['status']) == 'Inactive' ? '' : 'checked'; ?>>
+                                <input type="radio" name="status" value="Active"
+                                    <?php echo set_value('status', $header['status']) == 'Inactive' ? '' : 'checked'; ?>>
                                 Active
                             </label>
 
                             <label class="radio-inline">
-                                <input type="radio" name="status" value="Inactive" <?php echo set_value('status', $header['status']) == 'Inactive' ? 'checked' : ''; ?>>
+                                <input type="radio" name="status" value="Inactive"
+                                    <?php echo set_value('status', $header['status']) == 'Inactive' ? 'checked' : ''; ?>>
                                 Inactive
                             </label>
 
@@ -140,96 +141,90 @@
                                     <th style="width: 10%;">DN Qty</th>
                                 </tr>
                             </thead>
-                          <tbody id="item_container">
+                            <tbody id="item_container">
                                 <?php foreach ($items as $i => $row) { ?>
                                 <tr>
 
-                                    
+
                                     <td>
-                                        <input type="checkbox"
-                                            class="form-check-input item-check"
-                                            name="selected_items[]"
-                                            value="<?= $i ?>"
+                                        <input type="checkbox" class="form-check-input item-check"
+                                            name="selected_items[]" value="<?= $i ?>"
                                             <?php if (!empty($row['tender_dc_item_id'])) echo 'checked'; ?>>
 
-                                     
-                                        <input type="hidden"
-                                            name="tender_dc_item_id[<?= $i ?>]"
+
+                                        <input type="hidden" name="tender_dc_item_id[<?= $i ?>]"
                                             value="<?= $row['tender_dc_item_id'] ?? '' ?>">
 
-                                        <input type="hidden"
-                                            name="vendor_pur_inward_id[<?= $i ?>]"
+                                        <input type="hidden" name="vendor_pur_inward_id[<?= $i ?>]"
                                             value="<?= $row['vendor_pur_inward_id']; ?>">
 
-                                        <input type="hidden"
-                                            name="vendor_pur_inward_item_id[<?= $i ?>]"
+                                        <input type="hidden" name="vendor_pur_inward_item_id[<?= $i ?>]"
                                             value="<?= $row['vendor_pur_inward_item_id']; ?>">
 
-                                        <input type="hidden"
-                                            name="category_id[<?= $i ?>]"
+                                        <input type="hidden" name="category_id[<?= $i ?>]"
                                             value="<?= $row['category_id'] ?? '' ?>">
 
-                                        <input type="hidden"
-                                            name="item_id[<?= $i ?>]"
+                                        <input type="hidden" name="item_id[<?= $i ?>]"
                                             value="<?= $row['item_id'] ?? '' ?>">
                                     </td>
 
-                                 
+
                                     <td>
                                         <?= $row['vendor_name']; ?><br>
                                         <?= date('d-m-Y', strtotime($row['dc_date'])); ?><br>
                                         <?= $row['dc_no']; ?>
                                     </td>
 
-                                     <td>
-                                        <input type="text"
-                                            name="item_code[<?= $i ?>]"
-                                            value="<?= $row['item_code']; ?>"
-                                            class="form-control mb-2"
-                                            readonly>
+                                    <td>
+                                        <input type="text" name="item_code[<?= $i ?>]" value="<?= $row['item_code']; ?>"
+                                            class="form-control mb-2" readonly>
 
-                                        <textarea name="item_desc[<?= $i ?>]"
-                                            class="form-control"
+                                        <textarea name="item_desc[<?= $i ?>]" class="form-control"
                                             rows="2"><?= $row['item_desc']; ?></textarea>
                                     </td>
 
-                                     <td>
-                                        <input type="text"
-                                            name="uom[<?= $i ?>]"
-                                            value="<?= $row['uom']; ?>"
-                                            class="form-control mb-2"
-                                            readonly>
+                                    <td>
+                                        <input type="text" name="uom[<?= $i ?>]" value="<?= $row['uom']; ?>"
+                                            class="form-control mb-2" readonly>
 
-                                        <input type="number"
-                                            name="avail_qty[<?= $i ?>]"
-                                            value="<?= $row['avail_qty']; ?>"
-                                            class="form-control"
-                                            readonly>
-                                    </td> 
+                                        <input type="number" name="avail_qty[<?= $i ?>]"
+                                            value="<?= $row['avail_qty']; ?>" class="form-control" readonly>
+                                    </td>
                                     <td>
                                         <label>Delivery Qty</label>
-                                        <input type="number"
-                                            step="any"
-                                            name="dc_qty[<?= $i ?>]"
-                                            value="<?= $row['dc_qty']; ?>"
-                                            class="form-control">
+                                        <input type="number" step="any" name="dc_qty[<?= $i ?>]"
+                                            value="<?= $row['dc_qty']; ?>" class="form-control">
                                     </td>
 
                                 </tr>
                                 <?php } ?>
-                                </tbody>
+                            </tbody>
 
                         </table>
                     </div>
                 </fieldset>
             </div>
 
-            <div class="box-footer text-right">
-                <a href="<?php echo site_url('tender-dc-list'); ?>" class="btn btn-default"><i
-                        class="fa fa-arrow-left"></i> Back To List</a>
-                <button type="submit" class="btn btn-success">
-                    <i class="fa fa-save"></i> Update
-                </button>
+            <div class="box-footer">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <a href="<?php echo site_url('tender-dc-list'); ?>" class="btn btn-default"><i
+                                class="fa fa-arrow-left"></i> Back To List</a>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <a href="<?php echo site_url('tender-dc-print/' . $header['tender_dc_id']); ?>" target="_blank"
+                            class="btn btn-info btn-md" title="Print">
+                            <i class="fa fa-print"></i> Print
+                        </a>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fa fa-save"></i> Update
+                        </button>
+                    </div>
+                </div>
+
+
             </div>
         </form>
     </div>

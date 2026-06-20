@@ -7,16 +7,16 @@
     </ol>
 </section>
 <section class="content">
-        <?php if ($this->session->flashdata('success')): ?>
-            <div class="alert alert-success alert-dismissible auto-hide">
-                <?php echo $this->session->flashdata('success'); ?>
-            </div>
-        <?php endif; ?>
-        <?php if ($this->session->flashdata('error')): ?>
-            <div class="alert alert-danger alert-dismissible auto-hide">
-                <?php echo $this->session->flashdata('error'); ?>
-            </div>
-        <?php endif; ?>
+    <?php if ($this->session->flashdata('success')): ?>
+    <div class="alert alert-success alert-dismissible auto-hide">
+        <?php echo $this->session->flashdata('success'); ?>
+    </div>
+    <?php endif; ?>
+    <?php if ($this->session->flashdata('error')): ?>
+    <div class="alert alert-danger alert-dismissible auto-hide">
+        <?php echo $this->session->flashdata('error'); ?>
+    </div>
+    <?php endif; ?>
     <div class="box box-info">
         <div class="box-header with-border">
             <h3 class="box-title">Edit Vendor Rate Enquiry</h3>
@@ -119,16 +119,21 @@
                                 <div class="col-md-2">
                                     <div class="form-group" style="margin-top: 25px;">
                                         <div class="form-check">
-                                            <input type="checkbox"name="selected_items[]"value="<?= $i ?>"<?= !empty($row['vendor_rate_enquiry_item_id']) ? 'checked' : '' ?>>
+                                            <input type="checkbox" name="selected_items[]" value="<?= $i ?>"
+                                                <?= !empty($row['vendor_rate_enquiry_item_id']) ? 'checked' : '' ?>>
                                             <label class="form-check-label" for="check_<?php echo $i; ?>"
                                                 style="margin-left: 5px;">Select</label>
                                         </div>
-                                        <input type="hidden" name="vendor_rate_enquiry_item_id[]" value="<?php echo $row['vendor_rate_enquiry_item_id']; ?>" id="item_<?php echo $row['vendor_rate_enquiry_item_id']; ?>">
-                                        <input type="hidden" name="tender_enquiry_item_id[]"  value="<?php echo $row['tender_enquiry_item_id']; ?>">
+                                        <input type="hidden" name="vendor_rate_enquiry_item_id[]"
+                                            value="<?php echo $row['vendor_rate_enquiry_item_id']; ?>"
+                                            id="item_<?php echo $row['vendor_rate_enquiry_item_id']; ?>">
+                                        <input type="hidden" name="tender_enquiry_item_id[]"
+                                            value="<?php echo $row['tender_enquiry_item_id']; ?>">
                                     </div>
                                     <div class="form-group">
                                         <label>Item Code</label>
-                                        <input type="text" class="form-control item_code" name="item_code[]"  value="<?php echo $row['item_code']; ?>">
+                                        <input type="text" class="form-control item_code" name="item_code[]"
+                                            value="<?php echo $row['item_code']; ?>">
                                     </div>
                                 </div>
                                 <!-- <div class="col-md-3">
@@ -224,13 +229,27 @@
                     </div> -->
                 </fieldset>
             </div>
-            <div class="box-footer text-right">
+            <div class="box-footer">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <a href="<?php echo site_url('vendor-rate-enquiry-list'); ?>" class="btn btn-warning pull-left">
+                            <i class="fa fa-arrow-left"></i> Back to list</a>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <a href="<?php echo site_url('vendor-rate-enquiry-print/' . $main['vendor_rate_enquiry_id']); ?>"
+                            target="_blank" class="btn btn-info btn-md" title="Print / View">
+                            <i class="fa fa-print"></i> Print
+                        </a>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <button type="submit" class="btn btn-success">
+                            Update
+                        </button>
+                    </div>
+                </div>
 
-                <a href="<?php echo site_url('vendor-rate-enquiry-list'); ?>" class="btn btn-warning pull-left"> <i
-                        class="fa fa-arrow-left"></i> Back to list</a>
-                <button type="submit" class="btn btn-success">
-                    Update
-                </button>
+
+
             </div>
         </form>
     </div>

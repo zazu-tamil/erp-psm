@@ -450,7 +450,10 @@
                             class="btn btn-default"><i class="fa fa-arrow-left"></i> Back To List</a></div>
                     <div class="col-md-4 text-center">
                           <a href="<?php echo site_url('tender-quotation-print/' . $header['tender_quotation_id']); ?>" target="_blank" class="btn btn-info"><i class="fa fa-print"></i> Print</a>        
-
+                           
+                          <?php if($header['is_technical_bid'] == '1' ) { ?>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<a href="<?php echo site_url('tender-quotation-tbid-print/' . $header['tender_quotation_id']); ?>" target="_blank" class="btn btn-warning"><i class="fa fa-print"></i> Print Technical BID</a>
+                            <?php } ?>
                     </div>
                     <div class="col-md-4 text-right"><button type="submit" class="btn btn-success"><i
                                 class="fa fa-save"></i> Update</button></div>

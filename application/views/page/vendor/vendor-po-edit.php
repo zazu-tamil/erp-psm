@@ -130,8 +130,12 @@
                         </div>
                         <div class="form-group col-md-2">
                             <label>Status</label><br>
-                            <label class="radio-inline"><input type="radio" name="status" value="Active" <?php echo set_radio('status', 'Active', $header['status'] == 'Active'); ?>> Active</label>
-                            <label class="radio-inline"><input type="radio" name="status" value="Inactive" <?php echo set_radio('status', 'Inactive', $header['status'] == 'Inactive'); ?>> Inactive</label>
+                            <label class="radio-inline"><input type="radio" name="status" value="Active"
+                                    <?php echo set_radio('status', 'Active', $header['status'] == 'Active'); ?>>
+                                Active</label>
+                            <label class="radio-inline"><input type="radio" name="status" value="Inactive"
+                                    <?php echo set_radio('status', 'Inactive', $header['status'] == 'Inactive'); ?>>
+                                Inactive</label>
                         </div>
                     </div>
                     <div class="row">
@@ -171,110 +175,111 @@
                         </thead>
                         <tbody id="item_container">
                             <?php if (!empty($items)): ?>
-                                <?php foreach ($items as $index => $item): ?>
+                            <?php foreach ($items as $index => $item): ?>
 
-                                    <tr class="item-row"> 
-                                        <td>
-                                         <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="<?= $index; ?>"
+                            <tr class="item-row">
+                                <td>
+                                    <input type="checkbox" class="form-check-input item-check" name="selected_items[]"
+                                        value="<?= $index; ?>"
                                         <?= !empty($item['vendor_po_item_id']) ? 'checked' : ''; ?>>
 
 
-                                            <input type="hidden" name="vendor_rate_enquiry_item_id[<?= $index; ?>]"
-                                                value="<?= $item['vendor_rate_enquiry_item_id'] ?? ''; ?>">
+                                    <input type="hidden" name="vendor_rate_enquiry_item_id[<?= $index; ?>]"
+                                        value="<?= $item['vendor_rate_enquiry_item_id'] ?? ''; ?>">
 
-                                            <input type="hidden" name="vendor_quote_item_id[<?= $index; ?>]"
-                                                value="<?= $item['vendor_quote_item_id'] ?? ''; ?>">
+                                    <input type="hidden" name="vendor_quote_item_id[<?= $index; ?>]"
+                                        value="<?= $item['vendor_quote_item_id'] ?? ''; ?>">
 
-                                            <input type="hidden" name="vendor_po_item_id[<?= $index; ?>]"
-                                                value="<?= $item['vendor_po_item_id'] ?? ''; ?>">
-                                        </td> 
-                                        <td>
-                                            <input type="text" class="form-control item_code-input"
-                                                name="item_code[<?= $index; ?>]"
-                                                value="<?= htmlspecialchars($item['item_code'] ?? ''); ?>" readonly>
-                                        </td> 
-                                        <td>
-                                            <textarea name="item_desc[<?= $index; ?>]" class="form-control"
-                                                rows="2"><?= htmlspecialchars($item['item_desc'] ?? ''); ?></textarea>
-                                        </td> 
-                                        <td>
-                                            <input type="text" name="uom[<?= $index; ?>]" class="form-control"
-                                                value="<?= $item['uom'] ?? ''; ?>">
+                                    <input type="hidden" name="vendor_po_item_id[<?= $index; ?>]"
+                                        value="<?= $item['vendor_po_item_id'] ?? ''; ?>">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control item_code-input"
+                                        name="item_code[<?= $index; ?>]"
+                                        value="<?= htmlspecialchars($item['item_code'] ?? ''); ?>" readonly>
+                                </td>
+                                <td>
+                                    <textarea name="item_desc[<?= $index; ?>]" class="form-control"
+                                        rows="2"><?= htmlspecialchars($item['item_desc'] ?? ''); ?></textarea>
+                                </td>
+                                <td>
+                                    <input type="text" name="uom[<?= $index; ?>]" class="form-control"
+                                        value="<?= $item['uom'] ?? ''; ?>">
 
-                                            <br>
+                                    <br>
 
-                                            <input type="number" step="any" name="qty[<?= $index; ?>]"
-                                                class="form-control qty-input" value="<?= $item['qty'] ?? 0; ?>">
-                                        </td> 
-                                        <td>
-                                            <input type="number" step="any" name="rate[<?= $index; ?>]"
-                                                class="form-control rate-input" value="<?= $item['rate'] ?? 0; ?>">
-                                        </td> 
-                                        <td>
-                                            <input type="number" step="any" name="gst[<?= $index; ?>]" class="form-control vat"
-                                                value="<?= $item['vat'] ?? 0; ?>">
-                                        </td> 
-                                        <td>
-                                            <input type="number" step="any" name="amount_wo_tax[<?= $index; ?>]"
-                                                class="form-control amountwotx"
-                                                value="<?= number_format((($item['rate'] ?? 0) * ($item['qty'] ?? 0)), 3, '.', ''); ?>"
-                                                readonly>
-                                        </td>
+                                    <input type="number" step="any" name="qty[<?= $index; ?>]"
+                                        class="form-control qty-input" value="<?= $item['qty'] ?? 0; ?>">
+                                </td>
+                                <td>
+                                    <input type="number" step="any" name="rate[<?= $index; ?>]"
+                                        class="form-control rate-input" value="<?= $item['rate'] ?? 0; ?>">
+                                </td>
+                                <td>
+                                    <input type="number" step="any" name="gst[<?= $index; ?>]" class="form-control vat"
+                                        value="<?= $item['vat'] ?? 0; ?>">
+                                </td>
+                                <td>
+                                    <input type="number" step="any" name="amount_wo_tax[<?= $index; ?>]"
+                                        class="form-control amountwotx"
+                                        value="<?= number_format((($item['rate'] ?? 0) * ($item['qty'] ?? 0)), 3, '.', ''); ?>"
+                                        readonly>
+                                </td>
 
-                                    
-                                        <td>
-                                            <input type="number" step="any" name="amount[<?= $index; ?>]"
-                                                class="form-control amounttx amount"
-                                                value="<?= number_format(($item['amount'] ?? 0), 3, '.', ''); ?>" readonly>
-                                        </td>
 
-                                    </tr>
+                                <td>
+                                    <input type="number" step="any" name="amount[<?= $index; ?>]"
+                                        class="form-control amounttx amount"
+                                        value="<?= number_format(($item['amount'] ?? 0), 3, '.', ''); ?>" readonly>
+                                </td>
 
-                                <?php endforeach; ?>
+                            </tr>
+
+                            <?php endforeach; ?>
                             <?php endif; ?>
                         </tbody>
-                    </table> 
+                    </table>
                 </fieldset>
 
-                
-                    <div
-                        style="border-radius:10px; padding:30px; background-color:#f8f9fa; border:2px solid blue; margin-top:30px;margin-bottom:30px;">
-                        <div class="row">
-                            <div class="col-md-3 text-right ">
-                                <h3 class="text-red">Total Excl Addt Charges</h3>
-                            </div>
-                            <div class="col-md-3 text-right">
-                                <div class="total-box shadow-sm">
-                                    <h5 class="mb-0">
-                                        <i class="fa fa-calculator text-success me-2"></i>
-                                        <strong>Total Amount WO Tax:</strong>
-                                        <span class="text-primary"><span id="total_amount_wo_tax">0.000</span></span>
-                                    </h5>
-                                </div>
-                            </div>
-                            <div class="col-md-3 text-right">
-                                <div class="total-box shadow-sm">
-                                    <h5 class="mb-0">
-                                        <i class="fa fa-calculator text-success me-2"></i>
-                                        <strong>Total TAX Amount :</strong>
-                                        <span class="text-primary text-bold"><span id="total_tax_amount">0.000</span></span>
-                                    </h5>
-                                </div>
-                            </div>
-                            <div class="col-md-3 text-right ">
-                                <div class="total-box shadow-sm">
-                                    <h5 class="mb-0">
-                                        <i class="fa fa-calculator text-success me-2"></i>
-                                        <strong>Total Amount With Tax:</strong>
-                                        <span class="text-primary"><span id="total_amount">0.000</span></span>
-                                    </h5>
-                                </div>
-                            </div>
 
+                <div
+                    style="border-radius:10px; padding:30px; background-color:#f8f9fa; border:2px solid blue; margin-top:30px;margin-bottom:30px;">
+                    <div class="row">
+                        <div class="col-md-3 text-right ">
+                            <h3 class="text-red">Total Excl Addt Charges</h3>
                         </div>
-                    </div>
+                        <div class="col-md-3 text-right">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount WO Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount_wo_tax">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-right">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total TAX Amount :</strong>
+                                    <span class="text-primary text-bold"><span id="total_tax_amount">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-right ">
+                            <div class="total-box shadow-sm">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calculator text-success me-2"></i>
+                                    <strong>Total Amount With Tax:</strong>
+                                    <span class="text-primary"><span id="total_amount">0.000</span></span>
+                                </h5>
+                            </div>
+                        </div>
 
-            
+                    </div>
+                </div>
+
+
 
                 <div id="div_addt_chrg">
                     <fieldset class="mt-4 pt-4">
@@ -305,7 +310,8 @@
                                         <input type="hidden" class="form-control vendor_po_addtchrg_id"
                                             name="vendor_po_addtchrg_id[<?php echo $row['vendor_quote_addtchrg_id']; ?>]"
                                             value="<?php echo $row['vendor_po_addtchrg_id']; ?>">
-                                        <label for="chk_vendor_quote_addtchrg_id<?php echo $row['vendor_quote_addtchrg_id']; ?>"><?php echo $row['addt_charges_type_name']; ?></label>
+                                        <label
+                                            for="chk_vendor_quote_addtchrg_id<?php echo $row['vendor_quote_addtchrg_id']; ?>"><?php echo $row['addt_charges_type_name']; ?></label>
                                     </td>
                                     <td>
                                         <input type="number" step="any" class="form-control addt_charges_amt"
@@ -381,14 +387,26 @@
 
                 </div>
 
-                
+
             </div>
 
-            <div class="box-footer text-right">
-                <a href="<?php echo site_url('vendor-po-list'); ?>" class="btn btn-warning pull-left">
-                    <i class="fa fa-arrow-left"></i> Back To List
-                </a>
-                <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
+            <div class="box-footer">
+                <div class="row">
+                    <div class="col-md-4 text-center"><a href="<?php echo site_url('vendor-po-list'); ?>"
+                            class="btn btn-warning pull-left">
+                            <i class="fa fa-arrow-left"></i> Back To List
+                        </a></div>
+                    <div class="col-md-4 text-center">
+                        <a href="<?php echo site_url('vendor-po-view/' . $header['vendor_po_id']); ?>" target="_blank"
+                            class="btn btn-info btn-md" title="Print / View">
+                            <i class="fa fa-print"></i> Print
+                        </a>
+                    </div>
+                    <div class="col-md-4 text-center"><button type="submit" class="btn btn-success"><i
+                                class="fa fa-save"></i> Save</button></div>
+                </div>
+
+
             </div>
         </form>
     </div>
