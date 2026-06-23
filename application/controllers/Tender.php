@@ -1621,7 +1621,7 @@ class Tender extends CI_Controller
             $header = [
                 'company_id' => $this->input->post('srch_company_id'),
                 'customer_id' => $this->input->post('srch_customer_id'),
-                'customer_contact_id' => $this->input->post('srch_customer_contact_id'),
+                'customer_contact_id' => $this->input->post('customer_contact_id'),
                 // 'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
                 'quotation_no' => $this->input->post('quotation_no'),
                 'tender_ref_no' => $this->input->post('tender_ref_no'),
@@ -2008,7 +2008,7 @@ class Tender extends CI_Controller
         LEFT JOIN tender_enquiry_info te ON
             tqi.tender_enquiry_id = te.tender_enquiry_id AND te.status = 'Active'
         left join currencies_info as curr on tqi.currency_id= curr.currency_id and curr.status='Active'
-        left join customer_contact_info as cp on cp.customer_contact_id = te.customer_contact_id and cp.status = 'Active'
+        left join customer_contact_info as cp on cp.customer_contact_id = tqi.customer_contact_id and cp.status = 'Active'
         WHERE
             tqi.tender_quotation_id = ? AND tqi.status != 'Delete'
         ";
@@ -2114,7 +2114,7 @@ class Tender extends CI_Controller
         LEFT JOIN tender_enquiry_info te ON
             tqi.tender_enquiry_id = te.tender_enquiry_id AND te.status = 'Active'
         left join currencies_info as curr on tqi.currency_id= curr.currency_id and curr.status='Active'
-        left join customer_contact_info as cp on cp.customer_contact_id = te.customer_contact_id and cp.status = 'Active'
+        left join customer_contact_info as cp on cp.customer_contact_id = tqi.customer_contact_id and cp.status = 'Active'
         WHERE
             tqi.tender_quotation_id = ? 
             and tqi.is_technical_bid = '1' 
@@ -5047,9 +5047,9 @@ class Tender extends CI_Controller
             h.tender_po_id,
             h.tender_po_item_id,
             h.rate,
-            i.gst,
+            h.gst,
             h.qty as order_qty,
-            b.qty as del_qty,
+            sum(b.qty) as del_qty,
             i.tender_enq_invoice_item_id,
             if(i.tender_enq_invoice_item_id is null,  b.item_code, i.item_code) as item_code,
             if(i.tender_enq_invoice_item_id is null,  b.item_desc, i.item_desc) as item_desc,
@@ -5071,7 +5071,7 @@ class Tender extends CI_Controller
             and b.status = 'Active'
             and a.tender_po_id = ?
             and a.tender_dc_id in ?
-            group by b.tender_dc_item_id 
+            group by h.tender_po_id, h.tender_po_item_id
             order by b.tender_dc_item_id asc
         ";
 
