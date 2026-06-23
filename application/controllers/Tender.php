@@ -3968,13 +3968,14 @@ class Tender extends CI_Controller
         }
 
         $sql = "
-            select
-            c.*
-            from tender_enq_invoice_info  as a
-            left join company_info as b on a.company_id = b.company_id and a.`status`='Active'
-            left join company_bank_info as c on b.bank_id = c.bank_id and a.`status`='Active'
-            where a.tender_enq_invoice_id = ?
-            order by a.tender_enq_invoice_id asc
+            SELECT
+                c.*
+            FROM company_bank_info AS c 
+            INNER JOIN tender_enq_invoice_info AS a
+                ON c.company_id = a.company_id
+            WHERE a.tender_enq_invoice_id = ?
+                AND a.status = 'Active'
+            ORDER BY a.tender_enq_invoice_id ASC;
         ";
         $query = $this->db->query($sql, [$tender_enq_invoice_id]);
         $data['bank_details'] = $query->row_array();
@@ -5074,7 +5075,7 @@ class Tender extends CI_Controller
             order by b.tender_dc_item_id asc
         ";
 
-        $query = $this->db->query($sql,[$tender_po_id,$dc_ids]);
+        $query = $this->db->query($sql, [$tender_po_id, $dc_ids]);
         echo json_encode($query->result_array());
     }
 
@@ -5090,24 +5091,20 @@ class Tender extends CI_Controller
         $tender_po_id = $this->input->post('tender_po_id');
         $tender_enq_invoice_id = $this->input->post('tender_enq_invoice_id');
 
+        if (!is_array($dc_ids)) {
+            // dc_ids may arrive as a comma-separated string "1,2,3"
+            $dc_ids = array_filter(array_map('trim', explode(',', $dc_ids)));
+        }
+
+        $dc_ids = array_filter($dc_ids);
+        $dc_ids = array_map('intval', $dc_ids);
+
         if (empty($dc_ids)) {
-             echo json_encode([]);
-             return;
-         }
+            echo json_encode([]);
+            return;
+        }
 
-         if (!is_array($dc_ids)) {
-             $dc_ids = [$dc_ids];
-         }
 
-         $dc_ids = array_filter($dc_ids);
-         $dc_ids = array_map('intval', $dc_ids);
-
-         if (empty($dc_ids)) {
-             echo json_encode([]);
-             return;
-         } 
-
-         
 
         $sql = "
             select 
