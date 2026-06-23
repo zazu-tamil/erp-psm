@@ -729,7 +729,7 @@ class Reports extends CI_Controller
                     ON a.customer_id = d.customer_id 
                     AND d.status='Active'
                 left join vendor_info as e on a.vendor_id = e.vendor_id and e.`status`='Active'
-                left join vendor_contact_info as f on a.vendor_id = f.vendor_id and e.vendor_id = f.vendor_id and f.`status`='Active'
+                left join vendor_contact_info as f on a.vendor_id = f.vendor_id and f.vendor_contact_id = a.vendor_contact_person_id and f.`status`='Active'
            
                 WHERE a.status='Active'
                 AND a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
@@ -2374,7 +2374,7 @@ class Reports extends CI_Controller
         $data['purchases'] = $this->Pl_model->get_purchases_summary($srch_from_date, $srch_to_date);
         $data['indirect_expenses'] = $this->Pl_model->get_indirect_expenses_summary($srch_from_date, $srch_to_date);
 
-        print_r($data['other_income']);
+        //print_r($data['other_income']);
 
         // For now, we'll just load the view. The actual P&L logic can be implemented later.
         $this->load->view('page/reports/pl-report', $data);

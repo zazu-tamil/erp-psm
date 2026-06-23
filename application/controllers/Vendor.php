@@ -437,22 +437,22 @@ class Vendor extends CI_Controller
             $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_details'];
         }
 
-        $sql = "
-        SELECT
-                a.vendor_rate_enquiry_item_id,
-                a.vendor_rate_enquiry_id,
-                a.tender_enquiry_item_id,
-                a.item_code,
-                a.item_desc,
-                a.uom,
-                a.qty     
-            FROM
-                vendor_rate_enquiry_item_info a 
-            WHERE
-            a.status ='Active'
-            and a.vendor_rate_enquiry_id = ?
-            ORDER BY a.vendor_rate_enquiry_item_id ASC
-        ";
+        // $sql = "
+        // SELECT
+        //         a.vendor_rate_enquiry_item_id,
+        //         a.vendor_rate_enquiry_id,
+        //         a.tender_enquiry_item_id,
+        //         a.item_code,
+        //         a.item_desc,
+        //         a.uom,
+        //         a.qty     
+        //     FROM
+        //         vendor_rate_enquiry_item_info a 
+        //     WHERE
+        //     a.status ='Active'
+        //     and a.vendor_rate_enquiry_id = ?
+        //     ORDER BY a.vendor_rate_enquiry_item_id ASC
+        // ";
 
         $sql = "
         select  
@@ -3629,6 +3629,7 @@ class Vendor extends CI_Controller
             $query = $this->db->query("
                         SELECT
                             a.tender_enquiry_item_id,  
+                            a.serial_no,
                             b.enquiry_no,
                              date_format(b.closing_date, '%Y-%m-%d') as closing_date,
                             a.item_code,

@@ -595,7 +595,7 @@ function convertAmountToWords($amount, $currency = 'BHD', $decimal_point = 3)
                                     if (!isset($tot_vat[floatval($addt_chrg['addt_charges_vat'])]))
                                         $tot_vat[floatval($addt_chrg['addt_charges_vat'])] = 0;
                                     $tot_vat[floatval($addt_chrg['addt_charges_vat'])] += $addt_chrg['addt_charges_vat_amt'];
-                                    $grand_total += $addt_chrg['addt_charges_amt'] + $total_vat_amount;
+                                    $grand_total += $addt_chrg['addt_charges_amt'] ;
                                 ?>
                                     <tr class="items-table">
                                         <td colspan="5" class="text-right">
@@ -621,7 +621,7 @@ function convertAmountToWords($amount, $currency = 'BHD', $decimal_point = 3)
                                         <strong>TOTAL <?php echo htmlspecialchars($currency_code); ?></strong>
                                     </td>
                                     <td colspan="2" class="text-right">
-                                        <strong><?php echo number_format($grand_total, $decimal_point); ?></strong>
+                                        <strong><?php echo number_format(($grand_total + $total_vat_amount), $decimal_point); ?></strong>
                                     </td>
                                 </tr>
 
