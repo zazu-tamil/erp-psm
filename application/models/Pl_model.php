@@ -75,6 +75,7 @@ class Pl_model extends CI_Model
                     ON b.sub_account_head_id = a.sub_account_head_id
                 WHERE a.status = 'Active'
                 AND b.status = 'Active'
+                and b.nature_type = 'Expense'
                 AND a.inv_entry_date BETWEEN ? AND ?
                 GROUP BY a.sub_account_head_id
 
@@ -88,6 +89,7 @@ class Pl_model extends CI_Model
                     ON b.sub_account_head_id = a.sub_account_head_id
                 WHERE a.status = 'Active'
                 AND b.status = 'Active'
+                and b.nature_type = 'Expense'
                 AND a.inv_entry_date BETWEEN ? AND ?
                 GROUP BY a.sub_account_head_id
 

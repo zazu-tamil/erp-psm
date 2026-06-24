@@ -49,6 +49,8 @@ jQuery(function($) {
                 $("#edit_modal #type").val(d1.type);
                 
                 $editModal.find("#sub_account_head_id").val(d1.sub_account_head_id);
+                //$('#edit_modal #account_head_id').change(); // Trigger change to load account heads for the selected type
+
                 $editModal.find("#type").val(d1.type);
                 
                 let $natureDropdownEdit = $editModal.find("#nature_type");
@@ -58,7 +60,29 @@ jQuery(function($) {
                     }
                     $natureDropdownEdit.val(d1.nature_type);
                 } else {
-                    $natureDropdownEdit.val('');
+                    
+                    $.ajax({
+                        url: "<?= site_url('accounts/get_data'); ?>",
+                        type: "POST",
+                        data: { tbl: 'account_head_info', id: d1.account_head_id },
+                        dataType: "json",
+                        success: function(data) {
+                            if (data && data.nature_type) {
+                                if ($natureDropdownEdit.find("option[value='" + data.nature_type + "']").length === 0) {
+                                    $natureDropdownEdit.append($('<option>', { value: data.nature_type, text: data.nature_type }));
+                                }
+                                $natureDropdownEdit.val(data.nature_type);
+                            } else {
+                                $natureDropdownEdit.val('');
+                            }
+                        },
+                        error: function() {
+                            $natureDropdownEdit.val('');
+                        }
+                    });
+
+
+                    //$natureDropdownEdit.val('');
                 }
 
                 $editModal.find("#sub_account_head_name").val(d1.sub_account_head_name);
@@ -83,6 +107,8 @@ jQuery(function($) {
                         });
                     }
                 }); 
+
+                //$('#edit_modal #account_head_id').trigger('change');
 
                 //$editModal.modal('show');
             },
@@ -171,6 +197,8 @@ jQuery(function($) {
             $natureDropdown.val('');
         }
     });
+
+    
 
 });
 </script>

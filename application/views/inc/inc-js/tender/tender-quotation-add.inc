@@ -543,7 +543,7 @@
 
                         const itemHtml = `
                             <div class="item-card border p-3 mb-3" style="background-color:#f9f9f9; border-radius:8px;">
-                            <h5 class="text-primary mb-3">Item Details ${i + 1}</h5>
+                            <h5 class="text-primary mb-3">Item Details ${row.serial_no}</h5>
                             <div class="row">
                                 <div class="col-md-1 d-flex align-items-center justify-content-center">
                                 <input type="checkbox" class="form-check-input item-check" name="selected_items[]" value="${i}" checked>
