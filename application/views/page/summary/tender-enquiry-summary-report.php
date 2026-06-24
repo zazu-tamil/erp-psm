@@ -1216,6 +1216,7 @@
                                     <th width="8%">Supplier PO Id</th>
                                     <th width="10%">Supplier PO Item Id</th>
                                     <th width="10%">Supplier Quotation Item Id</th>
+                                    <th width="10%">Supplier Rate Enquiry Item Id</th>
                                     <th width="10%">Item Code</th>
                                     <th width="22%">Item Description</th>
                                     <th width="6%">UOM</th>
@@ -1239,8 +1240,8 @@
                                             <td class="text-center"><?php echo htmlspecialchars($item['vendor_po_id'] ?? ''); ?></td>
                                             <td class="text-center"><?php echo htmlspecialchars($item['vendor_po_item_id'] ?? ''); ?>
                                             </td>
-                                            <td class="text-center"><?php echo htmlspecialchars($item['vendor_quote_item_id'] ?? ''); ?>
-                                            </td>
+                                            <td class="text-center"><?php echo htmlspecialchars($item['vendor_quote_item_id'] ?? ''); ?> </td>
+                                            <td class="text-center"><?php echo htmlspecialchars($item['vendor_rate_enquiry_item_id'] ?? ''); ?> </td>
                                             <td><?php echo htmlspecialchars($item['item_code'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($item['item_desc'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($item['uom'] ?? ''); ?></td>

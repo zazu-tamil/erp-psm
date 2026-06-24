@@ -6,9 +6,9 @@ class Pl_model extends CI_Model
 
     public function get_sales_summary($from_date, $to_date)
     {
-        $this->db->select('SUM(total_amount) as total_sales');
-        $this->db->where('invoice_date >=', $from_date);
-        $this->db->where('invoice_date <=', $to_date);
+        $this->db->select('(SUM(total_amount - ifnull(tax_amount, 0))) as total_sales'); 
+
+        $this->db->where("invoice_date between '$from_date' AND '$to_date'");
         $this->db->where('status =', 'Active');
         return $this->db->get('tender_enq_invoice_info')->row('total_sales');
     }
@@ -32,12 +32,12 @@ class Pl_model extends CI_Model
             'left'
         );
 
+        $this->db->where("a.inward_date between '$from_date' AND '$to_date'");  
         $this->db->where('a.status', 'Active');
         $this->db->where('b.status', 'Active');
         $this->db->where('c.status', 'Active');
         $this->db->where('c.nature_type', 'Income');
-        $this->db->where('a.inward_date >=', $from_date);
-        $this->db->where('a.inward_date <=', $to_date);
+       // $this->db->where_between('a.inward_date', $from_date, $to_date);
 
         $this->db->group_by(array(
             'a.account_head_id',
@@ -52,7 +52,7 @@ class Pl_model extends CI_Model
 
     public function get_purchases_summary($from_date, $to_date)
     {
-        $this->db->select('SUM(total_amount) as total_purchases');
+        $this->db->select('SUM(total_amount_wo_tax) as total_purchases');
         $this->db->where('entry_date >=', $from_date);
         $this->db->where('entry_date <=', $to_date);
         $this->db->where('status =', 'Active');

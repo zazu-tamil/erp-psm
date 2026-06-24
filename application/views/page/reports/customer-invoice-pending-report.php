@@ -53,15 +53,12 @@
                 </button>
             </div>
         </div>
-        <?php
-        $grand_total = 0; // ✅ NEW
         
-        $invoice_no_count = 0;
-        ?>
 
         <?php
         $grand_total = 0;
         $invoice_no_count = 0;
+        $vat = 0;
         ?>
 
         <div class="box-body table-responsive">
@@ -70,39 +67,52 @@
                 <tr style="font-weight:bold;" class="bg-gray">
                     <th class="text-center">Date</th>
                     <th class="text-center">Invoice No</th>
-                    <th class="text-right">Amount</th>
+                    <th class="text-center">Customer</th>
+                    <th class="text-right">Inv.Amount Without VAT</th>
+                    <th class="text-right">VAT</th>
+                    <th class="text-right">Invoice Amount</th>
                 </tr>
 
                 <?php foreach ($record_list as $row) {
 
                     // ✅ Add inside loop
                     $grand_total += $row['total_amount'];
+                    $vat += $row['tax_amount'];
                     $invoice_no_count++;
 
                     ?>
-                    <tr>
-                        <td>
-                            <?php echo date('d/m/Y', strtotime($row['invoice_date'])); ?>
-                        </td>
-                        <td class="text-center">
-                            <?php echo $row['invoice_no']; ?>
-                        </td>
-                        <td align="right">
-                            <?php echo number_format($row['total_amount'], 3); ?>
-                        </td>
-                    </tr>
+                <tr>
+                    <td>
+                        <?php echo date('d/m/Y', strtotime($row['invoice_date'])); ?>
+                    </td>
+                    <td class="text-center">
+                        <?php echo $row['invoice_no']; ?>
+                    </td>
+                    <td>
+                        <?php echo $row['customer_name']; ?>
+                    </td>
+                    <td align="right">
+                        <?php echo number_format($row['total_amount'] - $row['tax_amount'], 3); ?>
+                    </td>
+                    <td align="right">
+                        <?php echo number_format($row['tax_amount'], 3); ?>
+                    </td>
+                    <td align="right">
+                        <?php echo number_format($row['total_amount'], 3); ?>
+                    </td>
+                </tr>
                 <?php } ?>
 
                 <!-- ✅ GRAND TOTAL -->
                 <tr style="font-weight:bold; background:green; font-size:16px; color:#ffffff;">
-                    <td></td>
-                    <td class="text-center">
+                    
+                    <td class="text-left" colspan="3">
                         Total Invoice : <?= $invoice_no_count; ?>
                     </td>
-                  
-                    <td class="text-right">
-                        Grand Total : <?= number_format($grand_total, 3); ?>
-                    </td>
+
+                    <td class="text-right"> <?= number_format(( $grand_total - $vat ), 3); ?> </td>
+                    <td class="text-right"> <?= number_format($vat, 3); ?> </td>
+                    <td class="text-right"> <?= number_format($grand_total, 3); ?> </td>
                 </tr>
 
             </table>

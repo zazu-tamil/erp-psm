@@ -620,7 +620,8 @@ class Reports extends CI_Controller
                     b.amount,
                     e.currency_code,
                     e.decimal_point,
-                    tpo.serial_no
+                    tpo.serial_no,
+                    b.tender_po_item_id
 
                 FROM tender_enq_invoice_info as a
                 LEFT JOIN tender_enq_invoice_item_info as b 
@@ -819,7 +820,7 @@ class Reports extends CI_Controller
                     a.po_status,
                     c.company_name,
                     d.customer_name,
-
+                    b.vendor_rate_enquiry_item_id,
                     b.vendor_po_item_id,
                     b.vendor_quote_item_id,
                     b.item_code,
@@ -1558,13 +1559,13 @@ class Reports extends CI_Controller
             SELECT 
                 DATE_FORMAT(a.invoice_date, '%d-%m-%Y') AS invoice_date,
                 a.invoice_no,
+                ifnull(a.tax_amount, 0) as tax_amount,
                 a.total_amount,
                 b.customer_name
             FROM tender_enq_invoice_info AS a
             LEFT JOIN customer_info AS b 
-                ON a.customer_id = b.customer_id 
-                AND b.status = 'Active'
-            WHERE a.status = 'Active'
+                ON a.customer_id = b.customer_id  
+            WHERE a.status = 'Active' AND b.status = 'Active'
             AND " . $where . "
             ORDER BY a.invoice_date ASC, a.invoice_no ASC
         ";
