@@ -71,7 +71,7 @@ echo "</pre>";
         /* ============================================================ */
 
         .main-table {
-            width: 900px;
+            width: 800px;
             margin: auto;
             border-collapse: collapse;
         }

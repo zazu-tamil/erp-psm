@@ -1,5 +1,9 @@
 <?php include_once(VIEWPATH . '/inc/header.php'); ?>
-
+<?php
+echo '<pre>';
+print_r($indirect_expenses);    
+echo '</pre>';    
+?>
 <section class="content-header">
     <h1>
         <i class="fa fa-line-chart"></i> <?php echo htmlspecialchars($title); ?>
@@ -23,12 +27,12 @@
                     <div class="col-md-3">
                         <label>From Date</label>
                         <input type="date" name="srch_from_date" class="form-control"
-                               value="<?php echo $srch_from_date; ?>" required>
+                            value="<?php echo $srch_from_date; ?>" required>
                     </div>
                     <div class="col-md-3">
                         <label>To Date</label>
-                        <input type="date" name="srch_to_date" class="form-control"
-                               value="<?php echo $srch_to_date; ?>" required>
+                        <input type="date" name="srch_to_date" class="form-control" value="<?php echo $srch_to_date; ?>"
+                            required>
                     </div>
                     <br>
                     <div class="col-md-6 filter-actions">
@@ -44,11 +48,96 @@
         </div>
     </div>
 
+     <?php
+            $income = [];
+            $expense = [];
+            $income_total = 0;
+            $expense_total = 0; 
+            $income_total += $sales;
+            $expense_total += $purchases;
+            $max = max(count($income), count($expense));
+            $tot_indirect_expenses = 0;
+            ?>
+    <div class="box box-info">
+        <div class="box-header with-border text-center  bg-info">
+            <h2 class="box-title">PROFIT & LOSS STATEMENT</h2>
+            <p class="period-text">
+                For the period from
+                <span class="date-highlight"><?php echo date('d M Y', strtotime($srch_from_date)); ?></span>
+                to
+                <span class="date-highlight"><?php echo date('d M Y', strtotime($srch_to_date)); ?></span>
+            </p>
+        </div>
+        <div class="box-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="box box-success">
+                        <div class="box-header  with-border text-center bg-success">
+                            <h3 class="box-title">INCOME</h3>
+                        </div>
+                        <div class="box-body">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <td>Purchase</td>
+                                    <td></td>
+                                    <td class="text-right"><?php echo number_format($purchases, 3); ?></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Indirect Expenses</td>
+                                    <td></td>
+                                    <td></td> 
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="box box-danger">
+                        <div class="box-header  with-border text-center bg-danger">
+                            <h3 class="box-title">EXPENSE</h3> 
+                        </div>
+                        <div class="box-body">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <td>Purchase</td>
+                                    <td></td>
+                                    <td class="text-right"><?php echo number_format($purchases, 3); ?></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Total Expense</td>
+                                    <td></td>
+                                    <td class="text-right"><?php echo number_format($total_expense, 3); ?></td>
+                                </tr>
+                                <?php /* foreach ($indirect_expenses as $expense): 
+                                    $expense_total += $expense['exp_amt'];
+                                    $tot_indirect_expenses += $expense['exp_amt'];
+                                ?>
+                                <tr>
+                                    <td class="text-capitalize"><?php echo strtolower($expense['exp_type']); ?></td>
+                                    <td></td>
+                                    <td class="text-right"> <?php echo number_format($expense['exp_amt'], 3); ?></td>
+                                </tr>
+                                <?php endforeach; */ ?>
+                                <tr>
+                                    <td class="text-muted">Total Indirect Expenses</td>
+                                    <td></td>
+                                    <td class="text-right"><?php echo number_format($tot_indirect_expenses, 3); ?></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- REPORT -->
     <div class="report-card">
 
         <!-- SCREEN VIEW: Card/Grid Layout (Hidden on Print) -->
         <div class="report-content screen-view">
+
+
 
             <!-- TITLE -->
             <div class="report-header">
@@ -72,32 +161,13 @@
             $income_total += $sales;
             $expense_total += $purchases;
             $max = max(count($income), count($expense));
+            $tot_indirect_expenses = 0;
             ?>
 
+
+
             <div class="pl-grid">
-                <!-- INCOME SECTION -->
-                <div class="pl-section income-section">
-                    <div class="section-header">
-                        <i class="fa fa-arrow-up"></i> INCOME
-                    </div>
-                    <div class="section-body">
-                         <div class="pl-item">
-                            <span class="item-name">Sales</span>
-                            <span class="item-amount"> <?php echo number_format($sales, 3); ?></span>
-                        </div>
-                    
-                    <?php foreach ($other_income as $income): $income_total += $income['inc_amt']; ?>
-                        <div class="pl-item">
-                            <span class="item-name"><?php echo $income['inc_type']; ?> - <?php echo $income['sub_typ']; ?></span>
-                            <span class="item-amount"> <?php echo number_format($income['inc_amt'], 3); ?></span>
-                        </div>
-                    <?php endforeach; ?>
-                    </div>
-                    <div class="section-total">
-                        <span>Total Income</span>
-                        <span class="total-amount"> <?php echo number_format($income_total, 3); ?></span>
-                    </div>
-                </div>
+
 
                 <!-- EXPENSE SECTION -->
                 <div class="pl-section expense-section">
@@ -115,16 +185,49 @@
                         </div>
                         <?php foreach ($indirect_expenses as $expense): 
                         $expense_total += $expense['exp_amt'];
+                        $tot_indirect_expenses += $expense['exp_amt'];
                         ?>
-                            <div class="pl-item">
-                                <span class="item-name text-capitalize"><?php echo strtolower($expense['exp_type']); ?></span>
-                                <span class="item-amount"> <?php echo number_format($expense['exp_amt'], 3); ?></span>
-                            </div>
+                        <div class="pl-item">
+                            <span
+                                class="item-name text-capitalize"><?php echo strtolower($expense['exp_type']); ?></span>
+                            <span class="item-amount"> <?php echo number_format($expense['exp_amt'], 3); ?></span>
+                            <span class="item-amount"></span>
+                        </div>
                         <?php endforeach; ?>
+                        <div class="pl-item">
+                            <span class="item-name text-muted"></span>
+                            <span class="item-amount"></span>
+                            <span class="item-amount"><?php echo number_format($tot_indirect_expenses, 3); ?></span>
+                        </div>
                     </div>
                     <div class="section-total">
                         <span>Total Expenses</span>
                         <span class="total-amount"> <?php echo number_format($expense_total, 3); ?></span>
+                    </div>
+                </div>
+
+                <!-- INCOME SECTION -->
+                <div class="pl-section income-section">
+                    <div class="section-header">
+                        <i class="fa fa-arrow-up"></i> INCOME
+                    </div>
+                    <div class="section-body">
+                        <div class="pl-item">
+                            <span class="item-name">Sales</span>
+                            <span class="item-amount"> <?php echo number_format($sales, 3); ?></span>
+                        </div>
+
+                        <?php foreach ($other_income as $income): $income_total += $income['inc_amt']; ?>
+                        <div class="pl-item">
+                            <span class="item-name"><?php echo $income['inc_type']; ?> -
+                                <?php echo $income['sub_typ']; ?></span>
+                            <span class="item-amount"> <?php echo number_format($income['inc_amt'], 3); ?></span>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="section-total">
+                        <span>Total Income</span>
+                        <span class="total-amount"> <?php echo number_format($income_total, 3); ?></span>
                     </div>
                 </div>
             </div>
@@ -160,39 +263,43 @@
             <table class="print-table" style="width:100%; border-collapse:collapse; margin-top:30px;">
                 <thead>
                     <tr>
-                        <th style="text-align:left; padding:10px; border-bottom:3px double #000; font-size:14px;">PARTICULARS</th>
-                        <th style="text-align:right; padding:10px; border-bottom:3px double #000; font-size:14px;">AMOUNT ()</th>
-                        <th style="text-align:left; padding:10px; border-bottom:3px double #000; font-size:14px;">PARTICULARS</th>
-                        <th style="text-align:right; padding:10px; border-bottom:3px double #000; font-size:14px;">AMOUNT ()</th>
+                        <th style="text-align:left; padding:10px; border-bottom:3px double #000; font-size:14px;">
+                            PARTICULARS</th>
+                        <th style="text-align:right; padding:10px; border-bottom:3px double #000; font-size:14px;">
+                            AMOUNT ()</th>
+                        <th style="text-align:left; padding:10px; border-bottom:3px double #000; font-size:14px;">
+                            PARTICULARS</th>
+                        <th style="text-align:right; padding:10px; border-bottom:3px double #000; font-size:14px;">
+                            AMOUNT ()</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php for ($i = 0; $i < $max || $i < 1; $i++): ?>
-                        <tr>
-                            <!-- Income Side -->
-                            <td style="padding:8px 10px; vertical-align:top;">
-                                <?php if (isset($income[$i])): ?>
-                                    <?php echo htmlspecialchars($income[$i]['ledger_name']); ?>
-                                <?php endif; ?>
-                            </td>
-                            <td style="text-align:right; padding:8px 10px; vertical-align:top;">
-                                <?php if (isset($income[$i])): ?>
-                                    <?php echo number_format(abs($income[$i]['net_amount']), 3); ?>
-                                <?php endif; ?>
-                            </td>
+                    <tr>
+                        <!-- Income Side -->
+                        <td style="padding:8px 10px; vertical-align:top;">
+                            <?php if (isset($income[$i])): ?>
+                            <?php echo htmlspecialchars($income[$i]['ledger_name']); ?>
+                            <?php endif; ?>
+                        </td>
+                        <td style="text-align:right; padding:8px 10px; vertical-align:top;">
+                            <?php if (isset($income[$i])): ?>
+                            <?php echo number_format(abs($income[$i]['net_amount']), 3); ?>
+                            <?php endif; ?>
+                        </td>
 
-                            <!-- Expense Side -->
-                            <td style="padding:8px 10px; vertical-align:top;">
-                                <?php if (isset($expense[$i])): ?>
-                                    <?php echo htmlspecialchars($expense[$i]['ledger_name']); ?>
-                                <?php endif; ?>
-                            </td>
-                            <td style="text-align:right; padding:8px 10px; vertical-align:top;">
-                                <?php if (isset($expense[$i])): ?>
-                                    <?php echo number_format(abs($expense[$i]['net_amount']), 3); ?>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
+                        <!-- Expense Side -->
+                        <td style="padding:8px 10px; vertical-align:top;">
+                            <?php if (isset($expense[$i])): ?>
+                            <?php echo htmlspecialchars($expense[$i]['ledger_name']); ?>
+                            <?php endif; ?>
+                        </td>
+                        <td style="text-align:right; padding:8px 10px; vertical-align:top;">
+                            <?php if (isset($expense[$i])): ?>
+                            <?php echo number_format(abs($expense[$i]['net_amount']), 3); ?>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
                     <?php endfor; ?>
 
                     <!-- Total Rows -->
@@ -232,7 +339,9 @@
 
 /* Print Styles - Enhanced for Table View */
 @media print {
-    .no-print, .screen-view {
+
+    .no-print,
+    .screen-view {
         display: none !important;
     }
 
@@ -260,7 +369,8 @@
     }
 
     /* Force background colors to print */
-    .net-result.profit, .net-result.loss {
+    .net-result.profit,
+    .net-result.loss {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }
@@ -276,23 +386,23 @@
 }
 </style>
 
- <style>
-    .print-view {
-        display: none;
-    }
+<style>
+.print-view {
+    display: none;
+}
 
-    @media print {
-        .print-view {
-            display: block;
-        }
+@media print {
+    .print-view {
+        display: block;
     }
+}
 </style>
 <style>
 /* Filter Card */
 .filter-card {
     background: #ffffff;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     margin-bottom: 25px;
     overflow: hidden;
 }
@@ -374,7 +484,7 @@
 .report-card {
     background: #ffffff;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     overflow: hidden;
 }
 
@@ -433,7 +543,7 @@
 .pl-section {
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .section-header {
@@ -466,13 +576,13 @@
     background: white;
     margin-bottom: 10px;
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     transition: all 0.3s;
 }
 
 .pl-item:hover {
     transform: translateX(5px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .item-name {
@@ -560,23 +670,23 @@
     .no-print {
         display: none !important;
     }
-    
+
     body {
         font-size: 12px;
     }
-    
+
     .report-card {
         box-shadow: none;
     }
-    
+
     .report-content {
         padding: 20px;
     }
-    
+
     .pl-item:hover {
         transform: none;
     }
-    
+
     .net-result {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
@@ -589,25 +699,25 @@
         grid-template-columns: 1fr;
         gap: 20px;
     }
-    
+
     .filter-actions {
         margin-top: 15px;
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .btn {
         width: 100%;
     }
-    
+
     .report-content {
         padding: 20px;
     }
-    
+
     .result-text h3 {
         font-size: 18px;
     }
-    
+
     .result-amount {
         font-size: 28px;
     }
