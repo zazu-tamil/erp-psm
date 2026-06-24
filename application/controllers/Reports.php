@@ -56,6 +56,7 @@ class Reports extends CI_Controller
 
         $sql = " 
                 select 
+                a.tender_enq_invoice_id as invoice_id,
                 v.s_order,
                 v.template,
                 v.vat_filing_head_name vat_payer_sales_grp,

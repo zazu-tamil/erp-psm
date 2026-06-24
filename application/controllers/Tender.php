@@ -3561,7 +3561,7 @@ class Tender extends CI_Controller
                 'terms' => $this->input->post('terms'),
                 'remarks' => $this->input->post('remarks'),
                 'total_amount' => $this->input->post('total_amount'),
-                'tax_amount' => $this->input->post('total_gst_amount'),
+                'tax_amount' => $this->input->post('tax_amount'),
                 'vat_payer_sales_grp' => $this->input->post('vat_payer_sales_grp'),
                 'declaration_no' => $this->input->post('declaration_no'),
                 'declaration_date' => $this->input->post('declaration_date'),

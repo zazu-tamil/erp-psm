@@ -98,7 +98,7 @@
                     echo "<td><b>{$row['g_desc']}</b></td>";
                     echo "<td class='text-right'>{$row['tot_amt_ex_tax']}</td>"; 
                     echo "<td class='text-right'>{$row['vat_amt']}</td>"; 
-                    echo "<td class='text-right'>{$row['tot_amt_inc_tax']}</td>"; 
+                    echo "<td class='text-right'><a href='".base_url("tender-po-invoice-edit/" . $row['invoice_id']) . "' target='_blank' class='nostyle'>{$row['tot_amt_inc_tax']}</a></td>"; 
                     echo "</tr>";
                     $tot_amt_ex_tax += $row['tot_amt_ex_tax'];
                     $tot_vat_amt += $row['vat_amt'];
@@ -238,5 +238,11 @@
     <?php  } else { echo "<p>No records found for the selected date range.</p>"; }  ?>
 
 </section>
+<style>
+    .nostyle {
+        text-decoration: none;
+        color: inherit;
+    }
+</style>
 <!-- /.content -->
 <?php  include_once(VIEWPATH . 'inc/footer.php'); ?>
