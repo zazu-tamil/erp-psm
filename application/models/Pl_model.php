@@ -1,16 +1,18 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Pl_model extends CI_Model {  
+class Pl_model extends CI_Model
+{
 
-     public function get_sales_summary($from_date, $to_date){
+    public function get_sales_summary($from_date, $to_date)
+    {
         $this->db->select('SUM(total_amount) as total_sales');
         $this->db->where('invoice_date >=', $from_date);
         $this->db->where('invoice_date <=', $to_date);
         $this->db->where('status =', 'Active');
         return $this->db->get('tender_enq_invoice_info')->row('total_sales');
     }
-     
+
     public function get_otherincome_summary($from_date, $to_date)
     {
         $this->db->select("
@@ -33,6 +35,7 @@ class Pl_model extends CI_Model {
         $this->db->where('a.status', 'Active');
         $this->db->where('b.status', 'Active');
         $this->db->where('c.status', 'Active');
+        $this->db->where('c.nature_type', 'Income');
         $this->db->where('a.inward_date >=', $from_date);
         $this->db->where('a.inward_date <=', $to_date);
 
@@ -47,7 +50,8 @@ class Pl_model extends CI_Model {
         return $this->db->get()->result_array();
     }
 
-    public function get_purchases_summary($from_date, $to_date){ 
+    public function get_purchases_summary($from_date, $to_date)
+    {
         $this->db->select('SUM(total_amount) as total_purchases');
         $this->db->where('entry_date >=', $from_date);
         $this->db->where('entry_date <=', $to_date);
@@ -101,11 +105,14 @@ class Pl_model extends CI_Model {
         ";
 
         $query = $this->db->query($sql, array(
-            $from_date, $to_date,
-            $from_date, $to_date,
-            $from_date, $to_date
+            $from_date,
+            $to_date,
+            $from_date,
+            $to_date,
+            $from_date,
+            $to_date
         ));
 
         return $query->result_array();
-    } 
+    }
 }
