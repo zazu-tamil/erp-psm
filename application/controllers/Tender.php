@@ -5126,7 +5126,7 @@ class Tender extends CI_Controller
             h.rate,
             i.gst,
             h.qty as order_qty,
-            b.qty as del_qty,
+            sum(b.qty) as del_qty,
             i.tender_enq_invoice_item_id,
             if(i.tender_enq_invoice_item_id is null,  b.item_code, i.item_code) as item_code,
             if(i.tender_enq_invoice_item_id is null,  b.item_desc, i.item_desc) as item_desc,
@@ -5148,7 +5148,7 @@ class Tender extends CI_Controller
             and b.status = 'Active'
             and a.tender_po_id = '" . $tender_po_id . "' 
             and a.tender_dc_id in (" . implode(',', $dc_ids) . ")
-            group by b.tender_dc_item_id 
+            group by h.tender_po_id, h.tender_po_item_id
             order by b.tender_dc_item_id asc
         ";
 
