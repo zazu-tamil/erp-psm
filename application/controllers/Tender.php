@@ -1225,7 +1225,7 @@ class Tender extends CI_Controller
             $header = [
                 'company_id' => $this->input->post('srch_company_id'),
                 'customer_id' => $this->input->post('srch_customer_id'),
-                'customer_contact_id' => $this->input->post('srch_customer_contact_id'),
+                'customer_contact_id' => $this->input->post('customer_contact_id'),
                 'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
                 'quotation_no' => $this->input->post('quotation_no'),
                 'tender_ref_no' => $this->input->post('tender_ref_no'),

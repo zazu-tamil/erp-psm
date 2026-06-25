@@ -6,6 +6,7 @@ $(document).ready(function() {
 
     $("#srch_customer_id").change(function () {
         var customerId = $(this).val();
+        $("#customer_id_two").val(customerId); // Sync with contact modal customer select
 
         // Reset contact dropdown
         var $contact = $("#srch_customer_contact_id");
@@ -32,6 +33,89 @@ $(document).ready(function() {
             alert("Failed to load contact persons");
             },
         });
+    });
+
+    // Automatically sync customer ID when showing the contact person modal
+    $('#add_customer_contact_id').on('show.bs.modal', function () {
+        var customerId = $("#srch_customer_id").val();
+        $("#customer_id_two").val(customerId);
+    });
+
+    $('input[name="btn_add_customer_contact"]').on("click", function (e) {
+      e.preventDefault();
+
+      // Disable button (avoid double save)
+      $('input[name="btn_add_customer_contact"]')
+        .val("Saving...")
+        .prop("disabled", true);
+
+      var formData = $("#frmadd_Customer_Contact").serializeArray();
+
+      // Required validation
+      var contactName = $('input[name="contact_person_name"]').val().trim();
+      var customer_id = $("#customer_id_two").val();
+
+      if (contactName === "") {
+        alert("Contact Person Name is required.");
+        $('input[name="contact_person_name"]').focus();
+        enableButton();
+        return false;
+      }
+
+      if (!customer_id) {
+        alert("Customer Name is required.");
+        $("#customer_id_two").focus();
+        enableButton();
+        return false;
+      }
+
+      $.ajax({
+        url: '<?php echo site_url("tender/ajax_add_master_inline"); ?>',
+        type: "POST",
+        data: formData,
+        dataType: "json",
+
+        success: function (response) {
+          if (response.status === "success") {
+            // Append newly added contact to dropdown
+            $("#srch_customer_contact_id")
+              .append(new Option(response.name, response.id, true, true))
+              .trigger("change");
+
+            // Reset form
+            $("#frmadd_Customer_Contact")[0].reset();
+
+            // Auto-close modal using close button (smooth fade)
+            $("#add_customer_contact_id").find(".close").trigger("click");
+
+            // Success alert
+            $("#zazualert").html(`
+                      <div class="alert alert-success sticky-notification" role="alert">
+                          <button type="button" class="close" data-dismiss="alert">&times;</button>
+                          <strong>Note:</strong>
+                          <div class="note-content">${response.message}</div>
+                      </div>
+                  `);
+          } else {
+            alert("Failed to add contact person.");
+          }
+        },
+
+        error: function (xhr, status, error) {
+          alert("Error: " + error);
+        },
+
+        complete: function () {
+          enableButton();
+        },
+      });
+
+      // Function to restore the button state
+      function enableButton() {
+        $('input[name="btn_add_customer_contact"]')
+          .val("Save")
+          .prop("disabled", false);
+      }
     });
 
 
