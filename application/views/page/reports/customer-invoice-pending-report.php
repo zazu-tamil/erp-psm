@@ -68,6 +68,7 @@
                     <th class="text-center">Date</th>
                     <th class="text-center">Invoice No</th>
                     <th class="text-center">Customer</th>
+                    <th class="text-center">VAT</th>
                     <th class="text-right">Inv.Amount Without VAT</th>
                     <th class="text-right">VAT</th>
                     <th class="text-right">Invoice Amount</th>
@@ -88,9 +89,8 @@
                     <td class="text-center">
                         <?php echo $row['invoice_no']; ?>
                     </td>
-                    <td>
-                        <?php echo $row['customer_name']; ?>
-                    </td>
+                    <td class="text-left"><?php echo $row['customer_name']; ?></td>
+                    <td class="text-left"><?php echo $row['vat']; ?></td>
                     <td align="right">
                         <?php echo number_format($row['total_amount'] - $row['tax_amount'], 3); ?>
                     </td>
@@ -106,7 +106,7 @@
                 <!-- ✅ GRAND TOTAL -->
                 <tr style="font-weight:bold; background:green; font-size:16px; color:#ffffff;">
                     
-                    <td class="text-left" colspan="3">
+                    <td class="text-left" colspan="4">
                         Total Invoice : <?= $invoice_no_count; ?>
                     </td>
 

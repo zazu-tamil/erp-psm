@@ -293,8 +293,8 @@ class Reports extends CI_Controller
             0.000 as addl_amt_ex_tax,
             a.vat_amt as tax_amount,
             a.customs_tot_amt as total_amount,
-            '' as declaration_date,
-            '' as declaration_no
+            a.declaration_date as declaration_date,
+            a.declaration_no as declaration_no
             from customs_bill_info as a
             where a.`status` = 'Active'  
             and a.ac_type_opt = 'Accountable'
@@ -1495,7 +1495,7 @@ class Reports extends CI_Controller
         $data = array();
         $data['js'] = 'reports/reports.inc';
         $data['s_url'] = 'customer-invoice-pending-report';
-        $data['title'] = 'Customer Invoice Pending Report';
+        $data['title'] = 'Customer Invoice Report';
 
 
 
@@ -1559,6 +1559,7 @@ class Reports extends CI_Controller
             SELECT 
                 DATE_FORMAT(a.invoice_date, '%d-%m-%Y') AS invoice_date,
                 a.invoice_no,
+                b.gst as vat,
                 ifnull(a.tax_amount, 0) as tax_amount,
                 a.total_amount,
                 b.customer_name

@@ -82,11 +82,10 @@
                             <th>VAT Account Number</th>
                             <th>Supplier Name</th> 
                             <th>Good/Service Description</th>
-                            <th>Total <br>(Excl. Additional Charges)</th>
-                            <th>Additional Charges</th>
-                            <th>Total <br>(Exclusive of VAT)</th>
-                            <th>VAT Amount</th>
-                            <th>Total <br>(Inclusive of VAT)</th>
+                             
+                            <th class='text-center'>Total <br>(Exclusive of VAT)</th>
+                            <th class='text-center'>VAT Amount</th>
+                            <th class='text-center'>Total <br>(Inclusive of VAT)</th>
                         </tr>
                     </thead>";
                 echo "<tbody>";
@@ -100,25 +99,23 @@
                     echo "<td><b>{$row['supplier_vat_no']}</b></td>";
                     echo "<td><b>{$row['supplier_name']}</b></td>"; 
                     echo "<td><b>{$row['g_desc']}</b></td>";
-                    echo "<td>".number_format($row['items_tot_ex_tax'], 3)."</td>"; 
-                    echo "<td>".number_format($row['addl_amt_ex_tax'], 3)."</td>"; 
-                    echo "<td>".number_format($row['tot_amt_ex_tax'], 3)."</td>"; 
-                    echo "<td>".number_format($row['vat_amt'], 3)."</td>"; 
-                    echo "<td>".number_format($row['tot_amt_inc_tax'], 3)."</td>"; 
+                     
+                    echo "<td class='text-right'>".number_format($row['tot_amt_ex_tax'], 3)."</td>"; 
+                    echo "<td class='text-right'>".number_format($row['vat_amt'], 3)."</td>"; 
+                    echo "<td class='text-right'>".number_format($row['tot_amt_inc_tax'], 3)."</td>"; 
                     echo "</tr>";
-                    $tot_items_ex_tax += $row['items_tot_ex_tax'];
-                    $tot_addl_ex_tax += $row['addl_amt_ex_tax'];
+                    //$tot_items_ex_tax += $row['items_tot_ex_tax'];
+                   // $tot_addl_ex_tax += $row['addl_amt_ex_tax'];
                     $tot_amt_ex_tax += $row['tot_amt_ex_tax'];
                     $tot_vat_amt += $row['vat_amt'];
                     $tot_amt_inc_tax += $row['tot_amt_inc_tax'];
                 }
                 echo "<tr>
                     <th colspan='6' class='text-left'>". $records[0]['vat_payer_purchase_grp'] ."</th>
-                    <th>".number_format($tot_items_ex_tax, 3)."</th>
-                    <th>".number_format($tot_addl_ex_tax, 3)."</th>
-                    <th>".number_format($tot_amt_ex_tax, 3)."</th>
-                    <th>".number_format($tot_vat_amt, 3)."</th>
-                    <th>".number_format($tot_amt_inc_tax, 3)."</th>
+                    
+                    <th class='text-right'>".number_format($tot_amt_ex_tax, 3)."</th>
+                    <th class='text-right'>".number_format($tot_vat_amt, 3)."</th>
+                    <th class='text-right'>".number_format($tot_amt_inc_tax, 3)."</th>
                 </tr>";
                 }
                 echo "</tbody></table></div></div><br/><br/>";
@@ -138,8 +135,8 @@
                             <th>Invoice Date</th> 
                             <th>Supplier Name</th> 
                             <th>Good/Service Description</th>
-                            <th>CIF Value (BHD)</th>
-                            <th>VAT Amount Paid Per Customs <br> Affairs Receipt</th> 
+                            <th class='text-center'>CIF Value (BHD)</th>
+                            <th class='text-center'>VAT Amount Paid Per Customs <br> Affairs Receipt</th> 
                         </tr>
                         </tr>
                     </thead>";
@@ -150,20 +147,20 @@
                     echo "<tr>";
                     echo "<td>{$row['vat_rtn_fld']}</td>"; 
                     echo "<td>{$row['declaration_no']}</td>";
-                    echo "<td>".date('d-m-Y', strtotime($row['declaration_date']))."</td>";
-                    echo "<td>".date('d-m-Y', strtotime($row['declaration_date']))."</td>"; 
+                    echo "<td>". (!empty($row['declaration_date']) ? date('d-m-Y', strtotime($row['declaration_date'])) : '')."</td>";
+                    echo "<td>". (!empty($row['declaration_date']) ? date('d-m-Y', strtotime($row['declaration_date'])) : '')."</td>"; 
                     echo "<td>".date('d-m-Y', strtotime($row['invoice_date']))."</td>"; 
                     echo "<td><b>{$row['supplier_name']}</b></td>"; 
                     echo "<td><b>{$row['g_desc']}</b></td>";
-                    echo "<td>{$row['tot_amt_ex_tax']}</td>";  
-                    echo "<td>{$row['tot_amt_ex_tax']}</td>";  
+                    echo "<td class='text-right'>{$row['tot_amt_ex_tax']}</td>";  
+                    echo "<td class='text-right'>{$row['tot_amt_ex_tax']}</td>";  
                     echo "</tr>";
-                    $tot_amt_ex_tax += $row['tot_amt_ex_tax']; 
+                    $tot_amt_ex_tax += $row['tot_amt_ex_tax'];  
                 }
                 echo "<tr>
                     <th colspan='7' class='text-left'>". $records[0]['vat_payer_purchase_grp'] ."</th>
-                    <th>".number_format($tot_amt_ex_tax, 3)."</th> 
-                    <th>".number_format($tot_amt_ex_tax, 3)."</th> 
+                    <th class='text-right'>".number_format($tot_amt_ex_tax, 3)."</th> 
+                    <th class='text-right'>".number_format($tot_amt_ex_tax, 3)."</th> 
                 </tr>";
                 }
                 echo "</tbody></table></div></div><br/><br/>";
@@ -183,7 +180,7 @@
                             <th>Supplier Name</th>
                             <th>Supplier's country of origin</th>
                             <th>Good/Service Description</th>
-                            <th>Total BHD</th>
+                            <th class='text-center'>Total BHD</th>
                         </tr>
                     </thead>";
                 echo "<tbody>";
@@ -197,11 +194,11 @@
                     echo "<td>{$row['supplier_name']}</td>";
                     echo "<td>{$row['country_code']}</td>";
                     echo "<td>{$row['g_desc']}</td>";
-                    echo "<td>{$row['tot_amt_inc_tax']}</td>"; 
+                    echo "<td class='text-right'>{$row['tot_amt_inc_tax']}</td>"; 
                     echo "</tr>";
                     $tot += $row['tot_amt_inc_tax'];
                 }
-                echo "<tr><th colspan='6' class='text-left'>". $records[0]['vat_payer_purchase_grp'] ."</th><th>".number_format($tot, 3)."</th></tr>";
+                echo "<tr><th colspan='6' class='text-left'>". $records[0]['vat_payer_purchase_grp'] ."</th><th class='text-right'>".number_format($tot, 3)."</th></tr>";
                 }
                 echo "</tbody></table></div></div><br/><br/>";
             }
@@ -220,7 +217,7 @@
                             <th>VAT Account Number</th>
                             <th>Supplier Name</th> 
                             <th>Good/Service Description</th>
-                            <th>Total BHD</th> 
+                            <th class='text-right'>Total BHD</th> 
                         </tr>
                     </thead>";
                 echo "<tbody>";
@@ -232,16 +229,16 @@
                     echo "<td><b>{$row['invoice_no']}</b></td>";
                     echo "<td>".date('d-m-Y', strtotime($row['invoice_date']))."</td>";
                     echo "<td><b>{$row['crno']}</b></td>";
-                    echo "<td><b>{$row['client_vat_no']}</b></td>";
-                    echo "<td><b>{$row['client_name']}</b></td>"; 
+                    echo "<td><b>{$row['supplier_vat_no']}</b></td>";
+                    echo "<td><b>{$row['supplier_name']}</b></td>"; 
                     echo "<td><b>{$row['g_desc']}</b></td>";
-                    echo "<td>{$row['tot_amt_inc_tax']}</td>";  
+                    echo "<td class='text-right'>{$row['tot_amt_inc_tax']}</td>";  
                     echo "</tr>";
                     $tot_amt_inc_tax += $row['tot_amt_inc_tax']; 
                 }
                 echo "<tr>
                     <th colspan='7' class='text-left'>". $records[0]['vat_payer_purchase_grp'] ."</th>
-                    <th>".number_format($tot_amt_inc_tax, 3)."</th> 
+                    <th class='text-right'>".number_format($tot_amt_inc_tax, 3)."</th> 
                 </tr>";
                 }
                 echo "</tbody></table></div></div><br/><br/>";
@@ -260,12 +257,8 @@
                             <th>CR Number</th>
                             <th>VAT Account Number</th>
                             <th>Supplier Name</th> 
-                            <th>Good/Service Description</th>
-                            <th>Total BHD<br>(Excl. Additional Charges)</th>
-                            <th>Additional Charges BHD</th>
-                            <th>Total BHD <br>(Exclusive of VAT)</th>
-                            <th>VAT Amount</th>
-                            <th>Total BHD <br>(Inclusive of VAT)</th>
+                            <th>Good/Service Description</th> 
+                            <th class='text-right'>Total BHD <br>(Inclusive of VAT)</th>
                         </tr>
                     </thead>";
                 echo "<tbody>";
@@ -277,28 +270,18 @@
                     echo "<td><b>{$row['invoice_no']}</b></td>";
                     echo "<td>".date('d-m-Y', strtotime($row['invoice_date']))."</td>";
                     echo "<td><b>{$row['crno']}</b></td>";
-                    echo "<td><b>{$row['client_vat_no']}</b></td>";
-                    echo "<td><b>{$row['client_name']}</b></td>"; 
-                    echo "<td><b>{$row['g_desc']}</b></td>";
-                    echo "<td>".number_format($row['items_tot_ex_tax'], 3)."</td>"; 
-                    echo "<td>".number_format($row['addl_amt_ex_tax'], 3)."</td>"; 
-                    echo "<td>".number_format($row['tot_amt_ex_tax'], 3)."</td>";  
-                    echo "<td>".number_format($row['vat_amt'], 3)."</td>";  
-                    echo "<td>".number_format($row['tot_amt_inc_tax'], 3)."</td>";  
+                    echo "<td><b>{$row['supplier_vat_no']}</b></td>";
+                    echo "<td><b>{$row['supplier_name']}</b></td>"; 
+                    echo "<td><b>{$row['g_desc']}</b></td>"; 
+                    echo "<td class='text-right'>".number_format($row['tot_amt_inc_tax'], 3)."</td>";   
                     echo "</tr>";
-                    $tot_items_ex_tax += $row['items_tot_ex_tax'];
-                    $tot_addl_ex_tax += $row['addl_amt_ex_tax'];
-                    $tot_amt_ex_tax += $row['tot_amt_ex_tax']; 
-                    $tot_vat_amt += $row['vat_amt']; 
+                   
                     $tot_amt_inc_tax += $row['tot_amt_inc_tax']; 
                 }
                 echo "<tr>
                     <th colspan='7' class='text-left'>". $records[0]['vat_payer_purchase_grp'] ."</th>
-                    <th>".number_format($tot_items_ex_tax, 3)."</th>
-                    <th>".number_format($tot_addl_ex_tax, 3)."</th>
-                    <th>".number_format($tot_amt_ex_tax, 3)."</th> 
-                    <th>".number_format($tot_vat_amt, 3)."</th> 
-                    <th>".number_format($tot_amt_inc_tax, 3)."</th> 
+                     
+                    <th class='text-right'>".number_format($tot_amt_inc_tax, 3)."</th> 
                 </tr>";
                 }
                 echo "</tbody></table></div></div><br/><br/>";
