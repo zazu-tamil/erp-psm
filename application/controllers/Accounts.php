@@ -3033,6 +3033,224 @@ class Accounts extends CI_Controller
             ];
         }
 
+        // ---------- CALCULATE CUSTOM BILLING / LEDGER BALANCES ----------
+        if (empty($srch_ac_type)) {
+            $esc_to = $this->db->escape_str($srch_to_date);
+            $esc_from = $this->db->escape_str($srch_from_date);
+
+            // 1. Duties & Taxes (Debit = cumulative Input VAT, Credit = cumulative Output VAT)
+            $output_vat = (float) $this->db->query("
+                SELECT SUM(tax_amount) AS amt 
+                FROM tender_enq_invoice_info 
+                WHERE status = 'Active' AND invoice_date <= '$esc_to'
+            ")->row('amt');
+
+            $input_vat_gen = (float) $this->db->query("
+                SELECT SUM(COALESCE(total_tax_amount_inc_addl, tax_amount, 0)) AS amt 
+                FROM vendor_purchase_invoice_info 
+                WHERE status = 'Active' AND invoice_date <= '$esc_to'
+            ")->row('amt');
+
+            $input_vat_local = (float) $this->db->query("
+                SELECT SUM(vat_amt) AS amt 
+                FROM local_purchase_bill_info 
+                WHERE status = 'Active' AND invoice_date <= '$esc_to'
+            ")->row('amt');
+
+            $input_vat_dp = (float) $this->db->query("
+                SELECT SUM(custom_vat_amt + dp_vat_amt) AS amt 
+                FROM dp_bill_info 
+                WHERE status = 'Active' AND invoice_date <= '$esc_to'
+            ")->row('amt');
+
+            $input_vat_customs = (float) $this->db->query("
+                SELECT SUM(vat_amt) AS amt 
+                FROM customs_bill_info 
+                WHERE status = 'Active' AND invoice_date <= '$esc_to'
+            ")->row('amt');
+
+            $total_input_vat = $input_vat_gen + $input_vat_local + $input_vat_dp + $input_vat_customs;
+
+            $record_list[] = [
+                'account_head_id' => 0,
+                'sub_account_head_id' => 0,
+                'account_head_name' => 'LIABILITIES',
+                'nature_type' => 'Liability',
+                'sub_account_head_name' => 'Duties & taxes',
+                'opening_debit' => 0,
+                'opening_credit' => 0,
+                'period_debit' => 0,
+                'period_credit' => 0,
+                'closing_debit' => $total_input_vat,
+                'closing_credit' => $output_vat
+            ];
+
+            // 2. Sundry Creditors (Debit = vendor payments in range, Credit = outstanding vendor balance up to $to_date)
+            // Payments in range (from $from_date to $to_date)
+            $pmts_gen_range = (float) $this->db->query("
+                SELECT SUM(amount) AS amt 
+                FROM vendor_payment_info 
+                WHERE status = 'Active' AND payment_date BETWEEN '$esc_from' AND '$esc_to'
+            ")->row('amt');
+
+            $pmts_adv_range = (float) $this->db->query("
+                SELECT SUM(adv_payment_amt) AS amt 
+                FROM vendor_advance_payment_info 
+                WHERE status = 'Active' AND adv_payment_date BETWEEN '$esc_from' AND '$esc_to'
+            ")->row('amt');
+
+            $total_creditors_payments_range = $pmts_gen_range + $pmts_adv_range;
+
+            // Outstanding balance up to $to_date
+            $creditors_op = (float) $this->db->query("
+                SELECT SUM(CASE WHEN balance_type = 'CR' THEN opening_amount ELSE -opening_amount END) AS amt 
+                FROM vendor_opening_balance_info v 
+                JOIN vendor_info vi ON vi.vendor_id = v.vendor_id 
+                WHERE vi.status = 'Active'
+            ")->row('amt');
+
+            $bills_gen = (float) $this->db->query("
+                SELECT SUM(COALESCE(total_amount_inc_addl, total_amount)) AS amt 
+                FROM vendor_purchase_invoice_info 
+                WHERE status = 'Active' AND invoice_date <= '$esc_to'
+            ")->row('amt');
+
+            $bills_local = (float) $this->db->query("
+                SELECT SUM(tot_amt_with_tax) AS amt 
+                FROM local_purchase_bill_info 
+                WHERE status = 'Active' AND invoice_date <= '$esc_to'
+            ")->row('amt');
+
+            $bills_dp = (float) $this->db->query("
+                SELECT SUM(g_total) AS amt 
+                FROM dp_bill_info 
+                WHERE status = 'Active' AND invoice_date <= '$esc_to'
+            ")->row('amt');
+
+            $bills_customs = (float) $this->db->query("
+                SELECT SUM(customs_tot_amt) AS amt 
+                FROM customs_bill_info 
+                WHERE status = 'Active' AND invoice_date <= '$esc_to'
+            ")->row('amt');
+
+            $total_creditors_bills = $bills_gen + $bills_local + $bills_dp + $bills_customs;
+
+            $pmts_gen_cumulative = (float) $this->db->query("
+                SELECT SUM(amount) AS amt 
+                FROM vendor_payment_info 
+                WHERE status = 'Active' AND payment_date <= '$esc_to'
+            ")->row('amt');
+
+            $pmts_adv_cumulative = (float) $this->db->query("
+                SELECT SUM(adv_payment_amt) AS amt 
+                FROM vendor_advance_payment_info 
+                WHERE status = 'Active' AND adv_payment_date <= '$esc_to'
+            ")->row('amt');
+
+            $total_creditors_payments_cumulative = $pmts_gen_cumulative + $pmts_adv_cumulative;
+            $creditors_balance = $creditors_op + $total_creditors_bills - $total_creditors_payments_cumulative;
+
+            $record_list[] = [
+                'account_head_id' => 0,
+                'sub_account_head_id' => 0,
+                'account_head_name' => 'LIABILITIES',
+                'nature_type' => 'Liability',
+                'sub_account_head_name' => 'Sundry Creditors',
+                'opening_debit' => 0,
+                'opening_credit' => 0,
+                'period_debit' => 0,
+                'period_credit' => 0,
+                'closing_debit' => $total_creditors_payments_range,
+                'closing_credit' => $creditors_balance > 0 ? $creditors_balance : 0
+            ];
+
+            // 3. Sundry Debtors (Debit = outstanding customer balance up to $to_date, Credit = customer receipts in range)
+            // Receipts in range (from $from_date to $to_date)
+            $receipts_range = (float) $this->db->query("
+                SELECT SUM(amount) AS amt 
+                FROM tender_receipt_info 
+                WHERE status = 'Active' AND receipt_date BETWEEN '$esc_from' AND '$esc_to'
+            ")->row('amt');
+
+            // Outstanding balance up to $to_date
+            $debtors_op = (float) $this->db->query("
+                SELECT SUM(CASE WHEN balance_type = 'DR' THEN opening_amount ELSE -opening_amount END) AS amt 
+                FROM customer_opening_balance_info c 
+                JOIN customer_info ci ON ci.customer_id = c.customer_id 
+                WHERE ci.status = 'Active'
+            ")->row('amt');
+
+            $invoices = (float) $this->db->query("
+                SELECT SUM(total_amount) AS amt 
+                FROM tender_enq_invoice_info 
+                WHERE status = 'Active' AND invoice_date <= '$esc_to'
+            ")->row('amt');
+
+            $receipts_cumulative = (float) $this->db->query("
+                SELECT SUM(amount) AS amt 
+                FROM tender_receipt_info 
+                WHERE status = 'Active' AND receipt_date <= '$esc_to'
+            ")->row('amt');
+
+            $debtors_balance = $debtors_op + $invoices - $receipts_cumulative;
+
+            $record_list[] = [
+                'account_head_id' => 0,
+                'sub_account_head_id' => 0,
+                'account_head_name' => 'ASSETS',
+                'nature_type' => 'Asset',
+                'sub_account_head_name' => 'Sundry Debtors',
+                'opening_debit' => 0,
+                'opening_credit' => 0,
+                'period_debit' => 0,
+                'period_credit' => 0,
+                'closing_debit' => $debtors_balance > 0 ? $debtors_balance : 0,
+                'closing_credit' => $receipts_range
+            ];
+
+            // 4. Sales (Income normal balance)
+            $sales_amt = (float) $this->db->query("
+                SELECT SUM(total_amount - IFNULL(tax_amount, 0)) AS amt 
+                FROM tender_enq_invoice_info 
+                WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'
+            ")->row('amt');
+
+            $record_list[] = [
+                'account_head_id' => 0,
+                'sub_account_head_id' => 0,
+                'account_head_name' => 'SALES ACCOUNTS',
+                'nature_type' => 'Income',
+                'sub_account_head_name' => 'Sales',
+                'opening_debit' => 0,
+                'opening_credit' => 0,
+                'period_debit' => 0,
+                'period_credit' => 0,
+                'closing_debit' => 0,
+                'closing_credit' => $sales_amt
+            ];
+
+            // 5. purchase (Expense normal balance)
+            $purchases_amt = (float) $this->db->query("
+                SELECT SUM(total_amount_wo_tax) AS amt 
+                FROM vendor_purchase_invoice_info 
+                WHERE status = 'Active' AND entry_date BETWEEN '$esc_from' AND '$esc_to'
+            ")->row('amt');
+
+            $record_list[] = [
+                'account_head_id' => 0,
+                'sub_account_head_id' => 0,
+                'account_head_name' => 'PURCHASES ACCOUNT',
+                'nature_type' => 'Expense',
+                'sub_account_head_name' => 'purchase',
+                'opening_debit' => 0,
+                'opening_credit' => 0,
+                'period_debit' => 0,
+                'period_credit' => 0,
+                'closing_debit' => $purchases_amt,
+                'closing_credit' => 0
+            ];
+        }
+
         // Merge Cash & Bank to record list
         $data['record_list'] = array_merge($cash_bank_records, $record_list);
 
