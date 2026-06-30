@@ -258,6 +258,7 @@ $route['customer-bill-invoice-entry-list/(:num)'] = 'tender/customer_bill_invoic
 //trial balance report routes
 $route['trial-balance-list'] = 'audit/trial_balance_list';
 $route['profit-loss-report'] = 'audit/profit_loss_report';
+$route['account-trial-balance'] = 'accounts/account_trial_balance';
 
 //setting 
 

@@ -1,6 +1,6 @@
 <?php
 // Define master menu pages
-$g_master = ['company-list', 'vendor-opening-balance-list', 'customer-opening-balance-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list', 'customer-list', 'customer-contact-list', 'vendor-contact-list', 'currency-list', 'account-head-list', 'country-list', 'addt-charges-type-list', 'sub-account-head-list',   'voucher-type-list', 'opening-balance-list', 'settings', 'company-bank-list'];
+$g_master = ['company-list', 'vendor-opening-balance-list', 'customer-opening-balance-list', 'category-list', 'brand-list', 'items-list', 'uom-list', 'gst-list', 'user-list', 'vendor-list', 'customer-list', 'customer-contact-list', 'vendor-contact-list', 'currency-list', 'account-head-list', 'country-list', 'addt-charges-type-list', 'sub-account-head-list', 'voucher-type-list', 'opening-balance-list', 'settings', 'company-bank-list'];
 
 // Get current page
 $current_page = $this->uri->segment(1, 0);
@@ -372,7 +372,8 @@ $report_m_grp = [
     'vendor-statement-report',
     'customer-statement-report',
     'item-rate-report',
-    'pl-report'
+    'pl-report',
+    'account-trial-balance'
 ];
 ?>
 <li class="header">REPORTS</li>
@@ -456,9 +457,15 @@ $report_m_grp = [
                 </li>
             </ul>
         </li>
-         <li class="<?= ($this->uri->segment(1) == 'pl-report') ? 'active' : '' ?>">
+        <li class="<?= ($this->uri->segment(1) == 'pl-report') ? 'active' : '' ?>">
             <a href="<?= site_url('pl-report') ?>">
                 <i class="fa fa-line-chart"></i> Profit &amp; Loss
+            </a>
+        </li>
+
+        <li class="<?= ($this->uri->segment(1) == 'account-trial-balance') ? 'active' : '' ?>">
+            <a href="<?= site_url('account-trial-balance') ?>">
+                <i class="fa fa-balance-scale"></i> Account Trial Balance
             </a>
         </li>
     </ul>
@@ -494,128 +501,128 @@ $report_m_grp = [
 <li class="header">AUDIT</li>
 
 <li class="treeview <?= in_array($this->uri->segment(1), [
-    'account-group-list',
-    'ledger-accounts-list',
-    'vouchers-list',
-    'voucher-entries-list',
-    'trial-balance-list',
-    'profit-loss-report'
+'account-group-list',
+'ledger-accounts-list',
+'vouchers-list',
+'voucher-entries-list',
+'trial-balance-list',
+'profit-loss-report'
 ]) ? 'active' : '' ?>">
 
 
-    <a href="#">
-        <i class="fa fa-database"></i>
-        <span>AUDIT</span>
-        <span class="pull-right-container">
-            <i class="fa fa-angle-left pull-right"></i>
-        </span>
-    </a>
+<a href="#">
+   <i class="fa fa-database"></i>
+   <span>AUDIT</span>
+   <span class="pull-right-container">
+       <i class="fa fa-angle-left pull-right"></i>
+   </span>
+</a>
 
-    <ul class="treeview-menu">
+<ul class="treeview-menu">
 
-        <!-- Account Groups -->
-        <li class="<?= ($this->uri->segment(1) == 'account-group-list') ? 'active' : '' ?>">
-            <a href="<?= site_url('account-group-list') ?>">
-                <i class="fa fa-sitemap"></i> Account Groups
-            </a>
-        </li>
+   <!-- Account Groups -->
+   <li class="<?= ($this->uri->segment(1) == 'account-group-list') ? 'active' : '' ?>">
+       <a href="<?= site_url('account-group-list') ?>">
+           <i class="fa fa-sitemap"></i> Account Groups
+       </a>
+   </li>
 
-        <!-- Ledger Accounts -->
-        <li class="<?= ($this->uri->segment(1) == 'ledger-accounts-list') ? 'active' : '' ?>">
-            <a href="<?= site_url('ledger-accounts-list') ?>">
-                <i class="fa fa-book"></i> Ledger Accounts
-            </a>
-        </li>
+   <!-- Ledger Accounts -->
+   <li class="<?= ($this->uri->segment(1) == 'ledger-accounts-list') ? 'active' : '' ?>">
+       <a href="<?= site_url('ledger-accounts-list') ?>">
+           <i class="fa fa-book"></i> Ledger Accounts
+       </a>
+   </li>
 
-        <!-- Vouchers -->
-        <li class="<?= ($this->uri->segment(1) == 'vouchers-list') ? 'active' : '' ?>">
-            <a href="<?= site_url('vouchers-list') ?>">
-                <i class="fa fa-file-text"></i> Vouchers
-            </a>
-        </li>
+   <!-- Vouchers -->
+   <li class="<?= ($this->uri->segment(1) == 'vouchers-list') ? 'active' : '' ?>">
+       <a href="<?= site_url('vouchers-list') ?>">
+           <i class="fa fa-file-text"></i> Vouchers
+       </a>
+   </li>
 
-        <!-- Voucher Entries -->
-        <li class="<?= ($this->uri->segment(1) == 'voucher-entries-list') ? 'active' : '' ?>">
-            <a href="<?= site_url('voucher-entries-list') ?>">
-                <i class="fa fa-pencil-square-o"></i> Voucher Entries
-            </a>
-        </li>
+   <!-- Voucher Entries -->
+   <li class="<?= ($this->uri->segment(1) == 'voucher-entries-list') ? 'active' : '' ?>">
+       <a href="<?= site_url('voucher-entries-list') ?>">
+           <i class="fa fa-pencil-square-o"></i> Voucher Entries
+       </a>
+   </li>
 
-        <!-- Trial Balance -->
-        <li class="<?= ($this->uri->segment(1) == 'trial-balance-list') ? 'active' : '' ?>">
-            <a href="<?= site_url('trial-balance-list') ?>">
-                <i class="fa fa-balance-scale"></i> Trial Balance
-            </a>
-        </li>
+   <!-- Trial Balance -->
+   <li class="<?= ($this->uri->segment(1) == 'trial-balance-list') ? 'active' : '' ?>">
+       <a href="<?= site_url('trial-balance-list') ?>">
+           <i class="fa fa-balance-scale"></i> Trial Balance
+       </a>
+   </li>
 
-        <!-- Profit & Loss -->
-        <li class="<?= ($this->uri->segment(1) == 'profit-loss-report') ? 'active' : '' ?>">
-            <a href="<?= site_url('profit-loss-report') ?>">
-                <i class="fa fa-line-chart"></i> Profit &amp; Loss
-            </a>
-        </li>
+   <!-- Profit & Loss -->
+   <li class="<?= ($this->uri->segment(1) == 'profit-loss-report') ? 'active' : '' ?>">
+       <a href="<?= site_url('profit-loss-report') ?>">
+           <i class="fa fa-line-chart"></i> Profit &amp; Loss
+       </a>
+   </li>
 
-    </ul>
+</ul>
 </li>
 
 
 <li class="header">Reports</li>
 <li
-    class="treeview <?= in_array($this->uri->segment(1), ['cash-ledger', 'cash-in-statement', 'cash-out-statement', 'inward-summary', 'outward-summary', 'na-cash-in-statement', 'na-cash-out-statement']) ? 'active' : '' ?>">
-    <a href="#">
-        <i class="fa fa-file-text"></i>
-        <span>Reports</span>
-        <span class="pull-right-container">
-            <i class="fa fa-angle-left pull-right"></i>
-        </span>
-    </a>
+class="treeview <?= in_array($this->uri->segment(1), ['cash-ledger', 'cash-in-statement', 'cash-out-statement', 'inward-summary', 'outward-summary', 'na-cash-in-statement', 'na-cash-out-statement']) ? 'active' : '' ?>">
+<a href="#">
+   <i class="fa fa-file-text"></i>
+   <span>Reports</span>
+   <span class="pull-right-container">
+       <i class="fa fa-angle-left pull-right"></i>
+   </span>
+</a>
 
-    <ul class="treeview-menu">
+<ul class="treeview-menu">
 
-        <li class="<?= ($this->uri->segment(1) == 'cash-ledger') ? 'active' : '' ?>">
-            <a href="<?= site_url('cash-ledger') ?>">
-                <i class="fa fa-book"></i> Ledger Reports
-            </a>
-        </li>
-        <li class="<?= ($this->uri->segment(1) == 'cash-in-statement') ? 'active' : '' ?>">
-            <a href="<?= site_url('cash-in-statement') ?>">
-                <i class="fa fa-arrow-circle-down"></i> Inward Statement
-            </a>
-        </li>
+   <li class="<?= ($this->uri->segment(1) == 'cash-ledger') ? 'active' : '' ?>">
+       <a href="<?= site_url('cash-ledger') ?>">
+           <i class="fa fa-book"></i> Ledger Reports
+       </a>
+   </li>
+   <li class="<?= ($this->uri->segment(1) == 'cash-in-statement') ? 'active' : '' ?>">
+       <a href="<?= site_url('cash-in-statement') ?>">
+           <i class="fa fa-arrow-circle-down"></i> Inward Statement
+       </a>
+   </li>
 
-        <li class="<?= ($this->uri->segment(1) == 'cash-out-statement') ? 'active' : '' ?>">
-            <a href="<?= site_url('cash-out-statement') ?>">
-                <i class="fa fa-arrow-circle-up"></i> Outward Statement
-            </a>
-        </li>
+   <li class="<?= ($this->uri->segment(1) == 'cash-out-statement') ? 'active' : '' ?>">
+       <a href="<?= site_url('cash-out-statement') ?>">
+           <i class="fa fa-arrow-circle-up"></i> Outward Statement
+       </a>
+   </li>
 
-        <li class="<?= ($this->uri->segment(1) == 'inward-summary') ? 'active' : '' ?>">
-            <a href="<?= site_url('inward-summary') ?>">
-                <i class="fa fa-file-text-o"></i> Inward Summary
-            </a>
-        </li>
+   <li class="<?= ($this->uri->segment(1) == 'inward-summary') ? 'active' : '' ?>">
+       <a href="<?= site_url('inward-summary') ?>">
+           <i class="fa fa-file-text-o"></i> Inward Summary
+       </a>
+   </li>
 
-        <li class="<?= ($this->uri->segment(1) == 'outward-summary') ? 'active' : '' ?>">
-            <a href="<?= site_url('outward-summary') ?>">
-                <i class="fa fa-file-text-o"></i> Outward Summary
-            </a>
-        </li>
+   <li class="<?= ($this->uri->segment(1) == 'outward-summary') ? 'active' : '' ?>">
+       <a href="<?= site_url('outward-summary') ?>">
+           <i class="fa fa-file-text-o"></i> Outward Summary
+       </a>
+   </li>
 
-        <li class="text-fuchsia">Non-Accountable</li>
+   <li class="text-fuchsia">Non-Accountable</li>
 
-        <li class="<?= ($this->uri->segment(1) == 'na-cash-in-statement') ? 'active' : '' ?>">
-            <a href="<?= site_url('na-cash-in-statement') ?>">
-                <i class="fa fa-file-text-o"></i> NA-Inward Statement
-            </a>
-        </li>
+   <li class="<?= ($this->uri->segment(1) == 'na-cash-in-statement') ? 'active' : '' ?>">
+       <a href="<?= site_url('na-cash-in-statement') ?>">
+           <i class="fa fa-file-text-o"></i> NA-Inward Statement
+       </a>
+   </li>
 
-        <li class="<?= ($this->uri->segment(1) == 'na-cash-out-statement') ? 'active' : '' ?>">
-            <a href="<?= site_url('na-cash-out-statement') ?>">
-                <i class="fa fa-file-text-o"></i> NA-Outward Statement
-            </a>
-        </li>
+   <li class="<?= ($this->uri->segment(1) == 'na-cash-out-statement') ? 'active' : '' ?>">
+       <a href="<?= site_url('na-cash-out-statement') ?>">
+           <i class="fa fa-file-text-o"></i> NA-Outward Statement
+       </a>
+   </li>
 
-    </ul>
+</ul>
 </li>
 */ ?>
 <!-- Master Section -->
@@ -707,7 +714,8 @@ $report_m_grp = [
         </li>
 
         <!-- Customer Info -->
-        <li class="treeview <?= in_array($current_page, ['customer-list', 'customer-contact-list', 'customer-opening-balance-list']) ? 'active' : '' ?>">
+        <li
+            class="treeview <?= in_array($current_page, ['customer-list', 'customer-contact-list', 'customer-opening-balance-list']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-address-book"></i> Customer Info
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
@@ -724,7 +732,8 @@ $report_m_grp = [
                 </li>
 
                 <li class="<?= ($current_page === 'customer-opening-balance-list') ? 'active' : '' ?>">
-                    <a href="<?= site_url('customer-opening-balance-list') ?>"><i class="fa fa-balance-scale"></i> Customer
+                    <a href="<?= site_url('customer-opening-balance-list') ?>"><i class="fa fa-balance-scale"></i>
+                        Customer
                         Opening Balance</a>
                 </li>
             </ul>
@@ -758,7 +767,7 @@ $report_m_grp = [
         </li>
 
         <li
-            class="treeview <?= in_array($current_page, ['account-head-list', 'sub-account-head-list',   'voucher-type-list', 'opening-balance-list']) ? 'active' : '' ?>">
+            class="treeview <?= in_array($current_page, ['account-head-list', 'sub-account-head-list', 'voucher-type-list', 'opening-balance-list']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-money"></i> Accounts
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
@@ -772,12 +781,12 @@ $report_m_grp = [
                 <li class="<?= ($current_page === 'sub-account-head-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('sub-account-head-list') ?>"><i class="fa fa-bank"></i> Sub-Account Head</a>
                 </li>
-<!-- 
+                <!-- 
                 <li class=" //<?= ($current_page === 'account-head-for-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('account-head-for-list') ?>"><i class="fa fa-inbox"></i> A/c In From / Out
                         For</a>
                 </li> -->
-<!-- 
+                <!-- 
                 <li class="<?= ($current_page === 'voucher-type-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('voucher-type-list') ?>"><i class="fa fa-file-text"></i> Voucher Type</a>
                 </li> -->

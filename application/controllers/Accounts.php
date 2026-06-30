@@ -2772,7 +2772,272 @@ class Accounts extends CI_Controller
         $this->load->view('page/accounts/opening-balance-list', $data);
     }
 
+    public function account_trial_balance()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
 
+        $data['title'] = 'Trial Balance (Accounts Book)';
+        $data['js'] = 'accounts/account-trial-balance.inc';
+
+        // ---------- DATE FILTERS ----------
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $this->session->set_userdata('srch_from_date', $srch_from_date);
+            $this->session->set_userdata('srch_to_date', $srch_to_date);
+        } elseif ($this->session->userdata('srch_from_date')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_to_date');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = date('Y-m-01');
+            $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
+        }
+
+        // ---------- AC TYPE FILTER ----------
+        if (isset($_POST['srch_ac_type'])) {
+            $data['srch_ac_type'] = $srch_ac_type = $this->input->post('srch_ac_type');
+            $this->session->set_userdata('srch_ac_type', $srch_ac_type);
+        } elseif ($this->session->userdata('srch_ac_type')) {
+            $data['srch_ac_type'] = $srch_ac_type = $this->session->userdata('srch_ac_type');
+        } else {
+            $data['srch_ac_type'] = $srch_ac_type = '';
+        }
+
+        $data['ac_type_opt'] = array('Bank' => 'Bank', 'Cash' => 'Cash');
+
+        // ---------- BUILD QUERY FOR ACCOUNTS & SUB-ACCOUNTS ----------
+        $ac_type_where_in = "";
+        $ac_type_where_out = "";
+        $params_op_in = [$srch_from_date];
+        $params_op_out = [$srch_from_date];
+        $params_pr_in = [$srch_from_date, $srch_to_date];
+        $params_pr_out = [$srch_from_date, $srch_to_date];
+
+        if (!empty($srch_ac_type)) {
+            $ac_type_where_in = " AND ac_type = ? ";
+            $ac_type_where_out = " AND ac_type = ? ";
+            $params_op_in[] = $srch_ac_type;
+            $params_op_out[] = $srch_ac_type;
+            $params_pr_in[] = $srch_ac_type;
+            $params_pr_out[] = $srch_ac_type;
+        }
+
+        $all_params = array_merge($params_op_in, $params_op_out, $params_pr_in, $params_pr_out);
+
+        $sql = "
+            SELECT 
+                k.account_head_id,
+                k.sub_account_head_id,
+                h.account_head_name,
+                h.nature_type,
+                COALESCE(s.sub_account_head_name, '[General]') AS sub_account_head_name,
+                COALESCE(op_in.amount, 0) AS op_inward,
+                COALESCE(op_out.amount, 0) AS op_outward,
+                COALESCE(pr_in.amount, 0) AS period_inward,
+                COALESCE(pr_out.amount, 0) AS period_outward
+            FROM (
+                SELECT DISTINCT account_head_id, sub_account_head_id 
+                FROM cb_sub_account_head_info 
+                WHERE status = 'Active'
+                
+                UNION
+                
+                SELECT DISTINCT account_head_id, sub_account_head_id 
+                FROM cb_cash_inward_info 
+                WHERE status = 'Active'
+                
+                UNION
+                
+                SELECT DISTINCT account_head_id, sub_account_head_id 
+                FROM cb_cash_outward_info 
+                WHERE status = 'Active'
+            ) k
+            JOIN cb_account_head_info h ON h.account_head_id = k.account_head_id
+            LEFT JOIN cb_sub_account_head_info s ON s.sub_account_head_id = k.sub_account_head_id
+            LEFT JOIN (
+                SELECT account_head_id, sub_account_head_id, SUM(amount) AS amount 
+                FROM cb_cash_inward_info 
+                WHERE status = 'Active' AND inward_date < ? $ac_type_where_in
+                GROUP BY account_head_id, sub_account_head_id
+            ) op_in ON op_in.account_head_id = k.account_head_id AND op_in.sub_account_head_id = k.sub_account_head_id
+            LEFT JOIN (
+                SELECT account_head_id, sub_account_head_id, SUM(amount) AS amount 
+                FROM cb_cash_outward_info 
+                WHERE status = 'Active' AND outward_date < ? $ac_type_where_out
+                GROUP BY account_head_id, sub_account_head_id
+            ) op_out ON op_out.account_head_id = k.account_head_id AND op_out.sub_account_head_id = k.sub_account_head_id
+            LEFT JOIN (
+                SELECT account_head_id, sub_account_head_id, SUM(amount) AS amount 
+                FROM cb_cash_inward_info 
+                WHERE status = 'Active' AND inward_date BETWEEN ? AND ? $ac_type_where_in
+                GROUP BY account_head_id, sub_account_head_id
+            ) pr_in ON pr_in.account_head_id = k.account_head_id AND pr_in.sub_account_head_id = k.sub_account_head_id
+            LEFT JOIN (
+                SELECT account_head_id, sub_account_head_id, SUM(amount) AS amount 
+                FROM cb_cash_outward_info 
+                WHERE status = 'Active' AND outward_date BETWEEN ? AND ? $ac_type_where_out
+                GROUP BY account_head_id, sub_account_head_id
+            ) pr_out ON pr_out.account_head_id = k.account_head_id AND pr_out.sub_account_head_id = k.sub_account_head_id
+            WHERE h.status = 'Active'
+            ORDER BY h.account_head_name, sub_account_head_name
+        ";
+
+        $query = $this->db->query($sql, $all_params);
+        $records = $query->result_array();
+
+        // ---------- CALCULATE FOR OTHER ACCOUNT HEADS & SUB-ACCOUNTS ----------
+        $record_list = [];
+        foreach ($records as $row) {
+            $op_in = (float)$row['op_inward'];
+            $op_out = (float)$row['op_outward'];
+            $pr_in = (float)$row['period_inward'];
+            $pr_out = (float)$row['period_outward'];
+
+            if ($op_in == 0 && $op_out == 0 && $pr_in == 0 && $pr_out == 0) {
+                continue; // Skip inactive accounts to keep report clean
+            }
+
+            $nature = $row['nature_type'];
+
+            // Calculate Opening Balance
+            $opening_debit = 0;
+            $opening_credit = 0;
+            if ($nature == 'Asset' || $nature == 'Expense') {
+                $op_balance = $op_out - $op_in; // Normal balance Debit
+                if ($op_balance >= 0) {
+                    $opening_debit = $op_balance;
+                } else {
+                    $opening_credit = -$op_balance;
+                }
+            } else { // Liability or Income
+                $op_balance = $op_in - $op_out; // Normal balance Credit
+                if ($op_balance >= 0) {
+                    $opening_credit = $op_balance;
+                } else {
+                    $opening_debit = -$op_balance;
+                }
+            }
+
+            // Calculations during period
+            $period_debit = $pr_out; // Outward transaction = Debit
+            $period_credit = $pr_in; // Inward transaction = Credit
+
+            // Calculate Closing Balance
+            $closing_debit = 0;
+            $closing_credit = 0;
+            if ($nature == 'Asset' || $nature == 'Expense') {
+                $cl_balance = ($op_out + $pr_out) - ($op_in + $pr_in);
+                if ($cl_balance >= 0) {
+                    $closing_debit = $cl_balance;
+                } else {
+                    $closing_credit = -$cl_balance;
+                }
+            } else {
+                $cl_balance = ($op_in + $pr_in) - ($op_out + $pr_out);
+                if ($cl_balance >= 0) {
+                    $closing_credit = $cl_balance;
+                } else {
+                    $closing_debit = -$cl_balance;
+                }
+            }
+
+            $row['opening_debit'] = $opening_debit;
+            $row['opening_credit'] = $opening_credit;
+            $row['period_debit'] = $period_debit;
+            $row['period_credit'] = $period_credit;
+            $row['closing_debit'] = $closing_debit;
+            $row['closing_credit'] = $closing_credit;
+
+            $record_list[] = $row;
+        }
+
+        // ---------- CALCULATE CASH & BANK BALANCE ----------
+        // Cash & Bank are Current Assets. We compute their Opening, Period, and Closing.
+        $cash_bank_records = [];
+        $ac_types_to_fetch = [];
+        if (empty($srch_ac_type)) {
+            $ac_types_to_fetch = ['Cash', 'Bank'];
+        } else {
+            $ac_types_to_fetch = [$srch_ac_type];
+        }
+
+        foreach ($ac_types_to_fetch as $type) {
+            // Find base opening date and amount
+            $base_sql = "
+                SELECT amount, opening_date 
+                FROM cb_opening_balance_info 
+                WHERE ac_type = ? AND status != 'Delete' AND opening_date <= ? 
+                ORDER BY opening_date DESC LIMIT 1
+            ";
+            $base_q = $this->db->query($base_sql, [$type, $srch_from_date])->row_array();
+
+            $base_amount = 0;
+            $base_date = '2024-04-01'; // Default backup start date
+            if ($base_q) {
+                $base_amount = (float)$base_q['amount'];
+                $base_date = $base_q['opening_date'];
+            }
+
+            // Sum prior inwards & outwards to determine opening balance at from_date
+            $prior_inward_sql = "
+                SELECT SUM(amount) AS amount 
+                FROM cb_cash_inward_info 
+                WHERE ac_type = ? AND status = 'Active' AND inward_date BETWEEN ? AND DATE_SUB(?, INTERVAL 1 DAY)
+            ";
+            $prior_in_amt = (float)$this->db->query($prior_inward_sql, [$type, $base_date, $srch_from_date])->row()->amount;
+
+            $prior_outward_sql = "
+                SELECT SUM(amount) AS amount 
+                FROM cb_cash_outward_info 
+                WHERE ac_type = ? AND status = 'Active' AND outward_date BETWEEN ? AND DATE_SUB(?, INTERVAL 1 DAY)
+            ";
+            $prior_out_amt = (float)$this->db->query($prior_outward_sql, [$type, $base_date, $srch_from_date])->row()->amount;
+
+            $opening_bal = $base_amount + $prior_in_amt - $prior_out_amt;
+
+            // Period inflows & outflows
+            $period_inward_sql = "
+                SELECT SUM(amount) AS amount 
+                FROM cb_cash_inward_info 
+                WHERE ac_type = ? AND status = 'Active' AND inward_date BETWEEN ? AND ?
+            ";
+            $period_in_amt = (float)$this->db->query($period_inward_sql, [$type, $srch_from_date, $srch_to_date])->row()->amount;
+
+            $period_outward_sql = "
+                SELECT SUM(amount) AS amount 
+                FROM cb_cash_outward_info 
+                WHERE ac_type = ? AND status = 'Active' AND outward_date BETWEEN ? AND ?
+            ";
+            $period_out_amt = (float)$this->db->query($period_outward_sql, [$type, $srch_from_date, $srch_to_date])->row()->amount;
+
+            $closing_bal = $opening_bal + $period_in_amt - $period_out_amt;
+
+            // Cash and Bank are Assets (Normal: Debit).
+            // Opening balance: Debit
+            // Inwards: Debit
+            // Outwards: Credit
+            $cash_bank_records[] = [
+                'account_head_id' => 0,
+                'sub_account_head_id' => 0,
+                'account_head_name' => 'Cash & Bank Accounts',
+                'nature_type' => 'Asset',
+                'sub_account_head_name' => ($type == 'Cash') ? 'Cash-in-Hand' : 'Bank Accounts',
+                'opening_debit' => ($opening_bal >= 0) ? $opening_bal : 0,
+                'opening_credit' => ($opening_bal < 0) ? -$opening_bal : 0,
+                'period_debit' => $period_in_amt,  // Receipt increases Cash/Bank Asset
+                'period_credit' => $period_out_amt, // Payment decreases Cash/Bank Asset
+                'closing_debit' => ($closing_bal >= 0) ? $closing_bal : 0,
+                'closing_credit' => ($closing_bal < 0) ? -$closing_bal : 0,
+            ];
+        }
+
+        // Merge Cash & Bank to record list
+        $data['record_list'] = array_merge($cash_bank_records, $record_list);
+
+        $this->load->view('page/accounts/account-trial-balance', $data);
+    }
 
     public function tds_report()
     {
