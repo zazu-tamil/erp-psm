@@ -78,6 +78,7 @@
                         <th>Customer</th>
                         <th>Our Enquiry No</th>
                         <th>Invoice No</th>
+                        <th>Remarks</th>
                         <th class="text-right">Amt W/O VAT</th>
                         <th class="text-right">Customs Payable</th>
                         <th class="text-right">Customs Total</th>
@@ -96,6 +97,7 @@
                             <td><?php echo htmlspecialchars($ls['customer_name'] ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($ls['tender_info'] ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($ls['invoice_no'] ?? ''); ?></td>
+                            <td><?php echo htmlspecialchars($ls['remarks'] ?? ''); ?></td>
                             <td class="text-right">
                                 <?php echo number_format((float) ($ls['tot_amt_wo_vat'] ?? 0), 3); ?>
                             </td>
@@ -204,6 +206,13 @@
                                     <div class="form-group col-md-12">
                                         <label>VAT Payer Sales / Purchase Group</label>
                                         <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('vat_payer_purchase_grp'), 'id="vat_payer_purchase_grp" class="form-control"'); ?>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label>Remarks</label>
+                                        <textarea name="remarks" id="remarks" class="form-control" rows="3" placeholder="Remarks"></textarea>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -359,6 +368,13 @@
                                     <div class="form-group col-md-12">
                                         <label>VAT Payer Sales / Purchase Group</label>
                                         <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('vat_payer_purchase_grp'), 'id="vat_payer_purchase_grp" class="form-control"'); ?>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label>Remarks</label>
+                                        <textarea name="remarks" id="remarks" class="form-control" rows="3" placeholder="Remarks"></textarea>
                                     </div>
                                 </div>
                                 <div class="row">

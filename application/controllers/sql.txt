@@ -765,3 +765,10 @@ select max(a.vno) into v_no from cb_cash_inward_info as a where a.status != 'Del
 set new.vno = ifnull(v_no , 0 ) + 1 ;*/
 
 END; 
+
+
+30-06-2026
+
+ALTER TABLE `local_purchase_bill_info` ADD COLUMN `remarks` TEXT NULL DEFAULT NULL AFTER `tot_amt_with_tax`;
+ALTER TABLE `dp_bill_info` ADD COLUMN `remarks` TEXT NULL DEFAULT NULL AFTER `g_total`;
+ALTER TABLE `customs_bill_info` ADD COLUMN `remarks` TEXT NULL DEFAULT NULL AFTER `customs_tot_amt`;

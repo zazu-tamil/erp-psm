@@ -370,6 +370,7 @@ $(function() {
                 $("#edit_modal #invoice_no").val(res.invoice_no);
                 $("#edit_modal #inv_entry_date").val(res.inv_entry_date);
                 $("#edit_modal #vat_payer_purchase_grp").val(res.vat_payer_purchase_grp);
+                $("#edit_modal #remarks").val(res.remarks);
                 $("#edit_modal #tot_amt_wo_tax").val(res.tot_amt_wo_tax);
                 $("#edit_modal #vat").val(res.vat);
                 $("#edit_modal #vat_amt").val(res.vat_amt);

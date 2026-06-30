@@ -377,6 +377,7 @@ $(function() {
                 $('#edit_modal #invoice_no').val(res.invoice_no);
                 $('#edit_modal #inv_entry_date').val(res.inv_entry_date);
                 $('#edit_modal #vat_payer_purchase_grp').val(res.vat_payer_purchase_grp);
+                $('#edit_modal #remarks').val(res.remarks);
                 $('#edit_modal #declaration_no').val(res.declaration_no);
                 $('#edit_modal #declaration_date').val(res.declaration_date);
                 $('#edit_modal #custom_duty').val(res.custom_duty);

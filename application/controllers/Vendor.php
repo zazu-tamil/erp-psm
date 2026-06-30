@@ -5357,6 +5357,7 @@ class Vendor extends CI_Controller
                 'vat' => $this->input->post('vat'),
                 'vat_amt' => $this->input->post('vat_amt'),
                 'tot_amt_with_tax' => $this->input->post('tot_amt_with_tax'),
+                'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s'),
@@ -5383,6 +5384,7 @@ class Vendor extends CI_Controller
                 'vat' => $this->input->post('vat'),
                 'vat_amt' => $this->input->post('vat_amt'),
                 'tot_amt_with_tax' => $this->input->post('tot_amt_with_tax'),
+                'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'updated_date' => date('Y-m-d H:i:s')
@@ -5640,6 +5642,7 @@ class Vendor extends CI_Controller
                 'dp_charges' => $this->input->post('dp_charges'),
                 'dp_vat' => $this->input->post('dp_vat'),
                 'g_total' => $this->input->post('g_total'),
+                'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s'),
@@ -5671,6 +5674,7 @@ class Vendor extends CI_Controller
                 'dp_charges' => $this->input->post('dp_charges'),
                 'dp_vat' => $this->input->post('dp_vat'),
                 'g_total' => $this->input->post('g_total'),
+                'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'updated_date' => date('Y-m-d H:i:s')
@@ -5928,6 +5932,7 @@ class Vendor extends CI_Controller
                 'vat_amt' => $this->input->post('vat_amt'),
                 'customs_payable' => $this->input->post('customs_payable'),
                 'customs_tot_amt' => $this->input->post('customs_tot_amt'),
+                'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s'),
@@ -5960,6 +5965,7 @@ class Vendor extends CI_Controller
                 'vat_amt' => $this->input->post('vat_amt'),
                 'customs_payable' => $this->input->post('customs_payable'),
                 'customs_tot_amt' => $this->input->post('customs_tot_amt'),
+                'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'updated_date' => date('Y-m-d H:i:s')
