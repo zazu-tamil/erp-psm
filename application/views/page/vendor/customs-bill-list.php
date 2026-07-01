@@ -92,7 +92,9 @@
                         <tr class="mb-3">
                             <td class="text-center"><?php echo ($j + 1); ?></td>
                             <td><?php echo date('d-m-Y', strtotime($ls['invoice_date'])); ?></td>
-                            <td><?php echo htmlspecialchars($ls['ac_type_opt'] ?? ''); ?></td>
+                            <td>
+                                <?php echo ($ls['ac_type_opt'] == 'Accountable') ? 'For NBR & Company Account' : 'For NBR Only'; ?>
+                            </td>
                             <td><?php echo htmlspecialchars($ls['vendor_name'] ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($ls['customer_name'] ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($ls['tender_info'] ?? ''); ?></td>
@@ -107,7 +109,7 @@
                             <td class="text-right">
                                 <?php echo number_format((float) ($ls['customs_tot_amt'] ?? 0), 3); ?>
                             </td>
-                            <td class="text-center">    
+                            <td class="text-center">
                                 <button data-toggle="modal" data-target="#edit_modal"
                                     value="<?php echo $ls['customs_bill_id'] ?? ''; ?>"
                                     class="edit_record btn btn-primary btn-xs" title="Edit">
@@ -152,10 +154,10 @@
                                         <div class="col-md-6 form-group">
                                             <label>Is Bill</label><br>
                                             <label class="radio-inline"><input type="radio" name="ac_type_opt"
-                                                    value="Accountable" checked> Accountable</label>
+                                                    value="Accountable" checked> For NBR & Company Account</label>
                                             <label class="radio-inline"><input type="radio" name="ac_type_opt"
                                                     value="Not-Accountable">
-                                                Not-Accountable</label>
+                                                For NBR Only</label>
                                         </div>
                                     </div>
                                 </div>
@@ -212,7 +214,8 @@
                                 <div class="row">
                                     <div class="form-group col-md-12">
                                         <label>Remarks</label>
-                                        <textarea name="remarks" id="remarks" class="form-control" rows="3" placeholder="Remarks"></textarea>
+                                        <textarea name="remarks" id="remarks" class="form-control" rows="3"
+                                            placeholder="Remarks"></textarea>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -318,10 +321,10 @@
                                         <div class="col-md-6 form-group">
                                             <label>Is Bill</label><br>
                                             <label class="radio-inline"><input type="radio" name="ac_type_opt"
-                                                    value="Accountable" checked> Accountable</label>
+                                                    value="Accountable" checked> For NBR & Company Account</label>
                                             <label class="radio-inline"><input type="radio" name="ac_type_opt"
                                                     value="Not-Accountable">
-                                                Not-Accountable</label>
+                                                For NBR Only</label>
                                         </div>
                                     </div>
                                 </div>
@@ -374,7 +377,8 @@
                                 <div class="row">
                                     <div class="form-group col-md-12">
                                         <label>Remarks</label>
-                                        <textarea name="remarks" id="remarks" class="form-control" rows="3" placeholder="Remarks"></textarea>
+                                        <textarea name="remarks" id="remarks" class="form-control" rows="3"
+                                            placeholder="Remarks"></textarea>
                                     </div>
                                 </div>
                                 <div class="row">

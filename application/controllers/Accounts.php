@@ -2890,10 +2890,47 @@ class Accounts extends CI_Controller
         // ---------- CALCULATE FOR OTHER ACCOUNT HEADS & SUB-ACCOUNTS ----------
         $record_list = [];
         foreach ($records as $row) {
+            $nature = $row['nature_type'];
+            $sub_id = $row['sub_account_head_id'];
+
             $op_in = (float)$row['op_inward'];
             $op_out = (float)$row['op_outward'];
             $pr_in = (float)$row['period_inward'];
             $pr_out = (float)$row['period_outward'];
+
+            // Add bill expenses if no Cash/Bank filter is set and nature is Expense
+            if (empty($srch_ac_type) && $nature == 'Expense' && !empty($sub_id)) {
+                $esc_sub = $this->db->escape_str($sub_id);
+
+                // Local Purchase Bills (tot_amt_wo_tax)
+                $lp_op = (float) $this->db->query("
+                    SELECT SUM(tot_amt_wo_tax) AS amt 
+                    FROM local_purchase_bill_info 
+                    WHERE status = 'Active' AND sub_account_head_id = '$esc_sub' AND inv_entry_date < ?
+                ", [$srch_from_date])->row('amt');
+
+                $lp_pr = (float) $this->db->query("
+                    SELECT SUM(tot_amt_wo_tax) AS amt 
+                    FROM local_purchase_bill_info 
+                    WHERE status = 'Active' AND sub_account_head_id = '$esc_sub' AND inv_entry_date BETWEEN ? AND ?
+                ", [$srch_from_date, $srch_to_date])->row('amt');
+
+                // DP Bills (dp_charges)
+                $dp_op = (float) $this->db->query("
+                    SELECT SUM(dp_charges) AS amt 
+                    FROM dp_bill_info 
+                    WHERE status = 'Active' AND sub_account_head_id = '$esc_sub' AND inv_entry_date < ?
+                ", [$srch_from_date])->row('amt');
+
+                $dp_pr = (float) $this->db->query("
+                    SELECT SUM(dp_charges) AS amt 
+                    FROM dp_bill_info 
+                    WHERE status = 'Active' AND sub_account_head_id = '$esc_sub' AND inv_entry_date BETWEEN ? AND ?
+                ", [$srch_from_date, $srch_to_date])->row('amt');
+
+                $op_out += ($lp_op + $dp_op);
+                $pr_out += ($lp_pr + $dp_pr);
+            }
 
             if ($op_in == 0 && $op_out == 0 && $pr_in == 0 && $pr_out == 0) {
                 continue; // Skip inactive accounts to keep report clean
@@ -3247,6 +3284,35 @@ class Accounts extends CI_Controller
                 'period_debit' => 0,
                 'period_credit' => 0,
                 'closing_debit' => $purchases_amt,
+                'closing_credit' => 0
+            ];
+
+            // 6. Customs (Expense normal balance)
+            $customs_op = (float) $this->db->query("
+                SELECT SUM(custom_stamp_fee + custom_duty) AS amt 
+                FROM customs_bill_info 
+                WHERE status = 'Active' AND inv_entry_date < '$esc_from'
+            ")->row('amt');
+
+            $customs_pr = (float) $this->db->query("
+                SELECT SUM(custom_stamp_fee + custom_duty) AS amt 
+                FROM customs_bill_info 
+                WHERE status = 'Active' AND inv_entry_date BETWEEN '$esc_from' AND '$esc_to'
+            ")->row('amt');
+
+            $customs_tot = $customs_op + $customs_pr;
+
+            $record_list[] = [
+                'account_head_id' => 0,
+                'sub_account_head_id' => 0,
+                'account_head_name' => 'INDIRECT EXPNSES',
+                'nature_type' => 'Expense',
+                'sub_account_head_name' => 'Customs',
+                'opening_debit' => 0,
+                'opening_credit' => 0,
+                'period_debit' => 0,
+                'period_credit' => 0,
+                'closing_debit' => $customs_tot,
                 'closing_credit' => 0
             ];
         }

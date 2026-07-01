@@ -231,7 +231,7 @@ class Reports extends CI_Controller
             'Supplier Bill' as v_type,
             a.vendor_id,  
             a.invoice_no,
-            a.entry_date as inv_date,  
+            a.invoice_date as inv_date,  
             a.vat_payer_purchase_grp,
             'General trading' g_desc,
             a.total_amount_wo_tax as items_tot_ex_tax,
@@ -250,7 +250,7 @@ class Reports extends CI_Controller
             'Local Bill' as v_type,
             a.vendor_id,
             a.invoice_no,
-            a.inv_entry_date as inv_date,
+            a.invoice_date as inv_date,
             a.vat_payer_purchase_grp,
             'General trading' g_desc,
             a.tot_amt_wo_tax as items_tot_ex_tax,
@@ -268,7 +268,7 @@ class Reports extends CI_Controller
             'DP Bill' as v_type,
             a.vendor_id,
             a.invoice_no,
-            a.inv_entry_date as inv_date,
+            a.invoice_date as inv_date,
             a.vat_payer_purchase_grp,
             'Service' g_desc,
             a.dp_charges as items_tot_ex_tax,
@@ -286,7 +286,7 @@ class Reports extends CI_Controller
             'Customs Bill' as v_type,
             a.vendor_id,
             a.invoice_no,
-            a.inv_entry_date as inv_date,
+            a.invoice_date as inv_date,
             a.vat_payer_purchase_grp,
             'Service' g_desc,
             a.tot_amt_wo_vat as items_tot_ex_tax,
@@ -297,7 +297,7 @@ class Reports extends CI_Controller
             a.declaration_no as declaration_no
             from customs_bill_info as a
             where a.`status` = 'Active'  
-            and a.ac_type_opt = 'Accountable'
+           ## and a.ac_type_opt = 'Accountable'
             and a.inv_entry_date between '$srch_from_date' and '$srch_to_date'
             order by a.inv_entry_date asc 
             ) 
@@ -2349,7 +2349,7 @@ class Reports extends CI_Controller
         exit;
     }
 
-     public function pl_report()
+    public function pl_report()
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in')) {
             redirect();
@@ -2358,10 +2358,10 @@ class Reports extends CI_Controller
         $data['title'] = 'Profit & Loss Report';
         $data['js'] = 'reports/pl-report.inc';
 
-       // Date Filter
+        // Date Filter
         if ($this->input->post('srch_from_date')) {
             $srch_from_date = $this->input->post('srch_from_date');
-            $srch_to_date = $this->input->post('srch_to_date'); 
+            $srch_to_date = $this->input->post('srch_to_date');
         } else {
             $srch_from_date = date('Y-m-01');
             $srch_to_date = date('Y-m-d');

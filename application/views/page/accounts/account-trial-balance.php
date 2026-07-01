@@ -22,13 +22,13 @@
                 <div class="row">
                     <div class="form-group col-md-3">
                         <label><i class="fa fa-calendar"></i> From Date</label>
-                        <input type="date" class="form-control" id="srch_from_date" name="srch_from_date" 
-                               value="<?php echo $srch_from_date; ?>" required>
+                        <input type="date" class="form-control" id="srch_from_date" name="srch_from_date"
+                            value="<?php echo $srch_from_date; ?>" required>
                     </div>
                     <div class="form-group col-md-3">
                         <label><i class="fa fa-calendar"></i> To Date</label>
-                        <input type="date" class="form-control" id="srch_to_date" name="srch_to_date" 
-                               value="<?php echo $srch_to_date; ?>" required>
+                        <input type="date" class="form-control" id="srch_to_date" name="srch_to_date"
+                            value="<?php echo $srch_to_date; ?>" required>
                     </div>
                     <div class="form-group col-md-3">
                         <label><i class="fa fa-university"></i> Account Group (Cash/Bank)</label>
@@ -56,9 +56,11 @@
             <h2 class="company-name"><?php echo defined('COMPANY') ? COMPANY : 'Your Company Name'; ?></h2>
             <h3 class="report-title">TRIAL BALANCE (ACCOUNTS BOOK)</h3>
             <p class="report-period">
-                Period: <strong><?php echo date('d-M-Y', strtotime($srch_from_date)); ?></strong> 
+                Period: <strong><?php echo date('d-M-Y', strtotime($srch_from_date)); ?></strong>
                 to <strong><?php echo date('d-M-Y', strtotime($srch_to_date)); ?></strong>
-                <?php if (!empty($srch_ac_type)) { echo " | Group: <strong>" . $srch_ac_type . "</strong>"; } ?>
+                <?php if (!empty($srch_ac_type)) {
+                    echo " | Group: <strong>" . $srch_ac_type . "</strong>";
+                } ?>
             </p>
         </div>
 
@@ -77,10 +79,10 @@
                 <tbody>
                     <?php
                     $current_group = '';
-                    
+
                     // Group totals
                     $grp_cl_dr = $grp_cl_cr = 0;
-                    
+
                     // Grand totals
                     $grand_cl_dr = $grand_cl_cr = 0;
 
@@ -91,7 +93,7 @@
                     }
 
                     foreach ($grouped_records as $group_name => $items):
-                    ?>
+                        ?>
                         <!-- Group Header -->
                         <tr class="group-header">
                             <td colspan="3"><strong><?php echo strtoupper(htmlspecialchars($group_name)); ?></strong></td>
@@ -103,7 +105,7 @@
                         foreach ($items as $row):
                             $grp_cl_dr += $row['closing_debit'];
                             $grp_cl_cr += $row['closing_credit'];
-                        ?>
+                            ?>
                             <!-- Ledger Subaccount Row -->
                             <tr class="ledger-row">
                                 <td class="ledger"><?php echo htmlspecialchars($row['sub_account_head_name']); ?></td>
@@ -119,11 +121,13 @@
                         <!-- Group Total Row -->
                         <tr class="group-total">
                             <td><strong>Total : <?php echo htmlspecialchars($group_name); ?></strong></td>
-                            <td class="text-right"><strong><?php echo ($grp_cl_dr > 0) ? number_format($grp_cl_dr, 3) : '-'; ?></strong></td>
-                            <td class="text-right"><strong><?php echo ($grp_cl_cr > 0) ? number_format($grp_cl_cr, 3) : '-'; ?></strong></td>
+                            <td class="text-right">
+                                <strong><?php echo ($grp_cl_dr > 0) ? number_format($grp_cl_dr, 3) : '-'; ?></strong></td>
+                            <td class="text-right">
+                                <strong><?php echo ($grp_cl_cr > 0) ? number_format($grp_cl_cr, 3) : '-'; ?></strong></td>
                         </tr>
 
-                    <?php
+                        <?php
                         $grand_cl_dr += $grp_cl_dr;
                         $grand_cl_cr += $grp_cl_cr;
                     endforeach;
@@ -137,14 +141,14 @@
                     </tr>
 
                     <!-- DIFFERENCE (if any) -->
-                    <?php 
+                    <?php
                     $diff_cl = abs($grand_cl_dr - $grand_cl_cr);
-                    
+
                     if ($diff_cl > 0.01):
-                    ?>
+                        ?>
                         <tr class="difference-row">
                             <td><strong>DIFFERENCE</strong></td>
-                            
+
                             <!-- Closing Difference -->
                             <td class="text-right" style="color: #d9534f;">
                                 <strong><?php echo ($grand_cl_dr < $grand_cl_cr) ? number_format($diff_cl, 3) : '-'; ?></strong>
@@ -163,13 +167,13 @@
             <div class="row">
                 <div class="col-md-6">
                     <p class="text-muted">
-                        <i class="fa fa-info-circle"></i> 
+                        <i class="fa fa-info-circle"></i>
                         Total Accounts Reported: <strong><?php echo count($record_list); ?></strong>
                     </p>
                 </div>
                 <div class="col-md-6 text-right">
                     <p class="text-muted">
-                        <i class="fa fa-clock-o"></i> 
+                        <i class="fa fa-clock-o"></i>
                         Generated on: <strong><?php echo date('d M Y, h:i A'); ?></strong>
                     </p>
                 </div>
@@ -184,7 +188,7 @@
     .trial-table {
         font-size: 13px;
         border-collapse: collapse;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         width: 100%;
         margin-bottom: 20px;
     }
@@ -303,56 +307,67 @@
     }
 
     @media print {
-        .no-print, .main-header, .main-sidebar, .breadcrumb, .content-header {
+
+        .no-print,
+        .main-header,
+        .main-sidebar,
+        .breadcrumb,
+        .content-header {
             display: none !important;
         }
+
         .content-wrapper {
             margin-left: 0 !important;
         }
+
         .print-header {
             display: block !important;
             margin-bottom: 15px;
             padding: 10px;
             border-bottom: 2px solid #333;
         }
+
         .box {
             border: none !important;
             box-shadow: none !important;
         }
+
         .trial-table th {
             background: #444 !important;
             color: #fff !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
+
         .group-header {
             background: #eee !important;
             color: #000 !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
+
         .grand-total {
             background: #222 !important;
             color: #fff !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
-       
+
     }
 </style>
 
 <?php include_once(VIEWPATH . '/inc/footer.php'); ?>
 
 <script>
-// Excel export function
-function exportToExcel() {
-    var table = document.getElementById('trialBalanceTable');
-    var html = table.outerHTML;
-    
-    var url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
-    var link = document.createElement('a');
-    link.href = url;
-    link.download = 'Account_Trial_Balance_<?php echo date("Y-m-d"); ?>.xls';
-    link.click();
-}
+    // Excel export function
+    function exportToExcel() {
+        var table = document.getElementById('trialBalanceTable');
+        var html = table.outerHTML;
+
+        var url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
+        var link = document.createElement('a');
+        link.href = url;
+        link.download = 'Account_Trial_Balance_<?php echo date("Y-m-d"); ?>.xls';
+        link.click();
+    }
 </script>
