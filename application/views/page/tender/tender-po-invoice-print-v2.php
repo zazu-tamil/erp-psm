@@ -233,10 +233,19 @@
         /* ══════════════════════════════════════════
            PRINT STYLES
            ══════════════════════════════════════════ */
-        @page {
-            size: A4;
-            margin: 5mm;
-        }
+         @page {
+             size: A4;
+             margin-top: 5mm;
+             margin-bottom: 15mm;
+             margin-left: 5mm;
+             margin-right: 5mm;
+             @bottom-right {
+                 content: "Page " counter(page);
+                 font-size: 11px;
+                 font-family: Arial, Helvetica, sans-serif;
+                 padding-right: 15mm;
+             }
+         }
 
         @media print {
             body {
