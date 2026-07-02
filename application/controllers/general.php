@@ -330,10 +330,16 @@ class General extends CI_Controller
         }
         if ($table == 'vendor_info') {
             $query = $this->db->query(" 
-                select 
-                a.* 
-                from vendor_info as a  
-                where a.vendor_id = '" . $rec_id . "'
+                    SELECT
+                        a.*,
+                        b.opening_id,
+                        b.opening_date,
+                        b.balance_type,
+                        b.opening_amount
+                    FROM vendor_info AS a
+                    LEFT JOIN vendor_opening_balance_info AS b
+                        ON a.vendor_id = b.vendor_id
+                    WHERE a.vendor_id = '" . $rec_id . "'
             ");
 
             $rec_list = array();
@@ -345,10 +351,16 @@ class General extends CI_Controller
         }
         if ($table == 'customer_info') {
             $query = $this->db->query(" 
-                select 
-                a.* 
-                from customer_info as a  
-                where a.customer_id = '" . $rec_id . "'
+                    SELECT
+                        a.*,
+                        b.opening_id,
+                        b.opening_date,
+                        b.balance_type,
+                        b.opening_amount
+                    FROM customer_info AS a
+                    LEFT JOIN customer_opening_balance_info AS b
+                        ON a.customer_id = b.customer_id
+                    WHERE a.customer_id = '" . $rec_id . "'
             ");
 
             $rec_list = array();

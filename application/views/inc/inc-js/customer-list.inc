@@ -34,7 +34,7 @@
                 alert("Error capturing location: " + error.message);
             }
           },
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
         );
       } else {
         alert("Geolocation is not supported by this browser.");
@@ -73,6 +73,10 @@
           $("#edit_modal #mobile").val(d.mobile);
           $("#edit_modal #mobile_alt").val(d.mobile_alt);
           $("#edit_modal #email").val(d.email);
+          $("#edit_modal #opening_id").val(d.opening_id);
+          $("#edit_modal #opening_date").val(d.opening_date);
+          $("#edit_modal #balance_type").val(d.balance_type);
+          $("#edit_modal #opening_amount").val(d.opening_amount);
           $("#edit_modal #remarks").val(d.remarks);
           $("#edit_modal #customer_code").val(d.customer_code);
           $("#edit_modal #gst").val(d.gst);
@@ -83,7 +87,7 @@
           // ✅ Handle status
           $(`#edit_modal input[name="status"][value="${d.status}"]`).prop(
             "checked",
-            true
+            true,
           );
 
           // ✅ Show Edit modal
@@ -115,7 +119,6 @@
     });
   });
 </script>
- 
 
 <!-- Font Awesome -->
 <link

@@ -974,25 +974,40 @@ class Master extends CI_Controller
             $this->db->insert('vendor_info', $ins);
             $vendor_id = $this->db->insert_id();
 
-            /* Create Ledger Account */
-            $ins1 = array(
-                'group_id' => SUNDRY_CREDITORS, // Sundry Creditors
-                'ledger_name' => $this->input->post('vendor_name'),
-                'opening_balance' => 0,
-                'opening_type' => 'Credit',
-                'ref_tbl' => 'Vendor',
-                'ref_id' => $vendor_id,
-                'status' => $this->input->post('status'),
+
+
+            $vendor_opening_balance_info = array(
+                'vendor_id' => $vendor_id,
+                'opening_amount' => $this->input->post('opening_amount'),
+                'balance_type' => $this->input->post('balance_type'),
+                'opening_date' => $this->input->post('opening_date'),
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_at' => date('Y-m-d H:i:s'),
             );
-            $this->db->insert('ledger_accounts', $ins1);
+            $this->db->insert('vendor_opening_balance_info', $vendor_opening_balance_info);
 
-            $ledger_id = $this->db->insert_id();
 
-            $this->db->where('vendor_id', $vendor_id);
-            $this->db->update('vendor_info', array('ledger_id' => $ledger_id));
+            // /* Create Ledger Account */
+            // $ins1 = array(
+            //     'group_id' => SUNDRY_CREDITORS, // Sundry Creditors
+            //     'ledger_name' => $this->input->post('vendor_name'),
+            //     'opening_balance' => 0,
+            //     'opening_type' => 'Credit',
+            //     'ref_tbl' => 'Vendor',
+            //     'ref_id' => $vendor_id,
+            //     'status' => $this->input->post('status'),
+            // );
+            // $this->db->insert('ledger_accounts', $ins1);
+
+            // $ledger_id = $this->db->insert_id();
+
+            // $this->db->where('vendor_id', $vendor_id);
+            // $this->db->update('vendor_info', array('ledger_id' => $ledger_id));
 
             redirect('vendor-list/');
         }
+
+
         if ($this->input->post('mode') == 'Edit') {
             $this->db->where('vendor_id', $this->input->post('vendor_id'));
             $upd = array(
@@ -1015,6 +1030,34 @@ class Master extends CI_Controller
             );
             $this->db->where('vendor_id', $this->input->post('vendor_id'));
             $this->db->update('vendor_info', $upd);
+
+
+            $vendor_id = $this->input->post('vendor_id');
+            // Check if opening balance record exists for this vendor
+            $check_opening = $this->db->get_where('vendor_opening_balance_info', array('vendor_id' => $vendor_id))->row_array();
+
+            if ($check_opening) {
+                $vendor_opening_balance_info = array(
+                    'opening_amount' => $this->input->post('opening_amount'),
+                    'balance_type' => $this->input->post('balance_type'),
+                    'opening_date' => $this->input->post('opening_date'),
+                    'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                );
+                $this->db->where('vendor_id', $vendor_id);
+                $this->db->update('vendor_opening_balance_info', $vendor_opening_balance_info);
+            } else {
+                $vendor_opening_balance_info = array(
+                    'vendor_id' => $vendor_id,
+                    'opening_amount' => $this->input->post('opening_amount'),
+                    'balance_type' => $this->input->post('balance_type'),
+                    'opening_date' => $this->input->post('opening_date'),
+                    'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                    'created_at' => date('Y-m-d H:i:s'),
+                );
+                $this->db->insert('vendor_opening_balance_info', $vendor_opening_balance_info);
+            }
+
 
             redirect('vendor-list/');
         }
@@ -1121,22 +1164,34 @@ class Master extends CI_Controller
 
             $customer_id = $this->db->insert_id();
 
-            /* Create Ledger Account */
-            $ins1 = array(
-                'group_id' => SUNDRY_DEBTORS, // Sundry Debtors
-                'ledger_name' => $this->input->post('customer_name'),
-                'opening_balance' => 0,
-                'opening_type' => 'Debit',
-                'ref_tbl' => 'Customer',
-                'ref_id' => $customer_id,
-                'status' => $this->input->post('status'),
+            // /* Create Ledger Account */
+            // $ins1 = array(
+            //     'group_id' => SUNDRY_DEBTORS, // Sundry Debtors
+            //     'ledger_name' => $this->input->post('customer_name'),
+            //     'opening_balance' => 0,
+            //     'opening_type' => 'Debit',
+            //     'ref_tbl' => 'Customer',
+            //     'ref_id' => $customer_id,
+            //     'status' => $this->input->post('status'),
+            // );
+            // $this->db->insert('ledger_accounts', $ins1);
+
+            // $ledger_id = $this->db->insert_id();
+
+            // $this->db->where('customer_id', $customer_id);
+            // $this->db->update('customer_info', array('ledger_id' => $ledger_id));
+
+
+
+            $customer_opening_balance_info = array(
+                'customer_id' => $customer_id,
+                'opening_amount' => $this->input->post('opening_amount'),
+                'balance_type' => $this->input->post('balance_type'),
+                'opening_date' => $this->input->post('opening_date'),
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_date' => date('Y-m-d H:i:s'),
             );
-            $this->db->insert('ledger_accounts', $ins1);
-
-            $ledger_id = $this->db->insert_id();
-
-            $this->db->where('customer_id', $customer_id);
-            $this->db->update('customer_info', array('ledger_id' => $ledger_id));
+            $this->db->insert('customer_opening_balance_info', $customer_opening_balance_info);
 
             redirect('customer-list/');
         }
@@ -1162,6 +1217,34 @@ class Master extends CI_Controller
             );
             $this->db->where('customer_id', $this->input->post('customer_id'));
             $this->db->update('customer_info', $upd);
+
+
+
+            $customer_id = $this->input->post('customer_id');
+            // Check if opening balance record exists for this customer
+            $check_opening = $this->db->get_where('customer_opening_balance_info', array('customer_id' => $customer_id))->row_array();
+
+            if ($check_opening) {
+                $customer_opening_balance_info = array(
+                    'opening_amount' => $this->input->post('opening_amount'),
+                    'balance_type' => $this->input->post('balance_type'),
+                    'opening_date' => $this->input->post('opening_date'),
+                    'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                );
+                $this->db->where('customer_id', $customer_id);
+                $this->db->update('customer_opening_balance_info', $customer_opening_balance_info);
+            } else {
+                $customer_opening_balance_info = array(
+                    'customer_id' => $customer_id,
+                    'opening_amount' => $this->input->post('opening_amount'),
+                    'balance_type' => $this->input->post('balance_type'),
+                    'opening_date' => $this->input->post('opening_date'),
+                    'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                    'created_at' => date('Y-m-d H:i:s'),
+                );
+                $this->db->insert('customer_opening_balance_info', $customer_opening_balance_info);
+            }
 
             redirect('customer-list/');
         }
@@ -1953,7 +2036,7 @@ class Master extends CI_Controller
         }
 
         // Handle Edit
-        if ($this->input->post('mode') == 'Edit') { 
+        if ($this->input->post('mode') == 'Edit') {
             $upd = array(
                 'account_name' => $this->input->post('account_name'),
                 'bank_name' => $this->input->post('bank_name'),

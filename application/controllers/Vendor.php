@@ -47,7 +47,7 @@ class Vendor extends CI_Controller
             $qtys = $this->input->post('qty');
 
             if (!empty($selected_items)) {
-                foreach ($selected_items as $index => $value) {
+                foreach ($selected_items as $index) {
                     if (!empty($item_descs[$index])) {
                         $insert_item_data = array(
                             'vendor_rate_enquiry_id' => $vendor_rate_enquiry_id,

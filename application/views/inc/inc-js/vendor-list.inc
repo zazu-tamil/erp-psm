@@ -73,6 +73,9 @@
           $("#edit_modal #mobile").val(d.mobile);
           $("#edit_modal #mobile_alt").val(d.mobile_alt);
           $("#edit_modal #email").val(d.email);
+           $("#edit_modal #opening_date").val(d.opening_date); 
+          $("#edit_modal #balance_type").val(d.balance_type); 
+          $("#edit_modal #opening_amount").val(d.opening_amount); 
           $("#edit_modal #remarks").val(d.remarks);
           $("#edit_modal #gst").val(d.gst);
           $("#edit_modal #latitude").val(d.latitude);

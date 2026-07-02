@@ -156,7 +156,27 @@
                                             placeholder="Email">
                                     </div>
                                 </div>
-
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label>Opening Date</label>
+                                        <input class="form-control" type="date" name="opening_date"
+                                            value="<?php echo date('Y-m-d'); ?>" required="true">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Balance Type</label>
+                                        <select name="balance_type" class="form-control" required="true">
+                                            <option value="CR">CR (Payable to Vendor)</option>
+                                            <option value="DR">DR (Advance Paid to Vendor)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label>Opening Amount</label>
+                                        <input class="form-control" type="number" step="0.01" name="opening_amount"
+                                            placeholder="0.000" required="true">
+                                    </div>
+                                </div>
                                 <div class="row">
                                     <div class="form-group col-md-6">
                                         <label>VAT No</label>
@@ -281,7 +301,27 @@
                                             placeholder="Email">
                                     </div>
                                 </div>
-
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label>Opening Date</label>
+                                        <input class="form-control" type="date" name="opening_date" id="opening_date"
+                                            value="<?php echo date('Y-m-d'); ?>" required="true">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Balance Type</label>
+                                        <select name="balance_type" id="balance_type" class="form-control" required="true">
+                                            <option value="CR">CR (Payable to Vendor)</option>
+                                            <option value="DR">DR (Advance Paid to Vendor)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label>Opening Amount</label>
+                                        <input class="form-control" type="number" step="0.01" name="opening_amount" id="opening_amount"
+                                            placeholder="0.000" required="true">
+                                    </div>
+                                </div>
                                 <div class="row">
                                     <div class="form-group col-md-6">
                                         <label>VAT No</label>
