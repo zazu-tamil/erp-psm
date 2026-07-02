@@ -257,7 +257,16 @@
 
         @page {
             size: A4;
-            margin: 0mm;
+            margin-top: 0mm;
+            margin-bottom: 15mm;
+            margin-left: 0mm;
+            margin-right: 0mm;
+            @bottom-right {
+                content: "Page " counter(page);
+                font-size: 11px;
+                font-family: Arial, Helvetica, sans-serif;
+                padding-right: 15mm;
+            }
         }
 
         @media print {

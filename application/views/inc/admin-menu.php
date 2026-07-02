@@ -731,11 +731,11 @@ class="treeview <?= in_array($this->uri->segment(1), ['cash-ledger', 'cash-in-st
                         Info</a>
                 </li>
 
-                <li class="<?= ($current_page === 'customer-opening-balance-list') ? 'active' : '' ?>">
+                <!-- <li class="<?= ($current_page === 'customer-opening-balance-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('customer-opening-balance-list') ?>"><i class="fa fa-balance-scale"></i>
                         Customer
                         Opening Balance</a>
-                </li>
+                </li> -->
             </ul>
         </li>
 
@@ -758,10 +758,10 @@ class="treeview <?= in_array($this->uri->segment(1), ['cash-ledger', 'cash-in-st
 
                 <!-- vendor-opening-balance-list -->
 
-                <li class="<?= ($current_page === 'vendor-opening-balance-list') ? 'active' : '' ?>">
+                <!-- <li class="<?= ($current_page === 'vendor-opening-balance-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('vendor-opening-balance-list') ?>"><i class="fa fa-balance-scale"></i> Vendor
                         Opening Balance</a>
-                </li>
+                </li> -->
 
             </ul>
         </li>
