@@ -21,51 +21,35 @@ echo "</pre>";
         }
 
         /* ============================================================
-           PRINT HEADER — repeats on every page via fixed positioning
+           PRINT HEADER — Only on the first page (handled via normal flow)
            ============================================================ */
         #print-header {
-            display: none; /* hidden on screen — only shown when printing */
+            display: none !important;
         }
 
         @media print {
-            /* Fixed block at top: browser re-draws it on every page */
-            #print-header {
-                display: block;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                z-index: 9999;
-                background: #fff;
-            }
-
-            #print-header img {
-                width: 100%;
-                display: block;
-            }
-
-            /* Push the main content down so it doesn't hide under the fixed header.
-               Measure your header image height and set this value accordingly.
-               200px matches the original height="200px" on the screen header cell. */
             body {
-                margin-top: 210px; /* header height + small gap */
+                margin-top: 0px;
             }
 
-            /* Hide the screen header row so it doesn't duplicate */
             #screen-header-row {
-                display: none;
+                display: table-row !important;
             }
 
             .no-print {
                 display: none !important;
             }
 
-            /* Ensure page margins leave room for the fixed header */
             @page {
-                
-                margin-bottom: 20mm;
+                margin-top: 15mm;
+                margin-bottom: 15mm;
                 margin-left: 10mm;
-               
+                margin-right: 10mm;
+                @bottom-right {
+                    content: "Page " counter(page);
+                    font-size: 12px;
+                    font-family: Arial, Helvetica, sans-serif;
+                }
             }
         }
         /* ============================================================ */
