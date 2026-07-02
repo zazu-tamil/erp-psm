@@ -557,15 +557,15 @@
                         <?php if (!empty($record['remarks'])): ?>
                             <div style="margin:15px 0; padding:10px; background:#ffff; page-break-inside:avoid; break-inside:avoid;">
                                 <div style="font-weight:bold; margin-bottom:5px;">Notes:</div>
-                                <?php echo nl2br($record['remarks']); ?>
+                                <?php echo ($record['remarks']); ?>
                             </div>
                         <?php endif; ?>
 
                         <!-- Terms & Conditions -->
                         <?php if (!empty($record['terms'])): ?>
                             <div style="margin:15px 0; padding:10px; background:#ffff; page-break-inside:avoid; break-inside:avoid;">
-                                <div style="font-weight:bold; margin-bottom:5px;">Terms & Conditions:</div>
-                                <?php echo nl2br($record['terms']); ?>
+                                <!-- <div style="font-weight:bold; margin-bottom:5px;">Terms & Conditions:</div> -->
+                                <?php echo ($record['terms']); ?>
                             </div>
                         <?php endif; ?>
 

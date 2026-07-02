@@ -225,6 +225,8 @@
         },
         dataType: "json",
         success: function (res) {
+          //console.log("Items Response:", res);
+
           let html = "";
 
           if (res.length > 0) {
@@ -233,8 +235,10 @@
                     <input type="hidden" name="category_id[]" value="${row.category_id}">
                     <input type="hidden" name="vendor_pur_inward_item_id[]" value="${row.vendor_pur_inward_item_id}">
                     <input type="hidden" name="vendor_pur_inward_id[]" value="${row.vendor_pur_inward_id}">
-                    <input type="hidden" name="item_code[]" value="${row.item_code}">
+                    
                   `;
+
+                  //<input type="hidden" name="item_code[]" value="${row.item_code}">
 
               const formattedDate = new Date(row.inward_date)
                 .toLocaleDateString("en-GB")

@@ -177,7 +177,7 @@
 
                                     <td>
                                         <input type="text" name="item_code[<?= $i ?>]" value="<?= $row['item_code']; ?>"
-                                            class="form-control mb-2" readonly>
+                                            class="form-control mb-2" >
 
                                         <textarea name="item_desc[<?= $i ?>]" class="form-control"
                                             rows="2"><?= $row['item_desc']; ?></textarea>
