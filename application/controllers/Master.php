@@ -1072,7 +1072,7 @@ class Master extends CI_Controller
 
         $config['base_url'] = site_url('vendor-list');
         $config['total_rows'] = $cnt;
-        $config['per_page'] = 20;
+        $config['per_page'] = 10;
         $config['uri_segment'] = 2;
         $config['attributes'] = array('class' => 'page-link');
         $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
@@ -2193,7 +2193,7 @@ class Master extends CI_Controller
 
         $data['sno'] = $this->uri->segment(2, 0);
 
-        $config['base_url'] = trim(site_url('vendor-opening-balance-list') . '/' . $this->uri->segment(2, 0));
+        $config['base_url'] = site_url('vendor-opening-balance-list');
         $config['total_rows'] = $cnt;
         $config['per_page'] = 50;
         $config['uri_segment'] = 2;
@@ -2374,7 +2374,7 @@ class Master extends CI_Controller
 
         $data['sno'] = $this->uri->segment(2, 0);
 
-        $config['base_url'] = trim(site_url('customer-opening-balance-list') . '/' . $this->uri->segment(2, 0));
+        $config['base_url'] = site_url('customer-opening-balance-list');
         $config['total_rows'] = $cnt;
         $config['per_page'] = 50;
         $config['uri_segment'] = 2;

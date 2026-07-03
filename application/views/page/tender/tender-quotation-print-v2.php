@@ -1,8 +1,8 @@
 <!--
 <?php
-echo "<pre>";
-print_r($addt_chrg_list);
-echo "</pre>";
+// echo "<pre>";
+// print_r($addt_chrg_list);
+// echo "</pre>";
 ?>
 -->
 <!DOCTYPE html>
@@ -20,9 +20,7 @@ echo "</pre>";
             padding: 0;
         }
 
-        /* ============================================================
-           PRINT HEADER — Only on the first page (handled via normal flow)
-           ============================================================ */
+
         #print-header {
             display: none !important;
         }
@@ -40,11 +38,22 @@ echo "</pre>";
                 display: none !important;
             }
 
+            tr {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            td, th {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
             @page {
-                margin-top: 15mm;
+                margin-top: 10mm !important;
                 margin-bottom: 15mm;
                 margin-left: 10mm;
                 margin-right: 10mm;
+
                 @bottom-right {
                     content: "Page " counter(page);
                     font-size: 12px;
@@ -52,6 +61,7 @@ echo "</pre>";
                 }
             }
         }
+
         /* ============================================================ */
 
         .main-table {
@@ -154,12 +164,12 @@ echo "</pre>";
 <body>
 
     <?php if (!empty($record['ltr_header_img'])): ?>
-    <!-- ============================================================
+        <!-- ============================================================
          FIXED PRINT HEADER — renders on every printed page
          ============================================================ -->
-    <div id="print-header">
-        <img src="<?php echo base_url('') . $record['ltr_header_img']; ?>" alt="Company Header">
-    </div>
+        <div id="print-header">
+            <img src="<?php echo base_url('') . $record['ltr_header_img']; ?>" alt="Company Header">
+        </div>
     <?php endif; ?>
 
     <table class="main-table" id="quoteTable">
@@ -257,14 +267,15 @@ echo "</pre>";
             $tot_vat = [];
             ?>
             <?php foreach ($item_list as $i => $item):
-                $net_amount    = floatval($item['Net_amount'] ?? 0);
+                $net_amount = floatval($item['Net_amount'] ?? 0);
                 $vat_percentage = floatval($item['gst'] ?? 0);
-                $net           = floatval($item['Net_amount'] ?? 0);
-                $vat_rate      = floatval($item['gst'] ?? 0);
-                $vat           = $net * $vat_rate / 100;
+                $net = floatval($item['Net_amount'] ?? 0);
+                $vat_rate = floatval($item['gst'] ?? 0);
+                $vat = $net * $vat_rate / 100;
                 $total_net_amount += $net;
                 $total_vat_amount += $vat;
-                if (!isset($tot_vat[$vat_percentage])) $tot_vat[$vat_percentage] = 0;
+                if (!isset($tot_vat[$vat_percentage]))
+                    $tot_vat[$vat_percentage] = 0;
                 $tot_vat[$vat_percentage] += $vat;
                 ?>
                 <tr class="items-table">
@@ -275,7 +286,8 @@ echo "</pre>";
                             <?php if (!empty($item['item_code'])): ?>
                                 <div class="item-code"><?php echo htmlspecialchars($item['item_code']); ?></div>
                             <?php endif; ?>
-                            <?php if (!empty($item['item_desc'])) echo nl2br(htmlspecialchars($item['item_desc'])); ?>
+                            <?php if (!empty($item['item_desc']))
+                                echo nl2br(htmlspecialchars($item['item_desc'])); ?>
                         </div>
                     </td>
                     <td class="text-center"><?php echo number_format($item['qty'] ?? 0, 0); ?></td>
@@ -307,8 +319,8 @@ echo "</pre>";
             if (!isset($tot_vat[floatval($addt_chrg['addt_charges_vat'])]))
                 $tot_vat[floatval($addt_chrg['addt_charges_vat'])] = 0;
             $tot_vat[floatval($addt_chrg['addt_charges_vat'])] += $addt_chrg['addt_charges_vat_amt'];
-            $grand_total += $addt_chrg['addt_charges_amt']  ;
-        ?>
+            $grand_total += $addt_chrg['addt_charges_amt'];
+            ?>
             <tr class="items-table">
                 <td colspan="5" class="text-right">
                     <strong><?php echo htmlspecialchars($addt_chrg['addt_charges_type_name']); ?></strong>
@@ -321,7 +333,8 @@ echo "</pre>";
 
         <!-- VAT Breakdown -->
         <?php foreach ($tot_vat as $vat_prt => $amt):
-            if ($amt > 0):  $grand_total += $amt; ?>
+            if ($amt > 0):
+                $grand_total += $amt; ?>
                 <tr class="items-table">
                     <td colspan="5" class="text-right"><strong>VAT <?php echo $vat_prt; ?>%</strong></td>
                     <td colspan="2" class="text-right">
@@ -397,4 +410,5 @@ echo "</pre>";
     <?php endif; ?>
 
 </body>
+
 </html>
