@@ -13,6 +13,28 @@ class Payment extends CI_Controller
             exit;
         }
 
+        // Dynamically ensure columns exist in tender_receipt_info
+        if (!$this->db->field_exists('is_without_bill', 'tender_receipt_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('tender_receipt_info', [
+                'is_without_bill' => [
+                    'type' => 'TINYINT',
+                    'constraint' => 1,
+                    'default' => 0
+                ]
+            ]);
+        }
+        if (!$this->db->field_exists('without_bill_amount', 'tender_receipt_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('tender_receipt_info', [
+                'without_bill_amount' => [
+                    'type' => 'DECIMAL',
+                    'constraint' => '14,3',
+                    'default' => 0.000
+                ]
+            ]);
+        }
+
         $data['js'] = 'payment/customer-invoice-receipt.inc';
         $data['title'] = 'Tender Receipt List';
 
@@ -30,6 +52,8 @@ class Payment extends CI_Controller
                 'cheque_no' => $this->input->post('cheque_no'),
                 'cheque_bank' => $this->input->post('cheque_bank'),
                 'amount' => $this->input->post('amount'),
+                'is_without_bill' => $this->input->post('is_without_bill') ? 1 : 0,
+                'without_bill_amount' => $this->input->post('without_bill_amount') ?: 0.000,
                 'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
@@ -84,6 +108,8 @@ class Payment extends CI_Controller
                 'cheque_no' => $this->input->post('cheque_no'),
                 'cheque_bank' => $this->input->post('cheque_bank'),
                 'amount' => $this->input->post('amount'),
+                'is_without_bill' => $this->input->post('is_without_bill') ? 1 : 0,
+                'without_bill_amount' => $this->input->post('without_bill_amount') ?: 0.000,
                 'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
@@ -411,19 +437,7 @@ class Payment extends CI_Controller
 
             $sql = "
                 SELECT
-                    a.tender_receipt_id,
-                    a.receipt_no,
-                    a.receipt_date,
-                    a.customer_id, 
-                    a.receipt_mode,
-                    a.bank_id,
-                    a.amount,
-                    a.remarks,
-                    a.status,
-                    a.receipt_type,
-                    a.cheque_date,
-                    a.cheque_no,
-                    a.cheque_bank
+                    a.*
                 FROM tender_receipt_info AS a
                 WHERE a.status = 'Active'
                 AND a.tender_receipt_id = ?
@@ -492,6 +506,28 @@ class Payment extends CI_Controller
             exit;
         }
 
+        // Dynamically ensure columns exist in vendor_payment_info
+        if (!$this->db->field_exists('is_without_bill', 'vendor_payment_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('vendor_payment_info', [
+                'is_without_bill' => [
+                    'type' => 'TINYINT',
+                    'constraint' => 1,
+                    'default' => 0
+                ]
+            ]);
+        }
+        if (!$this->db->field_exists('without_bill_amount', 'vendor_payment_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('vendor_payment_info', [
+                'without_bill_amount' => [
+                    'type' => 'DECIMAL',
+                    'constraint' => '14,3',
+                    'default' => 0.000
+                ]
+            ]);
+        }
+
         $data['js'] = 'payment/vendor-payment-list.inc';
         $data['title'] = 'Supplier Payment List';
 
@@ -513,6 +549,8 @@ class Payment extends CI_Controller
                 'cheque_no' => $this->input->post('cheque_no'),
                 'cheque_bank' => $this->input->post('cheque_bank'),
                 'amount' => $this->input->post('amount'),
+                'is_without_bill' => $this->input->post('is_without_bill') ? 1 : 0,
+                'without_bill_amount' => $this->input->post('without_bill_amount') ?: 0.000,
                 'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
@@ -572,6 +610,8 @@ class Payment extends CI_Controller
                 'cheque_no' => $this->input->post('cheque_no'),
                 'cheque_bank' => $this->input->post('cheque_bank'),
                 'amount' => $this->input->post('amount'),
+                'is_without_bill' => $this->input->post('is_without_bill') ? 1 : 0,
+                'without_bill_amount' => $this->input->post('without_bill_amount') ?: 0.000,
                 'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
@@ -1012,6 +1052,171 @@ class Payment extends CI_Controller
         echo json_encode($query->result_array());
     }
 
+
+    public function get_vendor_balance_summary()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        $vendor_id = $this->input->post('vendor_id');
+        if (empty($vendor_id)) {
+            echo json_encode(['status' => 'error', 'message' => 'Invalid Vendor ID']);
+            exit;
+        }
+
+        $esc_vendor = $this->db->escape_str($vendor_id);
+        $payment_date = $this->input->post('payment_date');
+        
+        $date_filter_bills = "";
+        $date_filter_paid = "";
+        $date_filter_adv = "";
+        
+        if (!empty($payment_date)) {
+            $esc_date = $this->db->escape_str($payment_date);
+            $date_filter_bills = " AND invoice_date <= '$esc_date'";
+            $date_filter_paid  = " AND payment_date <= '$esc_date'";
+            $date_filter_adv   = " AND adv_payment_date <= '$esc_date'";
+        }
+
+        // 1. Opening Balance
+        $opening_amount = 0;
+        $opening_type   = 'CR';
+        $op_query = $this->db->get_where('vendor_opening_balance_info', ['vendor_id' => $vendor_id]);
+        if ($op_query->num_rows() > 0) {
+            $op_row = $op_query->row_array();
+            $opening_amount = (float) $op_row['opening_amount'];
+            $opening_type   = $op_row['balance_type'];
+        }
+        // CR = we owe vendor (positive balance), DR = vendor owes us
+        $signed_opening = ($opening_type === 'CR') ? $opening_amount : -$opening_amount;
+
+        // 2. Total Bills (all purchase types)
+        $bill_sql = "
+            SELECT IFNULL(SUM(total_amount), 0) AS total_bills
+            FROM (
+                SELECT COALESCE(total_amount_inc_addl, total_amount) AS total_amount
+                FROM vendor_purchase_invoice_info
+                WHERE status = 'Active' AND vendor_id = '$esc_vendor' {$date_filter_bills}
+
+                UNION ALL
+
+                SELECT tot_amt_with_tax AS total_amount
+                FROM local_purchase_bill_info
+                WHERE status = 'Active' AND vendor_id = '$esc_vendor' {$date_filter_bills}
+
+                UNION ALL
+
+                SELECT g_total AS total_amount
+                FROM dp_bill_info
+                WHERE status = 'Active' AND vendor_id = '$esc_vendor' {$date_filter_bills}
+
+                UNION ALL
+
+                SELECT customs_tot_amt AS total_amount
+                FROM customs_bill_info
+                WHERE status = 'Active' AND vendor_id = '$esc_vendor' {$date_filter_bills}
+            ) AS bills
+        ";
+        $bill_row    = $this->db->query($bill_sql)->row_array();
+        $total_bills = (float) ($bill_row['total_bills'] ?? 0);
+
+        // 3. Total Bill Payments (vendor_payment_info)
+        $paid_sql    = "SELECT IFNULL(SUM(amount), 0) AS total_paid
+                        FROM vendor_payment_info
+                        WHERE status = 'Active' AND vendor_id = '$esc_vendor' {$date_filter_paid}";
+        $paid_row    = $this->db->query($paid_sql)->row_array();
+        $total_paid  = (float) ($paid_row['total_paid'] ?? 0);
+
+        // 4. Total Advance Payments (vendor_advance_payment_info)
+        $adv_sql     = "SELECT IFNULL(SUM(adv_payment_amt), 0) AS total_advance
+                        FROM vendor_advance_payment_info
+                        WHERE status = 'Active' AND vendor_id = '$esc_vendor' {$date_filter_adv}";
+        $adv_row     = $this->db->query($adv_sql)->row_array();
+        $total_advance = (float) ($adv_row['total_advance'] ?? 0);
+
+        // 5. Current Balance = Opening + Bills - Paid - Advance
+        $current_balance = $signed_opening + $total_bills - $total_paid - $total_advance;
+
+        echo json_encode([
+            'status'          => 'success',
+            'opening_balance' => number_format($opening_amount, 3),
+            'opening_type'    => $opening_type,
+            'total_bills'     => number_format($total_bills, 3),
+            'total_paid'      => number_format($total_paid, 3),
+            'total_advance'   => number_format($total_advance, 3),
+            'current_balance' => number_format($current_balance, 3),
+            'is_credit'       => ($current_balance >= 0),
+        ]);
+        exit;
+    }
+
+    public function get_customer_balance_summary()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        $customer_id = $this->input->post('customer_id');
+        if (empty($customer_id)) {
+            echo json_encode(['status' => 'error', 'message' => 'Invalid Customer ID']);
+            exit;
+        }
+
+        $esc_customer = $this->db->escape_str($customer_id);
+        $payment_date = $this->input->post('payment_date');
+        
+        $date_filter_inv = "";
+        $date_filter_rec = "";
+        
+        if (!empty($payment_date)) {
+            $esc_date = $this->db->escape_str($payment_date);
+            $date_filter_inv = " AND invoice_date <= '$esc_date'";
+            $date_filter_rec = " AND receipt_date <= '$esc_date'";
+        }
+
+        // 1. Opening Balance
+        $opening_amount = 0;
+        $opening_type   = 'DR'; // Default to Debit (customer owes us)
+        $op_query = $this->db->get_where('customer_opening_balance_info', ['customer_id' => $customer_id]);
+        if ($op_query->num_rows() > 0) {
+            $op_row = $op_query->row_array();
+            $opening_amount = (float) $op_row['opening_amount'];
+            $opening_type   = $op_row['balance_type'];
+        }
+        // DR = customer owes us (positive balance), CR = we owe customer
+        $signed_opening = ($opening_type === 'DR') ? $opening_amount : -$opening_amount;
+
+        // 2. Total Invoices (Sales)
+        $inv_sql     = "SELECT IFNULL(SUM(total_amount), 0) AS total_invoices
+                        FROM tender_enq_invoice_info
+                        WHERE status = 'Active' AND customer_id = '$esc_customer' {$date_filter_inv}";
+        $inv_row     = $this->db->query($inv_sql)->row_array();
+        $total_invoices = (float) ($inv_row['total_invoices'] ?? 0);
+
+        // 3. Total Received (Receipts)
+        $rec_sql     = "SELECT IFNULL(SUM(amount), 0) AS total_receipts
+                        FROM tender_receipt_info
+                        WHERE status = 'Active' AND customer_id = '$esc_customer' {$date_filter_rec}";
+        $rec_row     = $this->db->query($rec_sql)->row_array();
+        $total_receipts = (float) ($rec_row['total_receipts'] ?? 0);
+
+        // 4. Current Balance = Signed Opening + Invoices - Receipts
+        $current_balance = $signed_opening + $total_invoices - $total_receipts;
+
+        echo json_encode([
+            'status'          => 'success',
+            'opening_balance' => number_format($opening_amount, 3),
+            'opening_type'    => $opening_type,
+            'total_invoices'  => number_format($total_invoices, 3),
+            'total_receipts'  => number_format($total_receipts, 3),
+            'current_balance' => number_format($current_balance, 3),
+            'is_debit'        => ($current_balance >= 0),
+        ]);
+        exit;
+    }
 
     public function delete_record()
     {

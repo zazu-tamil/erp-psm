@@ -298,6 +298,7 @@ $route['customer-invoice-receipt/(:num)'] = 'payment/customer_invoice_recipt/$1'
 
 $route['vendor-payment-list'] = 'payment/vendor_payment_list';
 $route['vendor-payment-list/(:num)'] = 'payment/vendor_payment_list/$1';
+$route['get-vendor-balance-summary'] = 'payment/get_vendor_balance_summary';
 
 
 $route['customer-invoice-pending-report'] = 'reports/customer_invoice_pending_report';
@@ -323,6 +324,7 @@ $route['customer-opening-balance-list/(:num)'] = 'master/customer_opening_balanc
 //customer statement
 $route['customer-statement-report'] = 'reports/customer_statement_report'; 
 $route['get-customer-opening-balance'] = 'reports/get_customer_opening_balance_ajax';
+$route['get-customer-balance-summary'] = 'payment/get_customer_balance_summary';
 
 
 //vendor adv payment

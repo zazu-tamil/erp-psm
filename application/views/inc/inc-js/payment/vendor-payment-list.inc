@@ -30,6 +30,73 @@
 <script>
     $(document).ready(function () {
 
+        // ============================================================
+        // Vendor Balance Summary — inside Add Modal only (current balance)
+        // ============================================================
+        function loadAddModalVendorBalance(vendor_id) {
+            if (!vendor_id) {
+                $('#add_vendor_balance_panel').hide();
+                return;
+            }
+            var payment_date = $('#add_payment_date').val();
+            $.ajax({
+                url: "<?php echo site_url('get-vendor-balance-summary'); ?>",
+                type: "POST",
+                data: { 
+                    vendor_id: vendor_id,
+                    payment_date: payment_date
+                },
+                dataType: "json",
+                success: function (res) {
+                    if (!res || res.status !== 'success') {
+                        $('#add_vendor_balance_panel').hide();
+                        return;
+                    }
+
+                    // Vendor name
+                    var vname = (typeof vendorOpt !== 'undefined' && vendorOpt[vendor_id])
+                        ? vendorOpt[vendor_id] : 'Vendor #' + vendor_id;
+                    $('#add_bal_vendor_name').text(vname);
+
+                    // Current Balance
+                    var bal = parseFloat(res.current_balance.replace(/,/g, ''));
+                    $('#add_bal_current').text(res.current_balance);
+
+                    if (bal > 0) {
+                        $('#add_bal_current').css('color', '#c62828');
+                        $('#add_bal_current_label').html('<span class="label label-danger">Payable to Vendor</span>');
+                    } else if (bal < 0) {
+                        $('#add_bal_current').css('color', '#2e7d32');
+                        $('#add_bal_current_label').html('<span class="label label-success">Advance/Overpaid</span>');
+                    } else {
+                        $('#add_bal_current').css('color', '#555');
+                        $('#add_bal_current_label').html('<span class="label label-default">Settled</span>');
+                    }
+
+                    $('#add_vendor_balance_panel').slideDown(200);
+                },
+                error: function () {
+                    $('#add_vendor_balance_panel').hide();
+                }
+            });
+        }
+
+
+        // Fire when vendor is selected in Add modal
+        $('#add_vendor_id').on('change', function () {
+            loadAddModalVendorBalance($(this).val());
+        });
+
+        // Recalculate balance when payment date changes
+        $('#add_payment_date').on('change', function () {
+            var vendor_id = $('#add_vendor_id').val();
+            if (vendor_id) {
+                loadAddModalVendorBalance(vendor_id);
+            }
+        });
+
+
+
         // On change of receipt type
         $('input[name="payment_type"]').on('change', function () {
 
@@ -80,6 +147,7 @@
         function calculateGrandTotal(prefix) {
 
             var grand_total = 0;
+            var any_checked = false;
 
             $("#" + prefix + "_item_container tr").each(function () {
 
@@ -93,16 +161,34 @@
                 if ($chk.length > 0) {
                     if ($chk.is(":checked")) {
                         grand_total += value;
+                        any_checked = true;
                     }
                 }
 
                 else {
-                    grand_total += value;
+                    // Do not add if no select-item
                 }
 
             });
 
-            $("#" + prefix + "_grand_total_amount").val(format3(grand_total));
+            // Add without bill amount if checkbox is checked
+            if ($("#" + prefix + "_is_without_bill").is(":checked")) {
+                var without_bill_val = parseFloat($("#" + prefix + "_without_bill_amount").val()) || 0;
+                grand_total += without_bill_val;
+                any_checked = true;
+            }
+
+            var modal = $("#" + prefix + "_modal");
+            var is_initial = modal.data("initial_load");
+
+            if (is_initial) {
+                if (any_checked) {
+                    $("#" + prefix + "_grand_total_amount").val(format3(grand_total));
+                }
+                modal.data("initial_load", false);
+            } else {
+                $("#" + prefix + "_grand_total_amount").val(format3(grand_total));
+            }
         }
 
         $("#add_payment_mode").on("change", function () {
@@ -133,6 +219,26 @@
             var prefix =
                 $(this).closest(".modal").attr("id") === "add_modal" ? "add" : "edit";
             $(this).val(format3($(this).val()));
+            calculateGrandTotal(prefix);
+        });
+
+        // Without Bill Checkbox and Input handlers
+        $(document).on("change", "#add_is_without_bill, #edit_is_without_bill", function () {
+            var prefix = $(this).attr("id").startsWith("add") ? "add" : "edit";
+            var $input = $("#" + prefix + "_without_bill_amount");
+            if ($(this).is(":checked")) {
+                $input.show().focus();
+            } else {
+                $input.val("0.000").hide();
+            }
+            calculateGrandTotal(prefix);
+        });
+
+        $(document).on("input change blur", "#add_without_bill_amount, #edit_without_bill_amount", function (e) {
+            var prefix = $(this).attr("id").startsWith("add") ? "add" : "edit";
+            if (e.type === "blur") {
+                $(this).val(format3($(this).val()));
+            }
             calculateGrandTotal(prefix);
         });
 
@@ -168,6 +274,7 @@
         });
 
         $("#add_modal").on("show.bs.modal", function () {
+            $("#add_modal").data("initial_load", true);
             $("#frmadd")[0].reset();
             $("#add_item_container").html("");
             $("#add_tender_enquiry_id")
@@ -176,12 +283,21 @@
             $("#add_grand_total_amount").val("");
             $(".add_srch_enq_id").val("");
             toggleBank("add");
+            // Reset without bill elements
+            $("#add_is_without_bill").prop("checked", false);
+            $("#add_without_bill_amount").val("0.000").hide();
+            // Reset balance panel
+            $('#add_vendor_balance_panel').hide();
+            $('#add_bal_vendor_name').text('');
+            $('#add_bal_current').text('0.000');
+            $('#add_bal_current_label').html('');
         });
 
 
         $("#add_vendor_id").on("change", function () {
             var vendor_id = $(this).val();
             add_load_vendor_payment_list(vendor_id);
+
         });
 
 
@@ -306,7 +422,18 @@
                         return;
                     }
 
-                    var data = res[0];
+                     var data = res[0];
+
+                    $("#edit_modal").data("initial_load", true);
+                    $("#edit_grand_total_amount").val(format3(data.amount));
+
+                    if (data.is_without_bill == 1) {
+                        $("#edit_is_without_bill").prop("checked", true);
+                        $("#edit_without_bill_amount").val(format3(data.without_bill_amount)).show();
+                    } else {
+                        $("#edit_is_without_bill").prop("checked", false);
+                        $("#edit_without_bill_amount").val("0.000").hide();
+                    }
 
                     $("#edit_vendor_payment_id").val(data.vendor_payment_id);
                     $("#edit_payment_date").val(data.payment_date);
@@ -339,7 +466,6 @@
 
                     // Customer → load enquiry dropdown → load invoice list
                     $("#edit_vendor_id").val(data.vendor_id).trigger("change");
-                    edit_load_vendor_payment_bill_list(data.vendor_payment_id, data.vendor_id);
                 },
                 error: function () {
                     alert("Error loading record.");

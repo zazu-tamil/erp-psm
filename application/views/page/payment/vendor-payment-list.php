@@ -18,6 +18,12 @@
         cursor: pointer !important;
     }
 </style>
+<!-- Pass vendor data to JS for balance auto-load -->
+<script>
+    var vendorOpt = <?php echo json_encode($vendor_opt); ?>;
+    var preselectedVendorId = <?php echo json_encode($srch_vendor_id); ?>;
+</script>
+
 <!-- Main content -->
 <section class="content">
 
@@ -51,12 +57,13 @@
                     <div class="form-group col-md-3 text-left">
                         <br>
                         <button type="submit" class="btn btn-success"><i class="fa fa-search"></i> Show</button>
-
                     </div>
                 </div>
             </form>
         </div>
     </div>
+
+
 
     <!-- Main List Box -->
     <div class="box box-success">
@@ -151,13 +158,26 @@
                             <div class="form-group col-md-6">
                                 <label>Payment Date <span class="text-red">*</span></label>
                                 <input type="date" name="payment_date" id="add_payment_date" class="form-control"
-                                    required>
+                                    required value="<?php echo date('Y-m-d') ?>">
                             </div>
                             <div class="form-group col-md-6">
                                 <label>Vendor <span class="text-red">*</span></label>
                                 <?php echo form_dropdown('vendor_id', ['' => 'Select Vendor'] + $vendor_opt, set_value('vendor_id'), 'id="add_vendor_id" class="form-control" required="true"'); ?>
                             </div>
                         </div>
+
+                        <!-- Vendor Balance Summary (inside Add Modal) -->
+                        <div id="add_vendor_balance_panel" style="display:none; margin-bottom:12px;">
+                            <div style="background:#f0f4ff; border:1px solid #c5cae9; border-radius:6px; padding:8px 14px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                                <span style="font-size:12px; font-weight:700; color:#1a237e;">
+                                    <i class="fa fa-bar-chart"></i>&nbsp; Current Balance
+                                    (<span id="add_bal_vendor_name" style="color:#283593;"></span>) :
+                                </span>
+                                <span id="add_bal_current" style="font-size:20px; font-weight:800; color:#c62828;">0.000</span>
+                                <span id="add_bal_current_label"></span>
+                            </div>
+                        </div>
+
                         <div class="row">
                             <div class="form-group col-md-6">
                                 <label>Payment Mode <span class="text-red">*</span></label>
@@ -213,7 +233,7 @@
                         </div>
 
                         <div class="row">
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <label>Status</label><br>
                                 <label class="radio-inline">
                                     <input type="radio" name="status" value="Active" checked> Active
@@ -223,10 +243,19 @@
                                 </label>
                             </div>
 
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <label>Amount <span class="text-red">*</span></label>
                                 <input type="text" name="amount" id="add_grand_total_amount"
-                                    class="form-control text-right" readonly>
+                                    class="form-control text-right">
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label style="display: block; font-weight: bold; margin-bottom: 5px; cursor: pointer;">
+                                    <input type="checkbox" name="is_without_bill" id="add_is_without_bill" value="1">
+                                    Without Bill Amount
+                                </label>
+                                <input type="text" name="without_bill_amount" id="add_without_bill_amount"
+                                    class="form-control text-right" placeholder="0.000" style="display: none;">
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -280,7 +309,7 @@
                             <div class="form-group col-md-6">
                                 <label>Payment Date <span class="text-red">*</span></label>
                                 <input type="date" name="payment_date" id="edit_payment_date" class="form-control"
-                                    required>
+                                    required value="<?php echo date('Y-m-d') ?>">
                             </div>
                             <div class="form-group col-md-6">
                                 <label>Vendor <span class="text-red">*</span></label>
@@ -346,8 +375,7 @@
                         </div>
 
                         <div class="row">
-
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <label>Status</label><br>
                                 <label class="radio-inline">
                                     <input type="radio" name="status" value="Active" checked> Active
@@ -356,10 +384,20 @@
                                     <input type="radio" name="status" value="InActive"> InActive
                                 </label>
                             </div>
-                            <div class="form-group col-md-4">
+
+                            <div class="form-group col-md-3">
                                 <label>Amount <span class="text-red">*</span></label>
                                 <input type="text" name="amount" id="edit_grand_total_amount"
-                                    class="form-control text-right" readonly>
+                                    class="form-control text-right">
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label style="display: block; font-weight: bold; margin-bottom: 5px; cursor: pointer;">
+                                    <input type="checkbox" name="is_without_bill" id="edit_is_without_bill" value="1">
+                                    Without Bill Amount
+                                </label>
+                                <input type="text" name="without_bill_amount" id="edit_without_bill_amount"
+                                    class="form-control text-right" placeholder="0.000" style="display: none;">
                             </div>
                         </div>
 

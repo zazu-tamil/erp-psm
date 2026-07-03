@@ -18,6 +18,10 @@
         cursor: pointer !important;
     }
 </style>
+<!-- Pass customer data to JS for balance auto-load -->
+<script>
+    var customerOpt = <?php echo json_encode($customer_opt); ?>;
+</script>
 <!-- Main content -->
 <section class="content">
 
@@ -157,11 +161,23 @@
                             <div class="form-group col-md-6">
                                 <label>Receipt Date <span class="text-red">*</span></label>
                                 <input type="date" name="receipt_date" id="add_receipt_date" class="form-control"
-                                    required>
+                                    required value="<?php echo date('Y-m-d') ?>">
                             </div>
                             <div class="form-group col-md-6">
                                 <label>Customer <span class="text-red">*</span></label>
                                 <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="add_customer_id" class="form-control" required="true"'); ?>
+                            </div>
+                        </div>
+
+                        <!-- Customer Balance Summary (inside Add Modal) -->
+                        <div id="add_customer_balance_panel" style="display:none; margin-bottom:12px;">
+                            <div style="background:#f0f4ff; border:1px solid #c5cae9; border-radius:6px; padding:8px 14px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                                <span style="font-size:12px; font-weight:700; color:#1a237e;">
+                                    <i class="fa fa-bar-chart"></i>&nbsp; Current Balance
+                                    (<span id="add_bal_customer_name" style="color:#283593;"></span>) :
+                                </span>
+                                <span id="add_bal_current" style="font-size:20px; font-weight:800; color:#c62828;">0.000</span>
+                                <span id="add_bal_current_label"></span>
                             </div>
                         </div>
                         <div class="row">
@@ -218,7 +234,7 @@
                         </div>
 
                         <div class="row">
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <label>Status</label><br>
                                 <label class="radio-inline">
                                     <input type="radio" name="status" value="Active" checked> Active
@@ -228,10 +244,19 @@
                                 </label>
                             </div>
 
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <label>Amount <span class="text-red">*</span></label>
                                 <input type="text" name="amount" id="add_grand_total_amount"
-                                    class="form-control text-right" readonly>
+                                    class="form-control text-right">
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label style="display: block; font-weight: bold; margin-bottom: 5px; cursor: pointer;">
+                                    <input type="checkbox" name="is_without_bill" id="add_is_without_bill" value="1">
+                                    Without Bill Amount
+                                </label>
+                                <input type="text" name="without_bill_amount" id="add_without_bill_amount"
+                                    class="form-control text-right" placeholder="0.000" style="display: none;">
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -284,7 +309,7 @@
                             <div class="form-group col-md-6">
                                 <label>Receipt Date <span class="text-red">*</span></label>
                                 <input type="date" name="receipt_date" id="edit_receipt_date" class="form-control"
-                                    required>
+                                    required value="<?php echo date('Y-m-d') ?>">
                             </div>
                             <div class="form-group col-md-6">
                                 <label>Customer <span class="text-red">*</span></label>
@@ -350,8 +375,7 @@
                         </div>
 
                         <div class="row">
-
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <label>Status</label><br>
                                 <label class="radio-inline">
                                     <input type="radio" name="status" value="Active" checked> Active
@@ -360,10 +384,20 @@
                                     <input type="radio" name="status" value="InActive"> InActive
                                 </label>
                             </div>
-                            <div class="form-group col-md-4">
+
+                            <div class="form-group col-md-3">
                                 <label>Amount <span class="text-red">*</span></label>
                                 <input type="text" name="amount" id="edit_grand_total_amount"
-                                    class="form-control text-right" readonly>
+                                    class="form-control text-right">
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label style="display: block; font-weight: bold; margin-bottom: 5px; cursor: pointer;">
+                                    <input type="checkbox" name="is_without_bill" id="edit_is_without_bill" value="1">
+                                    Without Bill Amount
+                                </label>
+                                <input type="text" name="without_bill_amount" id="edit_without_bill_amount"
+                                    class="form-control text-right" placeholder="0.000" style="display: none;">
                             </div>
                         </div>
 
@@ -484,6 +518,7 @@
         function calculateGrandTotal(prefix) {
 
             var grand_total = 0;
+            var any_checked = false;
 
             $("#" + prefix + "_item_container tr").each(function () {
 
@@ -497,16 +532,34 @@
                 if ($chk.length > 0) {
                     if ($chk.is(":checked")) {
                         grand_total += value;
+                        any_checked = true;
                     }
                 }
               
                 else {
-                    grand_total += value;
+                    // Do not add if no select-item
                 }
 
             });
 
-            $("#" + prefix + "_grand_total_amount").val(format3(grand_total));
+            // Add without bill amount if checkbox is checked
+            if ($("#" + prefix + "_is_without_bill").is(":checked")) {
+                var without_bill_val = parseFloat($("#" + prefix + "_without_bill_amount").val()) || 0;
+                grand_total += without_bill_val;
+                any_checked = true;
+            }
+
+            var modal = $("#" + prefix + "_modal");
+            var is_initial = modal.data("initial_load");
+
+            if (is_initial) {
+                if (any_checked) {
+                    $("#" + prefix + "_grand_total_amount").val(format3(grand_total));
+                }
+                modal.data("initial_load", false);
+            } else {
+                $("#" + prefix + "_grand_total_amount").val(format3(grand_total));
+            }
         }
 
         $("#add_receipt_mode").on("change", function () {
@@ -537,6 +590,26 @@
             var prefix =
                 $(this).closest(".modal").attr("id") === "add_modal" ? "add" : "edit";
             $(this).val(format3($(this).val()));
+            calculateGrandTotal(prefix);
+        });
+
+        // Without Bill Checkbox and Input handlers
+        $(document).on("change", "#add_is_without_bill, #edit_is_without_bill", function () {
+            var prefix = $(this).attr("id").startsWith("add") ? "add" : "edit";
+            var $input = $("#" + prefix + "_without_bill_amount");
+            if ($(this).is(":checked")) {
+                $input.show().focus();
+            } else {
+                $input.val("0.000").hide();
+            }
+            calculateGrandTotal(prefix);
+        });
+
+        $(document).on("input change blur", "#add_without_bill_amount, #edit_without_bill_amount", function (e) {
+            var prefix = $(this).attr("id").startsWith("add") ? "add" : "edit";
+            if (e.type === "blur") {
+                $(this).val(format3($(this).val()));
+            }
             calculateGrandTotal(prefix);
         });
 
@@ -572,6 +645,7 @@
         });
 
         $("#add_modal").on("show.bs.modal", function () {
+            $("#add_modal").data("initial_load", true);
             $("#frmadd")[0].reset();
             $("#add_item_container").html("");
             $("#add_tender_enquiry_id")
@@ -580,12 +654,79 @@
             $("#add_grand_total_amount").val("");
             $(".add_srch_enq_id").val("");
             toggleBank("add");
+            // Reset without bill elements
+            $("#add_is_without_bill").prop("checked", false);
+            $("#add_without_bill_amount").val("0.000").hide();
+            // Reset balance panel
+            $('#add_customer_balance_panel').hide();
+            $('#add_bal_customer_name').text('');
+            $('#add_bal_current').text('0.000');
+            $('#add_bal_current_label').html('');
         });
 
+        // ============================================================
+        // Customer Balance Summary — inside Add Modal only (current balance)
+        // ============================================================
+        function loadAddModalCustomerBalance(customer_id) {
+            if (!customer_id) {
+                $('#add_customer_balance_panel').hide();
+                return;
+            }
+            var payment_date = $('#add_receipt_date').val();
+            $.ajax({
+                url: "<?php echo site_url('get-customer-balance-summary'); ?>",
+                type: "POST",
+                data: { 
+                    customer_id: customer_id,
+                    payment_date: payment_date
+                },
+                dataType: "json",
+                success: function (res) {
+                    if (!res || res.status !== 'success') {
+                        $('#add_customer_balance_panel').hide();
+                        return;
+                    }
+
+                    // Customer name
+                    var cname = (typeof customerOpt !== 'undefined' && customerOpt[customer_id])
+                        ? customerOpt[customer_id] : 'Customer #' + customer_id;
+                    $('#add_bal_customer_name').text(cname);
+
+                    // Current Balance
+                    var bal = parseFloat(res.current_balance.replace(/,/g, ''));
+                    $('#add_bal_current').text(res.current_balance);
+
+                    if (bal > 0) {
+                        $('#add_bal_current').css('color', '#c62828');
+                        $('#add_bal_current_label').html('<span class="label label-danger">Receivable from Customer</span>');
+                    } else if (bal < 0) {
+                        $('#add_bal_current').css('color', '#2e7d32');
+                        $('#add_bal_current_label').html('<span class="label label-success">Advance/Overpaid</span>');
+                    } else {
+                        $('#add_bal_current').css('color', '#555');
+                        $('#add_bal_current_label').html('<span class="label label-default">Settled</span>');
+                    }
+
+                    $('#add_customer_balance_panel').slideDown(200);
+                },
+                error: function () {
+                    $('#add_customer_balance_panel').hide();
+                }
+            });
+        }
 
         $("#add_customer_id").on("change", function () {
             var customer_id = $(this).val();
             add_load_invoice_list(customer_id);
+            loadAddModalCustomerBalance(customer_id);
+        });
+
+        // Recalculate balance when receipt date changes
+        $('#add_receipt_date').on('change', function () {
+            var customer_id = $('#add_customer_id').val();
+            if (customer_id) {
+                loadAddModalCustomerBalance(customer_id);
+            }
         });
 
 
@@ -715,6 +856,17 @@
 
                     var data = res[0];
 
+                    $("#edit_modal").data("initial_load", true);
+                    $("#edit_grand_total_amount").val(format3(data.amount));
+
+                    if (data.is_without_bill == 1) {
+                        $("#edit_is_without_bill").prop("checked", true);
+                        $("#edit_without_bill_amount").val(format3(data.without_bill_amount)).show();
+                    } else {
+                        $("#edit_is_without_bill").prop("checked", false);
+                        $("#edit_without_bill_amount").val("0.000").hide();
+                    }
+
                     $("#edit_tender_receipt_id").val(data.tender_receipt_id);
                     $("#edit_receipt_date").val(data.receipt_date);
                     $("#edit_remarks").val(data.remarks);
@@ -746,7 +898,6 @@
 
                     // Customer → load enquiry dropdown → load invoice list
                     $("#edit_customer_id").val(data.customer_id).trigger("change");
-                    edit_load_invoice_list(data.tender_receipt_id, data.customer_id);
                 },
                 error: function () {
                     alert("Error loading record.");
