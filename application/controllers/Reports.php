@@ -2098,6 +2098,29 @@ class Reports extends CI_Controller
         $query = $this->db->query($txn_sql);
         $data['record_list'] = $query->result_array();
 
+        // Get selected vendor name
+        $selected_vendor_name = 'All_Vendors';
+        if (!empty($vendor_id) && !empty($data['vendors'])) {
+            foreach ($data['vendors'] as $v) {
+                if ($v['id'] == $vendor_id) {
+                    $selected_vendor_name = $v['vendor_name'];
+                    break;
+                }
+            }
+        }
+        $data['selected_vendor_name'] = $selected_vendor_name;
+
+        if ($this->input->get_post('export_excel') == '1') {
+            header("Content-Type: application/vnd.ms-excel");
+            $clean_vendor_name = preg_replace('/[^A-Za-z0-9_\-]/', '_', $selected_vendor_name);
+            $filename = "Vendor_Statement_Report_" . $clean_vendor_name . "_" . ($from_date ? $from_date : 'start') . "_to_" . ($to_date ? $to_date : 'end') . ".xls";
+            header("Content-Disposition: attachment; filename=" . $filename);
+            header("Pragma: no-cache");
+            header("Expires: 0");
+            $this->load->view('page/reports/vendor-statement-report-xls', $data);
+            return;
+        }
+
         $this->load->view('page/reports/vendor-statement-report', $data);
     }
 
@@ -2313,6 +2336,29 @@ class Reports extends CI_Controller
 
         $query = $this->db->query($txn_sql);
         $data['record_list'] = $query->result_array();
+
+        // Get selected customer name
+        $selected_customer_name = 'All_Customers';
+        if (!empty($customer_id) && !empty($data['customers'])) {
+            foreach ($data['customers'] as $c) {
+                if ($c['id'] == $customer_id) {
+                    $selected_customer_name = $c['customer_name'];
+                    break;
+                }
+            }
+        }
+        $data['selected_customer_name'] = $selected_customer_name;
+
+        if ($this->input->get_post('export_excel') == '1') {
+            header("Content-Type: application/vnd.ms-excel");
+            $clean_customer_name = preg_replace('/[^A-Za-z0-9_\-]/', '_', $selected_customer_name);
+            $filename = "Customer_Statement_Report_" . $clean_customer_name . "_" . ($from_date ? $from_date : 'start') . "_to_" . ($to_date ? $to_date : 'end') . ".xls";
+            header("Content-Disposition: attachment; filename=" . $filename);
+            header("Pragma: no-cache");
+            header("Expires: 0");
+            $this->load->view('page/reports/customer-statement-report-xls', $data);
+            return;
+        }
 
         $this->load->view('page/reports/customer-statement-report', $data);
     }

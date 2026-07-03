@@ -1,5 +1,5 @@
 <?php include_once(VIEWPATH . 'inc/header.php'); ?>
-<section class="content-header">
+<section class="content-header no-print">
     <h1><?php echo htmlspecialchars($title); ?></h1>
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-file-text"></i> Vendor</a></li>
@@ -126,6 +126,28 @@
     .premium-alert i {
         font-size: 24px;
     }
+    
+    .print-header {
+        display: none;
+    }
+    
+    /* Print Media Styling */
+    @media print {
+        .print-header {
+            display: block !important;
+            margin-bottom: 20px;
+        }
+        .main-header,
+        .main-sidebar,
+        .main-footer {
+            display: none !important;
+        }
+        .content-wrapper {
+            margin-left: 0 !important;
+            padding-top: 0 !important;
+            background-color: #fff !important;
+        }
+    }
 </style>
 
 <?php
@@ -134,9 +156,36 @@ $min_date_attr = (!empty($vendor_id) && !empty($op_exists)) ? 'min="' . $op_deta
 ?>
 
 <section class="content" id="stmt-report-container">
+    <!-- PRINT HEADER -->
+    <div class="print-header">
+        <h2 style="margin: 0 0 10px 0; font-size: 20px; font-weight: bold; text-transform: uppercase; border-bottom: 2px solid #333; padding-bottom: 8px; text-align: center;">VENDOR STATEMENT REPORT</h2>
+        <table style="width: 100%; margin-bottom: 15px; font-size: 12px; border-collapse: collapse;">
+            <tr>
+                <td style="text-align: left; width: 50%; border: none;">
+                    <strong>Vendor:</strong> <?php
+                        $selected_vend_name = 'All Vendors';
+                        foreach ($vendors as $v) {
+                            if ($v['id'] == $vendor_id) {
+                                $selected_vend_name = $v['vendor_name'];
+                                break;
+                            }
+                        }
+                        echo htmlspecialchars($selected_vend_name);
+                    ?>
+                </td>
+                <td style="text-align: right; width: 50%; border: none;">
+                    <strong>Period:</strong>
+                    <?php echo !empty($from_date) ? date('d-M-Y', strtotime($from_date)) : 'Start'; ?>
+                    to
+                    <?php echo !empty($to_date) ? date('d-M-Y', strtotime($to_date)) : 'End'; ?>
+                </td>
+            </tr>
+        </table>
+    </div>
+
     <!-- Server-Side Warning Alert Banner -->
     <?php if (!empty($vendor_id) && empty($op_exists)) { ?>
-        <div class="alert alert-warning alert-dismissible opening-balance-warning" style="border-radius: 8px; margin-bottom: 20px;">
+        <div class="alert alert-warning alert-dismissible opening-balance-warning no-print" style="border-radius: 8px; margin-bottom: 20px;">
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
             <h4><i class="icon fa fa-warning"></i> Attention!</h4>
             Vendor opening balance is empty. Please enter the opening balance first!
@@ -144,12 +193,13 @@ $min_date_attr = (!empty($vendor_id) && !empty($op_exists)) ? 'min="' . $op_deta
     <?php } ?>
 
     <!-- Filter Section -->
-    <div class="box box-premium">
+    <div class="box box-premium no-print">
         <div class="box-header">
             <h3 class="box-title"><i class="fa fa-filter"></i> Search Filter</h3>
         </div>
         <div class="box-body">
-            <form method="get" action="">
+            <form method="get" action="" id="report-filter-form">
+                <input type="hidden" name="export_excel" id="export_excel" value="0">
                 <div class="row">
                     <div class="col-md-3">
                         <label>Vendor</label>
@@ -232,6 +282,14 @@ $min_date_attr = (!empty($vendor_id) && !empty($op_exists)) ? 'min="' . $op_deta
         <div class="box box-premium" style="margin-top: 10px;">
             <div class="box-header" style="background: #222d32;">
                 <h3 class="box-title"><i class="fa fa-list"></i> Statement Ledger</h3>
+                <div class="box-tools pull-right no-print">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="window.print();" style="border-radius: 4px; font-weight: 600; margin-top: -2px; margin-right: 5px;">
+                        <i class="fa fa-print"></i> Print PDF
+                    </button>
+                    <button type="button" id="btn-export-excel" class="btn btn-success btn-sm" style="border-radius: 4px; font-weight: 600; margin-top: -2px;">
+                        <i class="fa fa-file-excel-o"></i> Export Excel
+                    </button>
+                </div>
             </div>
             <div class="box-body table-responsive" style="padding: 0;">
                 <table class="table-premium">
