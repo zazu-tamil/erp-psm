@@ -27,7 +27,8 @@
         /* ── SCREEN: outer page wrapper ── */
         .page {
             width: 210mm;
-            min-height: 297mm;
+            /* min-height: 297mm; */
+            min-height: auto;
             margin: 20px auto;
             background: #fff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -46,12 +47,15 @@
 
         /* Header cell — contains the company letterhead image */
         table.page-table > thead > tr > td {
-            padding: 6mm 10mm 3mm 10mm;
+            /* padding: 6mm 10mm 3mm 10mm; */
+             padding: 0;
             text-align: center;
         }
 
         table.page-table > thead > tr > td img {
             width: 100%;
+            max-height: 200px;
+            display: block;
             /* max-height: 120px;
             object-fit: contain; */
         }
@@ -235,10 +239,11 @@
            ══════════════════════════════════════════ */
          @page {
              size: A4;
-             margin-top: 5mm;
+             /* margin-top: 5mm;
              margin-bottom: 15mm;
              margin-left: 5mm;
-             margin-right: 5mm;
+             margin-right: 5mm; */
+             margin: 10mm;
              @bottom-right {
                  content: "Page " counter(page);
                  font-size: 11px;
@@ -247,7 +252,7 @@
              }
          }
 
-        @media print {
+        * @media print {
             body {
                 background: #fff;
                 margin: 0;
@@ -261,7 +266,7 @@
                 box-shadow: none;
             }
 
-            /* This tells the browser to repeat thead on every page */
+             
             table.page-table > thead {
                 display: table-header-group;
             }
@@ -291,6 +296,31 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
+        }  
+
+            @media print {
+
+            html, body {
+                margin: 0;
+                padding: 0;
+            }
+
+            .page {
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+            }
+
+            table.page-table thead {
+                display: table-header-group;
+            }
+
+            table.page-table tbody {
+                display: table-row-group;
+            }
+
+             .button-container { display: none; }
         }
     </style>
 </head>
