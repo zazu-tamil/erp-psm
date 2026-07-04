@@ -525,7 +525,8 @@
                                                 <?php if (!empty($item['item_code'])): ?>
                                                     <div><strong><?= htmlspecialchars($item['item_code']) ?></strong></div>
                                                 <?php endif; ?>
-                                                <?= htmlspecialchars($item['item_desc'] ?? '') ?>
+                                                
+                                                <?= nl2br(htmlspecialchars($item['item_desc'] ?? '')) ?>
                                             </td>
                                             <td class="text-center"><?= number_format($qty, 0) ?></td>
                                             <td class="text-center"><?= htmlspecialchars($item['uom'] ?? '-') ?></td>

@@ -1559,10 +1559,9 @@
     </div>
 
 
-    <!-- Supplier Payment Bill List -->
     <div class="box box-success collapsed-box">
         <div class="box-header with-border clearfix">
-            <h3 class="box-title">Supplier Bill List</h3>
+            <h3 class="box-title">Local Supplier Bill List</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse">
                     <i class="fa fa-plus"></i>
@@ -1572,94 +1571,150 @@
 
         <div class="box-body">
             <div class="table-responsive">
-                <table class="table table-bordered table-striped">
-
-                    <?php if (!empty($vendor_payment_list)): ?>
-
-                        <?php foreach ($vendor_payment_list as $bill_list):
-                            $info = $bill_list['info'] ?? [];
-                            $items = $bill_list['items'] ?? [];
-                            ?>
-
-                            <thead>
-                                <tr class="bg_top_header">
-                                    <th>Payment Mode</th>
-                                    <td><?= htmlspecialchars($info['payment_mode'] ?? '') ?></td>
-
-                                    <th>Supplier Name</th>
-                                    <td><?= htmlspecialchars($info['vendor_name'] ?? '') ?></td>
-
-                                    <th>Payment No</th>
-                                    <td><?= htmlspecialchars($info['payment_no'] ?? '') ?></td>
-                                </tr>
-
-                                <tr class="bg_top_header">
-                                    <th>Payment Date</th>
-                                    <td><?= $info['payment_date'] ?? '' ?></td>
-                                    <th>Payment Date</th>
-                                    <td><?= $info['payment_date'] ?? '' ?></td>
-
-                                    <th>Payment Type</th>
-                                    <td><?= htmlspecialchars($info['payment_type'] ?? '') ?></td>
-                                </tr>
-
-                                <tr class="bg_table_header">
-                                    <th>S.No</th>
-                                    <th>Payment ID</th>
-                                    <th>Bill ID</th>
-                                    <th>Enquiry ID</th>
-                                    <th>Bill Type</th>
-                                    <th class="text-right" colspan="2">Amount</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-
-                                <?php if (!empty($items)): ?>
-                                    <?php $tot = 0; ?>
-
-                                    <?php foreach ($items as $k => $item):
-                                        $amount = $item['bill_amount'] ?? 0;
-                                        $tot += $amount;
-                                        ?>
-                                        <tr>
-                                            <td><?= $k + 1 ?></td>
-                                            <td><?= $item['vendor_payment_id'] ?? '' ?></td>
-                                            <td><?= $item['bill_id'] ?? '' ?></td>
-                                            <td><?= $item['tender_enquiry_id'] ?? '' ?></td>
-                                            <td><?= $item['bill_type'] ?? '' ?></td>
-                                            <td colspan="2" class="text-right"><?= number_format($amount, 2) ?></td>
-                                        </tr>
-                                    <?php endforeach; ?>
-
-                                    <!-- TOTAL -->
-                                    <tr>
-                                        <td colspan="5" class="text-right"><strong>Total</strong></td>
-                                        <td class="text-right">
-                                            <strong><?= number_format($tot, 2) ?></strong>
-                                        </td>
-                                    </tr>
-
-                                <?php else: ?>
-                                    <tr>
-                                        <td colspan="5" class="text-center">No items available</td>
-                                    </tr>
-                                <?php endif; ?>
-
-                                <tr>
-                                    <td colspan="5" style="height:20px;border:none;"></td>
-                                </tr>
-
-                            </tbody>
-
-                        <?php endforeach; ?>
-
-                    <?php else: ?>
-                        <tbody>
+                <table class="table table-bordered table-striped"> 
+                    <?php if (!empty($vendor_local_bill_list)): ?>
+                        <thead>
                             <tr>
-                                <td colspan="5" class="text-center">No records found</td>
+                                <th>Local Supplier</th>
+                                <th>Sub Account Head</th>
+                                <th>Invoice Date</th>
+                                <th>Invoice No</th>
+                                <th>Entry Date</th>
+                                <th>VAT Payer Group</th>
+                                <th>Total Amount (Without Tax)</th>
+                                <th>VAT</th>
+                                <th>VAT Amount</th>
+                                <th>Total Amount (With Tax)</th>
+                            </tr> 
+                        </thead>
+                        <?php foreach ($vendor_local_bill_list as $bill): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($bill['local_supplier'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($bill['sub_account_head_name'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($bill['invoice_date'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($bill['invoice_no'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($bill['inv_entry_date'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($bill['vat_payer_purchase_grp'] ?? '') ?></td>
+                                <td class="text-right"><?= number_format($bill['tot_amt_wo_tax'] ?? 0, 2) ?></td>
+                                <td class="text-right"><?= number_format($bill['vat'] ?? 0, 2) ?></td>
+                                <td class="text-right"><?= number_format($bill['vat_amt'] ?? 0, 2) ?></td>
+                                <td class="text-right"><?= number_format($bill['tot_amt_with_tax'] ?? 0, 2) ?></td>
                             </tr>
-                        </tbody>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="box box-success collapsed-box">
+        <div class="box-header with-border clearfix">
+            <h3 class="box-title">DP Bill List</h3>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="box-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped"> 
+                    <?php if (!empty($dp_bill_list)): ?>
+                        <thead>
+                            <tr>
+                                <th>Local Supplier</th>
+                                <th>Sub Account Head</th>
+                                <th>Invoice Date</th>
+                                <th>Invoice No</th>
+                                <th>Entry Date</th>
+                                <th>VAT Payer Group</th>    
+                                <th>Custom Stamp Fee</th>
+                                <th>Custom Duty</th>
+                                <th>Custom VAT Amount</th> 
+                                <th>Total Amount [WO DP]</th>
+                                <th>DP Charges</th>
+                                <th>DP VAT Amount</th>
+                                <th>DP Amount</th>
+                                <th>Gross Amount</th> 
+
+                            </tr> 
+                        </thead>
+                        <?php foreach ($dp_bill_list as $bill): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($bill['local_supplier'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($bill['sub_account_head_name'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($bill['invoice_date'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($bill['invoice_no'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($bill['inv_entry_date'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($bill['vat_payer_purchase_grp'] ?? '') ?></td>
+                                <td class="text-right"><?= number_format($bill['custom_stamp_fee'] ?? 0, 2) ?></td>
+                                <td class="text-right"><?= number_format($bill['custom_duty'] ?? 0, 2) ?></td>
+                                <td class="text-right"><?= number_format($bill['custom_vat_amt'] ?? 0, 2) ?></td>
+                                <td class="text-right"><?= number_format($bill['tot_amt_wo_dp'] ?? 0, 2) ?></td>
+                                <td class="text-right"><?= number_format($bill['dp_charges'] ?? 0, 2) ?></td>
+                                <td class="text-right"><?= number_format($bill['dp_vat_amt'] ?? 0, 2) ?></td>
+                                <td class="text-right"><?= number_format($bill['dp_total_amt'] ?? 0, 2) ?></td>
+                                <td class="text-right"><?= number_format($bill['g_total'] ?? 0, 2) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="box box-success collapsed-box">
+        <div class="box-header with-border clearfix">
+            <h3 class="box-title">Custom's Bill List</h3>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="box-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped"> 
+                    <?php if (!empty($custom_bill_list)): ?>
+                        <thead>
+                            <tr>
+                                <th>Local Supplier</th>
+                                <th>Sub Account Head</th>
+                                <th>Invoice Date</th>
+                                <th>Invoice No</th>
+                                <th>Entry Date</th>
+                                <th>VAT Payer Group</th>    
+                                <th>Custom Stamp Fee</th>
+                                <th>Bill Amount</th>
+                                <th>Custom Duty</th> 
+                                <th>Total Amount [WO VAT]</th> 
+                                <th>VAT Amount</th>
+                                <th>Customs Payable</th>
+                                <th>Customs Total Amount</th> 
+
+                            </tr> 
+                        </thead>
+                        <?php foreach ($custom_bill_list as $bill): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($bill['local_supplier'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($bill['sub_account_head_name'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($bill['invoice_date'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($bill['invoice_no'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($bill['inv_entry_date'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($bill['vat_payer_purchase_grp'] ?? '') ?></td>
+                                <td class="text-right"><?= number_format($bill['custom_stamp_fee'] ?? 0, 2) ?></td>
+                                <td class="text-right"><?= number_format($bill['custom_duty'] ?? 0, 2) ?></td>
+                                <td class="text-right"><?= number_format($bill['custom_vat_amt'] ?? 0, 2) ?></td>
+                                <td class="text-right"><?= number_format($bill['tot_amt_wo_vat'] ?? 0, 2) ?></td>
+                                <td class="text-right"><?= number_format($bill['vat_amt'] ?? 0, 2) ?></td>
+                                <td class="text-right"><?= number_format($bill['customs_payable'] ?? 0, 2) ?></td>
+                                <td class="text-right"><?= number_format($bill['customs_tot_amt'] ?? 0, 2) ?></td> 
+                            </tr>
+                        <?php endforeach; ?>
                     <?php endif; ?>
 
                 </table>
@@ -1671,7 +1726,7 @@
     <!-- Supplier Payment Local  Bill List -->
     <div class="box box-success collapsed-box">
         <div class="box-header with-border clearfix">
-            <h3 class="box-title">Local Supplier Bill List</h3>
+            <h3 class="box-title">Local Supplier Bill Payment List</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse">
                     <i class="fa fa-plus"></i>
@@ -1780,7 +1835,7 @@
     <!--  Delivery  Bill List -->
     <div class="box box-success collapsed-box">
         <div class="box-header with-border clearfix">
-            <h3 class="box-title">Delivery Partner List</h3>
+            <h3 class="box-title">DP Payment List</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse">
                     <i class="fa fa-plus"></i>
@@ -1888,7 +1943,7 @@
     <!-- Customs Bill List -->
     <div class="box box-success collapsed-box">
         <div class="box-header with-border clearfix">
-            <h3 class="box-title">Customs Bill List</h3>
+            <h3 class="box-title">Custom's Payment List</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse">
                     <i class="fa fa-plus"></i>
@@ -1991,7 +2046,113 @@
         </div>
     </div>
 
+<!-- Supplier Payment Bill List -->
+    <div class="box box-success collapsed-box">
+        <div class="box-header with-border clearfix">
+            <h3 class="box-title">Supplier Bill Payment List</h3>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
+        </div>
 
+        <div class="box-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+
+                    <?php if (!empty($vendor_payment_list)): ?>
+
+                        <?php foreach ($vendor_payment_list as $bill_list):
+                            $info = $bill_list['info'] ?? [];
+                            $items = $bill_list['items'] ?? [];
+                            ?>
+
+                            <thead>
+                                <tr class="bg_top_header">
+                                    <th>Payment Mode</th>
+                                    <td><?= htmlspecialchars($info['payment_mode'] ?? '') ?></td>
+
+                                    <th>Supplier Name</th>
+                                    <td><?= htmlspecialchars($info['vendor_name'] ?? '') ?></td>
+
+                                    <th>Payment No</th>
+                                    <td><?= htmlspecialchars($info['payment_no'] ?? '') ?></td>
+                                </tr>
+
+                                <tr class="bg_top_header">
+                                    <th>Payment Date</th>
+                                    <td><?= $info['payment_date'] ?? '' ?></td>
+                                    <th>Payment Date</th>
+                                    <td><?= $info['payment_date'] ?? '' ?></td>
+
+                                    <th>Payment Type</th>
+                                    <td><?= htmlspecialchars($info['payment_type'] ?? '') ?></td>
+                                </tr>
+
+                                <tr class="bg_table_header">
+                                    <th>S.No</th>
+                                    <th>Payment ID</th>
+                                    <th>Bill ID</th>
+                                    <th>Enquiry ID</th>
+                                    <th>Bill Type</th>
+                                    <th class="text-right" colspan="2">Amount</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                <?php if (!empty($items)): ?>
+                                    <?php $tot = 0; ?>
+
+                                    <?php foreach ($items as $k => $item):
+                                        $amount = $item['bill_amount'] ?? 0;
+                                        $tot += $amount;
+                                        ?>
+                                        <tr>
+                                            <td><?= $k + 1 ?></td>
+                                            <td><?= $item['vendor_payment_id'] ?? '' ?></td>
+                                            <td><?= $item['bill_id'] ?? '' ?></td>
+                                            <td><?= $item['tender_enquiry_id'] ?? '' ?></td>
+                                            <td><?= $item['bill_type'] ?? '' ?></td>
+                                            <td colspan="2" class="text-right"><?= number_format($amount, 2) ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+
+                                    <!-- TOTAL -->
+                                    <tr>
+                                        <td colspan="5" class="text-right"><strong>Total</strong></td>
+                                        <td class="text-right">
+                                            <strong><?= number_format($tot, 2) ?></strong>
+                                        </td>
+                                    </tr>
+
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="5" class="text-center">No items available</td>
+                                    </tr>
+                                <?php endif; ?>
+
+                                <tr>
+                                    <td colspan="5" style="height:20px;border:none;"></td>
+                                </tr>
+
+                            </tbody>
+
+                        <?php endforeach; ?>
+
+                    <?php else: ?>
+                        <tbody>
+                            <tr>
+                                <td colspan="5" class="text-center">No records found</td>
+                            </tr>
+                        </tbody>
+                    <?php endif; ?>
+
+                </table>
+            </div>
+        </div>
+    </div>
 
 
 </section>

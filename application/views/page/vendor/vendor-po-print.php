@@ -554,7 +554,7 @@ function convertAmountToWords($amount, $currency = 'BHD', $decimal_point = 3)
                                             <td class="text-center"><?php echo $i + 1; ?></td>
                                             <td class="text-left">
                                                 <div class="item-description">
-                                                    <?php echo htmlspecialchars($item['item_desc'] ?? ''); ?>
+                                                    <?php echo nl2br(htmlspecialchars($item['item_desc'] ?? '')); ?>
                                                 </div>
                                             </td>
                                             <td class="text-center"><?php echo number_format($item['qty'] ?? 0, 0); ?></td>

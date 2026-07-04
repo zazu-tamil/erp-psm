@@ -539,7 +539,7 @@
                                                     <?php if (!empty($item['item_code'])): ?>
                                                         <div class="item-code"><?php echo htmlspecialchars($item['item_code']); ?></div>
                                                     <?php endif; ?>
-                                                    <?php echo htmlspecialchars($item['item_desc'] ?? ''); ?>
+                                                    <?php echo nl2br(htmlspecialchars($item['item_desc'] ?? '')); ?>
                                                 </div>
                                             </td>
                                             <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?? '-'); ?></td>

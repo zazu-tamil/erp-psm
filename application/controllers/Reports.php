@@ -205,7 +205,7 @@ class Reports extends CI_Controller
         "; */
 
 
-        $sql = "
+     $sql = "
         select 
         c.s_order,
         c.template,
@@ -242,7 +242,7 @@ class Reports extends CI_Controller
             a.declaration_no
             from vendor_purchase_invoice_info as a  
             where a.`status` = 'Active' 
-            and a.only_accounting_entry != '1'
+            and (a.only_accounting_entry != 1 or a.only_accounting_entry = 0 or a.only_accounting_entry is null)
             and a.entry_date between '$srch_from_date' and '$srch_to_date'
             order by  a.entry_date asc 
             ) union all (
@@ -297,7 +297,7 @@ class Reports extends CI_Controller
             a.declaration_no as declaration_no
             from customs_bill_info as a
             where a.`status` = 'Active'  
-           ## and a.ac_type_opt = 'Accountable'
+            
             and a.inv_entry_date between '$srch_from_date' and '$srch_to_date'
             order by a.inv_entry_date asc 
             ) 
@@ -988,6 +988,83 @@ class Reports extends CI_Controller
                 $data['vendor_invoice_list'][$row['vendor_purchase_invoice_id']]['items'][] = $row;
             }
 
+            $sql = "
+            select 
+            c.vendor_name as local_supplier,
+            b.sub_account_head_name ,
+            a.invoice_date,
+            a.invoice_no,
+            a.inv_entry_date,
+            a.vat_payer_purchase_grp,
+            a.tot_amt_wo_tax,
+            a.vat,
+            a.vat_amt,
+            a.tot_amt_with_tax
+            from local_purchase_bill_info as a
+            left join cb_sub_account_head_info as b on b.sub_account_head_id = a.sub_account_head_id and b.`status` = 'Active' 
+            left join vendor_info as c on c.vendor_id = a.vendor_id and c.`status` = 'Active'
+            where a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
+            order by a.invoice_date asc
+            ";
+
+            $query = $this->db->query($sql);
+
+            $data['vendor_local_bill_list'] = $query->result_array();
+
+
+            $sql = "
+            select 
+                c.vendor_name as local_supplier,
+                b.sub_account_head_name ,
+                a.invoice_date,
+                a.invoice_no,
+                a.inv_entry_date,
+                a.vat_payer_purchase_grp, 
+                a.custom_stamp_fee,
+                a.custom_duty,
+                a.custom_vat_amt,
+                a.tot_amt_wo_dp,
+                a.dp_charges,
+                a.dp_vat_amt,
+                (a.dp_charges + a.dp_vat_amt) as dp_total_amt,
+                a.g_total
+                from dp_bill_info as a
+                left join cb_sub_account_head_info as b on b.sub_account_head_id = a.sub_account_head_id and b.`status` = 'Active' 
+                left join vendor_info as c on c.vendor_id = a.vendor_id and c.`status` = 'Active' 
+            where a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
+            order by a.invoice_date asc
+            ";
+
+            $query = $this->db->query($sql);
+
+            $data['dp_bill_list'] = $query->result_array();
+
+            $sql = "
+            select 
+            c.vendor_name as local_supplier, 
+            a.invoice_date,
+            a.invoice_no,
+            a.inv_entry_date,
+            a.vat_payer_purchase_grp,  
+            a.declaration_no,
+            a.declaration_date,
+            a.custom_stamp_fee,
+            a.bill_amount,
+            a.custom_duty,
+            a.tot_amt_wo_vat,
+            a.vat_amt,
+            (a.custom_stamp_fee + a.custom_duty + a.vat_amt) as customs_payable,
+            a.customs_tot_amt
+            from customs_bill_info as a 
+            left join vendor_info as c on c.vendor_id = a.vendor_id and c.`status` = 'Active'
+            where a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
+            order by a.invoice_date asc
+            ";
+
+            $query = $this->db->query($sql);
+
+            $data['custom_bill_list'] = $query->result_array();
+
 
             $sql = "
                 select
@@ -1047,6 +1124,8 @@ class Reports extends CI_Controller
                 and a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
                 order by c.payment_date asc
             ";
+
+            
 
             $query = $this->db->query($sql);
 
