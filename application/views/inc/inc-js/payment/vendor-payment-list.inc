@@ -26,116 +26,190 @@
         min-width: 100px;
     }
 </style>
-
 <script>
     $(document).ready(function () {
 
         // ============================================================
-        // AUTO-ALLOCATE: Oldest-first payment distribution
+        // AMOUNT DISTRIBUTION LOGIC
         // ============================================================
-        function autoAllocatePayment(prefix) {
-            var totalPayment = parseFloat($("#" + prefix + "_grand_total_amount").val()) || 0;
+        function distributeAmount(prefix, startFromRow = null) {
+            var overallAmount = parseFloat($("#" + prefix + "_grand_total_amount").val()) || 0;
+            var remaining = overallAmount;
 
-            if (totalPayment <= 0) {
+            // Handle without bill if checked
+            if ($("#" + prefix + "_is_without_bill").is(":checked")) {
+                var without_bill_val = parseFloat($("#" + prefix + "_without_bill_amount").val()) || 0;
+                remaining = parseFloat((remaining - without_bill_val).toFixed(3));
+            }
+
+            var lockSubsequent = false;
+            var totalAllocated = 0;
+
+            // Iterate over all rows in the table
+            $("#" + prefix + "_item_container tr").each(function () {
+                var $row = $(this);
+                var $chk = $row.find(".select-item");
+                var $input = $row.find(".invoice-amount-input");
+
+                if ($chk.length === 0) return; // skip row if no checkbox
+
+                if ($chk.is(":checked")) {
+                    var maxAmount = parseFloat($chk.attr("data-amount")) || 0;
+                    var payNow = 0;
+
+                    // If we are before or at the edited row, we preserve the current input value (capped)
+                    if (startFromRow !== null) {
+                        if (lockSubsequent) {
+                            // We are AFTER the edited row, so we distribute the remaining amount
+                            if (remaining > 0) {
+                                if (remaining >= maxAmount) {
+                                    payNow = maxAmount;
+                                    remaining = parseFloat((remaining - maxAmount).toFixed(3));
+                                } else {
+                                    payNow = remaining;
+                                    remaining = 0;
+                                }
+                            } else {
+                                payNow = 0;
+                            }
+                            $input.val(format3(payNow));
+                        } else {
+                            // We are BEFORE or AT the edited row
+                            var currentVal = parseFloat($input.val()) || 0;
+                            // Cap currentVal to maxAmount and remaining
+                            if (currentVal < 0) currentVal = 0;
+                            if (currentVal > maxAmount) currentVal = maxAmount;
+                            if (currentVal > remaining) currentVal = remaining;
+                            
+                            payNow = currentVal;
+                            $input.val(format3(payNow));
+                            remaining = parseFloat((remaining - payNow).toFixed(3));
+                        }
+                    } else {
+                        // Standard oldest-first distribution
+                        if (remaining > 0) {
+                            if (remaining >= maxAmount) {
+                                payNow = maxAmount;
+                                remaining = parseFloat((remaining - maxAmount).toFixed(3));
+                            } else {
+                                payNow = remaining;
+                                remaining = 0;
+                            }
+                        } else {
+                            payNow = 0;
+                        }
+                        $input.val(format3(payNow));
+                    }
+
+                    $input.prop("readonly", false);
+                    totalAllocated = parseFloat((totalAllocated + payNow).toFixed(3));
+                } else {
+                    $input.prop("readonly", true).val("0.000");
+                }
+
+                // If this is the startFromRow, we lock subsequent rows to distribute remaining amount
+                if (startFromRow !== null && $row.is(startFromRow)) {
+                    lockSubsequent = true;
+                }
+            });
+
+            // Update the allocated total
+            $("#" + prefix + "_alloc_total").text(format3(totalAllocated));
+            $("#" + prefix + "_alloc_tfoot").show();
+            
+            // Show allocation info
+            var msg = "Allocated " + format3(totalAllocated) + " across checked bill(s)";
+            var remainingUnallocated = parseFloat((overallAmount - totalAllocated).toFixed(3));
+            if (remainingUnallocated > 0) {
+                msg += ". <span class='text-danger'>Unallocated Balance: " + format3(remainingUnallocated) + "</span>";
+                $("#" + prefix + "_allocate_msg").html(msg);
+                $("#" + prefix + "_allocate_info").slideDown(200);
+            } else {
+                $("#" + prefix + "_allocate_info").hide();
+            }
+        }
+
+        function updateAllocatedFooter(prefix) {
+            var overallAmount = parseFloat($("#" + prefix + "_grand_total_amount").val()) || 0;
+            var totalAllocated = 0;
+
+            $("#" + prefix + "_item_container tr").each(function () {
+                var $row = $(this);
+                var $chk = $row.find(".select-item");
+                var $input = $row.find(".invoice-amount-input");
+
+                if ($chk.length > 0 && $chk.is(":checked")) {
+                    var val = parseFloat($input.val()) || 0;
+                    totalAllocated += val;
+                    $input.prop("readonly", false); // make sure it's writable
+                } else if ($chk.length > 0) {
+                    $input.prop("readonly", true); // make sure it's read-only
+                }
+            });
+
+            if ($("#" + prefix + "_is_without_bill").is(":checked")) {
+                var without_bill_val = parseFloat($("#" + prefix + "_without_bill_amount").val()) || 0;
+                totalAllocated += without_bill_val;
+            }
+
+            totalAllocated = parseFloat(totalAllocated.toFixed(3));
+            $("#" + prefix + "_alloc_total").text(format3(totalAllocated));
+            $("#" + prefix + "_alloc_tfoot").show();
+
+            var remainingUnallocated = parseFloat((overallAmount - totalAllocated).toFixed(3));
+            if (remainingUnallocated > 0) {
+                var msg = "Allocated " + format3(totalAllocated) + " across checked bill(s)";
+                msg += ". <span class='text-danger'>Unallocated Balance: " + format3(remainingUnallocated) + "</span>";
+                $("#" + prefix + "_allocate_msg").html(msg);
+                $("#" + prefix + "_allocate_info").slideDown(200);
+            } else {
+                $("#" + prefix + "_allocate_info").hide();
+            }
+        }
+
+        function autoAllocate(prefix) {
+            var overallAmount = parseFloat($("#" + prefix + "_grand_total_amount").val()) || 0;
+            if (overallAmount <= 0) {
                 alert("Please enter a valid payment amount before auto-allocating.");
                 return;
             }
 
-            var remaining = totalPayment;
-            var totalAllocated = 0;
-            var fullyPaidCount = 0;
-            var partialCount = 0;
+            // Check all checkboxes first
+            $("#" + prefix + "_item_container .select-item").prop("checked", true);
 
-            // Uncheck all rows first, reset amounts
+            // Distribute
+            distributeAmount(prefix);
+
+            // Uncheck checkboxes that ended up with 0 pay amount
             $("#" + prefix + "_item_container tr").each(function () {
                 var $row = $(this);
                 var $chk = $row.find(".select-item");
                 var $input = $row.find(".invoice-amount-input");
                 if ($chk.length > 0) {
-                    $chk.prop("checked", false);
-                    $input.prop("readonly", true).val("0.000");
+                    var val = parseFloat($input.val()) || 0;
+                    if (val <= 0) {
+                        $chk.prop("checked", false);
+                        $input.prop("readonly", true).val("0.000");
+                    }
                 }
             });
-
-            // Now allocate oldest-first (rows are already in invoice_date ASC order)
-            $("#" + prefix + "_item_container tr").each(function () {
-                if (remaining <= 0) return false; // break
-
-                var $row = $(this);
-                var $chk = $row.find(".select-item");
-                var $input = $row.find(".invoice-amount-input");
-
-                if ($chk.length === 0) return; // skip non-selectable rows
-
-                // balance for this bill (stored in data-amount)
-                var billBalance = parseFloat($chk.data("amount")) || 0;
-                if (billBalance <= 0) return;
-
-                var payNow = 0;
-
-                if (remaining >= billBalance) {
-                    // Full payment of this bill
-                    payNow = billBalance;
-                    remaining = parseFloat((remaining - billBalance).toFixed(3));
-                    fullyPaidCount++;
-                } else {
-                    // Partial payment — remaining covers only part of this bill
-                    payNow = remaining;
-                    remaining = 0;
-                    partialCount++;
-                }
-
-                $chk.prop("checked", true);
-                $input.prop("readonly", false).val(parseFloat(payNow).toFixed(3));
-                totalAllocated = parseFloat((totalAllocated + payNow).toFixed(3));
-            });
-
-            // Update grand total to match exactly what was allocated
-            // (it should already equal totalPayment if enough bills exist)
-            // Show summary footer
-            $("#" + prefix + "_alloc_total").text(parseFloat(totalAllocated).toFixed(3));
-            $("#" + prefix + "_alloc_tfoot").show();
-
-            // Build info message
-            var msg = "Auto-allocated " + parseFloat(totalAllocated).toFixed(3) +
-                " across " + (fullyPaidCount + partialCount) + " bill(s)";
-            if (fullyPaidCount > 0) msg += " ("+fullyPaidCount+" fully paid)";
-            if (partialCount > 0)   msg += " ("+partialCount+" partial)";
-            if (remaining > 0) {
-                msg += ". <span class='text-danger'>Unallocated Balance: " +
-                    parseFloat(remaining).toFixed(3) + "</span>";
-
-                // SweetAlert for Unallocated Balance
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Unallocated Balance!',
-                    html: 'Payment amount exceeds the total outstanding bills.<br><br><b>Unallocated Balance: ' + parseFloat(remaining).toFixed(3) + '</b> will be left.',
-                    confirmButtonColor: '#f9a825'
-                });
-            } else {
-                // Toastr success notification
-                toastr.success("Payment allocated successfully!");
-            }
-            $("#" + prefix + "_allocate_msg").html(msg);
-            $("#" + prefix + "_allocate_info").slideDown(200);
-
-            // Recalculate grand total from checked rows to stay consistent
-            calculateGrandTotal(prefix);
+            
+            // Show toastr
+            toastr.success("Payment allocated successfully!");
         }
 
         // Wire up Auto Allocate buttons
         $("#add_auto_allocate_btn").on("click", function () {
-            autoAllocatePayment("add");
+            autoAllocate("add");
         });
         $("#edit_auto_allocate_btn").on("click", function () {
-            autoAllocatePayment("edit");
+            autoAllocate("edit");
         });
 
-        // Hide allocation info when amount is manually changed
+        // Redistribute payment when overall amount is manually changed
         $("#add_grand_total_amount, #edit_grand_total_amount").on("input", function () {
             var prefix = $(this).attr("id").startsWith("add") ? "add" : "edit";
-            $("#" + prefix + "_allocate_info").hide();
-            $("#" + prefix + "_alloc_tfoot").hide();
+            distributeAmount(prefix);
         });
 
 
@@ -232,10 +306,6 @@
         });
 
 
-        $(document).on("input change", ".invoice-amount-input, .select-item", function () {
-            calculateGrandTotal("edit");
-        });
-
         function format3(val) {
             return parseFloat(val || 0).toFixed(3);
         }
@@ -258,53 +328,6 @@
             }
         }
 
-        function calculateGrandTotal(prefix) {
-
-            var grand_total = 0;
-            var any_checked = false;
-
-            $("#" + prefix + "_item_container tr").each(function () {
-
-                var $row = $(this);
-                var $chk = $row.find(".select-item");
-                var $input = $row.find(".invoice-amount-input");
-
-                var value = parseFloat($input.val()) || 0;
-
-
-                if ($chk.length > 0) {
-                    if ($chk.is(":checked")) {
-                        grand_total += value;
-                        any_checked = true;
-                    }
-                }
-
-                else {
-                    // Do not add if no select-item
-                }
-
-            });
-
-            // Add without bill amount if checkbox is checked
-            if ($("#" + prefix + "_is_without_bill").is(":checked")) {
-                var without_bill_val = parseFloat($("#" + prefix + "_without_bill_amount").val()) || 0;
-                grand_total += without_bill_val;
-                any_checked = true;
-            }
-
-            var modal = $("#" + prefix + "_modal");
-            var is_initial = modal.data("initial_load");
-
-            if (is_initial) {
-                if (any_checked) {
-                    $("#" + prefix + "_grand_total_amount").val(format3(grand_total));
-                }
-                modal.data("initial_load", false);
-            } else {
-                $("#" + prefix + "_grand_total_amount").val(format3(grand_total));
-            }
-        }
-
         $("#add_payment_mode").on("change", function () {
             toggleBank("add");
         });
@@ -316,24 +339,56 @@
         $(document).on("change", ".select-item", function () {
             var $row = $(this).closest("tr");
             var $input = $row.find(".invoice-amount-input");
-            var amount = parseFloat($(this).data("amount")) || 0;
             var prefix =
                 $(this).closest(".modal").attr("id") === "add_modal" ? "add" : "edit";
 
             if ($(this).is(":checked")) {
-                $input.prop("readonly", false).val(format3(amount));
+                $input.prop("readonly", false);
+                
+                // Compute remaining amount before this row
+                var overallAmount = parseFloat($("#" + prefix + "_grand_total_amount").val()) || 0;
+                var allocatedBefore = 0;
+                
+                // Deduct without bill amount if checked
+                if ($("#" + prefix + "_is_without_bill").is(":checked")) {
+                    allocatedBefore += parseFloat($("#" + prefix + "_without_bill_amount").val()) || 0;
+                }
+                
+                var currentRowIndex = $row.index();
+                $("#" + prefix + "_item_container tr").each(function () {
+                    var $r = $(this);
+                    if ($r.index() < currentRowIndex) {
+                        var $c = $r.find(".select-item");
+                        if ($c.length > 0 && $c.is(":checked")) {
+                            allocatedBefore += parseFloat($r.find(".invoice-amount-input").val()) || 0;
+                        }
+                    }
+                });
+                
+                var maxAmount = parseFloat($(this).attr("data-amount")) || 0;
+                var remaining = Math.max(0, overallAmount - allocatedBefore);
+                var initialVal = Math.min(maxAmount, remaining);
+                $input.val(format3(initialVal));
             } else {
-                $input.val("0.000");
+                $input.val("0.000").prop("readonly", true);
             }
 
-            calculateGrandTotal(prefix);
+            distributeAmount(prefix, $row);
+        });
+
+        $(document).on("input", ".invoice-amount-input", function () {
+            var $row = $(this).closest("tr");
+            var prefix =
+                $(this).closest(".modal").attr("id") === "add_modal" ? "add" : "edit";
+            distributeAmount(prefix, $row);
         });
 
         $(document).on("blur", ".invoice-amount-input", function () {
+            var $row = $(this).closest("tr");
             var prefix =
                 $(this).closest(".modal").attr("id") === "add_modal" ? "add" : "edit";
             $(this).val(format3($(this).val()));
-            calculateGrandTotal(prefix);
+            distributeAmount(prefix, $row);
         });
 
         // Without Bill Checkbox and Input handlers
@@ -345,7 +400,7 @@
             } else {
                 $input.val("0.000").hide();
             }
-            calculateGrandTotal(prefix);
+            distributeAmount(prefix);
         });
 
         $(document).on("input change blur", "#add_without_bill_amount, #edit_without_bill_amount", function (e) {
@@ -353,19 +408,43 @@
             if (e.type === "blur") {
                 $(this).val(format3($(this).val()));
             }
-            calculateGrandTotal(prefix);
+            distributeAmount(prefix);
         });
 
         $("#add_select_all_items").on("change", function () {
-            $("#add_item_container .select-item")
-                .prop("checked", $(this).is(":checked"))
-                .trigger("change");
+            var isChecked = $(this).is(":checked");
+            $("#add_item_container .select-item").prop("checked", isChecked);
+            
+            $("#add_item_container tr").each(function() {
+                var $chk = $(this).find(".select-item");
+                var $input = $(this).find(".invoice-amount-input");
+                if ($chk.length > 0) {
+                    if (isChecked) {
+                        $input.prop("readonly", false);
+                    } else {
+                        $input.val("0.000").prop("readonly", true);
+                    }
+                }
+            });
+            distributeAmount("add");
         });
 
         $("#edit_select_all_items").on("change", function () {
-            $("#edit_item_container .select-item")
-                .prop("checked", $(this).is(":checked"))
-                .trigger("change");
+            var isChecked = $(this).is(":checked");
+            $("#edit_item_container .select-item").prop("checked", isChecked);
+            
+            $("#edit_item_container tr").each(function() {
+                var $chk = $(this).find(".select-item");
+                var $input = $(this).find(".invoice-amount-input");
+                if ($chk.length > 0) {
+                    if (isChecked) {
+                        $input.prop("readonly", false);
+                    } else {
+                        $input.val("0.000").prop("readonly", true);
+                    }
+                }
+            });
+            distributeAmount("edit");
         });
 
         $(document).on("click", ".del_record", function () {
@@ -511,7 +590,7 @@
                         destroy: true // extra safety
                     });
 
-                    calculateGrandTotal("add");
+                    distributeAmount("add");
                 },
                 error: function () {
                     alert("Error loading invoice list.");
@@ -673,7 +752,7 @@
                                 checkbox =
                                     '<input type="checkbox" class="select-item" ' +
                                     'name="selected_items[]" ' +
-                                    'data-amount="' + balance_amount + '" ' +
+                                    'data-amount="' + (balance_amount + current_paid) + '" ' +
                                     'value="' + i + '" checked>';
 
                             } else {
@@ -739,7 +818,7 @@
                         destroy: true
                     });
 
-                    calculateGrandTotal("edit");
+                    updateAllocatedFooter("edit");
                 }
             });
         }

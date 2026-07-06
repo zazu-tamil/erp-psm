@@ -13,18 +13,7 @@
         <li class="active"><?php echo $title; ?></li>
     </ol>
 </section>
-<style>
-    .pointer {
-        cursor: pointer !important;
-    }
-    @media (min-width: 768px) {
-        #add_modal .modal-dialog,
-        #edit_modal .modal-dialog {
-            width: 95% !important;
-            max-width: 1400px !important;
-        }
-    }
-</style>
+ 
 <!-- Toastr CSS -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 <!-- Toastr JS -->
@@ -247,7 +236,7 @@
                         </div>
 
                         <div class="row">
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-6">
                                 <label>Status</label><br>
                                 <label class="radio-inline">
                                     <input type="radio" name="status" value="Active" checked> Active
@@ -255,13 +244,12 @@
                                 <label class="radio-inline">
                                     <input type="radio" name="status" value="InActive"> InActive
                                 </label>
-                            </div>
-
+                            </div> 
                             <div class="form-group col-md-6">
                                 <label>Amount <span class="text-red">*</span></label>
                                 <div class="input-group">
-                                    <input type="text" name="amount" id="add_grand_total_amount"
-                                        class="form-control text-right" placeholder="0.000">
+                                    <input type="number" name="amount" id="add_grand_total_amount"
+                                        class="form-control text-right" placeholder="0.000"> 
                                     <span class="input-group-btn">
                                         <button type="button" class="btn btn-warning btn-sm" id="add_auto_allocate_btn"
                                             title="Auto allocate payment oldest bill first"
@@ -270,8 +258,7 @@
                                         </button>
                                     </span>
                                 </div>
-                            </div>
-
+                            </div> 
                             <div class="form-group col-md-3" style="display: none;">
                                 <label style="display: block; font-weight: bold; margin-bottom: 5px; cursor: pointer;">
                                     <input type="checkbox" name="is_without_bill" id="add_is_without_bill" value="1">
@@ -279,9 +266,8 @@
                                 </label>
                                 <input type="text" name="without_bill_amount" id="add_without_bill_amount"
                                     class="form-control text-right" placeholder="0.000" style="display: none;">
-                            </div>
-                        </div>
-                        <!-- Auto Allocate Info Panel -->
+                            </div> 
+                        </div> 
                         <div id="add_allocate_info" style="display:none; margin-bottom:8px;">
                             <div style="background:#fffde7; border:1px solid #f9a825; border-radius:5px; padding:7px 14px; font-size:13px;">
                                 <i class="fa fa-info-circle text-warning"></i>

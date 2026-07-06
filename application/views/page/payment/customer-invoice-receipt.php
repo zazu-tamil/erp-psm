@@ -244,7 +244,7 @@
                                 </label>
                             </div>
 
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-6">
                                 <label>Amount <span class="text-red">*</span></label>
                                 <div class="input-group">
                                     <input type="text" name="amount" id="add_grand_total_amount"
@@ -409,7 +409,7 @@
                                 </label>
                             </div>
 
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-6">
                                 <label>Amount <span class="text-red">*</span></label>
                                 <div class="input-group">
                                     <input type="text" name="amount" id="edit_grand_total_amount"
