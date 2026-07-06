@@ -34,6 +34,16 @@ class Payment extends CI_Controller
                 ]
             ]);
         }
+        if (!$this->db->field_exists('bill_type', 'tender_receipt_invoice_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('tender_receipt_invoice_info', [
+                'bill_type' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 50,
+                    'default' => 'Invoice'
+                ]
+            ]);
+        }
 
         $data['js'] = 'payment/customer-invoice-receipt.inc';
         $data['title'] = 'Tender Receipt List';
@@ -66,6 +76,7 @@ class Payment extends CI_Controller
             $tender_enq_invoice_id = $this->input->post('tender_enq_invoice_id') ?? [];
             $tender_enquiry_id = $this->input->post('tender_enquiry_id') ?? [];
             $inv_amount = $this->input->post('inv_amount') ?? [];
+            $bill_type = $this->input->post('bill_type') ?? [];
 
             if (!empty($selected_idxs)) {
                 foreach ($selected_idxs as $idx) {
@@ -74,6 +85,7 @@ class Payment extends CI_Controller
                         'tender_enquiry_id' => $tender_enquiry_id[$idx] ?? 0,
                         'tender_enq_invoice_id' => $tender_enq_invoice_id[$idx] ?? 0,
                         'inv_amount' => $inv_amount[$idx] ?? 0.000,
+                        'bill_type' => $bill_type[$idx] ?? 'Invoice',
                         'status' => 'Active',
                     ];
                     $this->db->insert('tender_receipt_invoice_info', $item_data);
@@ -125,6 +137,7 @@ class Payment extends CI_Controller
             $tender_enq_invoice_id = $this->input->post('tender_enq_invoice_id') ?? [];
             $tender_enquiry_id = $this->input->post('tender_enquiry_id') ?? [];
             $inv_amount = $this->input->post('inv_amount') ?? [];
+            $bill_type = $this->input->post('bill_type') ?? [];
 
             $checked_existing_ids = [];
 
@@ -136,6 +149,7 @@ class Payment extends CI_Controller
                     'tender_enquiry_id' => $tender_enquiry_id[$idx] ?? 0,
                     'tender_enq_invoice_id' => $tender_enq_invoice_id[$idx] ?? 0,
                     'inv_amount' => $inv_amount[$idx] ?? 0.000,
+                    'bill_type' => $bill_type[$idx] ?? 'Invoice',
                     'status' => 'Active',
                 ];
 
@@ -315,33 +329,72 @@ class Payment extends CI_Controller
 
         $customer_id = $this->input->post('customer_id');
         $sql = "
-           SELECT
-            a.tender_enq_invoice_id,
-            a.tender_enquiry_id,
-            DATE_FORMAT(a.invoice_date, '%d-%m-%Y') AS invoice_date,
-            a.invoice_no,
-            get_tender_info(a.tender_enquiry_id) as tender_details,
-            a.total_amount,
-            b.customer_name, 
-            c.inv_amount as paid,
-            (a.total_amount - IFNULL(SUM(c.inv_amount), 0)) AS balance_amount,
-            CASE 
-                WHEN a.total_amount = IFNULL(c.inv_amount, 0) THEN 'Paid'
-                ELSE 'Unpaid'
-            END AS payment_status
-        FROM tender_enq_invoice_info AS a
-        LEFT JOIN customer_info AS b
-            ON a.customer_id = b.customer_id
-            AND b.status = 'Active'
-        left join tender_receipt_invoice_info as c on a.tender_enq_invoice_id = c.tender_enq_invoice_id and c.`status`='Active'
-        WHERE a.status = 'Active' 
-        AND a.customer_id = ? 
-        group by a.tender_enq_invoice_id
-       HAVING (a.total_amount - IFNULL(SUM(c.inv_amount), 0)) > 0
-        ORDER BY a.invoice_date ASC, a.invoice_no ASC
+            SELECT 
+                f.tender_enq_invoice_id,
+                f.tender_enquiry_id,
+                DATE_FORMAT(f.invoice_date, '%d-%m-%Y') AS invoice_date,
+                f.invoice_no,
+                get_tender_info(f.tender_enquiry_id) as tender_details,
+                f.total_amount,
+                f.customer_name,
+                f.bill_type,
+                IFNULL(SUM(c.inv_amount), 0) AS paid,
+                (f.total_amount - IFNULL(SUM(c.inv_amount), 0)) AS balance_amount,
+                CASE 
+                    WHEN f.total_amount = IFNULL(SUM(c.inv_amount), 0) THEN 'Paid'
+                    ELSE 'Unpaid'
+                END AS payment_status
+            FROM (
+                -- Invoice
+                SELECT
+                    a.tender_enq_invoice_id,
+                    a.tender_enquiry_id,
+                    a.invoice_date,
+                    a.invoice_no,
+                    b.customer_name,
+                    a.total_amount,
+                    'Invoice' AS bill_type
+                FROM tender_enq_invoice_info AS a
+                LEFT JOIN customer_info AS b
+                    ON a.customer_id = b.customer_id
+                    AND b.status = 'Active'
+                WHERE a.status = 'Active' 
+                    AND a.customer_id = ?
+
+                UNION ALL
+
+                -- Opening Balance
+                SELECT
+                    a.opening_id AS tender_enq_invoice_id,
+                    0 AS tender_enquiry_id,
+                    a.opening_date AS invoice_date,
+                    CONCAT('OB-', LPAD(a.opening_id, 3, '0')) AS invoice_no,
+                    b.customer_name,
+                    a.opening_amount AS total_amount,
+                    'Opening Balance' AS bill_type
+                FROM customer_opening_balance_info AS a
+                LEFT JOIN customer_info AS b
+                    ON a.customer_id = b.customer_id
+                    AND b.status = 'Active'
+                WHERE a.customer_id = ? AND a.balance_type = 'DR'
+            ) AS f
+            LEFT JOIN tender_receipt_invoice_info AS c 
+                ON f.tender_enq_invoice_id = c.tender_enq_invoice_id 
+                AND c.bill_type = f.bill_type
+                AND c.status = 'Active'
+            GROUP BY 
+                f.tender_enq_invoice_id,
+                f.tender_enquiry_id,
+                f.invoice_date,
+                f.invoice_no,
+                f.customer_name,
+                f.bill_type,
+                f.total_amount
+            HAVING (f.total_amount - IFNULL(SUM(c.inv_amount), 0)) > 0
+            ORDER BY f.invoice_date ASC, f.tender_enq_invoice_id DESC
         ";
 
-        $query = $this->db->query($sql, array($customer_id));
+        $query = $this->db->query($sql, array($customer_id, $customer_id));
         $data['record_list'] = $query->result_array();
         echo json_encode($data['record_list']);
     }
@@ -354,54 +407,68 @@ class Payment extends CI_Controller
 
         $sql = "
             SELECT
-                a.tender_enq_invoice_id,
-                a.tender_enquiry_id,
-
-                br.tender_receipt_id,
-                br.tender_receipt_invoice_id,
-
-                get_tender_info(a.tender_enquiry_id) AS tender_details,
-                a.customer_id,
-                a.invoice_no,
-                DATE_FORMAT(a.invoice_date, '%d-%m-%Y') AS invoice_date,
-                a.total_amount,
-
-             
+                f.tender_enq_invoice_id,
+                f.tender_enquiry_id,
+                MAX(br.tender_receipt_id) AS tender_receipt_id,
+                MAX(br.tender_receipt_invoice_id) AS tender_receipt_invoice_id,
+                get_tender_info(f.tender_enquiry_id) AS tender_details,
+                f.customer_id,
+                f.invoice_no,
+                DATE_FORMAT(f.invoice_date, '%d-%m-%Y') AS invoice_date,
+                f.total_amount,
+                f.bill_type,
                 IFNULL(SUM(b.inv_amount), 0) AS paid_amount,
+                MAX(IFNULL(br.inv_amount, 0)) AS current_paid_amount,
+                (f.total_amount - IFNULL(SUM(b.inv_amount), 0)) AS balance
+            FROM (
+                -- Invoice
+                SELECT
+                    a.tender_enq_invoice_id,
+                    a.tender_enquiry_id,
+                    a.customer_id,
+                    a.invoice_no,
+                    a.invoice_date,
+                    a.total_amount,
+                    'Invoice' AS bill_type
+                FROM tender_enq_invoice_info AS a
+                WHERE a.status = 'Active' AND a.customer_id = ?
 
-               
-                IFNULL(br.inv_amount, 0) AS current_paid_amount,
+                UNION ALL
 
-               
-               (a.total_amount - IFNULL(SUM(b.inv_amount), 0)) AS balance
-
-            FROM tender_enq_invoice_info AS a
-
-
+                -- Opening Balance
+                SELECT
+                    a.opening_id AS tender_enq_invoice_id,
+                    0 AS tender_enquiry_id,
+                    a.customer_id,
+                    CONCAT('OB-', LPAD(a.opening_id, 3, '0')) AS invoice_no,
+                    a.opening_date AS invoice_date,
+                    a.opening_amount AS total_amount,
+                    'Opening Balance' AS bill_type
+                FROM customer_opening_balance_info AS a
+                WHERE a.customer_id = ? AND a.balance_type = 'DR'
+            ) AS f
             LEFT JOIN tender_receipt_invoice_info AS b 
-                ON a.tender_enq_invoice_id = b.tender_enq_invoice_id 
+                ON f.tender_enq_invoice_id = b.tender_enq_invoice_id 
+                AND b.bill_type = f.bill_type
                 AND b.status = 'Active'
-
-
             LEFT JOIN tender_receipt_invoice_info AS br 
-                ON a.tender_enq_invoice_id = br.tender_enq_invoice_id 
+                ON f.tender_enq_invoice_id = br.tender_enq_invoice_id 
+                AND br.bill_type = f.bill_type
                 AND br.tender_receipt_id = ?
                 AND br.status = 'Active'
-
-            WHERE
-                a.status = 'Active'
-                AND a.customer_id = ?
-               
-           
             GROUP BY
-                a.tender_enq_invoice_id 
-
-             HAVING balance > 0 or br.tender_receipt_id = ?
-            ORDER BY
-                a.tender_enq_invoice_id DESC;
+                f.tender_enq_invoice_id,
+                f.tender_enquiry_id,
+                f.customer_id,
+                f.invoice_no,
+                f.invoice_date,
+                f.total_amount,
+                f.bill_type
+            HAVING balance > 0 OR MAX(br.tender_receipt_id) = ?
+            ORDER BY f.invoice_date ASC, f.tender_enq_invoice_id DESC;
         ";
 
-        $query = $this->db->query($sql, array($tender_receipt_id, $customer_id, $tender_receipt_id));
+        $query = $this->db->query($sql, array($customer_id, $customer_id, $tender_receipt_id, $tender_receipt_id));
         $data['data'] = $query->result_array();
         echo json_encode($data['data']);
     }
@@ -915,6 +982,22 @@ class Payment extends CI_Controller
                 WHERE a.status = 'Active' 
                     AND a.vendor_id = $vendor_id
 
+                UNION ALL
+
+                -- Opening Balance
+                SELECT
+                    a.opening_id AS bill_id,
+                    a.opening_date AS invoice_date,
+                    0 AS tender_enquiry_id,
+                    CONCAT('OB-', LPAD(a.opening_id, 3, '0')) AS invoice_no,
+                    b.vendor_name,
+                    a.opening_amount AS total_amount,
+                    'Opening Balance' AS bill_type
+                FROM vendor_opening_balance_info a
+                LEFT JOIN vendor_info b 
+                    ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.vendor_id = $vendor_id AND a.balance_type = 'CR'
+
             ) AS f
 
             LEFT JOIN vendor_payment_bill_info vrb 
@@ -930,7 +1013,7 @@ class Payment extends CI_Controller
                 f.bill_type,
                 f.total_amount
  				HAVING (f.total_amount - IFNULL(SUM(vrb.bill_amount), 0)) > 0
-            ORDER BY f.invoice_date DESC;
+            ORDER BY f.invoice_date ASC, f.bill_id DESC;
         ";
 
         $query = $this->db->query($sql);
@@ -952,9 +1035,9 @@ class Payment extends CI_Controller
                 f.bill_type,
                 f.total_amount,  
                 IFNULL(SUM(vrb_total.bill_amount), 0) AS paid_amount, 
-                vrb_current.bill_amount AS current_paid_amount, 
+                MAX(vrb_current.bill_amount) AS current_paid_amount, 
                 (f.total_amount - IFNULL(SUM(vrb_total.bill_amount), 0)) AS balance_amount,  
-                vrb_current.vendor_payment_bill_id  
+                MAX(vrb_current.vendor_payment_bill_id) AS vendor_payment_bill_id
                 
             FROM (
 
@@ -1024,6 +1107,22 @@ class Payment extends CI_Controller
                 WHERE a.status = 'Active' 
                     AND a.vendor_id = $vendor_id
 
+                UNION ALL
+
+                -- Opening Balance
+                SELECT
+                    a.opening_id AS bill_id,
+                    a.opening_date AS invoice_date,
+                    0 AS tender_enquiry_id,
+                    CONCAT('OB-', LPAD(a.opening_id, 3, '0')) AS invoice_no,
+                    b.vendor_name,
+                    a.opening_amount AS total_amount,
+                    'Opening Balance' AS bill_type
+                FROM vendor_opening_balance_info a
+                LEFT JOIN vendor_info b 
+                    ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.vendor_id = $vendor_id AND a.balance_type = 'CR'
+
             ) AS f 
             LEFT JOIN vendor_payment_bill_info vrb_total
                 ON vrb_total.bill_id = f.bill_id 
@@ -1046,7 +1145,7 @@ class Payment extends CI_Controller
 				HAVING 
 				    (f.total_amount - IFNULL(SUM(vrb_total.bill_amount), 0)) > 0 
 				    OR MAX(vrb_current.vendor_payment_bill_id) IS NOT NULL 
-            ORDER BY f.invoice_date DESC
+            ORDER BY f.invoice_date ASC, f.bill_id DESC
             ";
         $query = $this->db->query($sql);
         echo json_encode($query->result_array());

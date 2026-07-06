@@ -31,8 +31,114 @@
     $(document).ready(function () {
 
         // ============================================================
-        // Vendor Balance Summary — inside Add Modal only (current balance)
+        // AUTO-ALLOCATE: Oldest-first payment distribution
         // ============================================================
+        function autoAllocatePayment(prefix) {
+            var totalPayment = parseFloat($("#" + prefix + "_grand_total_amount").val()) || 0;
+
+            if (totalPayment <= 0) {
+                alert("Please enter a valid payment amount before auto-allocating.");
+                return;
+            }
+
+            var remaining = totalPayment;
+            var totalAllocated = 0;
+            var fullyPaidCount = 0;
+            var partialCount = 0;
+
+            // Uncheck all rows first, reset amounts
+            $("#" + prefix + "_item_container tr").each(function () {
+                var $row = $(this);
+                var $chk = $row.find(".select-item");
+                var $input = $row.find(".invoice-amount-input");
+                if ($chk.length > 0) {
+                    $chk.prop("checked", false);
+                    $input.prop("readonly", true).val("0.000");
+                }
+            });
+
+            // Now allocate oldest-first (rows are already in invoice_date ASC order)
+            $("#" + prefix + "_item_container tr").each(function () {
+                if (remaining <= 0) return false; // break
+
+                var $row = $(this);
+                var $chk = $row.find(".select-item");
+                var $input = $row.find(".invoice-amount-input");
+
+                if ($chk.length === 0) return; // skip non-selectable rows
+
+                // balance for this bill (stored in data-amount)
+                var billBalance = parseFloat($chk.data("amount")) || 0;
+                if (billBalance <= 0) return;
+
+                var payNow = 0;
+
+                if (remaining >= billBalance) {
+                    // Full payment of this bill
+                    payNow = billBalance;
+                    remaining = parseFloat((remaining - billBalance).toFixed(3));
+                    fullyPaidCount++;
+                } else {
+                    // Partial payment — remaining covers only part of this bill
+                    payNow = remaining;
+                    remaining = 0;
+                    partialCount++;
+                }
+
+                $chk.prop("checked", true);
+                $input.prop("readonly", false).val(parseFloat(payNow).toFixed(3));
+                totalAllocated = parseFloat((totalAllocated + payNow).toFixed(3));
+            });
+
+            // Update grand total to match exactly what was allocated
+            // (it should already equal totalPayment if enough bills exist)
+            // Show summary footer
+            $("#" + prefix + "_alloc_total").text(parseFloat(totalAllocated).toFixed(3));
+            $("#" + prefix + "_alloc_tfoot").show();
+
+            // Build info message
+            var msg = "Auto-allocated " + parseFloat(totalAllocated).toFixed(3) +
+                " across " + (fullyPaidCount + partialCount) + " bill(s)";
+            if (fullyPaidCount > 0) msg += " ("+fullyPaidCount+" fully paid)";
+            if (partialCount > 0)   msg += " ("+partialCount+" partial)";
+            if (remaining > 0) {
+                msg += ". <span class='text-danger'>Unallocated Balance: " +
+                    parseFloat(remaining).toFixed(3) + "</span>";
+
+                // SweetAlert for Unallocated Balance
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Unallocated Balance!',
+                    html: 'Payment amount exceeds the total outstanding bills.<br><br><b>Unallocated Balance: ' + parseFloat(remaining).toFixed(3) + '</b> will be left.',
+                    confirmButtonColor: '#f9a825'
+                });
+            } else {
+                // Toastr success notification
+                toastr.success("Payment allocated successfully!");
+            }
+            $("#" + prefix + "_allocate_msg").html(msg);
+            $("#" + prefix + "_allocate_info").slideDown(200);
+
+            // Recalculate grand total from checked rows to stay consistent
+            calculateGrandTotal(prefix);
+        }
+
+        // Wire up Auto Allocate buttons
+        $("#add_auto_allocate_btn").on("click", function () {
+            autoAllocatePayment("add");
+        });
+        $("#edit_auto_allocate_btn").on("click", function () {
+            autoAllocatePayment("edit");
+        });
+
+        // Hide allocation info when amount is manually changed
+        $("#add_grand_total_amount, #edit_grand_total_amount").on("input", function () {
+            var prefix = $(this).attr("id").startsWith("add") ? "add" : "edit";
+            $("#" + prefix + "_allocate_info").hide();
+            $("#" + prefix + "_alloc_tfoot").hide();
+        });
+
+
         function loadAddModalVendorBalance(vendor_id) {
             if (!vendor_id) {
                 $('#add_vendor_balance_panel').hide();
@@ -138,9 +244,17 @@
             var mode = $("#" + prefix + "_payment_mode").val();
             if (mode === "Bank") {
                 $("#" + prefix + "_bank_div").show();
+                $("#" + prefix + "_payment_type_container").show();
             } else {
                 $("#" + prefix + "_bank_div").hide();
                 $("#" + prefix + "_bank_id").val("");
+                $("#" + prefix + "_payment_type_container").hide();
+                // Uncheck radios and hide details
+                $('input[name="payment_type"]').prop('checked', false);
+                $('#' + prefix + '_payment_type_div').hide();
+                $('#' + prefix + '_cheque_no').val('');
+                $('#' + prefix + '_cheque_date').val('');
+                $('#' + prefix + '_cheque_bank').val('');
             }
         }
 
@@ -291,11 +405,18 @@
             $('#add_bal_vendor_name').text('');
             $('#add_bal_current').text('0.000');
             $('#add_bal_current_label').html('');
+            // Reset allocation panel
+            $('#add_allocate_info').hide();
+            $('#add_alloc_tfoot').hide();
+            $('#add_alloc_total').text('0.000');
         });
 
 
         $("#add_vendor_id").on("change", function () {
             var vendor_id = $(this).val();
+            // Reset allocation panel when vendor changes
+            $('#add_allocate_info').hide();
+            $('#add_alloc_tfoot').hide();
             add_load_vendor_payment_list(vendor_id);
 
         });
@@ -382,7 +503,7 @@
 
 
                     $(tableId).DataTable({
-                        paging: true,
+                        paging: false,
                         searching: true,
                         ordering: true,
                         info: true,
@@ -610,7 +731,7 @@
                     }
 
                     $(tableId).DataTable({
-                        paging: true,
+                        paging: false,
                         searching: true,
                         ordering: true,
                         info: true,
@@ -623,20 +744,5 @@
             });
         }
 
-       
-        $(document).on('change', '.select-item', function () {
-
-            var row = $(this).closest('tr');
-            var input = row.find('.invoice-amount-input');
-            var balance = parseFloat($(this).data('amount')) || 0;
-
-            if ($(this).is(':checked')) {
-                input.prop('readonly', false).val(format3(balance)); // auto fill
-            } else {
-                input.prop('readonly', true).val('0.000');
-            }
-
-            calculateGrandTotal("edit");
-        });
     });
 </script>

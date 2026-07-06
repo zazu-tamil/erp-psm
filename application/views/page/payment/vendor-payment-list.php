@@ -17,7 +17,21 @@
     .pointer {
         cursor: pointer !important;
     }
+    @media (min-width: 768px) {
+        #add_modal .modal-dialog,
+        #edit_modal .modal-dialog {
+            width: 95% !important;
+            max-width: 1400px !important;
+        }
+    }
 </style>
+<!-- Toastr CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<!-- Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <!-- Pass vendor data to JS for balance auto-load -->
 <script>
     var vendorOpt = <?php echo json_encode($vendor_opt); ?>;
@@ -183,7 +197,7 @@
                                 <label>Payment Mode <span class="text-red">*</span></label>
                                 <?php echo form_dropdown('payment_mode', ['' => 'Select Receipt Mode', 'Cash' => 'Cash', 'Bank' => 'Bank'], set_value('payment_mode'), 'id="add_payment_mode" class="form-control" required="true"'); ?>
                             </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-4" id="add_payment_type_container">
                                 <label>Payment Type</label><br>
                                 <label class="radio-inline">
                                     <input type="radio" name="payment_type" value="Online"> Online
@@ -243,19 +257,35 @@
                                 </label>
                             </div>
 
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-6">
                                 <label>Amount <span class="text-red">*</span></label>
-                                <input type="text" name="amount" id="add_grand_total_amount"
-                                    class="form-control text-right">
+                                <div class="input-group">
+                                    <input type="text" name="amount" id="add_grand_total_amount"
+                                        class="form-control text-right" placeholder="0.000">
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-warning btn-sm" id="add_auto_allocate_btn"
+                                            title="Auto allocate payment oldest bill first"
+                                            style="height:34px; white-space:nowrap;">
+                                            <i class="fa fa-magic"></i> Auto Allocate
+                                        </button>
+                                    </span>
+                                </div>
                             </div>
 
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-3" style="display: none;">
                                 <label style="display: block; font-weight: bold; margin-bottom: 5px; cursor: pointer;">
                                     <input type="checkbox" name="is_without_bill" id="add_is_without_bill" value="1">
                                     Without Bill Amount
                                 </label>
                                 <input type="text" name="without_bill_amount" id="add_without_bill_amount"
                                     class="form-control text-right" placeholder="0.000" style="display: none;">
+                            </div>
+                        </div>
+                        <!-- Auto Allocate Info Panel -->
+                        <div id="add_allocate_info" style="display:none; margin-bottom:8px;">
+                            <div style="background:#fffde7; border:1px solid #f9a825; border-radius:5px; padding:7px 14px; font-size:13px;">
+                                <i class="fa fa-info-circle text-warning"></i>
+                                &nbsp;<strong id="add_allocate_msg"></strong>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -274,6 +304,13 @@
                                     </tr>
                                 </thead>
                                 <tbody id="add_item_container"></tbody>
+                                <tfoot id="add_alloc_tfoot" style="display:none;">
+                                    <tr style="background:#e8f5e9; font-weight:bold;">
+                                        <td colspan="5" class="text-right">Total Auto Allocated :</td>
+                                        <td></td>
+                                        <td class="text-right text-success" id="add_alloc_total">0.000</td>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
                     </div>
@@ -298,7 +335,7 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <h3 class="modal-title" id="editModalLabel"><strong>Edit Customer Receipt</strong></h3>
+                        <h3 class="modal-title" id="editModalLabel"><strong>Edit Vendor Payment</strong></h3>
                         <input type="hidden" name="mode" value="Edit" />
                         <input type="hidden" name="vendor_payment_id" id="edit_vendor_payment_id" value="" />
                     </div>
@@ -322,7 +359,7 @@
                                 <label>Payment Mode <span class="text-red">*</span></label>
                                 <?php echo form_dropdown('payment_mode', ['' => 'Select Payment Mode', 'Cash' => 'Cash', 'Bank' => 'Bank'], set_value('payment_mode'), 'id="edit_payment_mode" class="form-control" required="true"'); ?>
                             </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-4" id="edit_payment_type_container">
                                 <label>Payment Type</label><br>
                                 <label class="radio-inline">
                                     <input type="radio" name="payment_type" value="Online"> Online
@@ -385,13 +422,22 @@
                                 </label>
                             </div>
 
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-6">
                                 <label>Amount <span class="text-red">*</span></label>
-                                <input type="text" name="amount" id="edit_grand_total_amount"
-                                    class="form-control text-right">
+                                <div class="input-group">
+                                    <input type="text" name="amount" id="edit_grand_total_amount"
+                                        class="form-control text-right" placeholder="0.000">
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-warning btn-sm" id="edit_auto_allocate_btn"
+                                            title="Auto allocate payment oldest bill first"
+                                            style="height:34px; white-space:nowrap;">
+                                            <i class="fa fa-magic"></i> Auto Allocate
+                                        </button>
+                                    </span>
+                                </div>
                             </div>
 
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-3" style="display: none;">
                                 <label style="display: block; font-weight: bold; margin-bottom: 5px; cursor: pointer;">
                                     <input type="checkbox" name="is_without_bill" id="edit_is_without_bill" value="1">
                                     Without Bill Amount
@@ -402,6 +448,13 @@
                         </div>
 
                         <br>
+                        <!-- Auto Allocate Info Panel -->
+                        <div id="edit_allocate_info" style="display:none; margin-bottom:8px;">
+                            <div style="background:#fffde7; border:1px solid #f9a825; border-radius:5px; padding:7px 14px; font-size:13px;">
+                                <i class="fa fa-info-circle text-warning"></i>
+                                &nbsp;<strong id="edit_allocate_msg"></strong>
+                            </div>
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped" id="eidt_vendor_payment_list">
                                 <thead class="bg-info">
@@ -418,6 +471,13 @@
                                     </tr>
                                 </thead>
                                 <tbody id="edit_item_container"></tbody>
+                                <tfoot id="edit_alloc_tfoot" style="display:none;">
+                                    <tr style="background:#e8f5e9; font-weight:bold;">
+                                        <td colspan="5" class="text-right">Total Auto Allocated :</td>
+                                        <td></td>
+                                        <td class="text-right text-success" id="edit_alloc_total">0.000</td>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
 

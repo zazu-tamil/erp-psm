@@ -774,5 +774,6 @@ ALTER TABLE `dp_bill_info` ADD COLUMN `remarks` TEXT NULL DEFAULT NULL AFTER `g_
 ALTER TABLE `customs_bill_info` ADD COLUMN `remarks` TEXT NULL DEFAULT NULL AFTER `customs_tot_amt`;
 
 
+06-07-2026
 
-
+ALTER TABLE `tender_receipt_invoice_info` ADD COLUMN `bill_type` VARCHAR(50) NULL DEFAULT 'Invoice' AFTER `inv_amount`;
