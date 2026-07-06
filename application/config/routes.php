@@ -330,3 +330,7 @@ $route['get-customer-balance-summary'] = 'payment/get_customer_balance_summary';
 //vendor adv payment
 $route['vendor-adv-payment'] = 'vendor/vendor_adv_payment_list';
 $route['vendor-adv-payment/(:any)'] = 'vendor/vendor_adv_payment_list/$1';
+
+
+
+$route['supplier-summary-report'] = 'reports/supplier_summary_report';

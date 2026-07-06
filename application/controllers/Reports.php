@@ -2508,6 +2508,44 @@ class Reports extends CI_Controller
         $this->load->view('page/reports/pl-report', $data);
     }
 
+
+
+    public function supplier_summary_report()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data['title'] = 'Supplier Summary Report';
+        $data['js'] = 'reports/supplier-summary-report.inc';
+
+        // Date Filter
+        if ($this->input->post('srch_from_date')) {
+            $srch_from_date = $this->input->post('srch_from_date');
+            $srch_to_date = $this->input->post('srch_to_date');
+        } else {
+            $srch_from_date = date('Y-m-01');
+            $srch_to_date = date('Y-m-d');
+        }
+
+        $data['srch_from_date'] = $srch_from_date;
+        $data['srch_to_date'] = $srch_to_date;
+
+
+        $this->load->model('Supplier_summary_model');
+        $data['suppliers'] = $this->Supplier_summary_model->get_supplier_summary($srch_from_date, $srch_to_date);
+
+        if ($this->input->get_post('export_excel') == '1') {
+            $this->load->helper('download');
+            $filename = "Supplier_Summary_Report_" . ($srch_from_date ? $srch_from_date : 'start') . "_to_" . ($srch_to_date ? $srch_to_date : 'end') . ".xls";
+            $content = $this->load->view('page/reports/supplier-summary-report-xls', $data, TRUE);
+            force_download($filename, $content);
+            return;
+        }
+
+        $this->load->view('page/reports/supplier-summary-report', $data);
+    }
+
 }
 
 

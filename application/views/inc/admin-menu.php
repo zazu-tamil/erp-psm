@@ -373,7 +373,8 @@ $report_m_grp = [
     'customer-statement-report',
     'item-rate-report',
     'pl-report',
-    'account-trial-balance'
+    'account-trial-balance',
+    'supplier-summary-report'
 ];
 ?>
 <li class="header">REPORTS</li>
@@ -391,7 +392,7 @@ $report_m_grp = [
 
     <ul class="treeview-menu">
         <li
-            class="treeview <?= in_array($current_page, ['sales-nbr-report', 'purchase-nbr-report', 'tender-enquiry-timeline', 'tender-enquiry-summary-report', 'customer-invoice-pending-report', 'vendor-invoice-pending-report', 'vendor-statement-report', 'customer-statement-report', 'item-rate-report']) ? 'active' : '' ?>">
+            class="treeview <?= in_array($current_page, ['sales-nbr-report', 'purchase-nbr-report', 'tender-enquiry-timeline', 'tender-enquiry-summary-report', 'customer-invoice-pending-report', 'vendor-invoice-pending-report', 'vendor-statement-report', 'customer-statement-report', 'item-rate-report', 'supplier-summary-report']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-envelope"></i> Tender Info Report
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
@@ -437,6 +438,11 @@ $report_m_grp = [
                 <li class="<?= ($current_page === 'vendor-statement-report') ? 'active' : '' ?>">
                     <a href="<?= site_url('vendor-statement-report') ?>">
                         <i class="fa fa-file-text"></i> Vendor Statement Report
+                    </a>
+                </li>
+                <li class="<?= ($current_page === 'supplier-summary-report') ? 'active' : '' ?>">
+                    <a href="<?= site_url('supplier-summary-report') ?>">
+                        <i class="fa fa-file-text"></i> PO Summary Report
                     </a>
                 </li>
 
