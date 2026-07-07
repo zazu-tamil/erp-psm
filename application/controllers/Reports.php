@@ -2516,7 +2516,7 @@ class Reports extends CI_Controller
             redirect();
         }
 
-        $data['title'] = 'Supplier Summary Report';
+        $data['title'] = 'PO Summary Report';
         $data['js'] = 'reports/supplier-summary-report.inc';
 
         // Date Filter

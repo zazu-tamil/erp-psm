@@ -52,7 +52,7 @@
     <div class="box box-info">
         <div class="box-header with-border">
             <div class="box-title">
-                <h3 class="box-title text-white">Supplier Summary Report
+                <h3 class="box-title text-white">PO Summary Report
                     [<?php echo date('d-m-Y', strtotime($srch_from_date)) . ' to ' . date('d-m-Y', strtotime($srch_to_date)); ?>]
                 </h3>
             </div>
@@ -70,120 +70,314 @@
             </div>
         </div>
 
-        <div class="box-body table-responsive">
-            <table class="table table-bordered table-hover">
-                <thead>
-                    <tr style="font-weight:bold; background-color: #f4f4f4;">
-                        <th>Order</th>
-                        <th>Customer</th>
-                        <th>PO Date</th>
-                        <th class="text-right">PO Amt</th>
-                        <th>Customer Inv</th>
-                        <th>Customer Inv Date</th>
-                        <th class="text-right">Customer Inv Amt</th>
-                        <th>Vendor</th>
-                        <th>Vendor Inv Date</th>
-                        <th>Vendor Inv No</th>
-                        <th class="text-right">Vendor Amt</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (!empty($suppliers)) {
-                        // Group flat records by order_id to eliminate duplicates and group properly by Order
-                        $grouped_suppliers = [];
-                        foreach ($suppliers as $row) {
-                            $group_key = $row['order_id'];
-                            if (!isset($grouped_suppliers[$group_key])) {
-                                $grouped_suppliers[$group_key] = [
-                                    'order_id' => $row['order_id'],
-                                    'pos' => [],
-                                    'customer_invoices' => [],
-                                    'vendor_invoices' => []
-                                ];
-                            }
+        <div class="box-body">
+            <style>
+                .summary-report-table th {
+                    vertical-align: middle !important;
+                    text-align: center;
+                    font-weight: 700;
+                    border: 1px solid #cbd5e1 !important;
+                }
+                .summary-report-table td {
+                    vertical-align: middle !important;
+                    border: 1px solid #cbd5e1 !important;
+                    font-size: 12px;
+                }
+                .summary-report-table .group-start td {
+                    border-top: 2.5px solid #64748b !important;
+                }
+                .summary-report-table td[rowspan] {
+                    background-color: #f8fafc !important;
+                    font-weight: bold;
+                    color: #1e293b;
+                    border-right: 2px solid #cbd5e1 !important;
+                    text-align: center;
+                }
+                .col-cust-po { background-color: #f8fafc; }
+                .col-cust-inv { background-color: #f0fdf4; } /* Soft green */
+                .col-supp-po { background-color: #fef2f2; } /* Soft red */
+                .col-supp-inv { background-color: #fffbeb; } /* Soft yellow */
+                .col-local-bill { background-color: #f5f3ff; } /* Soft purple */
+                .col-dp-bill { background-color: #ecfeff; } /* Soft cyan */
+                .col-customs-bill { background-color: #f0f9ff; } /* Soft blue */
 
-                            // Add PO record if not already added
-                            $po_key = $row['tender_po_id'];
-                            if (!isset($grouped_suppliers[$group_key]['pos'][$po_key])) {
-                                $grouped_suppliers[$group_key]['pos'][$po_key] = [
-                                    'po_date' => $row['po_date'],
-                                    'customer' => $row['customer'],
-                                    'po_amt' => $row['po_amt']
-                                ];
-                            }
+                .text-right { text-align: right !important; }
+                .text-center { text-align: center !important; }
+            </style>
 
-                            // Add customer invoice if present and not already added
-                            if (!empty($row['invoice_no'])) {
-                                $cust_inv_key = trim($row['invoice_no']);
-                                $grouped_suppliers[$group_key]['customer_invoices'][$cust_inv_key] = [
-                                    'invoice_no' => trim($row['invoice_no']),
-                                    'invoice_date' => $row['invoice_date'],
-                                    'customer_invoice_amt' => $row['customer_invoice_amt']
-                                ];
-                            }
+            <?php
+            // Group data by tender_order_id
+            $grouped = [];
+            if (!empty($suppliers)) {
+                foreach ($suppliers as $row) {
+                    $order_id = !empty($row['tender_order_id']) ? $row['tender_order_id'] : 'N/A';
+                    if (!isset($grouped[$order_id])) {
+                        $grouped[$order_id] = [
+                            'tender_order_id' => $row['tender_order_id'],
+                            'customer_name' => $row['customer_name'],
+                            'customer_pos' => [],
+                            'customer_invoices' => [],
+                            'supplier_pos' => [],
+                            'supplier_invoices' => [],
+                            'local_bills' => [],
+                            'dp_bills' => [],
+                            'customs_bills' => []
+                        ];
+                    }
 
-                            // Add vendor invoice if present and not already added
-                            if (!empty($row['vendor_invoice_no'])) {
-                                $vend_inv_key = trim($row['vendor_name']) . '_' . trim($row['vendor_invoice_no']);
-                                $grouped_suppliers[$group_key]['vendor_invoices'][$vend_inv_key] = [
-                                    'vendor_name' => $row['vendor_name'],
-                                    'vendor_invoice_date' => $row['vendor_invoice_date'],
-                                    'vendor_invoice_no' => $row['vendor_invoice_no'],
-                                    'vendor_invoice_amt' => $row['vendor_invoice_amt']
-                                ];
-                            }
-                        }
+                    // Customer POs
+                    if (!empty($row['customer_po_no'])) {
+                        $key = trim($row['customer_po_no']);
+                        $grouped[$order_id]['customer_pos'][$key] = [
+                            'no' => $row['customer_po_no'],
+                            'date' => $row['po_date'],
+                            'amount' => $row['customer_po_amount']
+                        ];
+                    }
 
-                        // Render grouped data side-by-side
-                        foreach ($grouped_suppliers as $group_key => $group) {
-                            $pos = array_values($group['pos']);
-                            $cust_invs = array_values($group['customer_invoices']);
-                            $vend_invs = array_values($group['vendor_invoices']);
-                            $max_rows = max(1, count($pos), count($cust_invs), count($vend_invs));
+                    // Customer Invoices
+                    if (!empty($row['customer_invoice_no'])) {
+                        $key = trim($row['customer_invoice_no']);
+                        $grouped[$order_id]['customer_invoices'][$key] = [
+                            'no' => $row['customer_invoice_no'],
+                            'date' => $row['customer_invoice_date'],
+                            'amount' => $row['customer_invoice_amount']
+                        ];
+                    }
 
-                            for ($i = 0; $i < $max_rows; $i++) {
-                                $is_first_row = ($i === 0);
-                                $po = isset($pos[$i]) ? $pos[$i] : null;
-                                $cust_inv = isset($cust_invs[$i]) ? $cust_invs[$i] : null;
-                                $vend = isset($vend_invs[$i]) ? $vend_invs[$i] : null;
-                                ?>
-                                <tr>
-                                    <!-- Order/PO Details printed only on the first row of each Order group -->
-                                    <td><?php echo $is_first_row ? htmlspecialchars($group['order_id']) : ''; ?></td>
-                                    
-                                    <!-- PO columns: printed row by row based on distinct PO records -->
-                                    <td><?php echo ($po && !empty($po['po_date'])) ? date('d-m-Y', strtotime($po['po_date'])) : ''; ?></td>
-                                    <td><?php echo $po ? htmlspecialchars($po['customer']) : ''; ?></td>
-                                    <td class="text-right">
-                                        <?php echo ($po && isset($po['po_amt'])) ? number_format($po['po_amt'], 3) : ''; ?>
-                                    </td>
+                    // Supplier POs
+                    if (!empty($row['supplier_po_no'])) {
+                        $key = trim($row['supplier_po_no']);
+                        $grouped[$order_id]['supplier_pos'][$key] = [
+                            'no' => $row['supplier_po_no'],
+                            'date' => $row['supplier_po_date'],
+                            'amount' => $row['supplier_po_amount']
+                        ];
+                    }
 
-                                    <!-- Customer Invoice Columns -->
-                                    <td><?php echo $cust_inv ? htmlspecialchars($cust_inv['invoice_no']) : ''; ?></td>
-                                    <td><?php echo ($cust_inv && !empty($cust_inv['invoice_date'])) ? date('d-m-Y', strtotime($cust_inv['invoice_date'])) : ''; ?></td>
-                                    <td class="text-right">
-                                        <?php echo ($cust_inv && isset($cust_inv['customer_invoice_amt'])) ? number_format($cust_inv['customer_invoice_amt'], 3) : ''; ?>
-                                    </td>
+                    // Supplier Invoices
+                    if (!empty($row['supplier_invoice_no'])) {
+                        $key = trim($row['supplier_invoice_no']);
+                        $grouped[$order_id]['supplier_invoices'][$key] = [
+                            'no' => $row['supplier_invoice_no'],
+                            'date' => $row['supplier_invoice_date'],
+                            'amount' => $row['supplier_invoice_amount']
+                        ];
+                    }
 
-                                    <!-- Vendor Invoice Columns -->
-                                    <td><?php echo $vend ? htmlspecialchars($vend['vendor_name']) : ''; ?></td>
-                                    <td><?php echo ($vend && !empty($vend['vendor_invoice_date'])) ? date('d-m-Y', strtotime($vend['vendor_invoice_date'])) : ''; ?></td>
-                                    <td><?php echo $vend ? htmlspecialchars($vend['vendor_invoice_no']) : ''; ?></td>
-                                    <td class="text-right">
-                                        <?php echo ($vend && isset($vend['vendor_invoice_amt'])) ? number_format($vend['vendor_invoice_amt'], 3) : ''; ?>
-                                    </td>
-                                </tr>
-                            <?php
-                            }
-                        }
-                    } else { ?>
-                        <tr>
-                            <td colspan="11" class="text-center text-muted">No records found for the selected date range.
-                            </td>
+                    // Local Supplier Bills
+                    if (!empty($row['local_bill_no'])) {
+                        $key = trim($row['local_bill_no']);
+                        $grouped[$order_id]['local_bills'][$key] = [
+                            'no' => $row['local_bill_no'],
+                            'date' => $row['local_bill_date'],
+                            'amount' => $row['local_bill_amount']
+                        ];
+                    }
+
+                    // Delivery Partner Bills
+                    if (!empty($row['dp_bill_no'])) {
+                        $key = trim($row['dp_bill_no']);
+                        $grouped[$order_id]['dp_bills'][$key] = [
+                            'no' => $row['dp_bill_no'],
+                            'date' => $row['dp_bill_date'],
+                            'amount' => $row['dp_bill_amount']
+                        ];
+                    }
+
+                    // Customs Bills
+                    if (!empty($row['customs_bill_no'])) {
+                        $key = trim($row['customs_bill_no']);
+                        $grouped[$order_id]['customs_bills'][$key] = [
+                            'no' => $row['customs_bill_no'],
+                            'date' => $row['customs_bill_date'],
+                            'amount' => $row['customs_bill_amount']
+                        ];
+                    }
+                }
+
+                // Sort grouped by the earliest customer PO date
+                uasort($grouped, function($a, $b) {
+                    $datesA = array_column($a['customer_pos'], 'date');
+                    $datesB = array_column($b['customer_pos'], 'date');
+                    $datesA = array_filter($datesA, function($d) { return !empty($d) && $d !== '0000-00-00'; });
+                    $datesB = array_filter($datesB, function($d) { return !empty($d) && $d !== '0000-00-00'; });
+                    $minA = !empty($datesA) ? min(array_map('strtotime', $datesA)) : 0;
+                    $minB = !empty($datesB) ? min(array_map('strtotime', $datesB)) : 0;
+                    if ($minA == $minB) return 0;
+                    return ($minA < $minB) ? -1 : 1;
+                });
+            }
+            ?>
+
+            <div class="table-responsive" style="overflow-x: auto !important; overflow-y: auto !important; max-height: 950px; width: 100%;">
+                <table class="table table-bordered summary-report-table" style="min-width: 2500px; margin-bottom: 0;">
+                    <thead>
+                        <tr style="background-color: #f1f5f9; color: #1e293b;">
+                            <th rowspan="2" style="vertical-align: middle;">Tender Order ID</th>
+                            <th rowspan="2" style="vertical-align: middle;">Customer Name</th>
+                            <th colspan="3" class="col-cust-po text-center">Customer PO</th>
+                            <th colspan="3" class="col-cust-inv text-center">Customer Invoice</th>
+                            <th colspan="3" class="col-supp-po text-center">Supplier PO</th>
+                            <th colspan="3" class="col-supp-inv text-center">Supplier Invoice</th>
+                            <th colspan="3" class="col-local-bill text-center">Local Supplier Bill</th>
+                            <th colspan="3" class="col-dp-bill text-center">Delivery Partner Bill</th>
+                            <th colspan="3" class="col-customs-bill text-center">Customs Bill</th>
                         </tr>
-                    <?php } ?>
-                </tbody>
-            </table>
+                        <tr style="background-color: #f8fafc;">
+                            <!-- Customer PO -->
+                            <th class="col-cust-po">PO Num</th>
+                            <th class="col-cust-po">PO Date</th>
+                            <th class="col-cust-po text-right">Amount</th>
+                            <!-- Customer Invoice -->
+                            <th class="col-cust-inv">Inv Num</th>
+                            <th class="col-cust-inv">Inv Date</th>
+                            <th class="col-cust-inv text-right">Amount</th>
+                            <!-- Supplier PO -->
+                            <th class="col-supp-po">PO Num</th>
+                            <th class="col-supp-po">PO Date</th>
+                            <th class="col-supp-po text-right">Amount</th>
+                            <!-- Supplier Invoice -->
+                            <th class="col-supp-inv">Inv Num</th>
+                            <th class="col-supp-inv">Inv Date</th>
+                            <th class="col-supp-inv text-right">Amount</th>
+                            <!-- Local Supplier Bill -->
+                            <th class="col-local-bill">Inv Num</th>
+                            <th class="col-local-bill">Inv Date</th>
+                            <th class="col-local-bill text-right">Amount</th>
+                            <!-- Delivery Partner Bill -->
+                            <th class="col-dp-bill">Inv Num</th>
+                            <th class="col-dp-bill">Inv Date</th>
+                            <th class="col-dp-bill text-right">Amount</th>
+                            <!-- Customs Bill -->
+                            <th class="col-customs-bill">Inv Num</th>
+                            <th class="col-customs-bill">Inv Date</th>
+                            <th class="col-customs-bill text-right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (!empty($grouped)): ?>
+                            <?php foreach ($grouped as $group): ?>
+                                <?php
+                                $cust_pos = array_values($group['customer_pos']);
+                                usort($cust_pos, function($a, $b) {
+                                    $t1 = !empty($a['date']) && $a['date'] !== '0000-00-00' ? strtotime($a['date']) : 0;
+                                    $t2 = !empty($b['date']) && $b['date'] !== '0000-00-00' ? strtotime($b['date']) : 0;
+                                    return $t1 - $t2;
+                                });
+
+                                $cust_invs = array_values($group['customer_invoices']);
+                                usort($cust_invs, function($a, $b) {
+                                    $t1 = !empty($a['date']) && $a['date'] !== '0000-00-00' ? strtotime($a['date']) : 0;
+                                    $t2 = !empty($b['date']) && $b['date'] !== '0000-00-00' ? strtotime($b['date']) : 0;
+                                    return $t1 - $t2;
+                                });
+
+                                $supp_pos = array_values($group['supplier_pos']);
+                                usort($supp_pos, function($a, $b) {
+                                    $t1 = !empty($a['date']) && $a['date'] !== '0000-00-00' ? strtotime($a['date']) : 0;
+                                    $t2 = !empty($b['date']) && $b['date'] !== '0000-00-00' ? strtotime($b['date']) : 0;
+                                    return $t1 - $t2;
+                                });
+
+                                $supp_invs = array_values($group['supplier_invoices']);
+                                usort($supp_invs, function($a, $b) {
+                                    $t1 = !empty($a['date']) && $a['date'] !== '0000-00-00' ? strtotime($a['date']) : 0;
+                                    $t2 = !empty($b['date']) && $b['date'] !== '0000-00-00' ? strtotime($b['date']) : 0;
+                                    return $t1 - $t2;
+                                });
+
+                                $local_bills = array_values($group['local_bills']);
+                                usort($local_bills, function($a, $b) {
+                                    $t1 = !empty($a['date']) && $a['date'] !== '0000-00-00' ? strtotime($a['date']) : 0;
+                                    $t2 = !empty($b['date']) && $b['date'] !== '0000-00-00' ? strtotime($b['date']) : 0;
+                                    return $t1 - $t2;
+                                });
+
+                                $dp_bills = array_values($group['dp_bills']);
+                                usort($dp_bills, function($a, $b) {
+                                    $t1 = !empty($a['date']) && $a['date'] !== '0000-00-00' ? strtotime($a['date']) : 0;
+                                    $t2 = !empty($b['date']) && $b['date'] !== '0000-00-00' ? strtotime($b['date']) : 0;
+                                    return $t1 - $t2;
+                                });
+
+                                $customs_bills = array_values($group['customs_bills']);
+                                usort($customs_bills, function($a, $b) {
+                                    $t1 = !empty($a['date']) && $a['date'] !== '0000-00-00' ? strtotime($a['date']) : 0;
+                                    $t2 = !empty($b['date']) && $b['date'] !== '0000-00-00' ? strtotime($b['date']) : 0;
+                                    return $t1 - $t2;
+                                });
+
+                                $max_rows = max(1, count($cust_pos), count($cust_invs), count($supp_pos), count($supp_invs), count($local_bills), count($dp_bills), count($customs_bills));
+                                ?>
+                                <?php for ($i = 0; $i < $max_rows; $i++): ?>
+                                    <?php
+                                    $is_first = ($i === 0);
+                                    $c_po = isset($cust_pos[$i]) ? $cust_pos[$i] : null;
+                                    $c_inv = isset($cust_invs[$i]) ? $cust_invs[$i] : null;
+                                    $s_po = isset($supp_pos[$i]) ? $supp_pos[$i] : null;
+                                    $s_inv = isset($supp_invs[$i]) ? $supp_invs[$i] : null;
+                                    $l_bill = isset($local_bills[$i]) ? $local_bills[$i] : null;
+                                    $d_bill = isset($dp_bills[$i]) ? $dp_bills[$i] : null;
+                                    $cb_bill = isset($customs_bills[$i]) ? $customs_bills[$i] : null;
+                                    ?>
+                                    <tr class="<?php echo $is_first ? 'group-start' : ''; ?>">
+                                        <?php if ($is_first): ?>
+                                            <td rowspan="<?php echo $max_rows; ?>">
+                                                <?php echo htmlspecialchars($group['tender_order_id']); ?>
+                                            </td>
+                                            <td rowspan="<?php echo $max_rows; ?>">
+                                                <?php echo htmlspecialchars($group['customer_name']); ?>
+                                            </td>
+                                        <?php endif; ?>
+
+                                        <!-- Customer PO -->
+                                        <td class="col-cust-po"><?php echo $c_po ? htmlspecialchars($c_po['no']) : ''; ?></td>
+                                        <td class="col-cust-po"><?php echo ($c_po && !empty($c_po['date']) && $c_po['date'] !== '0000-00-00') ? date('d-m-Y', strtotime($c_po['date'])) : ''; ?></td>
+                                        <td class="col-cust-po text-right"><?php echo ($c_po && isset($c_po['amount'])) ? number_format($c_po['amount'], 3) : ''; ?></td>
+
+                                        <!-- Customer Invoice -->
+                                        <td class="col-cust-inv"><?php echo $c_inv ? htmlspecialchars($c_inv['no']) : ''; ?></td>
+                                        <td class="col-cust-inv"><?php echo ($c_inv && !empty($c_inv['date']) && $c_inv['date'] !== '0000-00-00') ? date('d-m-Y', strtotime($c_inv['date'])) : ''; ?></td>
+                                        <td class="col-cust-inv text-right"><?php echo ($c_inv && isset($c_inv['amount'])) ? number_format($c_inv['amount'], 3) : ''; ?></td>
+
+                                        <!-- Supplier PO -->
+                                        <td class="col-supp-po"><?php echo $s_po ? htmlspecialchars($s_po['no']) : ''; ?></td>
+                                        <td class="col-supp-po"><?php echo ($s_po && !empty($s_po['date']) && $s_po['date'] !== '0000-00-00') ? date('d-m-Y', strtotime($s_po['date'])) : ''; ?></td>
+                                        <td class="col-supp-po text-right"><?php echo ($s_po && isset($s_po['amount'])) ? number_format($s_po['amount'], 3) : ''; ?></td>
+
+                                        <!-- Supplier Invoice -->
+                                        <td class="col-supp-inv"><?php echo $s_inv ? htmlspecialchars($s_inv['no']) : ''; ?></td>
+                                        <td class="col-supp-inv"><?php echo ($s_inv && !empty($s_inv['date']) && $s_inv['date'] !== '0000-00-00') ? date('d-m-Y', strtotime($s_inv['date'])) : ''; ?></td>
+                                        <td class="col-supp-inv text-right"><?php echo ($s_inv && isset($s_inv['amount'])) ? number_format($s_inv['amount'], 3) : ''; ?></td>
+
+                                        <!-- Local Supplier Bill -->
+                                        <td class="col-local-bill"><?php echo $l_bill ? htmlspecialchars($l_bill['no']) : ''; ?></td>
+                                        <td class="col-local-bill"><?php echo ($l_bill && !empty($l_bill['date']) && $l_bill['date'] !== '0000-00-00') ? date('d-m-Y', strtotime($l_bill['date'])) : ''; ?></td>
+                                        <td class="col-local-bill text-right"><?php echo ($l_bill && isset($l_bill['amount'])) ? number_format($l_bill['amount'], 3) : ''; ?></td>
+
+                                        <!-- Delivery Partner Bill -->
+                                        <td class="col-dp-bill"><?php echo $d_bill ? htmlspecialchars($d_bill['no']) : ''; ?></td>
+                                        <td class="col-dp-bill"><?php echo ($d_bill && !empty($d_bill['date']) && $d_bill['date'] !== '0000-00-00') ? date('d-m-Y', strtotime($d_bill['date'])) : ''; ?></td>
+                                        <td class="col-dp-bill text-right"><?php echo ($d_bill && isset($d_bill['amount'])) ? number_format($d_bill['amount'], 3) : ''; ?></td>
+
+                                        <!-- Customs Bill -->
+                                        <td class="col-customs-bill"><?php echo $cb_bill ? htmlspecialchars($cb_bill['no']) : ''; ?></td>
+                                        <td class="col-customs-bill"><?php echo ($cb_bill && !empty($cb_bill['date']) && $cb_bill['date'] !== '0000-00-00') ? date('d-m-Y', strtotime($cb_bill['date'])) : ''; ?></td>
+                                        <td class="col-customs-bill text-right"><?php echo ($cb_bill && isset($cb_bill['amount'])) ? number_format($cb_bill['amount'], 3) : ''; ?></td>
+                                    </tr>
+                                <?php endfor; ?>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="23" class="text-center text-muted" style="padding: 30px; font-style: italic;">
+                                    No records found for the selected date range.
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </section>
