@@ -205,7 +205,7 @@ class Reports extends CI_Controller
         "; */
 
 
-     $sql = "
+        $sql = "
         select 
         c.s_order,
         c.template,
@@ -1125,7 +1125,7 @@ class Reports extends CI_Controller
                 order by c.payment_date asc
             ";
 
-            
+
 
             $query = $this->db->query($sql);
 
@@ -2545,6 +2545,43 @@ class Reports extends CI_Controller
 
         $this->load->view('page/reports/supplier-summary-report', $data);
     }
+    public function invoice_report()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data['title'] = 'Invoice Summary Report';
+        $data['js'] = 'reports/invoice-report.inc';
+
+        // Date Filter
+        if ($this->input->post('srch_from_date')) {
+            $srch_from_date = $this->input->post('srch_from_date');
+            $srch_to_date = $this->input->post('srch_to_date');
+        } else {
+            $srch_from_date = date('Y-m-01');
+            $srch_to_date = date('Y-m-d');
+        }
+        $data['srch_from_date'] = $srch_from_date;
+        $data['srch_to_date'] = $srch_to_date;
+
+
+        $this->load->model('Invoice_report_model');
+        $data['invoices'] = $this->Invoice_report_model->get_invoice_summary($srch_from_date, $srch_to_date);
+
+        if ($this->input->get_post('export_excel') == '1') {
+            $this->load->helper('download');
+            $filename = "Invoice_Report_" . ($srch_from_date ? $srch_from_date : 'start') . "_to_" . ($srch_to_date ? $srch_to_date : 'end') . ".xls";
+            $content = $this->load->view('page/reports/invoice-report-xls', $data, TRUE);
+            force_download($filename, $content);
+            return;
+        }
+
+        $this->load->view('page/reports/invoice-report', $data);
+    }
+
+
+
 
 }
 

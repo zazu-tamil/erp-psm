@@ -334,3 +334,5 @@ $route['vendor-adv-payment/(:any)'] = 'vendor/vendor_adv_payment_list/$1';
 
 
 $route['supplier-summary-report'] = 'reports/supplier_summary_report';
+$route['invoice-report'] = 'reports/invoice_report';
+
