@@ -190,4 +190,161 @@ class Invoice_report_model extends CI_Model
 
         return $this->db->query($sql, $params)->result_array();
     }
+
+    public function get_customer_invoices_for_vat($srch_from_date, $srch_to_date, $company_id = '', $customer_id = '', $search_term = '')
+    {
+        $params = [];
+        $where = ["a.status = 'Active'"];
+
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $where[] = "a.invoice_date BETWEEN ? AND ?";
+            $params[] = $srch_from_date;
+            $params[] = $srch_to_date;
+        }
+
+        if (!empty($company_id)) {
+            $where[] = "a.company_id = ?";
+            $params[] = $company_id;
+        }
+
+        if (!empty($customer_id)) {
+            $where[] = "a.customer_id = ?";
+            $params[] = $customer_id;
+        }
+
+        if (!empty($search_term)) {
+            $where[] = "(a.invoice_no LIKE ? OR c.customer_name LIKE ?)";
+            $escaped = "%" . $search_term . "%";
+            $params[] = $escaped;
+            $params[] = $escaped;
+        }
+
+        $where_sql = implode(' AND ', $where);
+
+        $sql = "
+            SELECT 
+                a.tender_enq_invoice_id,
+                a.invoice_no,
+                a.invoice_date,
+                a.tender_enquiry_id,
+                (a.total_amount - a.tax_amount) AS total_amount_wo_tax,
+                a.tax_amount,
+                a.total_amount,
+                c.customer_name,
+                c.gst AS client_vat_no
+            FROM tender_enq_invoice_info a
+            LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
+            WHERE {$where_sql}
+            ORDER BY a.invoice_date ASC, a.invoice_no ASC
+        ";
+
+        return $this->db->query($sql, $params)->result_array();
+    }
+
+    public function get_vendor_bills_for_enquiries($enquiry_ids)
+    {
+        if (empty($enquiry_ids)) {
+            return [];
+        }
+
+        $results = [];
+
+        // 1. Supplier Invoices
+        $this->db->select("
+            a.tender_enquiry_id,
+            a.invoice_date,
+            a.invoice_no,
+            v.vendor_name,
+            v.gst AS vendor_vat,
+            a.total_amount_wo_tax AS cif_val,
+            a.total_duty_amount AS duty,
+            (a.total_amount_wo_tax + a.total_duty_amount) AS total_val,
+            a.tax_amount AS vat,
+            a.tax_amount AS vat_paid,
+            a.total_amount AS grand_total
+        ");
+        $this->db->from('vendor_purchase_invoice_info a');
+        $this->db->join('vendor_info v', 'a.vendor_id = v.vendor_id AND v.status = \'Active\'', 'left');
+        $this->db->where_in('a.tender_enquiry_id', $enquiry_ids);
+        $this->db->where('a.status', 'Active');
+        $q1 = $this->db->get()->result_array();
+        foreach ($q1 as $row) {
+            $row['type'] = 'Supplier Bill';
+            $results[] = $row;
+        }
+
+        // 2. Local Supplier Bills
+        $this->db->select("
+            a.tender_enquiry_id,
+            a.invoice_date,
+            a.invoice_no,
+            v.vendor_name,
+            v.gst AS vendor_vat,
+            a.tot_amt_wo_tax AS cif_val,
+            0 AS duty,
+            a.tot_amt_wo_tax AS total_val,
+            a.vat_amt AS vat,
+            a.vat_amt AS vat_paid,
+            a.tot_amt_with_tax AS grand_total
+        ");
+        $this->db->from('local_purchase_bill_info a');
+        $this->db->join('vendor_info v', 'a.vendor_id = v.vendor_id AND v.status = \'Active\'', 'left');
+        $this->db->where_in('a.tender_enquiry_id', $enquiry_ids);
+        $this->db->where('a.status', 'Active');
+        $q2 = $this->db->get()->result_array();
+        foreach ($q2 as $row) {
+            $row['type'] = 'Local Supplier Bill';
+            $results[] = $row;
+        }
+
+        // 3. Delivery Partner Bills
+        $this->db->select("
+            a.tender_enquiry_id,
+            a.invoice_date,
+            a.invoice_no,
+            v.vendor_name,
+            v.gst AS vendor_vat,
+            a.dp_charges AS cif_val,
+            0 AS duty,
+            a.dp_charges AS total_val,
+            a.dp_vat_amt AS vat,
+            a.dp_vat_amt AS vat_paid,
+            (a.dp_charges + a.dp_vat_amt) AS grand_total
+        ");
+        $this->db->from('dp_bill_info a');
+        $this->db->join('vendor_info v', 'a.vendor_id = v.vendor_id AND v.status = \'Active\'', 'left');
+        $this->db->where_in('a.tender_enquiry_id', $enquiry_ids);
+        $this->db->where('a.status', 'Active');
+        $q3 = $this->db->get()->result_array();
+        foreach ($q3 as $row) {
+            $row['type'] = 'Delivery Partner Bill';
+            $results[] = $row;
+        }
+
+        // 4. Customs Bills
+        $this->db->select("
+            a.tender_enquiry_id,
+            COALESCE(NULLIF(a.declaration_date, '0000-00-00'), a.invoice_date) AS invoice_date,
+            COALESCE(NULLIF(a.declaration_no, ''), a.invoice_no) AS invoice_no,
+            v.vendor_name,
+            v.gst AS vendor_vat,
+            a.tot_amt_wo_vat AS cif_val,
+            a.custom_duty AS duty,
+            (a.tot_amt_wo_vat + a.custom_duty) AS total_val,
+            a.vat_amt AS vat,
+            a.vat_amt AS vat_paid,
+            a.customs_tot_amt AS grand_total
+        ");
+        $this->db->from('customs_bill_info a');
+        $this->db->join('vendor_info v', 'a.vendor_id = v.vendor_id AND v.status = \'Active\'', 'left');
+        $this->db->where_in('a.tender_enquiry_id', $enquiry_ids);
+        $this->db->where('a.status', 'Active');
+        $q4 = $this->db->get()->result_array();
+        foreach ($q4 as $row) {
+            $row['type'] = 'Customs Bill';
+            $results[] = $row;
+        }
+
+        return $results;
+    }
 }

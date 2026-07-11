@@ -342,8 +342,7 @@ $vendor_m_grp = [
                 </li>
                 <li class="<?= ($current_page === 'customs-bill-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('customs-bill-list') ?>"><i class="fa fa-list"></i> Customs Bill List</a>
-                </li>
-
+                </li> 
             </ul>
         </li>
         <li class="<?= ($current_page === 'vendor-adv-payment') ? 'active' : '' ?>">
@@ -374,9 +373,10 @@ $report_m_grp = [
     'item-rate-report',
     'pl-report',
     'account-trial-balance',
-    'supplier-summary-report',
+    'supplier-summary-report', 
     'invoice-report',
-    'tender-progress-report'
+    'tender-progress-report',
+    'vat-statement-report'
 ];
 ?>
 <li class="header">REPORTS</li>
@@ -394,7 +394,7 @@ $report_m_grp = [
 
     <ul class="treeview-menu">
         <li
-            class="treeview <?= in_array($current_page, ['sales-nbr-report', 'purchase-nbr-report', 'tender-enquiry-timeline', 'tender-enquiry-summary-report', 'customer-invoice-pending-report', 'vendor-invoice-pending-report', 'vendor-statement-report', 'customer-statement-report', 'item-rate-report', 'supplier-summary-report', 'invoice-report', 'tender-progress-report']) ? 'active' : '' ?>">
+            class="treeview <?= in_array($current_page, ['sales-nbr-report', 'purchase-nbr-report', 'tender-enquiry-timeline', 'tender-enquiry-summary-report', 'customer-invoice-pending-report', 'vendor-invoice-pending-report', 'vendor-statement-report', 'customer-statement-report', 'item-rate-report', 'supplier-summary-report', 'invoice-report', 'tender-progress-report', 'vat-statement-report']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-envelope"></i> Tender Info Report
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
@@ -455,6 +455,11 @@ $report_m_grp = [
                 <li class="<?= ($current_page === 'tender-progress-report') ? 'active' : '' ?>">
                     <a href="<?= site_url('tender-progress-report') ?>">
                         <i class="fa fa-line-chart"></i> Tender Progress Report
+                    </a>
+                </li>
+                <li class="<?= ($current_page === 'vat-statement-report') ? 'active' : '' ?>">
+                    <a href="<?= site_url('vat-statement-report') ?>">
+                        <i class="fa fa-percent"></i> VAT Statement Report
                     </a>
                 </li>
 

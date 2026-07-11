@@ -2709,7 +2709,99 @@ class Reports extends CI_Controller
         $this->load->view('page/reports/tender-progress-report', $data);
     }
 
+    public function vat_statement_report()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
 
+        $data['title'] = 'VAT Statement Report';
+        $data['js'] = 'reports/vat-statement-report.inc';
+
+        $companies = $this->db->get_where('company_info', array('status' => 'Active'))->result_array();
+        $data['company_list'] = $companies;
+
+        // Date & Company Filter
+        if ($this->input->post('mode') == 'Search') {
+            $srch_from_date = $this->input->post('srch_from_date');
+            $srch_to_date = $this->input->post('srch_to_date');
+            $srch_company_id = $this->input->post('srch_company_id');
+            $srch_customer_id = $this->input->post('srch_customer_id');
+            $srch_text = $this->input->post('srch_text');
+        } else {
+            $srch_from_date = date('Y-m-01');
+            $srch_to_date = date('Y-m-d');
+            $srch_company_id = !empty($companies) ? $companies[0]['company_id'] : '';
+            $srch_customer_id = '';
+            $srch_text = '';
+        }
+
+        $data['srch_from_date'] = $srch_from_date;
+        $data['srch_to_date'] = $srch_to_date;
+        $data['srch_company_id'] = $srch_company_id;
+        $data['srch_customer_id'] = $srch_customer_id;
+        $data['srch_text'] = $srch_text;
+
+        // Fetch selected company details
+        $data['selected_company_name'] = 'AL HILLO TRADING CO W.L.L'; // Fallback
+        $data['selected_company_vat'] = '200011371800002'; // Fallback
+        if (!empty($srch_company_id)) {
+            $comp = $this->db->get_where('company_info', array('company_id' => $srch_company_id))->row_array();
+            if ($comp) {
+                $data['selected_company_name'] = $comp['company_name'];
+                $data['selected_company_vat'] = $comp['GST']; // GST field stores VAT No
+            }
+        }
+
+        // Fetch active customers for filter
+        $data['customer_list'] = $this->db->get_where('customer_info', array('status' => 'Active'))->result_array();
+
+        $this->load->model('Invoice_report_model');
+        
+        // 1. Fetch Customer Invoices
+        $invoices = $this->Invoice_report_model->get_customer_invoices_for_vat($srch_from_date, $srch_to_date, $srch_company_id, $srch_customer_id, $srch_text);
+
+        // 2. Extract Enquiry IDs
+        $enquiry_ids = [];
+        foreach ($invoices as $inv) {
+            if (!empty($inv['tender_enquiry_id'])) {
+                $enquiry_ids[] = $inv['tender_enquiry_id'];
+            }
+        }
+        $enquiry_ids = array_unique($enquiry_ids);
+
+        // 3. Fetch related Vendor Bills
+        $vendor_bills = [];
+        if (!empty($enquiry_ids)) {
+            $vendor_bills = $this->Invoice_report_model->get_vendor_bills_for_enquiries($enquiry_ids);
+        }
+
+        // Group vendor bills by tender_enquiry_id
+        $grouped_bills = [];
+        foreach ($vendor_bills as $bill) {
+            $enq_id = $bill['tender_enquiry_id'];
+            $grouped_bills[$enq_id][] = $bill;
+        }
+
+        // 4. Merge
+        $merged_records = [];
+        foreach ($invoices as $inv) {
+            $enq_id = $inv['tender_enquiry_id'];
+            $bills = isset($grouped_bills[$enq_id]) ? $grouped_bills[$enq_id] : [];
+            
+            $merged_records[] = [
+                'invoice' => $inv,
+                'bills' => $bills
+            ];
+        }
+
+        $data['records'] = $merged_records;
+
+        // Check Excel Export
+        if ($this->input->get('export') == 'excel' || $this->input->post('export') == 'excel') {
+            $this->load->view('page/reports/vat-statement-report-xls', $data);
+        } else {
+            $this->load->view('page/reports/vat-statement-report', $data);
+        }
+    }
 }
-
-
