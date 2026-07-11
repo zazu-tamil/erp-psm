@@ -2580,7 +2580,134 @@ class Reports extends CI_Controller
         $this->load->view('page/reports/invoice-report', $data);
     }
 
+    public function tender_progress_report()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
 
+        $data['title'] = 'Tender Progress Report';
+        $data['js'] = 'reports/tender-progress-report.inc';
+
+        // Date Filter
+        if ($this->input->post('mode') == 'Search') {
+            $srch_from_date = $this->input->post('srch_from_date');
+            $srch_to_date = $this->input->post('srch_to_date');
+            $srch_customer_id = $this->input->post('srch_customer_id');
+            $srch_text = $this->input->post('srch_text');
+        } else {
+            $srch_from_date = date('Y-m-01');
+            $srch_to_date = date('Y-m-d');
+            $srch_customer_id = '';
+            $srch_text = '';
+        }
+
+        $data['srch_from_date'] = $srch_from_date;
+        $data['srch_to_date'] = $srch_to_date;
+        $data['srch_customer_id'] = $srch_customer_id;
+        $data['srch_text'] = $srch_text;
+
+        // Fetch active customers
+        $data['customer_list'] = $this->db->get_where('customer_info', array('status' => 'Active'))->result_array();
+
+        $this->load->model('Invoice_report_model');
+        $raw_results = $this->Invoice_report_model->get_tender_progress($srch_from_date, $srch_to_date, $srch_customer_id, $srch_text);
+
+        // Group items under POs
+        $grouped = [];
+        $item_counts = [];
+        foreach ($raw_results as $row) {
+            $po_id = $row['tender_po_id'];
+            $item_code = $row['item_code'];
+            $key = $po_id . '_' . $item_code;
+            $item_counts[$key] = isset($item_counts[$key]) ? $item_counts[$key] + 1 : 1;
+        }
+
+        $allocated_totals = [];
+        $remaining_vendor = [];
+        $remaining_delivered = [];
+        $remaining_invoiced = [];
+        $item_indices = [];
+
+        foreach ($raw_results as $row) {
+            $po_id = $row['tender_po_id'];
+            $item_code = $row['item_code'];
+
+            if (!isset($grouped[$po_id])) {
+                $grouped[$po_id] = [
+                    'tender_po_id' => $row['tender_po_id'],
+                    'our_po_no' => $row['our_po_no'],
+                    'customer_po_no' => $row['customer_po_no'],
+                    'po_date' => $row['po_date'],
+                    'tender_enquiry_id' => $row['tender_enquiry_id'],
+                    'tender_order_id' => $row['tender_order_id'],
+                    'customer_name' => $row['customer_name'],
+                    'enquiry_no' => $row['enquiry_no'],
+                    'enquiry_date' => $row['enquiry_date'],
+                    'tender_status' => $row['tender_status'],
+                    'quotation_no' => $row['quotation_no'],
+                    'quote_date' => $row['quote_date'],
+                    'quotation_status' => $row['quotation_status'],
+                    'items' => [],
+                    'total_po_qty' => 0,
+                    'total_vendor_po_qty' => 0,
+                    'total_delivered_qty' => 0,
+                    'total_invoiced_qty' => 0
+                ];
+            }
+
+            $key = $po_id . '_' . $item_code;
+            if (!isset($allocated_totals[$key])) {
+                $allocated_totals[$key] = true;
+                $remaining_vendor[$key] = floatval($row['vendor_po_qty']);
+                $remaining_delivered[$key] = floatval($row['delivered_qty']);
+                $remaining_invoiced[$key] = floatval($row['invoiced_qty']);
+            }
+
+            if (!isset($item_indices[$key])) {
+                $item_indices[$key] = 0;
+            }
+            $item_indices[$key]++;
+            $is_last_item = ($item_indices[$key] === $item_counts[$key]);
+
+            $po_qty = floatval($row['po_qty']);
+
+            // Allocate Vendor Qty
+            $alloc_vendor = $is_last_item ? $remaining_vendor[$key] : min($po_qty, $remaining_vendor[$key]);
+            if ($alloc_vendor < 0) $alloc_vendor = 0;
+            $remaining_vendor[$key] -= $alloc_vendor;
+
+            // Allocate Delivered Qty
+            $alloc_delivered = $is_last_item ? $remaining_delivered[$key] : min($po_qty, $remaining_delivered[$key]);
+            if ($alloc_delivered < 0) $alloc_delivered = 0;
+            $remaining_delivered[$key] -= $alloc_delivered;
+
+            // Allocate Invoiced Qty
+            $alloc_invoiced = $is_last_item ? $remaining_invoiced[$key] : min($po_qty, $remaining_invoiced[$key]);
+            if ($alloc_invoiced < 0) $alloc_invoiced = 0;
+            $remaining_invoiced[$key] -= $alloc_invoiced;
+
+            $grouped[$po_id]['items'][] = [
+                'tender_po_item_id' => $row['tender_po_item_id'],
+                'item_code' => $row['item_code'],
+                'item_desc' => $row['item_desc'],
+                'uom' => $row['uom'],
+                'po_qty' => $po_qty,
+                'vendor_po_qty' => $alloc_vendor,
+                'delivered_qty' => $alloc_delivered,
+                'invoiced_qty' => $alloc_invoiced
+            ];
+
+            $grouped[$po_id]['total_po_qty'] += $po_qty;
+            $grouped[$po_id]['total_vendor_po_qty'] += $alloc_vendor;
+            $grouped[$po_id]['total_delivered_qty'] += $alloc_delivered;
+            $grouped[$po_id]['total_invoiced_qty'] += $alloc_invoiced;
+        }
+
+        $data['po_records'] = array_values($grouped);
+
+        $this->load->view('page/reports/tender-progress-report', $data);
+    }
 
 
 }
