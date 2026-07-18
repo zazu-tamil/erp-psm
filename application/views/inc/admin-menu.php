@@ -457,11 +457,11 @@ $report_m_grp = [
                         <i class="fa fa-line-chart"></i> Tender Progress Report
                     </a>
                 </li>
-                <li class="<?= ($current_page === 'vat-statement-report') ? 'active' : '' ?>">
+                <!-- <li class="<?= ($current_page === 'vat-statement-report') ? 'active' : '' ?>">
                     <a href="<?= site_url('vat-statement-report') ?>">
                         <i class="fa fa-percent"></i> VAT Statement Report
                     </a>
-                </li>
+                </li> -->
 
             </ul>
         </li>
