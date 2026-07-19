@@ -76,7 +76,7 @@ class Invoice_report_model extends CI_Model
                 a.status = 'Active'
                 AND ci.invoice_date BETWEEN ? AND ? 
             ORDER BY
-                ci.invoice_no asc, ci.invoice_date asc , ci.tender_enq_invoice_id asc ;
+                ci.invoice_no asc, ci.invoice_date asc   ;
         ";
 
         return $this->db->query($sql, [$srch_from_date, $srch_to_date])->result_array();

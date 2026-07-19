@@ -53,14 +53,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </tr>
 
         <thead>
-            <tr style="font-weight:bold; background-color: #f1f5f9;">
-                <th rowspan="2" style="padding: 8px; border: 1px solid #cbd5e1; text-align: left; background-color: #f1f5f9; vertical-align: middle;">Tender Order ID</th>
-                <th rowspan="2" style="padding: 8px; border: 1px solid #cbd5e1; text-align: left; background-color: #f1f5f9; vertical-align: middle;">Customer Name</th>
-                <th colspan="3" style="padding: 8px; border: 1px solid #cbd5e1; text-align: center; background-color: #d1fae5; vertical-align: middle;">Customer Invoice</th>
-                <th colspan="3" style="padding: 8px; border: 1px solid #cbd5e1; text-align: center; background-color: #fef3c7; vertical-align: middle;">Supplier Invoice</th>
-                <th colspan="3" style="padding: 8px; border: 1px solid #cbd5e1; text-align: center; background-color: #ede9fe; vertical-align: middle;">Local Supplier Bill</th>
-                <th colspan="3" style="padding: 8px; border: 1px solid #cbd5e1; text-align: center; background-color: #cffafe; vertical-align: middle;">Delivery Partner Bill</th>
-                <th colspan="3" style="padding: 8px; border: 1px solid #cbd5e1; text-align: center; background-color: #e0f2fe; vertical-align: middle;">Customs Bill</th>
+            <tr style="background-color: #f1f5f9; color: #1e293b;">
+                <th rowspan="2" style="vertical-align: middle; padding: 8px; border: 1px solid #cbd5e1; font-weight: bold; background-color: #f1f5f9;">Tender Order ID</th>
+                <th rowspan="2" style="vertical-align: middle; padding: 8px; border: 1px solid #cbd5e1; font-weight: bold; background-color: #f1f5f9;">Customer Name</th>
+                <th colspan="3" style="text-align: center; padding: 8px; border: 1px solid #cbd5e1; font-weight: bold; background-color: #dcfce7; color: #166534;">Customer Invoice</th>
+                <th colspan="4" style="text-align: center; padding: 8px; border: 1px solid #cbd5e1; font-weight: bold; background-color: #fef3c7; color: #92400e;">Supplier Invoice</th>
+                <th colspan="3" style="text-align: center; padding: 8px; border: 1px solid #cbd5e1; font-weight: bold; background-color: #ede9fe; color: #5b21b6;">Local Supplier Bill</th>
+                <th colspan="3" style="text-align: center; padding: 8px; border: 1px solid #cbd5e1; font-weight: bold; background-color: #cffafe; color: #155e75;">Delivery Partner Bill</th>
+                <th colspan="3" style="text-align: center; padding: 8px; border: 1px solid #cbd5e1; font-weight: bold; background-color: #e0f2fe; color: #075985;">Customs Bill</th>
             </tr>
             <tr style="font-weight:bold; background-color: #f8fafc;">
                 <!-- Customer Invoice -->
@@ -68,9 +68,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: left; background-color: #d1fae5;">Inv Date</th>
                 <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: right; background-color: #d1fae5;">Amount</th>
                 <!-- Supplier Invoice -->
-                <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: left; background-color: #fef3c7;">Inv Num</th>
-                <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: left; background-color: #fef3c7;">Inv Date</th>
-                <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: right; background-color: #fef3c7;">Amount</th>
+                <th style="padding: 8px; border: 1px solid #cbd5e1; font-weight: bold; background-color: #f8fafc;">Supplier Name</th>
+                <th style="padding: 8px; border: 1px solid #cbd5e1; font-weight: bold; background-color: #f8fafc;">Inv Num</th>
+                <th style="padding: 8px; border: 1px solid #cbd5e1; font-weight: bold; background-color: #f8fafc;">Inv Date</th>
+                <th style="text-align: right; padding: 8px; border: 1px solid #cbd5e1; font-weight: bold; background-color: #f8fafc;">Amount</th>
                 <!-- Local Supplier Bill -->
                 <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: left; background-color: #ede9fe;">Inv Num</th>
                 <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: left; background-color: #ede9fe;">Inv Date</th>
@@ -123,6 +124,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     if (!empty($row['supplier_invoice_no'])) {
                         $key = trim($row['supplier_invoice_no']);
                         $grouped[$order_id]['supplier_invoices'][$key] = [
+                            'name' => $row['vendor_name'],
                             'no' => $row['supplier_invoice_no'],
                             'date' => $row['supplier_invoice_date'],
                             'amount' => $row['supplier_invoice_amount']
@@ -160,53 +162,121 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     }
                 }
 
-                // Sort grouped by the earliest customer invoice date
-                uasort($grouped, function($a, $b) {
-                    $datesA = array_column($a['customer_invoices'], 'date');
-                    $datesB = array_column($b['customer_invoices'], 'date');
-                    $datesA = array_filter($datesA, function($d) { return !empty($d) && $d !== '0000-00-00'; });
-                    $datesB = array_filter($datesB, function($d) { return !empty($d) && $d !== '0000-00-00'; });
-                    $minA = !empty($datesA) ? min(array_map('strtotime', $datesA)) : 0;
-                    $minB = !empty($datesB) ? min(array_map('strtotime', $datesB)) : 0;
-                    if ($minA == $minB) return 0;
-                    return ($minA < $minB) ? -1 : 1;
+                // Create display blocks to separate multiple customer invoices for the same order
+                $display_blocks = [];
+                foreach ($grouped as $order_id => $group) {
+                    $cust_invs = array_values($group['customer_invoices']);
+                    if (empty($cust_invs)) {
+                        $display_blocks[] = $group;
+                    } else {
+                        // Sort customer invoices to ensure deterministic order for assigning supplier bills
+                        usort($cust_invs, function($a, $b) {
+                            $cmp = strnatcmp($a['no'], $b['no']);
+                            if ($cmp === 0) {
+                                $t1 = !empty($a['date']) && $a['date'] !== '0000-00-00' ? strtotime($a['date']) : 0;
+                                $t2 = !empty($b['date']) && $b['date'] !== '0000-00-00' ? strtotime($b['date']) : 0;
+                                return $t1 - $t2;
+                            }
+                            return $cmp;
+                        });
+
+                        foreach ($cust_invs as $idx => $c_inv) {
+                            $block = [
+                                'tender_order_id' => $group['tender_order_id'],
+                                'customer_name' => $group['customer_name'],
+                                'customer_invoices' => [$c_inv['no'] => $c_inv],
+                                'supplier_invoices' => ($idx === 0) ? $group['supplier_invoices'] : [],
+                                'local_bills' => ($idx === 0) ? $group['local_bills'] : [],
+                                'dp_bills' => ($idx === 0) ? $group['dp_bills'] : [],
+                                'customs_bills' => ($idx === 0) ? $group['customs_bills'] : []
+                            ];
+                            $display_blocks[] = $block;
+                        }
+                    }
+                }
+
+                // Sort display blocks by Customer Invoice Date, then Number
+                uasort($display_blocks, function($a, $b) {
+                    $cA = reset($a['customer_invoices']);
+                    $cB = reset($b['customer_invoices']);
+                    
+                    $t1 = 0;
+                    if ($cA && !empty($cA['date']) && $cA['date'] !== '0000-00-00') $t1 = strtotime($cA['date']);
+                    else {
+                        $sA = reset($a['supplier_invoices']);
+                        if ($sA && !empty($sA['date']) && $sA['date'] !== '0000-00-00') $t1 = strtotime($sA['date']);
+                    }
+
+                    $t2 = 0;
+                    if ($cB && !empty($cB['date']) && $cB['date'] !== '0000-00-00') $t2 = strtotime($cB['date']);
+                    else {
+                        $sB = reset($b['supplier_invoices']);
+                        if ($sB && !empty($sB['date']) && $sB['date'] !== '0000-00-00') $t2 = strtotime($sB['date']);
+                    }
+                    
+                    if ($t1 == $t2) {
+                        $no1 = $cA ? $cA['no'] : '';
+                        $no2 = $cB ? $cB['no'] : '';
+                        return strnatcmp($no1, $no2);
+                    }
+                    return $t1 - $t2;
                 });
 
                 $row_idx = 0;
-                foreach ($grouped as $group) {
+                foreach ($display_blocks as $group) {
                     $cust_invs = array_values($group['customer_invoices']);
                     usort($cust_invs, function($a, $b) {
-                        $t1 = !empty($a['date']) && $a['date'] !== '0000-00-00' ? strtotime($a['date']) : 0;
-                        $t2 = !empty($b['date']) && $b['date'] !== '0000-00-00' ? strtotime($b['date']) : 0;
-                        return $t1 - $t2;
+                        $cmp = strnatcmp($a['no'], $b['no']);
+                        if ($cmp === 0) {
+                            $t1 = !empty($a['date']) && $a['date'] !== '0000-00-00' ? strtotime($a['date']) : 0;
+                            $t2 = !empty($b['date']) && $b['date'] !== '0000-00-00' ? strtotime($b['date']) : 0;
+                            return $t1 - $t2;
+                        }
+                        return $cmp;
                     });
 
                     $supp_invs = array_values($group['supplier_invoices']);
                     usort($supp_invs, function($a, $b) {
-                        $t1 = !empty($a['date']) && $a['date'] !== '0000-00-00' ? strtotime($a['date']) : 0;
-                        $t2 = !empty($b['date']) && $b['date'] !== '0000-00-00' ? strtotime($b['date']) : 0;
-                        return $t1 - $t2;
+                        $cmp = strnatcmp($a['no'], $b['no']);
+                        if ($cmp === 0) {
+                            $t1 = !empty($a['date']) && $a['date'] !== '0000-00-00' ? strtotime($a['date']) : 0;
+                            $t2 = !empty($b['date']) && $b['date'] !== '0000-00-00' ? strtotime($b['date']) : 0;
+                            return $t1 - $t2;
+                        }
+                        return $cmp;
                     });
 
                     $local_bills = array_values($group['local_bills']);
                     usort($local_bills, function($a, $b) {
-                        $t1 = !empty($a['date']) && $a['date'] !== '0000-00-00' ? strtotime($a['date']) : 0;
-                        $t2 = !empty($b['date']) && $b['date'] !== '0000-00-00' ? strtotime($b['date']) : 0;
-                        return $t1 - $t2;
+                        $cmp = strnatcmp($a['no'], $b['no']);
+                        if ($cmp === 0) {
+                            $t1 = !empty($a['date']) && $a['date'] !== '0000-00-00' ? strtotime($a['date']) : 0;
+                            $t2 = !empty($b['date']) && $b['date'] !== '0000-00-00' ? strtotime($b['date']) : 0;
+                            return $t1 - $t2;
+                        }
+                        return $cmp;
                     });
 
                     $dp_bills = array_values($group['dp_bills']);
                     usort($dp_bills, function($a, $b) {
-                        $t1 = !empty($a['date']) && $a['date'] !== '0000-00-00' ? strtotime($a['date']) : 0;
-                        $t2 = !empty($b['date']) && $b['date'] !== '0000-00-00' ? strtotime($b['date']) : 0;
-                        return $t1 - $t2;
+                        $cmp = strnatcmp($a['no'], $b['no']);
+                        if ($cmp === 0) {
+                            $t1 = !empty($a['date']) && $a['date'] !== '0000-00-00' ? strtotime($a['date']) : 0;
+                            $t2 = !empty($b['date']) && $b['date'] !== '0000-00-00' ? strtotime($b['date']) : 0;
+                            return $t1 - $t2;
+                        }
+                        return $cmp;
                     });
 
                     $customs_bills = array_values($group['customs_bills']);
                     usort($customs_bills, function($a, $b) {
-                        $t1 = !empty($a['date']) && $a['date'] !== '0000-00-00' ? strtotime($a['date']) : 0;
-                        $t2 = !empty($b['date']) && $b['date'] !== '0000-00-00' ? strtotime($b['date']) : 0;
-                        return $t1 - $t2;
+                        $cmp = strnatcmp($a['no'], $b['no']);
+                        if ($cmp === 0) {
+                            $t1 = !empty($a['date']) && $a['date'] !== '0000-00-00' ? strtotime($a['date']) : 0;
+                            $t2 = !empty($b['date']) && $b['date'] !== '0000-00-00' ? strtotime($b['date']) : 0;
+                            return $t1 - $t2;
+                        }
+                        return $cmp;
                     });
 
                     $max_rows = max(1, count($cust_invs), count($supp_invs), count($local_bills), count($dp_bills), count($customs_bills));
@@ -244,6 +314,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: right; background-color: #f0fdf4; mso-number-format:'#,##0.000';"><?php echo ($c_inv && isset($c_inv['amount'])) ? number_format($c_inv['amount'], 3) : ''; ?></td>
 
                             <!-- Supplier Invoice -->
+                            <td style="padding: 8px; border: 1px solid #cbd5e1; background-color: #fffbeb;"><?php echo $s_inv ? htmlspecialchars($s_inv['name']) : ''; ?></td>
                             <td style="padding: 8px; border: 1px solid #cbd5e1; background-color: #fffbeb;"><?php echo $s_inv ? htmlspecialchars($s_inv['no']) : ''; ?></td>
                             <td style="padding: 8px; border: 1px solid #cbd5e1; background-color: #fffbeb;"><?php echo ($s_inv && !empty($s_inv['date']) && $s_inv['date'] !== '0000-00-00') ? date('d-m-Y', strtotime($s_inv['date'])) : ''; ?></td>
                             <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: right; background-color: #fffbeb; mso-number-format:'#,##0.000';"><?php echo ($s_inv && isset($s_inv['amount'])) ? number_format($s_inv['amount'], 3) : ''; ?></td>
@@ -272,7 +343,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <td colspan="2" style="padding: 8px; border: 1px solid #cbd5e1; text-align: left;">Grand Total:</td>
                     <td colspan="2" style="border: 1px solid #cbd5e1;"></td>
                     <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: right; mso-number-format:'#,##0.000';"><?php echo number_format($tot_c_inv_amt, 3); ?></td>
-                    <td colspan="2" style="border: 1px solid #cbd5e1;"></td>
+                    <td colspan="3" style="border: 1px solid #cbd5e1;"></td>
                     <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: right; mso-number-format:'#,##0.000';"><?php echo number_format($tot_s_inv_amt, 3); ?></td>
                     <td colspan="2" style="border: 1px solid #cbd5e1;"></td>
                     <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: right; mso-number-format:'#,##0.000';"><?php echo number_format($tot_l_bill_amt, 3); ?></td>
@@ -283,7 +354,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </tr>
             <?php } else { ?>
                 <tr>
-                    <td colspan="17"
+                    <td colspan="18"
                         style="padding: 20px; border: 1px solid #cbd5e1; text-align: center; color: #64748b; font-style: italic;">
                         No invoice records found for the selected date range.</td>
                 </tr>
