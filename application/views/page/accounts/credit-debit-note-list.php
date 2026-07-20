@@ -114,6 +114,9 @@
                                     <a href="<?php echo site_url('credit-debit-note-edit/' . $row['credit_debit_note_id']); ?>" class="btn btn-xs btn-primary" title="Edit">
                                         <i class="fa fa-pencil"></i> Edit
                                     </a>
+                                    <button type="button" class="btn btn-xs btn-danger" title="Delete" onclick="deleteNote(<?php echo $row['credit_debit_note_id']; ?>)">
+                                        <i class="fa fa-trash"></i> Delete
+                                    </button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -126,9 +129,59 @@
             </table>
         </div>
         <div class="box-footer clearfix">
-            <?php echo $this->pagination->create_links(); ?>
+            <!-- DataTables pagination used instead -->
         </div>
     </div>
 </section>
+
+<!-- DataTables -->
+<link rel="stylesheet" href="<?php echo base_url('assets/plugins/datatables/dataTables.bootstrap.css'); ?>">
+<script src="<?php echo base_url('assets/plugins/datatables/jquery.dataTables.min.js'); ?>"></script>
+<script src="<?php echo base_url('assets/plugins/datatables/dataTables.bootstrap.min.js'); ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+$(document).ready(function() {
+    $('.dataTable').DataTable({
+        "paging": true,
+        "lengthChange": true,
+        "searching": true,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false
+    });
+});
+
+function deleteNote(id) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You will not be able to recover this Credit / Debit Note!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    }).then(function(result) {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '<?php echo base_url(); ?>' + 'credit-debit-note-delete/' + id,
+                type: 'POST',
+                dataType: 'json',
+                success: function(res) {
+                    if (res.status == 'success') {
+                        Swal.fire('Deleted!', res.msg, 'success').then(function() {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error!', res.msg, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error!', 'An error occurred. Please try again.', 'error');
+                }
+            });
+        }
+    });
+}
+</script>
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>

@@ -10,6 +10,9 @@
 
 <section class="content">
     <form id="frmCreditDebitNote" method="post" enctype="multipart/form-data">
+        <?php if(isset($edit_data)): ?>
+            <input type="hidden" name="note_id" value="<?php echo $edit_data['credit_debit_note_id']; ?>">
+        <?php endif; ?>
         <!-- 1. Document Details -->
         <div class="box box-primary">
             <div class="box-header with-border">
@@ -56,7 +59,7 @@
                     
                     <div class="col-md-3 form-group">
                         <label>Search Enquiry No <span class="text-danger">*</span></label>
-                        <input type="text" name="srch_enq_id" id="srch_enq_id" class="form-control srch_enq_id" placeholder="Search Enquiry No" value="<?php echo isset($edit_data) ? $edit_data['tender_enquiry_id'] : ''; ?>">
+                        <input type="text" name="srch_enq_id" id="srch_enq_id" class="form-control srch_enq_id" placeholder="Search Enquiry No" value="<?php echo isset($edit_data) ? htmlspecialchars($edit_data['tender_no']) : ''; ?>">
                         <input type="hidden" name="tender_enquiry_id" id="tender_enquiry_id" value="<?php echo isset($edit_data) ? $edit_data['tender_enquiry_id'] : ''; ?>">
                     </div>
 
@@ -213,6 +216,9 @@
         </div>
 
         <div class="box-footer text-right">
+            <?php if(isset($edit_data)): ?>
+                <button type="button" class="btn btn-danger pull-left" onclick="deleteNote(<?php echo $edit_data['credit_debit_note_id']; ?>)"><i class="fa fa-trash"></i> Delete</button>
+            <?php endif; ?>
             <input type="hidden" name="status" id="doc_status" value="Draft">
             <a href="javascript:history.back();" class="btn btn-default">Cancel</a>
             <button type="submit" class="btn btn-warning" onclick="$('#doc_status').val('Draft');"><i class="fa fa-save"></i> Save Draft</button>

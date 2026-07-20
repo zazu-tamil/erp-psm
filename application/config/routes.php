@@ -188,6 +188,9 @@ $route['credit-debit-note-edit/(:num)'] = 'CreditDebitNote/edit/$1';
 $route['credit-debit-note-add'] = 'CreditDebitNote/add';
 $route['credit-debit-note-save'] = 'CreditDebitNote/save';
 $route['credit-debit-note-get-invoices'] = 'CreditDebitNote/get_reference_invoices';
+$route['credit-debit-note-get-enquiry-details'] = 'CreditDebitNote/get_enquiry_details';
+$route['credit-debit-note-get-enquiry-supplier'] = 'CreditDebitNote/get_supplier_for_enquiry';
+$route['credit-debit-note-get-invoice-items'] = 'CreditDebitNote/get_invoice_items';
 
 $route['inward-list'] = 'accounts/cash_inward_list';
 $route['inward-list/(:num)'] = 'accounts/cash_inward_list/$1';
@@ -345,3 +348,5 @@ $route['invoice-report'] = 'reports/invoice_report';
 $route['tender-progress-report'] = 'reports/tender_progress_report';
 $route['vat-statement-report'] = 'reports/vat_statement_report';
 
+
+$route['credit-debit-note-delete/(:num)'] = 'CreditDebitNote/delete/$1';

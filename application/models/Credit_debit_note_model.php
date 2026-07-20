@@ -145,7 +145,9 @@ class Credit_debit_note_model extends CI_Model
         }
 
         $this->db->order_by('a.credit_debit_note_id', 'DESC');
-        $this->db->limit($limit, $start);
+        if ($limit !== null) {
+            $this->db->limit($limit, $start);
+        }
         
         $query = $this->db->get();
         return $query->result_array();
@@ -171,8 +173,10 @@ class Credit_debit_note_model extends CI_Model
 
     public function get_note($id)
     {
-        $this->db->where('credit_debit_note_id', $id);
-        $query = $this->db->get('credit_debit_note_info');
+        $this->db->select('a.*, get_tender_info(a.tender_enquiry_id) as tender_no');
+        $this->db->from('credit_debit_note_info as a');
+        $this->db->where('a.credit_debit_note_id', $id);
+        $query = $this->db->get();
         return $query->row_array();
     }
 
@@ -240,5 +244,14 @@ class Credit_debit_note_model extends CI_Model
         }
 
         return $note_id;
+    }
+    public function delete_note($id)
+    {
+        $this->db->trans_start();
+        $this->db->where('credit_debit_note_id', $id);
+        $this->db->update('credit_debit_note_info', ['status' => 'Delete']);
+        $this->db->trans_complete();
+        
+        return $this->db->trans_status();
     }
 }

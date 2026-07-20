@@ -1,5 +1,17 @@
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+var base_url = '<?php echo base_url(); ?>';
 $(document).ready(function() {
+    if ($('.select2').length > 0) {
+        $('.select2').select2();
+    }
+
+    if ($('#party_type').val() && $('#tender_enquiry_id').val()) {
+        loadInvoices();
+    }
+
     // Show/hide party selection
     $('#party_type').on('change', function() {
         var pType = $(this).val();
@@ -22,7 +34,59 @@ $(document).ready(function() {
         loadInvoices();
     });
 
-    $('#customer_id, #supplier_id, #tender_enquiry_id').on('change', function() {
+    $(".srch_enq_id").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: base_url + "tender/tender_enquiry_id_search",
+                type: "POST",
+                data: { search: request.term },
+                dataType: "json",
+                success: function (data) {
+                    response(data);
+                },
+            });
+        },
+        minLength: 1,
+        select: function (event, ui) {
+            $("#tender_enquiry_id").val(ui.item.tender_enquiry_id);
+            $(this).val(ui.item.label);
+            
+            if (ui.item.company_id) {
+                $('#company_id').val(ui.item.company_id);
+            }
+            
+            var currentType = $('#party_type').val();
+            // Auto-select Customer only if party type is not set to Supplier
+            if (currentType !== 'Supplier') {
+                if (ui.item.customer_id) {
+                    $('#party_type').val('Customer').trigger('change');
+                    $('#customer_id').val(ui.item.customer_id);
+                }
+                loadInvoices();
+            } else {
+                // Try to auto-select unique supplier
+                $.ajax({
+                    url: base_url + 'credit-debit-note-get-enquiry-supplier',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { enquiry_id: ui.item.tender_enquiry_id },
+                    success: function(res) {
+                        if (res.status === 'success' && res.vendor_id) {
+                            $('#supplier_id').val(res.vendor_id);
+                        }
+                        loadInvoices();
+                    },
+                    error: function() {
+                        loadInvoices();
+                    }
+                });
+            }
+            
+            return false;
+        }
+    });
+
+    $('#customer_id, #supplier_id').on('change', function() {
         loadInvoices();
     });
 
@@ -31,7 +95,7 @@ $(document).ready(function() {
         var pId = (pType == 'Customer') ? $('#customer_id').val() : $('#supplier_id').val();
         var enqId = $('#tender_enquiry_id').val();
 
-        if (pType && pId && enqId) {
+        if (pType && enqId) {
             $.ajax({
                 url: base_url + 'credit-debit-note-get-invoices',
                 type: 'POST',
@@ -69,6 +133,28 @@ $(document).ready(function() {
             $('#reference_invoice_no').val(opt.data('no'));
             var amt = parseFloat(opt.data('amt')) || 0;
             $('#outstanding_invoice_amount').val(amt.toFixed(2));
+
+            // Auto fetch items
+            var pType = $('#party_type').val();
+            $.ajax({
+                url: base_url + 'credit-debit-note-get-invoice-items',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    party_type: pType,
+                    invoice_id: opt.val()
+                },
+                success: function(res) {
+                    if (res.status == 'success' && res.data.length > 0) {
+                        $('#itemTable tbody').empty();
+                        $.each(res.data, function(i, item) {
+                            addRow(item);
+                        });
+                        calculateAmounts();
+                    }
+                }
+            });
+
         } else {
             $('#reference_invoice_no').val('');
             $('#outstanding_invoice_amount').val('0.00');
@@ -84,18 +170,20 @@ $(document).ready(function() {
         var code = data.item_code || '';
         var desc = data.description || '';
         var hsn = data.hsn_sac || '';
-        var qty = data.qty || '';
         var uom = data.uom || '';
-        var rate = data.rate || '';
-        var dPercent = data.discount_percent || '0';
-        var dAmt = data.discount_amount || '0.00';
-        var tPercent = data.tax_percent || '0';
-        var tAmt = data.tax_amount || '0.00';
-        var lTotal = data.line_total || '0.00';
-
-        var taxSelect = '<select name="tax_percent[]" class="form-control input-sm calc-item">';
-        taxSelect += taxOptionsHtml;
-        taxSelect += '</select>';
+        
+        var qty = parseFloat(data.qty) || 0;
+        var rate = parseFloat(data.rate) || 0;
+        var tPercent = parseFloat(data.tax_percent) || 0;
+        var baseAmt = qty * rate;
+        var calcTAmt = (baseAmt * tPercent) / 100;
+        
+        var tAmt = data.tax_amount !== undefined ? data.tax_amount : calcTAmt.toFixed(2);
+        var lTotal = data.line_total !== undefined ? data.line_total : (baseAmt + calcTAmt).toFixed(2);
+        
+        qty = data.qty || '';
+        rate = data.rate || '';
+        tPercent = data.tax_percent || '0';
 
         var tr = '<tr>' +
             '<td><i class="fa fa-arrows"></i></td>' +
@@ -105,18 +193,14 @@ $(document).ready(function() {
             '<td><input type="number" name="qty[]" class="form-control input-sm calc-item" step="0.001" min="0" required value="' + qty + '"></td>' +
             '<td><input type="text" name="uom[]" class="form-control input-sm" required value="' + uom + '"></td>' +
             '<td><input type="number" name="rate[]" class="form-control input-sm calc-item" step="0.01" min="0" required value="' + rate + '"></td>' +
-            '<td><input type="number" name="discount_percent[]" class="form-control input-sm calc-item" step="0.01" min="0" value="' + dPercent + '"></td>' +
-            '<td><input type="text" name="item_discount_amount[]" class="form-control input-sm item_discount_amount" readonly value="' + dAmt + '"></td>' +
-            '<td>' + taxSelect + '</td>' +
+            '<td><input type="number" name="tax_percent[]" class="form-control input-sm calc-item" step="0.01" min="0" value="' + tPercent + '"></td>' +
             '<td><input type="text" name="item_tax_amount[]" class="form-control input-sm item_tax_amount" readonly value="' + tAmt + '"></td>' +
             '<td><input type="text" name="line_total[]" class="form-control input-sm line_total" readonly value="' + lTotal + '"></td>' +
             '<td><button type="button" class="btn btn-danger btn-xs btnRemoveItem"><i class="fa fa-trash"></i></button></td>' +
             '</tr>';
             
         var $tr = $(tr);
-        if (data.tax_percent !== undefined) {
-            $tr.find('select[name="tax_percent[]"]').val(parseFloat(data.tax_percent));
-        }
+
         $('#itemTable tbody').append($tr);
     }
 
@@ -149,16 +233,12 @@ $(document).ready(function() {
         var tr = $(this).closest('tr');
         var qty = parseFloat(tr.find('input[name="qty[]"]').val()) || 0;
         var rate = parseFloat(tr.find('input[name="rate[]"]').val()) || 0;
-        var discPercent = parseFloat(tr.find('input[name="discount_percent[]"]').val()) || 0;
-        var taxPercent = parseFloat(tr.find('select[name="tax_percent[]"]').val()) || 0;
+        var taxPercent = parseFloat(tr.find('input[name="tax_percent[]"]').val()) || 0;
 
         var baseAmount = qty * rate;
-        var discAmt = (baseAmount * discPercent) / 100;
-        var taxable = baseAmount - discAmt;
-        var taxAmt = (taxable * taxPercent) / 100;
-        var lineTotal = taxable + taxAmt;
+        var taxAmt = (baseAmount * taxPercent) / 100;
+        var lineTotal = baseAmount + taxAmt;
 
-        tr.find('input[name="item_discount_amount[]"]').val(discAmt.toFixed(2));
         tr.find('input[name="item_tax_amount[]"]').val(taxAmt.toFixed(2));
         tr.find('input[name="line_total[]"]').val(lineTotal.toFixed(2));
 
@@ -171,36 +251,34 @@ $(document).ready(function() {
 
     function calculateAmounts() {
         var subTotal = 0;
-        var totalDisc = 0;
         var totalTax = 0;
-        
+
         $('#itemTable tbody tr').each(function() {
             var qty = parseFloat($(this).find('input[name="qty[]"]').val()) || 0;
             var rate = parseFloat($(this).find('input[name="rate[]"]').val()) || 0;
-            var dAmt = parseFloat($(this).find('input[name="item_discount_amount[]"]').val()) || 0;
-            var tAmt = parseFloat($(this).find('input[name="item_tax_amount[]"]').val()) || 0;
-            
+            var taxPercent = parseFloat($(this).find('input[name="tax_percent[]"]').val()) || 0;
+
             var baseAmount = qty * rate;
+            var taxAmt = (baseAmount * taxPercent) / 100;
+
             subTotal += baseAmount;
-            totalDisc += dAmt;
-            totalTax += tAmt;
+            totalTax += taxAmt;
         });
 
-        var taxableAmount = subTotal - totalDisc;
-        var roundOff = parseFloat($('#roundoff').val()) || 0;
-        var totalAmount = taxableAmount + totalTax + roundOff;
-
         $('#subtotal').val(subTotal.toFixed(2));
-        $('#discount_amount').val(totalDisc.toFixed(2));
-        $('#taxable_amount').val(taxableAmount.toFixed(2));
+        $('#taxable_amount').val(subTotal.toFixed(2));
         $('#tax_amount').val(totalTax.toFixed(2));
-        $('#total_amount').val(totalAmount.toFixed(2));
 
-        // Adjustments logic
-        // In this implementation, Adjust Amount defaults to 0. If user types it, it calculates Remaining Credit.
-        var outstanding = parseFloat($('#outstanding_invoice_amount').val()) || 0;
+        var roundOff = parseFloat($('#roundoff').val()) || 0;
+        var totalAmount = subTotal + totalTax + roundOff;
+
+        $('#total_amount').val(totalAmount.toFixed(2));
+        calculateAdjustments();
+    }
+
+    function calculateAdjustments() {
+        var totalAmount = parseFloat($('#total_amount').val()) || 0;
         var adjust = parseFloat($('#adjustment_amount').val()) || 0;
-        // Remaining Credit = Total Amount - Adjust Amount
         var remaining = totalAmount - adjust;
         $('#remaining_amount').val(remaining.toFixed(2));
     }
@@ -229,18 +307,57 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(res) {
                 if (res.status == 'success') {
-                    alert(res.msg);
-                    window.location.href = base_url + 'credit-debit-note-list'; // Redirect to list page
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: res.msg,
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(function() {
+                        window.location.href = base_url + 'credit-debit-note-list';
+                    });
                 } else {
-                    alert(res.msg);
+                    Swal.fire('Error!', res.msg, 'error');
                     submitBtn.html(btnHtml).prop('disabled', false);
                 }
             },
             error: function() {
-                alert('An error occurred. Please try again.');
+                Swal.fire('Error!', 'An error occurred. Please try again.', 'error');
                 submitBtn.html(btnHtml).prop('disabled', false);
             }
         });
     });
 });
+
+function deleteNote(id) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You will not be able to recover this Credit / Debit Note!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    }).then(function(result) {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: base_url + 'credit-debit-note-delete/' + id,
+                type: 'POST',
+                dataType: 'json',
+                success: function(res) {
+                    if (res.status == 'success') {
+                        Swal.fire('Deleted!', res.msg, 'success').then(function() {
+                            window.location.href = base_url + 'credit-debit-note-list';
+                        });
+                    } else {
+                        Swal.fire('Error!', res.msg, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error!', 'An error occurred. Please try again.', 'error');
+                }
+            });
+        }
+    });
+}
 </script>

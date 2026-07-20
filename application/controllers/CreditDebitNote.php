@@ -23,28 +23,7 @@ class CreditDebitNote extends CI_Controller
             'note_type' => $this->input->post('srch_note_type')
         ];
 
-        $this->load->library('pagination');
-        $total_rows = $this->Credit_debit_note_model->get_list_count($filters);
-        
-        $config['base_url'] = site_url('credit-debit-note-list');
-        $config['total_rows'] = $total_rows;
-        $config['per_page'] = 25;
-        $config['uri_segment'] = 2;
-        $config['attributes'] = array('class' => 'page-link');
-        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
-        $config['full_tag_close'] = '</ul>';
-        $config['num_tag_open'] = '<li class="page-item">';
-        $config['num_tag_close'] = '</li>';
-        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
-        $config['cur_tag_close'] = '<span class="sr-only">(current)</span></a></li>';
-        $config['prev_tag_open'] = '<li class="page-item">';
-        $config['prev_tag_close'] = '</li>';
-        $config['next_tag_open'] = '<li class="page-item">';
-        $config['next_tag_close'] = '</li>';
-        
-        $this->pagination->initialize($config);
-        
-        $data['records'] = $this->Credit_debit_note_model->get_list($config['per_page'], $offset, $filters);
+        $data['records'] = $this->Credit_debit_note_model->get_list(null, 0, $filters);
         $data['filters'] = $filters;
         
         $this->load->view('page/accounts/credit-debit-note-list', $data);
@@ -84,7 +63,7 @@ class CreditDebitNote extends CI_Controller
         $data['edit_attachments'] = $this->Credit_debit_note_model->get_attachments($id);
         
         $data['js'] = 'accounts/credit_debit_note.inc';
-        $this->load->view('page/accounts/credit-debit-note-add', $data);
+        $this->load->view('page/accounts/credit-debit-note-edit', $data);
     }
 
     public function save()
@@ -94,10 +73,16 @@ class CreditDebitNote extends CI_Controller
             $party_type = $this->input->post('party_type');
             $status = $this->input->post('status') ? $this->input->post('status') : 'Draft';
             
+            $note_no = $this->input->post('note_no');
+            if (empty($note_no) || $note_no == 'Auto Generated') {
+                $max_id = $this->db->select_max('credit_debit_note_id')->get('credit_debit_note_info')->row()->credit_debit_note_id;
+                $note_no = 'CDN-' . str_pad(($max_id ? $max_id + 1 : 1), 4, '0', STR_PAD_LEFT);
+            }
+
             $save_data = [
                 'company_id' => $this->input->post('company_id'),
                 'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
-                'note_no' => $this->input->post('note_no'),
+                'note_no' => $note_no,
                 'note_type' => $this->input->post('note_type'),
                 'party_type' => $party_type,
                 'customer_id' => ($party_type == 'Customer') ? $this->input->post('customer_id') : NULL,
@@ -155,10 +140,10 @@ class CreditDebitNote extends CI_Controller
                             'qty' => $qtys[$i],
                             'uom' => $uoms[$i],
                             'rate' => $rates[$i],
-                            'discount_percent' => $discount_percents[$i] ?: 0,
-                            'discount_amount' => $discount_amounts[$i] ?: 0,
-                            'tax_percent' => $tax_percents[$i] ?: 0,
-                            'tax_amount' => $tax_amounts[$i] ?: 0,
+                            'discount_percent' => isset($discount_percents[$i]) && $discount_percents[$i] ? $discount_percents[$i] : 0,
+                            'discount_amount' => isset($discount_amounts[$i]) && $discount_amounts[$i] ? $discount_amounts[$i] : 0,
+                            'tax_percent' => isset($tax_percents[$i]) && $tax_percents[$i] ? $tax_percents[$i] : 0,
+                            'tax_amount' => isset($tax_amounts[$i]) && $tax_amounts[$i] ? $tax_amounts[$i] : 0,
                             'line_total' => $line_totals[$i] ?: 0,
                         ];
                     }
@@ -184,7 +169,7 @@ class CreditDebitNote extends CI_Controller
                 if (!is_dir($config['upload_path'])) {
                     mkdir($config['upload_path'], 0777, TRUE);
                 }
-                $config['allowed_types'] = 'gif|jpg|png|pdf|doc|docx|xls|xlsx';
+                $config['allowed_types'] = 'gif|jpg|jpeg|png|pdf|doc|docx|xls|xlsx';
                 $config['max_size'] = 5048; // 5MB
                 $config['encrypt_name'] = TRUE;
 
@@ -228,19 +213,91 @@ class CreditDebitNote extends CI_Controller
         $enquiry_id = $this->input->post('enquiry_id');
         
         if ($party_type == 'Customer' && $enquiry_id) {
-            $this->db->select('invoice_id, invoice_no, invoice_date, total_amount');
+            $this->db->select('tender_enq_invoice_id as invoice_id, invoice_no, invoice_date, total_amount');
             $this->db->from('tender_enq_invoice_info');
-            $this->db->where('customer_id', $party_id);
+            if ($party_id) $this->db->where('customer_id', $party_id);
+            $this->db->where('tender_enquiry_id', $enquiry_id);
             $query = $this->db->get();
             echo json_encode(['status'=>'success', 'data'=>$query->result()]);
         } else if ($party_type == 'Supplier' && $enquiry_id) {
             $this->db->select('vendor_purchase_invoice_id as invoice_id, invoice_no, invoice_date, total_amount');
             $this->db->from('vendor_purchase_invoice_info');
-            $this->db->where('vendor_id', $party_id);
+            if ($party_id) $this->db->where('vendor_id', $party_id);
             $query = $this->db->get();
             echo json_encode(['status'=>'success', 'data'=>$query->result()]);
         } else {
             echo json_encode(['status'=>'success', 'data'=>[]]);
+        }
+    }
+
+    public function get_enquiry_details()
+    {
+        $enquiry_id = $this->input->post('enquiry_id');
+        if ($enquiry_id) {
+            $this->db->select('company_id, customer_id');
+            $this->db->from('tender_enquiry_info');
+            $this->db->where('tender_enquiry_id', $enquiry_id);
+            $query = $this->db->get();
+            if ($query->num_rows() > 0) {
+                echo json_encode(['status'=>'success', 'data'=>$query->row()]);
+                return;
+            }
+        }
+        echo json_encode(['status'=>'error']);
+    }
+
+    public function get_supplier_for_enquiry()
+    {
+        $enquiry_id = $this->input->post('enquiry_id');
+        if ($enquiry_id) {
+            $this->db->select('vendor_id');
+            $this->db->distinct();
+            $this->db->from('vendor_purchase_invoice_info');
+            $this->db->where('tender_enquiry_id', $enquiry_id);
+            $query = $this->db->get();
+            
+            // If there's exactly 1 supplier for this enquiry
+            if ($query->num_rows() == 1) {
+                $row = $query->row();
+                echo json_encode(['status' => 'success', 'vendor_id' => $row->vendor_id]);
+                return;
+            }
+        }
+        echo json_encode(['status' => 'error']);
+    }
+
+    public function get_invoice_items()
+    {
+        $party_type = $this->input->post('party_type');
+        $invoice_id = $this->input->post('invoice_id');
+        
+        if ($party_type == 'Customer' && $invoice_id) {
+            $this->db->select('item_code, item_desc as description, uom, qty, rate, gst as tax_percent, amount as line_total');
+            $this->db->from('tender_enq_invoice_item_info');
+            $this->db->where('tender_enq_invoice_id', $invoice_id);
+            $query = $this->db->get();
+            echo json_encode(['status'=>'success', 'data'=>$query->result()]);
+        } else if ($party_type == 'Supplier' && $invoice_id) {
+            $this->db->select('item_code, item_desc as description, uom, qty, rate, gst as tax_percent, amount as line_total');
+            $this->db->from('vendor_purchase_invoice_item_info');
+            $this->db->where('vendor_purchase_invoice_id', $invoice_id);
+            $query = $this->db->get();
+            echo json_encode(['status'=>'success', 'data'=>$query->result()]);
+        } else {
+            echo json_encode(['status'=>'error', 'data'=>[]]);
+        }
+    }
+    public function delete($id)
+    {
+        if ($this->input->server('REQUEST_METHOD') == 'POST') {
+            $result = $this->Credit_debit_note_model->delete_note($id);
+            if ($result) {
+                echo json_encode(['status' => 'success', 'msg' => 'Credit / Debit note deleted successfully']);
+            } else {
+                echo json_encode(['status' => 'error', 'msg' => 'Database error occurred while deleting the note.']);
+            }
+        } else {
+            echo json_encode(['status' => 'error', 'msg' => 'Invalid request']);
         }
     }
 }

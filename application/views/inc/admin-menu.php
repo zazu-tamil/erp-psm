@@ -498,7 +498,7 @@ $report_m_grp = [
 
 <li class="header">Acounts Book Info</li>
 
-<li class="treeview <?= in_array($current_page, ['inward-list', 'outward-list']) ? 'active' : '' ?>">
+<li class="treeview <?= in_array($current_page, ['inward-list', 'outward-list', 'credit-debit-note-list', 'credit-debit-note-add', 'credit-debit-note-edit']) ? 'active' : '' ?>">
     <a href="#">
         <i class="fa fa-file-text"></i>
         <span>Accounts Book Info</span>
@@ -516,6 +516,28 @@ $report_m_grp = [
             <a href="<?= site_url('outward-list') ?>">
                 <i class="fa fa-list-ul"></i> Outward Entery
             </a>
+        </li>
+
+        <li
+            class="treeview <?= in_array($current_page, ['credit-debit-note-list', 'credit-debit-note-add', 'credit-debit-note-edit']) ? 'active' : '' ?>">
+            <a href="#">
+                <i class="fa fa-file-text-o"></i> Credit/Debit Note
+                <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+            </a>
+
+            <ul class="treeview-menu">
+                <li class="<?= ($current_page === 'credit-debit-note-add') ? 'active' : '' ?>">
+                    <a href="<?= site_url('credit-debit-note-add') ?>">
+                        <i class="fa fa-plus-circle"></i> Add Credit/Debit Note
+                    </a>
+                </li>
+
+                <li class="<?= ($current_page === 'credit-debit-note-list') ? 'active' : '' ?>">
+                    <a href="<?= site_url('credit-debit-note-list') ?>">
+                        <i class="fa fa-list-ul"></i> Credit/Debit Note List
+                    </a>
+                </li>
+            </ul>
         </li>
 
     </ul>
