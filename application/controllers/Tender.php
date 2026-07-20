@@ -1993,6 +1993,7 @@ class Tender extends CI_Controller
             te.enquiry_no AS tender_enquiry_no,
             te.enquiry_date AS tender_enquiry_date,
             tqi.quotation_no as tender_quotation_no,
+            get_tender_info(tqi.tender_enquiry_id) as tender_details,
             ci.ltr_header_img,
             curr.currency_code,
             curr.decimal_point,

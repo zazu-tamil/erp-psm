@@ -10,8 +10,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Quotation-<?php echo $record['tender_quotation_no']; ?></title>
-
+    <title>Enquiry No - <?= htmlspecialchars(str_replace('/', '∕', $record['tender_details'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></title>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
@@ -43,7 +42,8 @@
                 break-inside: avoid !important;
             }
 
-            td, th {
+            td,
+            th {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
             }

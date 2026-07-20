@@ -44,12 +44,12 @@ class Supplier_summary_model extends CI_Model
                 /*================ DELIVERY PARTNER BILL =================*/
                 dp.invoice_no AS dp_bill_no,
                 dp.invoice_date AS dp_bill_date,
-                dp.g_total AS dp_bill_amount,
+                dp.dp_charges AS dp_bill_amount,
 
                 /*================ CUSTOMS BILL =================*/
                 cb.invoice_no AS customs_bill_no,
                 cb.invoice_date AS customs_bill_date,
-                cb.customs_tot_amt AS customs_bill_amount
+                cb.custom_duty AS customs_bill_amount
 
             FROM customer_tender_po_info a
 
