@@ -182,6 +182,13 @@ $route['tender-po-invoice-print/(:num)'] = 'tender/tender_po_invoice_print/$1';
 
 /*Accounts Routes*/
 
+$route['credit-debit-note-list'] = 'CreditDebitNote/index';
+$route['credit-debit-note-list/(:num)'] = 'CreditDebitNote/index/$1';
+$route['credit-debit-note-edit/(:num)'] = 'CreditDebitNote/edit/$1';
+$route['credit-debit-note-add'] = 'CreditDebitNote/add';
+$route['credit-debit-note-save'] = 'CreditDebitNote/save';
+$route['credit-debit-note-get-invoices'] = 'CreditDebitNote/get_reference_invoices';
+
 $route['inward-list'] = 'accounts/cash_inward_list';
 $route['inward-list/(:num)'] = 'accounts/cash_inward_list/$1';
 
