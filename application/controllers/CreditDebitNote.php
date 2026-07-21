@@ -15,6 +15,7 @@ class CreditDebitNote extends CI_Controller
     public function index($offset = 0)
     {
         $data['title'] = "Credit / Debit Note List";
+         $data['js'] = 'accounts/credit_debit_note.inc';
         
         $filters = [
             'from_date' => $this->input->post('srch_from_date'),

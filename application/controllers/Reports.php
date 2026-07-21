@@ -1663,8 +1663,8 @@ class Reports extends CI_Controller
 
         $data = array();
         $data['js'] = 'reports/reports.inc';
-        $data['s_url'] = 'customer-invoice-pending-report';
-        $data['title'] = 'Customer Invoice Pending Report';
+        $data['s_url'] = 'vendor-invoice-pending-report';
+        $data['title'] = 'Vendor Invoice  Report';
 
 
 
