@@ -338,6 +338,219 @@ class Reports extends CI_Controller
         $this->load->view('page/reports/purchase-nbr-report', $data);
     }
 
+    public function sales_purchase_report()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        $data['js'] = 'reports/reports.inc';
+
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = date('Y-m-') . '01';
+            $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
+        }
+
+        if (isset($_POST['vat_payer_sales_grp'])) {
+            $data['vat_payer_sales_grp'] = $vat_payer_sales_grp = $this->input->post('vat_payer_sales_grp');
+        } else {
+            $data['vat_payer_sales_grp'] = $vat_payer_sales_grp = '';
+        }
+
+        if (isset($_POST['vat_payer_purchase_grp'])) {
+            $data['vat_payer_purchase_grp'] = $vat_payer_purchase_grp = $this->input->post('vat_payer_purchase_grp');
+        } else {
+            $data['vat_payer_purchase_grp'] = $vat_payer_purchase_grp = '';
+        }
+
+        // Fetch Sales Data
+        $data['sales_record_list'] = [];
+        $sql_sales = " 
+                select 
+                a.tender_enq_invoice_id as invoice_id,
+                v.s_order,
+                v.template,
+                v.vat_filing_head_name vat_payer_sales_grp,
+                a.vat_payer_sales_grp as vat_rtn_fld, 
+                a.invoice_no,
+                a.invoice_date,
+                b.gst as client_vat_no,
+                b.customer_name client_name,
+                'General trading' g_desc,
+                a.declaration_no,
+                a.declaration_date,
+                d.country_code,
+                (a.total_amount - a.tax_amount) as tot_amt_ex_tax,
+                a.tax_amount as vat_amt,
+                a.total_amount as tot_amt_inc_tax 
+                from vat_filing_head_info as v
+                left join tender_enq_invoice_info as a 
+                    on a.vat_payer_sales_grp = v.vat_filing_head_name 
+                    and a.invoice_date between '$srch_from_date' and '$srch_to_date'
+                    and a.`status` = 'Active' 
+                left join customer_info as b on b.customer_id = a.customer_id and b.`status` = 'Active'
+                left join country_info as d on d.country_name = b.country and a.`status` = 'Active'
+                where v.`status` = 'Active' 
+                and v.vat_filing_head_type = 'Sales'
+                and ('" . $this->db->escape_str($vat_payer_sales_grp) . "' = '' or v.vat_filing_head_name = '" . $this->db->escape_str($vat_payer_sales_grp) . "')
+                order by v.s_order asc , v.vat_filing_head_name ,  a.invoice_date , a.tender_enq_invoice_id asc
+        ";
+        $query_sales = $this->db->query($sql_sales);
+        $rec_sales = $query_sales->result_array();
+        $grouped_sales = [];
+        foreach ($rec_sales as $row) {
+            $s_order = $row['s_order'];   // group key
+            $grouped_sales[$s_order][] = $row;  // push row inside that s_order
+        }
+        $data['sales_record_list'] = $grouped_sales;
+
+        // Fetch Purchase Data
+        $data['purchase_record_list'] = [];
+        $sql_purchase = "
+        select 
+        c.s_order,
+        c.template,
+        c.vat_filing_head_name as vat_payer_purchase_grp, 
+        a1.vat_payer_purchase_grp as vat_rtn_fld, 
+        a1.invoice_no,   
+        a1.inv_date as invoice_date,
+        b.gst as supplier_vat_no,
+        b.vendor_name supplier_name,
+        b.crno,
+        a1.g_desc,
+        a1.items_tot_ex_tax,
+        a1.addl_amt_ex_tax,
+        (a1.items_tot_ex_tax + a1.addl_amt_ex_tax) as tot_amt_ex_tax,
+        a1.tax_amount as vat_amt,
+        a1.total_amount as tot_amt_inc_tax,
+        a1.declaration_date,
+        a1.declaration_no
+        from
+        (
+            (
+            select  
+            'Supplier Bill' as v_type,
+            a.vendor_id,  
+            a.invoice_no,
+            a.invoice_date as inv_date,  
+            a.vat_payer_purchase_grp,
+            'General trading' g_desc,
+            a.total_amount_wo_tax as items_tot_ex_tax,
+            (coalesce(a.total_amount_wo_tax_inc_addl, a.total_amount_wo_tax) - a.total_amount_wo_tax) as addl_amt_ex_tax,
+            coalesce(a.total_tax_amount_inc_addl, a.tax_amount) as tax_amount,
+            coalesce(a.total_amount_inc_addl, a.total_amount) as total_amount,
+            a.declaration_date,
+            a.declaration_no
+            from vendor_purchase_invoice_info as a  
+            where a.`status` = 'Active' 
+            and (a.only_accounting_entry != 1 or a.only_accounting_entry = 0 or a.only_accounting_entry is null)
+            and a.entry_date between '$srch_from_date' and '$srch_to_date'
+            order by  a.entry_date asc 
+            ) union all (
+             select 
+            'Local Bill' as v_type,
+            a.vendor_id,
+            a.invoice_no,
+            a.invoice_date as inv_date,
+            a.vat_payer_purchase_grp,
+            'General trading' g_desc,
+            a.tot_amt_wo_tax as items_tot_ex_tax,
+            0.000 as addl_amt_ex_tax,
+            a.vat_amt as tax_amount,
+            a.tot_amt_with_tax as total_amount,
+            '' as declaration_date,
+            '' as declaration_no
+            from local_purchase_bill_info as a
+            where a.`status` = 'Active'  
+            and a.inv_entry_date between '$srch_from_date' and '$srch_to_date'
+            order by  a.inv_entry_date asc  
+            ) union all (
+            select 
+            'DP Bill' as v_type,
+            a.vendor_id,
+            a.invoice_no,
+            a.invoice_date as inv_date,
+            a.vat_payer_purchase_grp,
+            'Service' g_desc,
+            a.dp_charges as items_tot_ex_tax,
+            0.000 as addl_amt_ex_tax,
+            a.dp_vat_amt as tax_amount,
+            (a.dp_charges + a.dp_vat_amt) as total_amount,
+            '' as declaration_date,
+            '' as declaration_no
+            from dp_bill_info as a
+            where a.`status` = 'Active'  
+            and a.inv_entry_date between '$srch_from_date' and '$srch_to_date'
+            order by a.inv_entry_date asc 
+            ) union all (
+            select 
+            'Customs Bill' as v_type,
+            a.vendor_id,
+            a.invoice_no,
+            a.invoice_date as inv_date,
+            a.vat_payer_purchase_grp,
+            'Service' g_desc,
+            a.tot_amt_wo_vat as items_tot_ex_tax,
+            0.000 as addl_amt_ex_tax,
+            a.vat_amt as tax_amount,
+            a.customs_tot_amt as total_amount,
+            a.declaration_date as declaration_date,
+            a.declaration_no as declaration_no
+            from customs_bill_info as a
+            where a.`status` = 'Active'  
+            and a.inv_entry_date between '$srch_from_date' and '$srch_to_date'
+            order by a.inv_entry_date asc 
+            ) 
+        ) as a1
+         left join vendor_info as b on b.vendor_id = a1.vendor_id and b.`status` = 'Active'
+         left join vat_filing_head_info as c on c.vat_filing_head_name = a1.vat_payer_purchase_grp and c.vat_filing_head_type = 'Purchase' and c.`status` = 'Active'
+         where ('" . $this->db->escape_str($vat_payer_purchase_grp) . "' = '' or a1.vat_payer_purchase_grp = '" . $this->db->escape_str($vat_payer_purchase_grp) . "')
+         order by c.s_order asc , c.vat_filing_head_name ,  a1.inv_date ,  a1.v_type 
+        ";
+
+        $query_purchase = $this->db->query($sql_purchase);
+        $rec_purchase = $query_purchase->result_array();
+        $grouped_purchase = [];
+        foreach ($rec_purchase as $row) {
+            $s_order = $row['s_order'];   // group key
+            $grouped_purchase[$s_order][] = $row;  // push row inside that s_order
+        }
+        $data['purchase_record_list'] = $grouped_purchase;
+
+        // Fetch Sales Categories for Dropdown
+        $sql = "
+            SELECT 
+            vat_filing_head_name 
+            FROM vat_filing_head_info 
+            WHERE status = 'Active' 
+            and vat_filing_head_type = 'Sales'
+            ORDER BY vat_filing_head_id ASC
+            ";
+        $query = $this->db->query($sql);
+        $data['vat_payer_sales_opt'] = ['' => 'All VAT Payer Sales Category'];
+        foreach ($query->result_array() as $row) {
+            $data['vat_payer_sales_opt'][$row['vat_filing_head_name']] = $row['vat_filing_head_name'];
+        }
+
+        // Fetch Purchase Categories for Dropdown
+        $sql = "
+            SELECT 
+            vat_filing_head_name 
+            FROM vat_filing_head_info 
+            WHERE status = 'Active' 
+            and vat_filing_head_type = 'Purchase'
+            ORDER BY vat_filing_head_id ASC
+            ";
+        $query = $this->db->query($sql);
+        $data['vat_payer_purchase_opt'] = ['' => 'All VAT Payer Purchase Category'];
+        foreach ($query->result_array() as $row) {
+            $data['vat_payer_purchase_opt'][$row['vat_filing_head_name']] = $row['vat_filing_head_name'];
+        }
+
+        $this->load->view('page/reports/sales-purchase-report', $data);
+    }
 
 
     public function tender_enquiry_summary_report()

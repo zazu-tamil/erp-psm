@@ -362,6 +362,7 @@ $vendor_m_grp = [
 <!-- Report -->
 <?php
 $report_m_grp = [
+    'sales-purchase-report',
     'sales-nbr-report',
     'purchase-nbr-report',
     'tender-enquiry-timeline',
@@ -466,12 +467,15 @@ $report_m_grp = [
             </ul>
         </li>
         <li
-            class="treeview <?= in_array($current_page, ['sales-nbr-report', 'purchase-nbr-report']) ? 'active' : '' ?>">
+            class="treeview <?= in_array($current_page, ['sales-purchase-report', 'sales-nbr-report', 'purchase-nbr-report']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-envelope"></i> NBR Report
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
             </a>
             <ul class="treeview-menu">
+                <li class="<?= ($current_page === 'sales-purchase-report') ? 'active' : '' ?>">
+                    <a href="<?= site_url('sales-purchase-report') ?>"><i class="fa fa-list"></i> VAT Return Form Summary</a>
+                </li>
                 <li class="<?= ($current_page === 'sales-nbr-report') ? 'active' : '' ?>">
                     <a href="<?= site_url('sales-nbr-report') ?>"><i class="fa fa-list"></i> Sales NBR Report</a>
                 </li>
