@@ -1982,6 +1982,11 @@ class Reports extends CI_Controller
                         
                         SELECT customs_tot_amt AS total_amount FROM customs_bill_info
                         WHERE status = 'Active' AND vendor_id = '$esc_vendor' AND invoice_date >= '$esc_op' AND invoice_date < '$esc_from'
+                        
+                        UNION ALL
+                        
+                        SELECT total_amount FROM credit_debit_note_info
+                        WHERE status != 'Delete' AND party_type = 'Supplier' AND note_type = 'Credit' AND supplier_id = '$esc_vendor' AND note_date >= '$esc_op' AND note_date < '$esc_from'
                     ) AS prev_purchases
                 ";
                 $p_query = $this->db->query($purchase_sql);
@@ -1996,6 +2001,11 @@ class Reports extends CI_Controller
                         UNION ALL
                         SELECT adv_payment_amt AS amount FROM vendor_advance_payment_info
                         WHERE status = 'Active' AND vendor_id = '$esc_vendor' AND adv_payment_date >= '$esc_op' AND adv_payment_date < '$esc_from'
+                        
+                        UNION ALL
+                        
+                        SELECT total_amount AS amount FROM credit_debit_note_info
+                        WHERE status != 'Delete' AND party_type = 'Supplier' AND note_type = 'Debit' AND supplier_id = '$esc_vendor' AND note_date >= '$esc_op' AND note_date < '$esc_from'
                     ) AS pay_adv
                 ";
                 $pay_query = $this->db->query($payment_sql);
@@ -2032,6 +2042,11 @@ class Reports extends CI_Controller
                         
                         SELECT customs_tot_amt AS total_amount FROM customs_bill_info
                         WHERE status = 'Active' AND invoice_date < '$esc_from'
+                        
+                        UNION ALL
+                        
+                        SELECT total_amount FROM credit_debit_note_info
+                        WHERE status != 'Delete' AND party_type = 'Supplier' AND note_type = 'Credit' AND note_date < '$esc_from'
                     ) AS prev_purchases
                 ";
                 $p_query = $this->db->query($purchase_sql);
@@ -2047,6 +2062,11 @@ class Reports extends CI_Controller
                         UNION ALL
                         SELECT adv_payment_amt AS amount FROM vendor_advance_payment_info
                         WHERE status = 'Active' AND adv_payment_date < '$esc_from'
+                        
+                        UNION ALL
+                        
+                        SELECT total_amount AS amount FROM credit_debit_note_info
+                        WHERE status != 'Delete' AND party_type = 'Supplier' AND note_type = 'Debit' AND note_date < '$esc_from'
                     ) AS pay_adv
                 ";
                 $pay_query = $this->db->query($payment_sql);
@@ -2170,6 +2190,40 @@ class Reports extends CI_Controller
                   " . (!empty($vendor_id) ? "AND a.vendor_id = '$esc_vendor'" : "") . "
                   " . (!empty($from_date) ? "AND a.adv_payment_date >= '$esc_from'" : "") . "
                   " . (!empty($to_date) ? "AND a.adv_payment_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
+                  
+                UNION ALL
+                
+                SELECT 
+                    a.note_date AS tr_date,
+                    a.note_no AS voucher_no,
+                    'Credit Note' AS description,
+                    a.total_amount AS purchase_amt,
+                    0.000 AS paid_amt,
+                    'purchase' AS type,
+                    v.vendor_name
+                FROM credit_debit_note_info a
+                LEFT JOIN vendor_info v ON a.supplier_id = v.vendor_id AND v.status = 'Active'
+                WHERE a.status != 'Delete' AND a.party_type = 'Supplier' AND a.note_type = 'Credit'
+                  " . (!empty($vendor_id) ? "AND a.supplier_id = '$esc_vendor'" : "") . "
+                  " . (!empty($from_date) ? "AND a.note_date >= '$esc_from'" : "") . "
+                  " . (!empty($to_date) ? "AND a.note_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
+                  
+                UNION ALL
+                
+                SELECT 
+                    a.note_date AS tr_date,
+                    a.note_no AS voucher_no,
+                    'Debit Note' AS description,
+                    0.000 AS purchase_amt,
+                    a.total_amount AS paid_amt,
+                    'payment' AS type,
+                    v.vendor_name
+                FROM credit_debit_note_info a
+                LEFT JOIN vendor_info v ON a.supplier_id = v.vendor_id AND v.status = 'Active'
+                WHERE a.status != 'Delete' AND a.party_type = 'Supplier' AND a.note_type = 'Debit'
+                  " . (!empty($vendor_id) ? "AND a.supplier_id = '$esc_vendor'" : "") . "
+                  " . (!empty($from_date) ? "AND a.note_date >= '$esc_from'" : "") . "
+                  " . (!empty($to_date) ? "AND a.note_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
             ) AS transactions
             ORDER BY tr_date ASC, voucher_no ASC
         ";
@@ -2315,8 +2369,13 @@ class Reports extends CI_Controller
                 // Calculate in-between invoices and receipts from opening date to from_date
                 $invoice_sql = "
                     SELECT IFNULL(SUM(total_amount), 0) AS total_invoices
-                    FROM tender_enq_invoice_info
-                    WHERE status = 'Active' AND customer_id = '$esc_customer' AND invoice_date >= '$esc_op' AND invoice_date < '$esc_from'
+                    FROM (
+                        SELECT total_amount FROM tender_enq_invoice_info
+                        WHERE status = 'Active' AND customer_id = '$esc_customer' AND invoice_date >= '$esc_op' AND invoice_date < '$esc_from'
+                        UNION ALL
+                        SELECT total_amount FROM credit_debit_note_info
+                        WHERE status != 'Delete' AND party_type = 'Customer' AND note_type = 'Debit' AND customer_id = '$esc_customer' AND note_date >= '$esc_op' AND note_date < '$esc_from'
+                    ) AS inv
                 ";
                 $inv_query = $this->db->query($invoice_sql);
                 $inv_row = $inv_query->row_array();
@@ -2324,8 +2383,13 @@ class Reports extends CI_Controller
 
                 $receipt_sql = "
                     SELECT IFNULL(SUM(amount), 0) AS total_receipts
-                    FROM tender_receipt_info
-                    WHERE status = 'Active' AND customer_id = '$esc_customer' AND receipt_date >= '$esc_op' AND receipt_date < '$esc_from'
+                    FROM (
+                        SELECT amount FROM tender_receipt_info
+                        WHERE status = 'Active' AND customer_id = '$esc_customer' AND receipt_date >= '$esc_op' AND receipt_date < '$esc_from'
+                        UNION ALL
+                        SELECT total_amount AS amount FROM credit_debit_note_info
+                        WHERE status != 'Delete' AND party_type = 'Customer' AND note_type = 'Credit' AND customer_id = '$esc_customer' AND note_date >= '$esc_op' AND note_date < '$esc_from'
+                    ) AS rec
                 ";
                 $rec_query = $this->db->query($receipt_sql);
                 $rec_row = $rec_query->row_array();
@@ -2343,8 +2407,13 @@ class Reports extends CI_Controller
                 // Total Invoices before from_date
                 $invoice_sql = "
                     SELECT IFNULL(SUM(total_amount), 0) AS total_invoices
-                    FROM tender_enq_invoice_info
-                    WHERE status = 'Active' AND invoice_date < '$esc_from'
+                    FROM (
+                        SELECT total_amount FROM tender_enq_invoice_info
+                        WHERE status = 'Active' AND invoice_date < '$esc_from'
+                        UNION ALL
+                        SELECT total_amount FROM credit_debit_note_info
+                        WHERE status != 'Delete' AND party_type = 'Customer' AND note_type = 'Debit' AND note_date < '$esc_from'
+                    ) AS inv
                 ";
                 $inv_query = $this->db->query($invoice_sql);
                 $inv_row = $inv_query->row_array();
@@ -2353,8 +2422,13 @@ class Reports extends CI_Controller
                 // Total Receipts before from_date
                 $receipt_sql = "
                     SELECT IFNULL(SUM(amount), 0) AS total_receipts
-                    FROM tender_receipt_info
-                    WHERE status = 'Active' AND receipt_date < '$esc_from'
+                    FROM (
+                        SELECT amount FROM tender_receipt_info
+                        WHERE status = 'Active' AND receipt_date < '$esc_from'
+                        UNION ALL
+                        SELECT total_amount AS amount FROM credit_debit_note_info
+                        WHERE status != 'Delete' AND party_type = 'Customer' AND note_type = 'Credit' AND note_date < '$esc_from'
+                    ) AS rec
                 ";
                 $rec_query = $this->db->query($receipt_sql);
                 $rec_row = $rec_query->row_array();
@@ -2409,6 +2483,40 @@ class Reports extends CI_Controller
                   " . (!empty($customer_id) ? "AND a.customer_id = '$esc_customer'" : "") . "
                   " . (!empty($from_date) ? "AND a.receipt_date >= '$esc_from'" : "") . "
                   " . (!empty($to_date) ? "AND a.receipt_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
+                  
+                UNION ALL
+                
+                SELECT 
+                    a.note_date AS tr_date,
+                    a.note_no AS voucher_no,
+                    'Debit Note' AS description,
+                    a.total_amount AS debit_amt,
+                    0.000 AS credit_amt,
+                    'invoice' AS type,
+                    c.customer_name
+                FROM credit_debit_note_info a
+                LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
+                WHERE a.status != 'Delete' AND a.party_type = 'Customer' AND a.note_type = 'Debit'
+                  " . (!empty($customer_id) ? "AND a.customer_id = '$esc_customer'" : "") . "
+                  " . (!empty($from_date) ? "AND a.note_date >= '$esc_from'" : "") . "
+                  " . (!empty($to_date) ? "AND a.note_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
+
+                UNION ALL
+
+                SELECT 
+                    a.note_date AS tr_date,
+                    a.note_no AS voucher_no,
+                    'Credit Note' AS description,
+                    0.000 AS debit_amt,
+                    a.total_amount AS credit_amt,
+                    'receipt' AS type,
+                    c.customer_name
+                FROM credit_debit_note_info a
+                LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
+                WHERE a.status != 'Delete' AND a.party_type = 'Customer' AND a.note_type = 'Credit'
+                  " . (!empty($customer_id) ? "AND a.customer_id = '$esc_customer'" : "") . "
+                  " . (!empty($from_date) ? "AND a.note_date >= '$esc_from'" : "") . "
+                  " . (!empty($to_date) ? "AND a.note_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
             ) AS transactions
             ORDER BY tr_date ASC, voucher_no ASC
         ";

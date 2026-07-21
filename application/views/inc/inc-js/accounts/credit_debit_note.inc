@@ -190,10 +190,10 @@ $(document).ready(function() {
             '<td><input type="text" name="item_code[]" class="form-control input-sm" required value="' + code + '"></td>' +
             '<td><input type="text" name="description[]" class="form-control input-sm" required value="' + desc + '"></td>' +
             '<td><input type="text" name="hsn_sac[]" class="form-control input-sm" value="' + hsn + '"></td>' +
-            '<td><input type="number" name="qty[]" class="form-control input-sm calc-item" step="0.001" min="0" required value="' + qty + '"></td>' +
+            '<td><input type="number" name="qty[]" class="form-control input-sm calc-item" step="any" min="0" required value="' + qty + '"></td>' +
             '<td><input type="text" name="uom[]" class="form-control input-sm" required value="' + uom + '"></td>' +
-            '<td><input type="number" name="rate[]" class="form-control input-sm calc-item" step="0.01" min="0" required value="' + rate + '"></td>' +
-            '<td><input type="number" name="tax_percent[]" class="form-control input-sm calc-item" step="0.01" min="0" value="' + tPercent + '"></td>' +
+            '<td><input type="number" name="rate[]" class="form-control input-sm calc-item" step="any" min="0" required value="' + rate + '"></td>' +
+            '<td><input type="number" name="tax_percent[]" class="form-control input-sm calc-item" step="any" min="0" value="' + tPercent + '"></td>' +
             '<td><input type="text" name="item_tax_amount[]" class="form-control input-sm item_tax_amount" readonly value="' + tAmt + '"></td>' +
             '<td><input type="text" name="line_total[]" class="form-control input-sm line_total" readonly value="' + lTotal + '"></td>' +
             '<td><button type="button" class="btn btn-danger btn-xs btnRemoveItem"><i class="fa fa-trash"></i></button></td>' +
