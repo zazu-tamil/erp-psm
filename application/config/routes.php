@@ -234,6 +234,9 @@ $route['voucher-type-list/(:num)'] = 'accounts/voucher_type_list/$1';
 $route['receipt-list'] = 'tender/receipt_list';
 $route['receipt-list/(:num)'] = 'tender/receipt_list/$1';
 
+$route['petty-cash'] = 'pettycash/index';
+$route['pettycash/add_funds'] = 'pettycash/add_funds';
+$route['pettycash/add_expense'] = 'pettycash/add_expense';
 
 //audit Routes
 $route['account-group-list'] = 'audit/account_group_list';
@@ -352,3 +355,7 @@ $route['vat-statement-report'] = 'reports/vat_statement_report';
 
 
 $route['credit-debit-note-delete/(:num)'] = 'CreditDebitNote/delete/$1';
+
+$route['petty-cash'] = 'PettyCash';
+$route['pettycash'] = 'PettyCash';
+$route['pettycash/(:any)'] = 'PettyCash/$1';
