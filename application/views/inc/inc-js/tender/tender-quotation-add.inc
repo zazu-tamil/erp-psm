@@ -1,244 +1,243 @@
-
-
 <script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+<link
+  rel="stylesheet"
+  href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
+/>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <style>
+  .total-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+  }
+
+  .total-box {
+    background: linear-gradient(135deg, #f6fff9, #e8f9f0);
+    border: 2px solid #b5e0c6;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 1.15rem;
+    color: #333;
+    min-width: 280px;
+    text-align: right;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .total-box:hover {
+    background: #e3f7ec;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .total-box i {
+    font-size: 1.3rem;
+    vertical-align: middle;
+  }
+
+  #total_amount {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-left: 5px;
+  }
+
+  @media (max-width: 768px) {
     .total-wrapper {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        width: 100%;
+      justify-content: center;
     }
 
     .total-box {
-        background: linear-gradient(135deg, #f6fff9, #e8f9f0);
-        border: 2px solid #b5e0c6;
-        border-radius: 12px;
-        padding: 12px 24px;
-        font-family: "Segoe UI", sans-serif;
-        font-size: 1.15rem;
-        color: #333;
-        min-width: 280px;
-        text-align: right;
-        transition: all 0.3s ease-in-out;
+      text-align: center;
+      min-width: 220px;
     }
-
-    .total-box:hover {
-        background: #e3f7ec;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-        transform: translateY(-2px);
-    }
-
-    .total-box i {
-        font-size: 1.3rem;
-        vertical-align: middle;
-    }
-
-    #total_amount {
-        font-size: 1.4rem;
-        font-weight: 700;
-        margin-left: 5px;
-    }
-
-    @media (max-width: 768px) {
-        .total-wrapper {
-            justify-content: center;
-        }
-
-        .total-box {
-            text-align: center;
-            min-width: 220px;
-        }
-    }
+  }
 </style>
 <style>
+  .total-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+  }
+
+  .total-box {
+    background: linear-gradient(135deg, #f6fff9, #e8f9f0);
+    border: 2px solid #b5e0c6;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 1.15rem;
+    color: #333;
+    min-width: 280px;
+    text-align: right;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .total-box:hover {
+    background: #e3f7ec;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .total-box i {
+    font-size: 1.3rem;
+    vertical-align: middle;
+  }
+
+  #total_amount,
+  #total_amount_wo_tax {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-left: 5px;
+  }
+
+  @media (max-width: 768px) {
     .total-wrapper {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        width: 100%;
+      justify-content: center;
     }
 
     .total-box {
-        background: linear-gradient(135deg, #f6fff9, #e8f9f0);
-        border: 2px solid #b5e0c6;
-        border-radius: 12px;
-        padding: 12px 24px;
-        font-family: "Segoe UI", sans-serif;
-        font-size: 1.15rem;
-        color: #333;
-        min-width: 280px;
-        text-align: right;
-        transition: all 0.3s ease-in-out;
+      text-align: center;
+      min-width: 220px;
     }
-
-    .total-box:hover {
-        background: #e3f7ec;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-        transform: translateY(-2px);
-    }
-
-    .total-box i {
-        font-size: 1.3rem;
-        vertical-align: middle;
-    }
-
-    #total_amount,
-    #total_amount_wo_tax {
-        font-size: 1.4rem;
-        font-weight: 700;
-        margin-left: 5px;
-    }
-
-    @media (max-width: 768px) {
-        .total-wrapper {
-            justify-content: center;
-        }
-
-        .total-box {
-            text-align: center;
-            min-width: 220px;
-        }
-    }
+  }
 </style>
 <script>
+  $(document).ready(function () {
+    // Enable / Disable on checkbox change
+    $(".chk_addt_charges_type_id").on("change", function () {
+      let row = $(this).closest("tr");
 
+      if ($(this).is(":checked")) {
+        row
+          .find(
+            ".addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt",
+          )
+          .prop("disabled", false);
+      } else {
+        row
+          .find(
+            ".addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt",
+          )
+          .prop("disabled", true);
+        // .val('0'); // clear values
+      }
 
- 
-    $(document).ready(function () {
-
-         
-
-        // Enable / Disable on checkbox change
-    $('.chk_addt_charges_type_id').on('change', function() {
-
-        let row = $(this).closest('tr');
-
-        if ($(this).is(':checked')) {
-            row.find(
-                    '.addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt'
-                )
-                .prop('disabled', false);
-        } else {
-            row.find(
-                    '.addt_charges_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt'
-                )
-                .prop('disabled', true);
-            // .val('0'); // clear values
-        }
-
-        calculateTotalAmount_addt();
+      calculateTotalAmount_addt();
     });
 
-    $('.chk_addt_charges_type_id').change();
-
+    $(".chk_addt_charges_type_id").change();
 
     // Calculation on change
-    $(document).on('input', '.addt_charges_amt, .addt_charges_vat', function() {
+    $(document).on(
+      "input",
+      ".addt_charges_amt, .addt_charges_vat",
+      function () {
+        let row = $(this).closest("tr");
 
-        let row = $(this).closest('tr');
-
-        let amt = parseFloat(row.find('.addt_charges_amt').val()) || 0;
-        let vat = parseFloat(row.find('.addt_charges_vat').val()) || 0;
+        let amt = parseFloat(row.find(".addt_charges_amt").val()) || 0;
+        let vat = parseFloat(row.find(".addt_charges_vat").val()) || 0;
 
         let vat_amt = (amt * vat) / 100;
         let total = amt + vat_amt;
 
-        row.find('.addt_charges_vat_amt').val(vat_amt.toFixed(2));
-        row.find('.addt_charges_tot_amt').val(total.toFixed(2));
+        row.find(".addt_charges_vat_amt").val(vat_amt.toFixed(2));
+        row.find(".addt_charges_tot_amt").val(total.toFixed(2));
 
         calculateTotalAmount_addt();
-    });
-
+      },
+    );
 
     function calculateTotalAmount_addt() {
-        let total_addt_amt_wo_tax = 0;
-        $(".addt_charges_amt").each(function() {
-            if ($(this).closest('tr').find('.chk_addt_charges_type_id').is(':checked')) {
-                total_addt_amt_wo_tax += parseFloat($(this).val()) || 0;
-            }
-        });
-        total_addt_amt_wo_tax = parseFloat($("#total_amount_wo_tax").text()) + parseFloat(
-            total_addt_amt_wo_tax);
-        $("#total_amount_wo_tax_addt").text(total_addt_amt_wo_tax.toFixed(3));
+      let total_addt_amt_wo_tax = 0;
+      $(".addt_charges_amt").each(function () {
+        if (
+          $(this).closest("tr").find(".chk_addt_charges_type_id").is(":checked")
+        ) {
+          total_addt_amt_wo_tax += parseFloat($(this).val()) || 0;
+        }
+      });
+      total_addt_amt_wo_tax =
+        parseFloat($("#total_amount_wo_tax").text()) +
+        parseFloat(total_addt_amt_wo_tax);
+      $("#total_amount_wo_tax_addt").text(total_addt_amt_wo_tax.toFixed(3));
 
+      let total_addt_amt_w_tax = 0;
+      $(".addt_charges_tot_amt").each(function () {
+        if (
+          $(this).closest("tr").find(".chk_addt_charges_type_id").is(":checked")
+        ) {
+          total_addt_amt_w_tax += parseFloat($(this).val()) || 0;
+        }
+      });
+      total_addt_amt_w_tax =
+        parseFloat($("#total_amount").text()) +
+        parseFloat(total_addt_amt_w_tax);
+      $("#total_amount_addt").text(total_addt_amt_w_tax.toFixed(3));
 
-        let total_addt_amt_w_tax = 0;
-        $(".addt_charges_tot_amt").each(function() {
-            if ($(this).closest('tr').find('.chk_addt_charges_type_id').is(':checked')) {
-                total_addt_amt_w_tax += parseFloat($(this).val()) || 0;
-            }
-        });
-        total_addt_amt_w_tax = parseFloat($("#total_amount").text()) + parseFloat(total_addt_amt_w_tax);
-        $("#total_amount_addt").text(total_addt_amt_w_tax.toFixed(3));
-
-
-        $("#total_tax_amount_addt").text((total_addt_amt_w_tax - total_addt_amt_wo_tax).toFixed(3));
-
+      $("#total_tax_amount_addt").text(
+        (total_addt_amt_w_tax - total_addt_amt_wo_tax).toFixed(3),
+      );
     }
 
-
-
-        $(".srch_enq_id").autocomplete({
-            source: function (request, response) {
-                $.ajax({
-                    url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
-                    type: "POST",
-                    data: { search: request.term },
-                    dataType: "json",
-                    success: function (data) {
-                        //console.log(data);
-                        response(data);
-                    },
-                });
-            },
-
-            minLength: 1,
-
-            select: function (event, ui) {
-                //console.log(ui);
-                $("#srch_company_id").val(ui.item.company_id);
-                $("#srch_customer_id").val(ui.item.customer_id);
-
-                 var $contact = $("#srch_customer_contact_id");
-                $contact.html('<option value="">Select Contact Person</option>');
-                $.ajax({
-                    url: "<?php echo site_url('tender/get_data'); ?>",
-                    type: "POST",
-                    data: { tbl: "get-customer-contacts", id: ui.item.customer_id },
-                    dataType: "json",
-                    success: function (data) {
-                    $.each(data, function (i, item) {
-                        if(item.customer_contact_id == ui.item.customer_contact_id) {
-                            $contact.append(
-                                $("<option>")
-                                    .val(item.customer_contact_id)
-                                    .text(item.contact_person_name)
-                                    .prop("selected", true)
-                            );
-                        } else {    
-                        $contact.append(
-                        $("<option>")
-                            .val(item.customer_contact_id)
-                            .text(item.contact_person_name)
-                        );
-                        }
-                    });
-                    },
-                    error: function (xhr) {
-                    console.error(xhr.responseText);
-                    alert("Failed to load contact persons");
-                    },
-                });
-                //$("#srch_customer_contact_id").val(ui.item.customer_contact_id);
-                //$("#srch_tender_enquiry_id").val(ui.item.tender_enquiry_id);
-                load_tender_enq(ui.item.tender_enquiry_id);
-            },
+    $(".srch_enq_id").autocomplete({
+      source: function (request, response) {
+        $.ajax({
+          url: "<?php echo base_url('tender/tender_enquiry_id_search'); ?>",
+          type: "POST",
+          data: { search: request.term },
+          dataType: "json",
+          success: function (data) {
+            //console.log(data);
+            response(data);
+          },
         });
+      },
 
-       
+      minLength: 1,
+
+      select: function (event, ui) {
+        //console.log(ui);
+        $("#srch_company_id").val(ui.item.company_id);
+        $("#srch_customer_id").val(ui.item.customer_id);
+
+        var $contact = $("#srch_customer_contact_id");
+        $contact.html('<option value="">Select Contact Person</option>');
+        $.ajax({
+          url: "<?php echo site_url('tender/get_data'); ?>",
+          type: "POST",
+          data: { tbl: "get-customer-contacts", id: ui.item.customer_id },
+          dataType: "json",
+          success: function (data) {
+            $.each(data, function (i, item) {
+              if (item.customer_contact_id == ui.item.customer_contact_id) {
+                $contact.append(
+                  $("<option>")
+                    .val(item.customer_contact_id)
+                    .text(item.contact_person_name)
+                    .prop("selected", true),
+                );
+              } else {
+                $contact.append(
+                  $("<option>")
+                    .val(item.customer_contact_id)
+                    .text(item.contact_person_name),
+                );
+              }
+            });
+          },
+          error: function (xhr) {
+            console.error(xhr.responseText);
+            alert("Failed to load contact persons");
+          },
+        });
+        //$("#srch_customer_contact_id").val(ui.item.customer_contact_id);
+        //$("#srch_tender_enquiry_id").val(ui.item.tender_enquiry_id);
+        load_tender_enq(ui.item.tender_enquiry_id);
+      },
+    });
 
     /* ================================================================
        1. COMPANY CHANGE - Load ALL Customers (no filtering by company)
@@ -288,80 +287,80 @@
        2. CUSTOMER CHANGE - Load Tender Enquiries (filtered by company + customer)
        ================================================================ */
     $("#srch_customer_id").on("change", function () {
-        load_tender_enq("");
+      load_tender_enq("");
     });
 
     function load_tender_enq(t_enq_id = "") {
-        const customer_id = $("#srch_customer_id").val(); // <-- IMPORTANT
-        const company_id = $("#srch_company_id").val();
-        const $enquiryDropdown = $("#srch_tender_enquiry_id");
-        const $container = $("#item_container");
+      const customer_id = $("#srch_customer_id").val(); // <-- IMPORTANT
+      const company_id = $("#srch_company_id").val();
+      const $enquiryDropdown = $("#srch_tender_enquiry_id");
+      const $container = $("#item_container");
 
-        // Reset
-        $enquiryDropdown
-            .html('<option value="">Select Enquiry</option>')
-            .prop("disabled", true);
+      // Reset
+      $enquiryDropdown
+        .html('<option value="">Select Enquiry</option>')
+        .prop("disabled", true);
 
-        $container.html("");
+      $container.html("");
 
-        if (!customer_id || !company_id) return;
+      if (!customer_id || !company_id) return;
 
-        $.ajax({
-            url: "<?php echo site_url('vendor/get_tender_enquiries_by_customer'); ?>",
-            type: "POST",
-            data: {
-                company_id: company_id,
-                customer_id: customer_id,
-            },
-            dataType: "json",
-            success: function (res) {
-                if (res.length > 0) {
-                    $enquiryDropdown.prop("disabled", false);
+      $.ajax({
+        url: "<?php echo site_url('vendor/get_tender_enquiries_by_customer'); ?>",
+        type: "POST",
+        data: {
+          company_id: company_id,
+          customer_id: customer_id,
+        },
+        dataType: "json",
+        success: function (res) {
+          if (res.length > 0) {
+            $enquiryDropdown.prop("disabled", false);
 
-                    $.each(res, function (i, row) {
-                        $enquiryDropdown.append(
-                            $("<option>", {
-                                value: row.tender_enquiry_id,
-                                text: row.display,
-                            }),
-                        );
-                    });
+            $.each(res, function (i, row) {
+              $enquiryDropdown.append(
+                $("<option>", {
+                  value: row.tender_enquiry_id,
+                  text: row.display,
+                }),
+              );
+            });
 
-                    // ✅ SET SELECTED VALUE HERE
-                    if (t_enq_id) {
-                        $enquiryDropdown.val(t_enq_id).trigger("change");
-                    }
-                } else {
-                    $enquiryDropdown.html(
-                        '<option value="">No enquiries found</option>',
-                    );
-                }
-            },
-            error: function () {
-                alert("Error loading enquiries");
-            },
-        });
+            // ✅ SET SELECTED VALUE HERE
+            if (t_enq_id) {
+              $enquiryDropdown.val(t_enq_id).trigger("change");
+            }
+          } else {
+            $enquiryDropdown.html(
+              '<option value="">No enquiries found</option>',
+            );
+          }
+        },
+        error: function () {
+          alert("Error loading enquiries");
+        },
+      });
     }
 
     $(".cls_export").hide();
 
     $(document).on("click", "#btnExport", function () {
-        let jsonData = $(this).data("xls"); // ✅ already an object
+      let jsonData = $(this).data("xls"); // ✅ already an object
 
-        let fileName = $(this).val() || "export";
-        exportJSONToXLSX(jsonData, fileName + ".xlsx");
+      let fileName = $(this).val() || "export";
+      exportJSONToXLSX(jsonData, fileName + ".xlsx");
     });
 
     function exportJSONToXLSX(data, fileName = "export.xlsx") {
-        // Convert JSON to worksheet
-        const worksheet = XLSX.utils.json_to_sheet(data);
+      // Convert JSON to worksheet
+      const worksheet = XLSX.utils.json_to_sheet(data);
 
-        // Create workbook
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+      // Create workbook
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
-        // Export XLSX
-        XLSX.writeFile(workbook, fileName);
+      // Export XLSX
+      XLSX.writeFile(workbook, fileName);
     }
 
     const itemHtml = `
@@ -376,7 +375,7 @@
                     <div class="col-md-2 text-center">  
                       <div class="form-group ">
                         <label>Item Code</label>
-                        <input type="text" class="form-control item_code" name="item_code[]" value="" readonly>
+                        <input type="text" class="form-control item_code" name="item_code[]" value="">
                       </div>
                     </div>
 
@@ -430,43 +429,43 @@
               `;
 
     $("#excelFile").on("change", function (e) {
-        const file = e.target.files[0];
-        if (!file) return;
+      const file = e.target.files[0];
+      if (!file) return;
 
-        const reader = new FileReader();
+      const reader = new FileReader();
 
-        reader.onload = function (e) {
-            const workbook = XLSX.read(e.target.result, { type: "binary" });
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      reader.onload = function (e) {
+        const workbook = XLSX.read(e.target.result, { type: "binary" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-            // JSON with headers
-            const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+        // JSON with headers
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-            console.log(rows);
+        console.log(rows);
 
-            $("#item_container").empty();
-            let i = 0;
-            rows.forEach(function (r) {
-                let newRow = $(itemHtml);
+        $("#item_container").empty();
+        let i = 0;
+        rows.forEach(function (r) {
+          let newRow = $(itemHtml);
 
-                newRow.find(".cnt").html(i + 1);
-                newRow.find(".item-check").val(i);
-                newRow.find(".tender_enquiry_item_id").val(r.tender_enquiry_item_id);
-                newRow.find(".item_code").val(r.item_code);
-                newRow.find(".desc-textarea").val(r.item_desc);
-                newRow.find(".uom").val(r.uom);
-                newRow.find(".qty-input").val(r.qty);
-                newRow.find(".vat-dropdown").val(r.vat);
-                newRow.find(".rate-input").val(r.rate);
-                newRow.find(".amount").val(r.amount);
+          newRow.find(".cnt").html(i + 1);
+          newRow.find(".item-check").val(i);
+          newRow.find(".tender_enquiry_item_id").val(r.tender_enquiry_item_id);
+          newRow.find(".item_code").val(r.item_code);
+          newRow.find(".desc-textarea").val(r.item_desc);
+          newRow.find(".uom").val(r.uom);
+          newRow.find(".qty-input").val(r.qty);
+          newRow.find(".vat-dropdown").val(r.vat);
+          newRow.find(".rate-input").val(r.rate);
+          newRow.find(".amount").val(r.amount);
 
-                $("#item_container").append(newRow);
+          $("#item_container").append(newRow);
 
-                newRow.find(".rate-input").change();
-                i++;
-            });
+          newRow.find(".rate-input").change();
+          i++;
+        });
 
-            /* $('#item_container').append(`<div class="total-wrapper mt-4 mb-4">
+        /* $('#item_container').append(`<div class="total-wrapper mt-4 mb-4">
                       <div class="total-box shadow-sm">
                         <h5 class="mb-0">
                           <i class="fa fa-calculator text-success me-2"></i>
@@ -475,47 +474,46 @@
                         </h5>
                       </div>
                     </div>`);*/
-        };
+      };
 
-        reader.readAsBinaryString(file);
+      reader.readAsBinaryString(file);
     });
 
-
     $("#srch_customer_id").change(function () {
-        var customerId = $(this).val();
-        $("#customer_id_two").val(customerId); // Sync with contact modal customer select
+      var customerId = $(this).val();
+      $("#customer_id_two").val(customerId); // Sync with contact modal customer select
 
-        // Reset contact dropdown
-        var $contact = $("#srch_customer_contact_id");
-        $contact.html('<option value="">Select Contact Person</option>');
+      // Reset contact dropdown
+      var $contact = $("#srch_customer_contact_id");
+      $contact.html('<option value="">Select Contact Person</option>');
 
-        if (!customerId) return;
+      if (!customerId) return;
 
-        $.ajax({
-            url: "<?php echo site_url('tender/get_data'); ?>",
-            type: "POST",
-            data: { tbl: "get-customer-contacts", id: customerId },
-            dataType: "json",
-            success: function (data) {
-            $.each(data, function (i, item) {
-                $contact.append(
-                $("<option>")
-                    .val(item.customer_contact_id)
-                    .text(item.contact_person_name)
-                );
-            });
-            },
-            error: function (xhr) {
-            console.error(xhr.responseText);
-            alert("Failed to load contact persons");
-            },
-        });
+      $.ajax({
+        url: "<?php echo site_url('tender/get_data'); ?>",
+        type: "POST",
+        data: { tbl: "get-customer-contacts", id: customerId },
+        dataType: "json",
+        success: function (data) {
+          $.each(data, function (i, item) {
+            $contact.append(
+              $("<option>")
+                .val(item.customer_contact_id)
+                .text(item.contact_person_name),
+            );
+          });
+        },
+        error: function (xhr) {
+          console.error(xhr.responseText);
+          alert("Failed to load contact persons");
+        },
+      });
     });
 
     // Automatically sync customer ID when showing the contact person modal
-    $('#add_customer_contact_id').on('show.bs.modal', function () {
-        var customerId = $("#srch_customer_id").val();
-        $("#customer_id_two").val(customerId);
+    $("#add_customer_contact_id").on("show.bs.modal", function () {
+      var customerId = $("#srch_customer_id").val();
+      $("#customer_id_two").val(customerId);
     });
 
     $('input[name="btn_add_customer_contact"]').on("click", function (e) {
@@ -596,36 +594,36 @@
     });
 
     $("#srch_tender_enquiry_id").on("change", function () {
-        const tender_enquiry_id = $(this).val();
-        const $container = $("#item_container");
-        $container.html("");
+      const tender_enquiry_id = $(this).val();
+      const $container = $("#item_container");
+      $container.html("");
 
-        if (!tender_enquiry_id) return;
+      if (!tender_enquiry_id) return;
 
-        $.ajax({
-            url: "<?php echo site_url('vendor/get_data'); ?>",
-            type: "POST",
-            data: {
-                tbl: "get-tender-enquiry-item-list-rate",
-                id: tender_enquiry_id,
-            },
-            dataType: "json",
-            success: function (res) {
-                if (res.length > 0) {
-                    $(".cls_export").show();
-                    $("#btnExport").attr("data-xls", JSON.stringify(res));
-                    $("#btnExport").val("Enquiry-" + res[0]["enquiry_no"]);
-                    //console.log(res);
+      $.ajax({
+        url: "<?php echo site_url('vendor/get_data'); ?>",
+        type: "POST",
+        data: {
+          tbl: "get-tender-enquiry-item-list-rate",
+          id: tender_enquiry_id,
+        },
+        dataType: "json",
+        success: function (res) {
+          if (res.length > 0) {
+            $(".cls_export").show();
+            $("#btnExport").attr("data-xls", JSON.stringify(res));
+            $("#btnExport").val("Enquiry-" + res[0]["enquiry_no"]);
+            //console.log(res);
 
-                    $.each(res, function (i, row) {
-                        $("#tender_ref_no").val(row.enquiry_no);
-                        $("#quote_date").val(row.closing_date);
+            $.each(res, function (i, row) {
+              $("#tender_ref_no").val(row.enquiry_no);
+              $("#quote_date").val(row.closing_date);
 
-                        const hiddenFields = `
+              const hiddenFields = `
                             <input type="hidden" name="tender_enquiry_item_id[${i}]" value="${row.tender_enquiry_item_id}"> 
                         `;
 
-                        const itemHtml = `
+              const itemHtml = `
                             <div class="item-card border p-3 mb-3" style="background-color:#f9f9f9; border-radius:8px;">
                             <h5 class="text-primary mb-3">Item Details ${row.serial_no}</h5>
                             <div class="row">
@@ -636,7 +634,7 @@
                                 <div class="col-md-2 text-center">  
                                 <div class="form-group ">
                                     <label>Item Code</label>
-                                    <input type="text" class="form-control item_code" name="item_code[]" value="${row.item_code}" readonly>
+                                    <input type="text" class="form-control item_code" name="item_code[]" value="${row.item_code}">
                                 </div>
                                 </div>
 
@@ -704,11 +702,11 @@
                             ${hiddenFields}
                             </div>
                         `;
-                        $container.append(itemHtml);
-                    });
+              $container.append(itemHtml);
+            });
 
-                    // Add total row
-                    /* $container.append(`
+            // Add total row
+            /* $container.append(`
                       <div class="total-wrapper mt-4 mb-4">
                         <div class="total-box shadow-sm">
                           <h5 class="mb-0">
@@ -719,115 +717,102 @@
                         </div>
                       </div> 
                     `);*/
-                } else {
-                    $container.html(
-                        '<div class="alert alert-warning">No items found for this tender enquiry.</div>',
-                    );
-                }
-            },
-            error: function () {
-                alert("Error loading items");
-            },
-        });
+          } else {
+            $container.html(
+              '<div class="alert alert-warning">No items found for this tender enquiry.</div>',
+            );
+          }
+        },
+        error: function () {
+          alert("Error loading items");
+        },
+      });
     });
 
     /* ================================================================
        5. Amount Calculation (Rate / VAT change)
        ================================================================ */
     $(document).on("input change", ".rate-input, .vat-dropdown", function () {
-        const $row = $(this).closest(".item-card");
-        const qty = parseFloat($row.find(".qty-input").val()) || 0;
-        const rate = parseFloat($row.find(".rate-input").val()) || 0;
-        const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
+      const $row = $(this).closest(".item-card");
+      const qty = parseFloat($row.find(".qty-input").val()) || 0;
+      const rate = parseFloat($row.find(".rate-input").val()) || 0;
+      const gst = parseFloat($row.find(".vat-dropdown").val()) || 0;
 
-        const amount = qty * rate * (1 + gst / 100);
-        $row.find(".amount-input").val(amount.toFixed(3));
-        $row.find(".amountwotx").val((qty * rate).toFixed(3));
+      const amount = qty * rate * (1 + gst / 100);
+      $row.find(".amount-input").val(amount.toFixed(3));
+      $row.find(".amountwotx").val((qty * rate).toFixed(3));
 
-        calculateTotalAmount();
-        calculateTotalAmount_addt();
+      calculateTotalAmount();
+      calculateTotalAmount_addt();
     });
 
     function calculateTotalAmount() {
-        let total = 0;
-        $(".amount-input").each(function () {
-            if ($(this).closest(".item-card").find(".item-check").is(":checked")) {
-                total += parseFloat($(this).val()) || 0;
-            }
-        });
-        $("#total_amount").text(total.toFixed(3));
+      let total = 0;
+      $(".amount-input").each(function () {
+        if ($(this).closest(".item-card").find(".item-check").is(":checked")) {
+          total += parseFloat($(this).val()) || 0;
+        }
+      });
+      $("#total_amount").text(total.toFixed(3));
 
-        let total_wot = 0;
-        $(".amountwotx").each(function () {
-            if ($(this).closest(".item-card").find(".item-check").is(":checked")) {
-                total_wot += parseFloat($(this).val()) || 0;
-            }
-        });
-        $("#total_amount_wo_tax").text(total_wot.toFixed(3));
+      let total_wot = 0;
+      $(".amountwotx").each(function () {
+        if ($(this).closest(".item-card").find(".item-check").is(":checked")) {
+          total_wot += parseFloat($(this).val()) || 0;
+        }
+      });
+      $("#total_amount_wo_tax").text(total_wot.toFixed(3));
 
-        $("#total_tax_amount").text((total - total_wot).toFixed(3));
+      $("#total_tax_amount").text((total - total_wot).toFixed(3));
     }
 
     $(document).on("change", ".item-check", function () {
-        calculateTotalAmount();
-        calculateTotalAmount_addt();
+      calculateTotalAmount();
+      calculateTotalAmount_addt();
     });
   });
-
-
-
 </script>
 
 <script>
-    $(document).ready(function () {
+  $(document).ready(function () {
+    var editorConfig = {
+      height: 120,
+      extraPlugins: "justify,colorbutton,font,table",
+    };
 
-       
-        var editorConfig = {
-            height: 120,
-            extraPlugins: "justify,colorbutton,font,table"
-        };
+    CKEDITOR.replace("editor1", editorConfig);
+    CKEDITOR.replace("editor2", editorConfig);
 
-        
-        CKEDITOR.replace('editor1', editorConfig);
-        CKEDITOR.replace('editor2', editorConfig);
+    CKEDITOR.instances.editor1.on("instanceReady", function () {
+      let companyId = $("#srch_company_id").val();
 
-       
-        CKEDITOR.instances.editor1.on('instanceReady', function () {
-
-            let companyId = $("#srch_company_id").val();
-
-            if (companyId) {
-                load_terms_and_conditions(companyId);
-            }
-        });
-
+      if (companyId) {
+        load_terms_and_conditions(companyId);
+      }
     });
+  });
 
+  function load_terms_and_conditions(companyId) {
+    $.ajax({
+      url: "<?php echo site_url('get-data'); ?>",
+      type: "POST",
+      dataType: "json",
+      data: {
+        tbl: "get-company-terms-and-conditions-list",
+        id: companyId,
+      },
+      success: function (res) {
+        console.log("Response:", res);
 
-    
-    function load_terms_and_conditions(companyId) {
-        $.ajax({
-            url: "<?php echo site_url('get-data'); ?>",
-            type: "POST",
-            dataType: "json",
-            data: {
-                tbl: "get-company-terms-and-conditions-list",
-                id: companyId
-            },
-            success: function (res) {
-                console.log("Response:", res);
-
-                if (res && res.length > 0) {
-                    CKEDITOR.instances.editor1
-                        .setData(res[0].quote_terms || '');
-                }
-                else {
-                    CKEDITOR.instances.editor1.setData('');
-                }
-            },
-            error: function (xhr) {
-                console.log(xhr.responseText);
-            }
-        });
-    }
+        if (res && res.length > 0) {
+          CKEDITOR.instances.editor1.setData(res[0].quote_terms || "");
+        } else {
+          CKEDITOR.instances.editor1.setData("");
+        }
+      },
+      error: function (xhr) {
+        console.log(xhr.responseText);
+      },
+    });
+  }
 </script>

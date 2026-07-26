@@ -225,7 +225,7 @@
                                     <div class="form-group">
                                         <label>Item Code</label>
                                         <input type="text" class="form-control" name="item_code[]"
-                                            value="<?php echo htmlspecialchars($row['item_code']); ?>" readonly>
+                                            value="<?php echo htmlspecialchars($row['item_code']); ?>" >
                                     </div>
                                 </div>
 

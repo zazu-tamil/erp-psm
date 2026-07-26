@@ -267,7 +267,7 @@ $(document).ready(function() {
                  <div class="col-md-3">
                      <div class="form-group">
                          <label>Item Code</label>
-                         <input type="text" class="form-control item_code" name="item_code[]" value="" readonly>
+                         <input type="text" class="form-control item_code" name="item_code[]" value="">
                      </div>
                  </div>
 

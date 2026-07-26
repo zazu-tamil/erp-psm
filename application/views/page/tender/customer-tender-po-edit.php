@@ -204,7 +204,7 @@
                                     <div class="form-group">
                                         <label>Item Code</label>
                                         <input type="text" class="form-control item_code col-md-2" name="item_code[]"
-                                            value="<?php echo htmlspecialchars($row['item_code']); ?>" readonly>
+                                            value="<?php echo htmlspecialchars($row['item_code']); ?>">
                                     </div>
                                 </div>
 
@@ -225,7 +225,7 @@
                                             <div class="form-group">
                                                 <label>UOM</label>
                                                 <input type="text" name="uom[]" class="form-control uom"
-                                                    value="<?php echo htmlspecialchars($row['uom']); ?>" readonly>
+                                                    value="<?php echo htmlspecialchars($row['uom']); ?>" >
                                             </div>
                                         </div>
 
@@ -234,7 +234,7 @@
                                                 <label>Qty</label>
                                                 <input type="number" step="any" name="qty[]"
                                                     class="form-control qty-input"
-                                                    value="<?php echo htmlspecialchars($row['qty']); ?>" readonly>
+                                                    value="<?php echo htmlspecialchars($row['qty']); ?>">
                                             </div>
                                         </div>
 

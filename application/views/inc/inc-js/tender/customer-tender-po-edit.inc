@@ -297,7 +297,7 @@
                     <div class="col-md-3">
                       <div class="form-group">
                         <label>Item Code</label>
-                        <input type="text" class="form-control item_code col-md-2" name="item_code[]" value="" readonly>
+                        <input type="text" class="form-control item_code col-md-2" name="item_code[]" value="" >
                       </div>
                     </div>
 
@@ -313,13 +313,13 @@
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>UOM</label>
-                            <input type="text" name="uom[]" class="form-control uom" value="" readonly>
+                            <input type="text" name="uom[]" class="form-control uom" value="" >
                           </div>
                         </div>
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>Quantity</label>
-                            <input type="number" step="any" name="qty[]" class="form-control qty-input" value="" readonly>
+                            <input type="number" step="any" name="qty[]" class="form-control qty-input" value="">
                           </div>
                         </div>
 
@@ -436,7 +436,7 @@
                     <div class="col-md-3">
                       <div class="form-group">
                         <label>Item Code</label>
-                        <input type="text" class="form-control" value="${row.item_code || ''}" readonly>
+                        <input type="text" class="form-control" value="${row.item_code || ''}" >
                       </div>
                     </div>
 
@@ -452,13 +452,13 @@
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>UOM</label>
-                            <input type="text" name="uom[]" class="form-control" value="${row.uom || ''}" readonly>
+                            <input type="text" name="uom[]" class="form-control" value="${row.uom || ''}" >
                           </div>
                         </div>
                         <div class="col-md-6">
                           <div class="form-group">
                             <label>Quantity</label>
-                            <input type="number" step="any" name="qty[]" class="form-control qty-input" value="${row.qty || 0}" readonly>
+                            <input type="number" step="any" name="qty[]" class="form-control qty-input" value="${row.qty || 0}">
                           </div>
                         </div>
 
