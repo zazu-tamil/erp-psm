@@ -144,7 +144,7 @@
 
                                         <td> 
                                             <input type="text" name="item_code[<?php echo $index; ?>]" class="form-control"
-                                                value="<?php echo $item['item_code']; ?>" readonly>
+                                                value="<?php echo $item['item_code']; ?>">
                                             <input type="hidden" name="vendor_pur_inward_item_id[]"
                                                 value="<?php echo $item['vendor_pur_inward_item_id']; ?>"> 
                                             <input type="hidden" name="vendor_po_item_id[<?php echo $index; ?>]"
@@ -154,12 +154,12 @@
 
                                         <td>
                                             <textarea name="item_desc[<?php echo $index; ?>]" class="form-control" rows="2"
-                                                readonly><?php echo htmlspecialchars($item['item_desc']); ?></textarea>
+                                                ><?php echo htmlspecialchars($item['item_desc']); ?></textarea>
                                         </td>
 
                                         <td>
                                             <input type="text" name="uom[<?php echo $index; ?>]" class="form-control"
-                                                value="<?php echo $item['uom']; ?>" readonly>
+                                                value="<?php echo $item['uom']; ?>" >
                                         </td>
 
                                         <td>

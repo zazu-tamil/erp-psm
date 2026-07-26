@@ -435,19 +435,19 @@
                         <td>
                             <input type="text" class="form-control"
                                 name="item_code[${rowIndex}]"
-                                value="${row.item_code || ""}" readonly>
+                                value="${row.item_code || ""}" >
                         </td>
                         <td>
-                            <textarea class="form-control" name="item_desc[${rowIndex}]" readonly>${row.item_desc || ""}</textarea>
+                            <textarea class="form-control" name="item_desc[${rowIndex}]" >${row.item_desc || ""}</textarea>
                         </td>
                         <td>
                             <input type="text" class="form-control"
                                 name="uom[${rowIndex}]"
-                                value="${row.uom || ""}" readonly>
+                                value="${row.uom || ""}" >
                             <br>
                             <input type="number" class="form-control qty-input"
                                 name="qty[${rowIndex}]"
-                                value="${qty}" readonly>
+                                value="${qty}" >
                         </td>
                         <td>
                             <input type="number" step="0.001" class="form-control rate-input"

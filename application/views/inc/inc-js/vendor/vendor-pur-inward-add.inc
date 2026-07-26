@@ -322,7 +322,7 @@
 
                     <td>
                       <input type="text" name="item_code[]" class="form-control"
-                             value="${row.item_code || ""}" readonly>
+                             value="${row.item_code || ""}" >
 
                       <input type="hidden" name="vendor_po_item_id[]" value="${
                         row.vendor_po_item_id
@@ -336,14 +336,14 @@
                     </td>
 
                     <td>
-                      <textarea name="item_desc[]" class="form-control" rows="2" readonly>${
+                      <textarea name="item_desc[]" class="form-control" rows="2" >${
                         row.item_desc || ""
                       }</textarea>
                     </td>
 
                     <td>
                       <input type="text" name="uom[]" class="form-control"
-                             value="${row.uom || ""}" readonly>
+                             value="${row.uom || ""}" >
                     </td>
 
                     <td>

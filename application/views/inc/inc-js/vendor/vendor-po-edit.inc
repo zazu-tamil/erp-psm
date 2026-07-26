@@ -234,7 +234,7 @@
 
                         <td>
                             <input type="text" name="item_code[]" class="form-control"
-                                   value="${row.item_code || ""}" readonly>
+                                   value="${row.item_code || ""}" >
 
                             <input type="hidden" name="vendor_rate_enquiry_item_id[]"
                                    value="${row.vendor_rate_enquiry_item_id}">

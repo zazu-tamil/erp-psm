@@ -196,7 +196,7 @@
                                 <td>
                                     <input type="text" class="form-control item_code-input"
                                         name="item_code[<?= $index; ?>]"
-                                        value="<?= htmlspecialchars($item['item_code'] ?? ''); ?>" readonly>
+                                        value="<?= htmlspecialchars($item['item_code'] ?? ''); ?>" >
                                 </td>
                                 <td>
                                     <textarea name="item_desc[<?= $index; ?>]" class="form-control"
