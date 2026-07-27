@@ -59,6 +59,26 @@
 			width: "100%",
 		});
 
+		$("#add_modal #ac_type").change(function () {
+			if ($(this).val() === "Bank") {
+				$("#add_modal #bank_div").show();
+				$("#add_modal #bank_id").prop("required", true);
+			} else {
+				$("#add_modal #bank_div").hide();
+				$("#add_modal #bank_id").val("").trigger("change.select2").prop("required", false);
+			}
+		});
+
+		$("#edit_modal #ac_type").change(function () {
+			if ($(this).val() === "Bank") {
+				$("#edit_modal #edit_bank_div").show();
+				$("#edit_modal #bank_id").prop("required", true);
+			} else {
+				$("#edit_modal #edit_bank_div").hide();
+				$("#edit_modal #bank_id").val("").trigger("change.select2").prop("required", false);
+			}
+		});
+
 		$("#add_modal").on("shown.bs.modal", function () {
 			$("#tender_enquiry_id").autocomplete({
 				source: function (request, response) {
@@ -243,6 +263,8 @@
 					$("#edit_modal #voucher_type_id").val(d1.voucher_type_id);
 					$("#edit_modal #outward_date").val(d1.outward_date);
 					$("#edit_modal #ac_type").val(d1.ac_type);
+					$("#edit_modal #bank_id").val(d1.bank_id).trigger("change.select2");
+					$("#edit_modal #ac_type").trigger("change");
 					$("#edit_modal #vno").val(d1.vno);
 					$("#edit_modal #company_id")
 						.val(d1.company_id)
@@ -275,14 +297,25 @@
 							opt1.text("Select Sub-Account Head");
 							$("#edit_modal #sub_account_head_id").append(opt1);
 
+							var found = false;
 							$.each(d, function (key, info) {
 								var opt1 = $("<option />");
 								opt1.val(info.sub_account_head_id);
 								opt1.text(info.sub_account_head_name);
-								if (d1.sub_account_head_id == info.sub_account_head_id)
+								if (d1.sub_account_head_id == info.sub_account_head_id) {
 									opt1.attr("selected", "selected");
+									found = true;
+								}
 								$("#edit_modal #sub_account_head_id").append(opt1);
 							});
+
+							if (!found && d1.sub_account_head_id && d1.sub_account_head_name) {
+								var opt1 = $("<option />");
+								opt1.val(d1.sub_account_head_id);
+								opt1.text(d1.sub_account_head_name);
+								opt1.attr("selected", "selected");
+								$("#edit_modal #sub_account_head_id").append(opt1);
+							}
 						},
 					});
 
@@ -300,14 +333,25 @@
 							opt1.text("Select Outward For");
 							$("#edit_modal #sub_account_headlvl3_id").append(opt1);
 
+							var found = false;
 							$.each(w, function (key, info) {
 								var opt1 = $("<option />");
 								opt1.val(info.id);
 								opt1.text(info.val);
-								if (d1.sub_account_headlvl3_id == info.id)
+								if (d1.sub_account_headlvl3_id == info.id) {
 									opt1.attr("selected", "selected");
+									found = true;
+								}
 								$("#edit_modal #sub_account_headlvl3_id").append(opt1);
 							});
+
+							if (!found && d1.sub_account_headlvl3_id && d1.sub_account_headlvl3_name) {
+								var opt1 = $("<option />");
+								opt1.val(d1.sub_account_headlvl3_id);
+								opt1.text(d1.sub_account_headlvl3_name);
+								opt1.attr("selected", "selected");
+								$("#edit_modal #sub_account_headlvl3_id").append(opt1);
+							}
 						},
 					});
 				},

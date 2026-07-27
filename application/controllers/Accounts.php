@@ -464,6 +464,7 @@ class Accounts extends CI_Controller
 
                 'vno' => $this->input->post('vno'),
                 'ac_type' => $this->input->post('ac_type'),
+                'bank_id' => $this->input->post('ac_type') == 'Bank' ? $this->input->post('bank_id') : null,
                 'inward_date' => $this->input->post('inward_date'),
                 'account_head_id' => $this->input->post('account_head_id'),
                 'sub_account_head_id' => $this->input->post('sub_account_head_id'),
@@ -487,10 +488,10 @@ class Accounts extends CI_Controller
                 'cash_inward_id ' => $this->input->post('cash_inward_id'),
                 'company_id' => $this->input->post('company_id'),
                 'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
-                'agent_id' => $this->input->post('agent_id'),
-
+                'agent_id' => $this->input->post('agent_id'), 
                 'vno' => $this->input->post('vno'),
                 'ac_type' => $this->input->post('ac_type'),
+                'bank_id' => $this->input->post('ac_type') == 'Bank' ? $this->input->post('bank_id') : null,
                 'inward_date' => $this->input->post('inward_date'),
                 'account_head_id' => $this->input->post('account_head_id'),
                 'sub_account_head_id' => $this->input->post('sub_account_head_id'),
@@ -585,7 +586,8 @@ class Accounts extends CI_Controller
                 g.enquiry_no,
                 DATEDIFF(current_date(), a.inward_date) as days,
                 get_tender_info(a.tender_enquiry_id) as tender_details,
-                e.sub_account_headlvl3_name as in_from
+                e.sub_account_headlvl3_name as in_from,
+                bank.bank_name
                 from cb_cash_inward_info as a 
                 left join cb_account_head_info as b on b.account_head_id = a.account_head_id and b.status != 'Delete'
                 left join cb_sub_account_head_info as c on c.sub_account_head_id = a.sub_account_head_id and c.status != 'Delete' 
@@ -593,6 +595,7 @@ class Accounts extends CI_Controller
                 left JOIN company_info as f on f.company_id = a.company_id and f.status='Active'
                 left JOIN tender_enquiry_info as g on g.tender_enquiry_id = a.tender_enquiry_id and f.status='Active'
                 left join customer_info as h on h.customer_id = g.customer_id and h.status='Active'
+                left join company_bank_info as bank on bank.bank_id = a.bank_id and bank.status != 'Delete'
                  
                 where a.status != 'Delete' and $where   
                 order by  a.inward_date desc , a.cash_inward_id desc
@@ -684,6 +687,20 @@ class Accounts extends CI_Controller
 
 
         $data['pagination'] = $this->pagination->create_links();
+
+        $sql = "
+                select 
+                a.bank_id,                
+                a.bank_name             
+                from company_bank_info as a  
+                where a.status = 'Active'
+                order by a.bank_name asc                 
+        ";
+        $query = $this->db->query($sql);
+        $data['bank_opt'] = array();
+        foreach ($query->result_array() as $row) {
+            $data['bank_opt'][$row['bank_id']] = $row['bank_name'];
+        }
 
         $data['ac_type_opt'] = array('Bank' => 'Bank', 'Cash' => 'Cash');
 
@@ -783,6 +800,7 @@ class Accounts extends CI_Controller
                 'voucher_type_id' => $this->input->post('voucher_type_id'),
                 'outward_date' => $this->input->post('outward_date'),
                 'ac_type' => $this->input->post('ac_type'),
+                'bank_id' => $this->input->post('ac_type') == 'Bank' ? $this->input->post('bank_id') : null,
                 'account_head_id' => $this->input->post('account_head_id'),
                 'sub_account_head_id' => $this->input->post('sub_account_head_id'),
                 'sub_account_headlvl3_id' => $this->input->post('sub_account_headlvl3_id'),
@@ -838,6 +856,7 @@ class Accounts extends CI_Controller
                 'voucher_type_id' => $this->input->post('voucher_type_id'),
                 'outward_date' => $this->input->post('outward_date'),
                 'ac_type' => $this->input->post('ac_type'),
+                'bank_id' => $this->input->post('ac_type') == 'Bank' ? $this->input->post('bank_id') : null,
                 'vno' => $this->input->post('vno'),
                 'account_head_id' => $this->input->post('account_head_id'),
                 'sub_account_head_id' => $this->input->post('sub_account_head_id'),
@@ -935,7 +954,8 @@ class Accounts extends CI_Controller
                 d.prefix,
                 e.sub_account_headlvl3_name as out_for, 
                 g.enquiry_no,
-                get_tender_info(a.tender_enquiry_id) as tender_details
+                get_tender_info(a.tender_enquiry_id) as tender_details,
+                bank.bank_name
                 from cb_cash_outward_info as a 
                 left join cb_account_head_info as b on b.account_head_id = a.account_head_id and b.status != 'Delete'
                 left join cb_sub_account_head_info as c on c.sub_account_head_id = a.sub_account_head_id and c.status != 'Delete'
@@ -944,6 +964,7 @@ class Accounts extends CI_Controller
                 left JOIN company_info as f on f.company_id = a.company_id and f.status='Active'
                 left JOIN tender_enquiry_info as g on g.tender_enquiry_id = a.tender_enquiry_id and g.status != 'Delete'
                 left join customer_info as h on h.customer_id = g.customer_id and h.status='Active'
+                left join company_bank_info as bank on bank.bank_id = a.bank_id and bank.status != 'Delete'
                 where a.status != 'Delete' and $where  
                 order by a.outward_date desc , a.cash_outward_id desc
                 limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
@@ -1034,6 +1055,20 @@ class Accounts extends CI_Controller
 
 
         $data['pagination'] = $this->pagination->create_links();
+
+        $sql = "
+                select 
+                a.bank_id,                
+                a.bank_name             
+                from company_bank_info as a  
+                where a.status = 'Active'
+                order by a.bank_name asc                 
+        ";
+        $query = $this->db->query($sql);
+        $data['bank_opt'] = array();
+        foreach ($query->result_array() as $row) {
+            $data['bank_opt'][$row['bank_id']] = $row['bank_name'];
+        }
 
         $data['ac_type_opt'] = array('Bank' => 'Bank', 'Cash' => 'Cash');
 
@@ -4150,11 +4185,15 @@ class Accounts extends CI_Controller
             $query = $this->db->query("
                 SELECT 
                     a.*,
-                    concat(ifnull(b.company_code,'') , '/', ifnull(g.company_sno,'') ,  '/' , ifnull(h.customer_code,'') ,  '/' , ifnull(g.customer_sno,''),  '/' , DATE_FORMAT(g.enquiry_date,'%Y') ) as enquiry_name
+                    concat(ifnull(b.company_code,'') , '/', ifnull(g.company_sno,'') ,  '/' , ifnull(h.customer_code,'') ,  '/' , ifnull(g.customer_sno,''),  '/' , DATE_FORMAT(g.enquiry_date,'%Y') ) as enquiry_name,
+                    sub.sub_account_head_name,
+                    lvl3.sub_account_headlvl3_name
                 FROM cb_cash_inward_info as a
                 LEFT JOIN company_info as b ON a.company_id = b.company_id
                 LEFT JOIN tender_enquiry_info as g ON a.tender_enquiry_id = g.tender_enquiry_id
                 LEFT JOIN customer_info as h ON g.customer_id = h.customer_id
+                LEFT JOIN cb_sub_account_head_info as sub ON a.sub_account_head_id = sub.sub_account_head_id
+                LEFT JOIN cb_sub_account_head_lvl3_info as lvl3 ON a.sub_account_headlvl3_id = lvl3.sub_account_headlvl3_id
                 WHERE a.cash_inward_id = '" . $this->db->escape_str($rec_id) . "'
             ");
             $rec_list = $query->row_array();
@@ -4164,11 +4203,15 @@ class Accounts extends CI_Controller
             $query = $this->db->query("
                 SELECT 
                     a.*,
-                    concat(ifnull(b.company_code,'') , '/', ifnull(g.company_sno,'') ,  '/' , ifnull(h.customer_code,'') ,  '/' , ifnull(g.customer_sno,''),  '/' , DATE_FORMAT(g.enquiry_date,'%Y') ) as enquiry_name
+                    concat(ifnull(b.company_code,'') , '/', ifnull(g.company_sno,'') ,  '/' , ifnull(h.customer_code,'') ,  '/' , ifnull(g.customer_sno,''),  '/' , DATE_FORMAT(g.enquiry_date,'%Y') ) as enquiry_name,
+                    sub.sub_account_head_name,
+                    lvl3.sub_account_headlvl3_name
                 FROM cb_cash_outward_info as a
                 LEFT JOIN company_info as b ON a.company_id = b.company_id
                 LEFT JOIN tender_enquiry_info as g ON a.tender_enquiry_id = g.tender_enquiry_id
                 LEFT JOIN customer_info as h ON g.customer_id = h.customer_id
+                LEFT JOIN cb_sub_account_head_info as sub ON a.sub_account_head_id = sub.sub_account_head_id
+                LEFT JOIN cb_sub_account_head_lvl3_info as lvl3 ON a.sub_account_headlvl3_id = lvl3.sub_account_headlvl3_id
                 WHERE a.cash_outward_id = '" . $this->db->escape_str($rec_id) . "'
             ");
             $rec_list = $query->row_array();
