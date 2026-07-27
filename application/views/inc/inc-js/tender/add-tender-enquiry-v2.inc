@@ -171,25 +171,61 @@
 
     $("#excelFile").on("change", function (e) {
       const file = e.target.files[0];
+      if (!file) return;
       const reader = new FileReader();
 
       reader.onload = function (e) {
         const workbook = XLSX.read(e.target.result, { type: "binary" });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(sheet); // JSON with headers
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" }); // JSON with headers
+
+        if (rows.length === 0) {
+          alert("No data found in the Excel file.");
+          return;
+        }
+
+        // Helper: resolve a value from a row by trying multiple possible column names (case-insensitive)
+        function getVal(row, keys) {
+          for (var i = 0; i < keys.length; i++) {
+            var k = keys[i];
+            // Direct match
+            if (row.hasOwnProperty(k) && row[k] !== undefined && row[k] !== "") {
+              return String(row[k]);
+            }
+            // Case-insensitive match
+            var lk = k.toLowerCase();
+            for (var rk in row) {
+              if (rk.toLowerCase() === lk && row[rk] !== undefined && row[rk] !== "") {
+                return String(row[rk]);
+              }
+            }
+          }
+          return "";
+        }
 
         $("#item_rows").empty(); // Clear previous rows
 
         rows.forEach(function (r) {
+          // Support both sample format and RFQ Excel format column names
+          var itemCode = getVal(r, ["item_code", "Item", "Material", "item code", "ITEM", "MATERIAL"]);
+          var itemDesc = getVal(r, ["item_desc", "PO TEXT", "Description", "description", "Item Description", "DESCRIPTION", "PO_TEXT", "po text"]);
+          var uom      = getVal(r, ["uom", "UOM", "Unit", "UNIT", "unit"]);
+          var qty      = getVal(r, ["qty", "Order Quantity", "Qty", "QTY", "quantity", "Quantity", "QUANTITY", "order quantity"]);
+
+          if (itemCode === "" && itemDesc === "" && qty === "") return; // skip blank rows
+
           let newRow = $(rowTemplate);
-          //alert(r.item_desc);
-          newRow.find(".item_code").val(r.item_code);
-          newRow.find(".item_desc").val(r.item_desc);
-          newRow.find(".uom").val(r.uom); // Should match option value
-          newRow.find(".qty").val(r.qty);
+          newRow.find(".item_code").val(itemCode);
+          newRow.find(".item_desc").val(itemDesc.replace(/[^\x20-\x7E]/g, ''));
+          newRow.find(".uom").val(uom);
+          newRow.find(".qty").val(qty);
 
           $("#item_rows").append(newRow);
         });
+
+        if ($("#item_rows .item-row").length === 0) {
+          alert("No valid rows imported. Please check your Excel column headers match: item_code, item_desc, uom, qty  OR  Item/Material, PO TEXT, UOM, Order Quantity");
+        }
       };
 
       reader.readAsBinaryString(file);
