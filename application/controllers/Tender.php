@@ -2130,7 +2130,7 @@ class Tender extends CI_Controller
         }
 
         // === ITEMS WITH RATE CALCULATION ===
-        $sql = "
+        /*$sql = "
            select
             a.tender_quotation_id,
             b.item_code,
@@ -2148,7 +2148,38 @@ class Tender extends CI_Controller
             order by b.tender_enquiry_item_id ,  b.tender_quotation_item_id asc
         ";
         $query = $this->db->query($sql, [$tender_quotation_id]);
+        $data['item_list'] = $query->result_array();*/
+
+         $sql = "
+           select
+            c.serial_no,
+            a.tender_quotation_id,
+            b.item_code,
+            b.item_desc,
+            b.uom,
+            b.qty,
+            b.rate,
+            b.gst,
+            b.amount,
+            (b.rate * b.qty) AS Net_amount,
+            ((b.rate * b.qty) * b.gst /100) as vat_amt
+            from tender_quotation_info as a  
+            left join tender_quotation_item_info as b on a.tender_quotation_id = b.tender_quotation_id 
+            left join tender_enquiry_item_info as c on a.tender_enquiry_id = c.tender_enquiry_id and b.tender_enquiry_item_id = c.tender_enquiry_item_id 
+            where a.`status`='Active'
+            and b.`status`='Active'
+            and c.`status`='Active'
+            and a.tender_quotation_id = ?
+            order by b.tender_enquiry_item_id ,  b.tender_quotation_item_id asc
+        ";
+        $query = $this->db->query($sql, [$tender_quotation_id]);
         $data['item_list'] = $query->result_array();
+        /*
+        echo '<pre>';   
+        print_r($data['item_list']);
+        echo "</pre>";
+        exit;
+        */
 
         if (isset($_POST['export_xls'])) {
 
