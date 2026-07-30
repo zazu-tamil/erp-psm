@@ -195,11 +195,15 @@ class General extends CI_Controller
             $query = $this->db->query("
                 SELECT 
                     a.*,
-                    concat(ifnull(b.company_code,'') , '/', ifnull(g.company_sno,'') ,  '/' , ifnull(h.customer_code,'') ,  '/' , ifnull(g.customer_sno,''),  '/' , DATE_FORMAT(g.enquiry_date,'%Y') ) as enquiry_name
+                    concat(ifnull(b.company_code,'') , '/', ifnull(g.company_sno,'') ,  '/' , ifnull(h.customer_code,'') ,  '/' , ifnull(g.customer_sno,''),  '/' , DATE_FORMAT(g.enquiry_date,'%Y') ) as enquiry_name,
+                    sub.sub_account_head_name,
+                    lvl3.sub_account_headlvl3_name
                 FROM cb_cash_inward_info as a
                 LEFT JOIN company_info as b ON a.company_id = b.company_id
                 LEFT JOIN tender_enquiry_info as g ON a.tender_enquiry_id = g.tender_enquiry_id
                 LEFT JOIN customer_info as h ON g.customer_id = h.customer_id
+                LEFT JOIN cb_sub_account_head_info as sub ON a.sub_account_head_id = sub.sub_account_head_id
+                LEFT JOIN cb_sub_account_head_lvl3_info as lvl3 ON a.sub_account_headlvl3_id = lvl3.sub_account_headlvl3_id
                 WHERE a.cash_inward_id = '" . $this->db->escape_str($rec_id) . "'
             ");
             $rec_list = $query->row_array();
@@ -209,11 +213,15 @@ class General extends CI_Controller
             $query = $this->db->query("
                 SELECT 
                     a.*,
-                    concat(ifnull(b.company_code,'') , '/', ifnull(g.company_sno,'') ,  '/' , ifnull(h.customer_code,'') ,  '/' , ifnull(g.customer_sno,''),  '/' , DATE_FORMAT(g.enquiry_date,'%Y') ) as enquiry_name
+                    concat(ifnull(b.company_code,'') , '/', ifnull(g.company_sno,'') ,  '/' , ifnull(h.customer_code,'') ,  '/' , ifnull(g.customer_sno,''),  '/' , DATE_FORMAT(g.enquiry_date,'%Y') ) as enquiry_name,
+                    sub.sub_account_head_name,
+                    lvl3.sub_account_headlvl3_name
                 FROM cb_cash_outward_info as a
                 LEFT JOIN company_info as b ON a.company_id = b.company_id
                 LEFT JOIN tender_enquiry_info as g ON a.tender_enquiry_id = g.tender_enquiry_id
                 LEFT JOIN customer_info as h ON g.customer_id = h.customer_id
+                LEFT JOIN cb_sub_account_head_info as sub ON a.sub_account_head_id = sub.sub_account_head_id
+                LEFT JOIN cb_sub_account_head_lvl3_info as lvl3 ON a.sub_account_headlvl3_id = lvl3.sub_account_headlvl3_id
                 WHERE a.cash_outward_id = '" . $this->db->escape_str($rec_id) . "'
             ");
             $rec_list = $query->row_array();

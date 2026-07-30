@@ -87,7 +87,7 @@
                             <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
                             <td class="text-center">  
                                     <i class="label label-success"><?php echo $ls['tender_details'] ?></i></td>
-                            <td><?php echo date('d-m-Y', strtotime($ls['outward_date'])) ?><br /><?php echo $ls['ac_type'] ?>
+                            <td><?php echo date('d-m-Y', strtotime($ls['outward_date'])) ?><br /><?php echo $ls['ac_type'] . ($ls['ac_type'] == 'Bank' && !empty($ls['bank_name']) ? ' (' . $ls['bank_name'] . ')' : '') ?>
                             </td>
                             <td><?php echo $ls['account_head_name'] ?></td>
                             <td><?php echo $ls['sub_account_head_name'] ?></td>
@@ -166,6 +166,10 @@
                                     <div class="form-group col-md-6">
                                         <label>Account Group</label>
                                         <?php echo form_dropdown('ac_type', array('' => 'Select') + $ac_type_opt, set_value('ac_type'), ' id="ac_type" class="form-control" required="true"'); ?>
+                                    </div>
+                                    <div class="form-group col-md-6" id="bank_div" style="display: none;">
+                                        <label>Bank</label>
+                                        <?php echo form_dropdown('bank_id', array('' => 'Select Bank') + $bank_opt, set_value('bank_id'), ' id="bank_id" class="form-control select2"'); ?>
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Account Head</label>
@@ -265,6 +269,10 @@
                                     <div class="form-group col-md-6">
                                         <label>Account Group</label>
                                         <?php echo form_dropdown('ac_type', array('' => 'Select') + $ac_type_opt, set_value('ac_type'), ' id="ac_type" class="form-control" required="true"'); ?>
+                                    </div>
+                                    <div class="form-group col-md-6" id="edit_bank_div" style="display: none;">
+                                        <label>Bank</label>
+                                        <?php echo form_dropdown('bank_id', array('' => 'Select Bank') + $bank_opt, set_value('bank_id'), ' id="bank_id" class="form-control select2"'); ?>
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Account Head</label>
