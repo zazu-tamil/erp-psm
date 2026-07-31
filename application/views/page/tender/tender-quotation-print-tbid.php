@@ -210,7 +210,7 @@
                 <table class="items-table"> -->
 
                     <tr class="items-table">
-                        <th width="8%">Item No</th>
+                        <th width="8%">Serial No</th>
                         <th width="40%" align="left">Description</th>
                         <th width="8%">Qty</th>
                         <th width="8%">Unit</th>
@@ -221,20 +221,20 @@
 
                     <?php if (!empty($item_list)): ?>
                     <?php foreach ($item_list as $i => $item):
-                        $net_amount = floatval($item['Net_amount'] ?? 0);
+                       /*  $net_amount = floatval($item['Net_amount'] ?? 0);
                         $vat_percentage = floatval($item['gst'] ?? 0);
                         
                         $net = floatval($item['Net_amount'] ?? 0);
                         $vat_rate = floatval($item['gst'] ?? 0);
                         $vat = $net * $vat_rate / 100;
                         $total_net_amount += $net;
-                        $total_vat_amount += $vat;
+                        $total_vat_amount += $vat; */
                         ?>
                     <tr class="items-table">
-                        <td class="text-center"><?php echo $i + 1; ?></td>
+                        <td class="text-center"><?php echo $item['serial_no']; ?></td>
                         <td class="text-left">
                             <div class="item-description">
-                                <?php if (!empty($item['item_code'])): ?>
+                                <?php if (!empty($item['serial_no'])): ?>
                                 <div class="item-code"><?php echo htmlspecialchars($item['item_code']); ?></div>
                                 <?php endif; ?>
                                 <?php //echo htmlspecialchars($item['item_desc'] ?? ''); ?>
@@ -257,14 +257,14 @@
                     </tr>
                     <?php endif; 
                     //$total_net_amount += ($record['transport_charges'] + $record['other_charges']);
-                    $total_vat_amount = (($total_net_amount + $record['transport_charges'] + $record['other_charges'] ) * $vat_percentage /100);
-                    $grand_total = ($total_net_amount + $record['transport_charges'] + $record['other_charges'] ) + $total_vat_amount;
+                    //$total_vat_amount = (($total_net_amount + $record['transport_charges'] + $record['other_charges'] ) * $vat_percentage /100);
+                    //$grand_total = ($total_net_amount + $record['transport_charges'] + $record['other_charges'] ) + $total_vat_amount;
                     ?>
 
                     <!-- <tr class="items-table">
                         <td colspan="5" class="text-right"><strong>TOTAL EXCL. VAT</strong></td>
                         <td colspan="2" class="text-right">
-                            <strong><?php echo number_format($total_net_amount, $decimal_point); ?></strong>
+                            <strong><?php //echo number_format($total_net_amount, $decimal_point); ?></strong>
                         </td>
                     </tr>
                    
@@ -272,7 +272,7 @@
                     <tr class="items-table">
                         <td colspan="5" class="text-right"><strong>TRANSPORT CHARGES</strong></td>
                         <td colspan="2" class="text-right">
-                            <strong><?php echo number_format($record['transport_charges'], $decimal_point); ?></strong>
+                            <strong><?php //echo number_format($record['transport_charges'], $decimal_point); ?></strong>
                         </td>
                     </tr>
                      <?php } ?>
@@ -280,22 +280,22 @@
                     <tr class="items-table">
                         <td colspan="5" class="text-right"><strong>OTHER CHARGES</strong></td>
                         <td colspan="2" class="text-right">
-                            <strong><?php echo number_format($record['other_charges'], $decimal_point); ?></strong>
+                            <strong><?php //echo number_format($record['other_charges'], $decimal_point); ?></strong>
                         </td>
                     </tr>
                     <?php } ?>
-                    <tr class="items-table">
+                    <!-- <tr class="items-table">
                         <td colspan="5" class="text-right"><strong>VAT
-                                <?php echo number_format($vat_percentage ?? 0, 0); ?>%</strong></td>
+                                <?php //echo number_format($vat_percentage ?? 0, 0); ?>%</strong></td>
                         <td colspan="2" class="text-right">
-                            <strong><?php echo number_format(($total_vat_amount), $decimal_point); ?></strong>
+                            <strong><?php //echo number_format(($total_vat_amount), $decimal_point); ?></strong>
                         </td>
                     </tr>
                     <tr class="items-table" style="background:#ffff; color:#000;">
                         <td colspan="5" class="text-right"><strong>TOTAL </strong> 
-                                <i class="text-sm">in <?php echo htmlspecialchars($currency_code); ?></i></td>
+                                <i class="text-sm">in <?php //echo htmlspecialchars($currency_code); ?></i></td>
                         <td colspan="2" class="text-right">
-                            <strong><?php echo number_format($grand_total, $decimal_point); ?></strong>
+                            <strong><?php //echo number_format($grand_total, $decimal_point); ?></strong>
                         </td>
                     </tr> -->
 
