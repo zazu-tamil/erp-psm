@@ -37,14 +37,14 @@ class PettyCash extends CI_Controller
 
             // Check if ref_outward_id and ref_inward_id column exists
             $fields = $this->db->list_fields('petty_cash_transactions');
+            if (!in_array('ac_type', $fields)) {
+                $this->db->query("ALTER TABLE `petty_cash_transactions` ADD `ac_type` VARCHAR(50) NULL AFTER `transaction_type`");
+            }
+            if (!in_array('bank_id', $fields)) {
+                $this->db->query("ALTER TABLE `petty_cash_transactions` ADD `bank_id` INT(11) NULL AFTER `ac_type`");
+            }
             if (!in_array('account_head_id', $fields)) {
-                $this->db->query("ALTER TABLE `petty_cash_transactions` ADD `account_head_id` INT(11) NULL AFTER `transaction_type`");
-            }
-            if (!in_array('ref_outward_id', $fields)) {
-                $this->db->query("ALTER TABLE `petty_cash_transactions` ADD `ref_outward_id` INT(11) NULL AFTER `remarks`");
-            }
-            if (!in_array('ref_inward_id', $fields)) {
-                $this->db->query("ALTER TABLE `petty_cash_transactions` ADD `ref_inward_id` INT(11) NULL AFTER `ref_outward_id`");
+                $this->db->query("ALTER TABLE `petty_cash_transactions` ADD `account_head_id` INT(11) NULL AFTER `bank_id`");
             }
         }
 
@@ -287,6 +287,8 @@ class PettyCash extends CI_Controller
                     t.id,
                     t.transaction_date,
                     IF(t.transaction_type = 'Inward' OR t.transaction_type = 'Income', 'Inward', 'Outward') AS transaction_type,
+                    t.ac_type,
+                    t.bank_id,
                     t.account_head_id,
                     t.category_id,
                     t.amount,
@@ -294,10 +296,12 @@ class PettyCash extends CI_Controller
                     t.created_at,
                     c.sub_account_head_name AS category_name,
                     a.account_head_name,
-                    'Petty Cash' AS source_type
+                    'Petty Cash' AS source_type,
+                    bank.bank_name
                 FROM petty_cash_transactions t
                 LEFT JOIN cb_sub_account_head_info c ON c.sub_account_head_id = t.category_id
                 LEFT JOIN cb_account_head_info a ON a.account_head_id = t.account_head_id
+                LEFT JOIN company_bank_info bank ON bank.bank_id = t.bank_id AND bank.status != 'Delete'
                 WHERE t.status != 'Deleted' AND t.transaction_date >= '$esc_from' AND t.transaction_date <= '$esc_to'
 
                 UNION ALL
@@ -306,6 +310,8 @@ class PettyCash extends CI_Controller
                     tr.tender_receipt_id AS id,
                     tr.receipt_date AS transaction_date,
                     'Inward' AS transaction_type,
+                    'Cash' AS ac_type,
+                    NULL AS bank_id,
                     NULL AS account_head_id,
                     NULL AS category_id,
                     tr.amount,
@@ -313,7 +319,8 @@ class PettyCash extends CI_Controller
                     IFNULL(tr.created_date, tr.receipt_date) AS created_at,
                     'Cash Inward' AS category_name,
                     'Tender Receipt (Cash)' AS account_head_name,
-                    'Tender Receipt' AS source_type
+                    'Tender Receipt' AS source_type,
+                    NULL AS bank_name
                 FROM tender_receipt_info tr
                 LEFT JOIN customer_info cust ON cust.customer_id = tr.customer_id
                 WHERE tr.receipt_mode = 'Cash' AND (tr.status = 'Active' OR (tr.status != 'Delete' AND tr.status != 'Deleted')) AND tr.receipt_date >= '$esc_from' AND tr.receipt_date <= '$esc_to'
@@ -324,6 +331,8 @@ class PettyCash extends CI_Controller
                     vp.vendor_payment_id AS id,
                     vp.payment_date AS transaction_date,
                     'Outward' AS transaction_type,
+                    'Cash' AS ac_type,
+                    NULL AS bank_id,
                     NULL AS account_head_id,
                     NULL AS category_id,
                     vp.amount,
@@ -331,7 +340,8 @@ class PettyCash extends CI_Controller
                     IFNULL(vp.created_date, vp.payment_date) AS created_at,
                     'Cash Outward' AS category_name,
                     'Vendor Bill (Cash)' AS account_head_name,
-                    'Vendor Payment' AS source_type
+                    'Vendor Payment' AS source_type,
+                    NULL AS bank_name
                 FROM vendor_payment_info vp
                 LEFT JOIN vendor_info ven ON ven.vendor_id = vp.vendor_id
                 WHERE vp.payment_mode = 'Cash' AND (vp.status = 'Active' OR (vp.status != 'Delete' AND vp.status != 'Deleted')) AND vp.payment_date >= '$esc_from' AND vp.payment_date <= '$esc_to'
@@ -342,6 +352,8 @@ class PettyCash extends CI_Controller
                     cb.customs_bill_id AS id,
                     cb.invoice_date AS transaction_date,
                     'Outward' AS transaction_type,
+                    NULL AS ac_type,
+                    NULL AS bank_id,
                     NULL AS account_head_id,
                     NULL AS category_id,
                     cb.customs_tot_amt AS amount,
@@ -349,7 +361,8 @@ class PettyCash extends CI_Controller
                     IFNULL(cb.created_date, cb.invoice_date) AS created_at,
                     'Customs Expense' AS category_name,
                     'Customs Bill' AS account_head_name,
-                    'Customs Bill' AS source_type
+                    'Customs Bill' AS source_type,
+                    NULL AS bank_name
                 FROM customs_bill_info cb
                 LEFT JOIN vendor_info ven ON ven.vendor_id = cb.vendor_id
                 WHERE (cb.status = 'Active' OR (cb.status != 'Delete' AND cb.status != 'Deleted')) AND cb.invoice_date >= '$esc_from' AND cb.invoice_date <= '$esc_to'
@@ -360,6 +373,8 @@ class PettyCash extends CI_Controller
                     dp.dp_bill_id AS id,
                     dp.invoice_date AS transaction_date,
                     'Outward' AS transaction_type,
+                    NULL AS ac_type,
+                    NULL AS bank_id,
                     NULL AS account_head_id,
                     NULL AS category_id,
                     dp.g_total AS amount,
@@ -367,7 +382,8 @@ class PettyCash extends CI_Controller
                     IFNULL(dp.created_date, dp.invoice_date) AS created_at,
                     'Delivery Expense' AS category_name,
                     'Delivery Partner Bill' AS account_head_name,
-                    'DP Bill' AS source_type
+                    'DP Bill' AS source_type,
+                    NULL AS bank_name
                 FROM dp_bill_info dp
                 LEFT JOIN vendor_info ven ON ven.vendor_id = dp.vendor_id
                 WHERE (dp.status = 'Active' OR (dp.status != 'Delete' AND dp.status != 'Deleted')) AND dp.invoice_date >= '$esc_from' AND dp.invoice_date <= '$esc_to'
@@ -378,6 +394,8 @@ class PettyCash extends CI_Controller
                     lp.local_purchase_bill_id AS id,
                     lp.invoice_date AS transaction_date,
                     'Outward' AS transaction_type,
+                    NULL AS ac_type,
+                    NULL AS bank_id,
                     NULL AS account_head_id,
                     NULL AS category_id,
                     lp.tot_amt_with_tax AS amount,
@@ -385,7 +403,8 @@ class PettyCash extends CI_Controller
                     IFNULL(lp.created_date, lp.invoice_date) AS created_at,
                     'Purchase Expense' AS category_name,
                     'Local Purchase Bill' AS account_head_name,
-                    'Local Purchase Bill' AS source_type
+                    'Local Purchase Bill' AS source_type,
+                    NULL AS bank_name
                 FROM local_purchase_bill_info lp
                 LEFT JOIN vendor_info ven ON ven.vendor_id = lp.vendor_id
                 WHERE (lp.status = 'Active' OR (lp.status != 'Delete' AND lp.status != 'Deleted')) AND lp.invoice_date >= '$esc_from' AND lp.invoice_date <= '$esc_to'
@@ -395,6 +414,27 @@ class PettyCash extends CI_Controller
 
         $data['history'] = $this->db->query($union_sql)->result_array();
 
+        // Fetch all active account heads
+        $all_heads_query = $this->db->query("
+            SELECT account_head_id, account_head_name, type 
+            FROM cb_account_head_info 
+            WHERE status = 'Active'
+            ORDER BY account_head_name ASC
+        ");
+        $data['account_heads'] = $all_heads_query->result_array();
+
+        // Fetch active banks
+        $banks_query = $this->db->query("
+            SELECT bank_id, bank_name 
+            FROM company_bank_info 
+            WHERE status = 'Active'
+            ORDER BY bank_name ASC
+        ");
+        $data['bank_opt'] = [];
+        foreach ($banks_query->result_array() as $row) {
+            $data['bank_opt'][$row['bank_id']] = $row['bank_name'];
+        }
+
         $this->load->view('page/accounts/petty-cash', $data);
     }
 
@@ -402,18 +442,25 @@ class PettyCash extends CI_Controller
     {
         $amount = $this->input->post('amount');
         $date = $this->input->post('transaction_date');
+        $ac_type = $this->input->post('ac_type');
+        $bank_id = $ac_type == 'Bank' ? $this->input->post('bank_id') : null;
+        $account_head_id = $this->input->post('account_head_id');
+        $category_id = $this->input->post('category_id');
         $remarks = $this->input->post('remarks');
 
         if ($amount > 0) {
             $this->db->insert('petty_cash_transactions', [
                 'transaction_date' => $date,
                 'transaction_type' => 'Inward',
+                'ac_type' => $ac_type,
+                'bank_id' => $bank_id,
+                'account_head_id' => $account_head_id,
+                'category_id' => $category_id,
                 'amount' => $amount,
                 'remarks' => $remarks,
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_at' => date('Y-m-d H:i:s')
             ]);
-
         }
 
         $this->session->set_flashdata('success', 'Funds added successfully');
@@ -432,6 +479,9 @@ class PettyCash extends CI_Controller
             $this->db->insert('petty_cash_transactions', [
                 'transaction_date' => $date,
                 'transaction_type' => 'Outward', 
+                'ac_type' => 'Cash',
+                'account_head_id' => $account_head_id,
+                'category_id' => $category_id,
                 'amount' => $amount,
                 'remarks' => $remarks,
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
@@ -449,23 +499,45 @@ class PettyCash extends CI_Controller
         $transaction_type = $this->input->post('transaction_type');
         $amount = $this->input->post('amount');
         $date = $this->input->post('transaction_date');
+        $ac_type = $this->input->post('ac_type');
+        $bank_id = $ac_type == 'Bank' ? $this->input->post('bank_id') : null;
+        $account_head_id = $this->input->post('account_head_id');
+        $category_id = $this->input->post('category_id');
         $remarks = $this->input->post('remarks');
-
-        // Fetch current transaction to check mapping
-        $txn = $this->db->get_where('petty_cash_transactions', ['id' => $id])->row();
 
         $update_data = [
             'transaction_date' => $date,
+            'ac_type' => $ac_type,
+            'bank_id' => $bank_id,
+            'account_head_id' => $account_head_id,
+            'category_id' => $category_id,
             'amount' => $amount,
             'remarks' => $remarks
         ]; 
         $this->db->where('id', $id);
         $this->db->update('petty_cash_transactions', $update_data);
- 
 
         $this->session->set_flashdata('success', 'Transaction updated successfully');
         redirect('petty-cash');
     }
+
+    public function get_sub_accounts()
+    {
+        $account_head_id = $this->input->post('account_head_id');
+        $query = $this->db->query("
+            SELECT sub_account_head_id, sub_account_head_name 
+            FROM cb_sub_account_head_info 
+            WHERE account_head_id = '" . $this->db->escape_str($account_head_id) . "' AND status = 'Active'
+            ORDER BY sub_account_head_name ASC
+        ");
+        
+        echo '<option value="">Select Sub Account</option>';
+        foreach ($query->result_array() as $row) {
+            echo '<option value="' . $row['sub_account_head_id'] . '">' . htmlspecialchars($row['sub_account_head_name']) . '</option>';
+        }
+        exit;
+    }
+
     public function delete_transaction($id = null)
     {
         if (!$id) {

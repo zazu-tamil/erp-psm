@@ -5,6 +5,43 @@
       $(".select2").select2({ width: "100%" });
     }
 
+    $("#add_ac_type").change(function () {
+      if ($(this).val() === "Bank") {
+        $("#add_bank_group").show();
+        $("#add_bank_id").prop("required", true);
+      } else {
+        $("#add_bank_group").hide();
+        $("#add_bank_id").val("").trigger("change.select2").prop("required", false);
+      }
+    });
+
+    $("#edit_ac_type").change(function () {
+      if ($(this).val() === "Bank") {
+        $("#edit_bank_group").show();
+        $("#edit_bank_id").prop("required", true);
+      } else {
+        $("#edit_bank_group").hide();
+        $("#edit_bank_id").val("").trigger("change.select2").prop("required", false);
+      }
+    });
+
+    $("#add_account_head_id").change(function () {
+      var ah_id = $(this).val();
+      if (ah_id) {
+        $.post(
+          '<?= site_url("pettycash/get_sub_accounts") ?>',
+          { account_head_id: ah_id },
+          function (data) {
+            $("#add_category_id").html(data);
+            if ($.fn.select2) $("#add_category_id").trigger("change.select2");
+          },
+        );
+      } else {
+        $("#add_category_id").html('<option value="">Select Sub Account</option>');
+        if ($.fn.select2) $("#add_category_id").trigger("change.select2");
+      }
+    });
+
     $("#account_head_id").change(function () {
       var ah_id = $(this).val();
       if (ah_id) {
@@ -46,6 +83,8 @@
       var id = $(this).data("id");
       var date = $(this).data("date");
       var type = $(this).data("type");
+      var ac_type = $(this).data("ac-type");
+      var bank = $(this).data("bank");
       var account_head = $(this).data("account-head");
       var category = $(this).data("category");
       var amount = $(this).data("amount");
@@ -57,7 +96,34 @@
       $("#edit_amount").val(amount);
       $("#edit_remarks").val(remarks);
 
-      if (type === "Outward") {
+      if (type === "Inward") {
+        $("#edit_ac_type_group").show();
+        $("#edit_ac_type").val(ac_type).trigger("change");
+        $("#edit_bank_id").val(bank).trigger("change.select2");
+        $("#edit_ac_type").prop("required", true);
+
+        $("#edit_account_head_group").show();
+        $("#edit_category_group").show();
+
+        $("#edit_account_head_id").val(account_head).trigger("change", [true]);
+
+        $.post(
+          '<?= site_url("pettycash/get_sub_accounts") ?>',
+          { account_head_id: account_head },
+          function (data) {
+            $("#edit_category_id").html(data);
+            $("#edit_category_id").val(category);
+            if ($.fn.select2) $("#edit_category_id").trigger("change.select2");
+          },
+        );
+
+        $("#edit_account_head_id").prop("required", true);
+        $("#edit_category_id").prop("required", true);
+      } else if (type === "Outward") {
+        $("#edit_ac_type_group").hide();
+        $("#edit_bank_group").hide();
+        $("#edit_ac_type").val("").trigger("change").prop("required", false);
+
         $("#edit_account_head_group").show();
         $("#edit_category_group").show();
 
@@ -76,6 +142,10 @@
         $("#edit_account_head_id").prop("required", true);
         $("#edit_category_id").prop("required", true);
       } else {
+        $("#edit_ac_type_group").hide();
+        $("#edit_bank_group").hide();
+        $("#edit_ac_type").val("").trigger("change").prop("required", false);
+
         $("#edit_account_head_group").hide();
         $("#edit_category_group").hide();
         $("#edit_account_head_id").val("").trigger("change", [true]);

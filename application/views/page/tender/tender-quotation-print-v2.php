@@ -10,7 +10,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Enquiry No - <?= htmlspecialchars(str_replace('/', '∕', $record['tender_details'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></title>
+    <title>Enquiry No -
+        <?= htmlspecialchars(str_replace('/', '', $record['tender_details'] ?? 'N/A'), ENT_QUOTES, 'UTF-8'); ?></title>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;

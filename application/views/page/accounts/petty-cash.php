@@ -736,12 +736,50 @@
                                     placeholder="0.000" required>
                             </div>
                         </div>
+                        <div class="row form-row-responsive">
+                            <div class="col-xs-6 form-group">
+                                <label>Account Group</label>
+                                <select class="form-control form-control-modern" name="ac_type" id="add_ac_type" required>
+                                    <option value="">Select Group</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="Bank">Bank</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-6 form-group" id="add_bank_group" style="display: none;">
+                                <label>Bank</label>
+                                <select class="form-control select2" name="bank_id" id="add_bank_id">
+                                    <option value="">Select Bank</option>
+                                    <?php foreach ($bank_opt as $b_id => $b_name): ?>
+                                        <option value="<?= $b_id ?>"><?= $b_name ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row form-row-responsive">
+                            <div class="col-xs-6 form-group">
+                                <label>Account Head</label>
+                                <select class="form-control select2" name="account_head_id" id="add_account_head_id" required>
+                                    <option value="">Select Account Head</option>
+                                    <?php foreach ($account_heads as $ah): ?>
+                                        <?php if ($ah['type'] == 'Inward'): ?>
+                                            <option value="<?= $ah['account_head_id'] ?>"><?= $ah['account_head_name'] ?></option>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-xs-6 form-group">
+                                <label>Sub Account Head</label>
+                                <select class="form-control select2" name="category_id" id="add_category_id" required>
+                                    <option value="">Select Sub Account</option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="form-group">
                             <label>Source / Remarks</label>
                             <input type="text" class="form-control form-control-modern" name="remarks"
                                 placeholder="e.g. Cash withdrawn from Bank">
                         </div>
-                        <div style="text-align: right; margin-top: 75px;">
+                        <div style="text-align: right; margin-top: 16px;">
                             <button type="submit" class="btn-modern btn-success-modern"><i class="fa fa-upload"></i> Add
                                 Funds</button>
                         </div>
@@ -913,6 +951,9 @@
                                         <?php else: ?>
                                             <span class="badge-modern badge-expense">Expense</span>
                                         <?php endif; ?>
+                                        <?php if (!empty($row['ac_type'])): ?>
+                                            <br><small style="color: #64748b;"><?= htmlspecialchars($row['ac_type']) ?><?= ($row['ac_type'] == 'Bank' && !empty($row['bank_name'])) ? ' (' . htmlspecialchars($row['bank_name']) . ')' : '' ?></small>
+                                        <?php endif; ?>
                                     </td>
                                     <td><?= !empty($row['account_head_name']) ? htmlspecialchars($row['account_head_name']) : '-' ?></td>
                                     <td><?= !empty($row['category_name']) ? htmlspecialchars($row['category_name']) : '-' ?></td>
@@ -928,6 +969,8 @@
                                             <button type="button" class="action-btn btn-edit-action btn-edit"
                                                 data-id="<?= $row['id'] ?>" data-date="<?= $row['transaction_date'] ?>"
                                                 data-type="<?= $row['transaction_type'] ?>"
+                                                data-ac-type="<?= htmlspecialchars($row['ac_type'] ?? '') ?>"
+                                                data-bank="<?= htmlspecialchars($row['bank_id'] ?? '') ?>"
                                                 data-account-head="<?= $row['account_head_id'] ?>"
                                                 data-category="<?= $row['category_id'] ?>" data-amount="<?= $row['amount'] ?>"
                                                 data-remarks="<?= htmlspecialchars($row['remarks'] ?? '') ?>">
@@ -987,6 +1030,25 @@
                         <label>Date</label>
                         <input type="date" class="form-control form-control-modern" name="transaction_date"
                             id="edit_date" required>
+                    </div>
+
+                    <div class="form-group" id="edit_ac_type_group">
+                        <label>Account Group</label>
+                        <select class="form-control form-control-modern" name="ac_type" id="edit_ac_type" required>
+                            <option value="">Select Group</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Bank">Bank</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="edit_bank_group" style="display: none;">
+                        <label>Bank</label>
+                        <select class="form-control select2" name="bank_id" id="edit_bank_id" style="width: 100%;">
+                            <option value="">Select Bank</option>
+                            <?php foreach ($bank_opt as $b_id => $b_name): ?>
+                                <option value="<?= $b_id ?>"><?= $b_name ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
 
                     <div class="form-group" id="edit_account_head_group">
