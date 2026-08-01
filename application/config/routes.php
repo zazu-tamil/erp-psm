@@ -230,6 +230,9 @@ $route['account-head-for-list/(:num)'] = 'accounts/account_head_for_list/$1';
 $route['company-bank-list'] = 'accounts/company_bank_list';
 $route['company-bank-list/(:num)'] = 'accounts/company_bank_list/$1';
 
+$route['cash-category-list'] = 'accounts/cash_category_list';
+$route['cash-category-list/(:num)'] = 'accounts/cash_category_list/$1';
+
 $route['voucher-type-list'] = 'accounts/voucher_type_list';
 $route['voucher-type-list/(:num)'] = 'accounts/voucher_type_list/$1';
 

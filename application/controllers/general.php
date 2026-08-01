@@ -495,6 +495,20 @@ class General extends CI_Controller
 
         }
 
+        if ($table == 'cash_category') {
+            $query = $this->db->query("
+                select 
+                a.* 
+                from cash_category as a  
+                where a.cash_category_id = '" . $this->db->escape_str($rec_id) . "'
+            ");
+            $rec_list = array();
+
+            foreach ($query->result_array() as $row) {
+                $rec_list = $row;
+            }
+        }
+
         $this->db->close();
 
         header('Content-Type: application/x-json; charset=utf-8');
@@ -702,6 +716,12 @@ class General extends CI_Controller
                 'updated_datetime' => date('Y-m-d H:i:s')
             ));
             echo 'Record Successfully deleted';
+        }
+
+        if ($table == 'cash_category') {
+            $this->db->where('cash_category_id', $rec_id);
+            $this->db->update('cash_category', array('status' => 'Delete'));
+            echo "Record Deleted Successfully";
         }
 
     }

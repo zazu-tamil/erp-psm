@@ -4455,5 +4455,57 @@ class Accounts extends CI_Controller
 
         $this->load->view('page/accounts/cash-in-out-statement', $data);
     }
+
+    /* ---------------------------------------------------------------
+       CASH CATEGORY MASTER
+       Table: cash_category (cash_category_id, category_name,
+                              category_type [Inward|Outward|Both],
+                              description, status, created_at)
+    --------------------------------------------------------------- */
+    public function cash_category_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data['js'] = 'accounts/cash-category.inc';
+
+        // ── ADD ──────────────────────────────────────────────────────
+        if ($this->input->post('mode') == 'Add') {
+            $ins = array(
+                'category_name'  => $this->input->post('category_name'),
+                'category_type'  => $this->input->post('category_type'),
+                'description'    => $this->input->post('description'),
+                'status'         => $this->input->post('status') ?: 'Active',
+                'created_at'     => date('Y-m-d H:i:s'),
+            );
+            $this->db->insert('cash_category', $ins);
+            redirect('cash-category-list');
+        }
+
+        // ── EDIT ─────────────────────────────────────────────────────
+        if ($this->input->post('mode') == 'Edit') {
+            $upd = array(
+                'category_name'  => $this->input->post('category_name'),
+                'category_type'  => $this->input->post('category_type'),
+                'description'    => $this->input->post('description'),
+                'status'         => $this->input->post('status') ?: 'Active',
+            );
+            $this->db->where('cash_category_id', $this->input->post('cash_category_id'));
+            $this->db->update('cash_category', $upd);
+            redirect('cash-category-list');
+        }
+
+        // ── FETCH LIST ───────────────────────────────────────────────
+        $sql = "
+            SELECT *
+            FROM cash_category
+            WHERE status != 'Delete'
+            ORDER BY category_type, category_name ASC
+        ";
+        $data['record_list'] = $this->db->query($sql)->result_array();
+
+        $this->load->view('page/accounts/cash-category-list', $data);
+    }
 }
 ?>
