@@ -4272,7 +4272,6 @@ class Accounts extends CI_Controller
 
         // Build precise table-specific where clauses for filter
         $w_tr = "tr.status = 'Active'";
-        $w_r = "r.status = 'Active'";
         $w_vp = "vp.status = 'Active'";
         $w_pt = "pt.status != 'Deleted'";
         $w_cin = "cin.status = 'Active'";
@@ -4281,7 +4280,6 @@ class Accounts extends CI_Controller
 
         if ($srch_bank_cash === 'cash') {
             $w_tr .= " AND tr.receipt_mode = 'Cash'";
-            $w_r .= " AND r.payment_mode = 'Cash'";
             $w_vp .= " AND vp.payment_mode = 'Cash'";
             $w_pt .= " AND pt.ac_type = 'Cash'";
             $w_cin .= " AND cin.ac_type = 'Cash'";
@@ -4290,7 +4288,6 @@ class Accounts extends CI_Controller
         } elseif (strpos($srch_bank_cash, 'bank_') === 0) {
             $bank_id = (int)str_replace('bank_', '', $srch_bank_cash);
             $w_tr .= " AND tr.receipt_mode = 'Bank' AND tr.bank_id = $bank_id";
-            $w_r .= " AND r.payment_mode = 'Bank'";
             $w_vp .= " AND vp.payment_mode = 'Bank' AND vp.bank_id = $bank_id";
             $w_pt .= " AND pt.ac_type = 'Bank' AND pt.bank_id = $bank_id";
             $w_cin .= " AND cin.ac_type = 'Bank' AND cin.bank_id = $bank_id";
@@ -4308,8 +4305,6 @@ class Accounts extends CI_Controller
             SELECT COALESCE(SUM(amount_in), 0) AS total_in, COALESCE(SUM(amount_out), 0) AS total_out
             FROM (
                 SELECT receipt_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM tender_receipt_info tr WHERE $w_tr
-                UNION ALL
-                SELECT receipt_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM receipt_info r WHERE $w_r
                 UNION ALL
                 SELECT payment_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM vendor_payment_info vp WHERE $w_vp
                 UNION ALL
@@ -4349,26 +4344,6 @@ class Accounts extends CI_Controller
                 LEFT JOIN customer_info c ON c.customer_id = tr.customer_id
                 LEFT JOIN company_bank_info b ON b.bank_id = tr.bank_id
                 WHERE $w_tr AND tr.receipt_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
-
-                UNION ALL
-
-                -- Customer Receipts
-                SELECT 
-                    'Supplier/Cust Receipt' AS tr_type, 
-                    r.receipt_no AS ref_no, 
-                    r.receipt_date AS tr_date, 
-                    r.amount AS amount_in, 
-                    0 AS amount_out, 
-                    r.payment_mode AS mode, 
-                    NULL AS bank_id,
-                    COALESCE(bl.ledger_name, 'Bank') AS bank_name,
-                    c.customer_name AS party_name, 
-                    r.narration AS remarks,
-                    r.created_date
-                FROM receipt_info r
-                LEFT JOIN customer_info c ON c.customer_id = r.customer_id
-                LEFT JOIN ledger_accounts bl ON bl.ledger_id = r.bank_ledger_id
-                WHERE $w_r AND r.receipt_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
 
                 UNION ALL
 
