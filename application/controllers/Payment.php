@@ -34,6 +34,17 @@ class Payment extends CI_Controller
                 ]
             ]);
         }
+        if (!$this->db->field_exists('cash_category_id', 'tender_receipt_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('tender_receipt_info', [
+                'cash_category_id' => [
+                    'type' => 'INT',
+                    'constraint' => 11,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
         if (!$this->db->field_exists('bill_type', 'tender_receipt_invoice_info')) {
             $this->load->dbforge();
             $this->dbforge->add_column('tender_receipt_invoice_info', [
@@ -52,11 +63,15 @@ class Payment extends CI_Controller
 
             $this->db->trans_start();
 
+            $receipt_mode = $this->input->post('receipt_mode');
+            $cash_category_id = ($receipt_mode == 'Cash') ? ($this->input->post('cash_category_id') ?: NULL) : NULL;
+
             $ins = array(
                 'receipt_date' => $this->input->post('receipt_date'),
                 'customer_id' => $this->input->post('customer_id'),
-                'receipt_mode' => $this->input->post('receipt_mode'),
+                'receipt_mode' => $receipt_mode,
                 'bank_id' => $this->input->post('bank_id'),
+                'cash_category_id' => $cash_category_id,
                 'receipt_type' => $this->input->post('receipt_type'),
                 'cheque_date' => $this->input->post('cheque_date'),
                 'cheque_no' => $this->input->post('cheque_no'),
@@ -110,11 +125,15 @@ class Payment extends CI_Controller
 
             $tender_receipt_id = $this->input->post('tender_receipt_id'); // ✅ SINGLE VALUE
 
+            $receipt_mode = $this->input->post('receipt_mode');
+            $cash_category_id = ($receipt_mode == 'Cash') ? ($this->input->post('cash_category_id') ?: NULL) : NULL;
+
             $upd = array(
                 'receipt_date' => $this->input->post('receipt_date'),
                 'customer_id' => $this->input->post('customer_id'),
-                'receipt_mode' => $this->input->post('receipt_mode'),
+                'receipt_mode' => $receipt_mode,
                 'bank_id' => $this->input->post('bank_id'),
+                'cash_category_id' => $cash_category_id,
                 'receipt_type' => $this->input->post('receipt_type'),
                 'cheque_date' => $this->input->post('cheque_date'),
                 'cheque_no' => $this->input->post('cheque_no'),
@@ -279,9 +298,11 @@ class Payment extends CI_Controller
                 a.customer_id,
                 a.receipt_mode,
                 a.amount,
-                b.bank_name
+                b.bank_name,
+                c.category_name
             FROM tender_receipt_info AS a
             LEFT JOIN company_bank_info AS b ON b.bank_id = a.bank_id AND b.status = 'Active'
+            LEFT JOIN cash_category AS c ON c.cash_category_id = a.cash_category_id AND c.status = 'Active'
             WHERE a.status = 'Active'
             and $where
             ORDER BY a.tender_receipt_id DESC
@@ -316,6 +337,19 @@ class Payment extends CI_Controller
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
             $data['bank_opt'][$row['bank_id']] = $row['bank_name'];
+        }
+
+        $data['cash_categories_opt'] = [];
+        $sql = "
+            SELECT cash_category_id, category_name
+            FROM cash_category
+            WHERE status = 'Active'
+            AND category_type IN ('Inward', 'Both', 'Cash')
+            ORDER BY category_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['cash_categories_opt'][$row['cash_category_id']] = $row['category_name'];
         }
 
         $data['pagination'] = $this->pagination->create_links();

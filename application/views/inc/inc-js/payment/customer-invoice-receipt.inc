@@ -257,11 +257,33 @@
             var mode = $("#" + prefix + "_receipt_mode").val();
             if (mode === "Bank") {
                 $("#" + prefix + "_bank_div").show();
+                $("#" + prefix + "_bank_id").prop("required", true);
                 $("#" + prefix + "_receipt_type_container").show();
+                
+                $("#" + prefix + "_cash_category_div").hide();
+                $("#" + prefix + "_cash_category_id").val("").prop("required", false);
+            } else if (mode === "Cash") {
+                $("#" + prefix + "_bank_div").hide();
+                $("#" + prefix + "_bank_id").val("").prop("required", false);
+                $("#" + prefix + "_receipt_type_container").hide();
+                
+                $("#" + prefix + "_cash_category_div").show();
+                $("#" + prefix + "_cash_category_id").prop("required", true);
+
+                // Uncheck radios and hide details
+                $('input[name="receipt_type"]').prop('checked', false);
+                $('#' + prefix + '_receipt_type_div').hide();
+                $('#' + prefix + '_cheque_no').val('');
+                $('#' + prefix + '_cheque_date').val('');
+                $('#' + prefix + '_cheque_bank').val('');
             } else {
                 $("#" + prefix + "_bank_div").hide();
-                $("#" + prefix + "_bank_id").val("");
+                $("#" + prefix + "_bank_id").val("").prop("required", false);
                 $("#" + prefix + "_receipt_type_container").hide();
+                
+                $("#" + prefix + "_cash_category_div").hide();
+                $("#" + prefix + "_cash_category_id").val("").prop("required", false);
+
                 // Uncheck radios and hide details
                 $('input[name="receipt_type"]').prop('checked', false);
                 $('#' + prefix + '_receipt_type_div').hide();
@@ -646,6 +668,10 @@
 
                     if (data.bank_id) {
                         $("#edit_bank_id").val(data.bank_id);
+                    }
+
+                    if (data.cash_category_id) {
+                        $("#edit_cash_category_id").val(data.cash_category_id);
                     }
 
                     // Status radio

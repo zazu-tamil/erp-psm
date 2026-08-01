@@ -102,6 +102,9 @@
                                     <br>(<?php echo $ls['bank_name'] ?? ''; ?>)
                                 <?php elseif ($ls['receipt_mode'] == 'Cash'): ?>
                                     <span class="label label-success"><?php echo $ls['receipt_mode']; ?></span>
+                                    <?php if (!empty($ls['category_name'])): ?>
+                                        <br>(<?php echo htmlspecialchars($ls['category_name']); ?>)
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             </td>
                             <td class="text-right"><?php echo number_format((float) ($ls['amount'] ?? 0), 3); ?></td>
@@ -199,6 +202,10 @@
                             <div class="form-group col-md-6" id="add_bank_div" style="display:none;">
                                 <label>Select Bank <span class="text-red">*</span></label>
                                 <?php echo form_dropdown('bank_id', ['' => 'Select Bank'] + $bank_opt, set_value('bank_id'), 'id="add_bank_id" class="form-control"'); ?>
+                            </div>
+                            <div class="form-group col-md-6" id="add_cash_category_div" style="display:none;">
+                                <label>Cash Category <span class="text-red">*</span></label>
+                                <?php echo form_dropdown('cash_category_id', ['' => 'Select Cash Category'] + $cash_categories_opt, set_value('cash_category_id'), 'id="add_cash_category_id" class="form-control"'); ?>
                             </div>
                             <div id="add_receipt_type_div" style="display:none;">
                                 <div class="col-md-6">
@@ -361,6 +368,10 @@
                             <div class="form-group col-md-6" id="edit_bank_div" style="display:none;">
                                 <label>Select Bank <span class="text-red">*</span></label>
                                 <?php echo form_dropdown('bank_id', ['' => 'Select Bank'] + $bank_opt, set_value('bank_id'), 'id="edit_bank_id" class="form-control"'); ?>
+                            </div>
+                            <div class="form-group col-md-6" id="edit_cash_category_div" style="display:none;">
+                                <label>Cash Category <span class="text-red">*</span></label>
+                                <?php echo form_dropdown('cash_category_id', ['' => 'Select Cash Category'] + $cash_categories_opt, set_value('cash_category_id'), 'id="edit_cash_category_id" class="form-control"'); ?>
                             </div>
                             <div id="edit_receipt_type_div" style="display:none;">
                                 <div class="col-md-6">
