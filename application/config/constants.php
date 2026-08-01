@@ -88,7 +88,7 @@ defined('EDIT_ALLOW_DAYS') or define('EDIT_ALLOW_DAYS', 1);
 
 defined('SESS_HD') or define('SESS_HD', 'ERP_PSM_');
 defined('PG_HEAD') or define('PG_HEAD', 'ERP PSM System');
-defined('COMPANY') or define('COMPANY', '-');
+defined('COMPANY') or define('COMPANY', 'ERP Management System');
 // defined('COMPANY_ID') or define('COMPANY_ID', '1'); 
  
 

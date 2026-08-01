@@ -46,26 +46,72 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <!-- Google Font -->
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+    
+    <style>
+        /* Top Navbar Branding */
+        .skin-blue .main-header .navbar {
+            background-color: #004b8d !important;
+        }
+        .skin-blue .main-header .navbar .sidebar-toggle:hover {
+            background-color: #003c73 !important;
+        }
+
+        /* Sidebar Branding */
+        .main-sidebar {
+            background-color: #003c73 !important;
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        .sidebar-menu > li.header {
+            background: #002b52 !important;
+            color: #8db5db !important;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 12px 25px 12px 15px !important;
+        }
+        .sidebar-menu > li > a {
+            color: #d1e3f3 !important;
+            border-left: 3px solid transparent !important;
+            transition: all 0.2s ease;
+        }
+        .sidebar-menu > li:hover > a, 
+        .sidebar-menu > li.active > a,
+        .sidebar-menu > li.menu-open > a {
+            background: #004b8d !important;
+            color: #ffffff !important;
+            border-left-color: #00c5ff !important;
+        }
+        .sidebar-menu > li > .treeview-menu {
+            background: #00274a !important;
+        }
+        .treeview-menu > li > a {
+            color: #b8d4ee !important;
+            transition: all 0.2s ease;
+        }
+        .treeview-menu > li > a:hover, 
+        .treeview-menu > li.active > a {
+            color: #00c5ff !important;
+            background: transparent !important;
+        }
+        .user-panel > .info, .user-panel > .info > a {
+            color: #ffffff !important;
+        }
+    </style>
 </head>
 
 <body class="hold-transition skin-blue sidebar-mini">
     <div class="wrapper">
         <header class="main-header">
             <!-- Logo -->
-            <a href="" class="logo">
+            <a href="<?php echo base_url('dash'); ?>" class="logo" style="background: #ffffff !important; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #edf2f7; line-height: 50px; height: 50px; display: block; overflow: hidden; padding: 0;">
                 <!-- mini logo for sidebar mini 50x50 pixels -->
-                <span class=" logo-mini"> 
-                    <!-- <img
-                        src="<?php echo base_url() ?>/asset/images/Classwall-Logo-SM.png"
-                        class="img-circle img-responsive" alt="<?php echo PG_HEAD;?>"> -->
-                        <?php echo PG_HEAD; ?>
+                <span class="logo-mini"> 
+                    <img src="<?php echo base_url('asset/images/zazulogo.png'); ?>" alt="Zazu" style="max-height: 35px; max-width: 35px; vertical-align: middle; object-fit: contain; display: inline-block;">
                 </span>
                 <!-- logo for regular state and mobile devices -->
-                <span class="logo-lg"><?php echo PG_HEAD; ?></span>
-                <!-- <div class="logo-lg" style="background-color:#f4f4f4;border-radius:0px; ">
-                    <img
-                        src="<?php echo base_url() ?>/asset/images/Classwall-H.png" class="img-rounded img-responsive"
-                        alt="<?php echo PG_HEAD;?>"></div> -->
+                <span class="logo-lg">
+                    <img src="<?php echo base_url('asset/images/zazulogo.png'); ?>" alt="Zazu Technologies" style="max-height: 35px; max-width: 180px; vertical-align: middle; object-fit: contain; display: inline-block;">
+                </span>
             </a>
             <!-- Header Navbar: style can be found in header.less -->
             <nav class="navbar navbar-static-top">
