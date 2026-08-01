@@ -1,9 +1,9 @@
 <?php include_once(VIEWPATH . '/inc/header.php'); ?>
 <section class="content-header">
-    <h1>Cash In & Out Statement</h1>
+    <h1>Petty Cash Statement</h1>
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-cubes"></i> Accounts</a></li>
-        <li class="active">Cash In & Out Statement</li>
+        <li class="active">Petty Cash Statement</li>
     </ol>
 </section>
 
@@ -15,7 +15,7 @@
             <h3 class="box-title text-white">Search Filter</h3>
         </div>
         <div class="box-body">
-            <form method="post" action="<?php echo site_url('cash-in-out-statement') ?>" id="frmsearch">
+            <form method="post" action="<?php echo site_url('petty-cash-statement') ?>" id="frmsearch">
                 <div class="row">
                     <div class="form-group col-md-3">
                         <label>From Date</label>
@@ -54,7 +54,7 @@
     <div class="box box-info">
         <div class="box-header with-border">
             <h4 class="box-title" style="display:inline-block; font-size:18px;">
-                Statement Period: [ <?php echo date('d-m-Y', strtotime($srch_from_date)); ?> to <?php echo date('d-m-Y', strtotime($srch_to_date)); ?> ]
+                Petty Cash Period: [ <?php echo date('d-m-Y', strtotime($srch_from_date)); ?> to <?php echo date('d-m-Y', strtotime($srch_to_date)); ?> ]
             </h4>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-primary btn-sm btnexp no-print" style="margin-right: 5px;">
@@ -71,13 +71,11 @@
                     <tr class="bg-gray-light">
                         <th style="width: 50px;">#</th>
                         <th style="width: 100px;">Date</th>
-                        <th style="width: 120px;">V.No</th>
-                        <th style="width: 150px;">Transaction Type</th>
-                        <th style="width: 100px;">Mode</th>
-                        <th style="width: 180px;">Bank / Account Name</th>
-                        <th>Particulars / Remarks</th>
-                        <th class="text-right" style="width: 130px;">Cash In (Inward)</th>
-                        <th class="text-right" style="width: 130px;">Cash Out (Outward)</th>
+                        <th style="width: 120px;">Mode</th>
+                        <th style="width: 150px;">Account Head / Category</th>
+                        <th>Remarks / Description</th>
+                        <th class="text-right" style="width: 130px;">Received (Inward)</th>
+                        <th class="text-right" style="width: 130px;">Paid (Outward)</th>
                         <th class="text-right" style="width: 140px;">Running Balance</th>
                     </tr>
                 </thead>
@@ -87,7 +85,7 @@
                         <td>1</td>
                         <td><?php echo date('d-m-Y', strtotime($srch_from_date)); ?></td>
                         <td>-</td>
-                        <td colspan="4"><strong>Opening Balance</strong></td>
+                        <td colspan="2"><strong>Opening Balance</strong></td>
                         <td class="text-right">-</td>
                         <td class="text-right">-</td>
                         <td class="text-right text-bold">
@@ -103,45 +101,46 @@
 
                     if (!empty($records)) {
                         foreach ($records as $row) {
-                            $running_balance += ((float)$row['amount_in'] - (float)$row['amount_out']);
-                            $tot_in += (float)$row['amount_in'];
-                            $tot_out += (float)$row['amount_out'];
+                            $is_inward = in_array($row['transaction_type'], ['Inward', 'Income']);
+                            $amt_in = $is_inward ? (float)$row['amount'] : 0.0;
+                            $amt_out = !$is_inward ? (float)$row['amount'] : 0.0;
+
+                            $running_balance += ($amt_in - $amt_out);
+                            $tot_in += $amt_in;
+                            $tot_out += $amt_out;
                             
-                            $party_remarks = "";
-                            if (!empty($row['party_name'])) {
-                                $party_remarks .= "<strong>" . htmlspecialchars($row['party_name']) . "</strong>";
+                            $head_cat = "";
+                            if (!empty($row['account_head_name'])) {
+                                $head_cat .= htmlspecialchars($row['account_head_name']);
                             }
-                            if (!empty($row['remarks'])) {
-                                if (!empty($party_remarks)) {
-                                    $party_remarks .= " - ";
+                            if (!empty($row['category_name'])) {
+                                if (!empty($head_cat)) {
+                                    $head_cat .= " / ";
                                 }
-                                $party_remarks .= htmlspecialchars($row['remarks']);
+                                $head_cat .= htmlspecialchars($row['category_name']);
                             }
-                            if (empty($party_remarks)) {
-                                $party_remarks = "-";
+                            if (empty($head_cat)) {
+                                $head_cat = "-";
                             }
                     ?>
                         <tr>
                             <td><?php echo $serial++; ?></td>
-                            <td><?php echo date('d-m-Y', strtotime($row['tr_date'])); ?></td>
-                            <td><?php echo !empty($row['ref_no']) ? htmlspecialchars($row['ref_no']) : '-'; ?></td>
+                            <td><?php echo date('d-m-Y', strtotime($row['transaction_date'])); ?></td>
                             <td>
-                                <span class="label label-default" style="font-size: 11px;">
-                                    <?php echo htmlspecialchars($row['tr_type']); ?>
+                                <span class="badge <?php echo $row['ac_type'] === 'Cash' ? 'bg-green' : 'bg-blue'; ?>">
+                                    <?php echo htmlspecialchars($row['ac_type']); ?>
                                 </span>
+                                <?php if ($row['ac_type'] === 'Bank') { ?>
+                                    <small class="text-muted" style="display:block;"><?php echo htmlspecialchars($row['bank_name']); ?></small>
+                                <?php } ?>
                             </td>
-                            <td>
-                                <span class="badge <?php echo $row['mode'] === 'Cash' ? 'bg-green' : 'bg-blue'; ?>">
-                                    <?php echo htmlspecialchars($row['mode']); ?>
-                                </span>
-                            </td>
-                            <td><?php echo htmlspecialchars($row['bank_name']); ?></td>
-                            <td><?php echo $party_remarks; ?></td>
+                            <td><?php echo $head_cat; ?></td>
+                            <td><?php echo !empty($row['remarks']) ? htmlspecialchars($row['remarks']) : '-'; ?></td>
                             <td class="text-right text-green">
-                                <?php echo (float)$row['amount_in'] > 0 ? number_format((float)$row['amount_in'], 3) : '-'; ?>
+                                <?php echo $amt_in > 0 ? number_format($amt_in, 3) : '-'; ?>
                             </td>
                             <td class="text-right text-red">
-                                <?php echo (float)$row['amount_out'] > 0 ? number_format((float)$row['amount_out'], 3) : '-'; ?>
+                                <?php echo $amt_out > 0 ? number_format($amt_out, 3) : '-'; ?>
                             </td>
                             <td class="text-right text-bold">
                                 <?php echo number_format($running_balance, 3); ?>
@@ -152,7 +151,7 @@
                     } else { 
                     ?>
                         <tr>
-                            <td colspan="10" class="text-center text-muted">No transactions found for the selected period and account filter.</td>
+                            <td colspan="8" class="text-center text-muted">No transactions found for the selected period and account filter.</td>
                         </tr>
                     <?php 
                     } 
@@ -160,13 +159,13 @@
                 </tbody>
                 <tfoot>
                     <tr class="bg-gray-light text-bold" style="font-size: 15px; border-top: 2px solid #ddd;">
-                        <td colspan="7" class="text-right">Total Transacted:</td>
+                        <td colspan="5" class="text-right">Total Transacted:</td>
                         <td class="text-right text-green"><?php echo number_format($tot_in, 3); ?></td>
                         <td class="text-right text-red"><?php echo number_format($tot_out, 3); ?></td>
                         <td class="text-right">-</td>
                     </tr>
                     <tr class="bg-warning text-bold" style="font-size: 16px; background-color: #fcf8e3 !important;">
-                        <td colspan="7" class="text-right">Closing Balance:</td>
+                        <td colspan="5" class="text-right">Closing Balance:</td>
                         <td colspan="2" class="text-center">
                             <?php 
                             if ($running_balance >= 0) {

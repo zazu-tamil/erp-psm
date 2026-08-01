@@ -554,4 +554,80 @@ class PettyCash extends CI_Controller
         } 
         redirect('petty-cash');
     } 
+
+    public function petty_cash_statement()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $data['srch_bank_cash'] = $srch_bank_cash = $this->input->post('srch_bank_cash');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = date('Y-m-') . '01';
+            $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
+            $data['srch_bank_cash'] = $srch_bank_cash = 'all';
+        }
+
+        // Get bank list for filter dropdown
+        $sql_banks = "SELECT bank_id, bank_name, branch FROM company_bank_info WHERE status = 'Active' ORDER BY bank_name ASC";
+        $data['bank_list'] = $this->db->query($sql_banks)->result_array();
+
+        // Build bank options for the filter dropdown
+        $bank_cash_options = array(
+            'all' => 'All Cash & Bank',
+            'cash' => 'Cash Only'
+        );
+        foreach ($data['bank_list'] as $bank) {
+            $bank_cash_options['bank_' . $bank['bank_id']] = 'Bank - ' . $bank['bank_name'] . ' (' . $bank['branch'] . ')';
+        }
+        $data['bank_cash_options'] = $bank_cash_options;
+
+        // Build where conditions
+        $where_pt = "pt.status != 'Deleted'";
+        if ($srch_bank_cash === 'cash') {
+            $where_pt .= " AND pt.ac_type = 'Cash'";
+        } elseif (strpos($srch_bank_cash, 'bank_') === 0) {
+            $bank_id = (int)str_replace('bank_', '', $srch_bank_cash);
+            $where_pt .= " AND pt.ac_type = 'Bank' AND pt.bank_id = $bank_id";
+        }
+
+        // 1. Calculate Opening Balance before srch_from_date
+        $sql_op = "
+            SELECT 
+                COALESCE(SUM(CASE WHEN pt.transaction_type IN ('Inward', 'Income') THEN pt.amount ELSE 0 END), 0) AS total_in,
+                COALESCE(SUM(CASE WHEN pt.transaction_type IN ('Outward', 'Cash', 'Expense') THEN pt.amount ELSE 0 END), 0) AS total_out
+            FROM petty_cash_transactions pt
+            WHERE $where_pt AND pt.transaction_date < '" . $this->db->escape_str($srch_from_date) . "'
+        ";
+        $op_res = $this->db->query($sql_op)->row_array();
+        $data['opening_balance'] = (float)$op_res['total_in'] - (float)$op_res['total_out'];
+
+        // 2. Fetch petty cash transactions in range
+        $sql_tr = "
+            SELECT 
+                pt.id,
+                pt.transaction_date,
+                pt.transaction_type,
+                pt.ac_type,
+                pt.amount,
+                pt.remarks,
+                COALESCE(b.bank_name, 'Cash') AS bank_name,
+                ah.account_head_name,
+                sh.sub_account_head_name AS category_name
+            FROM petty_cash_transactions pt
+            LEFT JOIN company_bank_info b ON b.bank_id = pt.bank_id
+            LEFT JOIN cb_account_head_info ah ON ah.account_head_id = pt.account_head_id
+            LEFT JOIN cb_sub_account_head_info sh ON sh.sub_account_head_id = pt.category_id
+            WHERE $where_pt AND pt.transaction_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+            ORDER BY pt.transaction_date ASC, pt.id ASC
+        ";
+        $data['records'] = $this->db->query($sql_tr)->result_array();
+
+        $data['js'] = 'accounts/petty-cash-statement.inc';
+
+        $this->load->view('page/accounts/petty-cash-statement', $data);
+    }
 }
