@@ -615,6 +615,8 @@ class PettyCash extends CI_Controller
         $w_cout = "cout.status = 'Active' AND cout.ac_type = 'Cash'";
         $w_op = "status != 'Delete' AND ac_type = 'Cash'";
 
+        $w_ce_to = "1=1";
+        $w_ce_from = "1=1";
         if (!empty($srch_cash_category_id)) {
             $w_tr .= " AND tr.cash_category_id = " . (int)$srch_cash_category_id;
             $w_vp .= " AND vp.cash_category_id = " . (int)$srch_cash_category_id;
@@ -622,6 +624,8 @@ class PettyCash extends CI_Controller
             $w_pt .= " AND pt.cash_category_id = " . (int)$srch_cash_category_id;
             $w_cin .= " AND cin.cash_category_id = " . (int)$srch_cash_category_id;
             $w_cout .= " AND cout.cash_category_id = " . (int)$srch_cash_category_id;
+            $w_ce_to = "ce.to_cash_category_id = " . (int)$srch_cash_category_id;
+            $w_ce_from = "ce.from_cash_category_id = " . (int)$srch_cash_category_id;
         }
 
         // 1. Calculate Opening Balance before srch_from_date
@@ -646,6 +650,10 @@ class PettyCash extends CI_Controller
                 SELECT inward_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM cb_cash_inward_info cin WHERE $w_cin
                 UNION ALL
                 SELECT outward_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM cb_cash_outward_info cout WHERE $w_cout
+                UNION ALL
+                SELECT entry_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM cb_contra_entry_info ce WHERE ce.status = 'Active' AND ce.to_ac_type = 'Cash' AND $w_ce_to
+                UNION ALL
+                SELECT entry_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM cb_contra_entry_info ce WHERE ce.status = 'Active' AND ce.from_ac_type = 'Cash' AND $w_ce_from
             ) t
             WHERE t.tr_date < '" . $this->db->escape_str($srch_from_date) . "'
         ";
@@ -791,6 +799,46 @@ class PettyCash extends CI_Controller
                 LEFT JOIN cb_voucher_type_info vt ON vt.voucher_type_id = cout.voucher_type_id
                 LEFT JOIN cash_category cc ON cc.cash_category_id = cout.cash_category_id AND cc.status = 'Active'
                 WHERE $w_cout AND cout.outward_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+
+                UNION ALL
+
+                -- Contra Entry Inward (To Cash)
+                SELECT 
+                    'Contra Inward' AS tr_type, 
+                    '' AS ref_no, 
+                    ce.entry_date AS tr_date, 
+                    ce.amount AS amount_in, 
+                    0 AS amount_out, 
+                    'Cash' AS mode, 
+                    cc.category_name AS cash_category_name,
+                    IF(ce.from_ac_type = 'Cash', CONCAT('Cash (', fcc.category_name, ')'), fb.bank_name) AS party_name, 
+                    ce.to_remarks AS remarks,
+                    ce.created_at AS created_date
+                FROM cb_contra_entry_info ce
+                LEFT JOIN company_bank_info fb ON fb.bank_id = ce.from_bank_id
+                LEFT JOIN cash_category cc ON cc.cash_category_id = ce.to_cash_category_id AND cc.status = 'Active'
+                LEFT JOIN cash_category fcc ON fcc.cash_category_id = ce.from_cash_category_id AND fcc.status = 'Active'
+                WHERE ce.status = 'Active' AND ce.to_ac_type = 'Cash' AND $w_ce_to AND ce.entry_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+
+                UNION ALL
+
+                -- Contra Entry Outward (From Cash)
+                SELECT 
+                    'Contra Outward' AS tr_type, 
+                    '' AS ref_no, 
+                    ce.entry_date AS tr_date, 
+                    0 AS amount_in, 
+                    ce.amount AS amount_out, 
+                    'Cash' AS mode, 
+                    cc.category_name AS cash_category_name,
+                    IF(ce.to_ac_type = 'Cash', CONCAT('Cash (', tcc.category_name, ')'), tb.bank_name) AS party_name, 
+                    ce.from_remarks AS remarks,
+                    ce.created_at AS created_date
+                FROM cb_contra_entry_info ce
+                LEFT JOIN company_bank_info tb ON tb.bank_id = ce.to_bank_id
+                LEFT JOIN cash_category cc ON cc.cash_category_id = ce.from_cash_category_id AND cc.status = 'Active'
+                LEFT JOIN cash_category tcc ON tcc.cash_category_id = ce.to_cash_category_id AND tcc.status = 'Active'
+                WHERE ce.status = 'Active' AND ce.from_ac_type = 'Cash' AND $w_ce_from AND ce.entry_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
             ) t
             ORDER BY t.tr_date ASC, t.created_date ASC
         ";

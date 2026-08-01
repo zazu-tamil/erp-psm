@@ -4362,6 +4362,14 @@ class Accounts extends CI_Controller
             $w_cout .= " AND cout.bank_id = $bank_id";
         }
 
+        $w_ce_to = "1=1";
+        $w_ce_from = "1=1";
+        if (strpos($srch_bank_cash, 'bank_') === 0) {
+            $bank_id = (int)str_replace('bank_', '', $srch_bank_cash);
+            $w_ce_to = "ce.to_bank_id = $bank_id";
+            $w_ce_from = "ce.from_bank_id = $bank_id";
+        }
+
         // 1. Calculate Opening Balance:
         // A. Base Opening Balances from cb_opening_balance_info
         $sql_cb_op = "SELECT COALESCE(SUM(amount), 0) AS op_amount FROM cb_opening_balance_info WHERE $w_op AND opening_date < '" . $this->db->escape_str($srch_from_date) . "'";
@@ -4382,6 +4390,10 @@ class Accounts extends CI_Controller
                 SELECT inward_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM cb_cash_inward_info cin WHERE $w_cin
                 UNION ALL
                 SELECT outward_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM cb_cash_outward_info cout WHERE $w_cout
+                UNION ALL
+                SELECT entry_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM cb_contra_entry_info ce WHERE ce.status = 'Active' AND ce.to_ac_type = 'Bank' AND $w_ce_to
+                UNION ALL
+                SELECT entry_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM cb_contra_entry_info ce WHERE ce.status = 'Active' AND ce.from_ac_type = 'Bank' AND $w_ce_from
             ) t
             WHERE t.tr_date < '" . $this->db->escape_str($srch_from_date) . "'
         ";
@@ -4514,6 +4526,48 @@ class Accounts extends CI_Controller
                 LEFT JOIN cb_voucher_type_info vt ON vt.voucher_type_id = cout.voucher_type_id
                 LEFT JOIN company_bank_info b ON b.bank_id = cout.bank_id
                 WHERE $w_cout AND cout.outward_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+
+                UNION ALL
+
+                -- Contra Entry Inward (To Bank)
+                SELECT 
+                    'Contra Inward' AS tr_type, 
+                    '' AS ref_no, 
+                    ce.entry_date AS tr_date, 
+                    ce.amount AS amount_in, 
+                    0 AS amount_out, 
+                    'Bank' AS mode, 
+                    ce.to_bank_id AS bank_id, 
+                    COALESCE(b.bank_name, 'Cash') AS bank_name,
+                    IF(ce.from_ac_type = 'Bank', fb.bank_name, CONCAT('Cash (', fcc.category_name, ')')) AS party_name, 
+                    ce.to_remarks AS remarks,
+                    ce.created_at AS created_date
+                FROM cb_contra_entry_info ce
+                LEFT JOIN company_bank_info b ON b.bank_id = ce.to_bank_id
+                LEFT JOIN company_bank_info fb ON fb.bank_id = ce.from_bank_id
+                LEFT JOIN cash_category fcc ON fcc.cash_category_id = ce.from_cash_category_id
+                WHERE ce.status = 'Active' AND ce.to_ac_type = 'Bank' AND $w_ce_to AND ce.entry_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+
+                UNION ALL
+
+                -- Contra Entry Outward (From Bank)
+                SELECT 
+                    'Contra Outward' AS tr_type, 
+                    '' AS ref_no, 
+                    ce.entry_date AS tr_date, 
+                    0 AS amount_in, 
+                    ce.amount AS amount_out, 
+                    'Bank' AS mode, 
+                    ce.from_bank_id AS bank_id, 
+                    COALESCE(b.bank_name, 'Cash') AS bank_name,
+                    IF(ce.to_ac_type = 'Bank', tb.bank_name, CONCAT('Cash (', tcc.category_name, ')')) AS party_name, 
+                    ce.from_remarks AS remarks,
+                    ce.created_at AS created_date
+                FROM cb_contra_entry_info ce
+                LEFT JOIN company_bank_info b ON b.bank_id = ce.from_bank_id
+                LEFT JOIN company_bank_info tb ON tb.bank_id = ce.to_bank_id
+                LEFT JOIN cash_category tcc ON tcc.cash_category_id = ce.to_cash_category_id
+                WHERE ce.status = 'Active' AND ce.from_ac_type = 'Bank' AND $w_ce_from AND ce.entry_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
             ) t
             ORDER BY t.tr_date ASC, t.created_date ASC
         ";
@@ -4573,6 +4627,136 @@ class Accounts extends CI_Controller
         $data['record_list'] = $this->db->query($sql)->result_array();
 
         $this->load->view('page/accounts/cash-category-list', $data);
+    }
+
+    public function contra_entry()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        // Setup DB table dynamically if not exists
+        $query = $this->db->query("SHOW TABLES LIKE 'cb_contra_entry_info'");
+        if ($query->num_rows() == 0) {
+            $this->db->query("
+                CREATE TABLE `cb_contra_entry_info` (
+                    `contra_entry_id` INT AUTO_INCREMENT PRIMARY KEY,
+                    `franchise_id` INT(11) NOT NULL DEFAULT 0,
+                    `entry_date` DATE NOT NULL,
+                    `from_ac_type` VARCHAR(50) NOT NULL,
+                    `from_bank_id` INT(11) NULL DEFAULT NULL,
+                    `from_cash_category_id` INT(11) NULL DEFAULT NULL,
+                    `from_remarks` TEXT NULL,
+                    `to_ac_type` VARCHAR(50) NOT NULL,
+                    `to_bank_id` INT(11) NULL DEFAULT NULL,
+                    `to_cash_category_id` INT(11) NULL DEFAULT NULL,
+                    `to_remarks` TEXT NULL,
+                    `amount` DECIMAL(10,3) NOT NULL,
+                    `status` ENUM('Active', 'Delete') NOT NULL DEFAULT 'Active',
+                    `created_by` INT(11) NOT NULL,
+                    `created_at` DATETIME NOT NULL,
+                    `updated_by` INT(11) NULL DEFAULT NULL,
+                    `updated_at` DATETIME NULL DEFAULT NULL
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            ");
+        }
+
+        // ── ADD ──────────────────────────────────────────────────────
+        if ($this->input->post('mode') == 'Add') {
+            $from_ac_type = $this->input->post('from_ac_type');
+            $to_ac_type = $this->input->post('to_ac_type');
+
+            $ins = array(
+                'franchise_id'          => ($this->session->userdata('cr_franchise_id') == '' ? 0 : $this->session->userdata('cr_franchise_id')),
+                'entry_date'            => $this->input->post('entry_date'),
+                'from_ac_type'          => $from_ac_type,
+                'from_bank_id'          => ($from_ac_type == 'Bank') ? ($this->input->post('from_bank_id') ?: null) : null,
+                'from_cash_category_id' => ($from_ac_type == 'Cash') ? ($this->input->post('from_cash_category_id') ?: null) : null,
+                'from_remarks'          => $this->input->post('from_remarks'),
+                'to_ac_type'            => $to_ac_type,
+                'to_bank_id'            => ($to_ac_type == 'Bank') ? ($this->input->post('to_bank_id') ?: null) : null,
+                'to_cash_category_id'   => ($to_ac_type == 'Cash') ? ($this->input->post('to_cash_category_id') ?: null) : null,
+                'to_remarks'            => $this->input->post('to_remarks'),
+                'amount'                => $this->input->post('amount'),
+                'status'                => 'Active',
+                'created_by'            => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_at'            => date('Y-m-d H:i:s'),
+            );
+            $this->db->insert('cb_contra_entry_info', $ins);
+            redirect('contra-entry');
+        }
+
+        // ── EDIT ─────────────────────────────────────────────────────
+        if ($this->input->post('mode') == 'Edit') {
+            $from_ac_type = $this->input->post('from_ac_type');
+            $to_ac_type = $this->input->post('to_ac_type');
+
+            $upd = array(
+                'entry_date'            => $this->input->post('entry_date'),
+                'from_ac_type'          => $from_ac_type,
+                'from_bank_id'          => ($from_ac_type == 'Bank') ? ($this->input->post('from_bank_id') ?: null) : null,
+                'from_cash_category_id' => ($from_ac_type == 'Cash') ? ($this->input->post('from_cash_category_id') ?: null) : null,
+                'from_remarks'          => $this->input->post('from_remarks'),
+                'to_ac_type'            => $to_ac_type,
+                'to_bank_id'            => ($to_ac_type == 'Bank') ? ($this->input->post('to_bank_id') ?: null) : null,
+                'to_cash_category_id'   => ($to_ac_type == 'Cash') ? ($this->input->post('to_cash_category_id') ?: null) : null,
+                'to_remarks'            => $this->input->post('to_remarks'),
+                'amount'                => $this->input->post('amount'),
+                'updated_by'            => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_at'            => date('Y-m-d H:i:s'),
+            );
+            $this->db->where('contra_entry_id', $this->input->post('contra_entry_id'));
+            $this->db->update('cb_contra_entry_info', $upd);
+            redirect('contra-entry');
+        }
+
+        // ── DELETE ───────────────────────────────────────────────────
+        if ($this->input->post('mode') == 'Delete') {
+            $this->db->where('contra_entry_id', $this->input->post('contra_entry_id'));
+            $this->db->update('cb_contra_entry_info', array('status' => 'Delete'));
+            redirect('contra-entry');
+        }
+
+        // Filters
+        $srch_from_date = $this->input->post('srch_from_date') ?: date('Y-m-') . '01';
+        $srch_to_date = $this->input->post('srch_to_date') ?: date('Y-m-d');
+        $data['srch_from_date'] = $srch_from_date;
+        $data['srch_to_date'] = $srch_to_date;
+
+        $w_ce = "ce.status = 'Active'";
+        if ($srch_from_date && $srch_to_date) {
+            $w_ce .= " AND ce.entry_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'";
+        }
+
+        // Fetch Contra Entries
+        $sql = "
+            SELECT 
+                ce.*,
+                fb.bank_name AS from_bank_name,
+                tb.bank_name AS to_bank_name,
+                fcc.category_name AS from_cash_category_name,
+                tcc.category_name AS to_cash_category_name
+            FROM cb_contra_entry_info ce
+            LEFT JOIN company_bank_info fb ON fb.bank_id = ce.from_bank_id
+            LEFT JOIN company_bank_info tb ON tb.bank_id = ce.to_bank_id
+            LEFT JOIN cash_category fcc ON fcc.cash_category_id = ce.from_cash_category_id
+            LEFT JOIN cash_category tcc ON tcc.cash_category_id = ce.to_cash_category_id
+            WHERE $w_ce
+            ORDER BY ce.entry_date DESC, ce.contra_entry_id DESC
+        ";
+        $data['record_list'] = $this->db->query($sql)->result_array();
+
+        // Active Banks
+        $sql_banks = "SELECT bank_id, bank_name, branch FROM company_bank_info WHERE status = 'Active' ORDER BY bank_name ASC";
+        $data['bank_list'] = $this->db->query($sql_banks)->result_array();
+
+        // Active Cash Categories
+        $sql_cash = "SELECT cash_category_id, category_name FROM cash_category WHERE status = 'Active' ORDER BY category_name ASC";
+        $data['cash_categories'] = $this->db->query($sql_cash)->result_array();
+
+        $data['js'] = 'accounts/contra-entry.inc';
+
+        $this->load->view('page/accounts/contra-entry-list', $data);
     }
 }
 ?>

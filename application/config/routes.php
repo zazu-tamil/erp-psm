@@ -364,3 +364,6 @@ $route['credit-debit-note-delete/(:num)'] = 'CreditDebitNote/delete/$1';
 $route['petty-cash'] = 'PettyCash';
 $route['pettycash'] = 'PettyCash';
 $route['pettycash/(:any)'] = 'PettyCash/$1';
+
+
+$route['contra-entry'] = 'accounts/contra_entry';

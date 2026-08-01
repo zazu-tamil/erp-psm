@@ -1,4 +1,4 @@
-<?php 
+<?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
 <!DOCTYPE html>
@@ -7,7 +7,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title><?php echo PG_HEAD; if(isset($title)) echo " - " . $title; ?></title>
+    <title><?php echo PG_HEAD;
+    if (isset($title))
+        echo " - " . $title; ?></title>
     <link rel="icon" type="image/png" sizes="32x32" href="<?php echo base_url() ?>/asset/images/icon-cce.png">
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
@@ -46,12 +48,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <!-- Google Font -->
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
-    
+
     <style>
         /* Top Navbar Branding */
         .skin-blue .main-header .navbar {
             background-color: #004b8d !important;
         }
+
         .skin-blue .main-header .navbar .sidebar-toggle:hover {
             background-color: #003c73 !important;
         }
@@ -61,7 +64,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             background-color: #003c73 !important;
             border-right: 1px solid rgba(0, 0, 0, 0.1);
         }
-        .sidebar-menu > li.header {
+
+        .sidebar-menu>li.header {
             background: #002b52 !important;
             color: #8db5db !important;
             font-size: 11px;
@@ -69,31 +73,38 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             letter-spacing: 0.5px;
             padding: 12px 25px 12px 15px !important;
         }
-        .sidebar-menu > li > a {
+
+        .sidebar-menu>li>a {
             color: #d1e3f3 !important;
             border-left: 3px solid transparent !important;
             transition: all 0.2s ease;
         }
-        .sidebar-menu > li:hover > a, 
-        .sidebar-menu > li.active > a,
-        .sidebar-menu > li.menu-open > a {
+
+        .sidebar-menu>li:hover>a,
+        .sidebar-menu>li.active>a,
+        .sidebar-menu>li.menu-open>a {
             background: #004b8d !important;
             color: #ffffff !important;
             border-left-color: #00c5ff !important;
         }
-        .sidebar-menu > li > .treeview-menu {
+
+        .sidebar-menu>li>.treeview-menu {
             background: #00274a !important;
         }
-        .treeview-menu > li > a {
+
+        .treeview-menu>li>a {
             color: #b8d4ee !important;
             transition: all 0.2s ease;
         }
-        .treeview-menu > li > a:hover, 
-        .treeview-menu > li.active > a {
+
+        .treeview-menu>li>a:hover,
+        .treeview-menu>li.active>a {
             color: #00c5ff !important;
             background: transparent !important;
         }
-        .user-panel > .info, .user-panel > .info > a {
+
+        .user-panel>.info,
+        .user-panel>.info>a {
             color: #ffffff !important;
         }
     </style>
@@ -103,14 +114,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <div class="wrapper">
         <header class="main-header">
             <!-- Logo -->
-            <a href="<?php echo base_url('dash'); ?>" class="logo" style="background: #ffffff !important; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #edf2f7; line-height: 50px; height: 50px; display: block; overflow: hidden; padding: 0;">
+            <a href="<?php echo base_url('dash'); ?>" class="logo"
+                style="background: #ffffff !important; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #edf2f7; line-height: 50px; height: 50px; display: block; overflow: hidden; padding: 0;">
                 <!-- mini logo for sidebar mini 50x50 pixels -->
-                <span class="logo-mini"> 
-                    <img src="<?php echo base_url('asset/images/zazulogo.png'); ?>" alt="Zazu" style="max-height: 35px; max-width: 35px; vertical-align: middle; object-fit: contain; display: inline-block;">
+                <span class="logo-mini">
+                    <img src="<?php echo base_url('asset/images/1.png'); ?>" alt="Zazu"
+                        style="max-height: 35px; max-width: 35px; vertical-align: middle; object-fit: contain; display: inline-block;">
                 </span>
                 <!-- logo for regular state and mobile devices -->
                 <span class="logo-lg">
-                    <img src="<?php echo base_url('asset/images/zazulogo.png'); ?>" alt="Zazu Technologies" style="max-height: 35px; max-width: 180px; vertical-align: middle; object-fit: contain; display: inline-block;">
+                    <img src="<?php echo base_url('asset/images/1.png'); ?>"
+                        alt="Zazu Technologies"
+                        style="max-height: 35px; max-width: 180px; vertical-align: middle; object-fit: contain; display: inline-block;">
                 </span>
             </a>
             <!-- Header Navbar: style can be found in header.less -->
@@ -134,7 +149,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 <img src="<?php echo base_url() ?>asset/images/user.jpg" class="user-image"
                                     alt="User Image">
                                 <span
-                                    class="hidden-xs"><?php echo strtoupper($this->session->userdata(SESS_HD . 'staff_name')) ;?></span>
+                                    class="hidden-xs"><?php echo strtoupper($this->session->userdata(SESS_HD . 'staff_name')); ?></span>
                             </a>
                             <ul class="dropdown-menu">
                                 <!-- User image -->
@@ -143,26 +158,26 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                         alt="User Image">
 
                                     <p>
-                                        <?php echo strtoupper($this->session->userdata(SESS_HD . 'staff_name')) ;?>
-                                        <small><?php echo date('d-M-Y')?></small>
+                                        <?php echo strtoupper($this->session->userdata(SESS_HD . 'staff_name')); ?>
+                                        <small><?php echo date('d-M-Y') ?></small>
                                     </p>
                                 </li>
                                 <!-- Menu Body -->
                                 <?php /*
-                                <li class="user-body">
-                                  <div class="row">
-                                    <div class="col-xs-4 text-center">
-                                      <a href="#">Followers</a>
-                                    </div>
-                                    <div class="col-xs-4 text-center">
-                                      <a href="#">Sales</a>
-                                    </div>
-                                    <div class="col-xs-4 text-center">
-                                      <a href="#">Friends</a>
-                                    </div>
-                                  </div>
-                                  <!-- /.row -->
-                                </li> */ ?>
+                           <li class="user-body">
+                             <div class="row">
+                               <div class="col-xs-4 text-center">
+                                 <a href="#">Followers</a>
+                               </div>
+                               <div class="col-xs-4 text-center">
+                                 <a href="#">Sales</a>
+                               </div>
+                               <div class="col-xs-4 text-center">
+                                 <a href="#">Friends</a>
+                               </div>
+                             </div>
+                             <!-- /.row -->
+                           </li> */ ?>
                                 <!-- Menu Footer-->
                                 <li class="user-footer">
                                     <div class="pull-left hide">
@@ -184,7 +199,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </div>
             </nav>
         </header>
-        <?php  include_once('left-menu.php'); ?>
+        <?php include_once('left-menu.php'); ?>
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
             <div id="zazualert"></div>
