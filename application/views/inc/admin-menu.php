@@ -504,7 +504,7 @@ $report_m_grp = [
 <li class="header">Acounts Book Info</li>
 
 <li
-    class="treeview <?= in_array($current_page, ['petty-cash', 'inward-list', 'outward-list', 'credit-debit-note-list', 'credit-debit-note-add', 'credit-debit-note-edit']) ? 'active' : '' ?>">
+    class="treeview <?= in_array($current_page, ['petty-cash', 'inward-list', 'outward-list', 'cash-in-out-statement', 'credit-debit-note-list', 'credit-debit-note-add', 'credit-debit-note-edit']) ? 'active' : '' ?>">
     <a href="#">
         <i class="fa fa-file-text"></i>
         <span>Accounts Book Info</span>
@@ -527,6 +527,12 @@ $report_m_grp = [
         <li class="<?= ($current_page === 'petty-cash') ? 'active' : '' ?>">
             <a href="<?= site_url('petty-cash') ?>">
                 <i class="fa fa-money"></i> Petty Cash
+            </a>
+        </li>
+
+        <li class="<?= ($current_page === 'cash-in-out-statement') ? 'active' : '' ?>">
+            <a href="<?= site_url('cash-in-out-statement') ?>">
+                <i class="fa fa-exchange"></i> Cash In & Out Statement
             </a>
         </li>
 

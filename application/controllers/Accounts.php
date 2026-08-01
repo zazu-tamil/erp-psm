@@ -4238,5 +4238,247 @@ class Accounts extends CI_Controller
         exit;   // ⭐ VERY IMPORTANT
     }
 
+    public function cash_in_out_statement()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data['js'] = 'accounts/cash-in-out-statement.inc';
+
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $data['srch_bank_cash'] = $srch_bank_cash = $this->input->post('srch_bank_cash');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = date('Y-m-') . '01';
+            $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
+            $data['srch_bank_cash'] = $srch_bank_cash = 'all';
+        }
+
+        // Get bank list for filter dropdown
+        $sql_banks = "SELECT bank_id, bank_name, branch FROM company_bank_info WHERE status = 'Active' ORDER BY bank_name ASC";
+        $data['bank_list'] = $this->db->query($sql_banks)->result_array();
+
+        // Build bank options for the filter dropdown
+        $bank_cash_options = array(
+            'all' => 'All Cash & Bank',
+            'cash' => 'Cash Only'
+        );
+        foreach ($data['bank_list'] as $bank) {
+            $bank_cash_options['bank_' . $bank['bank_id']] = 'Bank - ' . $bank['bank_name'] . ' (' . $bank['branch'] . ')';
+        }
+        $data['bank_cash_options'] = $bank_cash_options;
+
+        // Build precise table-specific where clauses for filter
+        $w_tr = "tr.status = 'Active'";
+        $w_r = "r.status = 'Active'";
+        $w_vp = "vp.status = 'Active'";
+        $w_pt = "pt.status != 'Deleted'";
+        $w_cin = "cin.status = 'Active'";
+        $w_cout = "cout.status = 'Active'";
+        $w_op = "status = 'Active'";
+
+        if ($srch_bank_cash === 'cash') {
+            $w_tr .= " AND tr.receipt_mode = 'Cash'";
+            $w_r .= " AND r.payment_mode = 'Cash'";
+            $w_vp .= " AND vp.payment_mode = 'Cash'";
+            $w_pt .= " AND pt.ac_type = 'Cash'";
+            $w_cin .= " AND cin.ac_type = 'Cash'";
+            $w_cout .= " AND cout.ac_type = 'Cash'";
+            $w_op .= " AND ac_type = 'Cash'";
+        } elseif (strpos($srch_bank_cash, 'bank_') === 0) {
+            $bank_id = (int)str_replace('bank_', '', $srch_bank_cash);
+            $w_tr .= " AND tr.receipt_mode = 'Bank' AND tr.bank_id = $bank_id";
+            $w_r .= " AND r.payment_mode = 'Bank'";
+            $w_vp .= " AND vp.payment_mode = 'Bank' AND vp.bank_id = $bank_id";
+            $w_pt .= " AND pt.ac_type = 'Bank' AND pt.bank_id = $bank_id";
+            $w_cin .= " AND cin.ac_type = 'Bank' AND cin.bank_id = $bank_id";
+            $w_cout .= " AND cout.ac_type = 'Bank' AND cout.bank_id = $bank_id";
+            $w_op .= " AND ac_type = 'Bank'";
+        }
+
+        // 1. Calculate Opening Balance:
+        // A. Base Opening Balances from cb_opening_balance_info
+        $sql_cb_op = "SELECT COALESCE(SUM(amount), 0) AS op_amount FROM cb_opening_balance_info WHERE $w_op AND opening_date < '" . $this->db->escape_str($srch_from_date) . "'";
+        $cb_op = (float)$this->db->query($sql_cb_op)->row('op_amount');
+
+        // B. Combined transactions before srch_from_date
+        $sql_tr_before = "
+            SELECT COALESCE(SUM(amount_in), 0) AS total_in, COALESCE(SUM(amount_out), 0) AS total_out
+            FROM (
+                SELECT receipt_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM tender_receipt_info tr WHERE $w_tr
+                UNION ALL
+                SELECT receipt_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM receipt_info r WHERE $w_r
+                UNION ALL
+                SELECT payment_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM vendor_payment_info vp WHERE $w_vp
+                UNION ALL
+                SELECT transaction_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM petty_cash_transactions pt WHERE $w_pt AND pt.transaction_type IN ('Inward', 'Income')
+                UNION ALL
+                SELECT transaction_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM petty_cash_transactions pt WHERE $w_pt AND pt.transaction_type IN ('Outward', 'Cash', 'Expense')
+                UNION ALL
+                SELECT inward_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM cb_cash_inward_info cin WHERE $w_cin
+                UNION ALL
+                SELECT outward_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM cb_cash_outward_info cout WHERE $w_cout
+            ) t
+            WHERE t.tr_date < '" . $this->db->escape_str($srch_from_date) . "'
+        ";
+        $tr_before_res = $this->db->query($sql_tr_before)->row_array();
+        $total_tr_in_before = (float)$tr_before_res['total_in'];
+        $total_tr_out_before = (float)$tr_before_res['total_out'];
+
+        $data['opening_balance'] = $cb_op + $total_tr_in_before - $total_tr_out_before;
+
+        // 2. Fetch main transaction list within date range
+        $sql_main = "
+            SELECT * FROM (
+                -- Tender Receipts
+                SELECT 
+                    'Tender Receipt' AS tr_type, 
+                    tr.receipt_no AS ref_no, 
+                    tr.receipt_date AS tr_date, 
+                    tr.amount AS amount_in, 
+                    0 AS amount_out, 
+                    tr.receipt_mode AS mode, 
+                    tr.bank_id, 
+                    COALESCE(b.bank_name, 'Cash') AS bank_name,
+                    c.customer_name AS party_name, 
+                    tr.remarks,
+                    tr.created_date
+                FROM tender_receipt_info tr
+                LEFT JOIN customer_info c ON c.customer_id = tr.customer_id
+                LEFT JOIN company_bank_info b ON b.bank_id = tr.bank_id
+                WHERE $w_tr AND tr.receipt_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+
+                UNION ALL
+
+                -- Customer Receipts
+                SELECT 
+                    'Supplier/Cust Receipt' AS tr_type, 
+                    r.receipt_no AS ref_no, 
+                    r.receipt_date AS tr_date, 
+                    r.amount AS amount_in, 
+                    0 AS amount_out, 
+                    r.payment_mode AS mode, 
+                    NULL AS bank_id,
+                    COALESCE(bl.ledger_name, 'Bank') AS bank_name,
+                    c.customer_name AS party_name, 
+                    r.narration AS remarks,
+                    r.created_date
+                FROM receipt_info r
+                LEFT JOIN customer_info c ON c.customer_id = r.customer_id
+                LEFT JOIN ledger_accounts bl ON bl.ledger_id = r.bank_ledger_id
+                WHERE $w_r AND r.receipt_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+
+                UNION ALL
+
+                -- Vendor Payments
+                SELECT 
+                    'Vendor Payment' AS tr_type, 
+                    vp.payment_no AS ref_no, 
+                    vp.payment_date AS tr_date, 
+                    0 AS amount_in, 
+                    vp.amount AS amount_out, 
+                    vp.payment_mode AS mode, 
+                    vp.bank_id, 
+                    COALESCE(b.bank_name, 'Cash') AS bank_name,
+                    v.vendor_name AS party_name, 
+                    vp.remarks,
+                    vp.created_date
+                FROM vendor_payment_info vp
+                LEFT JOIN vendor_info v ON v.vendor_id = vp.vendor_id
+                LEFT JOIN company_bank_info b ON b.bank_id = vp.bank_id
+                WHERE $w_vp AND vp.payment_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+
+                UNION ALL
+
+                -- Petty Cash Inward
+                SELECT 
+                    'Petty Cash Inward' AS tr_type, 
+                    '' AS ref_no, 
+                    pt.transaction_date AS tr_date, 
+                    pt.amount AS amount_in, 
+                    0 AS amount_out, 
+                    pt.ac_type AS mode, 
+                    pt.bank_id, 
+                    COALESCE(b.bank_name, 'Cash') AS bank_name,
+                    'Petty Cash' AS party_name, 
+                    pt.remarks,
+                    pt.created_at AS created_date
+                FROM petty_cash_transactions pt
+                LEFT JOIN company_bank_info b ON b.bank_id = pt.bank_id
+                WHERE $w_pt AND pt.transaction_type IN ('Inward', 'Income') AND pt.transaction_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+
+                UNION ALL
+
+                -- Petty Cash Outward
+                SELECT 
+                    'Petty Cash Outward' AS tr_type, 
+                    '' AS ref_no, 
+                    pt.transaction_date AS tr_date, 
+                    0 AS amount_in, 
+                    pt.amount AS amount_out, 
+                    pt.ac_type AS mode, 
+                    pt.bank_id, 
+                    COALESCE(b.bank_name, 'Cash') AS bank_name,
+                    'Petty Cash' AS party_name, 
+                    pt.remarks,
+                    pt.created_at AS created_date
+                FROM petty_cash_transactions pt
+                LEFT JOIN company_bank_info b ON b.bank_id = pt.bank_id
+                WHERE $w_pt AND pt.transaction_type IN ('Outward', 'Cash', 'Expense') AND pt.transaction_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+
+                UNION ALL
+
+                -- Cash Inward Info
+                SELECT 
+                    'Cash Inward Entry' AS tr_type, 
+                    cin.vno AS ref_no, 
+                    cin.inward_date AS tr_date, 
+                    cin.amount AS amount_in, 
+                    0 AS amount_out, 
+                    cin.ac_type AS mode, 
+                    cin.bank_id, 
+                    COALESCE(b.bank_name, 'Cash') AS bank_name,
+                    COALESCE(e.sub_account_headlvl3_name, sh.sub_account_head_name, ah.account_head_name) AS party_name, 
+                    cin.remarks,
+                    cin.created_datetime AS created_date
+                FROM cb_cash_inward_info cin
+                LEFT JOIN cb_account_head_info ah ON ah.account_head_id = cin.account_head_id
+                LEFT JOIN cb_sub_account_head_info sh ON sh.sub_account_head_id = cin.sub_account_head_id
+                LEFT JOIN cb_sub_account_head_lvl3_info e ON e.sub_account_headlvl3_id = cin.sub_account_headlvl3_id
+                LEFT JOIN company_bank_info b ON b.bank_id = cin.bank_id
+                WHERE $w_cin AND cin.inward_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+
+                UNION ALL
+
+                -- Cash Outward Info
+                SELECT 
+                    'Cash Outward Entry' AS tr_type, 
+                    CONCAT(vt.prefix, cout.vno) AS ref_no, 
+                    cout.outward_date AS tr_date, 
+                    0 AS amount_in, 
+                    cout.amount AS amount_out, 
+                    cout.ac_type AS mode, 
+                    cout.bank_id, 
+                    COALESCE(b.bank_name, 'Cash') AS bank_name,
+                    COALESCE(e.sub_account_headlvl3_name, sh.sub_account_head_name, ah.account_head_name) AS party_name, 
+                    cout.remarks,
+                    cout.created_datetime AS created_date
+                FROM cb_cash_outward_info cout
+                LEFT JOIN cb_account_head_info ah ON ah.account_head_id = cout.account_head_id
+                LEFT JOIN cb_sub_account_head_info sh ON sh.sub_account_head_id = cout.sub_account_head_id
+                LEFT JOIN cb_sub_account_head_lvl3_info e ON e.sub_account_headlvl3_id = cout.sub_account_headlvl3_id
+                LEFT JOIN cb_voucher_type_info vt ON vt.voucher_type_id = cout.voucher_type_id
+                LEFT JOIN company_bank_info b ON b.bank_id = cout.bank_id
+                WHERE $w_cout AND cout.outward_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+            ) t
+            ORDER BY t.tr_date ASC, t.created_date ASC
+        ";
+
+        $data['records'] = $this->db->query($sql_main)->result_array();
+
+        $this->load->view('page/accounts/cash-in-out-statement', $data);
+    }
 }
 ?>

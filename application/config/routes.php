@@ -210,6 +210,7 @@ $route['cash-in-statement'] = 'accounts/cash_in_statement';
 $route['na-cash-in-statement'] = 'accounts/na_cash_in_statement';
 $route['cash-out-statement'] = 'accounts/cash_out_statement';
 $route['na-cash-out-statement'] = 'accounts/na_cash_out_statement';
+$route['cash-in-out-statement'] = 'accounts/cash_in_out_statement';
 $route['outward-summary'] = 'accounts/outward_summary';
 $route['inward-summary'] = 'accounts/inward_summary';
 
