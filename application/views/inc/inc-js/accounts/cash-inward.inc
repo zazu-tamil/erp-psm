@@ -62,9 +62,18 @@
       if ($(this).val() === "Bank") {
         $("#add_modal #bank_div").show();
         $("#add_modal #bank_id").prop("required", true);
+        $("#add_modal #cash_category_div").hide();
+        $("#add_modal #cash_category_id").val("").trigger("change.select2").prop("required", false);
+      } else if ($(this).val() === "Cash") {
+        $("#add_modal #bank_div").hide();
+        $("#add_modal #bank_id").val("").trigger("change.select2").prop("required", false);
+        $("#add_modal #cash_category_div").show();
+        $("#add_modal #cash_category_id").prop("required", true);
       } else {
         $("#add_modal #bank_div").hide();
         $("#add_modal #bank_id").val("").trigger("change.select2").prop("required", false);
+        $("#add_modal #cash_category_div").hide();
+        $("#add_modal #cash_category_id").val("").trigger("change.select2").prop("required", false);
       }
     });
 
@@ -72,9 +81,18 @@
       if ($(this).val() === "Bank") {
         $("#edit_modal #edit_bank_div").show();
         $("#edit_modal #bank_id").prop("required", true);
+        $("#edit_modal #edit_cash_category_div").hide();
+        $("#edit_modal #cash_category_id").val("").trigger("change.select2").prop("required", false);
+      } else if ($(this).val() === "Cash") {
+        $("#edit_modal #edit_bank_div").hide();
+        $("#edit_modal #bank_id").val("").trigger("change.select2").prop("required", false);
+        $("#edit_modal #edit_cash_category_div").show();
+        $("#edit_modal #cash_category_id").prop("required", true);
       } else {
         $("#edit_modal #edit_bank_div").hide();
         $("#edit_modal #bank_id").val("").trigger("change.select2").prop("required", false);
+        $("#edit_modal #edit_cash_category_div").hide();
+        $("#edit_modal #cash_category_id").val("").trigger("change.select2").prop("required", false);
       }
     });
 
@@ -269,6 +287,7 @@
           $("#edit_modal #vno").val(d1.vno);
           $("#edit_modal #ac_type").val(d1.ac_type);
           $("#edit_modal #bank_id").val(d1.bank_id).trigger("change.select2");
+          $("#edit_modal #cash_category_id").val(d1.cash_category_id).trigger("change.select2");
           $("#edit_modal #ac_type").trigger("change");
           $("#edit_modal #account_head_id").val(d1.account_head_id);
           //$('#edit_modal #sub_account_head_id').val(d1.sub_account_head_id);

@@ -452,9 +452,26 @@ class Accounts extends CI_Controller
             echo "<h3 style='color:red;'>Permission Denied</h3>"; exit;
         }  */
 
+        // Dynamically ensure columns exist in cb_cash_inward_info
+        if (!$this->db->field_exists('cash_category_id', 'cb_cash_inward_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('cb_cash_inward_info', [
+                'cash_category_id' => [
+                    'type' => 'INT',
+                    'constraint' => 11,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+
         $data['js'] = 'accounts/cash-inward.inc';
 
         if ($this->input->post('mode') == 'Add') {
+            $ac_type = $this->input->post('ac_type');
+            $bank_id = ($ac_type == 'Bank') ? ($this->input->post('bank_id') ?: null) : null;
+            $cash_category_id = ($ac_type == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null;
+
             $ins = array(
                 'franchise_id' => ($this->session->userdata('cr_franchise_id') == '' ? 0 : $this->session->userdata('cr_franchise_id')),
                 'cash_inward_id ' => $this->input->post('cash_inward_id '),
@@ -463,8 +480,9 @@ class Accounts extends CI_Controller
                 'agent_id' => $this->input->post('agent_id'),
 
                 'vno' => $this->input->post('vno'),
-                'ac_type' => $this->input->post('ac_type'),
-                'bank_id' => $this->input->post('ac_type') == 'Bank' ? $this->input->post('bank_id') : null,
+                'ac_type' => $ac_type,
+                'bank_id' => $bank_id,
+                'cash_category_id' => $cash_category_id,
                 'inward_date' => $this->input->post('inward_date'),
                 'account_head_id' => $this->input->post('account_head_id'),
                 'sub_account_head_id' => $this->input->post('sub_account_head_id'),
@@ -483,6 +501,10 @@ class Accounts extends CI_Controller
         }
 
         if ($this->input->post('mode') == 'Edit') {
+            $ac_type = $this->input->post('ac_type');
+            $bank_id = ($ac_type == 'Bank') ? ($this->input->post('bank_id') ?: null) : null;
+            $cash_category_id = ($ac_type == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null;
+
             $upd = array(
                 'franchise_id' => ($this->session->userdata('cr_franchise_id') == '' ? 0 : $this->session->userdata('cr_franchise_id')),
                 'cash_inward_id ' => $this->input->post('cash_inward_id'),
@@ -490,8 +512,9 @@ class Accounts extends CI_Controller
                 'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
                 'agent_id' => $this->input->post('agent_id'), 
                 'vno' => $this->input->post('vno'),
-                'ac_type' => $this->input->post('ac_type'),
-                'bank_id' => $this->input->post('ac_type') == 'Bank' ? $this->input->post('bank_id') : null,
+                'ac_type' => $ac_type,
+                'bank_id' => $bank_id,
+                'cash_category_id' => $cash_category_id,
                 'inward_date' => $this->input->post('inward_date'),
                 'account_head_id' => $this->input->post('account_head_id'),
                 'sub_account_head_id' => $this->input->post('sub_account_head_id'),
@@ -587,7 +610,8 @@ class Accounts extends CI_Controller
                 DATEDIFF(current_date(), a.inward_date) as days,
                 get_tender_info(a.tender_enquiry_id) as tender_details,
                 e.sub_account_headlvl3_name as in_from,
-                bank.bank_name
+                bank.bank_name,
+                cc.category_name
                 from cb_cash_inward_info as a 
                 left join cb_account_head_info as b on b.account_head_id = a.account_head_id and b.status != 'Delete'
                 left join cb_sub_account_head_info as c on c.sub_account_head_id = a.sub_account_head_id and c.status != 'Delete' 
@@ -596,6 +620,7 @@ class Accounts extends CI_Controller
                 left JOIN tender_enquiry_info as g on g.tender_enquiry_id = a.tender_enquiry_id and f.status='Active'
                 left join customer_info as h on h.customer_id = g.customer_id and h.status='Active'
                 left join company_bank_info as bank on bank.bank_id = a.bank_id and bank.status != 'Delete'
+                left join cash_category as cc on cc.cash_category_id = a.cash_category_id and cc.status = 'Active'
                  
                 where a.status != 'Delete' and $where   
                 order by  a.inward_date desc , a.cash_inward_id desc
@@ -704,6 +729,19 @@ class Accounts extends CI_Controller
 
         $data['ac_type_opt'] = array('Bank' => 'Bank', 'Cash' => 'Cash');
 
+        $data['cash_categories_opt'] = [];
+        $sql = "
+            SELECT cash_category_id, category_name
+            FROM cash_category
+            WHERE status = 'Active'
+            AND category_type IN ('Inward', 'Both', 'Cash')
+            ORDER BY category_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['cash_categories_opt'][$row['cash_category_id']] = $row['category_name'];
+        }
+
         $this->load->view('page/accounts/cash-inward-list', $data);
     }
 
@@ -759,6 +797,19 @@ class Accounts extends CI_Controller
             echo "<h3 style='color:red;'>Permission Denied</h3>"; exit;
         }  */
 
+        // Dynamically ensure columns exist in cb_cash_outward_info
+        if (!$this->db->field_exists('cash_category_id', 'cb_cash_outward_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('cb_cash_outward_info', [
+                'cash_category_id' => [
+                    'type' => 'INT',
+                    'constraint' => 11,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+
         $data['js'] = 'accounts/cash-outward.inc';
 
         if ($this->input->post('mode') == 'Add') {
@@ -792,6 +843,10 @@ class Accounts extends CI_Controller
                 }
             }
 
+            $ac_type = $this->input->post('ac_type');
+            $bank_id = ($ac_type == 'Bank') ? ($this->input->post('bank_id') ?: null) : null;
+            $cash_category_id = ($ac_type == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null;
+
             // Prepare data for insert
             $ins = array(
                 'franchise_id' => ($this->session->userdata('cr_franchise_id') == '' ? 0 : $this->session->userdata('cr_franchise_id')),
@@ -799,8 +854,9 @@ class Accounts extends CI_Controller
                 'company_id' => $this->input->post('company_id'),
                 'voucher_type_id' => $this->input->post('voucher_type_id'),
                 'outward_date' => $this->input->post('outward_date'),
-                'ac_type' => $this->input->post('ac_type'),
-                'bank_id' => $this->input->post('ac_type') == 'Bank' ? $this->input->post('bank_id') : null,
+                'ac_type' => $ac_type,
+                'bank_id' => $bank_id,
+                'cash_category_id' => $cash_category_id,
                 'account_head_id' => $this->input->post('account_head_id'),
                 'sub_account_head_id' => $this->input->post('sub_account_head_id'),
                 'sub_account_headlvl3_id' => $this->input->post('sub_account_headlvl3_id'),
@@ -848,6 +904,10 @@ class Accounts extends CI_Controller
                 }
             }
 
+            $ac_type = $this->input->post('ac_type');
+            $bank_id = ($ac_type == 'Bank') ? ($this->input->post('bank_id') ?: null) : null;
+            $cash_category_id = ($ac_type == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null;
+
             // Prepare data for update
             $upd = array(
                 'franchise_id' => ($this->session->userdata('cr_franchise_id') == '' ? 0 : $this->session->userdata('cr_franchise_id')),
@@ -855,8 +915,9 @@ class Accounts extends CI_Controller
                 'company_id' => $this->input->post('company_id'),
                 'voucher_type_id' => $this->input->post('voucher_type_id'),
                 'outward_date' => $this->input->post('outward_date'),
-                'ac_type' => $this->input->post('ac_type'),
-                'bank_id' => $this->input->post('ac_type') == 'Bank' ? $this->input->post('bank_id') : null,
+                'ac_type' => $ac_type,
+                'bank_id' => $bank_id,
+                'cash_category_id' => $cash_category_id,
                 'vno' => $this->input->post('vno'),
                 'account_head_id' => $this->input->post('account_head_id'),
                 'sub_account_head_id' => $this->input->post('sub_account_head_id'),
@@ -955,7 +1016,8 @@ class Accounts extends CI_Controller
                 e.sub_account_headlvl3_name as out_for, 
                 g.enquiry_no,
                 get_tender_info(a.tender_enquiry_id) as tender_details,
-                bank.bank_name
+                bank.bank_name,
+                cc.category_name
                 from cb_cash_outward_info as a 
                 left join cb_account_head_info as b on b.account_head_id = a.account_head_id and b.status != 'Delete'
                 left join cb_sub_account_head_info as c on c.sub_account_head_id = a.sub_account_head_id and c.status != 'Delete'
@@ -965,6 +1027,7 @@ class Accounts extends CI_Controller
                 left JOIN tender_enquiry_info as g on g.tender_enquiry_id = a.tender_enquiry_id and g.status != 'Delete'
                 left join customer_info as h on h.customer_id = g.customer_id and h.status='Active'
                 left join company_bank_info as bank on bank.bank_id = a.bank_id and bank.status != 'Delete'
+                left join cash_category as cc on cc.cash_category_id = a.cash_category_id and cc.status = 'Active'
                 where a.status != 'Delete' and $where  
                 order by a.outward_date desc , a.cash_outward_id desc
                 limit " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "                
@@ -1071,6 +1134,19 @@ class Accounts extends CI_Controller
         }
 
         $data['ac_type_opt'] = array('Bank' => 'Bank', 'Cash' => 'Cash');
+
+        $data['cash_categories_opt'] = [];
+        $sql = "
+            SELECT cash_category_id, category_name
+            FROM cash_category
+            WHERE status = 'Active'
+            AND category_type IN ('Outward', 'Both', 'Cash')
+            ORDER BY category_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['cash_categories_opt'][$row['cash_category_id']] = $row['category_name'];
+        }
 
         $this->load->view('page/accounts/cash-outward-list', $data);
     }
