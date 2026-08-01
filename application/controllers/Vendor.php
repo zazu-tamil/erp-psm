@@ -6194,12 +6194,42 @@ class Vendor extends CI_Controller
             exit;
         }
 
+        // Dynamically ensure columns exist in vendor_advance_payment_info
+        if (!$this->db->field_exists('bank_id', 'vendor_advance_payment_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('vendor_advance_payment_info', [
+                'bank_id' => [
+                    'type' => 'INT',
+                    'constraint' => 11,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+        if (!$this->db->field_exists('cash_category_id', 'vendor_advance_payment_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('vendor_advance_payment_info', [
+                'cash_category_id' => [
+                    'type' => 'INT',
+                    'constraint' => 11,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+
         $data['js'] = 'vendor/vendor-advance-payment.inc';
         $data['title'] = 'Vendor Advance Payment';
 
         if ($this->input->post('mode') == 'Add') {
+            $ac_type_opt = $this->input->post('ac_type_opt');
+            $bank_id = ($ac_type_opt == 'Bank') ? ($this->input->post('bank_id') ?: null) : null;
+            $cash_category_id = ($ac_type_opt == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null;
+
             $ins = array(
-                'ac_type_opt' => $this->input->post('ac_type_opt'),
+                'ac_type_opt' => $ac_type_opt,
+                'bank_id' => $bank_id,
+                'cash_category_id' => $cash_category_id,
                 'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
                 'vendor_id' => $this->input->post('vendor_id'),
                 'vendor_po_id' => $this->input->post('vendor_po_id'),
@@ -6218,8 +6248,14 @@ class Vendor extends CI_Controller
         }
 
         if ($this->input->post('mode') == 'Edit') {
+            $ac_type_opt = $this->input->post('ac_type_opt');
+            $bank_id = ($ac_type_opt == 'Bank') ? ($this->input->post('bank_id') ?: null) : null;
+            $cash_category_id = ($ac_type_opt == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null;
+
             $upd = array(
-                'ac_type_opt' => $this->input->post('ac_type_opt'),
+                'ac_type_opt' => $ac_type_opt,
+                'bank_id' => $bank_id,
+                'cash_category_id' => $cash_category_id,
                 'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
                 'vendor_id' => $this->input->post('vendor_id'),
                 'vendor_po_id' => $this->input->post('vendor_po_id'),
@@ -6324,8 +6360,12 @@ class Vendor extends CI_Controller
                 a.*,  
                 c.vendor_name,
                 po.po_no,
-                get_tender_info(a.tender_enquiry_id) as tender_info 
+                get_tender_info(a.tender_enquiry_id) as tender_info,
+                b.bank_name,
+                cc.category_name
                 from vendor_advance_payment_info as a   
+                left join company_bank_info as b on b.bank_id = a.bank_id and b.status = 'Active'
+                left join cash_category as cc on cc.cash_category_id = a.cash_category_id and cc.status = 'Active'
                 left join vendor_info as c on c.vendor_id = a.vendor_id and c.status = 'Active' 
                 left join vendor_po_info as po on po.vendor_po_id = a.vendor_po_id
                 where a.status != 'Delete' 
@@ -6365,6 +6405,31 @@ class Vendor extends CI_Controller
         $data['tender_enquiry_opt'] = ['' => 'Select Tender Enquiry'];
         foreach ($query->result_array() as $row) {
             $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_details'];
+        }
+
+        $data['bank_opt'] = [];
+        $sql = "
+            SELECT bank_id, bank_name
+            FROM company_bank_info
+            WHERE status = 'Active'
+            ORDER BY bank_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['bank_opt'][$row['bank_id']] = $row['bank_name'];
+        }
+
+        $data['cash_categories_opt'] = [];
+        $sql = "
+            SELECT cash_category_id, category_name
+            FROM cash_category
+            WHERE status = 'Active'
+            AND category_type IN ('Outward', 'Both', 'Cash')
+            ORDER BY category_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['cash_categories_opt'][$row['cash_category_id']] = $row['category_name'];
         }
 
         $data['ac_type_opt_list'] = [

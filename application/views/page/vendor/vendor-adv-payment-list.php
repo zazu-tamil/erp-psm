@@ -46,10 +46,20 @@
                                 </select>
                             </div>
 
-                            <div class="form-group col-md-6">
-                                <label>Account Type</label>
-                                <?php echo form_dropdown('ac_type_opt', $ac_type_opt_list, '', 'id="ac_type_opt" class="form-control select2" style="width:100%" required'); ?>
-                            </div>
+                             <div class="form-group col-md-6">
+                                 <label>Account Type</label>
+                                 <?php echo form_dropdown('ac_type_opt', $ac_type_opt_list, '', 'id="ac_type_opt" class="form-control select2" style="width:100%" required'); ?>
+                             </div>
+
+                             <div class="form-group col-md-6" id="bank_div" style="display:none;">
+                                 <label>Select Bank <span class="text-red">*</span></label>
+                                 <?php echo form_dropdown('bank_id', ['' => 'Select Bank'] + $bank_opt, '', 'id="bank_id" class="form-control select2" style="width:100%"'); ?>
+                             </div>
+
+                             <div class="form-group col-md-6" id="cash_category_div" style="display:none;">
+                                 <label>Cash Category <span class="text-red">*</span></label>
+                                 <?php echo form_dropdown('cash_category_id', ['' => 'Select Cash Category'] + $cash_categories_opt, '', 'id="cash_category_id" class="form-control select2" style="width:100%"'); ?>
+                             </div>
                         
                             <div class="form-group col-md-6">
                                 <label for="adv_payment_date">Advance Payment Date</label>
@@ -153,23 +163,32 @@
                                 </td>
                                 <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['po_no'] ?? '-'); ?></td>
-                                <td><?php echo htmlspecialchars($row['ac_type_opt'] ?? '-'); ?></td>
+                                 <td>
+                                     <?php echo htmlspecialchars($row['ac_type_opt'] ?? '-'); ?>
+                                     <?php if ($row['ac_type_opt'] == 'Bank' && !empty($row['bank_name'])): ?>
+                                         <br><small class="text-muted">(<?php echo htmlspecialchars($row['bank_name']); ?>)</small>
+                                     <?php elseif ($row['ac_type_opt'] == 'Cash' && !empty($row['category_name'])): ?>
+                                         <br><small class="text-muted">(<?php echo htmlspecialchars($row['category_name']); ?>)</small>
+                                     <?php endif; ?>
+                                 </td>
                                 <td class="text-right"><?php echo number_format($row['adv_payment_amt'], 2); ?></td>
                                 <td><?php echo htmlspecialchars($row['status'] ?? '-'); ?></td>
 
                                 <td class="text-center">
-                                    <button class="btn btn-primary btn-xs edit_record" 
-                                            data-id="<?php echo $row['adv_payment_id']; ?>"
-                                            data-tender="<?php echo $row['tender_enquiry_id']; ?>"
-                                            data-vendor="<?php echo $row['vendor_id']; ?>"
-                                            data-po="<?php echo $row['vendor_po_id']; ?>"
-                                            data-ac="<?php echo $row['ac_type_opt']; ?>"
-                                            data-date="<?php echo $row['adv_payment_date']; ?>"
-                                            data-amt="<?php echo $row['adv_payment_amt']; ?>"
-                                            data-status="<?php echo $row['status']; ?>"
-                                            title="Edit">
-                                        <i class="fa fa-edit"></i>
-                                    </button>
+                                     <button class="btn btn-primary btn-xs edit_record" 
+                                             data-id="<?php echo $row['adv_payment_id']; ?>"
+                                             data-tender="<?php echo $row['tender_enquiry_id']; ?>"
+                                             data-vendor="<?php echo $row['vendor_id']; ?>"
+                                             data-po="<?php echo $row['vendor_po_id']; ?>"
+                                             data-ac="<?php echo $row['ac_type_opt']; ?>"
+                                             data-bank="<?php echo $row['bank_id'] ?? ''; ?>"
+                                             data-cash="<?php echo $row['cash_category_id'] ?? ''; ?>"
+                                             data-date="<?php echo $row['adv_payment_date']; ?>"
+                                             data-amt="<?php echo $row['adv_payment_amt']; ?>"
+                                             data-status="<?php echo $row['status']; ?>"
+                                             title="Edit">
+                                         <i class="fa fa-edit"></i>
+                                     </button>
                                 </td>
                                 <td class="text-center">
                                     <button value="<?php echo $row['adv_payment_id']; ?>"

@@ -73,11 +73,35 @@
             }
         });
 
+        function handleAcTypeChange(type) {
+            if (type === 'Bank') {
+                $('#bank_div').show();
+                $('#bank_id').prop('required', true);
+                $('#cash_category_div').hide();
+                $('#cash_category_id').val('').trigger('change.select2').prop('required', false);
+            } else if (type === 'Cash') {
+                $('#bank_div').hide();
+                $('#bank_id').val('').trigger('change.select2').prop('required', false);
+                $('#cash_category_div').show();
+                $('#cash_category_id').prop('required', true);
+            } else {
+                $('#bank_div').hide();
+                $('#bank_id').val('').trigger('change.select2').prop('required', false);
+                $('#cash_category_div').hide();
+                $('#cash_category_id').val('').trigger('change.select2').prop('required', false);
+            }
+        }
+
+        $('#ac_type_opt').on('change', function() {
+            handleAcTypeChange($(this).val());
+        });
+
         $('#btnAdd').on('click', function() {
             $('#frmAdd')[0].reset();
             $('#mode').val('Add');
             $('#adv_payment_id').val('');
             $('.select2').val('').trigger('change.select2');
+            handleAcTypeChange('');
             window.isEditing = false;
             $('#addModal').modal('show');
         });
@@ -89,6 +113,8 @@
             var tender = $(this).data('tender');
             var vendor = $(this).data('vendor');
             var po = $(this).data('po');
+            var bank = $(this).data('bank');
+            var cash = $(this).data('cash');
             
             window.isEditing = true;
             window.editVendor = vendor;
@@ -96,7 +122,14 @@
 
             $('#tender_enquiry_id').val(tender).trigger('change');
             
-            $('#ac_type_opt').val($(this).data('ac')).trigger('change.select2');
+            $('#ac_type_opt').val($(this).data('ac')).trigger('change');
+            if (bank) {
+                $('#bank_id').val(bank).trigger('change.select2');
+            }
+            if (cash) {
+                $('#cash_category_id').val(cash).trigger('change.select2');
+            }
+            
             $('#adv_payment_date').val($(this).data('date'));
             $('#adv_payment_amt').val($(this).data('amt'));
             $('#status').val($(this).data('status')).trigger('change.select2');
@@ -109,6 +142,7 @@
             $('#mode').val('Add');
             $('#adv_payment_id').val('');
             $('.select2').val('').trigger('change.select2');
+            handleAcTypeChange('');
             window.isEditing = false;
         });
 

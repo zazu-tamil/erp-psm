@@ -628,6 +628,17 @@ class Payment extends CI_Controller
                 ]
             ]);
         }
+        if (!$this->db->field_exists('cash_category_id', 'vendor_payment_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('vendor_payment_info', [
+                'cash_category_id' => [
+                    'type' => 'INT',
+                    'constraint' => 11,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
 
         $data['js'] = 'payment/vendor-payment-list.inc';
         $data['title'] = 'Supplier Payment List';
@@ -640,11 +651,15 @@ class Payment extends CI_Controller
             // exit;
             $this->db->trans_start();
 
+            $payment_mode = $this->input->post('payment_mode');
+            $cash_category_id = ($payment_mode == 'Cash') ? ($this->input->post('cash_category_id') ?: NULL) : NULL;
+
             $ins = array(
                 'payment_date' => $this->input->post('payment_date'),
                 'vendor_id' => $this->input->post('vendor_id'),
-                'payment_mode' => $this->input->post('payment_mode'),
+                'payment_mode' => $payment_mode,
                 'bank_id' => $this->input->post('bank_id'),
+                'cash_category_id' => $cash_category_id,
                 'payment_type' => $this->input->post('payment_type'),
                 'cheque_date' => $this->input->post('cheque_date'),
                 'cheque_no' => $this->input->post('cheque_no'),
@@ -701,11 +716,15 @@ class Payment extends CI_Controller
 
             $vendor_payment_id = $this->input->post('vendor_payment_id');
 
+            $payment_mode = $this->input->post('payment_mode');
+            $cash_category_id = ($payment_mode == 'Cash') ? ($this->input->post('cash_category_id') ?: NULL) : NULL;
+
             $upd = array(
                 'payment_date' => $this->input->post('payment_date'),
                 'vendor_id' => $this->input->post('vendor_id'),
-                'payment_mode' => $this->input->post('payment_mode'),
+                'payment_mode' => $payment_mode,
                 'bank_id' => $this->input->post('bank_id'),
+                'cash_category_id' => $cash_category_id,
                 'payment_type' => $this->input->post('payment_type'),
                 'cheque_date' => $this->input->post('cheque_date'),
                 'cheque_no' => $this->input->post('cheque_no'),
@@ -844,9 +863,11 @@ class Payment extends CI_Controller
                 a.amount,
                 a.remarks,
                 a.status,  
-                b.bank_name
+                b.bank_name,
+                cc.category_name
             FROM vendor_payment_info AS a
             LEFT JOIN company_bank_info AS b ON b.bank_id = a.bank_id AND b.status = 'Active'
+            LEFT JOIN cash_category AS cc ON cc.cash_category_id = a.cash_category_id AND cc.status = 'Active'
             left join vendor_info as c on c.vendor_id = a.vendor_id and c.status = 'Active'
             WHERE a.status = 'Active'
             and $where
@@ -872,6 +893,19 @@ class Payment extends CI_Controller
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
             $data['bank_opt'][$row['bank_id']] = $row['bank_name'];
+        }
+
+        $data['cash_categories_opt'] = [];
+        $sql = "
+            SELECT cash_category_id, category_name
+            FROM cash_category
+            WHERE status = 'Active'
+            AND category_type IN ('Outward', 'Both', 'Cash')
+            ORDER BY category_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['cash_categories_opt'][$row['cash_category_id']] = $row['category_name'];
         }
 
         $sql = "
