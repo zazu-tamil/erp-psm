@@ -1,6 +1,6 @@
 <?php include_once(VIEWPATH . '/inc/header.php'); ?>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap.min.css"/>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap.min.css" />
 
 <?php
 // Fallbacks for variables to avoid PHP notices
@@ -27,7 +27,7 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
 <style>
     /* Theme Font & Settings override */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    
+
     .dashboard-container {
         font-family: 'Inter', 'Source Sans Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         background-color: #f8fafc;
@@ -156,9 +156,17 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
         font-weight: 500;
     }
 
-    .kpi-change.up { color: #10b981; }
-    .kpi-change.down { color: #ef4444; }
-    .kpi-change.neutral { color: #64748b; }
+    .kpi-change.up {
+        color: #10b981;
+    }
+
+    .kpi-change.down {
+        color: #ef4444;
+    }
+
+    .kpi-change.neutral {
+        color: #64748b;
+    }
 
     .kpi-icon-wrapper {
         width: 48px;
@@ -172,17 +180,55 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
     }
 
     /* KPI Colors and Gradient Details */
-    .kpi-card.sales .kpi-icon-wrapper { background-color: rgba(16, 185, 129, 0.1); color: #10b981; }
-    .kpi-card.purchases .kpi-icon-wrapper { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; }
-    .kpi-card.inward .kpi-icon-wrapper { background-color: rgba(6, 182, 212, 0.1); color: #06b6d4; }
-    .kpi-card.outward .kpi-icon-wrapper { background-color: rgba(249, 115, 22, 0.1); color: #f97316; }
-    .kpi-card.balance .kpi-icon-wrapper { background-color: rgba(247, 147, 30, 0.1); color: #f7931e; }
-    
-    .kpi-card.tenders .kpi-icon-wrapper { background-color: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-    .kpi-card.customers .kpi-icon-wrapper { background-color: rgba(168, 85, 247, 0.1); color: #a855f7; }
-    .kpi-card.vendors .kpi-icon-wrapper { background-color: rgba(236, 72, 153, 0.1); color: #ec4899; }
-    .kpi-card.items .kpi-icon-wrapper { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-    .kpi-card.categories .kpi-icon-wrapper { background-color: rgba(100, 116, 139, 0.1); color: #64748b; }
+    .kpi-card.sales .kpi-icon-wrapper {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+
+    .kpi-card.purchases .kpi-icon-wrapper {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+
+    .kpi-card.inward .kpi-icon-wrapper {
+        background-color: rgba(6, 182, 212, 0.1);
+        color: #06b6d4;
+    }
+
+    .kpi-card.outward .kpi-icon-wrapper {
+        background-color: rgba(249, 115, 22, 0.1);
+        color: #f97316;
+    }
+
+    .kpi-card.balance .kpi-icon-wrapper {
+        background-color: rgba(247, 147, 30, 0.1);
+        color: #f7931e;
+    }
+
+    .kpi-card.tenders .kpi-icon-wrapper {
+        background-color: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+    }
+
+    .kpi-card.customers .kpi-icon-wrapper {
+        background-color: rgba(168, 85, 247, 0.1);
+        color: #a855f7;
+    }
+
+    .kpi-card.vendors .kpi-icon-wrapper {
+        background-color: rgba(236, 72, 153, 0.1);
+        color: #ec4899;
+    }
+
+    .kpi-card.items .kpi-icon-wrapper {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+    }
+
+    .kpi-card.categories .kpi-icon-wrapper {
+        background-color: rgba(100, 116, 139, 0.1);
+        color: #64748b;
+    }
 
     /* Operational Stats Mini Grid */
     .ops-row {
@@ -302,11 +348,30 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
     /* Recent Tenders Table Styles */
     .table-responsive {
         border: none;
+        overflow: visible;
+        /* let DataTables scrollX handle overflow */
+    }
+
+    /* DataTables scrollX container */
+    .dataTables_scrollBody {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .dataTables_scrollHead,
+    .dataTables_scrollBody {
+        border: none !important;
+    }
+
+    .dataTables_scroll {
+        overflow: hidden;
     }
 
     .custom-table {
         width: 100%;
         margin-bottom: 0;
+        min-width: 900px;
+        /* ensures all columns have enough space */
     }
 
     .custom-table th {
@@ -317,15 +382,40 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
         color: #64748b;
         background-color: #f8fafc;
         border-bottom: 2px solid #edf2f7 !important;
-        padding: 12px 16px !important;
+        padding: 10px 12px !important;
+        white-space: nowrap;
     }
 
     .custom-table td {
-        padding: 14px 16px !important;
+        padding: 12px 12px !important;
         font-size: 13px;
         color: #334155;
         vertical-align: middle !important;
         border-bottom: 1px solid #f1f5f9;
+        white-space: nowrap;
+        /* ALL cells — no text wrapping */
+    }
+
+    /* Date column extra guarantee */
+    .custom-table td.col-date,
+    .custom-table th.col-date {
+        white-space: nowrap !important;
+        min-width: 95px;
+        width: 95px;
+    }
+
+    /* Allow Tender Name / Subject to wrap (it's long text) */
+    .custom-table td:nth-child(3) {
+        white-space: normal;
+        min-width: 160px;
+        max-width: 220px;
+    }
+
+    /* Allow Customer Name to wrap too */
+    .custom-table td:nth-child(4) {
+        white-space: normal;
+        min-width: 130px;
+        max-width: 180px;
     }
 
     .custom-table tbody tr:hover td {
@@ -342,13 +432,36 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
         display: inline-block;
         letter-spacing: 0.5px;
     }
-    
-    .status-open { background-color: rgba(59, 130, 246, 0.1); color: #2563eb; }
-    .status-quoted { background-color: rgba(139, 92, 246, 0.1); color: #7c3aed; }
-    .status-won { background-color: rgba(16, 185, 129, 0.1); color: #059669; }
-    .status-lost { background-color: rgba(239, 68, 68, 0.1); color: #dc2626; }
-    .status-hold { background-color: rgba(245, 158, 11, 0.1); color: #d97706; }
-    .status-default { background-color: #f1f5f9; color: #64748b; }
+
+    .status-open {
+        background-color: rgba(59, 130, 246, 0.1);
+        color: #2563eb;
+    }
+
+    .status-quoted {
+        background-color: rgba(139, 92, 246, 0.1);
+        color: #7c3aed;
+    }
+
+    .status-won {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #059669;
+    }
+
+    .status-lost {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+    }
+
+    .status-hold {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #d97706;
+    }
+
+    .status-default {
+        background-color: #f1f5f9;
+        color: #64748b;
+    }
 
     /* Quick Actions Layout */
     .quick-actions-grid {
@@ -395,8 +508,9 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
         padding: 0;
         margin-top: 10px;
     }
-    
-    .dataTables_length, .dataTables_filter {
+
+    .dataTables_length,
+    .dataTables_filter {
         margin-bottom: 20px;
         font-size: 13px;
         color: #475569;
@@ -433,13 +547,19 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
     }
 
     .dataTables_paginate {
-        padding-top: 15px;
+        padding-top: 10px;
         text-align: right;
     }
 
+    /* Wrap buttons and prevent overflow on small screens */
+    .dataTables_paginate .dataTables_paginate,
+    span.paginate_button {
+        display: inline-block;
+    }
+
     .dataTables_paginate .paginate_button {
-        padding: 6px 12px !important;
-        margin-left: 4px !important;
+        padding: 5px 10px !important;
+        margin: 2px !important;
         border-radius: 8px !important;
         border: 1px solid #e2e8f0 !important;
         background: #ffffff !important;
@@ -450,6 +570,7 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
         transition: all 0.2s ease;
         display: inline-block;
         text-decoration: none !important;
+        white-space: nowrap;
     }
 
     .dataTables_paginate .paginate_button:hover {
@@ -458,7 +579,7 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
         border-color: #cbd5e1 !important;
     }
 
-    .dataTables_paginate .paginate_button.current, 
+    .dataTables_paginate .paginate_button.current,
     .dataTables_paginate .paginate_button.current:hover {
         background: #0054a6 !important;
         color: #ffffff !important;
@@ -475,37 +596,167 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
         cursor: not-allowed;
     }
 
-    /* Responsive Media Queries */
-    @media (max-width: 1200px) {
-        .kpi-col { width: 33.333% !important; }
+    /* Ellipsis spans inside pagination */
+    .dataTables_paginate .ellipsis {
+        padding: 5px 6px !important;
+        font-size: 12px;
+        color: #94a3b8;
     }
 
+    /* ════════════════════════════════════
+       Responsive Media Queries — All Devices
+    ════════════════════════════════════ */
+
+    /* Large tablets / small desktops */
+    @media (max-width: 1200px) {
+        .kpi-col {
+            width: 33.333% !important;
+        }
+    }
+
+    /* Tablets */
+    @media (max-width: 992px) {
+        .kpi-col {
+            width: 50% !important;
+        }
+
+        /* Stack charts section */
+        .row .col-md-8,
+        .row .col-md-4 {
+            width: 100% !important;
+            float: none !important;
+        }
+
+        /* Tender table + Quick Actions stack */
+        .row .col-md-8,
+        .row .col-md-4 {
+            width: 100% !important;
+        }
+    }
+
+    /* Mobile landscape */
     @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 12px 10px;
+        }
+
         .dashboard-banner {
             flex-direction: column;
             align-items: flex-start;
-            gap: 15px;
-            padding: 20px 24px;
+            gap: 12px;
+            padding: 18px 20px;
         }
 
-        .banner-content h2 { font-size: 22px; }
+        .banner-content h2 {
+            font-size: 20px;
+        }
 
-        .kpi-col { width: 50% !important; }
+        .kpi-col {
+            width: 50% !important;
+        }
 
-        .ops-col { width: 50% !important; }
+        .ops-col {
+            width: 50% !important;
+        }
 
-        .analytics-card, .section-card {
+        .kpi-card {
             padding: 16px;
+        }
+
+        .kpi-value {
+            font-size: 20px;
+        }
+
+        .analytics-card,
+        .section-card {
+            padding: 14px;
+        }
+
+        /* DataTable controls stack vertically */
+        .dataTables_length,
+        .dataTables_filter {
+            float: none !important;
+            text-align: left !important;
+            margin-bottom: 10px;
+        }
+
+        .dataTables_filter input {
+            width: 100% !important;
+            margin-left: 0 !important;
+        }
+
+        /* Pagination — wrap so buttons don't overflow */
+        .dataTables_paginate {
+            text-align: left !important;
+            overflow-x: auto;
+        }
+
+        .dataTables_paginate .paginate_button {
+            padding: 4px 8px !important;
+            font-size: 11px !important;
+            margin: 2px 1px !important;
+        }
+
+        /* Info + pagination in rows */
+        .dataTables_info {
+            padding-top: 5px;
         }
     }
 
-    @media (max-width: 480px) {
-        .kpi-col { width: 100% !important; }
+    /* Mobile portrait */
+    @media (max-width: 576px) {
+        .kpi-col {
+            width: 100% !important;
+        }
 
-        .ops-col { width: 100% !important; }
+        .ops-col {
+            width: 100% !important;
+        }
+
+        .kpi-card {
+            padding: 14px;
+        }
+
+        .kpi-value {
+            font-size: 18px;
+        }
+
+        .kpi-icon-wrapper {
+            width: 38px;
+            height: 38px;
+            font-size: 16px;
+        }
 
         .quick-actions-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        /* Pagination compact */
+        .dataTables_paginate .paginate_button {
+            padding: 4px 7px !important;
+            font-size: 11px !important;
+        }
+
+        /* Stack charts full width */
+        .row .col-md-8,
+        .row .col-md-4 {
+            width: 100% !important;
+            float: none !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+    }
+
+    /* Very small phones */
+    @media (max-width: 400px) {
+        .quick-actions-grid {
             grid-template-columns: 1fr;
+        }
+
+        .dataTables_paginate .paginate_button {
+            padding: 3px 6px !important;
+            font-size: 10px !important;
+            border-radius: 5px !important;
         }
     }
 </style>
@@ -706,7 +957,7 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
                 </div>
             </div>
         </div>
-        
+
         <!-- Today's Quotations -->
         <div class="col-md-4 ops-col" style="width: 33.333%;">
             <div class="ops-card">
@@ -774,7 +1025,7 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
                         <thead>
                             <tr>
                                 <th>Enquiry No</th>
-                                <th>Date</th>
+                                <th class="col-date">Date</th>
                                 <th>Tender Name / Subject</th>
                                 <th>Customer Name</th>
                                 <th>Company</th>
@@ -784,25 +1035,37 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
                         <tbody>
                             <?php if (!empty($recent_tenders)): ?>
                                 <?php foreach ($recent_tenders as $tender): ?>
-                                    <?php 
-                                        $statusClass = 'status-default';
-                                        $status = $tender['tender_status'] ? $tender['tender_status'] : 'Open';
-                                        if (strtolower($status) == 'open') $statusClass = 'status-open';
-                                        elseif (strtolower($status) == 'quoted') $statusClass = 'status-quoted';
-                                        elseif (strtolower($status) == 'won') $statusClass = 'status-won';
-                                        elseif (strtolower($status) == 'lost') $statusClass = 'status-lost';
-                                        elseif (strtolower($status) == 'on hold') $statusClass = 'status-hold';
+                                    <?php
+                                    $statusClass = 'status-default';
+                                    $status = $tender['tender_status'] ? $tender['tender_status'] : 'Open';
+                                    if (strtolower($status) == 'open')
+                                        $statusClass = 'status-open';
+                                    elseif (strtolower($status) == 'quoted')
+                                        $statusClass = 'status-quoted';
+                                    elseif (strtolower($status) == 'won')
+                                        $statusClass = 'status-won';
+                                    elseif (strtolower($status) == 'lost')
+                                        $statusClass = 'status-lost';
+                                    elseif (strtolower($status) == 'on hold')
+                                        $statusClass = 'status-hold';
                                     ?>
                                     <tr>
                                         <td>
-                                            <a href="<?php echo base_url('tender-enquiry-edit/' . $tender['tender_enquiry_id']); ?>" style="font-weight: 600; color: #4f46e5;">
+                                            <a href="<?php echo base_url('tender-enquiry-edit/' . $tender['tender_enquiry_id']); ?>"
+                                                style="font-weight: 600; color: #4f46e5;">
                                                 <?php echo $tender['enquiry_no']; ?>
                                             </a>
                                         </td>
-                                        <td><?php echo date('d-m-Y', strtotime($tender['enquiry_date'])); ?></td>
-                                        <td><span style="font-weight: 500; color: #1e293b;"><?php echo $tender['tender_name'] ? $tender['tender_name'] : '-'; ?></span></td>
+                                        <td class="col-date" style="white-space:nowrap;">
+                                            <?php echo date('d-m-Y', strtotime($tender['enquiry_date'])); ?>
+                                        </td>
+                                        <td><span
+                                                style="font-weight: 500; color: #1e293b;"><?php echo $tender['tender_name'] ? $tender['tender_name'] : '-'; ?></span>
+                                        </td>
                                         <td><?php echo $tender['customer_name']; ?></td>
-                                        <td><span class="text-muted" style="font-size: 12px;"><?php echo $tender['company_name'] ? $tender['company_name'] : '-'; ?></span></td>
+                                        <td><span class="text-muted"
+                                                style="font-size: 12px;"><?php echo $tender['company_name'] ? $tender['company_name'] : '-'; ?></span>
+                                        </td>
                                         <td>
                                             <span class="status-badge <?php echo $statusClass; ?>">
                                                 <?php echo $status; ?>
@@ -830,15 +1093,18 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
                     <h3 class="section-title"><i class="fa fa-bolt"></i> Quick Actions</h3>
                 </div>
                 <div class="quick-actions-grid">
-                    <a href="<?php echo base_url('add-tender-enquiry'); ?>" class="action-btn" style="padding: 15px 10px;">
+                    <a href="<?php echo base_url('add-tender-enquiry'); ?>" class="action-btn"
+                        style="padding: 15px 10px;">
                         <i class="fa fa-plus-circle" style="color: #6366f1;"></i>
                         <span>New Enquiry</span>
                     </a>
-                    <a href="<?php echo base_url('tender-invoice-add'); ?>" class="action-btn" style="padding: 15px 10px;">
+                    <a href="<?php echo base_url('tender-invoice-add'); ?>" class="action-btn"
+                        style="padding: 15px 10px;">
                         <i class="fa fa-file-text-o" style="color: #10b981;"></i>
                         <span>New Invoice</span>
                     </a>
-                    <a href="<?php echo base_url('credit-debit-note-add'); ?>" class="action-btn" style="padding: 15px 10px;">
+                    <a href="<?php echo base_url('credit-debit-note-add'); ?>" class="action-btn"
+                        style="padding: 15px 10px;">
                         <i class="fa fa-calculator" style="color: #ef4444;"></i>
                         <span>Debit/Credit Note</span>
                     </a>
@@ -850,9 +1116,9 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
                         <i class="fa fa-arrow-up" style="color: #f97316;"></i>
                         <span>Add Cash Outward</span>
                     </a>
-                    <a href="<?php echo base_url('cash-ledger'); ?>" class="action-btn" style="padding: 15px 10px;">
-                        <i class="fa fa-university" style="color: #8b5cf6;"></i>
-                        <span>Cash Ledger</span>
+                    <a href="<?php echo base_url('petty-cash'); ?>" class="action-btn" style="padding: 15px 10px;">
+                        <i class="fa fa-bank" style="color: #8b5cf6;"></i>
+                        <span>Petty Cash</span>
                     </a>
                 </div>
             </div>

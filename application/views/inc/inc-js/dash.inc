@@ -215,7 +215,7 @@ $(document).ready(function() {
     // 3. Initialize Recent Tenders DataTable
     if ($('#recentTendersTable').length) {
         $('#recentTendersTable').DataTable({
-            "order": [[1, "desc"]], // Sort by Date column descending by default
+            "order": [[1, "desc"]],
             "pageLength": 10,
             "lengthMenu": [5, 10, 25, 50, 100],
             "language": {
@@ -223,8 +223,19 @@ $(document).ready(function() {
                 "searchPlaceholder": "Search Enquiry No or Client...",
                 "lengthMenu": "Show _MENU_ entries"
             },
-            "responsive": true,
-            "dom": '<"row"<"col-xs-6"l><"col-xs-6"f>>rt<"row"<"col-xs-5"i><"col-xs-7"p>>'
+            "responsive": false,
+            "scrollX": true,           // KEY FIX: enforces column widths, adds horizontal scroll
+            "autoWidth": false,        // prevent DataTables from auto-shrinking columns
+            "pagingType": "simple_numbers",
+            "dom": '<"row align-items-center"<"col-sm-6"l><"col-sm-6"f>>rt<"row align-items-center mt-2"<"col-sm-5"i><"col-sm-7"p>>',
+            "columnDefs": [
+                { "targets": 0, "width": "160px" },                               // Enquiry No
+                { "targets": 1, "width": "95px",  "className": "col-date" },      // Date
+                { "targets": 2, "width": "180px" },                               // Tender Name
+                { "targets": 3, "width": "150px" },                               // Customer
+                { "targets": 4, "width": "130px" },                               // Company
+                { "targets": 5, "width": "90px",  "orderable": false }            // Status
+            ]
         });
     }
 });
