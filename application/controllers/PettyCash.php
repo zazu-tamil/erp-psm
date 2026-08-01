@@ -668,15 +668,15 @@ class PettyCash extends CI_Controller
             SELECT * FROM (
                 -- Tender Receipts (Customer Receipts)
                 SELECT 
-                    'Customer Receipt' AS tr_type, 
-                    tr.receipt_no AS ref_no, 
+                    CONVERT('Customer Receipt' USING utf8) AS tr_type, 
+                    CONVERT(tr.receipt_no USING utf8) AS ref_no, 
                     tr.receipt_date AS tr_date, 
                     tr.amount AS amount_in, 
                     0 AS amount_out, 
-                    tr.receipt_mode AS mode, 
-                    cc.category_name AS cash_category_name,
-                    c.customer_name AS party_name, 
-                    tr.remarks,
+                    CONVERT(tr.receipt_mode USING utf8) AS mode, 
+                    CONVERT(cc.category_name USING utf8) AS cash_category_name,
+                    CONVERT(c.customer_name USING utf8) AS party_name, 
+                    CONVERT(tr.remarks USING utf8) AS remarks,
                     tr.created_date
                 FROM tender_receipt_info tr
                 LEFT JOIN customer_info c ON c.customer_id = tr.customer_id
@@ -687,15 +687,15 @@ class PettyCash extends CI_Controller
 
                 -- Vendor Payments (Supplier Payments)
                 SELECT 
-                    'Supplier Payment' AS tr_type, 
-                    vp.payment_no AS ref_no, 
+                    CONVERT('Supplier Payment' USING utf8) AS tr_type, 
+                    CONVERT(vp.payment_no USING utf8) AS ref_no, 
                     vp.payment_date AS tr_date, 
                     0 AS amount_in, 
                     vp.amount AS amount_out, 
-                    vp.payment_mode AS mode, 
-                    cc.category_name AS cash_category_name,
-                    v.vendor_name AS party_name, 
-                    vp.remarks,
+                    CONVERT(vp.payment_mode USING utf8) AS mode, 
+                    CONVERT(cc.category_name USING utf8) AS cash_category_name,
+                    CONVERT(v.vendor_name USING utf8) AS party_name, 
+                    CONVERT(vp.remarks USING utf8) AS remarks,
                     vp.created_date
                 FROM vendor_payment_info vp
                 LEFT JOIN vendor_info v ON v.vendor_id = vp.vendor_id
@@ -706,15 +706,15 @@ class PettyCash extends CI_Controller
 
                 -- Vendor Advance Payments (Supplier Advance Payments)
                 SELECT 
-                    'Supplier Adv Payment' AS tr_type, 
-                    '' AS ref_no, 
+                    CONVERT('Supplier Adv Payment' USING utf8) AS tr_type, 
+                    CONVERT('' USING utf8) AS ref_no, 
                     vap.adv_payment_date AS tr_date, 
                     0 AS amount_in, 
                     vap.adv_payment_amt AS amount_out, 
-                    vap.ac_type_opt AS mode, 
-                    cc.category_name AS cash_category_name,
-                    v.vendor_name AS party_name, 
-                    'Advance Payment' AS remarks,
+                    CONVERT(vap.ac_type_opt USING utf8) AS mode, 
+                    CONVERT(cc.category_name USING utf8) AS cash_category_name,
+                    CONVERT(v.vendor_name USING utf8) AS party_name, 
+                    CONVERT('Advance Payment' USING utf8) AS remarks,
                     vap.created_date
                 FROM vendor_advance_payment_info vap
                 LEFT JOIN vendor_info v ON v.vendor_id = vap.vendor_id
@@ -725,15 +725,15 @@ class PettyCash extends CI_Controller
 
                 -- Petty Cash Inward
                 SELECT 
-                    'Petty Cash Inward' AS tr_type, 
-                    '' AS ref_no, 
+                    CONVERT('Petty Cash Inward' USING utf8) AS tr_type, 
+                    CONVERT('' USING utf8) AS ref_no, 
                     pt.transaction_date AS tr_date, 
                     pt.amount AS amount_in, 
                     0 AS amount_out, 
-                    pt.ac_type AS mode, 
-                    cc.category_name AS cash_category_name,
-                    'Petty Cash' AS party_name, 
-                    pt.remarks,
+                    CONVERT(pt.ac_type USING utf8) AS mode, 
+                    CONVERT(cc.category_name USING utf8) AS cash_category_name,
+                    CONVERT('Petty Cash' USING utf8) AS party_name, 
+                    CONVERT(pt.remarks USING utf8) AS remarks,
                     pt.created_at AS created_date
                 FROM petty_cash_transactions pt
                 LEFT JOIN cash_category cc ON cc.cash_category_id = pt.cash_category_id AND cc.status = 'Active'
@@ -743,15 +743,15 @@ class PettyCash extends CI_Controller
 
                 -- Petty Cash Outward
                 SELECT 
-                    'Petty Cash Outward' AS tr_type, 
-                    '' AS ref_no, 
+                    CONVERT('Petty Cash Outward' USING utf8) AS tr_type, 
+                    CONVERT('' USING utf8) AS ref_no, 
                     pt.transaction_date AS tr_date, 
                     0 AS amount_in, 
                     pt.amount AS amount_out, 
-                    pt.ac_type AS mode, 
-                    cc.category_name AS cash_category_name,
-                    'Petty Cash' AS party_name, 
-                    pt.remarks,
+                    CONVERT(pt.ac_type USING utf8) AS mode, 
+                    CONVERT(cc.category_name USING utf8) AS cash_category_name,
+                    CONVERT('Petty Cash' USING utf8) AS party_name, 
+                    CONVERT(pt.remarks USING utf8) AS remarks,
                     pt.created_at AS created_date
                 FROM petty_cash_transactions pt
                 LEFT JOIN cash_category cc ON cc.cash_category_id = pt.cash_category_id AND cc.status = 'Active'
@@ -761,15 +761,15 @@ class PettyCash extends CI_Controller
 
                 -- Cash Inward Entry
                 SELECT 
-                    'Cash Inward' AS tr_type, 
-                    cin.vno AS ref_no, 
+                    CONVERT('Cash Inward' USING utf8) AS tr_type, 
+                    CONVERT(cin.vno USING utf8) AS ref_no, 
                     cin.inward_date AS tr_date, 
                     cin.amount AS amount_in, 
                     0 AS amount_out, 
-                    cin.ac_type AS mode, 
-                    cc.category_name AS cash_category_name,
-                    COALESCE(e.sub_account_headlvl3_name, sh.sub_account_head_name, ah.account_head_name) AS party_name, 
-                    cin.remarks,
+                    CONVERT(cin.ac_type USING utf8) AS mode, 
+                    CONVERT(cc.category_name USING utf8) AS cash_category_name,
+                    CONVERT(COALESCE(e.sub_account_headlvl3_name, sh.sub_account_head_name, ah.account_head_name) USING utf8) AS party_name, 
+                    CONVERT(cin.remarks USING utf8) AS remarks,
                     cin.created_datetime AS created_date
                 FROM cb_cash_inward_info cin
                 LEFT JOIN cb_account_head_info ah ON ah.account_head_id = cin.account_head_id
@@ -782,15 +782,15 @@ class PettyCash extends CI_Controller
 
                 -- Cash Outward Entry
                 SELECT 
-                    'Cash Outward' AS tr_type, 
-                    CONCAT(vt.prefix, cout.vno) AS ref_no, 
+                    CONVERT('Cash Outward' USING utf8) AS tr_type, 
+                    CONVERT(CONCAT(vt.prefix, cout.vno) USING utf8) AS ref_no, 
                     cout.outward_date AS tr_date, 
                     0 AS amount_in, 
                     cout.amount AS amount_out, 
-                    cout.ac_type AS mode, 
-                    cc.category_name AS cash_category_name,
-                    COALESCE(e.sub_account_headlvl3_name, sh.sub_account_head_name, ah.account_head_name) AS party_name, 
-                    cout.remarks,
+                    CONVERT(cout.ac_type USING utf8) AS mode, 
+                    CONVERT(cc.category_name USING utf8) AS cash_category_name,
+                    CONVERT(COALESCE(e.sub_account_headlvl3_name, sh.sub_account_head_name, ah.account_head_name) USING utf8) AS party_name, 
+                    CONVERT(cout.remarks USING utf8) AS remarks,
                     cout.created_datetime AS created_date
                 FROM cb_cash_outward_info cout
                 LEFT JOIN cb_account_head_info ah ON ah.account_head_id = cout.account_head_id
@@ -804,15 +804,15 @@ class PettyCash extends CI_Controller
 
                 -- Contra Entry Inward (To Cash)
                 SELECT 
-                    'Contra Inward' AS tr_type, 
-                    '' AS ref_no, 
+                    CONVERT('Contra Inward' USING utf8) AS tr_type, 
+                    CONVERT('' USING utf8) AS ref_no, 
                     ce.entry_date AS tr_date, 
                     ce.amount AS amount_in, 
                     0 AS amount_out, 
-                    'Cash' AS mode, 
-                    cc.category_name AS cash_category_name,
-                    IF(ce.from_ac_type = 'Cash', CONCAT('Cash (', fcc.category_name, ')'), fb.bank_name) AS party_name, 
-                    ce.to_remarks AS remarks,
+                    CONVERT('Cash' USING utf8) AS mode, 
+                    CONVERT(cc.category_name USING utf8) AS cash_category_name,
+                    CONVERT(IF(ce.from_ac_type = 'Cash', CONCAT('Cash (', fcc.category_name, ')'), fb.bank_name) USING utf8) AS party_name, 
+                    CONVERT(ce.to_remarks USING utf8) AS remarks,
                     ce.created_at AS created_date
                 FROM cb_contra_entry_info ce
                 LEFT JOIN company_bank_info fb ON fb.bank_id = ce.from_bank_id
@@ -824,15 +824,15 @@ class PettyCash extends CI_Controller
 
                 -- Contra Entry Outward (From Cash)
                 SELECT 
-                    'Contra Outward' AS tr_type, 
-                    '' AS ref_no, 
+                    CONVERT('Contra Outward' USING utf8) AS tr_type, 
+                    CONVERT('' USING utf8) AS ref_no, 
                     ce.entry_date AS tr_date, 
                     0 AS amount_in, 
                     ce.amount AS amount_out, 
-                    'Cash' AS mode, 
-                    cc.category_name AS cash_category_name,
-                    IF(ce.to_ac_type = 'Cash', CONCAT('Cash (', tcc.category_name, ')'), tb.bank_name) AS party_name, 
-                    ce.from_remarks AS remarks,
+                    CONVERT('Cash' USING utf8) AS mode, 
+                    CONVERT(cc.category_name USING utf8) AS cash_category_name,
+                    CONVERT(IF(ce.to_ac_type = 'Cash', CONCAT('Cash (', tcc.category_name, ')'), tb.bank_name) USING utf8) AS party_name, 
+                    CONVERT(ce.from_remarks USING utf8) AS remarks,
                     ce.created_at AS created_date
                 FROM cb_contra_entry_info ce
                 LEFT JOIN company_bank_info tb ON tb.bank_id = ce.to_bank_id

@@ -4408,16 +4408,16 @@ class Accounts extends CI_Controller
             SELECT * FROM (
                 -- Tender Receipts
                 SELECT 
-                    'Tender Receipt' AS tr_type, 
-                    tr.receipt_no AS ref_no, 
+                    CONVERT('Tender Receipt' USING utf8) AS tr_type, 
+                    CONVERT(tr.receipt_no USING utf8) AS ref_no, 
                     tr.receipt_date AS tr_date, 
                     tr.amount AS amount_in, 
                     0 AS amount_out, 
-                    tr.receipt_mode AS mode, 
+                    CONVERT(tr.receipt_mode USING utf8) AS mode, 
                     tr.bank_id, 
-                    COALESCE(b.bank_name, 'Cash') AS bank_name,
-                    c.customer_name AS party_name, 
-                    tr.remarks,
+                    CONVERT(COALESCE(b.bank_name, 'Cash') USING utf8) AS bank_name,
+                    CONVERT(c.customer_name USING utf8) AS party_name, 
+                    CONVERT(tr.remarks USING utf8) AS remarks,
                     tr.created_date
                 FROM tender_receipt_info tr
                 LEFT JOIN customer_info c ON c.customer_id = tr.customer_id
@@ -4428,16 +4428,16 @@ class Accounts extends CI_Controller
 
                 -- Vendor Payments
                 SELECT 
-                    'Vendor Payment' AS tr_type, 
-                    vp.payment_no AS ref_no, 
+                    CONVERT('Vendor Payment' USING utf8) AS tr_type, 
+                    CONVERT(vp.payment_no USING utf8) AS ref_no, 
                     vp.payment_date AS tr_date, 
                     0 AS amount_in, 
                     vp.amount AS amount_out, 
-                    vp.payment_mode AS mode, 
+                    CONVERT(vp.payment_mode USING utf8) AS mode, 
                     vp.bank_id, 
-                    COALESCE(b.bank_name, 'Cash') AS bank_name,
-                    v.vendor_name AS party_name, 
-                    vp.remarks,
+                    CONVERT(COALESCE(b.bank_name, 'Cash') USING utf8) AS bank_name,
+                    CONVERT(v.vendor_name USING utf8) AS party_name, 
+                    CONVERT(vp.remarks USING utf8) AS remarks,
                     vp.created_date
                 FROM vendor_payment_info vp
                 LEFT JOIN vendor_info v ON v.vendor_id = vp.vendor_id
@@ -4448,16 +4448,16 @@ class Accounts extends CI_Controller
 
                 -- Petty Cash Inward
                 SELECT 
-                    'Petty Cash Inward' AS tr_type, 
-                    '' AS ref_no, 
+                    CONVERT('Petty Cash Inward' USING utf8) AS tr_type, 
+                    CONVERT('' USING utf8) AS ref_no, 
                     pt.transaction_date AS tr_date, 
                     pt.amount AS amount_in, 
                     0 AS amount_out, 
-                    pt.ac_type AS mode, 
+                    CONVERT(pt.ac_type USING utf8) AS mode, 
                     pt.bank_id, 
-                    COALESCE(b.bank_name, 'Cash') AS bank_name,
-                    'Petty Cash' AS party_name, 
-                    pt.remarks,
+                    CONVERT(COALESCE(b.bank_name, 'Cash') USING utf8) AS bank_name,
+                    CONVERT('Petty Cash' USING utf8) AS party_name, 
+                    CONVERT(pt.remarks USING utf8) AS remarks,
                     pt.created_at AS created_date
                 FROM petty_cash_transactions pt
                 LEFT JOIN company_bank_info b ON b.bank_id = pt.bank_id
@@ -4467,16 +4467,16 @@ class Accounts extends CI_Controller
 
                 -- Petty Cash Outward
                 SELECT 
-                    'Petty Cash Outward' AS tr_type, 
-                    '' AS ref_no, 
+                    CONVERT('Petty Cash Outward' USING utf8) AS tr_type, 
+                    CONVERT('' USING utf8) AS ref_no, 
                     pt.transaction_date AS tr_date, 
                     0 AS amount_in, 
                     pt.amount AS amount_out, 
-                    pt.ac_type AS mode, 
+                    CONVERT(pt.ac_type USING utf8) AS mode, 
                     pt.bank_id, 
-                    COALESCE(b.bank_name, 'Cash') AS bank_name,
-                    'Petty Cash' AS party_name, 
-                    pt.remarks,
+                    CONVERT(COALESCE(b.bank_name, 'Cash') USING utf8) AS bank_name,
+                    CONVERT('Petty Cash' USING utf8) AS party_name, 
+                    CONVERT(pt.remarks USING utf8) AS remarks,
                     pt.created_at AS created_date
                 FROM petty_cash_transactions pt
                 LEFT JOIN company_bank_info b ON b.bank_id = pt.bank_id
@@ -4486,16 +4486,16 @@ class Accounts extends CI_Controller
 
                 -- Cash Inward Info
                 SELECT 
-                    'Cash Inward Entry' AS tr_type, 
-                    cin.vno AS ref_no, 
+                    CONVERT('Cash Inward Entry' USING utf8) AS tr_type, 
+                    CONVERT(cin.vno USING utf8) AS ref_no, 
                     cin.inward_date AS tr_date, 
                     cin.amount AS amount_in, 
                     0 AS amount_out, 
-                    cin.ac_type AS mode, 
+                    CONVERT(cin.ac_type USING utf8) AS mode, 
                     cin.bank_id, 
-                    COALESCE(b.bank_name, 'Cash') AS bank_name,
-                    COALESCE(e.sub_account_headlvl3_name, sh.sub_account_head_name, ah.account_head_name) AS party_name, 
-                    cin.remarks,
+                    CONVERT(COALESCE(b.bank_name, 'Cash') USING utf8) AS bank_name,
+                    CONVERT(COALESCE(e.sub_account_headlvl3_name, sh.sub_account_head_name, ah.account_head_name) USING utf8) AS party_name, 
+                    CONVERT(cin.remarks USING utf8) AS remarks,
                     cin.created_datetime AS created_date
                 FROM cb_cash_inward_info cin
                 LEFT JOIN cb_account_head_info ah ON ah.account_head_id = cin.account_head_id
@@ -4508,16 +4508,16 @@ class Accounts extends CI_Controller
 
                 -- Cash Outward Info
                 SELECT 
-                    'Cash Outward Entry' AS tr_type, 
-                    CONCAT(vt.prefix, cout.vno) AS ref_no, 
+                    CONVERT('Cash Outward Entry' USING utf8) AS tr_type, 
+                    CONVERT(CONCAT(vt.prefix, cout.vno) USING utf8) AS ref_no, 
                     cout.outward_date AS tr_date, 
                     0 AS amount_in, 
                     cout.amount AS amount_out, 
-                    cout.ac_type AS mode, 
+                    CONVERT(cout.ac_type USING utf8) AS mode, 
                     cout.bank_id, 
-                    COALESCE(b.bank_name, 'Cash') AS bank_name,
-                    COALESCE(e.sub_account_headlvl3_name, sh.sub_account_head_name, ah.account_head_name) AS party_name, 
-                    cout.remarks,
+                    CONVERT(COALESCE(b.bank_name, 'Cash') USING utf8) AS bank_name,
+                    CONVERT(COALESCE(e.sub_account_headlvl3_name, sh.sub_account_head_name, ah.account_head_name) USING utf8) AS party_name, 
+                    CONVERT(cout.remarks USING utf8) AS remarks,
                     cout.created_datetime AS created_date
                 FROM cb_cash_outward_info cout
                 LEFT JOIN cb_account_head_info ah ON ah.account_head_id = cout.account_head_id
@@ -4531,16 +4531,16 @@ class Accounts extends CI_Controller
 
                 -- Contra Entry Inward (To Bank)
                 SELECT 
-                    'Contra Inward' AS tr_type, 
-                    '' AS ref_no, 
+                    CONVERT('Contra Inward' USING utf8) AS tr_type, 
+                    CONVERT('' USING utf8) AS ref_no, 
                     ce.entry_date AS tr_date, 
                     ce.amount AS amount_in, 
                     0 AS amount_out, 
-                    'Bank' AS mode, 
+                    CONVERT('Bank' USING utf8) AS mode, 
                     ce.to_bank_id AS bank_id, 
-                    COALESCE(b.bank_name, 'Cash') AS bank_name,
-                    IF(ce.from_ac_type = 'Bank', fb.bank_name, CONCAT('Cash (', fcc.category_name, ')')) AS party_name, 
-                    ce.to_remarks AS remarks,
+                    CONVERT(COALESCE(b.bank_name, 'Cash') USING utf8) AS bank_name,
+                    CONVERT(IF(ce.from_ac_type = 'Bank', fb.bank_name, CONCAT('Cash (', fcc.category_name, ')')) USING utf8) AS party_name, 
+                    CONVERT(ce.to_remarks USING utf8) AS remarks,
                     ce.created_at AS created_date
                 FROM cb_contra_entry_info ce
                 LEFT JOIN company_bank_info b ON b.bank_id = ce.to_bank_id
@@ -4552,16 +4552,16 @@ class Accounts extends CI_Controller
 
                 -- Contra Entry Outward (From Bank)
                 SELECT 
-                    'Contra Outward' AS tr_type, 
-                    '' AS ref_no, 
+                    CONVERT('Contra Outward' USING utf8) AS tr_type, 
+                    CONVERT('' USING utf8) AS ref_no, 
                     ce.entry_date AS tr_date, 
                     0 AS amount_in, 
                     ce.amount AS amount_out, 
-                    'Bank' AS mode, 
+                    CONVERT('Bank' USING utf8) AS mode, 
                     ce.from_bank_id AS bank_id, 
-                    COALESCE(b.bank_name, 'Cash') AS bank_name,
-                    IF(ce.to_ac_type = 'Bank', tb.bank_name, CONCAT('Cash (', tcc.category_name, ')')) AS party_name, 
-                    ce.from_remarks AS remarks,
+                    CONVERT(COALESCE(b.bank_name, 'Cash') USING utf8) AS bank_name,
+                    CONVERT(IF(ce.to_ac_type = 'Bank', tb.bank_name, CONCAT('Cash (', tcc.category_name, ')')) USING utf8) AS party_name, 
+                    CONVERT(ce.from_remarks USING utf8) AS remarks,
                     ce.created_at AS created_date
                 FROM cb_contra_entry_info ce
                 LEFT JOIN company_bank_info b ON b.bank_id = ce.from_bank_id
