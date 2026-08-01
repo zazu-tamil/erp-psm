@@ -9,9 +9,18 @@
       if ($(this).val() === "Bank") {
         $("#add_bank_group").show();
         $("#add_bank_id").prop("required", true);
+        $("#add_cash_category_group").hide();
+        $("#add_cash_category_id").val("").trigger("change.select2").prop("required", false);
+      } else if ($(this).val() === "Cash") {
+        $("#add_bank_group").hide();
+        $("#add_bank_id").val("").trigger("change.select2").prop("required", false);
+        $("#add_cash_category_group").show();
+        $("#add_cash_category_id").prop("required", true);
       } else {
         $("#add_bank_group").hide();
         $("#add_bank_id").val("").trigger("change.select2").prop("required", false);
+        $("#add_cash_category_group").hide();
+        $("#add_cash_category_id").val("").trigger("change.select2").prop("required", false);
       }
     });
 
@@ -19,9 +28,18 @@
       if ($(this).val() === "Bank") {
         $("#edit_bank_group").show();
         $("#edit_bank_id").prop("required", true);
+        $("#edit_cash_category_group").hide();
+        $("#edit_cash_category_id").val("").trigger("change.select2").prop("required", false);
+      } else if ($(this).val() === "Cash") {
+        $("#edit_bank_group").hide();
+        $("#edit_bank_id").val("").trigger("change.select2").prop("required", false);
+        $("#edit_cash_category_group").show();
+        $("#edit_cash_category_id").prop("required", true);
       } else {
         $("#edit_bank_group").hide();
         $("#edit_bank_id").val("").trigger("change.select2").prop("required", false);
+        $("#edit_cash_category_group").hide();
+        $("#edit_cash_category_id").val("").trigger("change.select2").prop("required", false);
       }
     });
 
@@ -85,6 +103,7 @@
       var type = $(this).data("type");
       var ac_type = $(this).data("ac-type");
       var bank = $(this).data("bank");
+      var cash_category = $(this).data("cash-category");
       var account_head = $(this).data("account-head");
       var category = $(this).data("category");
       var amount = $(this).data("amount");
@@ -99,7 +118,11 @@
       if (type === "Inward") {
         $("#edit_ac_type_group").show();
         $("#edit_ac_type").val(ac_type).trigger("change");
-        $("#edit_bank_id").val(bank).trigger("change.select2");
+        if (ac_type === "Bank") {
+          $("#edit_bank_id").val(bank).trigger("change.select2");
+        } else if (ac_type === "Cash") {
+          $("#edit_cash_category_id").val(cash_category).trigger("change.select2");
+        }
         $("#edit_ac_type").prop("required", true);
 
         $("#edit_account_head_group").show();
@@ -123,6 +146,8 @@
         $("#edit_ac_type_group").hide();
         $("#edit_bank_group").hide();
         $("#edit_ac_type").val("").trigger("change").prop("required", false);
+        $("#edit_cash_category_group").show();
+        $("#edit_cash_category_id").val(cash_category).trigger("change.select2").prop("required", true);
 
         $("#edit_account_head_group").show();
         $("#edit_category_group").show();
@@ -144,7 +169,9 @@
       } else {
         $("#edit_ac_type_group").hide();
         $("#edit_bank_group").hide();
+        $("#edit_cash_category_group").hide();
         $("#edit_ac_type").val("").trigger("change").prop("required", false);
+        $("#edit_cash_category_id").val("").trigger("change.select2").prop("required", false);
 
         $("#edit_account_head_group").hide();
         $("#edit_category_group").hide();

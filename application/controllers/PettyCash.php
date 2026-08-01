@@ -43,8 +43,11 @@ class PettyCash extends CI_Controller
             if (!in_array('bank_id', $fields)) {
                 $this->db->query("ALTER TABLE `petty_cash_transactions` ADD `bank_id` INT(11) NULL AFTER `ac_type`");
             }
+            if (!in_array('cash_category_id', $fields)) {
+                $this->db->query("ALTER TABLE `petty_cash_transactions` ADD `cash_category_id` INT(11) NULL AFTER `bank_id`");
+            }
             if (!in_array('account_head_id', $fields)) {
-                $this->db->query("ALTER TABLE `petty_cash_transactions` ADD `account_head_id` INT(11) NULL AFTER `bank_id`");
+                $this->db->query("ALTER TABLE `petty_cash_transactions` ADD `account_head_id` INT(11) NULL AFTER `cash_category_id`");
             }
         }
 
@@ -289,6 +292,8 @@ class PettyCash extends CI_Controller
                     IF(t.transaction_type = 'Inward' OR t.transaction_type = 'Income', 'Inward', 'Outward') AS transaction_type,
                     t.ac_type,
                     t.bank_id,
+                    t.cash_category_id,
+                    cc.category_name AS cash_category_name,
                     t.account_head_id,
                     t.category_id,
                     t.amount,
@@ -302,6 +307,7 @@ class PettyCash extends CI_Controller
                 LEFT JOIN cb_sub_account_head_info c ON c.sub_account_head_id = t.category_id
                 LEFT JOIN cb_account_head_info a ON a.account_head_id = t.account_head_id
                 LEFT JOIN company_bank_info bank ON bank.bank_id = t.bank_id AND bank.status != 'Delete'
+                LEFT JOIN cash_category cc ON cc.cash_category_id = t.cash_category_id AND cc.status = 'Active'
                 WHERE t.status != 'Deleted' AND t.transaction_date >= '$esc_from' AND t.transaction_date <= '$esc_to'
 
                 UNION ALL
@@ -312,6 +318,8 @@ class PettyCash extends CI_Controller
                     'Inward' AS transaction_type,
                     'Cash' AS ac_type,
                     NULL AS bank_id,
+                    NULL AS cash_category_id,
+                    NULL AS cash_category_name,
                     NULL AS account_head_id,
                     NULL AS category_id,
                     tr.amount,
@@ -333,6 +341,8 @@ class PettyCash extends CI_Controller
                     'Outward' AS transaction_type,
                     'Cash' AS ac_type,
                     NULL AS bank_id,
+                    NULL AS cash_category_id,
+                    NULL AS cash_category_name,
                     NULL AS account_head_id,
                     NULL AS category_id,
                     vp.amount,
@@ -354,6 +364,8 @@ class PettyCash extends CI_Controller
                     'Outward' AS transaction_type,
                     NULL AS ac_type,
                     NULL AS bank_id,
+                    NULL AS cash_category_id,
+                    NULL AS cash_category_name,
                     NULL AS account_head_id,
                     NULL AS category_id,
                     cb.customs_tot_amt AS amount,
@@ -375,6 +387,8 @@ class PettyCash extends CI_Controller
                     'Outward' AS transaction_type,
                     NULL AS ac_type,
                     NULL AS bank_id,
+                    NULL AS cash_category_id,
+                    NULL AS cash_category_name,
                     NULL AS account_head_id,
                     NULL AS category_id,
                     dp.g_total AS amount,
@@ -396,6 +410,8 @@ class PettyCash extends CI_Controller
                     'Outward' AS transaction_type,
                     NULL AS ac_type,
                     NULL AS bank_id,
+                    NULL AS cash_category_id,
+                    NULL AS cash_category_name,
                     NULL AS account_head_id,
                     NULL AS category_id,
                     lp.tot_amt_with_tax AS amount,
@@ -435,6 +451,19 @@ class PettyCash extends CI_Controller
             $data['bank_opt'][$row['bank_id']] = $row['bank_name'];
         }
 
+        $data['cash_categories'] = [];
+        $sql = "
+            SELECT cash_category_id, category_name
+            FROM cash_category
+            WHERE status = 'Active'
+            AND category_type IN ('Inward', 'Outward', 'Both', 'Cash')
+            ORDER BY category_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['cash_categories'][$row['cash_category_id']] = $row['category_name'];
+        }
+
         $this->load->view('page/accounts/petty-cash', $data);
     }
 
@@ -444,6 +473,7 @@ class PettyCash extends CI_Controller
         $date = $this->input->post('transaction_date');
         $ac_type = $this->input->post('ac_type');
         $bank_id = $ac_type == 'Bank' ? $this->input->post('bank_id') : null;
+        $cash_category_id = $ac_type == 'Cash' ? ($this->input->post('cash_category_id') ?: null) : null;
         $account_head_id = $this->input->post('account_head_id');
         $category_id = $this->input->post('category_id');
         $remarks = $this->input->post('remarks');
@@ -454,6 +484,7 @@ class PettyCash extends CI_Controller
                 'transaction_type' => 'Inward',
                 'ac_type' => $ac_type,
                 'bank_id' => $bank_id,
+                'cash_category_id' => $cash_category_id,
                 'account_head_id' => $account_head_id,
                 'category_id' => $category_id,
                 'amount' => $amount,
@@ -471,6 +502,7 @@ class PettyCash extends CI_Controller
     {
         $amount = $this->input->post('amount');
         $date = $this->input->post('transaction_date');
+        $cash_category_id = $this->input->post('cash_category_id') ?: null;
         $account_head_id = $this->input->post('account_head_id');
         $category_id = $this->input->post('category_id');
         $remarks = $this->input->post('remarks');
@@ -480,6 +512,7 @@ class PettyCash extends CI_Controller
                 'transaction_date' => $date,
                 'transaction_type' => 'Outward', 
                 'ac_type' => 'Cash',
+                'cash_category_id' => $cash_category_id,
                 'account_head_id' => $account_head_id,
                 'category_id' => $category_id,
                 'amount' => $amount,
@@ -501,6 +534,7 @@ class PettyCash extends CI_Controller
         $date = $this->input->post('transaction_date');
         $ac_type = $this->input->post('ac_type');
         $bank_id = $ac_type == 'Bank' ? $this->input->post('bank_id') : null;
+        $cash_category_id = $ac_type == 'Cash' ? ($this->input->post('cash_category_id') ?: null) : null;
         $account_head_id = $this->input->post('account_head_id');
         $category_id = $this->input->post('category_id');
         $remarks = $this->input->post('remarks');
@@ -509,6 +543,7 @@ class PettyCash extends CI_Controller
             'transaction_date' => $date,
             'ac_type' => $ac_type,
             'bank_id' => $bank_id,
+            'cash_category_id' => $cash_category_id,
             'account_head_id' => $account_head_id,
             'category_id' => $category_id,
             'amount' => $amount,
@@ -564,67 +599,216 @@ class PettyCash extends CI_Controller
         if (isset($_POST['srch_from_date'])) {
             $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
             $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
-            $data['srch_bank_cash'] = $srch_bank_cash = $this->input->post('srch_bank_cash');
+            $data['srch_cash_category_id'] = $srch_cash_category_id = $this->input->post('srch_cash_category_id');
         } else {
             $data['srch_from_date'] = $srch_from_date = date('Y-m-') . '01';
             $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
-            $data['srch_bank_cash'] = $srch_bank_cash = 'all';
+            $data['srch_cash_category_id'] = $srch_cash_category_id = '';
         }
 
-        // Get bank list for filter dropdown
-        $sql_banks = "SELECT bank_id, bank_name, branch FROM company_bank_info WHERE status = 'Active' ORDER BY bank_name ASC";
-        $data['bank_list'] = $this->db->query($sql_banks)->result_array();
+        // Build where conditions: enforce Cash only
+        $w_tr = "tr.status = 'Active' AND tr.receipt_mode = 'Cash'";
+        $w_vp = "vp.status = 'Active' AND vp.payment_mode = 'Cash'";
+        $w_vap = "vap.status = 'Active' AND vap.ac_type_opt = 'Cash'";
+        $w_pt = "pt.status != 'Deleted' AND pt.ac_type = 'Cash'";
+        $w_cin = "cin.status = 'Active' AND cin.ac_type = 'Cash'";
+        $w_cout = "cout.status = 'Active' AND cout.ac_type = 'Cash'";
+        $w_op = "status != 'Delete' AND ac_type = 'Cash'";
 
-        // Build bank options for the filter dropdown
-        $bank_cash_options = array(
-            'all' => 'All Cash & Bank',
-            'cash' => 'Cash Only'
-        );
-        foreach ($data['bank_list'] as $bank) {
-            $bank_cash_options['bank_' . $bank['bank_id']] = 'Bank - ' . $bank['bank_name'] . ' (' . $bank['branch'] . ')';
-        }
-        $data['bank_cash_options'] = $bank_cash_options;
-
-        // Build where conditions
-        $where_pt = "pt.status != 'Deleted'";
-        if ($srch_bank_cash === 'cash') {
-            $where_pt .= " AND pt.ac_type = 'Cash'";
-        } elseif (strpos($srch_bank_cash, 'bank_') === 0) {
-            $bank_id = (int)str_replace('bank_', '', $srch_bank_cash);
-            $where_pt .= " AND pt.ac_type = 'Bank' AND pt.bank_id = $bank_id";
+        if (!empty($srch_cash_category_id)) {
+            $w_tr .= " AND tr.cash_category_id = " . (int)$srch_cash_category_id;
+            $w_vp .= " AND vp.cash_category_id = " . (int)$srch_cash_category_id;
+            $w_vap .= " AND vap.cash_category_id = " . (int)$srch_cash_category_id;
+            $w_pt .= " AND pt.cash_category_id = " . (int)$srch_cash_category_id;
+            $w_cin .= " AND cin.cash_category_id = " . (int)$srch_cash_category_id;
+            $w_cout .= " AND cout.cash_category_id = " . (int)$srch_cash_category_id;
         }
 
         // 1. Calculate Opening Balance before srch_from_date
-        $sql_op = "
-            SELECT 
-                COALESCE(SUM(CASE WHEN pt.transaction_type IN ('Inward', 'Income') THEN pt.amount ELSE 0 END), 0) AS total_in,
-                COALESCE(SUM(CASE WHEN pt.transaction_type IN ('Outward', 'Cash', 'Expense') THEN pt.amount ELSE 0 END), 0) AS total_out
-            FROM petty_cash_transactions pt
-            WHERE $where_pt AND pt.transaction_date < '" . $this->db->escape_str($srch_from_date) . "'
-        ";
-        $op_res = $this->db->query($sql_op)->row_array();
-        $data['opening_balance'] = (float)$op_res['total_in'] - (float)$op_res['total_out'];
+        // A. Base Opening Balances from cb_opening_balance_info
+        $sql_cb_op = "SELECT COALESCE(SUM(amount), 0) AS op_amount FROM cb_opening_balance_info WHERE $w_op AND opening_date < '" . $this->db->escape_str($srch_from_date) . "'";
+        $cb_op = (float)$this->db->query($sql_cb_op)->row()->op_amount;
 
-        // 2. Fetch petty cash transactions in range
+        // B. Combined transactions before srch_from_date
+        $sql_tr_before = "
+            SELECT COALESCE(SUM(amount_in), 0) AS total_in, COALESCE(SUM(amount_out), 0) AS total_out
+            FROM (
+                SELECT receipt_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM tender_receipt_info tr WHERE $w_tr
+                UNION ALL
+                SELECT payment_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM vendor_payment_info vp WHERE $w_vp
+                UNION ALL
+                SELECT adv_payment_date AS tr_date, 0 AS amount_in, adv_payment_amt AS amount_out FROM vendor_advance_payment_info vap WHERE $w_vap
+                UNION ALL
+                SELECT transaction_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM petty_cash_transactions pt WHERE $w_pt AND pt.transaction_type IN ('Inward', 'Income')
+                UNION ALL
+                SELECT transaction_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM petty_cash_transactions pt WHERE $w_pt AND pt.transaction_type IN ('Outward', 'Cash', 'Expense')
+                UNION ALL
+                SELECT inward_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM cb_cash_inward_info cin WHERE $w_cin
+                UNION ALL
+                SELECT outward_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM cb_cash_outward_info cout WHERE $w_cout
+            ) t
+            WHERE t.tr_date < '" . $this->db->escape_str($srch_from_date) . "'
+        ";
+        $tr_before_res = $this->db->query($sql_tr_before)->row_array();
+        $total_tr_in_before = (float)$tr_before_res['total_in'];
+        $total_tr_out_before = (float)$tr_before_res['total_out'];
+
+        $data['opening_balance'] = $cb_op + $total_tr_in_before - $total_tr_out_before;
+
+        // 2. Fetch main transactions in range
         $sql_tr = "
-            SELECT 
-                pt.id,
-                pt.transaction_date,
-                pt.transaction_type,
-                pt.ac_type,
-                pt.amount,
-                pt.remarks,
-                COALESCE(b.bank_name, 'Cash') AS bank_name,
-                ah.account_head_name,
-                sh.sub_account_head_name AS category_name
-            FROM petty_cash_transactions pt
-            LEFT JOIN company_bank_info b ON b.bank_id = pt.bank_id
-            LEFT JOIN cb_account_head_info ah ON ah.account_head_id = pt.account_head_id
-            LEFT JOIN cb_sub_account_head_info sh ON sh.sub_account_head_id = pt.category_id
-            WHERE $where_pt AND pt.transaction_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
-            ORDER BY pt.transaction_date ASC, pt.id ASC
+            SELECT * FROM (
+                -- Tender Receipts (Customer Receipts)
+                SELECT 
+                    'Customer Receipt' AS tr_type, 
+                    tr.receipt_no AS ref_no, 
+                    tr.receipt_date AS tr_date, 
+                    tr.amount AS amount_in, 
+                    0 AS amount_out, 
+                    tr.receipt_mode AS mode, 
+                    cc.category_name AS cash_category_name,
+                    c.customer_name AS party_name, 
+                    tr.remarks,
+                    tr.created_date
+                FROM tender_receipt_info tr
+                LEFT JOIN customer_info c ON c.customer_id = tr.customer_id
+                LEFT JOIN cash_category cc ON cc.cash_category_id = tr.cash_category_id AND cc.status = 'Active'
+                WHERE $w_tr AND tr.receipt_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+
+                UNION ALL
+
+                -- Vendor Payments (Supplier Payments)
+                SELECT 
+                    'Supplier Payment' AS tr_type, 
+                    vp.payment_no AS ref_no, 
+                    vp.payment_date AS tr_date, 
+                    0 AS amount_in, 
+                    vp.amount AS amount_out, 
+                    vp.payment_mode AS mode, 
+                    cc.category_name AS cash_category_name,
+                    v.vendor_name AS party_name, 
+                    vp.remarks,
+                    vp.created_date
+                FROM vendor_payment_info vp
+                LEFT JOIN vendor_info v ON v.vendor_id = vp.vendor_id
+                LEFT JOIN cash_category cc ON cc.cash_category_id = vp.cash_category_id AND cc.status = 'Active'
+                WHERE $w_vp AND vp.payment_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+
+                UNION ALL
+
+                -- Vendor Advance Payments (Supplier Advance Payments)
+                SELECT 
+                    'Supplier Adv Payment' AS tr_type, 
+                    '' AS ref_no, 
+                    vap.adv_payment_date AS tr_date, 
+                    0 AS amount_in, 
+                    vap.adv_payment_amt AS amount_out, 
+                    vap.ac_type_opt AS mode, 
+                    cc.category_name AS cash_category_name,
+                    v.vendor_name AS party_name, 
+                    'Advance Payment' AS remarks,
+                    vap.created_date
+                FROM vendor_advance_payment_info vap
+                LEFT JOIN vendor_info v ON v.vendor_id = vap.vendor_id
+                LEFT JOIN cash_category cc ON cc.cash_category_id = vap.cash_category_id AND cc.status = 'Active'
+                WHERE $w_vap AND vap.adv_payment_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+
+                UNION ALL
+
+                -- Petty Cash Inward
+                SELECT 
+                    'Petty Cash Inward' AS tr_type, 
+                    '' AS ref_no, 
+                    pt.transaction_date AS tr_date, 
+                    pt.amount AS amount_in, 
+                    0 AS amount_out, 
+                    pt.ac_type AS mode, 
+                    cc.category_name AS cash_category_name,
+                    'Petty Cash' AS party_name, 
+                    pt.remarks,
+                    pt.created_at AS created_date
+                FROM petty_cash_transactions pt
+                LEFT JOIN cash_category cc ON cc.cash_category_id = pt.cash_category_id AND cc.status = 'Active'
+                WHERE $w_pt AND pt.transaction_type IN ('Inward', 'Income') AND pt.transaction_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+
+                UNION ALL
+
+                -- Petty Cash Outward
+                SELECT 
+                    'Petty Cash Outward' AS tr_type, 
+                    '' AS ref_no, 
+                    pt.transaction_date AS tr_date, 
+                    0 AS amount_in, 
+                    pt.amount AS amount_out, 
+                    pt.ac_type AS mode, 
+                    cc.category_name AS cash_category_name,
+                    'Petty Cash' AS party_name, 
+                    pt.remarks,
+                    pt.created_at AS created_date
+                FROM petty_cash_transactions pt
+                LEFT JOIN cash_category cc ON cc.cash_category_id = pt.cash_category_id AND cc.status = 'Active'
+                WHERE $w_pt AND pt.transaction_type IN ('Outward', 'Cash', 'Expense') AND pt.transaction_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+
+                UNION ALL
+
+                -- Cash Inward Entry
+                SELECT 
+                    'Cash Inward' AS tr_type, 
+                    cin.vno AS ref_no, 
+                    cin.inward_date AS tr_date, 
+                    cin.amount AS amount_in, 
+                    0 AS amount_out, 
+                    cin.ac_type AS mode, 
+                    cc.category_name AS cash_category_name,
+                    COALESCE(e.sub_account_headlvl3_name, sh.sub_account_head_name, ah.account_head_name) AS party_name, 
+                    cin.remarks,
+                    cin.created_datetime AS created_date
+                FROM cb_cash_inward_info cin
+                LEFT JOIN cb_account_head_info ah ON ah.account_head_id = cin.account_head_id
+                LEFT JOIN cb_sub_account_head_info sh ON sh.sub_account_head_id = cin.sub_account_head_id
+                LEFT JOIN cb_sub_account_head_lvl3_info e ON e.sub_account_headlvl3_id = cin.sub_account_headlvl3_id
+                LEFT JOIN cash_category cc ON cc.cash_category_id = cin.cash_category_id AND cc.status = 'Active'
+                WHERE $w_cin AND cin.inward_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+
+                UNION ALL
+
+                -- Cash Outward Entry
+                SELECT 
+                    'Cash Outward' AS tr_type, 
+                    CONCAT(vt.prefix, cout.vno) AS ref_no, 
+                    cout.outward_date AS tr_date, 
+                    0 AS amount_in, 
+                    cout.amount AS amount_out, 
+                    cout.ac_type AS mode, 
+                    cc.category_name AS cash_category_name,
+                    COALESCE(e.sub_account_headlvl3_name, sh.sub_account_head_name, ah.account_head_name) AS party_name, 
+                    cout.remarks,
+                    cout.created_datetime AS created_date
+                FROM cb_cash_outward_info cout
+                LEFT JOIN cb_account_head_info ah ON ah.account_head_id = cout.account_head_id
+                LEFT JOIN cb_sub_account_head_info sh ON sh.sub_account_head_id = cout.sub_account_head_id
+                LEFT JOIN cb_sub_account_head_lvl3_info e ON e.sub_account_headlvl3_id = cout.sub_account_headlvl3_id
+                LEFT JOIN cb_voucher_type_info vt ON vt.voucher_type_id = cout.voucher_type_id
+                LEFT JOIN cash_category cc ON cc.cash_category_id = cout.cash_category_id AND cc.status = 'Active'
+                WHERE $w_cout AND cout.outward_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+            ) t
+            ORDER BY t.tr_date ASC, t.created_date ASC
         ";
         $data['records'] = $this->db->query($sql_tr)->result_array();
+
+        // Load cash categories list
+        $data['cash_categories_opt'] = ['' => 'All Cash Categories'];
+        $sql = "
+            SELECT cash_category_id, category_name
+            FROM cash_category
+            WHERE status = 'Active'
+            AND category_type IN ('Inward', 'Outward', 'Both', 'Cash')
+            ORDER BY category_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['cash_categories_opt'][$row['cash_category_id']] = $row['category_name'];
+        }
 
         $data['js'] = 'accounts/petty-cash-statement.inc';
 

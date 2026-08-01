@@ -697,6 +697,15 @@
                             </div>
                         </div>
                         <div class="form-group">
+                            <label>Cash Category <span class="text-red">*</span></label>
+                            <select class="form-control select2" name="cash_category_id" required>
+                                <option value="">Select Cash Category</option>
+                                <?php foreach ($cash_categories as $cc_id => $cc_name): ?>
+                                    <option value="<?= $cc_id ?>"><?= htmlspecialchars($cc_name) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label>Remarks / Description</label>
                             <input type="text" class="form-control form-control-modern" name="remarks"
                                 placeholder="Optional notes for this expense">
@@ -751,6 +760,15 @@
                                     <option value="">Select Bank</option>
                                     <?php foreach ($bank_opt as $b_id => $b_name): ?>
                                         <option value="<?= $b_id ?>"><?= $b_name ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-xs-6 form-group" id="add_cash_category_group" style="display: none;">
+                                <label>Cash Category <span class="text-red">*</span></label>
+                                <select class="form-control select2" name="cash_category_id" id="add_cash_category_id">
+                                    <option value="">Select Cash Category</option>
+                                    <?php foreach ($cash_categories as $cc_id => $cc_name): ?>
+                                        <option value="<?= $cc_id ?>"><?= htmlspecialchars($cc_name) ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -952,7 +970,7 @@
                                             <span class="badge-modern badge-expense">Expense</span>
                                         <?php endif; ?>
                                         <?php if (!empty($row['ac_type'])): ?>
-                                            <br><small style="color: #64748b;"><?= htmlspecialchars($row['ac_type']) ?><?= ($row['ac_type'] == 'Bank' && !empty($row['bank_name'])) ? ' (' . htmlspecialchars($row['bank_name']) . ')' : '' ?></small>
+                                            <br><small style="color: #64748b;"><?= htmlspecialchars($row['ac_type']) ?><?= ($row['ac_type'] == 'Bank' && !empty($row['bank_name'])) ? ' (' . htmlspecialchars($row['bank_name']) . ')' : '' ?><?= ($row['ac_type'] == 'Cash' && !empty($row['cash_category_name'])) ? ' (' . htmlspecialchars($row['cash_category_name']) . ')' : '' ?></small>
                                         <?php endif; ?>
                                     </td>
                                     <td><?= !empty($row['account_head_name']) ? htmlspecialchars($row['account_head_name']) : '-' ?></td>
@@ -971,6 +989,7 @@
                                                 data-type="<?= $row['transaction_type'] ?>"
                                                 data-ac-type="<?= htmlspecialchars($row['ac_type'] ?? '') ?>"
                                                 data-bank="<?= htmlspecialchars($row['bank_id'] ?? '') ?>"
+                                                data-cash-category="<?= htmlspecialchars($row['cash_category_id'] ?? '') ?>"
                                                 data-account-head="<?= $row['account_head_id'] ?>"
                                                 data-category="<?= $row['category_id'] ?>" data-amount="<?= $row['amount'] ?>"
                                                 data-remarks="<?= htmlspecialchars($row['remarks'] ?? '') ?>">
@@ -1047,6 +1066,16 @@
                             <option value="">Select Bank</option>
                             <?php foreach ($bank_opt as $b_id => $b_name): ?>
                                 <option value="<?= $b_id ?>"><?= $b_name ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="edit_cash_category_group" style="display: none;">
+                        <label>Cash Category <span class="text-red">*</span></label>
+                        <select class="form-control select2" name="cash_category_id" id="edit_cash_category_id" style="width: 100%;">
+                            <option value="">Select Cash Category</option>
+                            <?php foreach ($cash_categories as $cc_id => $cc_name): ?>
+                                <option value="<?= $cc_id ?>"><?= htmlspecialchars($cc_name) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>

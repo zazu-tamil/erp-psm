@@ -1,9 +1,9 @@
 <?php include_once(VIEWPATH . '/inc/header.php'); ?>
 <section class="content-header">
-    <h1>Cash In & Out Statement</h1>
+    <h1>Bank Statement</h1>
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-cubes"></i> Accounts</a></li>
-        <li class="active">Cash In & Out Statement</li>
+        <li class="active">Bank Statement</li>
     </ol>
 </section>
 
@@ -38,7 +38,7 @@
                         </div>
                     </div>
                     <div class="form-group col-md-4">
-                        <label>Cash & Bank Account</label>
+                        <label>Bank Account</label>
                         <?php echo form_dropdown('srch_bank_cash', $bank_cash_options, set_value('srch_bank_cash', $srch_bank_cash), 'id="srch_bank_cash" class="form-control"'); ?>
                     </div>
                     <div class="form-group col-md-2 text-left">

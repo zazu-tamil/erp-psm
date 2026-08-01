@@ -4338,37 +4338,28 @@ class Accounts extends CI_Controller
 
         // Build bank options for the filter dropdown
         $bank_cash_options = array(
-            'all' => 'All Cash & Bank',
-            'cash' => 'Cash Only'
+            'all' => 'All Bank Accounts'
         );
         foreach ($data['bank_list'] as $bank) {
-            $bank_cash_options['bank_' . $bank['bank_id']] = 'Bank - ' . $bank['bank_name'] . ' (' . $bank['branch'] . ')';
+            $bank_cash_options['bank_' . $bank['bank_id']] = $bank['bank_name'] . ' (' . $bank['branch'] . ')';
         }
         $data['bank_cash_options'] = $bank_cash_options;
 
-        // Build precise table-specific where clauses for filter
-        $w_tr = "tr.status = 'Active'";
-        $w_vp = "vp.status = 'Active'";
-        $w_pt = "pt.status != 'Deleted'";
-        $w_cin = "cin.status = 'Active'";
-        $w_cout = "cout.status = 'Active'";
-        $w_op = "status = 'Active'";
+        // Build precise table-specific where clauses for filter (Bank Only)
+        $w_tr = "tr.status = 'Active' AND tr.receipt_mode = 'Bank'";
+        $w_vp = "vp.status = 'Active' AND vp.payment_mode = 'Bank'";
+        $w_pt = "pt.status != 'Deleted' AND pt.ac_type = 'Bank'";
+        $w_cin = "cin.status = 'Active' AND cin.ac_type = 'Bank'";
+        $w_cout = "cout.status = 'Active' AND cout.ac_type = 'Bank'";
+        $w_op = "status != 'Delete' AND ac_type = 'Bank'";
 
-        if ($srch_bank_cash === 'cash') {
-            $w_tr .= " AND tr.receipt_mode = 'Cash'";
-            $w_vp .= " AND vp.payment_mode = 'Cash'";
-            $w_pt .= " AND pt.ac_type = 'Cash'";
-            $w_cin .= " AND cin.ac_type = 'Cash'";
-            $w_cout .= " AND cout.ac_type = 'Cash'";
-            $w_op .= " AND ac_type = 'Cash'";
-        } elseif (strpos($srch_bank_cash, 'bank_') === 0) {
+        if (strpos($srch_bank_cash, 'bank_') === 0) {
             $bank_id = (int)str_replace('bank_', '', $srch_bank_cash);
-            $w_tr .= " AND tr.receipt_mode = 'Bank' AND tr.bank_id = $bank_id";
-            $w_vp .= " AND vp.payment_mode = 'Bank' AND vp.bank_id = $bank_id";
-            $w_pt .= " AND pt.ac_type = 'Bank' AND pt.bank_id = $bank_id";
-            $w_cin .= " AND cin.ac_type = 'Bank' AND cin.bank_id = $bank_id";
-            $w_cout .= " AND cout.ac_type = 'Bank' AND cout.bank_id = $bank_id";
-            $w_op .= " AND ac_type = 'Bank'";
+            $w_tr .= " AND tr.bank_id = $bank_id";
+            $w_vp .= " AND vp.bank_id = $bank_id";
+            $w_pt .= " AND pt.bank_id = $bank_id";
+            $w_cin .= " AND cin.bank_id = $bank_id";
+            $w_cout .= " AND cout.bank_id = $bank_id";
         }
 
         // 1. Calculate Opening Balance:
