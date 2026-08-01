@@ -523,12 +523,12 @@ $report_m_grp = [
                 <i class="fa fa-list-ul"></i> Outward Entery
             </a>
         </li>
-
+        <!-- 
         <li class="<?= ($current_page === 'petty-cash') ? 'active' : '' ?>">
             <a href="<?= site_url('petty-cash') ?>">
                 <i class="fa fa-money"></i> Petty Cash
             </a>
-        </li>
+        </li> -->
 
         <li class="<?= ($current_page === 'cash-in-out-statement') ? 'active' : '' ?>">
             <a href="<?= site_url('cash-in-out-statement') ?>">

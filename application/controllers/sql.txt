@@ -798,3 +798,25 @@ CREATE TABLE IF NOT EXISTS `cash_category` (
     `status`           ENUM('Active','InActive','Delete') NOT NULL DEFAULT 'Active',
     `created_at`       DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+01-08-2026
+
+-- Add cash_category_id to Tender Receipts (Customer Receipts)
+ALTER TABLE `tender_receipt_info` ADD COLUMN `cash_category_id` INT(11) NULL DEFAULT NULL AFTER `bank_id`;
+
+-- Add cash_category_id to Vendor Payments (Supplier Payments)
+ALTER TABLE `vendor_payment_info` ADD COLUMN `cash_category_id` INT(11) NULL DEFAULT NULL AFTER `bank_id`;
+
+-- Add bank_id and cash_category_id to Vendor Advance Payments (Supplier Advance Payments)
+ALTER TABLE `vendor_advance_payment_info` ADD COLUMN `bank_id` INT(11) NULL DEFAULT NULL AFTER `ac_type_opt`;
+ALTER TABLE `vendor_advance_payment_info` ADD COLUMN `cash_category_id` INT(11) NULL DEFAULT NULL AFTER `bank_id`;
+
+-- Add cash_category_id to Cash Inward Entries
+ALTER TABLE `cb_cash_inward_info` ADD COLUMN `cash_category_id` INT(11) NULL DEFAULT NULL AFTER `bank_id`;
+
+-- Add cash_category_id to Cash Outward Entries
+ALTER TABLE `cb_cash_outward_info` ADD COLUMN `cash_category_id` INT(11) NULL DEFAULT NULL AFTER `bank_id`;
+
+-- Add cash_category_id to Petty Cash Transactions
+ALTER TABLE `petty_cash_transactions` ADD COLUMN `cash_category_id` INT(11) NULL DEFAULT NULL AFTER `bank_id`;
