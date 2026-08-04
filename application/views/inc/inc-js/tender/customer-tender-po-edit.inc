@@ -49,16 +49,9 @@
     background-color: #e9ecef;
   }
 </style>
-
 <script>
   $(document).ready(function () 
   {
-    // Trigger customer change to load contact persons on init
-    setTimeout(function() {
-        if ($("#srch_customer_id").val()) {
-            $("#srch_customer_id").trigger('change');
-        }
-    }, 500);
 
     // Enable / Disable on checkbox change
      $(document).on("change", ".chk_tender_quote_addtchrg_id", function () { 
@@ -196,33 +189,6 @@
 
       if (!customer_id || !company_id) return;
 
-      // Load contact persons for this customer
-      $.ajax({
-        url: "<?php echo site_url('tender/get_customer_contacts_by_customer'); ?>",
-        type: "POST",
-        data: { customer_id: customer_id },
-        dataType: "json",
-        success: function(res) {
-          const $contactDropdown = $("#customer_contact_id");
-          $contactDropdown.html('<option value="">Select Contact Person</option>');
-          if(res.length > 0) {
-            $.each(res, function(i, row) {
-              $contactDropdown.append(
-                $("<option>", {
-                  value: row.customer_contact_id,
-                  text: row.contact_person_name + (row.mobile ? ' - ' + row.mobile : '')
-                })
-              );
-            });
-            // Auto-select if we have a hidden value (on edit)
-            let selected_contact = $("#selected_customer_contact_id").val();
-            if (selected_contact) {
-                $contactDropdown.val(selected_contact);
-            }
-          }
-        }
-      });
-
       $.ajax({
         url: "<?php echo site_url('tender/get_tender_enquiries_by_customer'); ?>",
         type: "POST",
@@ -255,6 +221,7 @@
        3. TENDER ENQUIRY CHANGE - Load Quotations with "Won" status
        ================================================================ */
     $("#srch_tender_enquiry_id").on("change", function () {
+
       const company_id = $("#srch_company_id").val();
       const customer_id = $("#srch_customer_id").val();
       const $quotationDropdown = $("#srch_quotation_no");
@@ -266,50 +233,16 @@
 
       if (!company_id || !customer_id) return;
 
-      // Load the contact person from the selected enquiry if not already selected
-      $.ajax({
-        url: "<?php echo site_url('tender/get_tender_enquiry_details'); ?>",
-        type: "POST",
-        data: { tender_enquiry_id: $(this).val() },
-        dataType: "json",
-        success: function(res) {
-          if (res && res.customer_contact_id) {
-            $("#customer_contact_id").val(res.customer_contact_id).trigger("change");
-          } else {
-            $("#customer_contact_id").val("").trigger("change");
-          }
-        }
-      });
-    });
-
-    /* ================================================================
-       3.5 CONTACT PERSON CHANGE - Load Quotations with "Won" status
-       ================================================================ */
-    $("#customer_contact_id").on("change", function () {
-      const company_id = $("#srch_company_id").val();
-      const customer_id = $("#srch_customer_id").val();
-      const tender_enquiry_id = $("#srch_tender_enquiry_id").val();
-      const customer_contact_id = $(this).val();
-      const $quotationDropdown = $("#srch_quotation_no");
-      const $container = $("#item_container");
-
-      // Reset quotation and items
-      $quotationDropdown.html('<option value="">Select Quotation</option>').prop('disabled', true);
-      $container.html('');
-
-      if (!company_id || !customer_id || !tender_enquiry_id) return;
-
       $.ajax({
         url: "<?php echo site_url('tender/get_quotations_by_customer'); ?>",
         type: "POST",
         data: {
           company_id: company_id,
-          customer_id: customer_id,
-          tender_enquiry_id: tender_enquiry_id,
-          customer_contact_id: customer_contact_id
+          customer_id: customer_id
         },
         dataType: "json",
         success: function (res) {
+            console.log(res);
           if (res.length > 0) {
             $quotationDropdown.prop('disabled', false);
             $.each(res, function (i, row) {
@@ -320,7 +253,7 @@
               );
             });
           } else {
-            $quotationDropdown.html('<option value="">No quotations found for this contact person</option>');
+            $quotationDropdown.html('<option value="">No quotations with "Won" status found</option>');
           }
         },
         error: function () {

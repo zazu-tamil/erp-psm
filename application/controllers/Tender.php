@@ -2463,8 +2463,6 @@ class Tender extends CI_Controller
             exit;
         }
 
-        
-
         $data['js'] = 'tender/customer-tender-po-add.inc';
         $data['title'] = 'Tender PO';
 
@@ -2479,7 +2477,6 @@ class Tender extends CI_Controller
                 'tender_quotation_id' => $this->input->post('srch_quotation_no'),
                 'currency_id' => $this->input->post('currency_id'),
                 'our_po_no' => $this->input->post('our_po_no'),
-                'customer_contact_id' => $this->input->post('customer_contact_id'),
                 'customer_po_no' => $this->input->post('customer_po_no'),
                 'po_date' => $this->input->post('po_date'),
                 'po_received_date' => $this->input->post('po_received_date'),
@@ -2648,7 +2645,6 @@ class Tender extends CI_Controller
                 'tender_quotation_id' => $this->input->post('tender_quotation_id'),
                 'currency_id' => $this->input->post('currency_id'),
                 'our_po_no' => $this->input->post('our_po_no'),
-                'customer_contact_id' => $this->input->post('customer_contact_id'),
                 'customer_po_no' => $this->input->post('customer_po_no'),
                 'po_date' => $this->input->post('po_date'),
                 'po_received_date' => $this->input->post('po_received_date'),
@@ -2994,19 +2990,6 @@ class Tender extends CI_Controller
         if (!empty($srch_customer_id)) {
             $where .= " AND a.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
         }
-        
-        // Contact Person Filter
-        if ($this->input->post('srch_customer_contact_id') !== null) {
-            $data['srch_customer_contact_id'] = $srch_customer_contact_id = $this->input->post('srch_customer_contact_id');
-            $this->session->set_userdata('srch_customer_contact_id', $srch_customer_contact_id);
-        } elseif ($this->session->userdata('srch_customer_contact_id')) {
-            $data['srch_customer_contact_id'] = $srch_customer_contact_id = $this->session->userdata('srch_customer_contact_id');
-        } else {
-            $data['srch_customer_contact_id'] = $srch_customer_contact_id = '';
-        }
-        if (!empty($srch_customer_contact_id)) {
-            $where .= " AND a.customer_contact_id = '" . $this->db->escape_str($srch_customer_contact_id) . "'";
-        }
 
 
         // OUR RFQ Filter
@@ -3135,13 +3118,6 @@ class Tender extends CI_Controller
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
             $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
-        }
-
-        $data['contact_person_opt'] = ['' => 'All'];
-        $sql = "SELECT customer_contact_id, contact_person_name FROM customer_contact_info WHERE status = 'Active' ORDER BY contact_person_name";
-        $query = $this->db->query($sql);
-        foreach ($query->result_array() as $row) {
-            $data['contact_person_opt'][$row['customer_contact_id']] = $row['contact_person_name'];
         }
 
         $data['tender_quotation_opt'] = ['' => 'All'];
@@ -4901,7 +4877,6 @@ class Tender extends CI_Controller
         $company_id = $this->input->post('company_id');
         $customer_id = $this->input->post('customer_id');
         $tender_enquiry_id = $this->input->post('tender_enquiry_id');
-        $customer_contact_id = $this->input->post('customer_contact_id');
 
         if (empty($company_id) || empty($customer_id) || empty($tender_enquiry_id)) {
             echo json_encode([]);
@@ -4919,21 +4894,13 @@ class Tender extends CI_Controller
             LEFT JOIN tender_enquiry_info te ON tq.tender_enquiry_id = te.tender_enquiry_id
             WHERE tq.company_id = ?
                 AND tq.customer_id = ? 
-                AND tq.tender_enquiry_id = ?";
-
-        $params = [$company_id, $customer_id, $tender_enquiry_id];
-
-        if (!empty($customer_contact_id)) {
-            $sql .= " AND tq.customer_contact_id = ?";
-            $params[] = $customer_contact_id;
-        }
-
-        $sql .= " AND tq.status = 'Active'
+                AND tq.tender_enquiry_id = ?
+                AND tq.status = 'Active'
             ORDER BY tq.quote_date DESC";
 
         //  AND tq.quotation_status = 'Won'
 
-        $query = $this->db->query($sql, $params);
+        $query = $this->db->query($sql, [$company_id, $customer_id, $tender_enquiry_id]);
         $result = $query->result_array();
         echo json_encode($result);
     }
@@ -6998,25 +6965,6 @@ class Tender extends CI_Controller
 
         $data['pagination'] = $this->pagination->create_links();
         $this->load->view('page/tender/in-stock-item-list', $data);
-    }
-    
-    public function get_tender_enquiry_details()
-    {
-        $tender_enquiry_id = $this->input->post('tender_enquiry_id');
-        $this->db->where('tender_enquiry_id', $tender_enquiry_id);
-        $query = $this->db->get('tender_enquiry_info');
-        echo json_encode($query->row_array());
-    }
-    
-    public function get_customer_contacts_by_customer()
-    {
-        $customer_id = $this->input->post('customer_id');
-        $this->db->select('customer_contact_id, contact_person_name, mobile');
-        $this->db->from('customer_contact_info');
-        $this->db->where('customer_id', $customer_id);
-        $this->db->where('status', 'Active');
-        $query = $this->db->get();
-        echo json_encode($query->result_array());
     }
 
 }
