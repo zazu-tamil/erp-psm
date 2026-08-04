@@ -368,9 +368,15 @@
         }
 
         $amount       = floatval($amount);
+        $amount       = round($amount, $decimal_point);
         $integer_part = floor($amount);
         $multiplier   = pow(10, $decimal_point);
         $decimal_part = round(($amount - $integer_part) * $multiplier);
+
+        if ($decimal_part >= $multiplier) {
+            $integer_part += 1;
+            $decimal_part -= $multiplier;
+        }
 
         $words = ($integer_part > 0)
             ? convertNumberToWords($integer_part, $ones, $tens, $hundreds)
