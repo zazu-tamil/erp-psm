@@ -33,7 +33,7 @@
 
                     <div class="row">
                         <div class="form-group col-md-3">
-                            <label for="srch_company_id">Company <span style="color:red;">*</span></label>
+                            <label for="srch_company_id">Company 1<span style="color:red;">*</span></label>
                             <?php echo form_dropdown('srch_company_id', $company_opt, set_value('srch_company_id'), 'id="srch_company_id" class="form-control" required'); ?>
                         </div>
 
@@ -50,10 +50,20 @@
                         </div>
 
                         <div class="form-group col-md-3">
+                            <label for="customer_contact_id">Contact Person</label>
+                            <select name="customer_contact_id" id="customer_contact_id" class="form-control">
+                                <option value="">Select Contact Person</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group col-md-3">
                             <label for="srch_quotation_no">Quotation No <span style="color:red;">*</span> <i
                                     class="text-red text-sm text-right"> [ Note: Quotation Status : Won ] </i></label>
                             <?php echo form_dropdown('srch_quotation_no', ['' => 'Select Quotation'], set_value('srch_quotation_no'), 'id="srch_quotation_no" class="form-control" required'); ?>
                         </div>
+
+
+
 
                         <!-- <div class="form-group col-md-3">
                             <label>Our PO No</label>

@@ -49,6 +49,15 @@
                         </div>
 
                         <div class="form-group col-md-3">
+                            <label for="customer_contact_id">Contact Person</label>
+                            <select name="customer_contact_id" id="customer_contact_id" class="form-control">
+                                <option value="">Select Contact Person</option>
+                            </select>
+                            
+                            <input type="hidden" id="selected_customer_contact_id" value="<?php echo htmlspecialchars(isset($header['customer_contact_id']) ? $header['customer_contact_id'] : ''); ?>">
+                        </div>
+                        
+                        <div class="form-group col-md-3">
                             <label>Customer PO No</label>
                             <input type="text" name="customer_po_no" id="customer_po_no" class="form-control"
                                 value="<?php echo htmlspecialchars($header['customer_po_no']); ?>"

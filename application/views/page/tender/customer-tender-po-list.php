@@ -28,10 +28,17 @@
                         <input type="date" name="srch_to_date" id="srch_to_date" class="form-control"
                             value="<?php echo set_value('srch_to_date', $srch_to_date); ?>">
                     </div>
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-3">
                         <label>Customer</label>
+                        
                         <div class="form-group">
                             <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control select2" '); ?>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label>Contact Person</label>
+                        <div class="form-group">
+                            <?php echo form_dropdown('srch_customer_contact_id', ['' => 'All'] + (isset($contact_person_opt) ? $contact_person_opt : []), isset($srch_customer_contact_id) ? $srch_customer_contact_id : '', 'id="srch_customer_contact_id" class="form-control select2" '); ?>
                         </div>
                     </div>
                 </div>

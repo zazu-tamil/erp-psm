@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | Typically there is a one-to-one relationship between a URL string
 | and its corresponding controller class/method. The segments in a
 | URL normally follow this pattern:
-|
+|   
 |	example.com/class/method/id/
 |
 | In some instances, however, you may want to remap this relationship
