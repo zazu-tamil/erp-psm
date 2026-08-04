@@ -2991,6 +2991,26 @@ class Tender extends CI_Controller
             $where .= " AND a.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
         }
 
+        // Customer Contact Person Filter
+        if ($this->input->post('srch_customer_contact_id') !== null) {
+            $data['srch_customer_contact_id'] = $srch_customer_contact_id = $this->input->post('srch_customer_contact_id');
+            $this->session->set_userdata('srch_customer_contact_id', $srch_customer_contact_id);
+        } elseif ($this->session->userdata('srch_customer_contact_id')) {
+            $data['srch_customer_contact_id'] = $srch_customer_contact_id = $this->session->userdata('srch_customer_contact_id');
+        } else {
+            $data['srch_customer_contact_id'] = $srch_customer_contact_id = '';
+        }
+
+        if (empty($srch_customer_id)) {
+            $srch_customer_contact_id = '';
+            $data['srch_customer_contact_id'] = '';
+            $this->session->set_userdata('srch_customer_contact_id', '');
+        }
+
+        if (!empty($srch_customer_contact_id)) {
+            $where .= " AND t.customer_contact_id = '" . $this->db->escape_str($srch_customer_contact_id) . "'";
+        }
+
 
         // OUR RFQ Filter
         if ($this->input->post('srch_tender_enquiry_id') !== null) {
@@ -3003,6 +3023,10 @@ class Tender extends CI_Controller
         }
         if (!empty($srch_tender_enquiry_id)) {
             $where = " ( tq.tender_ref_no = '" . $this->db->escape_str($srch_tender_enquiry_id) . "') ";
+            $data['srch_from_date'] = $srch_from_date = '';
+            $data['srch_to_date'] = $srch_to_date = '';
+            $data['srch_customer_id'] = $srch_customer_id = '';
+            $data['srch_customer_contact_id'] = $srch_customer_contact_id = '';
         }
 
 
@@ -3020,6 +3044,7 @@ class Tender extends CI_Controller
             $data['srch_from_date'] = $srch_from_date = '';
             $data['srch_to_date'] = $srch_to_date = '';
             $data['srch_customer_id'] = $srch_customer_id = '';
+            $data['srch_customer_contact_id'] = $srch_customer_contact_id = '';
         }
 
 
@@ -3035,6 +3060,10 @@ class Tender extends CI_Controller
 
         if (!empty($srch_tender_po_no)) {
             $where = " (a.customer_po_no = '" . $this->db->escape_str($srch_tender_po_no) . "')";
+            $data['srch_from_date'] = $srch_from_date = '';
+            $data['srch_to_date'] = $srch_to_date = '';
+            $data['srch_customer_id'] = $srch_customer_id = '';
+            $data['srch_customer_contact_id'] = $srch_customer_contact_id = '';
         }
 
 
@@ -3118,6 +3147,15 @@ class Tender extends CI_Controller
         $query = $this->db->query($sql);
         foreach ($query->result_array() as $row) {
             $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
+        $data['customer_contact_opt'] = [];
+        if (!empty($srch_customer_id)) {
+            $sql = "SELECT customer_contact_id, contact_person_name FROM customer_contact_info WHERE customer_id = ? AND status = 'Active' ORDER BY contact_person_name";
+            $query = $this->db->query($sql, [$srch_customer_id]);
+            foreach ($query->result_array() as $row) {
+                $data['customer_contact_opt'][$row['customer_contact_id']] = $row['contact_person_name'];
+            }
         }
 
         $data['tender_quotation_opt'] = ['' => 'All'];

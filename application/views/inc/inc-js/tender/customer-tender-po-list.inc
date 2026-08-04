@@ -1,10 +1,89 @@
-<link
-  rel="stylesheet"
-  href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
-/>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+<link href="<?php echo base_url() ?>asset/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script src="<?php echo base_url() ?>asset/bower_components/select2/dist/js/select2.full.min.js"></script>
+
+<style>
+  /* FULL RESPONSIVE WIDTH */
+  .select2-container {
+    width: 100% !important;
+  }
+
+  /* ADMINLTE INPUT MATCH */
+  .select2-container--default .select2-selection--single {
+    height: 34px !important;
+    padding: 6px 12px !important;
+    border: 1px solid #d2d6de !important;
+    border-radius: 0 !important;
+    background-color: #fff !important;
+  }
+
+  /* TEXT ALIGN FIX */
+  .select2-selection__rendered {
+    line-height: 22px !important;
+  }
+
+  /* DROPDOWN ARROW */
+  .select2-selection__arrow {
+    height: 32px !important;
+  }
+
+  /* MOBILE TOUCH FIX */
+  @media (max-width: 768px) {
+    .select2-container--default .select2-selection--single {
+      height: 37px !important;
+      padding: 8px 12px !important;
+    }
+  }
+
+  .select2-container .select2-selection--single .select2-selection__rendered {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    height: auto !important;
+  }
+</style>
+
 <script>
   jQuery(function ($) {
+    // Initialize select2
+    $(".select2").select2({
+      width: "100%",
+    });
+
+    // Customer selection change handler
+    $("#srch_customer_id").on("change", function () {
+      var customerId = $(this).val();
+      var $contact = $("#srch_customer_contact_id");
+
+      // Reset contact dropdown
+      $contact.html('<option value="">All</option>');
+
+      if (!customerId) {
+        $contact.trigger('change');
+        return;
+      }
+
+      $.ajax({
+        url: "<?php echo site_url('tender/get_data'); ?>",
+        type: "POST",
+        data: { tbl: "get-customer-contacts", id: customerId },
+        dataType: "json",
+        success: function (data) {
+          $.each(data, function (i, item) {
+            $contact.append(
+              $("<option></option>")
+                .val(item.customer_contact_id)
+                .text(item.contact_person_name)
+            );
+          });
+          $contact.trigger('change');
+        },
+        error: function (xhr) {
+          console.error(xhr.responseText);
+          alert("Failed to load contact persons");
+        },
+      });
+    });
     $("#srch_enquiry_no").autocomplete({
       source: function (request, response) {
         $.ajax({
