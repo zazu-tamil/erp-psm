@@ -132,8 +132,8 @@ class PettyCash extends CI_Controller
         $vp_outward_query = $this->db->get('vendor_payment_info')->row();
         $vp_outward = $vp_outward_query->amount ? (float)$vp_outward_query->amount : 0;
 
-        // Customs Bills Outward in date range
-        $this->db->select_sum('customs_tot_amt');
+        // Customs Bills Outward in date range (P&L portion, plus VAT for Not-Accountable bills)
+        $this->db->select("SUM(custom_stamp_fee + custom_duty + IF(ac_type_opt = 'Not-Accountable', vat_amt, 0)) as customs_tot_amt");
         $this->db->where('status !=', 'Delete');
         $this->db->where('status !=', 'Deleted');
         $this->db->where('invoice_date >=', $from_date);
@@ -368,7 +368,7 @@ class PettyCash extends CI_Controller
                     NULL AS cash_category_name,
                     NULL AS account_head_id,
                     NULL AS category_id,
-                    cb.customs_tot_amt AS amount,
+                    (cb.custom_stamp_fee + cb.custom_duty + IF(cb.ac_type_opt = 'Not-Accountable', cb.vat_amt, 0)) AS amount,
                     CONCAT('Customs Bill No: ', IFNULL(cb.invoice_no, ''), IF(ven.vendor_name IS NOT NULL AND ven.vendor_name != '', CONCAT(' | Vendor: ', ven.vendor_name), ''), IF(cb.remarks IS NOT NULL AND cb.remarks != '', CONCAT(' | ', cb.remarks), '')) AS remarks,
                     IFNULL(cb.created_date, cb.invoice_date) AS created_at,
                     'Customs Expense' AS category_name,

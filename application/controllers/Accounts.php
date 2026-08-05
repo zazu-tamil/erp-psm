@@ -301,7 +301,7 @@ class Accounts extends CI_Controller
         $where = "1=1";
         if ($srch_account_head_id != '') {
             $where .= ' and a.account_head_id = "' . $srch_account_head_id . '"';
-        }  
+        }
 
         if ($nature_type != '') {
             $where .= ' and a.nature_type = "' . $nature_type . '"';
@@ -323,7 +323,7 @@ class Accounts extends CI_Controller
             'Income' => 'Income',
             'Expense' => 'Expense'
         );
-    
+
         $sql = "
                 select 
                 a.account_head_id,                
@@ -510,7 +510,7 @@ class Accounts extends CI_Controller
                 'cash_inward_id ' => $this->input->post('cash_inward_id'),
                 'company_id' => $this->input->post('company_id'),
                 'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
-                'agent_id' => $this->input->post('agent_id'), 
+                'agent_id' => $this->input->post('agent_id'),
                 'vno' => $this->input->post('vno'),
                 'ac_type' => $ac_type,
                 'bank_id' => $bank_id,
@@ -3004,10 +3004,10 @@ class Accounts extends CI_Controller
             $nature = $row['nature_type'];
             $sub_id = $row['sub_account_head_id'];
 
-            $op_in = (float)$row['op_inward'];
-            $op_out = (float)$row['op_outward'];
-            $pr_in = (float)$row['period_inward'];
-            $pr_out = (float)$row['period_outward'];
+            $op_in = (float) $row['op_inward'];
+            $op_out = (float) $row['op_outward'];
+            $pr_in = (float) $row['period_inward'];
+            $pr_out = (float) $row['period_outward'];
 
             // Add bill expenses if no Cash/Bank filter is set and nature is Expense
             if (empty($srch_ac_type) && $nature == 'Expense' && !empty($sub_id)) {
@@ -3017,26 +3017,26 @@ class Accounts extends CI_Controller
                 $lp_op = (float) $this->db->query("
                     SELECT SUM(tot_amt_wo_tax) AS amt 
                     FROM local_purchase_bill_info 
-                    WHERE status = 'Active' AND sub_account_head_id = '$esc_sub' AND inv_entry_date < ?
+                    WHERE status = 'Active' AND sub_account_head_id = '$esc_sub' AND invoice_date < ?
                 ", [$srch_from_date])->row('amt');
 
                 $lp_pr = (float) $this->db->query("
                     SELECT SUM(tot_amt_wo_tax) AS amt 
                     FROM local_purchase_bill_info 
-                    WHERE status = 'Active' AND sub_account_head_id = '$esc_sub' AND inv_entry_date BETWEEN ? AND ?
+                    WHERE status = 'Active' AND sub_account_head_id = '$esc_sub' AND invoice_date BETWEEN ? AND ?
                 ", [$srch_from_date, $srch_to_date])->row('amt');
 
                 // DP Bills (dp_charges)
                 $dp_op = (float) $this->db->query("
                     SELECT SUM(dp_charges) AS amt 
                     FROM dp_bill_info 
-                    WHERE status = 'Active' AND sub_account_head_id = '$esc_sub' AND inv_entry_date < ?
+                    WHERE status = 'Active' AND sub_account_head_id = '$esc_sub' AND invoice_date < ?
                 ", [$srch_from_date])->row('amt');
 
                 $dp_pr = (float) $this->db->query("
                     SELECT SUM(dp_charges) AS amt 
                     FROM dp_bill_info 
-                    WHERE status = 'Active' AND sub_account_head_id = '$esc_sub' AND inv_entry_date BETWEEN ? AND ?
+                    WHERE status = 'Active' AND sub_account_head_id = '$esc_sub' AND invoice_date BETWEEN ? AND ?
                 ", [$srch_from_date, $srch_to_date])->row('amt');
 
                 $op_out += ($lp_op + $dp_op);
@@ -3124,7 +3124,7 @@ class Accounts extends CI_Controller
             $base_amount = 0;
             $base_date = '2024-04-01'; // Default backup start date
             if ($base_q) {
-                $base_amount = (float)$base_q['amount'];
+                $base_amount = (float) $base_q['amount'];
                 $base_date = $base_q['opening_date'];
             }
 
@@ -3134,14 +3134,14 @@ class Accounts extends CI_Controller
                 FROM cb_cash_inward_info 
                 WHERE ac_type = ? AND status = 'Active' AND inward_date BETWEEN ? AND DATE_SUB(?, INTERVAL 1 DAY)
             ";
-            $prior_in_amt = (float)$this->db->query($prior_inward_sql, [$type, $base_date, $srch_from_date])->row()->amount;
+            $prior_in_amt = (float) $this->db->query($prior_inward_sql, [$type, $base_date, $srch_from_date])->row()->amount;
 
             $prior_outward_sql = "
                 SELECT SUM(amount) AS amount 
                 FROM cb_cash_outward_info 
                 WHERE ac_type = ? AND status = 'Active' AND outward_date BETWEEN ? AND DATE_SUB(?, INTERVAL 1 DAY)
             ";
-            $prior_out_amt = (float)$this->db->query($prior_outward_sql, [$type, $base_date, $srch_from_date])->row()->amount;
+            $prior_out_amt = (float) $this->db->query($prior_outward_sql, [$type, $base_date, $srch_from_date])->row()->amount;
 
             $opening_bal = $base_amount + $prior_in_amt - $prior_out_amt;
 
@@ -3151,14 +3151,14 @@ class Accounts extends CI_Controller
                 FROM cb_cash_inward_info 
                 WHERE ac_type = ? AND status = 'Active' AND inward_date BETWEEN ? AND ?
             ";
-            $period_in_amt = (float)$this->db->query($period_inward_sql, [$type, $srch_from_date, $srch_to_date])->row()->amount;
+            $period_in_amt = (float) $this->db->query($period_inward_sql, [$type, $srch_from_date, $srch_to_date])->row()->amount;
 
             $period_outward_sql = "
                 SELECT SUM(amount) AS amount 
                 FROM cb_cash_outward_info 
                 WHERE ac_type = ? AND status = 'Active' AND outward_date BETWEEN ? AND ?
             ";
-            $period_out_amt = (float)$this->db->query($period_outward_sql, [$type, $srch_from_date, $srch_to_date])->row()->amount;
+            $period_out_amt = (float) $this->db->query($period_outward_sql, [$type, $srch_from_date, $srch_to_date])->row()->amount;
 
             $closing_bal = $opening_bal + $period_in_amt - $period_out_amt;
 
@@ -3276,9 +3276,9 @@ class Accounts extends CI_Controller
             ")->row('amt');
 
             $bills_customs = (float) $this->db->query("
-                SELECT SUM(customs_tot_amt) AS amt 
+                SELECT SUM(bill_amount + vat_amt) AS amt 
                 FROM customs_bill_info 
-                WHERE status = 'Active' AND invoice_date <= '$esc_to'
+                WHERE status = 'Active' AND ac_type_opt = 'Accountable' AND invoice_date <= '$esc_to'
             ")->row('amt');
 
             $total_creditors_bills = $bills_gen + $bills_local + $bills_dp + $bills_customs;
@@ -3400,15 +3400,15 @@ class Accounts extends CI_Controller
 
             // 6. Customs (Expense normal balance)
             $customs_op = (float) $this->db->query("
-                SELECT SUM(custom_stamp_fee + custom_duty) AS amt 
+                SELECT SUM(custom_stamp_fee + custom_duty + IF(ac_type_opt = 'Accountable', bill_amount, 0)) AS amt 
                 FROM customs_bill_info 
-                WHERE status = 'Active' AND inv_entry_date < '$esc_from'
+                WHERE status = 'Active' AND invoice_date < '$esc_from'
             ")->row('amt');
 
             $customs_pr = (float) $this->db->query("
-                SELECT SUM(custom_stamp_fee + custom_duty) AS amt 
+                SELECT SUM(custom_stamp_fee + custom_duty + IF(ac_type_opt = 'Accountable', bill_amount, 0)) AS amt 
                 FROM customs_bill_info 
-                WHERE status = 'Active' AND inv_entry_date BETWEEN '$esc_from' AND '$esc_to'
+                WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'
             ")->row('amt');
 
             $customs_tot = $customs_op + $customs_pr;
@@ -4354,7 +4354,7 @@ class Accounts extends CI_Controller
         $w_op = "status != 'Delete' AND ac_type = 'Bank'";
 
         if (strpos($srch_bank_cash, 'bank_') === 0) {
-            $bank_id = (int)str_replace('bank_', '', $srch_bank_cash);
+            $bank_id = (int) str_replace('bank_', '', $srch_bank_cash);
             $w_tr .= " AND tr.bank_id = $bank_id";
             $w_vp .= " AND vp.bank_id = $bank_id";
             $w_pt .= " AND pt.bank_id = $bank_id";
@@ -4365,7 +4365,7 @@ class Accounts extends CI_Controller
         $w_ce_to = "1=1";
         $w_ce_from = "1=1";
         if (strpos($srch_bank_cash, 'bank_') === 0) {
-            $bank_id = (int)str_replace('bank_', '', $srch_bank_cash);
+            $bank_id = (int) str_replace('bank_', '', $srch_bank_cash);
             $w_ce_to = "ce.to_bank_id = $bank_id";
             $w_ce_from = "ce.from_bank_id = $bank_id";
         }
@@ -4373,7 +4373,7 @@ class Accounts extends CI_Controller
         // 1. Calculate Opening Balance:
         // A. Base Opening Balances from cb_opening_balance_info
         $sql_cb_op = "SELECT COALESCE(SUM(amount), 0) AS op_amount FROM cb_opening_balance_info WHERE $w_op AND opening_date < '" . $this->db->escape_str($srch_from_date) . "'";
-        $cb_op = (float)$this->db->query($sql_cb_op)->row('op_amount');
+        $cb_op = (float) $this->db->query($sql_cb_op)->row('op_amount');
 
         // B. Combined transactions before srch_from_date
         $sql_tr_before = "
@@ -4398,8 +4398,8 @@ class Accounts extends CI_Controller
             WHERE t.tr_date < '" . $this->db->escape_str($srch_from_date) . "'
         ";
         $tr_before_res = $this->db->query($sql_tr_before)->row_array();
-        $total_tr_in_before = (float)$tr_before_res['total_in'];
-        $total_tr_out_before = (float)$tr_before_res['total_out'];
+        $total_tr_in_before = (float) $tr_before_res['total_in'];
+        $total_tr_out_before = (float) $tr_before_res['total_out'];
 
         $data['opening_balance'] = $cb_op + $total_tr_in_before - $total_tr_out_before;
 
@@ -4594,11 +4594,11 @@ class Accounts extends CI_Controller
         // ── ADD ──────────────────────────────────────────────────────
         if ($this->input->post('mode') == 'Add') {
             $ins = array(
-                'category_name'  => $this->input->post('category_name'),
-                'category_type'  => $this->input->post('category_type'),
-                'description'    => $this->input->post('description'),
-                'status'         => $this->input->post('status') ?: 'Active',
-                'created_at'     => date('Y-m-d H:i:s'),
+                'category_name' => $this->input->post('category_name'),
+                'category_type' => $this->input->post('category_type'),
+                'description' => $this->input->post('description'),
+                'status' => $this->input->post('status') ?: 'Active',
+                'created_at' => date('Y-m-d H:i:s'),
             );
             $this->db->insert('cash_category', $ins);
             redirect('cash-category-list');
@@ -4607,10 +4607,10 @@ class Accounts extends CI_Controller
         // ── EDIT ─────────────────────────────────────────────────────
         if ($this->input->post('mode') == 'Edit') {
             $upd = array(
-                'category_name'  => $this->input->post('category_name'),
-                'category_type'  => $this->input->post('category_type'),
-                'description'    => $this->input->post('description'),
-                'status'         => $this->input->post('status') ?: 'Active',
+                'category_name' => $this->input->post('category_name'),
+                'category_type' => $this->input->post('category_type'),
+                'description' => $this->input->post('description'),
+                'status' => $this->input->post('status') ?: 'Active',
             );
             $this->db->where('cash_category_id', $this->input->post('cash_category_id'));
             $this->db->update('cash_category', $upd);
@@ -4667,20 +4667,20 @@ class Accounts extends CI_Controller
             $to_ac_type = $this->input->post('to_ac_type');
 
             $ins = array(
-                'franchise_id'          => ($this->session->userdata('cr_franchise_id') == '' ? 0 : $this->session->userdata('cr_franchise_id')),
-                'entry_date'            => $this->input->post('entry_date'),
-                'from_ac_type'          => $from_ac_type,
-                'from_bank_id'          => ($from_ac_type == 'Bank') ? ($this->input->post('from_bank_id') ?: null) : null,
+                'franchise_id' => ($this->session->userdata('cr_franchise_id') == '' ? 0 : $this->session->userdata('cr_franchise_id')),
+                'entry_date' => $this->input->post('entry_date'),
+                'from_ac_type' => $from_ac_type,
+                'from_bank_id' => ($from_ac_type == 'Bank') ? ($this->input->post('from_bank_id') ?: null) : null,
                 'from_cash_category_id' => ($from_ac_type == 'Cash') ? ($this->input->post('from_cash_category_id') ?: null) : null,
-                'from_remarks'          => $this->input->post('from_remarks'),
-                'to_ac_type'            => $to_ac_type,
-                'to_bank_id'            => ($to_ac_type == 'Bank') ? ($this->input->post('to_bank_id') ?: null) : null,
-                'to_cash_category_id'   => ($to_ac_type == 'Cash') ? ($this->input->post('to_cash_category_id') ?: null) : null,
-                'to_remarks'            => $this->input->post('to_remarks'),
-                'amount'                => $this->input->post('amount'),
-                'status'                => 'Active',
-                'created_by'            => $this->session->userdata(SESS_HD . 'user_id'),
-                'created_at'            => date('Y-m-d H:i:s'),
+                'from_remarks' => $this->input->post('from_remarks'),
+                'to_ac_type' => $to_ac_type,
+                'to_bank_id' => ($to_ac_type == 'Bank') ? ($this->input->post('to_bank_id') ?: null) : null,
+                'to_cash_category_id' => ($to_ac_type == 'Cash') ? ($this->input->post('to_cash_category_id') ?: null) : null,
+                'to_remarks' => $this->input->post('to_remarks'),
+                'amount' => $this->input->post('amount'),
+                'status' => 'Active',
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_at' => date('Y-m-d H:i:s'),
             );
             $this->db->insert('cb_contra_entry_info', $ins);
             redirect('contra-entry');
@@ -4692,18 +4692,18 @@ class Accounts extends CI_Controller
             $to_ac_type = $this->input->post('to_ac_type');
 
             $upd = array(
-                'entry_date'            => $this->input->post('entry_date'),
-                'from_ac_type'          => $from_ac_type,
-                'from_bank_id'          => ($from_ac_type == 'Bank') ? ($this->input->post('from_bank_id') ?: null) : null,
+                'entry_date' => $this->input->post('entry_date'),
+                'from_ac_type' => $from_ac_type,
+                'from_bank_id' => ($from_ac_type == 'Bank') ? ($this->input->post('from_bank_id') ?: null) : null,
                 'from_cash_category_id' => ($from_ac_type == 'Cash') ? ($this->input->post('from_cash_category_id') ?: null) : null,
-                'from_remarks'          => $this->input->post('from_remarks'),
-                'to_ac_type'            => $to_ac_type,
-                'to_bank_id'            => ($to_ac_type == 'Bank') ? ($this->input->post('to_bank_id') ?: null) : null,
-                'to_cash_category_id'   => ($to_ac_type == 'Cash') ? ($this->input->post('to_cash_category_id') ?: null) : null,
-                'to_remarks'            => $this->input->post('to_remarks'),
-                'amount'                => $this->input->post('amount'),
-                'updated_by'            => $this->session->userdata(SESS_HD . 'user_id'),
-                'updated_at'            => date('Y-m-d H:i:s'),
+                'from_remarks' => $this->input->post('from_remarks'),
+                'to_ac_type' => $to_ac_type,
+                'to_bank_id' => ($to_ac_type == 'Bank') ? ($this->input->post('to_bank_id') ?: null) : null,
+                'to_cash_category_id' => ($to_ac_type == 'Cash') ? ($this->input->post('to_cash_category_id') ?: null) : null,
+                'to_remarks' => $this->input->post('to_remarks'),
+                'amount' => $this->input->post('amount'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_at' => date('Y-m-d H:i:s'),
             );
             $this->db->where('contra_entry_id', $this->input->post('contra_entry_id'));
             $this->db->update('cb_contra_entry_info', $upd);

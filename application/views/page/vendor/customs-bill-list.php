@@ -30,7 +30,14 @@
                         <label>Customs</label>
                         <?php echo form_dropdown('srch_vendor_id', ['' => 'All'] + $vendor_opt, $srch_vendor_id, 'id="srch_vendor_id" class="form-control srch_vendor_id select2" style="width:100%"'); ?>
                     </div>
+                    <div class="form-group col-md-6">
+                        <label>Is Bill</label><br>
+                        <label class="radio-inline"><input type="radio" name="srch_ac_type_opt" value="" <?php echo ($srch_ac_type_opt == '') ? 'checked' : ''; ?>> All</label>
+                        <label class="radio-inline"><input type="radio" name="srch_ac_type_opt" value="Accountable" <?php echo ($srch_ac_type_opt == 'Accountable') ? 'checked' : ''; ?>> For NBR & Company Account</label>
+                        <label class="radio-inline"><input type="radio" name="srch_ac_type_opt" value="Not-Accountable" <?php echo ($srch_ac_type_opt == 'Not-Accountable') ? 'checked' : ''; ?>> For NBR Only</label>
+                    </div>
                 </div>
+
                 <div class="row">
                     <div class="col-md-12 text-center">
                         <label for="">OR</label>

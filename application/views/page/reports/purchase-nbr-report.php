@@ -20,7 +20,7 @@
         <div class="box-body">
             <form method="post" action="<?php echo site_url('purchase-nbr-report') ?>" id="frmsearch">
                 <div class="row">
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <label>From Month</label>
                         <div class="input-group date">
                             <div class="input-group-addon">
@@ -32,7 +32,7 @@
                         </div>
                         <!-- /.input group -->
                     </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <label>To Month</label>
                         <div class="input-group date">
                             <div class="input-group-addon">
@@ -47,6 +47,13 @@
                     <div class="form-group col-md-3">
                         <label>VAT Payer Purchase Category</label>
                         <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('vat_payer_purchase_grp', $vat_payer_purchase_grp), 'class="form-control" id="vat_payer_purchase_grp"'); ?>
+                    </div>
+
+                    <div class="form-group col-md-3">
+                        <label>Is Bill</label><br>
+                        <label class="radio-inline"><input type="radio" name="srch_ac_type_opt" value="" <?php echo ($srch_ac_type_opt == '') ? 'checked' : ''; ?>> All</label>
+                        <label class="radio-inline"><input type="radio" name="srch_ac_type_opt" value="Accountable" <?php echo ($srch_ac_type_opt == 'Accountable') ? 'checked' : ''; ?>> NBR & Account</label>
+                        <label class="radio-inline"><input type="radio" name="srch_ac_type_opt" value="Not-Accountable" <?php echo ($srch_ac_type_opt == 'Not-Accountable') ? 'checked' : ''; ?>> only NBR</label>
                     </div>
 
                     <div class="form-group col-md-2 text-left">

@@ -141,69 +141,110 @@ class Reports extends CI_Controller
             $data['vat_payer_purchase_grp'] = $vat_payer_purchase_grp = '';
         }
 
+        if (isset($_POST['srch_ac_type_opt'])) {
+            $data['srch_ac_type_opt'] = $srch_ac_type_opt = $this->input->post('srch_ac_type_opt');
+        } else {
+            $data['srch_ac_type_opt'] = $srch_ac_type_opt = '';
+        }
+
         $data['record_list'] = [];
 
-        // $sql = "
-        //         select
-        //         c.s_order,
-        //         c.template,
-        //         a.vat_payer_purchase_grp,
-        //         a.vat_payer_purchase_grp as vat_rtn_fld, 
-        //         a.invoice_no,
-        //         a.invoice_date,
-        //         b.gst as supplier_vat_no,
-        //         b.vendor_name supplier_name,
-        //         b.crno,
-        //         'General trading' g_desc,
-        //         a.declaration_no,
-        //         a.declaration_date,
-        //         d.country_code,
-        //         (a.total_amount - a.tax_amount) as tot_amt_ex_tax,
-        //         a.tax_amount as vat_amt,
-        //         a.total_amount as tot_amt_inc_tax
-        //         from vendor_purchase_invoice_info as a
-        //         left join vendor_info as b on b.vendor_id = a.vendor_id and b.`status` = 'Active'
-        //         left join vat_filing_head_info as c on c.vat_filing_head_name = a.vat_payer_purchase_grp and c.vat_filing_head_type = 'Purchase' and c.`status` = 'Active'
-        //         left join country_info as d on d.country_name = b.country and a.`status` = 'Active'
-        //         where a.`status` = 'Active'
-        //         and a.invoice_date between '$srch_from_date'  and '$srch_to_date'
-        //         order by c.s_order asc , a.vat_payer_purchase_grp ,  a.invoice_date , a.vendor_purchase_invoice_id asc
+        $ac_type_cond_customs = "";
+        $include_other_bills = true;
 
-        // ";
+        if ($srch_ac_type_opt === 'Accountable') {
+            $ac_type_cond_customs = "and a.ac_type_opt = 'Accountable'";
+        } elseif ($srch_ac_type_opt === 'Not-Accountable') {
+            $ac_type_cond_customs = "and a.ac_type_opt = 'Not-Accountable'";
+            $include_other_bills = false;
+        }
 
+        $union_parts = [];
+        if ($include_other_bills) {
+            $union_parts[] = "
+            (select  
+            'Supplier Bill' as v_type,
+            a.vendor_id,  
+            a.invoice_no,
+            a.invoice_date as inv_date,  
+            a.vat_payer_purchase_grp,
+            'General trading' g_desc,
+            a.total_amount_wo_tax as items_tot_ex_tax,
+            (coalesce(a.total_amount_wo_tax_inc_addl, a.total_amount_wo_tax) - a.total_amount_wo_tax) as addl_amt_ex_tax,
+            coalesce(a.total_tax_amount_inc_addl, a.tax_amount) as tax_amount,
+            coalesce(a.total_amount_inc_addl, a.total_amount) as total_amount,
+            a.declaration_date,
+            a.declaration_no
+            from vendor_purchase_invoice_info as a  
+            where a.`status` = 'Active' 
+            and (a.only_accounting_entry != 1 or a.only_accounting_entry = 0 or a.only_accounting_entry is null)
+            and a.invoice_date between '$srch_from_date' and '$srch_to_date'
+            order by  a.invoice_date asc) 
+            ";
 
-        /* $sql = "
-                select
-                v.s_order,
-                v.template,
-                v.vat_filing_head_name as vat_payer_purchase_grp,
-                a.vat_payer_purchase_grp as vat_rtn_fld, 
-                a.invoice_no,
-                a.invoice_date,
-                b.gst as supplier_vat_no,
-                b.vendor_name supplier_name,
-                b.crno,
-                'General trading' g_desc,
-                a.declaration_no,
-                a.declaration_date,
-                d.country_code,
-                (a.total_amount - a.tax_amount) as tot_amt_ex_tax,
-                a.tax_amount as vat_amt,
-                a.total_amount as tot_amt_inc_tax
-                from vat_filing_head_info as v
-                left join vendor_purchase_invoice_info as a 
-                    on a.vat_payer_purchase_grp = v.vat_filing_head_name 
-                    and a.invoice_date between '$srch_from_date' and '$srch_to_date' 
-                    and a.`status` = 'Active'
-                left join vendor_info as b on b.vendor_id = a.vendor_id and b.`status` = 'Active'
-                left join vat_filing_head_info as c on c.vat_filing_head_name = a.vat_payer_purchase_grp and c.vat_filing_head_type = 'Purchase' and c.`status` = 'Active'
-                left join country_info as d on d.country_name = b.country and a.`status` = 'Active'
-                where v.`status` = 'Active' 
-                and v.vat_filing_head_type = 'Purchase'
-                order by v.s_order asc , v.vat_filing_head_name ,  a.invoice_date , a.vendor_purchase_invoice_id asc
+            $union_parts[] = "
+            (select 
+            'Local Bill' as v_type,
+            a.vendor_id,
+            a.invoice_no,
+            a.invoice_date as inv_date,
+            a.vat_payer_purchase_grp,
+            'General trading' g_desc,
+            a.tot_amt_wo_tax as items_tot_ex_tax,
+            0.000 as addl_amt_ex_tax,
+            a.vat_amt as tax_amount,
+            a.tot_amt_with_tax as total_amount,
+            '' as declaration_date,
+            '' as declaration_no
+            from local_purchase_bill_info as a
+            where a.`status` = 'Active'  
+            and a.invoice_date between '$srch_from_date' and '$srch_to_date'
+            order by  a.invoice_date asc) 
+            ";
 
-        "; */
+            $union_parts[] = "
+            (select 
+            'DP Bill' as v_type,
+            a.vendor_id,
+            a.invoice_no,
+            a.invoice_date as inv_date,
+            a.vat_payer_purchase_grp,
+            'Service' g_desc,
+            a.dp_charges as items_tot_ex_tax,
+            0.000 as addl_amt_ex_tax,
+            a.dp_vat_amt as tax_amount,
+            (a.dp_charges + a.dp_vat_amt) as total_amount,
+            '' as declaration_date,
+            '' as declaration_no
+            from dp_bill_info as a
+            where a.`status` = 'Active'  
+            and a.invoice_date between '$srch_from_date' and '$srch_to_date'
+            order by a.invoice_date asc) 
+            ";
+        }
 
+        $union_parts[] = "
+        (select 
+        'Customs Bill' as v_type,
+        a.vendor_id,
+        a.invoice_no,
+        a.invoice_date as inv_date,
+        a.vat_payer_purchase_grp,
+        'Service' g_desc,
+        a.tot_amt_wo_vat as items_tot_ex_tax,
+        0.000 as addl_amt_ex_tax,
+        a.vat_amt as tax_amount,
+        a.customs_tot_amt as total_amount,
+        a.declaration_date as declaration_date,
+        a.declaration_no as declaration_no
+        from customs_bill_info as a
+        where a.`status` = 'Active'  
+        $ac_type_cond_customs
+        and a.invoice_date between '$srch_from_date' and '$srch_to_date'
+        order by a.invoice_date asc) 
+        ";
+
+        $union_sql = implode(" union all ", $union_parts);
 
         $sql = "
         select 
@@ -226,81 +267,7 @@ class Reports extends CI_Controller
         a1.declaration_no
         from
         (
-            (
-            select  
-            'Supplier Bill' as v_type,
-            a.vendor_id,  
-            a.invoice_no,
-            a.invoice_date as inv_date,  
-            a.vat_payer_purchase_grp,
-            'General trading' g_desc,
-            a.total_amount_wo_tax as items_tot_ex_tax,
-            (coalesce(a.total_amount_wo_tax_inc_addl, a.total_amount_wo_tax) - a.total_amount_wo_tax) as addl_amt_ex_tax,
-            coalesce(a.total_tax_amount_inc_addl, a.tax_amount) as tax_amount,
-            coalesce(a.total_amount_inc_addl, a.total_amount) as total_amount,
-            a.declaration_date,
-            a.declaration_no
-            from vendor_purchase_invoice_info as a  
-            where a.`status` = 'Active' 
-            and (a.only_accounting_entry != 1 or a.only_accounting_entry = 0 or a.only_accounting_entry is null)
-            and a.entry_date between '$srch_from_date' and '$srch_to_date'
-            order by  a.entry_date asc 
-            ) union all (
-             select 
-            'Local Bill' as v_type,
-            a.vendor_id,
-            a.invoice_no,
-            a.invoice_date as inv_date,
-            a.vat_payer_purchase_grp,
-            'General trading' g_desc,
-            a.tot_amt_wo_tax as items_tot_ex_tax,
-            0.000 as addl_amt_ex_tax,
-            a.vat_amt as tax_amount,
-            a.tot_amt_with_tax as total_amount,
-            '' as declaration_date,
-            '' as declaration_no
-            from local_purchase_bill_info as a
-            where a.`status` = 'Active'  
-            and a.inv_entry_date between '$srch_from_date' and '$srch_to_date'
-            order by  a.inv_entry_date asc  
-            ) union all (
-            select 
-            'DP Bill' as v_type,
-            a.vendor_id,
-            a.invoice_no,
-            a.invoice_date as inv_date,
-            a.vat_payer_purchase_grp,
-            'Service' g_desc,
-            a.dp_charges as items_tot_ex_tax,
-            0.000 as addl_amt_ex_tax,
-            a.dp_vat_amt as tax_amount,
-            (a.dp_charges + a.dp_vat_amt) as total_amount,
-            '' as declaration_date,
-            '' as declaration_no
-            from dp_bill_info as a
-            where a.`status` = 'Active'  
-            and a.inv_entry_date between '$srch_from_date' and '$srch_to_date'
-            order by a.inv_entry_date asc 
-            ) union all (
-            select 
-            'Customs Bill' as v_type,
-            a.vendor_id,
-            a.invoice_no,
-            a.invoice_date as inv_date,
-            a.vat_payer_purchase_grp,
-            'Service' g_desc,
-            a.tot_amt_wo_vat as items_tot_ex_tax,
-            0.000 as addl_amt_ex_tax,
-            a.vat_amt as tax_amount,
-            a.customs_tot_amt as total_amount,
-            a.declaration_date as declaration_date,
-            a.declaration_no as declaration_no
-            from customs_bill_info as a
-            where a.`status` = 'Active'  
-            
-            and a.inv_entry_date between '$srch_from_date' and '$srch_to_date'
-            order by a.inv_entry_date asc 
-            ) 
+            $union_sql
         ) as a1
          left join vendor_info as b on b.vendor_id = a1.vendor_id and b.`status` = 'Active'
          left join vat_filing_head_info as c on c.vat_filing_head_name = a1.vat_payer_purchase_grp and c.vat_filing_head_type = 'Purchase' and c.`status` = 'Active'
@@ -308,8 +275,8 @@ class Reports extends CI_Controller
          order by c.s_order asc , c.vat_filing_head_name ,  a1.inv_date ,  a1.v_type 
         ";
 
-
         $query = $this->db->query($sql);
+
         $rec = $query->result_array();
 
         $grouped = [];
@@ -365,6 +332,13 @@ class Reports extends CI_Controller
             $data['vat_payer_purchase_grp'] = $vat_payer_purchase_grp = '';
         }
 
+        if (isset($_POST['srch_ac_type_opt'])) {
+            $data['srch_ac_type_opt'] = $srch_ac_type_opt = $this->input->post('srch_ac_type_opt');
+        } else {
+            $data['srch_ac_type_opt'] = $srch_ac_type_opt = '';
+        }
+
+
         // Fetch Sales Data
         $data['sales_record_list'] = [];
         $sql_sales = " 
@@ -408,6 +382,103 @@ class Reports extends CI_Controller
 
         // Fetch Purchase Data
         $data['purchase_record_list'] = [];
+        $ac_type_cond_customs = "";
+        $include_other_bills = true;
+
+        if ($srch_ac_type_opt === 'Accountable') {
+            $ac_type_cond_customs = "and a.ac_type_opt = 'Accountable'";
+        } elseif ($srch_ac_type_opt === 'Not-Accountable') {
+            $ac_type_cond_customs = "and a.ac_type_opt = 'Not-Accountable'";
+            $include_other_bills = false;
+        }
+
+        $union_parts = [];
+        if ($include_other_bills) {
+            $union_parts[] = "
+            (select  
+            'Supplier Bill' as v_type,
+            a.vendor_id,  
+            a.invoice_no,
+            a.invoice_date as inv_date,  
+            a.vat_payer_purchase_grp,
+            'General trading' g_desc,
+            a.total_amount_wo_tax as items_tot_ex_tax,
+            (coalesce(a.total_amount_wo_tax_inc_addl, a.total_amount_wo_tax) - a.total_amount_wo_tax) as addl_amt_ex_tax,
+            coalesce(a.total_tax_amount_inc_addl, a.tax_amount) as tax_amount,
+            coalesce(a.total_amount_inc_addl, a.total_amount) as total_amount,
+            a.declaration_date,
+            a.declaration_no
+            from vendor_purchase_invoice_info as a  
+            where a.`status` = 'Active' 
+            and (a.only_accounting_entry != 1 or a.only_accounting_entry = 0 or a.only_accounting_entry is null)
+            and a.invoice_date between '$srch_from_date' and '$srch_to_date'
+            order by  a.invoice_date asc) 
+            ";
+
+            $union_parts[] = "
+            (select 
+            'Local Bill' as v_type,
+            a.vendor_id,
+            a.invoice_no,
+            a.invoice_date as inv_date,
+            a.vat_payer_purchase_grp,
+            'General trading' g_desc,
+            a.tot_amt_wo_tax as items_tot_ex_tax,
+            0.000 as addl_amt_ex_tax,
+            a.vat_amt as tax_amount,
+            a.tot_amt_with_tax as total_amount,
+            '' as declaration_date,
+            '' as declaration_no
+            from local_purchase_bill_info as a
+            where a.`status` = 'Active'  
+            and a.invoice_date between '$srch_from_date' and '$srch_to_date'
+            order by  a.invoice_date asc) 
+            ";
+
+            $union_parts[] = "
+            (select 
+            'DP Bill' as v_type,
+            a.vendor_id,
+            a.invoice_no,
+            a.invoice_date as inv_date,
+            a.vat_payer_purchase_grp,
+            'Service' g_desc,
+            a.dp_charges as items_tot_ex_tax,
+            0.000 as addl_amt_ex_tax,
+            a.dp_vat_amt as tax_amount,
+            (a.dp_charges + a.dp_vat_amt) as total_amount,
+            '' as declaration_date,
+            '' as declaration_no
+            from dp_bill_info as a
+            where a.`status` = 'Active'  
+            and a.invoice_date between '$srch_from_date' and '$srch_to_date'
+            order by a.invoice_date asc) 
+            ";
+        }
+
+        $union_parts[] = "
+        (select 
+        'Customs Bill' as v_type,
+        a.vendor_id,
+        a.invoice_no,
+        a.invoice_date as inv_date,
+        a.vat_payer_purchase_grp,
+        'Service' g_desc,
+        a.tot_amt_wo_vat as items_tot_ex_tax,
+        0.000 as addl_amt_ex_tax,
+        a.vat_amt as tax_amount,
+        a.customs_tot_amt as total_amount,
+        a.declaration_date as declaration_date,
+        a.declaration_no as declaration_no
+        from customs_bill_info as a
+        where a.`status` = 'Active'  
+        $ac_type_cond_customs
+        and a.invoice_date between '$srch_from_date' and '$srch_to_date'
+        order by a.invoice_date asc) 
+        ";
+
+        $union_sql = implode(" union all ", $union_parts);
+
         $sql_purchase = "
         select 
         c.s_order,
@@ -429,86 +500,14 @@ class Reports extends CI_Controller
         a1.declaration_no
         from
         (
-            (
-            select  
-            'Supplier Bill' as v_type,
-            a.vendor_id,  
-            a.invoice_no,
-            a.invoice_date as inv_date,  
-            a.vat_payer_purchase_grp,
-            'General trading' g_desc,
-            a.total_amount_wo_tax as items_tot_ex_tax,
-            (coalesce(a.total_amount_wo_tax_inc_addl, a.total_amount_wo_tax) - a.total_amount_wo_tax) as addl_amt_ex_tax,
-            coalesce(a.total_tax_amount_inc_addl, a.tax_amount) as tax_amount,
-            coalesce(a.total_amount_inc_addl, a.total_amount) as total_amount,
-            a.declaration_date,
-            a.declaration_no
-            from vendor_purchase_invoice_info as a  
-            where a.`status` = 'Active' 
-            and (a.only_accounting_entry != 1 or a.only_accounting_entry = 0 or a.only_accounting_entry is null)
-            and a.entry_date between '$srch_from_date' and '$srch_to_date'
-            order by  a.entry_date asc 
-            ) union all (
-             select 
-            'Local Bill' as v_type,
-            a.vendor_id,
-            a.invoice_no,
-            a.invoice_date as inv_date,
-            a.vat_payer_purchase_grp,
-            'General trading' g_desc,
-            a.tot_amt_wo_tax as items_tot_ex_tax,
-            0.000 as addl_amt_ex_tax,
-            a.vat_amt as tax_amount,
-            a.tot_amt_with_tax as total_amount,
-            '' as declaration_date,
-            '' as declaration_no
-            from local_purchase_bill_info as a
-            where a.`status` = 'Active'  
-            and a.inv_entry_date between '$srch_from_date' and '$srch_to_date'
-            order by  a.inv_entry_date asc  
-            ) union all (
-            select 
-            'DP Bill' as v_type,
-            a.vendor_id,
-            a.invoice_no,
-            a.invoice_date as inv_date,
-            a.vat_payer_purchase_grp,
-            'Service' g_desc,
-            a.dp_charges as items_tot_ex_tax,
-            0.000 as addl_amt_ex_tax,
-            a.dp_vat_amt as tax_amount,
-            (a.dp_charges + a.dp_vat_amt) as total_amount,
-            '' as declaration_date,
-            '' as declaration_no
-            from dp_bill_info as a
-            where a.`status` = 'Active'  
-            and a.inv_entry_date between '$srch_from_date' and '$srch_to_date'
-            order by a.inv_entry_date asc 
-            ) union all (
-            select 
-            'Customs Bill' as v_type,
-            a.vendor_id,
-            a.invoice_no,
-            a.invoice_date as inv_date,
-            a.vat_payer_purchase_grp,
-            'Service' g_desc,
-            a.tot_amt_wo_vat as items_tot_ex_tax,
-            0.000 as addl_amt_ex_tax,
-            a.vat_amt as tax_amount,
-            a.customs_tot_amt as total_amount,
-            a.declaration_date as declaration_date,
-            a.declaration_no as declaration_no
-            from customs_bill_info as a
-            where a.`status` = 'Active'  
-            and a.inv_entry_date between '$srch_from_date' and '$srch_to_date'
-            order by a.inv_entry_date asc 
-            ) 
+            $union_sql
         ) as a1
          left join vendor_info as b on b.vendor_id = a1.vendor_id and b.`status` = 'Active'
          left join vat_filing_head_info as c on c.vat_filing_head_name = a1.vat_payer_purchase_grp and c.vat_filing_head_type = 'Purchase' and c.`status` = 'Active'
          where ('" . $this->db->escape_str($vat_payer_purchase_grp) . "' = '' or a1.vat_payer_purchase_grp = '" . $this->db->escape_str($vat_payer_purchase_grp) . "')
          order by c.s_order asc , c.vat_filing_head_name ,  a1.inv_date ,  a1.v_type 
         ";
+
 
         $query_purchase = $this->db->query($sql_purchase);
         $rec_purchase = $query_purchase->result_array();
@@ -1972,12 +1971,12 @@ class Reports extends CI_Controller
                     a.invoice_date,
                     a.invoice_no,
                     b.vendor_name,
-                    a.customs_tot_amt AS total_amount,
+                    (a.bill_amount + a.vat_amt) AS total_amount,
                     'Customer Bill' AS bill_type
                 FROM customs_bill_info AS a
                 LEFT JOIN vendor_info AS b 
                     ON a.vendor_id = b.vendor_id AND b.status = 'Active'
-                WHERE a.status = 'Active' $where
+                WHERE a.status = 'Active' AND a.ac_type_opt = 'Accountable' $where
 
             ) AS final_table
 
@@ -2193,8 +2192,8 @@ class Reports extends CI_Controller
                         
                         UNION ALL
                         
-                        SELECT customs_tot_amt AS total_amount FROM customs_bill_info
-                        WHERE status = 'Active' AND vendor_id = '$esc_vendor' AND invoice_date >= '$esc_op' AND invoice_date < '$esc_from'
+                        SELECT (bill_amount + vat_amt) AS total_amount FROM customs_bill_info
+                        WHERE status = 'Active' AND ac_type_opt = 'Accountable' AND vendor_id = '$esc_vendor' AND invoice_date >= '$esc_op' AND invoice_date < '$esc_from'
                         
                         UNION ALL
                         
@@ -2253,8 +2252,8 @@ class Reports extends CI_Controller
                         
                         UNION ALL
                         
-                        SELECT customs_tot_amt AS total_amount FROM customs_bill_info
-                        WHERE status = 'Active' AND invoice_date < '$esc_from'
+                        SELECT (bill_amount + vat_amt) AS total_amount FROM customs_bill_info
+                        WHERE status = 'Active' AND ac_type_opt = 'Accountable' AND invoice_date < '$esc_from'
                         
                         UNION ALL
                         
@@ -2359,13 +2358,14 @@ class Reports extends CI_Controller
                     a.invoice_date AS tr_date,
                     a.invoice_no AS voucher_no,
                     'Customer Bill' AS description,
-                    a.customs_tot_amt AS purchase_amt,
+                    (a.bill_amount + a.vat_amt) AS purchase_amt,
                     0.000 AS paid_amt,
                     'purchase' AS type,
                     v.vendor_name
                 FROM customs_bill_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status = 'Active'
+                  AND a.ac_type_opt = 'Accountable'
                   " . (!empty($vendor_id) ? "AND a.vendor_id = '$esc_vendor'" : "") . "
                   " . (!empty($from_date) ? "AND a.invoice_date >= '$esc_from'" : "") . "
                   " . (!empty($to_date) ? "AND a.invoice_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
@@ -2995,17 +2995,20 @@ class Reports extends CI_Controller
 
             // Allocate Vendor Qty
             $alloc_vendor = $is_last_item ? $remaining_vendor[$key] : min($po_qty, $remaining_vendor[$key]);
-            if ($alloc_vendor < 0) $alloc_vendor = 0;
+            if ($alloc_vendor < 0)
+                $alloc_vendor = 0;
             $remaining_vendor[$key] -= $alloc_vendor;
 
             // Allocate Delivered Qty
             $alloc_delivered = $is_last_item ? $remaining_delivered[$key] : min($po_qty, $remaining_delivered[$key]);
-            if ($alloc_delivered < 0) $alloc_delivered = 0;
+            if ($alloc_delivered < 0)
+                $alloc_delivered = 0;
             $remaining_delivered[$key] -= $alloc_delivered;
 
             // Allocate Invoiced Qty
             $alloc_invoiced = $is_last_item ? $remaining_invoiced[$key] : min($po_qty, $remaining_invoiced[$key]);
-            if ($alloc_invoiced < 0) $alloc_invoiced = 0;
+            if ($alloc_invoiced < 0)
+                $alloc_invoiced = 0;
             $remaining_invoiced[$key] -= $alloc_invoiced;
 
             $grouped[$po_id]['items'][] = [
@@ -3078,7 +3081,7 @@ class Reports extends CI_Controller
         $data['customer_list'] = $this->db->get_where('customer_info', array('status' => 'Active'))->result_array();
 
         $this->load->model('Invoice_report_model');
-        
+
         // 1. Fetch Customer Invoices
         $invoices = $this->Invoice_report_model->get_customer_invoices_for_vat($srch_from_date, $srch_to_date, $srch_company_id, $srch_customer_id, $srch_text);
 
@@ -3109,7 +3112,7 @@ class Reports extends CI_Controller
         foreach ($invoices as $inv) {
             $enq_id = $inv['tender_enquiry_id'];
             $bills = isset($grouped_bills[$enq_id]) ? $grouped_bills[$enq_id] : [];
-            
+
             $merged_records[] = [
                 'invoice' => $inv,
                 'bills' => $bills

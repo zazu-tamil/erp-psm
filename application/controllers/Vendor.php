@@ -6041,17 +6041,29 @@ class Vendor extends CI_Controller
             $data['srch_customer_id'] = $srch_customer_id = '';
         }
 
-
+        // Is Bill (ac_type_opt) Filter
+        if ($this->input->post('srch_ac_type_opt') !== null) {
+            $data['srch_ac_type_opt'] = $srch_ac_type_opt = $this->input->post('srch_ac_type_opt');
+            $this->session->set_userdata('srch_ac_type_opt', $srch_ac_type_opt);
+        } elseif ($this->session->userdata('srch_ac_type_opt') !== null) {
+            $data['srch_ac_type_opt'] = $srch_ac_type_opt = $this->session->userdata('srch_ac_type_opt');
+        } else {
+            $data['srch_ac_type_opt'] = $srch_ac_type_opt = '';
+        }
+        if (!empty($srch_ac_type_opt)) {
+            $where .= " AND a.ac_type_opt = '" . $this->db->escape_str($srch_ac_type_opt) . "'";
+        }
 
         $this->load->library('pagination');
 
         $this->db->where('status != ', 'Delete');
-        $this->db->from('dp_bill_info as a');
+        $this->db->where($where);
+        $this->db->from('customs_bill_info as a');
         $data['total_records'] = $cnt = $this->db->count_all_results();
 
         $data['sno'] = $this->uri->segment(2, 0);
 
-        $config['base_url'] = trim(site_url('delivery-partner-bill-list') . '/' . $this->uri->segment(2, 0));
+        $config['base_url'] = trim(site_url('customs-bill-list') . '/' . $this->uri->segment(2, 0));
         $config['total_rows'] = $cnt;
         $config['per_page'] = 50;
         $config['uri_segment'] = 2;
@@ -6073,6 +6085,7 @@ class Vendor extends CI_Controller
         $config['prev_link'] = "Prev";
         $config['next_link'] = "Next";
         $this->pagination->initialize($config);
+
 
 
         $sql = "
