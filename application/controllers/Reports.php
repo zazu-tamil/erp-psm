@@ -1215,7 +1215,8 @@ class Reports extends CI_Controller
             from local_purchase_bill_info as a
             left join cb_sub_account_head_info as b on b.sub_account_head_id = a.sub_account_head_id and b.`status` = 'Active' 
             left join vendor_info as c on c.vendor_id = a.vendor_id and c.`status` = 'Active'
-            where a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
+            where a.status='Active'
+            and a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
             order by a.invoice_date asc
             ";
 
