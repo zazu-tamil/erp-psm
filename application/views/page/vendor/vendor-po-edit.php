@@ -137,6 +137,15 @@
                                     <?php echo set_radio('status', 'Inactive', $header['status'] == 'Inactive'); ?>>
                                 Inactive</label>
                         </div>
+                        <div class="form-group col-md-2">
+                            <label>PO Type</label><br>
+                            <label class="radio-inline"><input type="radio" name="po_type" value="Local" class="po_type_radio"
+                                    <?php echo set_radio('po_type', 'Local', ($header['po_type'] ?? 'Local') == 'Local'); ?>>
+                                Local</label>
+                            <label class="radio-inline"><input type="radio" name="po_type" value="International" class="po_type_radio"
+                                    <?php echo set_radio('po_type', 'International', ($header['po_type'] ?? 'Local') == 'International'); ?>>
+                                International</label>
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6">

@@ -560,6 +560,19 @@ class Vendor extends CI_Controller
             exit;
         }
 
+        // Dynamically ensure column po_type exists in vendor_po_info
+        if (!$this->db->field_exists('po_type', 'vendor_po_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('vendor_po_info', [
+                'po_type' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 50,
+                    'null' => TRUE,
+                    'default' => 'Local'
+                ]
+            ]);
+        }
+
         $data['js'] = 'vendor/vendor-po-add.inc';
         $data['title'] = 'Add Supplier PO';
 
@@ -581,6 +594,7 @@ class Vendor extends CI_Controller
                 // 'other_charges' => $this->input->post('other_charges'),
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
+                'po_type' => $this->input->post('po_type'),
                 'po_status' => $this->input->post('po_status'),
                 'status' => $this->input->post('status'),
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
@@ -948,6 +962,7 @@ class Vendor extends CI_Controller
                 a.vendor_id,
                 a.po_status, 
                 a.po_date,
+                a.po_type,
                 c.customer_name,
                 v.vendor_name,
                 a.company_id,
@@ -985,6 +1000,19 @@ class Vendor extends CI_Controller
             exit;
         }
 
+        // Dynamically ensure column po_type exists in vendor_po_info
+        if (!$this->db->field_exists('po_type', 'vendor_po_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('vendor_po_info', [
+                'po_type' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 50,
+                    'null' => TRUE,
+                    'default' => 'Local'
+                ]
+            ]);
+        }
+
         $data['js'] = 'vendor/vendor-po-edit.inc';
         $data['title'] = 'Edit Supplier PO';
 
@@ -1007,6 +1035,7 @@ class Vendor extends CI_Controller
                 // 'other_charges' => $this->input->post('other_charges'),
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
+                'po_type' => $this->input->post('po_type'),
                 'po_status' => $this->input->post('po_status'),
                 'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),

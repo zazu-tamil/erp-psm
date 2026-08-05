@@ -105,9 +105,6 @@
       $("#total_tax_amount_addt").text((grand_total - grand_wot).toFixed(3));
     }
 
-    /* ============================================================
-       HELPER: LOAD TERMS & CONDITIONS INTO CKEDITOR
-    ============================================================ */
     function load_terms_and_conditions(companyId) {
       $.ajax({
         url: "<?php echo site_url('get-data'); ?>",
@@ -116,7 +113,12 @@
         data: { tbl: "get-company-terms-and-conditions-list", id: companyId },
         success: function (res) {
           if (res && res.length > 0) {
-            CKEDITOR.instances.editor2.setData(res[0].vendor_po_terms || "");
+            let poType = $(".po_type_radio:checked").val() || "Local";
+            if (poType === "International") {
+              CKEDITOR.instances.editor2.setData(res[0].vendor_po_intl_terms || "");
+            } else {
+              CKEDITOR.instances.editor2.setData(res[0].vendor_po_terms || "");
+            }
           } else {
             CKEDITOR.instances.editor2.setData("");
           }
@@ -126,6 +128,13 @@
         },
       });
     }
+
+    $(document).on("change", "#srch_company_id, .po_type_radio", function () {
+      let companyId = $("#srch_company_id").val();
+      if (companyId) {
+        load_terms_and_conditions(companyId);
+      }
+    });
 
     /* ============================================================
        HELPER: LOAD TENDER ENQUIRIES (by company + customer)
@@ -216,7 +225,7 @@
       },
       minLength: 1,
       select: function (event, ui) {
-        $("#srch_company_id").val(ui.item.company_id);
+        $("#srch_company_id").val(ui.item.company_id).trigger("change");
         $("#srch_customer_id").val(ui.item.customer_id).trigger("change");
         // load_tender_enq is called inside the customer change handler,
         // but we also need to pre-select the specific enquiry id:

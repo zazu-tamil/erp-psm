@@ -155,6 +155,9 @@
                                             <li>
                                                 <a href="#tab_4" data-toggle="tab"> Vendor PO Terms & Conditions</a>
                                             </li>
+                                            <li>
+                                                <a href="#tab_5" data-toggle="tab"> Vendor PO Intl Terms</a>
+                                            </li>
                                         </ul>
 
                                         <div class="tab-content">
@@ -208,6 +211,19 @@
                                                             <textarea id="editor4" name="vendor_po_terms"
                                                                 class="form-control custom-textarea"
                                                                 placeholder="Enter vendor PO terms and conditions"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="tab-pane" id="tab_5">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Vendor PO Intl Terms & Conditions</label>
+                                                            <textarea id="editor5" name="vendor_po_intl_terms"
+                                                                class="form-control custom-textarea"
+                                                                placeholder="Enter vendor PO international terms and conditions"></textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -352,6 +368,9 @@
                                                 <a href="#edit_tab_4" data-toggle="tab"> Vendor PO Terms &
                                                     Conditions</a>
                                             </li>
+                                            <li>
+                                                <a href="#edit_tab_5" data-toggle="tab"> Vendor PO Intl Terms</a>
+                                            </li>
                                         </ul>
 
                                         <div class="tab-content">
@@ -403,6 +422,18 @@
                                                             <textarea id="editor4_edit_modal" name="vendor_po_terms"
                                                                 class="form-control custom-textarea"
                                                                 placeholder="Enter vendor PO terms and conditions"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="tab-pane" id="edit_tab_5">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Vendor PO Intl Terms & Conditions</label>
+                                                            <textarea id="editor5_edit_modal" name="vendor_po_intl_terms"
+                                                                class="form-control custom-textarea"
+                                                                placeholder="Enter vendor PO international terms and conditions"></textarea>
                                                         </div>
                                                     </div>
                                                 </div>

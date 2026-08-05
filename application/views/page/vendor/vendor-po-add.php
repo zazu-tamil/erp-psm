@@ -126,6 +126,12 @@
                             <label class="radio-inline"><input type="radio" name="status" value="Active" <?php echo set_radio('status', 'Active', TRUE); ?>> Active</label>
                             <label class="radio-inline"><input type="radio" name="status" value="Inactive" <?php echo set_radio('status', 'Inactive'); ?>> Inactive</label>
                         </div>
+
+                        <div class="form-group col-md-4">
+                            <label>PO Type</label><br>
+                            <label class="radio-inline"><input type="radio" name="po_type" value="Local" class="po_type_radio" <?php echo set_radio('po_type', 'Local', TRUE); ?>> Local</label>
+                            <label class="radio-inline"><input type="radio" name="po_type" value="International" class="po_type_radio" <?php echo set_radio('po_type', 'International'); ?>> International</label>
+                        </div>
                     </div>
 
                     <div class="row">
