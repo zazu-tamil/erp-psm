@@ -373,6 +373,7 @@ $(function() {
                 edit_load_tender_enq(res.tender_enquiry_id);
                 $('#edit_modal #srch_tender_enquiry_id').val(res.tender_enquiry_id).trigger('change');
                 $('#edit_modal #vendor_id').val(res.vendor_id).trigger('change');
+                $('#edit_modal #vendor_id_2').val(res.vendor_id_2).trigger('change');
                 $('#edit_modal #invoice_date').val(res.invoice_date);
                 $('#edit_modal #invoice_no').val(res.invoice_no);
                 $('#edit_modal #inv_entry_date').val(res.inv_entry_date);
