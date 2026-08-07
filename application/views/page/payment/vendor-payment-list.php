@@ -255,7 +255,7 @@
                             <div class="form-group col-md-6">
                                 <label>Amount <span class="text-red">*</span></label>
                                 <div class="input-group">
-                                    <input type="number" name="amount" id="add_grand_total_amount"
+                                    <input type="number" step="any" name="amount" id="add_grand_total_amount"
                                         class="form-control text-right" placeholder="0.000"> 
                                     <span class="input-group-btn">
                                         <button type="button" class="btn btn-warning btn-sm" id="add_auto_allocate_btn"
