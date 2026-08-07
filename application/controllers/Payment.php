@@ -1035,19 +1035,20 @@ class Payment extends CI_Controller
 
                 UNION ALL
 
-                -- Customs Bill
+                -- Customs Bill (For Accountable bills: bill_amount + vat_amt)
                 SELECT
                     a.customs_bill_id,
                     a.invoice_date,
                     a.tender_enquiry_id,
                     a.invoice_no,
                     b.vendor_name,
-                    a.customs_tot_amt,
+                    (a.bill_amount + a.vat_amt) AS customs_tot_amt,
                     'Customs Bill'
                 FROM customs_bill_info a
                 LEFT JOIN vendor_info b 
                     ON a.vendor_id = b.vendor_id AND b.status = 'Active'
                 WHERE a.status = 'Active' 
+                    AND a.ac_type_opt = 'Accountable'
                     AND a.vendor_id = $vendor_id
 
                 UNION ALL
@@ -1160,19 +1161,20 @@ class Payment extends CI_Controller
 
                 UNION ALL
 
-                -- Customs Bill
+                -- Customs Bill (For Accountable bills: bill_amount + vat_amt)
                 SELECT
                     a.customs_bill_id,
                     a.invoice_date,
                     a.tender_enquiry_id,
                     a.invoice_no, 
                     b.vendor_name,
-                    a.customs_tot_amt,
+                    (a.bill_amount + a.vat_amt) AS customs_tot_amt,
                     'Customs Bill'
                 FROM customs_bill_info a
                 LEFT JOIN vendor_info b 
                     ON a.vendor_id = b.vendor_id AND b.status = 'Active'
                 WHERE a.status = 'Active' 
+                    AND a.ac_type_opt = 'Accountable'
                     AND a.vendor_id = $vendor_id
 
                 UNION ALL
@@ -1281,9 +1283,9 @@ class Payment extends CI_Controller
 
                 UNION ALL
 
-                SELECT customs_tot_amt AS total_amount
+                SELECT (bill_amount + vat_amt) AS total_amount
                 FROM customs_bill_info
-                WHERE status = 'Active' AND vendor_id = '$esc_vendor' {$date_filter_bills}
+                WHERE status = 'Active' AND ac_type_opt = 'Accountable' AND vendor_id = '$esc_vendor' {$date_filter_bills}
             ) AS bills
         ";
         $bill_row    = $this->db->query($bill_sql)->row_array();

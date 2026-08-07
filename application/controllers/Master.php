@@ -124,6 +124,18 @@ class Master extends CI_Controller
             exit;
         }
 
+        // Dynamically ensure column vendor_po_intl_terms exists in company_info
+        if (!$this->db->field_exists('vendor_po_intl_terms', 'company_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('company_info', [
+                'vendor_po_intl_terms' => [
+                    'type' => 'TEXT',
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+
         $data['js'] = 'company-list.inc';
 
         // Handle Add (only if none exists)
@@ -162,6 +174,7 @@ class Master extends CI_Controller
                 'invoice_terms' => $this->input->post('invoice_terms'),
                 'dn_terms' => $this->input->post('dn_terms'),
                 'vendor_po_terms' => $this->input->post('vendor_po_terms'),
+                'vendor_po_intl_terms' => $this->input->post('vendor_po_intl_terms'),
                 'country' => $this->input->post('country'),
                 'ltr_header_img' => $folder . '/' . $ltr_header_img,
                 'email' => $this->input->post('email'),
@@ -201,6 +214,7 @@ class Master extends CI_Controller
                 'invoice_terms' => $this->input->post('invoice_terms'),
                 'dn_terms' => $this->input->post('dn_terms'),
                 'vendor_po_terms' => $this->input->post('vendor_po_terms'),
+                'vendor_po_intl_terms' => $this->input->post('vendor_po_intl_terms'),
                 'company_code' => $this->input->post('company_code'),
                 'email' => $this->input->post('email'),
                 'bank_id' => $this->input->post('bank_id'),

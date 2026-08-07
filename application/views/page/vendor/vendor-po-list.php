@@ -1,4 +1,4 @@
-<?php include_once(VIEWPATH . 'inc/header.php'); ?>
+  <?php include_once(VIEWPATH . 'inc/header.php'); ?>
 <section class="content-header">
     <h1><?php echo htmlspecialchars($title); ?></h1>
     <ol class="breadcrumb">
@@ -93,6 +93,7 @@
                         <th>Company / RFQ No</th>
                         <th>Customer</th> 
                         <th>Po No</th> 
+                        <th>PO Type</th>
                         <th>Po Status</th>
 
 
@@ -111,6 +112,7 @@
                                 <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
 
                                 <td><strong><?php echo htmlspecialchars($row['po_no']); ?></strong></td> 
+                                <td><span class="label label-default"><?php echo htmlspecialchars($row['po_type'] ?? 'Local'); ?></span></td>
 
                                 <?php
                                 $status = $row['po_status'];

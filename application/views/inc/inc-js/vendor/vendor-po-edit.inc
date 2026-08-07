@@ -460,7 +460,38 @@
 
     /* =====================================================
    INITIAL LOAD
-===================================================== */
+ ===================================================== */
+    function load_terms_and_conditions(companyId) {
+      $.ajax({
+        url: "<?php echo site_url('get-data'); ?>",
+        type: "POST",
+        dataType: "json",
+        data: { tbl: "get-company-terms-and-conditions-list", id: companyId },
+        success: function (res) {
+          if (res && res.length > 0) {
+            let poType = $(".po_type_radio:checked").val() || "Local";
+            if (poType === "International") {
+              CKEDITOR.instances.editor2.setData(res[0].vendor_po_intl_terms || "");
+            } else {
+              CKEDITOR.instances.editor2.setData(res[0].vendor_po_terms || "");
+            }
+          } else {
+            CKEDITOR.instances.editor2.setData("");
+          }
+        },
+        error: function (xhr) {
+          console.error("Terms load error:", xhr.responseText);
+        },
+      });
+    }
+
+    $(document).on("change", ".po_type_radio", function () {
+      let companyId = $("#srch_company_id").val();
+      if (companyId) {
+        load_terms_and_conditions(companyId);
+      }
+    });
+
     $(document).ready(function () {
       recalculateAll();
     });

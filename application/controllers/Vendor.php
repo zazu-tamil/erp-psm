@@ -82,7 +82,7 @@ class Vendor extends CI_Controller
 
         $data['sno'] = $this->uri->segment(2, 0);
 
-        $config['base_url'] = trim(site_url('vendor-rate-enquiry-list') . '/' . $this->uri->segment(2, 0));
+        $config['base_url'] = site_url('vendor-rate-enquiry-list');
         $config['total_rows'] = $cnt;
         $config['per_page'] = 50;
         $config['uri_segment'] = 2;
@@ -560,6 +560,19 @@ class Vendor extends CI_Controller
             exit;
         }
 
+        // Dynamically ensure column po_type exists in vendor_po_info
+        if (!$this->db->field_exists('po_type', 'vendor_po_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('vendor_po_info', [
+                'po_type' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 50,
+                    'null' => TRUE,
+                    'default' => 'Local'
+                ]
+            ]);
+        }
+
         $data['js'] = 'vendor/vendor-po-add.inc';
         $data['title'] = 'Add Supplier PO';
 
@@ -581,6 +594,7 @@ class Vendor extends CI_Controller
                 // 'other_charges' => $this->input->post('other_charges'),
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
+                'po_type' => $this->input->post('po_type'),
                 'po_status' => $this->input->post('po_status'),
                 'status' => $this->input->post('status'),
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
@@ -948,6 +962,7 @@ class Vendor extends CI_Controller
                 a.vendor_id,
                 a.po_status, 
                 a.po_date,
+                a.po_type,
                 c.customer_name,
                 v.vendor_name,
                 a.company_id,
@@ -985,6 +1000,19 @@ class Vendor extends CI_Controller
             exit;
         }
 
+        // Dynamically ensure column po_type exists in vendor_po_info
+        if (!$this->db->field_exists('po_type', 'vendor_po_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('vendor_po_info', [
+                'po_type' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 50,
+                    'null' => TRUE,
+                    'default' => 'Local'
+                ]
+            ]);
+        }
+
         $data['js'] = 'vendor/vendor-po-edit.inc';
         $data['title'] = 'Edit Supplier PO';
 
@@ -1007,6 +1035,7 @@ class Vendor extends CI_Controller
                 // 'other_charges' => $this->input->post('other_charges'),
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
+                'po_type' => $this->input->post('po_type'),
                 'po_status' => $this->input->post('po_status'),
                 'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
@@ -5339,6 +5368,19 @@ class Vendor extends CI_Controller
             exit;
         }
 
+        // Dynamically ensure column vendor_id_2 exists in local_purchase_bill_info
+        if (!$this->db->field_exists('vendor_id_2', 'local_purchase_bill_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('local_purchase_bill_info', [
+                'vendor_id_2' => [
+                    'type' => 'INT',
+                    'constraint' => 11,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+
         $data['js'] = 'vendor/local-purchase-bill-list.inc';
         $data['title'] = 'Local Supplier Bill List';
 
@@ -5349,6 +5391,7 @@ class Vendor extends CI_Controller
                 'customer_id' => $this->input->post('customer_id'),
                 'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
                 'vendor_id' => $this->input->post('vendor_id'),
+                'vendor_id_2' => $this->input->post('vendor_id_2') ?: NULL,
                 'invoice_date' => $this->input->post('invoice_date'),
                 'invoice_no' => $this->input->post('invoice_no'),
                 'inv_entry_date' => $this->input->post('inv_entry_date'),
@@ -5376,6 +5419,7 @@ class Vendor extends CI_Controller
                 'customer_id' => $this->input->post('customer_id'),
                 'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
                 'vendor_id' => $this->input->post('vendor_id'),
+                'vendor_id_2' => $this->input->post('vendor_id_2') ?: NULL,
                 'invoice_date' => $this->input->post('invoice_date'),
                 'invoice_no' => $this->input->post('invoice_no'),
                 'inv_entry_date' => $this->input->post('inv_entry_date'),
@@ -5399,6 +5443,24 @@ class Vendor extends CI_Controller
 
         $where = "1=1";
 
+        // Date Filter
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $this->session->set_userdata('local_bill_srch_from_date', $srch_from_date);
+            $this->session->set_userdata('local_bill_srch_to_date', $srch_to_date);
+        } elseif ($this->session->userdata('local_bill_srch_from_date') !== NULL) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('local_bill_srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('local_bill_srch_to_date');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = '';
+            $data['srch_to_date'] = $srch_to_date = '';
+        }
+
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $where .= " AND a.invoice_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'";
+        }
+
         // Customer Filter
         if ($this->input->post('srch_customer_id') !== null) {
             $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
@@ -5411,9 +5473,6 @@ class Vendor extends CI_Controller
         if (!empty($srch_customer_id)) {
             $where .= " AND a.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
         }
-
-
-
 
         // Vendor Filter
         if ($this->input->post('srch_vendor_id') !== null) {
@@ -5428,8 +5487,7 @@ class Vendor extends CI_Controller
             $where .= " AND a.vendor_id = '" . $this->db->escape_str($srch_vendor_id) . "'";
         }
 
-
-        // Company Filter
+        // Invoice No Filter
         if ($this->input->post('srch_invoice_no') !== null) {
             $data['srch_invoice_no'] = $srch_invoice_no = $this->input->post('srch_invoice_no');
             $this->session->set_userdata('srch_invoice_no', $srch_invoice_no);
@@ -5439,11 +5497,10 @@ class Vendor extends CI_Controller
             $data['srch_invoice_no'] = $srch_invoice_no = '';
         }
         if (!empty($srch_invoice_no)) {
-            $where = " (a.invoice_no = '" . $this->db->escape_str($srch_invoice_no) . "')";
+            $where .= " AND a.invoice_no LIKE '%" . $this->db->escape_str($srch_invoice_no) . "%'";
         }
 
-
-
+        // Enquiry No Filter
         if ($this->input->post('srch_enquiry_no') !== null) {
             $data['srch_enquiry_no'] = $srch_enquiry_no = $this->input->post('srch_enquiry_no');
             $this->session->set_userdata('srch_enquiry_no', $srch_enquiry_no);
@@ -5453,24 +5510,20 @@ class Vendor extends CI_Controller
             $data['srch_enquiry_no'] = $srch_enquiry_no = '';
         }
 
-
         if (!empty($srch_enquiry_no)) {
-            //$where = " ( concat(ifnull(com.company_code,'') , '/', ifnull(t.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(t.customer_sno,''),  '/' , DATE_FORMAT(t.enquiry_date,'%Y') ) like '%" . $this->db->escape_str($srch_enquiry_no) . "%' ) ";
-            $where = "(get_tender_info(a.tender_enquiry_id) like '%" . $this->db->escape_str($srch_enquiry_no) . "%') ";
-            $data['srch_customer_id'] = $srch_customer_id = '';
+            $where .= " AND get_tender_info(a.tender_enquiry_id) LIKE '%" . $this->db->escape_str($srch_enquiry_no) . "%'";
         }
-
-
 
         $this->load->library('pagination');
 
-        $this->db->where('status != ', 'Delete');
+        $this->db->where('a.status != ', 'Delete');
+        $this->db->where($where);
         $this->db->from('local_purchase_bill_info as a');
         $data['total_records'] = $cnt = $this->db->count_all_results();
 
         $data['sno'] = $this->uri->segment(2, 0);
 
-        $config['base_url'] = trim(site_url('local-purchase-bill-list') . '/' . $this->uri->segment(2, 0));
+        $config['base_url'] = site_url('local-purchase-bill-list');
         $config['total_rows'] = $cnt;
         $config['per_page'] = 50;
         $config['uri_segment'] = 2;
@@ -5499,11 +5552,13 @@ class Vendor extends CI_Controller
                 a.*, 
                 b.sub_account_head_name,
                 c.vendor_name,
+                c2.vendor_name as vendor_name_2,
                 e.customer_name,
                 get_tender_info(a.tender_enquiry_id) as tender_info 
                 from local_purchase_bill_info as a  
                 left join cb_sub_account_head_info as b on b.sub_account_head_id = a.sub_account_head_id and b.status = 'Active'
                 left join vendor_info as c on c.vendor_id = a.vendor_id and c.status = 'Active' 
+                left join vendor_info as c2 on c2.vendor_id = a.vendor_id_2 and c2.status = 'Active' 
                 left JOIN tender_enquiry_info as d on d.tender_enquiry_id = a.tender_enquiry_id and d.status='Active'
                 left join customer_info as e on e.customer_id = a.customer_id and e.status='Active' 
                 where a.status != 'Delete' 
@@ -5760,7 +5815,7 @@ class Vendor extends CI_Controller
 
         $data['sno'] = $this->uri->segment(2, 0);
 
-        $config['base_url'] = trim(site_url('delivery-partner-bill-list') . '/' . $this->uri->segment(2, 0));
+        $config['base_url'] = site_url('delivery-partner-bill-list');
         $config['total_rows'] = $cnt;
         $config['per_page'] = 50;
         $config['uri_segment'] = 2;
@@ -5907,6 +5962,19 @@ class Vendor extends CI_Controller
             exit;
         }
 
+        // Dynamically ensure column vendor_id_2 exists in customs_bill_info
+        if (!$this->db->field_exists('vendor_id_2', 'customs_bill_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('customs_bill_info', [
+                'vendor_id_2' => [
+                    'type' => 'INT',
+                    'constraint' => 11,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+
         $data['js'] = 'vendor/customs-bill-list.inc';
         $data['title'] = 'Customs Bill List';
 
@@ -5918,6 +5986,7 @@ class Vendor extends CI_Controller
                 'customer_id' => $this->input->post('customer_id'),
                 'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
                 'vendor_id' => $this->input->post('vendor_id'),
+                'vendor_id_2' => $this->input->post('vendor_id_2') ?: NULL,
                 'invoice_date' => $this->input->post('invoice_date'),
                 'invoice_no' => $this->input->post('invoice_no'),
                 'inv_entry_date' => $this->input->post('inv_entry_date'),
@@ -5951,6 +6020,7 @@ class Vendor extends CI_Controller
                 'customer_id' => $this->input->post('customer_id'),
                 'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
                 'vendor_id' => $this->input->post('vendor_id'),
+                'vendor_id_2' => $this->input->post('vendor_id_2') ?: NULL,
                 'invoice_date' => $this->input->post('invoice_date'),
                 'invoice_no' => $this->input->post('invoice_no'),
                 'inv_entry_date' => $this->input->post('inv_entry_date'),
@@ -5979,6 +6049,24 @@ class Vendor extends CI_Controller
 
 
         $where = "1=1";
+
+        // Date Filter
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $this->session->set_userdata('customs_bill_srch_from_date', $srch_from_date);
+            $this->session->set_userdata('customs_bill_srch_to_date', $srch_to_date);
+        } elseif ($this->session->userdata('customs_bill_srch_from_date') !== NULL) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('customs_bill_srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('customs_bill_srch_to_date');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = '';
+            $data['srch_to_date'] = $srch_to_date = '';
+        }
+
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $where .= " AND a.invoice_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'";
+        }
 
         // Customer Filter
         if ($this->input->post('srch_customer_id') !== null) {
@@ -6020,7 +6108,7 @@ class Vendor extends CI_Controller
             $data['srch_invoice_no'] = $srch_invoice_no = '';
         }
         if (!empty($srch_invoice_no)) {
-            $where = " (a.invoice_no = '" . $this->db->escape_str($srch_invoice_no) . "')";
+            $where .= " AND a.invoice_no LIKE '%" . $this->db->escape_str($srch_invoice_no) . "%'";
         }
 
 
@@ -6036,22 +6124,32 @@ class Vendor extends CI_Controller
 
 
         if (!empty($srch_enquiry_no)) {
-            //$where = " ( concat(ifnull(com.company_code,'') , '/', ifnull(t.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(t.customer_sno,''),  '/' , DATE_FORMAT(t.enquiry_date,'%Y') ) like '%" . $this->db->escape_str($srch_enquiry_no) . "%' ) ";
-            $where = "(get_tender_info(a.tender_enquiry_id) like '%" . $this->db->escape_str($srch_enquiry_no) . "%') ";
-            $data['srch_customer_id'] = $srch_customer_id = '';
+            $where .= " AND get_tender_info(a.tender_enquiry_id) LIKE '%" . $this->db->escape_str($srch_enquiry_no) . "%'";
         }
 
-
+        // Is Bill (ac_type_opt) Filter
+        if ($this->input->post('srch_ac_type_opt') !== null) {
+            $data['srch_ac_type_opt'] = $srch_ac_type_opt = $this->input->post('srch_ac_type_opt');
+            $this->session->set_userdata('srch_ac_type_opt', $srch_ac_type_opt);
+        } elseif ($this->session->userdata('srch_ac_type_opt') !== null) {
+            $data['srch_ac_type_opt'] = $srch_ac_type_opt = $this->session->userdata('srch_ac_type_opt');
+        } else {
+            $data['srch_ac_type_opt'] = $srch_ac_type_opt = '';
+        }
+        if (!empty($srch_ac_type_opt)) {
+            $where .= " AND a.ac_type_opt = '" . $this->db->escape_str($srch_ac_type_opt) . "'";
+        }
 
         $this->load->library('pagination');
 
         $this->db->where('status != ', 'Delete');
-        $this->db->from('dp_bill_info as a');
+        $this->db->where($where);
+        $this->db->from('customs_bill_info as a');
         $data['total_records'] = $cnt = $this->db->count_all_results();
 
         $data['sno'] = $this->uri->segment(2, 0);
 
-        $config['base_url'] = trim(site_url('delivery-partner-bill-list') . '/' . $this->uri->segment(2, 0));
+        $config['base_url'] = site_url('customs-bill-list');
         $config['total_rows'] = $cnt;
         $config['per_page'] = 50;
         $config['uri_segment'] = 2;
@@ -6075,14 +6173,17 @@ class Vendor extends CI_Controller
         $this->pagination->initialize($config);
 
 
+
         $sql = "
                 select 
                 a.*,  
                 c.vendor_name,
+                c2.vendor_name as vendor_name_2,
                 e.customer_name,
                 get_tender_info(a.tender_enquiry_id) as tender_info 
                 from customs_bill_info as a   
                 left join vendor_info as c on c.vendor_id = a.vendor_id and c.status = 'Active' 
+                left join vendor_info as c2 on c2.vendor_id = a.vendor_id_2 and c2.status = 'Active' 
                 left JOIN tender_enquiry_info as d on d.tender_enquiry_id = a.tender_enquiry_id and d.status='Active'
                 left join customer_info as e on e.customer_id = a.customer_id and e.status='Active' 
                 where a.status != 'Delete' 
@@ -6332,7 +6433,7 @@ class Vendor extends CI_Controller
 
         $data['sno'] = $this->uri->segment(2, 0);
 
-        $config['base_url'] = trim(site_url('vendor-adv-payment') . '/' . $this->uri->segment(2, 0));
+        $config['base_url'] = site_url('vendor-adv-payment');
         $config['total_rows'] = $cnt;
         $config['per_page'] = 50;
         $config['uri_segment'] = 2;
@@ -6455,7 +6556,7 @@ class Vendor extends CI_Controller
         $query = $this->db->query($sql, [$tender_enquiry_id]);
         $vendors = $query->result_array();
 
-        if(empty($vendors)) {
+        if (empty($vendors)) {
             $sql = "
                 SELECT DISTINCT v.vendor_id, v.vendor_name 
                 FROM vendor_rate_enquiry_info r

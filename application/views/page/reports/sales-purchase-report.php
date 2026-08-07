@@ -38,6 +38,12 @@
                                 value="<?php echo set_value('srch_to_date',$srch_to_date);?>" required="true">
                         </div> 
                     </div>
+                    <div class="form-group col-md-4">
+                        <label>Is Bill</label><br>
+                        <label class="radio-inline"><input type="radio" name="srch_ac_type_opt" value="" <?php echo ($srch_ac_type_opt == '') ? 'checked' : ''; ?>> All</label>
+                        <label class="radio-inline"><input type="radio" name="srch_ac_type_opt" value="Accountable" <?php echo ($srch_ac_type_opt == 'Accountable') ? 'checked' : ''; ?>> NBR & Account</label>
+                        <label class="radio-inline"><input type="radio" name="srch_ac_type_opt" value="Not-Accountable" <?php echo ($srch_ac_type_opt == 'Not-Accountable') ? 'checked' : ''; ?>> only NBR</label>
+                    </div>
                     <div class="form-group col-md-2 text-left">
                         <br />
                         <button class="btn btn-success" name="btn_show" value="Show'"><i class="fa fa-search"></i>

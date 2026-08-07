@@ -50,6 +50,11 @@
                 d.vendor_po_terms || "",
               );
             }
+            if (CKEDITOR.instances["editor5_edit_modal"]) {
+              CKEDITOR.instances["editor5_edit_modal"].setData(
+                d.vendor_po_intl_terms || "",
+              );
+            }
           }
 
           if (d.ltr_header_img) {
@@ -507,6 +512,116 @@
         ],
       });
       CKEDITOR.replace("editor4_edit_modal", {
+        height: 100,
+        extraPlugins: "justify,colorbutton,font,table",
+        removeButtons: "",
+        toolbar: [
+          {
+            name: "clipboard",
+            items: [
+              "Cut",
+              "Copy",
+              "Paste",
+              "PasteText",
+              "PasteFromWord",
+              "-",
+              "Undo",
+              "Redo",
+            ],
+          },
+          {
+            name: "basicstyles",
+            items: [
+              "Bold",
+              "Italic",
+              "Underline",
+              "Strike",
+              "RemoveFormat",
+              "CopyFormatting",
+            ],
+          },
+          {
+            name: "paragraph",
+            items: [
+              "NumberedList",
+              "BulletedList",
+              "-",
+              "Outdent",
+              "Indent",
+              "-",
+              "Blockquote",
+              "JustifyLeft",
+              "JustifyCenter",
+              "JustifyRight",
+              "JustifyBlock",
+            ],
+          },
+          { name: "links", items: ["Link", "Unlink", "Anchor"] },
+          {
+            name: "insert",
+            items: ["Image", "Table", "HorizontalRule", "SpecialChar"],
+          },
+          { name: "styles", items: ["Format", "Font", "FontSize"] },
+          { name: "colors", items: ["TextColor", "BGColor"] },
+          { name: "tools", items: ["Maximize", "ShowBlocks"] },
+        ],
+      });
+      CKEDITOR.replace("editor5", {
+        height: 100,
+        extraPlugins: "justify,colorbutton,font,table",
+        removeButtons: "",
+        toolbar: [
+          {
+            name: "clipboard",
+            items: [
+              "Cut",
+              "Copy",
+              "Paste",
+              "PasteText",
+              "PasteFromWord",
+              "-",
+              "Undo",
+              "Redo",
+            ],
+          },
+          {
+            name: "basicstyles",
+            items: [
+              "Bold",
+              "Italic",
+              "Underline",
+              "Strike",
+              "RemoveFormat",
+              "CopyFormatting",
+            ],
+          },
+          {
+            name: "paragraph",
+            items: [
+              "NumberedList",
+              "BulletedList",
+              "-",
+              "Outdent",
+              "Indent",
+              "-",
+              "Blockquote",
+              "JustifyLeft",
+              "JustifyCenter",
+              "JustifyRight",
+              "JustifyBlock",
+            ],
+          },
+          { name: "links", items: ["Link", "Unlink", "Anchor"] },
+          {
+            name: "insert",
+            items: ["Image", "Table", "HorizontalRule", "SpecialChar"],
+          },
+          { name: "styles", items: ["Format", "Font", "FontSize"] },
+          { name: "colors", items: ["TextColor", "BGColor"] },
+          { name: "tools", items: ["Maximize", "ShowBlocks"] },
+        ],
+      });
+      CKEDITOR.replace("editor5_edit_modal", {
         height: 100,
         extraPlugins: "justify,colorbutton,font,table",
         removeButtons: "",

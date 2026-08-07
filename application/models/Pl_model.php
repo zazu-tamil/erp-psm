@@ -53,8 +53,8 @@ class Pl_model extends CI_Model
     public function get_purchases_summary($from_date, $to_date)
     {
         $this->db->select('SUM(total_amount_wo_tax) as total_purchases');
-        $this->db->where('entry_date >=', $from_date);
-        $this->db->where('entry_date <=', $to_date);
+        $this->db->where('invoice_date >=', $from_date);
+        $this->db->where('invoice_date <=', $to_date);
         $this->db->where('status =', 'Active');
         return $this->db->get('vendor_purchase_invoice_info')->row('total_purchases');
     }
@@ -76,7 +76,7 @@ class Pl_model extends CI_Model
                 WHERE a.status = 'Active'
                 AND b.status = 'Active'
                 and b.nature_type = 'Expense'
-                AND a.inv_entry_date BETWEEN ? AND ?
+                AND a.invoice_date BETWEEN ? AND ?
                 GROUP BY a.sub_account_head_id
 
                 UNION ALL
@@ -90,7 +90,7 @@ class Pl_model extends CI_Model
                 WHERE a.status = 'Active'
                 AND b.status = 'Active'
                 and b.nature_type = 'Expense'
-                AND a.inv_entry_date BETWEEN ? AND ?
+                AND a.invoice_date BETWEEN ? AND ?
                 GROUP BY a.sub_account_head_id
 
                 UNION ALL
@@ -100,7 +100,7 @@ class Pl_model extends CI_Model
                     SUM(a.custom_stamp_fee + a.custom_duty) AS exp_amt
                 FROM customs_bill_info AS a
                 WHERE a.status = 'Active'
-                AND a.inv_entry_date BETWEEN ? AND ?
+                AND a.invoice_date BETWEEN ? AND ?
             ) x
             GROUP BY exp_type
             ORDER BY exp_type
