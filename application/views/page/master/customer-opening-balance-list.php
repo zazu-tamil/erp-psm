@@ -149,7 +149,7 @@
                                 <div class="row">
                                     <div class="form-group col-md-12">
                                         <label>Opening Amount</label>
-                                        <input class="form-control" type="number" step="0.01" name="opening_amount" placeholder="0.00" required="true">
+                                        <input class="form-control" type="number" step="any" name="opening_amount" placeholder="0.000" required="true">
                                     </div>
                                 </div>
                                 <div class="row">
@@ -204,7 +204,7 @@
                                 <div class="row">
                                     <div class="form-group col-md-12">
                                         <label>Opening Amount</label>
-                                        <input class="form-control" type="number" step="0.01" name="opening_amount" id="opening_amount" required="true">
+                                        <input class="form-control" type="number" step="any" name="opening_amount" id="opening_amount" required="true">
                                     </div>
                                 </div>
                                 <div class="row">
