@@ -5117,7 +5117,7 @@ class Tender extends CI_Controller
             h.tender_po_id,
             h.tender_po_item_id,
             h.rate,
-            h.gst,
+            if(i.tender_enq_invoice_item_id is null,  h.gst, i.gst) as gst,
             h.qty as order_qty,
             sum(b.qty) as del_qty,
             i.tender_enq_invoice_item_id,
@@ -5132,20 +5132,21 @@ class Tender extends CI_Controller
             left join vendor_po_item_info as e on e.vendor_po_item_id = d.vendor_po_item_id and e.status = 'Active'
             left join vendor_rate_enquiry_info as f1  on f1.vendor_rate_enquiry_id = e1.vendor_rate_enquiry_id and f1.status = 'Active'
             left join vendor_rate_enquiry_item_info as f on f.vendor_rate_enquiry_item_id = e.vendor_rate_enquiry_item_id and f.status = 'Active'
-            left join tender_quotation_info as g1 on  g1.tender_enquiry_id = a.tender_enquiry_id and g1.status = 'Active'
-            left join tender_quotation_item_info as g on g.tender_enquiry_item_id = f.tender_enquiry_item_id and g.status = 'Active'
-            left join customer_tender_po_info as h1 on h1.tender_quotation_id = g1.tender_quotation_id and h1.tender_enquiry_id = a.tender_enquiry_id  and h1.status = 'Active'
+            
+            left join customer_tender_po_info as h1 on h1.tender_po_id = a.tender_po_id and h1.status = 'Active'
+            left join tender_quotation_info as g1 on g1.tender_quotation_id = h1.tender_quotation_id and g1.status = 'Active'
+            left join tender_quotation_item_info as g on g.tender_enquiry_item_id = f.tender_enquiry_item_id and g.tender_quotation_id = h1.tender_quotation_id and g.status = 'Active'
             left join tender_po_item_info as h on h.tender_quotation_item_id = g.tender_quotation_item_id  and h.tender_po_id = a.tender_po_id  and h.status = 'Active'
-            left join tender_enq_invoice_item_info as i on i.tender_po_item_id = h.tender_po_item_id  and i.status = 'Active'
+            left join tender_enq_invoice_item_info as i on i.tender_po_item_id = h.tender_po_item_id and i.tender_enq_invoice_id = ? and i.status = 'Active'
             where a.status = 'Active' 
             and b.status = 'Active'
             and a.tender_po_id = ?
-            and a.tender_dc_id in ?
+            and a.tender_dc_id in (" . implode(',', $dc_ids) . ")
             group by h.tender_po_id, h.tender_po_item_id
             order by b.tender_dc_item_id asc
         ";
 
-        $query = $this->db->query($sql, [$tender_po_id, $dc_ids]);
+        $query = $this->db->query($sql, [0, $tender_po_id]);
         echo json_encode($query->result_array());
     }
 
@@ -5173,8 +5174,6 @@ class Tender extends CI_Controller
             echo json_encode([]);
             return;
         }
-
-
 
         $sql = "
             select 
@@ -5209,21 +5208,21 @@ class Tender extends CI_Controller
             left join vendor_po_item_info as e on e.vendor_po_item_id = d.vendor_po_item_id and e.status = 'Active'
             left join vendor_rate_enquiry_info as f1  on f1.vendor_rate_enquiry_id = e1.vendor_rate_enquiry_id and f1.status = 'Active'
             left join vendor_rate_enquiry_item_info as f on f.vendor_rate_enquiry_item_id = e.vendor_rate_enquiry_item_id and f.status = 'Active'
-            left join tender_quotation_info as g1 on  g1.tender_enquiry_id = a.tender_enquiry_id and g1.status = 'Active'
-            left join tender_quotation_item_info as g on g.tender_enquiry_item_id = f.tender_enquiry_item_id and g.status = 'Active'
-            left join customer_tender_po_info as h1 on h1.tender_quotation_id = g1.tender_quotation_id and h1.tender_enquiry_id = a.tender_enquiry_id  and h1.status = 'Active'
+            
+            left join customer_tender_po_info as h1 on h1.tender_po_id = a.tender_po_id and h1.status = 'Active'
+            left join tender_quotation_info as g1 on g1.tender_quotation_id = h1.tender_quotation_id and g1.status = 'Active'
+            left join tender_quotation_item_info as g on g.tender_enquiry_item_id = f.tender_enquiry_item_id and g.tender_quotation_id = h1.tender_quotation_id and g.status = 'Active'
             left join tender_po_item_info as h on h.tender_quotation_item_id = g.tender_quotation_item_id  and h.tender_po_id = a.tender_po_id  and h.status = 'Active'
-            left join tender_enq_invoice_item_info as i on i.tender_po_item_id = h.tender_po_item_id and i.tender_enq_invoice_id = '" . $tender_enq_invoice_id . "' and i.status = 'Active'
+            left join tender_enq_invoice_item_info as i on i.tender_po_item_id = h.tender_po_item_id and i.tender_enq_invoice_id = ? and i.status = 'Active'
             where a.status = 'Active' 
             and b.status = 'Active'
-            and a.tender_po_id = '" . $tender_po_id . "' 
+            and a.tender_po_id = ?
             and a.tender_dc_id in (" . implode(',', $dc_ids) . ")
             group by h.tender_po_id, h.tender_po_item_id
             order by b.tender_dc_item_id asc
         ";
 
-        $query = $this->db->query($sql);
-
+        $query = $this->db->query($sql, [$tender_enq_invoice_id, $tender_po_id]);
         echo json_encode($query->result_array());
     }
 
