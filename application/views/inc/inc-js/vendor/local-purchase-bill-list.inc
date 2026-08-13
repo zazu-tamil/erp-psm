@@ -32,6 +32,7 @@
 $(function() {
 
     var parentModal = null;
+    var default_vendor_options = $('#add_modal #vendor_id_2').html();
 
     /* OPEN CHILD MODAL */
     $('#btn_open_add_vendor').click(function() {
@@ -363,10 +364,18 @@ $(function() {
                 $("#edit_modal #local_purchase_bill_id").val(res.local_purchase_bill_id);
                 $("#edit_modal #sub_account_head_id").val(res.sub_account_head_id);
                 $("#edit_modal #srch_customer_id").val(res.customer_id);
+                
+                // Store vendor_id_2 for the change handler to pre-select
+                $("#edit_modal #srch_tender_enquiry_id").data("selected-vendor2", res.vendor_id_2);
+                
                 edit_load_tender_enq(res.tender_enquiry_id);
-                $("#edit_modal #tender_enquiry_id").val(res.tender_enquiry_id);
+                
+                // If there's no tender_enquiry_id, edit_load_tender_enq won't trigger change, so we trigger it manually
+                if (!res.tender_enquiry_id) {
+                    $("#edit_modal #srch_tender_enquiry_id").trigger('change');
+                }
+                
                 $("#edit_modal #vendor_id").val(res.vendor_id);
-                $("#edit_modal #vendor_id_2").val(res.vendor_id_2);
                 $("#edit_modal #invoice_date").val(res.invoice_date);
                 $("#edit_modal #invoice_no").val(res.invoice_no);
                 $("#edit_modal #inv_entry_date").val(res.inv_entry_date);
@@ -400,6 +409,68 @@ $(function() {
         $('#' + prefix + ' #tot_amt_with_tax').val(total.toFixed(3));
 
     }
+
+
+    function load_supplier2_dropdown(modal_id, tender_enquiry_id, selected_vendor_id_2) {
+        var dd = $(modal_id + ' #vendor_id_2');
+        dd.prop('disabled', true);
+
+        if (!tender_enquiry_id) {
+            dd.html(default_vendor_options);
+            if (selected_vendor_id_2) {
+                dd.val(selected_vendor_id_2);
+            } else {
+                dd.val('');
+            }
+            dd.prop('disabled', false);
+            dd.trigger('change');
+            return;
+        }
+
+        $.ajax({
+            url: "<?php echo site_url('vendor/get_vendor_by_tender_id_ajax'); ?>",
+            type: "POST",
+            dataType: "json",
+            data: {
+                tender_enquiry_id: tender_enquiry_id
+            },
+            success: function(res) {
+                dd.html('<option value="">Select</option>');
+                if (res && res.length > 0) {
+                    $.each(res, function(i, row) {
+                        dd.append($('<option>', {
+                            value: row.vendor_id,
+                            text: row.vendor_name
+                        }));
+                    });
+                }
+                
+                if (selected_vendor_id_2) {
+                    dd.val(selected_vendor_id_2);
+                } else {
+                    dd.val('');
+                }
+                dd.prop('disabled', false);
+                dd.trigger('change');
+            },
+            error: function() {
+                dd.prop('disabled', false);
+                alert('Error loading suppliers');
+            }
+        });
+    }
+
+    $('#add_modal #srch_tender_enquiry_id').on('change', function() {
+        var tender_enquiry_id = $(this).val();
+        load_supplier2_dropdown('#add_modal', tender_enquiry_id);
+    });
+
+    $('#edit_modal #srch_tender_enquiry_id').on('change', function() {
+        var tender_enquiry_id = $(this).val();
+        var selected_vendor_id_2 = $(this).data("selected-vendor2") || '';
+        $(this).data("selected-vendor2", '');
+        load_supplier2_dropdown('#edit_modal', tender_enquiry_id, selected_vendor_id_2);
+    });
 
 
     $('#add_modal #vat,#add_modal #tot_amt_wo_tax').on('input', function() {
