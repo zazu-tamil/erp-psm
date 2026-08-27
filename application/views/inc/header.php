@@ -59,6 +59,85 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             background-color: #003c73 !important;
         }
 
+        /* Logo Branding & Sidebar Structure */
+        @media (min-width: 768px) {
+            .main-header {
+                min-height: 50px;
+                position: relative;
+            }
+            .skin-blue .main-header .logo {
+                position: absolute !important;
+                top: 0;
+                left: 0;
+                height: 120px !important;
+                background: linear-gradient(135deg, #ffffff 0%, #f4f6fa 100%) !important;
+                border-bottom: 1px solid #eaeaea;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+                z-index: 1030;
+            }
+            .main-sidebar {
+                padding-top: 120px !important;
+            }
+            .main-header .logo .custom-logo-lg img {
+                max-height: 80px !important;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .skin-blue .main-header .logo {
+                position: absolute !important;
+                top: 0;
+                left: 0;
+                width: 100% !important;
+                height: 65px !important;
+                background: #ffffff !important;
+                z-index: 1030;
+            }
+            .main-header .navbar {
+                margin-top: 65px !important;
+            }
+            .main-sidebar {
+                padding-top: 115px !important;
+            }
+            .main-header .logo .custom-logo-lg img {
+                max-height: 45px !important;
+            }
+        }
+
+        .skin-blue .main-header .logo {
+            color: #333;
+            overflow: hidden !important;
+            padding: 10px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .skin-blue .main-header .logo:hover {
+            background-color: #f8f9fa !important;
+        }
+
+        .main-header .logo .custom-logo-lg,
+        .main-header .logo .custom-logo-mini {
+            background-color: transparent;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .main-header .logo .custom-logo-lg img,
+        .main-header .logo .custom-logo-mini img {
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .main-header .logo .custom-logo-mini img {
+            max-height: 40px !important;
+        }
+
         /* Sidebar Branding */
         .main-sidebar {
             background-color: #003c73 !important;
@@ -114,18 +193,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <div class="wrapper">
         <header class="main-header">
             <!-- Logo -->
-            <a href="<?php echo base_url('dash'); ?>" class="logo"
-                style="background: #ffffff !important; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #edf2f7; line-height: 50px; height: 50px; display: block; overflow: hidden; padding: 0;">
+            <a href="<?php echo base_url('dash'); ?>" class="logo">
                 <!-- mini logo for sidebar mini 50x50 pixels -->
                 <span class="logo-mini">
-                    <img src="<?php echo base_url('asset/images/1.png'); ?>" alt="Zazu"
-                        style="max-height: 35px; max-width: 35px; vertical-align: middle; object-fit: contain; display: inline-block;">
+                    <div class="custom-logo-mini">
+                        <img src="<?php echo base_url('asset/images/newtextlogo.svg'); ?>" alt="Zazu">
+                    </div>
                 </span>
                 <!-- logo for regular state and mobile devices -->
                 <span class="logo-lg">
-                    <img src="<?php echo base_url('asset/images/1.png'); ?>"
-                        alt="Zazu Technologies"
-                        style="max-height: 35px; max-width: 180px; vertical-align: middle; object-fit: contain; display: inline-block;">
+                    <div class="custom-logo-lg">
+                        <img src="<?php echo base_url('asset/images/newtextlogo.svg'); ?>" alt="Zazu Technologies">
+                    </div>
                 </span>
             </a>
             <!-- Header Navbar: style can be found in header.less -->
