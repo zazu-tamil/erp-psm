@@ -161,14 +161,27 @@
                     <div class="modal-body">
 
                         <div class="row">
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-4">
+                                <label>Search Enquiry No</label>
+                                <div class="input-group">
+                                    <input type="text" name="srch_enq_no" id="add_srch_enq_no" class="form-control srch_enq_id"
+                                        placeholder="Search Enquiry No..." autocomplete="off">
+                                    <input type="hidden" name="tender_enquiry_id" id="add_tender_enquiry_id" value="">
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default" id="add_clear_enq_btn" title="Clear Enquiry Filter">
+                                            <i class="fa fa-times text-danger"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-4">
                                 <label>Payment Date <span class="text-red">*</span></label>
                                 <input type="date" name="payment_date" id="add_payment_date" class="form-control"
                                     required value="<?php echo date('Y-m-d') ?>">
                             </div>
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-4">
                                 <label>Vendor <span class="text-red">*</span></label>
-                                <?php echo form_dropdown('vendor_id', ['' => 'Select Vendor'] + $vendor_opt, set_value('vendor_id'), 'id="add_vendor_id" class="form-control" required="true"'); ?>
+                                <?php echo form_dropdown('vendor_id', ['' => 'Select Vendor'] + $vendor_opt, set_value('vendor_id'), 'id="add_vendor_id" class="form-control select2" required="true" style="width:100%"'); ?>
                             </div>
                         </div>
 
@@ -336,14 +349,27 @@
 
 
                         <div class="row">
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-4">
+                                <label>Search Enquiry No</label>
+                                <div class="input-group">
+                                    <input type="text" name="srch_enq_no" id="edit_srch_enq_no" class="form-control srch_enq_id"
+                                        placeholder="Search Enquiry No..." autocomplete="off">
+                                    <input type="hidden" name="tender_enquiry_id" id="edit_tender_enquiry_id" value="">
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default" id="edit_clear_enq_btn" title="Clear Enquiry Filter">
+                                            <i class="fa fa-times text-danger"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-4">
                                 <label>Payment Date <span class="text-red">*</span></label>
                                 <input type="date" name="payment_date" id="edit_payment_date" class="form-control"
                                     required value="<?php echo date('Y-m-d') ?>">
                             </div>
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-4">
                                 <label>Vendor <span class="text-red">*</span></label>
-                                <?php echo form_dropdown('vendor_id', ['' => 'Select Vendor'] + $vendor_opt, set_value('vendor_id'), 'id="edit_vendor_id" class="form-control" required="true"'); ?>
+                                <?php echo form_dropdown('vendor_id', ['' => 'Select Vendor'] + $vendor_opt, set_value('vendor_id'), 'id="edit_vendor_id" class="form-control select2" required="true" style="width:100%"'); ?>
                             </div>
                         </div>
 

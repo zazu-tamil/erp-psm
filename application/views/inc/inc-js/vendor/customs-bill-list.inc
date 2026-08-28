@@ -1,4 +1,16 @@
 <style>
+/* Lock background scrolling completely when modal is open */
+html:has(body.modal-open),
+html.modal-open,
+body.modal-open {
+    overflow: hidden !important;
+}
+
+.modal {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
 .ui-autocomplete {
     z-index: 9999999 !important;
 }
@@ -30,6 +42,16 @@
 
 <script>
 $(function() {
+
+    // Lock background scroll when modal opens, unlock when closed
+    $(document).on('show.bs.modal shown.bs.modal', '.modal', function () {
+        $('html').addClass('modal-open');
+    });
+    $(document).on('hidden.bs.modal', '.modal', function () {
+        if ($('.modal.in:visible, .modal.show:visible').length === 0) {
+            $('html').removeClass('modal-open');
+        }
+    });
 
     var parentModal = null;
     var default_vendor_options = $('#add_modal #vendor_id_2').html();

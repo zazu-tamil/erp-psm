@@ -8,6 +8,18 @@
 <script src="<?php echo base_url() ?>asset/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
 <script src="<?php echo base_url() ?>asset/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 <style>
+    /* Lock background scrolling completely when modal is open */
+    html:has(body.modal-open),
+    html.modal-open,
+    body.modal-open {
+        overflow: hidden !important;
+    }
+
+    .modal {
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+
     .ui-autocomplete {
         z-index: 9999999 !important;
     }
@@ -36,6 +48,16 @@
 
 <script>
     $(document).ready(function () {
+
+        // Lock background scroll when modal opens, unlock when closed
+        $(document).on('show.bs.modal shown.bs.modal', '.modal', function () {
+            $('html').addClass('modal-open');
+        });
+        $(document).on('hidden.bs.modal', '.modal', function () {
+            if ($('.modal.in:visible, .modal.show:visible').length === 0) {
+                $('html').removeClass('modal-open');
+            }
+        });
 
         // ============================================================
         // AMOUNT DISTRIBUTION LOGIC

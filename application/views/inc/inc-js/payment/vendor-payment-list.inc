@@ -7,7 +7,84 @@
     href="<?php echo base_url() ?>asset/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
 <script src="<?php echo base_url() ?>asset/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
 <script src="<?php echo base_url() ?>asset/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<!-- Select2 -->
+<link rel="stylesheet" href="<?php echo base_url('asset/bower_components/select2/dist/css/select2.min.css'); ?>" />
+<script src="<?php echo base_url('asset/bower_components/select2/dist/js/select2.full.min.js'); ?>"></script>
 <style>
+    /* Single Page Scrollbar Fix */
+    html {
+        height: 100% !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+    body {
+        min-height: 100% !important;
+        height: auto !important;
+        overflow-x: hidden !important;
+        overflow-y: visible !important;
+    }
+    .wrapper {
+        min-height: 100% !important;
+        height: auto !important;
+        overflow-x: hidden !important;
+        overflow-y: visible !important;
+    }
+    .content-wrapper {
+        overflow: visible !important;
+    }
+
+    /* Lock background scrolling completely when modal is open */
+    html:has(body.modal-open),
+    html.modal-open,
+    body.modal-open {
+        overflow: hidden !important;
+    }
+
+    .modal {
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+
+    .modal-open .modal {
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+
+    #add_modal .modal-body,
+    #edit_modal .modal-body {
+        max-height: calc(100vh - 180px);
+        overflow-y: auto !important;
+        overflow-x: hidden;
+    }
+
+    /* Scrollable Invoice Table Container */
+    #add_modal .table-responsive,
+    #edit_modal .table-responsive {
+        max-height: 380px;
+        overflow-y: auto !important;
+        overflow-x: auto !important;
+        border: 1px solid #d2d6de;
+        border-radius: 4px;
+        margin-top: 6px;
+    }
+
+    #add_modal .table-responsive thead th,
+    #edit_modal .table-responsive thead th {
+        position: sticky;
+        top: 0;
+        background-color: #00c0ef !important;
+        color: #fff !important;
+        z-index: 5;
+    }
+
+    #add_modal .table-responsive tfoot td,
+    #edit_modal .table-responsive tfoot td {
+        position: sticky;
+        bottom: 0;
+        background-color: #e8f5e9 !important;
+        z-index: 5;
+    }
+
     .ui-autocomplete {
         z-index: 9999999 !important;
     }
@@ -25,9 +102,183 @@
         width: 120px;
         min-width: 100px;
     }
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+    .select2-dropdown {
+        z-index: 99999999 !important;
+    }
+
+    .select2-container--default .select2-selection--single {
+        height: 34px !important;
+        padding: 6px 12px !important;
+        border: 1px solid #d2d6de !important;
+        border-radius: 0 !important;
+        background-color: #fff !important;
+    }
+
+    .select2-selection__arrow {
+        height: 32px !important;
+    }
 </style>
 <script>
     $(document).ready(function () {
+
+        // Initialize Select2
+        $('#srch_vendor_id').select2({ width: '100%' });
+        $('#add_vendor_id').select2({ dropdownParent: $('#add_modal'), width: '100%' });
+        $('#edit_vendor_id').select2({ dropdownParent: $('#edit_modal'), width: '100%' });
+
+        $('#add_modal, #edit_modal').on('shown.bs.modal', function () {
+            $(this).find('.select2').select2({
+                dropdownParent: $(this),
+                width: '100%'
+            });
+        });
+
+        // Lock background scroll when modal opens, unlock when closed
+        $(document).on('show.bs.modal shown.bs.modal', '.modal', function () {
+            $('html').addClass('modal-open');
+        });
+        $(document).on('hidden.bs.modal', '.modal', function () {
+            if ($('.modal.in:visible, .modal.show:visible').length === 0) {
+                $('html').removeClass('modal-open');
+            }
+        });
+
+        // ============================================================
+        // VENDOR DROPDOWN UPDATER BASED ON ENQUIRY
+        // ============================================================
+        function updateVendorDropdown(prefix, tender_enquiry_id, selectedVendorId) {
+            var $vendorDropdown = $('#' + prefix + '_vendor_id');
+
+            if (!tender_enquiry_id) {
+                // Restore all active vendors
+                var html = '<option value="">Select Vendor</option>';
+                if (typeof vendorOpt !== 'undefined') {
+                    $.each(vendorOpt, function (vid, vname) {
+                        html += '<option value="' + vid + '">' + vname + '</option>';
+                    });
+                }
+                $vendorDropdown.html(html);
+                if (selectedVendorId) {
+                    $vendorDropdown.val(selectedVendorId);
+                } else {
+                    $vendorDropdown.val('');
+                }
+                $vendorDropdown.trigger('change.select2');
+                $vendorDropdown.trigger('change');
+                return;
+            }
+
+            $vendorDropdown.html('<option value="">Loading vendors...</option>').trigger('change.select2');
+
+            $.ajax({
+                url: "<?php echo site_url('payment/get_vendor_list_tender_enquiry_id'); ?>",
+                type: "POST",
+                data: { srch_tender_enquiry_id: tender_enquiry_id },
+                dataType: "json",
+                success: function (res) {
+                    var html = '<option value="">Select Vendor</option>';
+                    if (Array.isArray(res) && res.length > 0) {
+                        $.each(res, function (i, row) {
+                            html += '<option value="' + row.vendor_id + '">' + row.vendor_name + '</option>';
+                        });
+                    } else {
+                        html = '<option value="">No vendors found for this enquiry</option>';
+                    }
+                    $vendorDropdown.html(html);
+
+                    if (selectedVendorId) {
+                        $vendorDropdown.val(selectedVendorId);
+                    } else if (Array.isArray(res) && res.length === 1) {
+                        $vendorDropdown.val(res[0].vendor_id);
+                    } else {
+                        $vendorDropdown.val('');
+                    }
+                    $vendorDropdown.trigger('change.select2');
+                    $vendorDropdown.trigger('change');
+                },
+                error: function () {
+                    $vendorDropdown.html('<option value="">Select Vendor</option>').trigger('change.select2');
+                }
+            });
+        }
+
+        // ============================================================
+        // ENQUIRY NUMBER AUTOCOMPLETE SEARCH
+        // ============================================================
+        $('#add_modal .srch_enq_id').autocomplete({
+            appendTo: "#add_modal",
+            source: function (request, response) {
+                $.ajax({
+                    url: "<?php echo base_url('payment/tender_enquiry_id_search'); ?>",
+                    type: "POST",
+                    dataType: "json",
+                    data: { search: request.term },
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            },
+            minLength: 1,
+            select: function (event, ui) {
+                $(this).val(ui.item.label);
+                $("#add_tender_enquiry_id").val(ui.item.tender_enquiry_id);
+                updateVendorDropdown("add", ui.item.tender_enquiry_id);
+                return false;
+            }
+        });
+
+        $("#add_clear_enq_btn").on("click", function () {
+            $("#add_srch_enq_no").val("");
+            $("#add_tender_enquiry_id").val("");
+            updateVendorDropdown("add", "");
+        });
+
+        $("#add_srch_enq_no").on("input", function () {
+            if ($(this).val().trim() === "") {
+                $("#add_tender_enquiry_id").val("");
+                updateVendorDropdown("add", "");
+            }
+        });
+
+        $('#edit_modal .srch_enq_id').autocomplete({
+            appendTo: "#edit_modal",
+            source: function (request, response) {
+                $.ajax({
+                    url: "<?php echo base_url('payment/tender_enquiry_id_search'); ?>",
+                    type: "POST",
+                    dataType: "json",
+                    data: { search: request.term },
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            },
+            minLength: 1,
+            select: function (event, ui) {
+                $(this).val(ui.item.label);
+                $("#edit_tender_enquiry_id").val(ui.item.tender_enquiry_id);
+                updateVendorDropdown("edit", ui.item.tender_enquiry_id);
+                return false;
+            }
+        });
+
+        $("#edit_clear_enq_btn").on("click", function () {
+            $("#edit_srch_enq_no").val("");
+            $("#edit_tender_enquiry_id").val("");
+            updateVendorDropdown("edit", "");
+        });
+
+        $("#edit_srch_enq_no").on("input", function () {
+            if ($(this).val().trim() === "") {
+                $("#edit_tender_enquiry_id").val("");
+                updateVendorDropdown("edit", "");
+            }
+        });
 
         // ============================================================
         // AMOUNT DISTRIBUTION LOGIC
@@ -491,12 +742,11 @@
         $("#add_modal").on("show.bs.modal", function () {
             $("#add_modal").data("initial_load", true);
             $("#frmadd")[0].reset();
+            $("#add_srch_enq_no").val("");
+            $("#add_tender_enquiry_id").val("");
+            updateVendorDropdown("add", "");
             $("#add_item_container").html("");
-            $("#add_tender_enquiry_id")
-                .html('<option value="">Select Enquiry</option>')
-                .prop("disabled", true);
             $("#add_grand_total_amount").val("");
-            $(".add_srch_enq_id").val("");
             toggleBank("add");
             // Reset without bill elements
             $("#add_is_without_bill").prop("checked", false);
@@ -690,8 +940,10 @@
                         $('#edit_cheque_bank').val(data.cheque_bank);
                     }
 
-                    // Customer → load enquiry dropdown → load invoice list
-                    $("#edit_vendor_id").val(data.vendor_id).trigger("change");
+                    // Load vendor into dropdown and trigger bill list
+                    $("#edit_srch_enq_no").val("");
+                    $("#edit_tender_enquiry_id").val("");
+                    updateVendorDropdown("edit", "", data.vendor_id);
                 },
                 error: function () {
                     alert("Error loading record.");

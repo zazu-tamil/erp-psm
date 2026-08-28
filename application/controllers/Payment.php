@@ -570,8 +570,10 @@ class Payment extends CI_Controller
             FROM tender_enquiry_info AS a
             LEFT JOIN company_info AS b ON a.company_id = b.company_id AND b.status = 'Active'
             LEFT JOIN customer_info AS c ON a.customer_id = c.customer_id AND c.status = 'Active'
-            WHERE  a.`status` = 'Active' 
-            having enq like '%" . $this->db->escape_like_str($term) . "%'
+            WHERE a.`status` = 'Active' 
+            HAVING enq LIKE '%" . $this->db->escape_like_str($term) . "%'
+                OR tender_ref LIKE '%" . $this->db->escape_like_str($term) . "%'
+                OR enquiry_no LIKE '%" . $this->db->escape_like_str($term) . "%'
             ORDER BY a.tender_enquiry_id desc, a.enquiry_no ASC  
         ";
         //and a.enquiry_no like '%" . $this->db->escape_like_str($term) . "%'
@@ -760,7 +762,7 @@ class Payment extends CI_Controller
 
                 if (!empty($vendor_payment_bill_id[$idx])) {
                     // Existing row → UPDATE
-                    $this->db->where('vendor_payment_bill_id', $vendor_payment_bill_id[$idx]); 
+                    $this->db->where('vendor_payment_bill_id', $vendor_payment_bill_id[$idx]);
                     $this->db->update('vendor_payment_bill_info', $item_data);
 
                     $checked_existing_ids[] = $vendor_payment_bill_id[$idx];
@@ -795,7 +797,7 @@ class Payment extends CI_Controller
 
         $where = "1=1";
 
- 
+
         if ($this->input->post('srch_vendor_id') !== null) {
             $data['srch_vendor_id'] = $srch_vendor_id = $this->input->post('srch_vendor_id');
             $this->session->set_userdata('srch_vendor_id', $srch_vendor_id);
@@ -809,7 +811,7 @@ class Payment extends CI_Controller
             $where .= " AND a.vendor_id = '" . $this->db->escape_str($srch_vendor_id) . "'";
         }
 
- 
+
 
 
         $this->load->library('pagination');
@@ -931,30 +933,76 @@ class Payment extends CI_Controller
             return;
         }
 
-        $tender_enquiry_id = $this->input->post('srch_tender_enquiry_id');
+        $tender_enquiry_id = $this->input->post('srch_tender_enquiry_id') ?: $this->input->post('tender_enquiry_id');
         $customer_id = $this->input->post('srch_customer_id');
 
-        if (empty($tender_enquiry_id) || empty($customer_id)) {
+        if (empty($tender_enquiry_id)) {
             echo json_encode([]);
             return;
         }
 
+        $where_cust = "";
+        $params = [$tender_enquiry_id, $tender_enquiry_id, $tender_enquiry_id, $tender_enquiry_id, $tender_enquiry_id, $tender_enquiry_id];
+        if (!empty($customer_id)) {
+            $where_cust = " AND a.customer_id = " . (int) $customer_id;
+        }
+
         $sql = "
             SELECT 
-                e.vendor_id,
-                e.vendor_name
-            FROM vendor_rate_enquiry_info AS a
-            LEFT JOIN vendor_info AS e 
-                ON a.vendor_id = e.vendor_id 
-                AND e.status = 'Active'
-            WHERE a.status = 'Active'
-            AND a.tender_enquiry_id = ?
-            AND a.customer_id = ?
-            GROUP BY e.vendor_id, e.vendor_name
-            ORDER BY e.vendor_name ASC
+                vendor_id,
+                vendor_name
+            FROM (
+                -- Vendor Purchase Invoices
+                SELECT a.vendor_id, b.vendor_name
+                FROM vendor_purchase_invoice_info a
+                JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active' AND a.tender_enquiry_id = ? $where_cust
+
+                UNION
+
+                -- Local Purchase Bills
+                SELECT a.vendor_id, b.vendor_name
+                FROM local_purchase_bill_info a
+                JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active' AND a.tender_enquiry_id = ? $where_cust
+
+                UNION
+
+                -- DP Bills
+                SELECT a.vendor_id, b.vendor_name
+                FROM dp_bill_info a
+                JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active' AND a.tender_enquiry_id = ? $where_cust
+
+                UNION
+
+                -- Customs Bills
+                SELECT a.vendor_id, b.vendor_name
+                FROM customs_bill_info a
+                JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active' AND a.tender_enquiry_id = ? $where_cust
+
+                UNION
+
+                -- Purchase Orders
+                SELECT a.vendor_id, b.vendor_name
+                FROM vendor_po_info a
+                JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active' AND a.tender_enquiry_id = ? $where_cust
+
+                UNION
+
+                -- Vendor Rate Enquiries
+                SELECT a.vendor_id, b.vendor_name
+                FROM vendor_rate_enquiry_info a
+                JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active' AND a.tender_enquiry_id = ? $where_cust
+            ) AS v
+            WHERE vendor_id IS NOT NULL AND vendor_id > 0
+            ORDER BY vendor_name ASC
         ";
 
-        $query = $this->db->query($sql, [$tender_enquiry_id, $customer_id]);
+        $query = $this->db->query($sql, $params);
 
         echo json_encode($query->result_array());
     }
@@ -1042,7 +1090,7 @@ class Payment extends CI_Controller
                     a.tender_enquiry_id,
                     a.invoice_no,
                     b.vendor_name,
-                    (a.bill_amount + a.vat_amt) AS customs_tot_amt,
+                    a.customs_payable AS customs_tot_amt,
                     'Customs Bill'
                 FROM customs_bill_info a
                 LEFT JOIN vendor_info b 
@@ -1237,26 +1285,26 @@ class Payment extends CI_Controller
 
         $esc_vendor = $this->db->escape_str($vendor_id);
         $payment_date = $this->input->post('payment_date');
-        
+
         $date_filter_bills = "";
         $date_filter_paid = "";
         $date_filter_adv = "";
-        
+
         if (!empty($payment_date)) {
             $esc_date = $this->db->escape_str($payment_date);
             $date_filter_bills = " AND invoice_date <= '$esc_date'";
-            $date_filter_paid  = " AND payment_date <= '$esc_date'";
-            $date_filter_adv   = " AND adv_payment_date <= '$esc_date'";
+            $date_filter_paid = " AND payment_date <= '$esc_date'";
+            $date_filter_adv = " AND adv_payment_date <= '$esc_date'";
         }
 
         // 1. Opening Balance
         $opening_amount = 0;
-        $opening_type   = 'CR';
+        $opening_type = 'CR';
         $op_query = $this->db->get_where('vendor_opening_balance_info', ['vendor_id' => $vendor_id]);
         if ($op_query->num_rows() > 0) {
             $op_row = $op_query->row_array();
             $opening_amount = (float) $op_row['opening_amount'];
-            $opening_type   = $op_row['balance_type'];
+            $opening_type = $op_row['balance_type'];
         }
         // CR = we owe vendor (positive balance), DR = vendor owes us
         $signed_opening = ($opening_type === 'CR') ? $opening_amount : -$opening_amount;
@@ -1288,35 +1336,35 @@ class Payment extends CI_Controller
                 WHERE status = 'Active' AND ac_type_opt = 'Accountable' AND vendor_id = '$esc_vendor' {$date_filter_bills}
             ) AS bills
         ";
-        $bill_row    = $this->db->query($bill_sql)->row_array();
+        $bill_row = $this->db->query($bill_sql)->row_array();
         $total_bills = (float) ($bill_row['total_bills'] ?? 0);
 
         // 3. Total Bill Payments (vendor_payment_info)
-        $paid_sql    = "SELECT IFNULL(SUM(amount), 0) AS total_paid
+        $paid_sql = "SELECT IFNULL(SUM(amount), 0) AS total_paid
                         FROM vendor_payment_info
                         WHERE status = 'Active' AND vendor_id = '$esc_vendor' {$date_filter_paid}";
-        $paid_row    = $this->db->query($paid_sql)->row_array();
-        $total_paid  = (float) ($paid_row['total_paid'] ?? 0);
+        $paid_row = $this->db->query($paid_sql)->row_array();
+        $total_paid = (float) ($paid_row['total_paid'] ?? 0);
 
         // 4. Total Advance Payments (vendor_advance_payment_info)
-        $adv_sql     = "SELECT IFNULL(SUM(adv_payment_amt), 0) AS total_advance
+        $adv_sql = "SELECT IFNULL(SUM(adv_payment_amt), 0) AS total_advance
                         FROM vendor_advance_payment_info
                         WHERE status = 'Active' AND vendor_id = '$esc_vendor' {$date_filter_adv}";
-        $adv_row     = $this->db->query($adv_sql)->row_array();
+        $adv_row = $this->db->query($adv_sql)->row_array();
         $total_advance = (float) ($adv_row['total_advance'] ?? 0);
 
         // 5. Current Balance = Opening + Bills - Paid - Advance
         $current_balance = $signed_opening + $total_bills - $total_paid - $total_advance;
 
         echo json_encode([
-            'status'          => 'success',
+            'status' => 'success',
             'opening_balance' => number_format($opening_amount, 3),
-            'opening_type'    => $opening_type,
-            'total_bills'     => number_format($total_bills, 3),
-            'total_paid'      => number_format($total_paid, 3),
-            'total_advance'   => number_format($total_advance, 3),
+            'opening_type' => $opening_type,
+            'total_bills' => number_format($total_bills, 3),
+            'total_paid' => number_format($total_paid, 3),
+            'total_advance' => number_format($total_advance, 3),
             'current_balance' => number_format($current_balance, 3),
-            'is_credit'       => ($current_balance >= 0),
+            'is_credit' => ($current_balance >= 0),
         ]);
         exit;
     }
@@ -1336,10 +1384,10 @@ class Payment extends CI_Controller
 
         $esc_customer = $this->db->escape_str($customer_id);
         $payment_date = $this->input->post('payment_date');
-        
+
         $date_filter_inv = "";
         $date_filter_rec = "";
-        
+
         if (!empty($payment_date)) {
             $esc_date = $this->db->escape_str($payment_date);
             $date_filter_inv = " AND invoice_date <= '$esc_date'";
@@ -1348,41 +1396,41 @@ class Payment extends CI_Controller
 
         // 1. Opening Balance
         $opening_amount = 0;
-        $opening_type   = 'DR'; // Default to Debit (customer owes us)
+        $opening_type = 'DR'; // Default to Debit (customer owes us)
         $op_query = $this->db->get_where('customer_opening_balance_info', ['customer_id' => $customer_id]);
         if ($op_query->num_rows() > 0) {
             $op_row = $op_query->row_array();
             $opening_amount = (float) $op_row['opening_amount'];
-            $opening_type   = $op_row['balance_type'];
+            $opening_type = $op_row['balance_type'];
         }
         // DR = customer owes us (positive balance), CR = we owe customer
         $signed_opening = ($opening_type === 'DR') ? $opening_amount : -$opening_amount;
 
         // 2. Total Invoices (Sales)
-        $inv_sql     = "SELECT IFNULL(SUM(total_amount), 0) AS total_invoices
+        $inv_sql = "SELECT IFNULL(SUM(total_amount), 0) AS total_invoices
                         FROM tender_enq_invoice_info
                         WHERE status = 'Active' AND customer_id = '$esc_customer' {$date_filter_inv}";
-        $inv_row     = $this->db->query($inv_sql)->row_array();
+        $inv_row = $this->db->query($inv_sql)->row_array();
         $total_invoices = (float) ($inv_row['total_invoices'] ?? 0);
 
         // 3. Total Received (Receipts)
-        $rec_sql     = "SELECT IFNULL(SUM(amount), 0) AS total_receipts
+        $rec_sql = "SELECT IFNULL(SUM(amount), 0) AS total_receipts
                         FROM tender_receipt_info
                         WHERE status = 'Active' AND customer_id = '$esc_customer' {$date_filter_rec}";
-        $rec_row     = $this->db->query($rec_sql)->row_array();
+        $rec_row = $this->db->query($rec_sql)->row_array();
         $total_receipts = (float) ($rec_row['total_receipts'] ?? 0);
 
         // 4. Current Balance = Signed Opening + Invoices - Receipts
         $current_balance = $signed_opening + $total_invoices - $total_receipts;
 
         echo json_encode([
-            'status'          => 'success',
+            'status' => 'success',
             'opening_balance' => number_format($opening_amount, 3),
-            'opening_type'    => $opening_type,
-            'total_invoices'  => number_format($total_invoices, 3),
-            'total_receipts'  => number_format($total_receipts, 3),
+            'opening_type' => $opening_type,
+            'total_invoices' => number_format($total_invoices, 3),
+            'total_receipts' => number_format($total_receipts, 3),
             'current_balance' => number_format($current_balance, 3),
-            'is_debit'        => ($current_balance >= 0),
+            'is_debit' => ($current_balance >= 0),
         ]);
         exit;
     }

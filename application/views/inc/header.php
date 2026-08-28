@@ -107,6 +107,39 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         .user-panel>.info>a {
             color: #ffffff !important;
         }
+
+        /* Single Page Scrollbar Fix & Modal Backdrop Lock */
+        html {
+            height: 100% !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+        }
+        body {
+            min-height: 100% !important;
+            height: auto !important;
+            overflow-x: hidden !important;
+            overflow-y: visible !important;
+        }
+        .wrapper {
+            min-height: 100% !important;
+            height: auto !important;
+            overflow-x: hidden !important;
+            overflow-y: visible !important;
+        }
+        .content-wrapper {
+            overflow: visible !important;
+        }
+
+        /* Lock background and backdrop scrolling completely when any modal is open */
+        html:has(body.modal-open),
+        html.modal-open,
+        body.modal-open {
+            overflow: hidden !important;
+        }
+        .modal {
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+        }
     </style>
 </head>
 
