@@ -1216,7 +1216,7 @@ class Payment extends CI_Controller
                     a.tender_enquiry_id,
                     a.invoice_no, 
                     b.vendor_name,
-                    (a.bill_amount + a.vat_amt) AS customs_tot_amt,
+                    a.customs_payable AS customs_tot_amt,
                     'Customs Bill'
                 FROM customs_bill_info a
                 LEFT JOIN vendor_info b 
