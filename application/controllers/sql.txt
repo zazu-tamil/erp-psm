@@ -820,3 +820,8 @@ ALTER TABLE `cb_cash_outward_info` ADD COLUMN `cash_category_id` INT(11) NULL DE
 
 -- Add cash_category_id to Petty Cash Transactions
 ALTER TABLE `petty_cash_transactions` ADD COLUMN `cash_category_id` INT(11) NULL DEFAULT NULL AFTER `bank_id`;
+
+28-08-2026
+
+-- Add bank_id to Tender Invoice Info
+ALTER TABLE `tender_enq_invoice_info` ADD COLUMN `bank_id` INT(11) NULL DEFAULT NULL AFTER `company_id`;

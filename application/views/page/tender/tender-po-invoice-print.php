@@ -451,7 +451,29 @@ echo '</pre>';
             </tfoot>
         </table>
 
-
+        <!-- Bank Details -->
+        <?php if (!empty($bank_details) && (!empty($bank_details['bank_name']) || !empty($bank_details['account_name']))): ?>
+            <div class="terms-section">
+                <div class="section-title">OUR BANK ACCOUNT DETAILS</div>
+                <div class="section-content">
+                    <?php if (!empty($bank_details['account_name'])): ?>
+                        <div><strong>ACCOUNT NAME:</strong> <?php echo htmlspecialchars($bank_details['account_name']); ?></div>
+                    <?php endif; ?>
+                    <?php if (!empty($bank_details['bank_name'])): ?>
+                        <div><strong>BANK NAME:</strong> <?php echo htmlspecialchars($bank_details['bank_name']); ?></div>
+                    <?php endif; ?>
+                    <?php if (!empty($bank_details['account_number'])): ?>
+                        <div><strong>ACCOUNT NO.:</strong> <?php echo htmlspecialchars($bank_details['account_number']); ?></div>
+                    <?php endif; ?>
+                    <?php if (!empty($bank_details['iban_no'])): ?>
+                        <div><strong>IBAN NO:</strong> <?php echo htmlspecialchars($bank_details['iban_no']); ?></div>
+                    <?php endif; ?>
+                    <?php if (!empty($bank_details['swift_code'])): ?>
+                        <div><strong>SWIFT/BIC:</strong> <?php echo htmlspecialchars($bank_details['swift_code']); ?></div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endif; ?>
 
         <!-- Terms & Conditions -->
         <?php if (!empty($record['remarks'])): ?>

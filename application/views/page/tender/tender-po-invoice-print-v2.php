@@ -553,7 +553,7 @@
                                 <?php endif; ?>
 
                                 <!-- Bank Details + Summary Row -->
-                                <?php if (!empty($bank_details) && !empty($bank_details['account_name'])): ?>
+                                <?php if (!empty($bank_details) && (!empty($bank_details['bank_name']) || !empty($bank_details['account_name']))): ?>
                                     <tr>
                                         <td colspan="4" class="text-left">
                                             <div class="bank-details-section">

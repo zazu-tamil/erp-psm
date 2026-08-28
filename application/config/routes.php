@@ -180,6 +180,7 @@ $route['tender-invoice-list'] = 'tender/tender_po_invoice_list';
 $route['tender-invoice-list/(:num)'] = 'tender/tender_po_invoice_list/$1';
 $route['tender-po-invoice-edit/(:num)'] = 'tender/tender_po_invoice_edit/$1';
 $route['tender-po-invoice-print/(:num)'] = 'tender/tender_po_invoice_print/$1';
+$route['tender/get_company_bank_load'] = 'tender/get_company_bank_load';
 
 /*Accounts Routes*/
 

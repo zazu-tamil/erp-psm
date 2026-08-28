@@ -97,6 +97,19 @@
                                 ?>
                             </div>
                         </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="bank_id">Select Bank</label>
+                                <?php
+                                echo form_dropdown(
+                                    'bank_id',
+                                    $bank_opt,
+                                    set_value('bank_id', $header['bank_id']),
+                                    'id="bank_id" class="form-control"'
+                                );
+                                ?>
+                            </div>
+                        </div>
 
                         <div class="form-group col-md-3">
                             <label>Invoice Status</label><br>

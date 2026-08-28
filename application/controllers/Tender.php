@@ -3203,6 +3203,19 @@ class Tender extends CI_Controller
             exit;
         }
 
+        // Dynamically ensure bank_id column exists in tender_enq_invoice_info
+        if (!$this->db->field_exists('bank_id', 'tender_enq_invoice_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('tender_enq_invoice_info', [
+                'bank_id' => [
+                    'type' => 'INT',
+                    'constraint' => 11,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+
         $data['js'] = 'tender/tender-invoice-add.inc';
         $data['title'] = 'Tender Invoice Generator';
 
@@ -3230,6 +3243,7 @@ class Tender extends CI_Controller
                 'tender_po_id' => $this->input->post('srch_tender_po_id'),
                 'tender_dc_id' => $tender_dc_ids,
                 'currency_id' => $this->input->post('currency_id'),
+                'bank_id' => $this->input->post('bank_id') ? $this->input->post('bank_id') : NULL,
                 'invoice_no' => $this->input->post('invoice_no'),
                 'invoice_date' => $this->input->post('invoice_date'),
                 'vat_payer_sales_grp' => $this->input->post('vat_payer_sales_grp'),
@@ -3388,6 +3402,8 @@ class Tender extends CI_Controller
         foreach ($query->result_array() as $row) {
             $data['vat_payer_sales_opt'][$row['vat_filing_head_name']] = $row['vat_filing_head_name'];
         }
+
+        $data['bank_opt'] = ['' => 'Select Bank'];
 
         $this->load->view('page/tender/tender-invoice-add', $data);
     }
@@ -3611,6 +3627,19 @@ class Tender extends CI_Controller
             exit;
         }
 
+        // Dynamically ensure bank_id column exists in tender_enq_invoice_info
+        if (!$this->db->field_exists('bank_id', 'tender_enq_invoice_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('tender_enq_invoice_info', [
+                'bank_id' => [
+                    'type' => 'INT',
+                    'constraint' => 11,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+
         $data['js'] = 'tender/tender-po-invoice-edit.inc';
         $data['title'] = 'Edit Tender PO Invoice';
 
@@ -3625,6 +3654,7 @@ class Tender extends CI_Controller
                 'tender_enquiry_id' => $this->input->post('srch_tender_enquiry_id'),
                 'tender_po_id' => $this->input->post('srch_tender_po_id'),
                 'currency_id' => $this->input->post('currency_id'),
+                'bank_id' => $this->input->post('bank_id') ? $this->input->post('bank_id') : NULL,
                 'invoice_no' => $this->input->post('invoice_no'),
                 'invoice_date' => $this->input->post('invoice_date'),
                 'invoice_status' => $this->input->post('invoice_status'),
@@ -3973,6 +4003,20 @@ class Tender extends CI_Controller
 
         $data['addt_charges_list'] = $query->result_array();
 
+        $data['bank_opt'] = ['' => 'Select Bank'];
+        if (!empty($data['header']['company_id'])) {
+            $sql = "
+                SELECT bank_id, bank_name, account_number
+                FROM company_bank_info
+                WHERE status = 'Active' AND company_id = ?
+                ORDER BY bank_name ASC
+            ";
+            $query = $this->db->query($sql, [$data['header']['company_id']]);
+            foreach ($query->result_array() as $row) {
+                $label = $row['bank_name'] . (!empty($row['account_number']) ? ' (' . $row['account_number'] . ')' : '');
+                $data['bank_opt'][$row['bank_id']] = $label;
+            }
+        }
 
         $data['pagination'] = $this->pagination->create_links();
         $this->load->view('page/tender/tender-po-invoice-edit', $data);
@@ -4037,15 +4081,30 @@ class Tender extends CI_Controller
             show_404();
         }
 
+        // Ensure bank_id column exists before querying
+        if (!$this->db->field_exists('bank_id', 'tender_enq_invoice_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('tender_enq_invoice_info', [
+                'bank_id' => [
+                    'type'       => 'INT',
+                    'constraint' => 11,
+                    'null'       => TRUE,
+                    'default'    => NULL
+                ]
+            ]);
+        }
+
         $sql = "
             SELECT
                 c.*
             FROM company_bank_info AS c 
             INNER JOIN tender_enq_invoice_info AS a
-                ON c.company_id = a.company_id
+                ON c.bank_id = a.bank_id  and a.status != 'Delete'
             WHERE a.tender_enq_invoice_id = ?
                 AND a.status = 'Active'
-            ORDER BY a.tender_enq_invoice_id ASC;
+                AND c.status = 'Active'
+            ORDER BY a.tender_enq_invoice_id ASC
+            LIMIT 1;
         ";
         $query = $this->db->query($sql, [$tender_enq_invoice_id]);
         $data['bank_details'] = $query->row_array();
@@ -4188,6 +4247,35 @@ class Tender extends CI_Controller
         $data['grand_total'] = array_sum(array_column($data['items'], 'base_amount'));
         $data['total_gst'] = array_sum(array_column($data['items'], 'gst_amount'));
         $data['final_total'] = $data['grand_total'] + $data['total_gst'];
+
+        // Ensure bank_id column exists before querying
+        if (!$this->db->field_exists('bank_id', 'tender_enq_invoice_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('tender_enq_invoice_info', [
+                'bank_id' => [
+                    'type'       => 'INT',
+                    'constraint' => 11,
+                    'null'       => TRUE,
+                    'default'    => NULL
+                ]
+            ]);
+        }
+
+        $sql = "
+            SELECT
+                c.*
+            FROM company_bank_info AS c 
+            INNER JOIN tender_enq_invoice_info AS a
+                ON (a.bank_id IS NOT NULL AND a.bank_id > 0 AND c.bank_id = a.bank_id)
+                   OR ((a.bank_id IS NULL OR a.bank_id = 0) AND c.company_id = a.company_id)
+            WHERE a.tender_enq_invoice_id = ?
+                AND a.status = 'Active'
+                AND c.status = 'Active'
+            ORDER BY a.tender_enq_invoice_id ASC
+            LIMIT 1;
+        ";
+        $query = $this->db->query($sql, [$tender_enq_invoice_id]);
+        $data['bank_details'] = $query->row_array();
 
         $this->load->view('page/tender/tender-po-invoice-print', $data);
     }
@@ -4901,6 +4989,36 @@ class Tender extends CI_Controller
         ";
 
         $query = $this->db->query($sql, [$tender_enquiry_id]);
+        echo json_encode($query->result_array());
+    }
+
+    public function get_company_bank_load()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            echo json_encode(['error' => 'Unauthorized']);
+            return;
+        }
+
+        $company_id = $this->input->post('company_id');
+        if (empty($company_id)) {
+            echo json_encode([]);
+            return;
+        }
+
+        $sql = "
+            SELECT 
+                bank_id,
+                bank_name,
+                account_name,
+                account_number,
+                iban_no,
+                swift_code
+            FROM company_bank_info
+            WHERE status = 'Active'
+                AND company_id = ?
+            ORDER BY bank_name ASC
+        ";
+        $query = $this->db->query($sql, [$company_id]);
         echo json_encode($query->result_array());
     }
 

@@ -67,7 +67,56 @@
         $("#srch_customer_id").val(ui.item.customer_id).change();
         //$("#srch_tender_enquiry_id").val(ui.item.tender_enquiry_id);
         load_tender_enq(ui.item.tender_enquiry_id);
+        load_company_banks(ui.item.company_id);
       },
+    });
+
+    function load_company_banks(company_id, selected_bank_id = "") {
+      const $bankDropdown = $("#bank_id");
+      $bankDropdown.html('<option value="">Loading banks...</option>');
+
+      if (!company_id) {
+        $bankDropdown.html('<option value="">Select Bank</option>');
+        return;
+      }
+
+      $.ajax({
+        url: "<?php echo site_url('tender/get_company_bank_load'); ?>",
+        type: "POST",
+        data: { company_id: company_id },
+        dataType: "json",
+        success: function (res) {
+          $bankDropdown.html('<option value="">Select Bank</option>');
+          if (res.length > 0) {
+            $.each(res, function (i, row) {
+              let label = row.bank_name;
+              if (row.account_number) {
+                label += ' (' + row.account_number + ')';
+              }
+              $bankDropdown.append(
+                $("<option>", {
+                  value: row.bank_id,
+                  text: label,
+                })
+              );
+            });
+
+            if (selected_bank_id) {
+              $bankDropdown.val(selected_bank_id).trigger("change");
+            }
+          } else {
+            $bankDropdown.html('<option value="">No bank found</option>');
+          }
+        },
+        error: function () {
+          $bankDropdown.html('<option value="">Select Bank</option>');
+        }
+      });
+    }
+
+    $("#srch_company_id").on("change", function () {
+      const company_id = $(this).val();
+      load_company_banks(company_id);
     });
 
     function load_tender_enq(t_enq_id = "") {
