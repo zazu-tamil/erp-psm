@@ -538,6 +538,32 @@ class General extends CI_Controller
         $table = $this->input->post('tbl');
         $rec_id = $this->input->post('id');
 
+        // Role-based delete enforcement (table -> menu slug mapping).
+        $delete_perm_map = array(
+            'user_login_info' => 'user-list',
+            'category_info' => 'category-list',
+            'brand_info' => 'brand-list',
+            'uom_info' => 'uom-list',
+            'gst_info' => 'gst-list',
+            'item_info' => 'items-list',
+            'vendor_info' => 'vendor-list',
+            'customer_info' => 'customer-list',
+            'currencies_info' => 'currency-list',
+            'country_info' => 'country-list',
+            'addt_charges_type_info' => 'addt-charges-type-list',
+            'company_info' => 'company-list',
+            'company_bank_info' => 'company-bank-list',
+            'customer_contact_info' => 'customer-contact-list',
+            'vendor_contact_info' => 'vendor-contact-list',
+            'vat_filing_head_info' => 'vat-filing-head-list',
+            'in_stock_item_info' => 'in-stock-item-list',
+            'vendor_opening_balance_info' => 'vendor-opening-balance-list',
+            'customer_opening_balance_info' => 'customer-opening-balance-list',
+        );
+        if (isset($delete_perm_map[$table]) && !is_super_admin() && !has_perm($delete_perm_map[$table], 'delete')) {
+            echo 'Permission Denied';
+            return;
+        }
 
         if ($table == 'country_info') {
             $this->db->where('country_id', $rec_id);

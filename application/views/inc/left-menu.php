@@ -18,27 +18,10 @@
         <!-- sidebar menu: : style can be found in sidebar.less -->
         <ul class="sidebar-menu" data-widget="tree">
             <?php
-            if ($this->session->userdata(SESS_HD . 'level') == 'Customer') {
-                include_once('customer-menu.php');
-            }
-            if ($this->session->userdata(SESS_HD . 'level') == 'Admin') {
-                include_once('admin-menu.php');
-            }
-            if ($this->session->userdata(SESS_HD . 'level') == 'Supervisor') {
-                include_once('supervisor-menu.php');
-            }
-            if ($this->session->userdata(SESS_HD . 'level') == 'Agent') {
-                include_once('agent-menu.php');
-            }
-            if ($this->session->userdata(SESS_HD . 'level') == 'Labour') {
-                include_once('labour-menu.php');
-            }
-            if ($this->session->userdata(SESS_HD . 'level') == 'Vendor') {
-                include_once('vendor-menu.php');
-            }
-            if ($this->session->userdata(SESS_HD . 'level') == 'Staff') {
-                include_once('staff-menu.php');
-            }
+            // Dynamic, role-aware menu. Built from menu_info + role_permission.
+            $current_page = $this->uri->segment(1, 0);
+            $menu_tree = get_menu_tree_for_current_role();
+            render_sidebar_menu($menu_tree, $current_page);
             ?>
             <li>
                 <a href="<?php echo site_url('logout') ?>">

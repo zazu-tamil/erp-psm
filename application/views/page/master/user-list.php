@@ -82,6 +82,16 @@
                                 </div>
                                 <div class="row">
                                     <div class="form-group col-md-12">
+                                        <label>Role</label>
+                                        <select class="form-control" name="level" required="true">
+                                            <?php foreach ($role_opt as $role_key => $role_name): ?>
+                                                <option value="<?php echo $role_key; ?>"><?php echo $role_name; ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-12">
                                         <label for="user_pwd">Password</label>
                                         <div class="input-group">
                                             <input type="password" name="user_pwd" id="user_pwd" class="form-control"
@@ -148,6 +158,16 @@
                                         <label>User Name</label>
                                         <input class="form-control" type="text" name="user_name" id="user_name" value=""
                                             placeholder="Enter User Name" required="true">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label>Role</label>
+                                        <select class="form-control" name="level" required="true">
+                                            <?php foreach ($role_opt as $role_key => $role_name): ?>
+                                                <option value="<?php echo $role_key; ?>"><?php echo $role_name; ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="row">

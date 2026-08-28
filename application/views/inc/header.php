@@ -114,18 +114,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             overflow-x: hidden !important;
             overflow-y: auto !important;
         }
+
         body {
             min-height: 100% !important;
             height: auto !important;
             overflow-x: hidden !important;
             overflow-y: visible !important;
         }
+
         .wrapper {
             min-height: 100% !important;
             height: auto !important;
             overflow-x: hidden !important;
             overflow-y: visible !important;
         }
+
         .content-wrapper {
             overflow: visible !important;
         }
@@ -136,14 +139,42 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         body.modal-open {
             overflow: hidden !important;
         }
+
         .modal {
             overflow-x: hidden !important;
             overflow-y: auto !important;
         }
+
+        /* Dynamic role-permission button visibility */
+        body.no-perm-add button[data-target="#add_modal"],
+        body.no-perm-add a[data-target="#add_modal"],
+        body.no-perm-add .btn-add-record,
+        body.no-perm-add .box-header a.btn-success[href*="add"],
+        body.no-perm-add .box-header button.btn-success[data-target*="add"] { display: none !important; }
+        body.no-perm-edit .edit_record,
+        body.no-perm-edit .btn-edit-record,
+        body.no-perm-edit a.btn-primary[href*="edit"] { display: none !important; }
+        body.no-perm-delete .del_record,
+        body.no-perm-delete .btn-delete-record,
+        body.no-perm-delete a.btn-danger[href*="delete"] { display: none !important; }
     </style>
 </head>
 
-<body class="hold-transition skin-blue sidebar-mini">
+<?php
+// Dynamic permission classes: hide Add/Edit/Delete buttons per role.
+$cur_perm_slug = $this->uri->segment(1, 0);
+$body_perm_classes = '';
+if (!is_super_admin()) {
+    if (!has_perm($cur_perm_slug, 'add'))
+        $body_perm_classes .= ' no-perm-add';
+    if (!has_perm($cur_perm_slug, 'edit'))
+        $body_perm_classes .= ' no-perm-edit';
+    if (!has_perm($cur_perm_slug, 'delete'))
+        $body_perm_classes .= ' no-perm-delete';
+}
+?>
+
+<body class="hold-transition skin-blue sidebar-mini<?php echo $body_perm_classes; ?>">
     <div class="wrapper">
         <header class="main-header">
             <!-- Logo -->
@@ -156,8 +187,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </span>
                 <!-- logo for regular state and mobile devices -->
                 <span class="logo-lg">
-                    <img src="<?php echo base_url('asset/images/1.png'); ?>"
-                        alt="Zazu Technologies"
+                    <img src="<?php echo base_url('asset/images/1.png'); ?>" alt="Zazu Technologies"
                         style="max-height: 35px; max-width: 180px; vertical-align: middle; object-fit: contain; display: inline-block;">
                 </span>
             </a>
@@ -197,20 +227,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 </li>
                                 <!-- Menu Body -->
                                 <?php /*
-                           <li class="user-body">
-                             <div class="row">
-                               <div class="col-xs-4 text-center">
-                                 <a href="#">Followers</a>
-                               </div>
-                               <div class="col-xs-4 text-center">
-                                 <a href="#">Sales</a>
-                               </div>
-                               <div class="col-xs-4 text-center">
-                                 <a href="#">Friends</a>
-                               </div>
-                             </div>
-                             <!-- /.row -->
-                           </li> */ ?>
+                      <li class="user-body">
+                        <div class="row">
+                          <div class="col-xs-4 text-center">
+                            <a href="#">Followers</a>
+                          </div>
+                          <div class="col-xs-4 text-center">
+                            <a href="#">Sales</a>
+                          </div>
+                          <div class="col-xs-4 text-center">
+                            <a href="#">Friends</a>
+                          </div>
+                        </div>
+                        <!-- /.row -->
+                      </li> */ ?>
                                 <!-- Menu Footer-->
                                 <li class="user-footer">
                                     <div class="pull-left hide">

@@ -95,7 +95,7 @@ public function index()
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if ($this->session->userdata(SESS_HD . 'level') != 'Admin') {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }

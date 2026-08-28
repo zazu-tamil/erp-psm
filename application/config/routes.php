@@ -333,7 +333,7 @@ $route['in-stock-item-report'] = 'reports/in_stock_item_report';
 $route['pl-report'] = 'reports/pl_report';
 
 
-$route['vendor-statement-report'] = 'reports/vendor_statement_report'; 
+$route['vendor-statement-report'] = 'reports/vendor_statement_report';
 $route['get-vendor-opening-balance'] = 'reports/get_vendor_opening_balance_ajax';
 
 $route['vendor-opening-balance-list'] = 'master/vendor_opening_balance_list';
@@ -343,7 +343,7 @@ $route['customer-opening-balance-list'] = 'master/customer_opening_balance_list'
 $route['customer-opening-balance-list/(:num)'] = 'master/customer_opening_balance_list/$1';
 
 //customer statement
-$route['customer-statement-report'] = 'reports/customer_statement_report'; 
+$route['customer-statement-report'] = 'reports/customer_statement_report';
 $route['get-customer-opening-balance'] = 'reports/get_customer_opening_balance_ajax';
 $route['get-customer-balance-summary'] = 'payment/get_customer_balance_summary';
 
@@ -368,3 +368,17 @@ $route['pettycash/(:any)'] = 'PettyCash/$1';
 
 
 $route['contra-entry'] = 'accounts/contra_entry';
+
+/* Menu & Permission Management (role-based access control) */
+$route['menu-management'] = 'menu_manager/index';
+$route['menu-management/save'] = 'menu_manager/save_menu';
+$route['menu-management/delete/(:num)'] = 'menu_manager/delete_menu/$1';
+$route['menu-management/reorder'] = 'menu_manager/reorder_menu';
+
+$route['role-management'] = 'menu_manager/role_list';
+$route['role-management/save'] = 'menu_manager/save_role';
+$route['role-management/delete/(:num)'] = 'menu_manager/delete_role/$1';
+
+$route['role-permission'] = 'menu_manager/role_permissions';
+$route['role-permission/(:num)'] = 'menu_manager/role_permissions/$1';
+$route['role-permission/save'] = 'menu_manager/save_role_permissions';

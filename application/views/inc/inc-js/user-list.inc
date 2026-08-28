@@ -18,9 +18,10 @@
           $("#edit_modal #staff_name").val(d.staff_name);
           $("#edit_modal #user_name").val(d.user_name);
           $("#edit_modal #user_pwd").val(d.user_pwd);
+          $("#edit_modal select[name='level']").val(d.level);
           $("#edit_modal input:radio[value='" + d.status + "']").prop(
             "checked",
-            true
+            true,
           );
 
           // Show modal
@@ -56,7 +57,7 @@
     $(document).on("click", ".togglePassword", function () {
       const inputGroup = $(this).closest(".input-group");
       const passwordField = inputGroup.find(
-        "input[type='password'], input[type='text']"
+        "input[type='password'], input[type='text']",
       );
       const eyeIcon = $(this).find("i");
 

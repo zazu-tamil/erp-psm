@@ -14,10 +14,7 @@ class Master extends CI_Controller
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin'
-            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
-        ) {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -31,7 +28,7 @@ class Master extends CI_Controller
                 'staff_name' => $this->input->post('staff_name'),
                 'user_name' => $this->input->post('user_name'),
                 'user_pwd' => $this->input->post('user_pwd'),
-                'level' => 'Admin',
+                'level' => $this->input->post('level'),
                 'ref_id' => '0',
                 'status' => $this->input->post('status')
             );
@@ -45,7 +42,7 @@ class Master extends CI_Controller
                 'staff_name' => $this->input->post('staff_name'),
                 'user_name' => $this->input->post('user_name'),
                 'user_pwd' => $this->input->post('user_pwd'),
-                'level' => 'Admin',
+                'level' => $this->input->post('level'),
                 'ref_id' => '0',
                 'status' => $this->input->post('status')
             );
@@ -112,6 +109,12 @@ class Master extends CI_Controller
 
         $data['pagination'] = $this->pagination->create_links();
 
+        $role_rows = $this->db->where('status', 'Active')->order_by('sort_order', 'ASC')->get('role_info')->result_array();
+        $data['role_opt'] = array();
+        foreach ($role_rows as $rr) {
+            $data['role_opt'][$rr['role_key']] = $rr['role_name'];
+        }
+
         $this->load->view('page/master/user-list', $data);
     }
     public function company_list()
@@ -119,7 +122,7 @@ class Master extends CI_Controller
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if ($this->session->userdata(SESS_HD . 'level') != 'Admin' && $this->session->userdata(SESS_HD . 'level') != 'Staff') {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -329,10 +332,7 @@ class Master extends CI_Controller
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin'
-            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
-        ) {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -423,10 +423,7 @@ class Master extends CI_Controller
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin'
-            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
-        ) {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -517,10 +514,7 @@ class Master extends CI_Controller
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin'
-            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
-        ) {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -611,10 +605,7 @@ class Master extends CI_Controller
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin'
-            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
-        ) {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -708,10 +699,7 @@ class Master extends CI_Controller
             redirect();
         }
 
-        if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin' &&
-            $this->session->userdata(SESS_HD . 'level') != 'Staff'
-        ) {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -955,10 +943,7 @@ class Master extends CI_Controller
             redirect();
         }
 
-        if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin'
-            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
-        ) {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -1143,10 +1128,7 @@ class Master extends CI_Controller
             redirect();
         }
 
-        if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin'
-            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
-        ) {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -1304,10 +1286,7 @@ class Master extends CI_Controller
             redirect();
         }
 
-        if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin'
-            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
-        ) {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -1431,10 +1410,7 @@ class Master extends CI_Controller
             redirect();
         }
 
-        if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin'
-            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
-        ) {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -1647,10 +1623,7 @@ class Master extends CI_Controller
             redirect();
         }
 
-        if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin' &&
-            $this->session->userdata(SESS_HD . 'level') != 'Staff'
-        ) {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -1735,10 +1708,7 @@ class Master extends CI_Controller
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin'
-            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
-        ) {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -1831,10 +1801,7 @@ class Master extends CI_Controller
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin'
-            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
-        ) {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -1929,10 +1896,7 @@ class Master extends CI_Controller
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin'
-            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
-        ) {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -2019,10 +1983,7 @@ class Master extends CI_Controller
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin'
-            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
-        ) {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -2097,10 +2058,7 @@ class Master extends CI_Controller
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin'
-            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
-        ) {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
@@ -2260,10 +2218,7 @@ class Master extends CI_Controller
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
             redirect();
 
-        if (
-            $this->session->userdata(SESS_HD . 'level') != 'Admin'
-            && $this->session->userdata(SESS_HD . 'level') != 'Staff'
-        ) {
+        if (!authorize_page()) {
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
