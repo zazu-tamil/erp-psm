@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP-PSM System User Manual & Workflow Guide</title>
+    <style>
+        /* ============================================================
+           GLOBAL RESET & TYPOGRAPHY
+           ============================================================ */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.45;
+            color: #1e293b;
+            background-color: #f1f5f9;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        /* Screen Container */
+        .page-container {
+            max-width: 210mm;
+            margin: 20px auto;
+            background: #ffffff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-radius: 4px;
+            padding: 16mm 14mm;
+        }
+
+        /* ============================================================
+           PRINT OPTIMIZATION & PAGE BREAK CONTROLS
+           ============================================================ */
+        @page {
+            size: A4 portrait;
+            margin: 12mm 10mm 14mm 10mm;
+        }
+
+        @media print {
+            body {
+                background: #ffffff;
+                font-size: 9.5pt;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .page-container {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                border-radius: 0;
+            }
+
+            .page-break {
+                page-break-before: always;
+                break-before: page;
+            }
+
+            .avoid-break {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            tr {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+        }
+
+        /* Toolbar */
+        .print-toolbar {
+            position: sticky;
+            top: 10px;
+            z-index: 1000;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 210mm;
+            margin: 15px auto;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-print {
+            background: #2563eb;
+            color: #ffffff;
+            border: none;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn-print:hover {
+            background: #1d4ed8;
+        }
+
+        /* ============================================================
+           COVER PAGE & HEADER STYLES
+           ============================================================ */
+        .cover-page {
+            text-align: center;
+            padding: 30px 20px 20px;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 25px;
+        }
+
+        .system-badge {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            font-size: 9pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+        }
+
+        .cover-title {
+            font-size: 22pt;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .cover-subtitle {
+            font-size: 11pt;
+            color: #475569;
+            margin-bottom: 16px;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 10px 14px;
+            border-radius: 6px;
+            text-align: left;
+            margin-top: 15px;
+        }
+
+        .meta-item .meta-label {
+            font-size: 7.5pt;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .meta-item .meta-val {
+            font-size: 9pt;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        /* ============================================================
+           SECTION HEADINGS & BLOCKS
+           ============================================================ */
+        h2.section-heading {
+            font-size: 13pt;
+            font-weight: 700;
+            color: #0f172a;
+            border-left: 4px solid #2563eb;
+            padding-left: 10px;
+            margin: 22px 0 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        h3.sub-heading {
+            font-size: 10.5pt;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 14px 0 6px 0;
+        }
+
+        p {
+            margin-bottom: 8px;
+            color: #334155;
+        }
+
+        /* ============================================================
+           PROCESS FLOW STEPS & DIAGRAM CARDS
+           ============================================================ */
+        .workflow-step-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 12px 0;
+        }
+
+        .flow-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            align-items: stretch;
+        }
+
+        .flow-step-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-top: 3px solid #2563eb;
+            border-radius: 6px;
+            padding: 8px 10px;
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .flow-step-card.purple { border-top-color: #7c3aed; }
+        .flow-step-card.emerald { border-top-color: #059669; }
+        .flow-step-card.amber { border-top-color: #d97706; }
+        .flow-step-card.rose { border-top-color: #e11d48; }
+
+        .flow-step-num {
+            font-size: 7.5pt;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        .flow-step-title {
+            font-size: 9pt;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+            line-height: 1.2;
+        }
+
+        .flow-step-desc {
+            font-size: 7.8pt;
+            color: #475569;
+            line-height: 1.3;
+        }
+
+        .flow-step-route {
+            margin-top: 6px;
+            display: inline-block;
+            font-family: Consolas, monospace;
+            font-size: 7.2pt;
+            background: #f1f5f9;
+            color: #0284c7;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        /* ============================================================
+           TABLE DESIGN & CELL ALIGNMENT
+           ============================================================ */
+        table.doc-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0 16px 0;
+            table-layout: fixed;
+            font-size: 8.5pt;
+        }
+
+        table.doc-table th {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 7.5pt;
+            letter-spacing: 0.5px;
+            padding: 6px 8px;
+            border: 1px solid #334155;
+            text-align: left;
+        }
+
+        table.doc-table td {
+            padding: 6px 8px;
+            border: 1px solid #cbd5e1;
+            vertical-align: top;
+            word-wrap: break-word;
+            line-height: 1.35;
+        }
+
+        table.doc-table tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        table.doc-table tbody tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        /* Specific Alignment Classes */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-left { text-align: left; }
+        .font-mono { font-family: Consolas, Monaco, monospace; font-size: 8pt; }
+        .font-bold { font-weight: 700; }
+
+        /* ============================================================
+           BADGES & CALLOUT ALERTS
+           ============================================================ */
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 7.2pt;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-blue { background: #dbeafe; color: #1e40af; }
+        .badge-green { background: #dcfce7; color: #166534; }
+        .badge-amber { background: #fef3c7; color: #92400e; }
+        .badge-red { background: #fee2e2; color: #991b1b; }
+        .badge-purple { background: #f3e8ff; color: #6b21a8; }
+
+        .callout {
+            border-left: 3px solid #2563eb;
+            background: #eff6ff;
+            padding: 8px 12px;
+            border-radius: 0 6px 6px 0;
+            margin: 10px 0;
+            font-size: 8.5pt;
+        }
+
+        .callout.warning {
+            border-left-color: #d97706;
+            background: #fffbeb;
+        }
+
+        .callout.success {
+            border-left-color: #059669;
+            background: #ecfdf5;
+        }
+
+        .callout-title {
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 2px;
+            font-size: 8.5pt;
+        }
+
+        /* ============================================================
+           DOCUMENT FOOTER
+           ============================================================ */
+        .doc-footer {
+            margin-top: 25px;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 7.5pt;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- On-screen print toolbar -->
+    <div class="print-toolbar no-print">
+        <div>
+            <strong>ERP-PSM User Guide & Workflow Manual</strong>
+            <div style="font-size: 11px; color: #94a3b8;">Configured for standard A4 portrait printing and PDF export</div>
+        </div>
+        <button class="btn-print" onclick="window.print()">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
+                <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>
+            </svg>
+            Print / Save to PDF (Ctrl + P)
+        </button>
+    </div>
+
+    <div class="page-container">
+
+        <!-- ============================================================
+             COVER / TITLE HEADER
+             ============================================================ -->
+        <div class="cover-page avoid-break">
+            <span class="system-badge">Enterprise Resource Planning</span>
+            <h1 class="cover-title">ERP-PSM Operating Manual</h1>
+            <div class="cover-subtitle">Complete Process Workflow, Module Execution Guide & Standard Operating Procedures</div>
+
+            <div class="meta-grid">
+                <div class="meta-item">
+                    <div class="meta-label">System</div>
+                    <div class="meta-val">ERP-PSM Suite</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Architecture</div>
+                    <div class="meta-val">PHP CI3 & MariaDB</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Core Specialization</div>
+                    <div class="meta-val">Tenders & Logistics</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Compliance</div>
+                    <div class="meta-val">VAT & NBR Reports</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+             SECTION 1: SYSTEM WORKFLOW ARCHITECTURE
+             ============================================================ -->
+        <h2 class="section-heading">
+            <span>1. End-to-End System Workflow</span>
+            <span class="badge badge-blue">Lifecycle Overview</span>
+        </h2>
+        <p>The ERP-PSM system manages two synchronized operational tracks: <strong>Customer Sales & Project Execution</strong> and <strong>Supplier Procurement & Landed Cost Tracking</strong>.</p>
+
+        <h3 class="sub-heading">A. Customer Tender-to-Cash Cycle</h3>
+        <div class="workflow-step-container avoid-break">
+            <div class="flow-row">
+                <div class="flow-step-card">
+                    <div class="flow-step-num">Step 01</div>
+                    <div class="flow-step-title">Tender Enquiry</div>
+                    <div class="flow-step-desc">Log customer RFQ, upload specs & register required items.</div>
+                    <span class="flow-step-route">add-tender-enquiry</span>
+                </div>
+                <div class="flow-step-card purple">
+                    <div class="flow-step-num">Step 02</div>
+                    <div class="flow-step-title">Tender Quotation</div>
+                    <div class="flow-step-desc">Cost estimation, currency selection, profit margin & VAT.</div>
+                    <span class="flow-step-route">tender-quotation-add</span>
+                </div>
+                <div class="flow-step-card emerald">
+                    <div class="flow-step-num">Step 03</div>
+                    <div class="flow-step-title">Customer PO</div>
+                    <div class="flow-step-desc">Record client award, attach PO file & confirm line items.</div>
+                    <span class="flow-step-route">customer-tender-po-add</span>
+                </div>
+                <div class="flow-step-card amber">
+                    <div class="flow-step-num">Step 04</div>
+                    <div class="flow-step-title">Delivery Challan</div>
+                    <div class="flow-step-desc">Material dispatch, transport info & customer receipt note.</div>
+                    <span class="flow-step-route">tender-dc-add</span>
+                </div>
+                <div class="flow-step-card rose">
+                    <div class="flow-step-num">Step 05</div>
+                    <div class="flow-step-title">Sales Invoice & Receipt</div>
+                    <div class="flow-step-desc">Generate commercial invoice & record payment receipts.</div>
+                    <span class="flow-step-route">tender-invoice-add</span>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="sub-heading">B. Supplier Procurement & Landed Cost Cycle</h3>
+        <div class="workflow-step-container avoid-break">
+            <div class="flow-row">
+                <div class="flow-step-card">
+                    <div class="flow-step-num">Step 01</div>
+                    <div class="flow-step-title">Supplier Enquiry</div>
+                    <div class="flow-step-desc">Send RFQs to manufacturers and suppliers for item prices.</div>
+                    <span class="flow-step-route">vendor-rate-enquiry</span>
+                </div>
+                <div class="flow-step-card purple">
+                    <div class="flow-step-num">Step 02</div>
+                    <div class="flow-step-title">Supplier Quotation</div>
+                    <div class="flow-step-desc">Log vendor bids, evaluate currency rates & shipping terms.</div>
+                    <span class="flow-step-route">vendor-quotation-add</span>
+                </div>
+                <div class="flow-step-card emerald">
+                    <div class="flow-step-num">Step 03</div>
+                    <div class="flow-step-title">Supplier PO</div>
+                    <div class="flow-step-desc">Issue official purchase order with delivery schedule.</div>
+                    <span class="flow-step-route">vendor-po-add</span>
+                </div>
+                <div class="flow-step-card amber">
+                    <div class="flow-step-num">Step 04</div>
+                    <div class="flow-step-title">Supplier Inward (GRN)</div>
+                    <div class="flow-step-desc">Acknowledge physical receipt of goods in warehouse.</div>
+                    <span class="flow-step-route">vendor-pur-inward-add</span>
+                </div>
+                <div class="flow-step-card rose">
+                    <div class="flow-step-num">Step 05</div>
+                    <div class="flow-step-title">Costing Bills & Payout</div>
+                    <div class="flow-step-desc">Record vendor bills, local bills, freight, customs & payout.</div>
+                    <span class="flow-step-route">vendor-purchase-bill-add</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+             SECTION 2: MASTER CONFIGURATION GUIDE
+             ============================================================ -->
+        <div class="page-break"></div>
+        <h2 class="section-heading">
+            <span>2. Master Configuration Guide</span>
+            <span class="badge badge-purple">Prerequisites</span>
+        </h2>
+        <p>Before initiating transactions, configure master tables under the <strong>Master</strong> navigation tree.</p>
+
+        <table class="doc-table avoid-break">
+            <thead>
+                <tr>
+                    <th style="width: 22%;">Master Entity</th>
+                    <th style="width: 28%;">Route / Link</th>
+                    <th style="width: 32%;">Key Fields & Requirements</th>
+                    <th style="width: 18%;">Accounting Impact</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="font-bold">Company Profile</td>
+                    <td class="font-mono">master/company_list</td>
+                    <td>Company Name, CR No, VAT No, Address, Header Logo, Quote & Invoice terms.</td>
+                    <td><span class="badge badge-blue">Entity Header</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Company Banks</td>
+                    <td class="font-mono">master/company_bank_list</td>
+                    <td>Bank Name, Account No, IBAN, Swift Code, Currency, Branch.</td>
+                    <td><span class="badge badge-green">Bank Ledger</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Customer Directory</td>
+                    <td class="font-mono">master/customer_list</td>
+                    <td>Customer Name, CR/VAT No, Contact Persons, GPS Map, Opening Balance.</td>
+                    <td><span class="badge badge-purple">Sundry Debtors</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Supplier Directory</td>
+                    <td class="font-mono">master/vendor_list</td>
+                    <td>Vendor Name, Contact Persons, Country, VAT, Payment terms, Opening Balance.</td>
+                    <td><span class="badge badge-purple">Sundry Creditors</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Chart of Accounts</td>
+                    <td class="font-mono">accounts/account_head_list</td>
+                    <td>Account Heads & Sub-Account Heads (Income, Expense, Asset, Liability).</td>
+                    <td><span class="badge badge-amber">General Ledger</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Items & Categories</td>
+                    <td class="font-mono">master/items_list</td>
+                    <td>Item Name, Description, Category, Brand, HSN Code, UOM, VAT %.</td>
+                    <td><span class="badge badge-blue">Item Valuation</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ============================================================
+             SECTION 3: SALES & TENDER MANAGEMENT EXECUTION
+             ============================================================ -->
+        <h2 class="section-heading">
+            <span>3. Tender & Sales Execution Guide</span>
+            <span class="badge badge-green">Customer Side</span>
+        </h2>
+
+        <table class="doc-table avoid-break">
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Operational Step</th>
+                    <th style="width: 22%;">System Route</th>
+                    <th style="width: 40%;">Standard Operating Procedure (SOP)</th>
+                    <th style="width: 18%;">Output / Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="font-bold">1. Tender Enquiry</td>
+                    <td class="font-mono">add-tender-enquiry</td>
+                    <td>Select Company & Customer &rarr; Enter Tender Name & Closing Date &rarr; Upload specification PDF &rarr; Add required item line items.</td>
+                    <td><span class="badge badge-blue">Enquiry No Generated</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold">2. Tender Quotation</td>
+                    <td class="font-mono">tender-quotation-add</td>
+                    <td>Select Tender Enquiry &rarr; Auto-fetches items &rarr; Input Currency, Unit Rates, VAT %, Freight/Handling &rarr; Define quotation validity terms.</td>
+                    <td><span class="badge badge-purple">Print Quotation PDF</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold">3. Customer PO</td>
+                    <td class="font-mono">customer-tender-po-add</td>
+                    <td>Select Customer & Quotation &rarr; Input Customer PO Number, Award Date &rarr; Upload signed client PO copy & confirm ordered quantities.</td>
+                    <td><span class="badge badge-green">Order Status: Awarded</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold">4. Delivery Challan (DC)</td>
+                    <td class="font-mono">tender-dc-add</td>
+                    <td>Select Tender PO &rarr; Input Delivery Date, Vehicle No, Driver & Dispatch Quantities &rarr; Print Challan for physical gate pass & delivery note.</td>
+                    <td><span class="badge badge-amber">Print DC Note</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold">5. Commercial Invoice</td>
+                    <td class="font-mono">tender-invoice-add</td>
+                    <td>Select Tender PO & DC &rarr; System computes Subtotal, VAT Amount, Net Total &rarr; Select remittance bank & verify terms.</td>
+                    <td><span class="badge badge-blue">Print Tax Invoice</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold">6. Payment Collection</td>
+                    <td class="font-mono">customer-invoice-receipt</td>
+                    <td>Select Customer &rarr; Choose Bank / Cash mode &rarr; Enter Cheque/Ref No & allocate payment against outstanding invoice numbers.</td>
+                    <td><span class="badge badge-green">Receipt Voucher</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ============================================================
+             SECTION 4: PROCUREMENT & COST ACCOUNTING
+             ============================================================ -->
+        <div class="page-break"></div>
+        <h2 class="section-heading">
+            <span>4. Supplier Procurement & Landed Costing</span>
+            <span class="badge badge-amber">Procurement Side</span>
+        </h2>
+        <p>All direct materials, local workshop charges, shipping carriers, and customs clearing are tracked per tender to establish 100% cost transparency.</p>
+
+        <table class="doc-table avoid-break">
+            <thead>
+                <tr>
+                    <th style="width: 22%;">Procurement Phase</th>
+                    <th style="width: 24%;">System Route</th>
+                    <th style="width: 38%;">Action Details</th>
+                    <th style="width: 16%;">Linked Record</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="font-bold">Supplier Rate RFQ</td>
+                    <td class="font-mono">vendor-rate-enquiry</td>
+                    <td>Send requests for quotation to vendors for items required under specific tender inquiries.</td>
+                    <td>Tender Enquiry</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Supplier Quotation</td>
+                    <td class="font-mono">vendor-quotation-add</td>
+                    <td>Record rates offered by suppliers, currency conversion rates, and delivery lead times.</td>
+                    <td>Supplier RFQ</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Supplier PO</td>
+                    <td class="font-mono">vendor-po-add</td>
+                    <td>Issue official Purchase Order to supplier specifying rates, VAT, freight, and delivery terms.</td>
+                    <td>Tender & Vendor Quote</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Supplier Inward (GRN)</td>
+                    <td class="font-mono">vendor-pur-inward-add</td>
+                    <td>Verify received goods against Supplier PO. Record delivered quantities and condition.</td>
+                    <td>Supplier PO</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Vendor Purchase Bill</td>
+                    <td class="font-mono">vendor-purchase-bill-add</td>
+                    <td>Post actual vendor invoice amount, VAT, and supplier invoice reference.</td>
+                    <td>Supplier Inward</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Local Purchase Bills</td>
+                    <td class="font-mono">local-purchase-bill-list</td>
+                    <td>Log direct consumable costs, local accessories, or fabrication charges tagged to the tender.</td>
+                    <td>Tender ID</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Delivery Partner Bills</td>
+                    <td class="font-mono">delivery-partner-bill-list</td>
+                    <td>Log freight charges, international shipping, air/sea cargo invoices from logistics providers.</td>
+                    <td>Tender ID</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Customs Duty & Clearance</td>
+                    <td class="font-mono">customs-bill-list</td>
+                    <td>Log customs duty, clearing agent fees, and government stamp charges.</td>
+                    <td>Tender ID</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Supplier Payments</td>
+                    <td class="font-mono">vendor-payment-list</td>
+                    <td>Disburse advance payments or settle vendor bills with payment voucher printing.</td>
+                    <td>Vendor Bills</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ============================================================
+             SECTION 5: FINANCIALS & GENERAL LEDGER
+             ============================================================ -->
+        <h2 class="section-heading">
+            <span>5. Accounts Book, Treasury & Credit/Debit Notes</span>
+            <span class="badge badge-purple">Financials</span>
+        </h2>
+
+        <div class="callout avoid-break">
+            <div class="callout-title">Double-Entry Financial Controls:</div>
+            All Customer & Vendor transactions synchronize automatically with Sub-Ledgers. Miscellaneous treasury events are managed via dedicated books below:
+        </div>
+
+        <table class="doc-table avoid-break">
+            <thead>
+                <tr>
+                    <th style="width: 22%;">Accounting Book</th>
+                    <th style="width: 25%;">Route / URL</th>
+                    <th style="width: 53%;">Description & Accounting Treatment</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="font-bold">Cash/Bank Inward</td>
+                    <td class="font-mono">inward-list</td>
+                    <td>Record non-sales income, bank interest, partner capital injection, or miscellaneous receipts.</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Cash/Bank Outward</td>
+                    <td class="font-mono">outward-list</td>
+                    <td>Record administrative overheads, office rent, utilities, staff payroll, and operational expenses.</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Contra Entry</td>
+                    <td class="font-mono">contra-entry</td>
+                    <td>Record internal transfers: Cash deposit into Bank, Cash withdrawal from Bank, or Bank-to-Bank transfer.</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Petty Cash Management</td>
+                    <td class="font-mono">petty-cash</td>
+                    <td>Top-up petty cash fund, disburse day-to-day minor vouchers, and review petty cash statements.</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Credit / Debit Notes</td>
+                    <td class="font-mono">credit-debit-note-list</td>
+                    <td>Issue Credit Notes to customers (sales returns/discounts) or Debit Notes to suppliers (disputed charges).</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Bank / Cash Statement</td>
+                    <td class="font-mono">cash-in-out-statement</td>
+                    <td>View date-filtered ledger statement of debits, credits, and running balance per bank account.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ============================================================
+             SECTION 6: AUDIT, REPORTS & TAX COMPLIANCE
+             ============================================================ -->
+        <div class="page-break"></div>
+        <h2 class="section-heading">
+            <span>6. Comprehensive Reports & Tax Compliance Guide</span>
+            <span class="badge badge-emerald" style="background:#dcfce7; color:#166534;">Intelligence & Compliance</span>
+        </h2>
+
+        <table class="doc-table avoid-break">
+            <thead>
+                <tr>
+                    <th style="width: 26%;">Report Name</th>
+                    <th style="width: 26%;">Route</th>
+                    <th style="width: 48%;">Purpose & Decision Metrics</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="font-bold">Tender Summary Report</td>
+                    <td class="font-mono">tender-enquiry-summary-report</td>
+                    <td><strong>Full Project Profitability Matrix:</strong> Shows Sales Invoiced vs (Supplier POs + Local Bills + Delivery Partner Bills + Customs), displaying net project gross profit.</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Tender Timeline & Progress</td>
+                    <td class="font-mono">tender-enquiry-timeline</td>
+                    <td>Lifecycle tracking from Enquiry &rarr; Quotation &rarr; PO &rarr; DC &rarr; Invoice &rarr; Payment Receipt.</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Customer Statement (SOA)</td>
+                    <td class="font-mono">customer-statement-report</td>
+                    <td>Statement of Account with opening balance, debit invoices, credit receipts, and balance with Excel export.</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Vendor Statement (SOA)</td>
+                    <td class="font-mono">vendor-statement-report</td>
+                    <td>Supplier ledger showing opening balances, purchase bills, advance payouts, and balance payable.</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">PO Summary Report</td>
+                    <td class="font-mono">supplier-summary-report</td>
+                    <td>Overview of all Supplier Purchase Orders, delivered quantities, and pending backorders.</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Invoice Summary Report</td>
+                    <td class="font-mono">invoice-report</td>
+                    <td>Chronological sales invoice register with taxable amounts, VAT amounts, and payment status.</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Item Rate History</td>
+                    <td class="font-mono">item-rate-report</td>
+                    <td>Historical purchase and sales rates by item across all past tenders for pricing intelligence.</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">VAT Return Form Summary</td>
+                    <td class="font-mono">sales-purchase-report</td>
+                    <td>Consolidated VAT liability report showing Output VAT on Sales minus Input VAT on Purchases.</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Sales & Purchase NBR</td>
+                    <td class="font-mono">sales-nbr-report / purchase-nbr</td>
+                    <td>Tax filing reports structured specifically for National Bureau for Revenue (NBR) compliance.</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Profit & Loss (P&L)</td>
+                    <td class="font-mono">pl-report</td>
+                    <td>Income statement showing Sales Revenue, Cost of Goods Sold, Other Income, Indirect Expenses & Net Margin.</td>
+                </tr>
+                <tr>
+                    <td class="font-bold">Account Trial Balance</td>
+                    <td class="font-mono">account-trial-balance</td>
+                    <td>Standard double-entry trial balance verifying debit-credit equilibrium across all ledger accounts.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ============================================================
+             SECTION 7: ROLES & STANDARD OPERATING PROCEDURES (SOP)
+             ============================================================ -->
+        <h2 class="section-heading">
+            <span>7. Role-Based SOP & Best Practices</span>
+            <span class="badge badge-amber">Operational Standards</span>
+        </h2>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 10px 0;" class="avoid-break">
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;">
+                <div style="font-weight: 700; color: #0f172a; font-size: 9pt; margin-bottom: 4px;">Tendering & Sales Team</div>
+                <ul style="padding-left: 14px; font-size: 8pt; color: #334155; line-height: 1.4;">
+                    <li>Always attach original PDF specs when creating a Tender Enquiry.</li>
+                    <li>Double check foreign currency exchange rates before submitting quotations.</li>
+                    <li>Ensure Customer PO copies are uploaded before dispatching materials.</li>
+                </ul>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;">
+                <div style="font-weight: 700; color: #0f172a; font-size: 9pt; margin-bottom: 4px;">Procurement & Logistics Team</div>
+                <ul style="padding-left: 14px; font-size: 8pt; color: #334155; line-height: 1.4;">
+                    <li>Always tag Delivery Partner & Customs bills with the corresponding Tender ID.</li>
+                    <li>Record Supplier Inward (GRN) immediately upon physical delivery.</li>
+                    <li>Obtain customer-stamped Delivery Challans for invoice audit proof.</li>
+                </ul>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;">
+                <div style="font-weight: 700; color: #0f172a; font-size: 9pt; margin-bottom: 4px;">Accounts & Finance Team</div>
+                <ul style="padding-left: 14px; font-size: 8pt; color: #334155; line-height: 1.4;">
+                    <li>Allocate customer receipts against specific invoice numbers for accurate aging.</li>
+                    <li>Perform weekly Bank Reconciliation using the Bank Statement tool.</li>
+                    <li>Review Tender Summary Report before closing project files for P&L signoff.</li>
+                </ul>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;">
+                <div style="font-weight: 700; color: #0f172a; font-size: 9pt; margin-bottom: 4px;">System Admin & Management</div>
+                <ul style="padding-left: 14px; font-size: 8pt; color: #334155; line-height: 1.4;">
+                    <li>Verify Customer and Vendor Opening Balances at the beginning of each fiscal year.</li>
+                    <li>Regularly review the Executive Dashboard KPIs for overdue receivables.</li>
+                    <li>Export monthly NBR VAT Return summaries for regulatory tax filing.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Document Footer -->
+        <div class="doc-footer avoid-break">
+            <div>ERP-PSM Enterprise System &bull; Confidential Operational Manual</div>
+            <div>Generated for User Training & Operational Guidance</div>
+        </div>
+
+    </div>
+
+</body>
+</html>

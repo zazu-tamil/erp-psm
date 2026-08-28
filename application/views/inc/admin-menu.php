@@ -9,13 +9,19 @@ echo "<br> dsfsdfsdf" . $current_page;
 ?>
 
 <!-- Dashboard -->
-<li class="header">Dashboard</li>
+<li class="header">Dashboard & Help</li>
 <li class="<?= ($current_page === 'dash') ? 'active' : '' ?>">
     <a href="<?= site_url('dash') ?>">
         <i class="fa fa-dashboard"></i>
         <span>Dashboard</span>
     </a>
 </li>
+<!-- <li class="<?= ($current_page === 'user-guide') ? 'active' : '' ?>">
+    <a href="<?= site_url('user-guide') ?>" target="_blank">
+        <i class="fa fa-book text-aqua"></i>
+        <span>User Guide (PDF)</span>
+    </a>
+</li> -->
 <!-- Tender Main Menu -->
 <li class="header">TENDER</li>
 <!-- Tender Enquiry -->

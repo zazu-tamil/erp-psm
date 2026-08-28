@@ -24,6 +24,16 @@ class General extends CI_Controller
         //$this->load->view('page/dashboard');
     }
 
+    public function user_guide()
+    {
+        $file_path = FCPATH . 'USER_GUIDE.html';
+        if (file_exists($file_path)) {
+            echo file_get_contents($file_path);
+        } else {
+            show_404();
+        }
+    }
+
 
     public function get_data()
     {

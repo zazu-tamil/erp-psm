@@ -55,6 +55,7 @@ $route['translate_uri_dashes'] = FALSE;
 
 $route['logout'] = 'login/logout';
 $route['dash'] = 'dashboard';
+$route['user-guide'] = 'general/user_guide';
 
 //$route['add-tender-enquiry']='tender/add_tender_enquiry';
 $route['add-tender-enquiry'] = 'tender/add_tender_enquiry_v2';
