@@ -383,7 +383,14 @@
             : 'Zero';
 
         if ($decimal_part > 0) {
-            $words .= ' & Fils ' . $decimal_part . '/' . $multiplier;
+            if($currency == 'BHD') {
+                $words .= ' & Fils ' . $decimal_part . '/' . $multiplier;
+            } elseif($currency == 'EUR') {
+                $words .= ' & Cents ' . $decimal_part . '/' . $multiplier;
+            } else {
+                $words .= ' & ' . $decimal_part . '/' . $multiplier;
+            }
+             
         }
 
         return $words;
@@ -419,7 +426,7 @@
                         <!-- Invoice Title & Number -->
                         <div class="invoice-header">
                             <?php if ($record['vat_payer_sales_grp'] == 'Exports (Line 5 of the VAT Return)'): ?>
-                                <div class="invoice-title">Exports INVOICE</div>
+                                <div class="invoice-title">EXPORT INVOICE</div>
                                 <div style="float:right; text-align:right;">
                                     Date : <?php echo htmlspecialchars(date('d/m/Y', strtotime($record['invoice_date']))); ?><br>
                                     Invoice No: <?php echo htmlspecialchars($record['invoice_no'] ?? 'N/A'); ?>
