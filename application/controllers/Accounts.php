@@ -184,16 +184,11 @@ class Accounts extends CI_Controller
             $where .= ' and a.nature_type = "' . $nature_type . '"';
         }
 
-        $this->db->where('a.status != ', 'Delete');
-        if ($srch_type != '')
-            $this->db->where($where);
-        $this->db->from('cb_account_head_info as a');
-
         $sql = "
                 select 
                 a.*
                 from cb_account_head_info as a 
-                where status != 'Delete'
+                where a.status != 'Delete'
                 and $where
                 order by a.status asc , a.account_head_name asc 
          ";
@@ -342,11 +337,6 @@ class Accounts extends CI_Controller
         }
 
 
-
-        $this->db->where('a.status != ', 'Delete');
-        if ($srch_type != '')
-            $this->db->where($where);
-        $this->db->from('cb_sub_account_head_info as a');
 
         $sql = "
                 select 
@@ -2856,9 +2846,6 @@ class Accounts extends CI_Controller
 
             redirect('opening-balance-list/' . $this->uri->segment(2, 0));
         }
-
-        $this->db->where('status != ', 'Delete');
-        $this->db->from('cb_opening_balance_info');
 
         $sql = "
                 select 

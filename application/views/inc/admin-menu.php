@@ -5,7 +5,7 @@ $g_master = ['company-list', 'vendor-opening-balance-list', 'customer-opening-ba
 // Get current page
 $current_page = $this->uri->segment(1, 0);
 
-echo "<br> dsfsdfsdf" . $current_page;
+// echo "<br> dsfsdfsdf" . $current_page; // removed debug output
 ?>
 
 <!-- Dashboard -->
