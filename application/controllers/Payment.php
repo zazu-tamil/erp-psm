@@ -259,9 +259,10 @@ class Payment extends CI_Controller
         $this->db->where($where);
         $data['total_records'] = $cnt = $this->db->count_all_results();
 
-        $data['sno'] = $this->uri->segment(2, 0);
+        $offset = (int) ($this->uri->segment(3) ? $this->uri->segment(3) : $this->uri->segment(2, 0));
+        $data['sno'] = $offset;
 
-        $config['base_url'] = trim(site_url('customer-invoice-receipt') . '/' . $this->uri->segment(2, 0));
+        $config['base_url'] = site_url('customer-invoice-receipt');
         $config['total_rows'] = $cnt;
         $config['per_page'] = 50;
         $config['uri_segment'] = 2;
@@ -284,7 +285,6 @@ class Payment extends CI_Controller
         $config['next_link'] = "Next";
         $this->pagination->initialize($config);
 
-        $offset = (int) $this->uri->segment(2, 0);
         $limit = (int) $config['per_page'];
 
 
@@ -893,9 +893,10 @@ class Payment extends CI_Controller
         $cnt_row = $cnt_query->row_array();
         $data['total_records'] = $cnt = (int) ($cnt_row['cnt'] ?? 0);
 
-        $data['sno'] = $this->uri->segment(2, 0);
+        $offset = (int) ($this->uri->segment(3) ? $this->uri->segment(3) : $this->uri->segment(2, 0));
+        $data['sno'] = $offset;
 
-        $config['base_url'] = trim(site_url('vendor-payment-list') . '/' . $this->uri->segment(2, 0));
+        $config['base_url'] = site_url('vendor-payment-list');
         $config['total_rows'] = $cnt;
         $config['per_page'] = 50;
         $config['uri_segment'] = 2;
@@ -918,7 +919,6 @@ class Payment extends CI_Controller
         $config['next_link'] = "Next";
         $this->pagination->initialize($config);
 
-        $offset = (int) $this->uri->segment(2, 0);
         $limit = (int) $config['per_page'];
 
 
