@@ -236,7 +236,7 @@
                                     <div class="form-group col-md-12">
                                         <label>Tender Enquiry Id</label>
                                         <input type="text" class="form-control" id="edit_tender_enquiry_id"
-                                            placeholder="Search Enquiry No" required>
+                                            placeholder="Search Enquiry No">
                                         <input type="hidden" name="tender_enquiry_id" id="edit_tender_enquiry_hidden">
                                     </div>
 

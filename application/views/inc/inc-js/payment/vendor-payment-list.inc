@@ -281,6 +281,34 @@
         });
 
         // ============================================================
+        // SEARCH FILTER ENQUIRY AUTOCOMPLETE
+        // ============================================================
+        $("#srch_enquiry_no").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "<?php echo base_url('payment/tender_enquiry_id_search'); ?>",
+                    type: "POST",
+                    dataType: "json",
+                    data: { search: request.term },
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            },
+            minLength: 1,
+            select: function (event, ui) {
+                $(this).val(ui.item.value);
+                $(".tender_enquiry_id_value_id").val(ui.item.tender_enquiry_id);
+            }
+        });
+
+        $("#srch_enquiry_no").on("input", function () {
+            if ($(this).val().trim() === "") {
+                $(".tender_enquiry_id_value_id").val("");
+            }
+        });
+
+        // ============================================================
         // AMOUNT DISTRIBUTION LOGIC
         // ============================================================
         function distributeAmount(prefix, startFromRow = null) {

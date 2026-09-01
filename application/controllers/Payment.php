@@ -797,7 +797,7 @@ class Payment extends CI_Controller
 
         $where = "1=1";
 
-
+        // ===================== SEARCH FILTERS =====================
         if ($this->input->post('srch_vendor_id') !== null) {
             $data['srch_vendor_id'] = $srch_vendor_id = $this->input->post('srch_vendor_id');
             $this->session->set_userdata('srch_vendor_id', $srch_vendor_id);
@@ -811,15 +811,87 @@ class Payment extends CI_Controller
             $where .= " AND a.vendor_id = '" . $this->db->escape_str($srch_vendor_id) . "'";
         }
 
+        if ($this->input->post('srch_enquiry_no') !== null) {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->input->post('srch_enquiry_no');
+            $this->session->set_userdata('vendor_payment_srch_enquiry_no', $srch_enquiry_no);
+        } elseif ($this->session->userdata('vendor_payment_srch_enquiry_no')) {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->session->userdata('vendor_payment_srch_enquiry_no');
+        } else {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = '';
+        }
 
+        if ($this->input->post('tender_enquiry_id_value_id') !== null) {
+            $data['tender_enquiry_id_value_id'] = $tender_enquiry_id_value_id = $this->input->post('tender_enquiry_id_value_id');
+            $this->session->set_userdata('vendor_payment_tender_enquiry_id_value_id', $tender_enquiry_id_value_id);
+        } elseif ($this->session->userdata('vendor_payment_tender_enquiry_id_value_id')) {
+            $data['tender_enquiry_id_value_id'] = $tender_enquiry_id_value_id = $this->session->userdata('vendor_payment_tender_enquiry_id_value_id');
+        } else {
+            $data['tender_enquiry_id_value_id'] = $tender_enquiry_id_value_id = '';
+        }
 
+        if (!empty($tender_enquiry_id_value_id)) {
+            $where .= " AND EXISTS (
+                SELECT 1 FROM vendor_payment_bill_info vpbi_f
+                LEFT JOIN vendor_purchase_invoice_info vpi_f ON vpi_f.vendor_purchase_invoice_id = vpbi_f.bill_id AND vpbi_f.bill_type = 'Purchase Invoice'
+                LEFT JOIN local_purchase_bill_info lpb_f ON lpb_f.local_purchase_bill_id = vpbi_f.bill_id AND vpbi_f.bill_type = 'Local Bill'
+                LEFT JOIN dp_bill_info dpb_f ON dpb_f.dp_bill_id = vpbi_f.bill_id AND vpbi_f.bill_type = 'Delivery Bill'
+                LEFT JOIN customs_bill_info cb_f ON cb_f.customs_bill_id = vpbi_f.bill_id AND vpbi_f.bill_type = 'Customs Bill'
+                WHERE vpbi_f.vendor_payment_id = a.vendor_payment_id
+                AND vpbi_f.status = 'Active'
+                AND COALESCE(vpi_f.tender_enquiry_id, lpb_f.tender_enquiry_id, dpb_f.tender_enquiry_id, cb_f.tender_enquiry_id) = '" . $this->db->escape_str($tender_enquiry_id_value_id) . "'
+            )";
+        } elseif (!empty($srch_enquiry_no)) {
+            $where .= " AND EXISTS (
+                SELECT 1 FROM vendor_payment_bill_info vpbi_f
+                LEFT JOIN vendor_purchase_invoice_info vpi_f ON vpi_f.vendor_purchase_invoice_id = vpbi_f.bill_id AND vpbi_f.bill_type = 'Purchase Invoice'
+                LEFT JOIN local_purchase_bill_info lpb_f ON lpb_f.local_purchase_bill_id = vpbi_f.bill_id AND vpbi_f.bill_type = 'Local Bill'
+                LEFT JOIN dp_bill_info dpb_f ON dpb_f.dp_bill_id = vpbi_f.bill_id AND vpbi_f.bill_type = 'Delivery Bill'
+                LEFT JOIN customs_bill_info cb_f ON cb_f.customs_bill_id = vpbi_f.bill_id AND vpbi_f.bill_type = 'Customs Bill'
+                LEFT JOIN tender_enquiry_info tei_f ON tei_f.tender_enquiry_id = COALESCE(vpi_f.tender_enquiry_id, lpb_f.tender_enquiry_id, dpb_f.tender_enquiry_id, cb_f.tender_enquiry_id)
+                WHERE vpbi_f.vendor_payment_id = a.vendor_payment_id
+                AND vpbi_f.status = 'Active'
+                AND (
+                    tei_f.enquiry_no LIKE '%" . $this->db->escape_like_str($srch_enquiry_no) . "%'
+                    OR get_tender_info(COALESCE(vpi_f.tender_enquiry_id, lpb_f.tender_enquiry_id, dpb_f.tender_enquiry_id, cb_f.tender_enquiry_id)) LIKE '%" . $this->db->escape_like_str($srch_enquiry_no) . "%'
+                )
+            )";
+        }
+
+        if ($this->input->post('srch_bill_no') !== null) {
+            $data['srch_bill_no'] = $srch_bill_no = $this->input->post('srch_bill_no');
+            $this->session->set_userdata('vendor_payment_srch_bill_no', $srch_bill_no);
+        } elseif ($this->session->userdata('vendor_payment_srch_bill_no')) {
+            $data['srch_bill_no'] = $srch_bill_no = $this->session->userdata('vendor_payment_srch_bill_no');
+        } else {
+            $data['srch_bill_no'] = $srch_bill_no = '';
+        }
+
+        if (!empty($srch_bill_no)) {
+            $where .= " AND EXISTS (
+                SELECT 1 FROM vendor_payment_bill_info vpbi_b
+                LEFT JOIN vendor_purchase_invoice_info vpi_b ON vpi_b.vendor_purchase_invoice_id = vpbi_b.bill_id AND vpbi_b.bill_type = 'Purchase Invoice'
+                LEFT JOIN local_purchase_bill_info lpb_b ON lpb_b.local_purchase_bill_id = vpbi_b.bill_id AND vpbi_b.bill_type = 'Local Bill'
+                LEFT JOIN dp_bill_info dpb_b ON dpb_b.dp_bill_id = vpbi_b.bill_id AND vpbi_b.bill_type = 'Delivery Bill'
+                LEFT JOIN customs_bill_info cb_b ON cb_b.customs_bill_id = vpbi_b.bill_id AND vpbi_b.bill_type = 'Customs Bill'
+                LEFT JOIN vendor_opening_balance_info vob_b ON vob_b.opening_id = vpbi_b.bill_id AND vpbi_b.bill_type = 'Opening Balance'
+                WHERE vpbi_b.vendor_payment_id = a.vendor_payment_id
+                AND vpbi_b.status = 'Active'
+                AND (
+                    vpi_b.invoice_no LIKE '%" . $this->db->escape_like_str($srch_bill_no) . "%'
+                    OR lpb_b.invoice_no LIKE '%" . $this->db->escape_like_str($srch_bill_no) . "%'
+                    OR dpb_b.invoice_no LIKE '%" . $this->db->escape_like_str($srch_bill_no) . "%'
+                    OR cb_b.invoice_no LIKE '%" . $this->db->escape_like_str($srch_bill_no) . "%'
+                    OR CONCAT('OB-', LPAD(vob_b.opening_id, 3, '0')) LIKE '%" . $this->db->escape_like_str($srch_bill_no) . "%'
+                )
+            )";
+        }
 
         $this->load->library('pagination');
 
-        $this->db->where('status != ', 'Delete');
-        $this->db->from('vendor_payment_info as a');
-        $this->db->where($where);
-        $data['total_records'] = $cnt = $this->db->count_all_results();
+        $cnt_sql = "SELECT COUNT(*) as cnt FROM vendor_payment_info as a WHERE a.status != 'Delete' AND $where";
+        $cnt_query = $this->db->query($cnt_sql);
+        $cnt_row = $cnt_query->row_array();
+        $data['total_records'] = $cnt = (int) ($cnt_row['cnt'] ?? 0);
 
         $data['sno'] = $this->uri->segment(2, 0);
 
@@ -866,13 +938,48 @@ class Payment extends CI_Controller
                 a.remarks,
                 a.status,  
                 b.bank_name,
-                cc.category_name
+                cc.category_name,
+                bills.bill_nos,
+                bills.enquiry_nos
             FROM vendor_payment_info AS a
             LEFT JOIN company_bank_info AS b ON b.bank_id = a.bank_id AND b.status = 'Active'
             LEFT JOIN cash_category AS cc ON cc.cash_category_id = a.cash_category_id AND cc.status = 'Active'
-            left join vendor_info as c on c.vendor_id = a.vendor_id and c.status = 'Active'
+            LEFT JOIN vendor_info AS c ON c.vendor_id = a.vendor_id AND c.status = 'Active'
+            LEFT JOIN (
+                SELECT 
+                    vpbi.vendor_payment_id,
+                    GROUP_CONCAT(DISTINCT 
+                        CASE 
+                            WHEN vpbi.bill_type = 'Purchase Invoice' THEN vpi.invoice_no
+                            WHEN vpbi.bill_type = 'Local Bill' THEN lpb.invoice_no
+                            WHEN vpbi.bill_type = 'Delivery Bill' THEN dpb.invoice_no
+                            WHEN vpbi.bill_type = 'Customs Bill' THEN cb.invoice_no
+                            WHEN vpbi.bill_type = 'Opening Balance' THEN CONCAT('OB-', LPAD(vob.opening_id, 3, '0'))
+                            ELSE NULL
+                        END
+                        SEPARATOR '<br>'
+                    ) AS bill_nos,
+                    GROUP_CONCAT(DISTINCT 
+                        CASE 
+                            WHEN vpbi.bill_type = 'Purchase Invoice' AND vpi.tender_enquiry_id > 0 THEN get_tender_info(vpi.tender_enquiry_id)
+                            WHEN vpbi.bill_type = 'Local Bill' AND lpb.tender_enquiry_id > 0 THEN get_tender_info(lpb.tender_enquiry_id)
+                            WHEN vpbi.bill_type = 'Delivery Bill' AND dpb.tender_enquiry_id > 0 THEN get_tender_info(dpb.tender_enquiry_id)
+                            WHEN vpbi.bill_type = 'Customs Bill' AND cb.tender_enquiry_id > 0 THEN get_tender_info(cb.tender_enquiry_id)
+                            ELSE NULL
+                        END
+                        SEPARATOR '<br>'
+                    ) AS enquiry_nos
+                FROM vendor_payment_bill_info vpbi
+                LEFT JOIN vendor_purchase_invoice_info vpi ON vpi.vendor_purchase_invoice_id = vpbi.bill_id AND vpbi.bill_type = 'Purchase Invoice'
+                LEFT JOIN local_purchase_bill_info lpb ON lpb.local_purchase_bill_id = vpbi.bill_id AND vpbi.bill_type = 'Local Bill'
+                LEFT JOIN dp_bill_info dpb ON dpb.dp_bill_id = vpbi.bill_id AND vpbi.bill_type = 'Delivery Bill'
+                LEFT JOIN customs_bill_info cb ON cb.customs_bill_id = vpbi.bill_id AND vpbi.bill_type = 'Customs Bill'
+                LEFT JOIN vendor_opening_balance_info vob ON vob.opening_id = vpbi.bill_id AND vpbi.bill_type = 'Opening Balance'
+                WHERE vpbi.status = 'Active'
+                GROUP BY vpbi.vendor_payment_id
+            ) AS bills ON bills.vendor_payment_id = a.vendor_payment_id
             WHERE a.status = 'Active'
-            and $where
+            AND $where
             ORDER BY a.vendor_payment_id DESC
             LIMIT ?, ?
         ";
