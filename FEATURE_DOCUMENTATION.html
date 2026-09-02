@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP-PSM Full Feature Specification Document</title>
+    <style>
+        /* ============================================================
+           GLOBAL RESET & TYPOGRAPHY
+           ============================================================ */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 9.5pt;
+            line-height: 1.48;
+            color: #1e293b;
+            background-color: #f8fafc;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        .page-container {
+            max-width: 210mm;
+            margin: 20px auto;
+            background: #ffffff;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
+            border-radius: 6px;
+            padding: 16mm 14mm;
+        }
+
+        @page {
+            size: A4 portrait;
+            margin: 12mm 10mm 14mm 10mm;
+        }
+
+        @media print {
+            body {
+                background: #ffffff;
+                font-size: 9pt;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .page-container {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                border-radius: 0;
+            }
+
+            .page-break {
+                page-break-before: always;
+                break-before: page;
+            }
+
+            .avoid-break {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            tr {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+        }
+
+        .print-toolbar {
+            position: sticky;
+            top: 10px;
+            z-index: 1000;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 210mm;
+            margin: 15px auto;
+            box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn-print {
+            background: #2563eb;
+            color: #ffffff;
+            border: none;
+            padding: 9px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-print:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .cover-page {
+            text-align: center;
+            padding: 24px 20px 20px;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        .system-badge {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            font-size: 8.5pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+        }
+
+        .cover-title {
+            font-size: 22pt;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .cover-subtitle {
+            font-size: 10.5pt;
+            color: #475569;
+            margin-bottom: 14px;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 10px 14px;
+            border-radius: 6px;
+            text-align: left;
+            margin-top: 12px;
+        }
+
+        .meta-item .meta-label {
+            font-size: 7.5pt;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .meta-item .meta-val {
+            font-size: 9pt;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        h2.section-heading {
+            font-size: 12pt;
+            font-weight: 700;
+            color: #0f172a;
+            border-left: 4px solid #2563eb;
+            padding-left: 10px;
+            margin: 20px 0 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        h3.sub-heading {
+            font-size: 10pt;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 12px 0 5px 0;
+        }
+
+        p {
+            margin-bottom: 8px;
+            color: #334155;
+            text-align: justify;
+        }
+
+        table.doc-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0 14px 0;
+            table-layout: fixed;
+            font-size: 8.5pt;
+        }
+
+        table.doc-table th {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 7.5pt;
+            letter-spacing: 0.5px;
+            padding: 6px 8px;
+            border: 1px solid #334155;
+            text-align: left;
+        }
+
+        table.doc-table td {
+            padding: 6px 8px;
+            border: 1px solid #cbd5e1;
+            vertical-align: top;
+            word-wrap: break-word;
+            line-height: 1.35;
+        }
+
+        table.doc-table tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 7pt;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-blue { background: #dbeafe; color: #1e40af; }
+        .badge-green { background: #dcfce7; color: #166534; }
+        .badge-amber { background: #fef3c7; color: #92400e; }
+        .badge-purple { background: #f3e8ff; color: #6b21a8; }
+        .badge-red { background: #fee2e2; color: #991b1b; }
+
+        .callout {
+            border-left: 3px solid #2563eb;
+            background: #eff6ff;
+            padding: 8px 12px;
+            border-radius: 0 6px 6px 0;
+            margin: 8px 0 12px 0;
+            font-size: 8.5pt;
+        }
+
+        .callout-title {
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 2px;
+            font-size: 8.5pt;
+        }
+
+        .font-mono { font-family: Consolas, Monaco, monospace; font-size: 7.8pt; color: #0284c7; }
+        .font-bold { font-weight: 700; }
+
+        .feature-block {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-left: 3px solid #2563eb;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin: 8px 0;
+        }
+
+        .feature-block.purple { border-left-color: #7c3aed; }
+        .feature-block.emerald { border-left-color: #059669; }
+        .feature-block.amber { border-left-color: #d97706; }
+        .feature-block.rose { border-left-color: #e11d48; }
+
+        .feature-title {
+            font-size: 9pt;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .feature-desc {
+            font-size: 8.2pt;
+            color: #475569;
+            line-height: 1.35;
+        }
+
+        .formula-box {
+            background: #f1f5f9;
+            border-left: 3px solid #0284c7;
+            padding: 6px 10px;
+            font-family: Consolas, monospace;
+            font-size: 8pt;
+            color: #0f172a;
+            margin: 4px 0 6px 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .doc-footer {
+            margin-top: 25px;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 7.5pt;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- On-screen print toolbar -->
+    <div class="print-toolbar no-print">
+        <div>
+            <strong>ERP-PSM Feature Specification Document</strong>
+            <div style="font-size: 11px; color: #94a3b8;">Complete Functional Specifications | A4 Portrait View</div>
+        </div>
+        <button class="btn-print" onclick="window.print()">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
+                <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>
+            </svg>
+            Print / Save to PDF (Ctrl + P)
+        </button>
+    </div>
+
+    <div class="page-container">
+
+        <!-- ============================================================
+             COVER / TITLE HEADER
+             ============================================================ -->
+        <div class="cover-page avoid-break">
+            <span class="system-badge">Feature Reference Document</span>
+            <h1 class="cover-title">ERP-PSM Feature Specification</h1>
+            <div class="cover-subtitle">Complete Inventory of System Modules, Business Rules, Validations & User Workflows</div>
+
+            <div class="meta-grid">
+                <div class="meta-item">
+                    <div class="meta-label">System</div>
+                    <div class="meta-val">ERP-PSM Suite</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Total Modules</div>
+                    <div class="meta-val">8 Comprehensive Suites</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Core Specialization</div>
+                    <div class="meta-val">Tenders & Landed Costs</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Compliance</div>
+                    <div class="meta-val">VAT, NBR & Double-Entry</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+             MODULE SUMMARY TABLE
+             ============================================================ -->
+        <h2 class="section-heading">
+            <span>System Feature Index</span>
+            <span class="badge badge-blue">8 Modules</span>
+        </h2>
+
+        <table class="doc-table avoid-break">
+            <thead>
+                <tr>
+                    <th style="width: 14%;">Module Code</th>
+                    <th style="width: 26%;">Module Name</th>
+                    <th style="width: 42%;">Core Functional Capabilities</th>
+                    <th style="width: 18%;">User Roles</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="font-bold">MOD-01</td>
+                    <td><strong>RBAC & Security</strong></td>
+                    <td>User login, dynamic menu builder, role permissions matrix (View/Add/Edit/Delete).</td>
+                    <td><span class="badge badge-blue">Super Admin</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold">MOD-02</td>
+                    <td><strong>Master Setup</strong></td>
+                    <td>Company profile, bank accounts, customer/vendor directories, item catalog & VAT.</td>
+                    <td><span class="badge badge-purple">Admin / Data</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold">MOD-03</td>
+                    <td><strong>Customer Tenders</strong></td>
+                    <td>Tender RFQ enquiries, cost estimation quotes, customer PO, delivery challan, invoices.</td>
+                    <td><span class="badge badge-green">Sales / Projects</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold">MOD-04</td>
+                    <td><strong>Procurement & Costs</strong></td>
+                    <td>Supplier RFQs, quotes, POs, Goods Receipt (GRN), local & customs landed cost bills.</td>
+                    <td><span class="badge badge-amber">Procurement</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold">MOD-05</td>
+                    <td><strong>Accounts & Treasury</strong></td>
+                    <td>Cash/Bank inward & outward, contra fund transfers, petty cash, credit/debit notes.</td>
+                    <td><span class="badge badge-purple">Accountants</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold">MOD-06</td>
+                    <td><strong>Payments & Payouts</strong></td>
+                    <td>Customer invoice payment receipts, supplier disbursements, multi-invoice allocation.</td>
+                    <td><span class="badge badge-green">Cashiers / Finance</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold">MOD-07</td>
+                    <td><strong>Audit & Statements</strong></td>
+                    <td>Chart of accounts, journal vouchers, trial balance, and profit & loss (P&L) statements.</td>
+                    <td><span class="badge badge-blue">Auditors / Mgmt</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold">MOD-08</td>
+                    <td><strong>Reports & Intelligence</strong></td>
+                    <td>Project profitability matrix, customer/vendor SOA, NBR/VAT compliance tax filing.</td>
+                    <td><span class="badge badge-amber">Directors / Tax</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ============================================================
+             MODULE 01 & 02
+             ============================================================ -->
+        <div class="page-break"></div>
+        <h2 class="section-heading">
+            <span>MOD-01: Authentication & Dynamic RBAC</span>
+            <span class="badge badge-blue">Security Layer</span>
+        </h2>
+
+        <div class="feature-block avoid-break">
+            <div class="feature-title">
+                <span>1.1 User Authentication & Password Change</span>
+                <span class="font-mono">/login, /change-password</span>
+            </div>
+            <div class="feature-desc">
+                Enforces encrypted session credentials (<code>zazu_logged_in</code>). Automatic logout upon inactivity, brute-force protection, and secure password updates with current credential verification.
+            </div>
+        </div>
+
+        <div class="feature-block avoid-break">
+            <div class="feature-title">
+                <span>1.2 Dynamic Navigation Menu Manager</span>
+                <span class="font-mono">/menu-management, /menu-management/reorder</span>
+            </div>
+            <div class="feature-desc">
+                Construct and reorder menu trees dynamically. Allows admins to configure parent groups, child menu routes, and FontAwesome icons without modifying code files.
+            </div>
+        </div>
+
+        <div class="feature-block avoid-break">
+            <div class="feature-title">
+                <span>1.3 Role-Based Permission Matrix</span>
+                <span class="font-mono">/role-management, /role-permission</span>
+            </div>
+            <div class="feature-desc">
+                Assign granular permissions per menu per role: <strong>View</strong> (read-only), <strong>Add</strong> (create transaction), <strong>Edit</strong> (modify records), and <strong>Delete</strong> (soft-delete).
+            </div>
+        </div>
+
+        <h2 class="section-heading">
+            <span>MOD-02: Master Data Management</span>
+            <span class="badge badge-purple">Configuration Engine</span>
+        </h2>
+
+        <div class="feature-block purple avoid-break">
+            <div class="feature-title">
+                <span>2.1 Company Profiles & Multi-Bank Accounts</span>
+                <span class="font-mono">/company-list, /company-bank-list</span>
+            </div>
+            <div class="feature-desc">
+                Maintains corporate identity, CR and VAT numbers, invoice headers, and multi-currency bank accounts with IBAN, Swift, and automated general ledger links.
+            </div>
+        </div>
+
+        <div class="feature-block purple avoid-break">
+            <div class="feature-title">
+                <span>2.2 Customer & Vendor Directories</span>
+                <span class="font-mono">/customer-list, /vendor-list</span>
+            </div>
+            <div class="feature-desc">
+                Customer & supplier records with CR/VAT numbers, GPS delivery coordinates, multiple contact persons, and opening ledger balance initializations.
+            </div>
+        </div>
+
+        <div class="feature-block purple avoid-break">
+            <div class="feature-title">
+                <span>2.3 Items, Categories, Brands & Units (UOM)</span>
+                <span class="font-mono">/items-list, /category-list, /uom-list</span>
+            </div>
+            <div class="feature-desc">
+                Central catalog with item descriptions, HSN codes, default VAT rates, and specification sheet file attachments.
+            </div>
+        </div>
+
+        <!-- ============================================================
+             MODULE 03: CUSTOMER TENDERS
+             ============================================================ -->
+        <div class="page-break"></div>
+        <h2 class="section-heading">
+            <span>MOD-03: Customer Tender & Sales Execution</span>
+            <span class="badge badge-green">Customer Side</span>
+        </h2>
+
+        <div class="feature-block emerald avoid-break">
+            <div class="feature-title">
+                <span>3.1 Tender Enquiry Registration (RFQ)</span>
+                <span class="font-mono">/add-tender-enquiry, /tender-enquiry-list</span>
+            </div>
+            <div class="feature-desc">
+                Log customer requests, deadline dates, technical specifications PDF upload, and item line registrations. Automatically generates an Enquiry ID.
+            </div>
+        </div>
+
+        <div class="feature-block emerald avoid-break">
+            <div class="feature-title">
+                <span>3.2 Tender Quotation & Pricing Engine</span>
+                <span class="font-mono">/tender-quotation-add, /tender-quotation-print/(:num)</span>
+            </div>
+            <div class="feature-desc">
+                Auto-fetches enquiry items. Supports multi-currency conversion, unit costs, profit markups, and VAT calculation:
+                <div class="formula-box">Line Net Rate = Unit Cost × (1 + Margin %)<br>Gross Total = Total Subtotal + Total VAT + Freight / Handling</div>
+                Includes one-click branded quotation PDF export.
+            </div>
+        </div>
+
+        <div class="feature-block emerald avoid-break">
+            <div class="feature-title">
+                <span>3.3 Customer PO Award Tracking</span>
+                <span class="font-mono">/customer-tender-po-add</span>
+            </div>
+            <div class="feature-desc">
+                Record client contract awards, input customer PO reference numbers, upload signed PO copies, and confirm ordered line quantities.
+            </div>
+        </div>
+
+        <div class="feature-block emerald avoid-break">
+            <div class="feature-title">
+                <span>3.4 Delivery Challan (DC) Dispatch Note</span>
+                <span class="font-mono">/tender-dc-add, /tender-dc-print/(:num)</span>
+            </div>
+            <div class="feature-desc">
+                Issue dispatch notes with vehicle numbers, driver contact, dispatch quantities, and legal gate-pass verification sheets.
+            </div>
+        </div>
+
+        <div class="feature-block emerald avoid-break">
+            <div class="feature-title">
+                <span>3.5 Commercial Tax Invoice Generation</span>
+                <span class="font-mono">/tender-invoice-add, /tender-po-invoice-print/(:num)</span>
+            </div>
+            <div class="feature-desc">
+                Auto-generate commercial tax invoices linked to PO and DC shipments with automated VAT breakdowns and payment bank selection.
+            </div>
+        </div>
+
+        <!-- ============================================================
+             MODULE 04: SUPPLIER PROCUREMENT & LANDED COSTING
+             ============================================================ -->
+        <h2 class="section-heading">
+            <span>MOD-04: Supplier Procurement & Landed Costing</span>
+            <span class="badge badge-amber">Procurement Side</span>
+        </h2>
+
+        <div class="feature-block amber avoid-break">
+            <div class="feature-title">
+                <span>4.1 Supplier RFQ & Quotation Comparison</span>
+                <span class="font-mono">/vendor-rate-enquiry, /vendor-quotation-add</span>
+            </div>
+            <div class="feature-desc">
+                Issue RFQs directly tied to customer tender requirements. Log supplier price bids and compare multi-currency rates side-by-side.
+            </div>
+        </div>
+
+        <div class="feature-block amber avoid-break">
+            <div class="feature-title">
+                <span>4.2 Supplier Purchase Orders (PO) & GRN Inward</span>
+                <span class="font-mono">/vendor-po-add, /vendor-pur-inward-add</span>
+            </div>
+            <div class="feature-desc">
+                Issue formal POs with delivery terms. Goods Receipt Notes (GRN) verify physically received materials at the warehouse against PO line items.
+            </div>
+        </div>
+
+        <div class="feature-block amber avoid-break">
+            <div class="feature-title">
+                <span>4.3 Complete Multi-Element Landed Cost Framework</span>
+                <span class="font-mono">/vendor-purchase-bill-add, /customs-bill-list</span>
+            </div>
+            <div class="feature-desc">
+                Aggregates 4 distinct cost streams directly into the tender ledger:
+                <div class="formula-box">Total Project Cost = Vendor Bills + Local Consumables + Freight / Shipping + Customs Duty</div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+             MODULE 05 & 06
+             ============================================================ -->
+        <div class="page-break"></div>
+        <h2 class="section-heading">
+            <span>MOD-05: Accounts, Treasury & General Ledger</span>
+            <span class="badge badge-purple">Financials</span>
+        </h2>
+
+        <div class="feature-block purple avoid-break">
+            <div class="feature-title">
+                <span>5.1 Cash & Bank Inward / Outward Books</span>
+                <span class="font-mono">/inward-list, /outward-list, /print-voucher/(:num)</span>
+            </div>
+            <div class="feature-desc">
+                Record non-sales income receipts and operational expenditure disbursements (rent, utilities, salaries) with auto-generated receipt and payment vouchers.
+            </div>
+        </div>
+
+        <div class="feature-block purple avoid-break">
+            <div class="feature-title">
+                <span>5.2 Contra Entries & Petty Cash Float</span>
+                <span class="font-mono">/contra-entry, /petty-cash</span>
+            </div>
+            <div class="feature-desc">
+                Internal fund movements (Cash to Bank, Bank to Bank) without equity impact. Petty cash float management with minor expense vouchers and running balance tracking.
+            </div>
+        </div>
+
+        <div class="feature-block purple avoid-break">
+            <div class="feature-title">
+                <span>5.3 Credit & Debit Notes</span>
+                <span class="font-mono">/credit-debit-note-list, /credit-debit-note-add</span>
+            </div>
+            <div class="feature-desc">
+                Issue Credit Notes to clients for goods returns or invoice revisions; issue Debit Notes to suppliers for rejected materials or price disputes.
+            </div>
+        </div>
+
+        <h2 class="section-heading">
+            <span>MOD-06: Payment Processing & Settlements</span>
+            <span class="badge badge-green">Settlements</span>
+        </h2>
+
+        <div class="feature-block emerald avoid-break">
+            <div class="feature-title">
+                <span>6.1 Customer Invoice Receipts</span>
+                <span class="font-mono">/customer-invoice-receipt</span>
+            </div>
+            <div class="feature-desc">
+                Real-time outstanding balance calculation. Multi-invoice allocation of incoming cheques, wires, or cash payments with official receipt voucher printouts.
+            </div>
+        </div>
+
+        <div class="feature-block emerald avoid-break">
+            <div class="feature-title">
+                <span>6.2 Vendor Payments & Advance Settlements</span>
+                <span class="font-mono">/vendor-payment-list, /vendor-adv-payment</span>
+            </div>
+            <div class="feature-desc">
+                Disburse advance deposits against Supplier POs or settle outstanding supplier purchase bills with debit reconciliation.
+            </div>
+        </div>
+
+        <!-- ============================================================
+             MODULE 07 & 08
+             ============================================================ -->
+        <div class="page-break"></div>
+        <h2 class="section-heading">
+            <span>MOD-07: Audit & Financial Statements</span>
+            <span class="badge badge-blue">Audit & Accounting</span>
+        </h2>
+
+        <div class="feature-block avoid-break">
+            <div class="feature-title">
+                <span>7.1 Journal Vouchers & Double-Entry Ledger</span>
+                <span class="font-mono">/vouchers-list, /voucher-entries-list</span>
+            </div>
+            <div class="feature-desc">
+                Manual journal vouchers for adjustments and provisions with strict <code>Total Debit == Total Credit</code> validation checks.
+            </div>
+        </div>
+
+        <div class="feature-block avoid-break">
+            <div class="feature-title">
+                <span>7.2 Trial Balance & Profit & Loss (P&L)</span>
+                <span class="font-mono">/trial-balance-list, /profit-loss-report</span>
+            </div>
+            <div class="feature-desc">
+                Consolidated Trial Balance across Assets, Liabilities, Incomes, and Expenses. Automatic P&L report computing gross margin and net operating profit.
+            </div>
+        </div>
+
+        <h2 class="section-heading">
+            <span>MOD-08: Business Intelligence & Tax Reports</span>
+            <span class="badge badge-amber">Reporting Suite</span>
+        </h2>
+
+        <div class="feature-block amber avoid-break">
+            <div class="feature-title">
+                <span>8.1 Tender Enquiry Summary & Profitability Matrix</span>
+                <span class="font-mono">/tender-enquiry-summary-report</span>
+            </div>
+            <div class="feature-desc">
+                <strong>Project Profitability Engine:</strong> Real-time comparison of Total Invoiced Sales vs. Complete Landed Costs (Supplier POs + Local Bills + Freight + Customs) showing net gross profit and margin %.
+            </div>
+        </div>
+
+        <div class="feature-block amber avoid-break">
+            <div class="feature-title">
+                <span>8.2 Customer & Vendor Statements of Account (SOA)</span>
+                <span class="font-mono">/customer-statement-report, /vendor-statement-report</span>
+            </div>
+            <div class="feature-desc">
+                Complete chronological ledger statements with opening balances, debits, credits, and closing dues. Supports PDF printing and Excel (.xls) exports.
+            </div>
+        </div>
+
+        <div class="feature-block amber avoid-break">
+            <div class="feature-title">
+                <span>8.3 NBR & VAT Compliance Reporting</span>
+                <span class="font-mono">/sales-nbr-report, /purchase-nbr-report</span>
+            </div>
+            <div class="feature-desc">
+                Sales VAT output register and Purchase input tax credit (ITC) schedule aligned with NBR and GCC VAT filing standards.
+            </div>
+        </div>
+
+        <div class="doc-footer">
+            <span>ERP-PSM Feature Specification Document | Version 2.0</span>
+            <span>Comprehensive Functional Blueprint</span>
+        </div>
+
+    </div>
+
+</body>
+</html>
