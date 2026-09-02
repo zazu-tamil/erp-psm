@@ -6294,6 +6294,27 @@ class Vendor extends CI_Controller
                 ]
             ]);
         }
+        if (!$this->db->field_exists('invoice_ids', 'vendor_advance_payment_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('vendor_advance_payment_info', [
+                'invoice_ids' => [
+                    'type' => 'TEXT',
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+        if (!$this->db->field_exists('invoice_no', 'vendor_advance_payment_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('vendor_advance_payment_info', [
+                'invoice_no' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 255,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
 
         $data['js'] = 'vendor/vendor-advance-payment.inc';
         $data['title'] = 'Vendor Advance Payment';
@@ -6303,13 +6324,32 @@ class Vendor extends CI_Controller
             $bank_id = ($ac_type_opt == 'Bank') ? ($this->input->post('bank_id') ?: null) : null;
             $cash_category_id = ($ac_type_opt == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null;
 
+            $invoice_ids = $this->input->post('invoice_ids');
+            $invoice_ids_str = '';
+            $invoice_no_str = '';
+            if (!empty($invoice_ids) && is_array($invoice_ids)) {
+                $clean_ids = array_filter(array_map('intval', $invoice_ids));
+                if (!empty($clean_ids)) {
+                    $invoice_ids_str = implode(',', $clean_ids);
+                    $invoices_res = $this->db->select('invoice_no')
+                        ->from('vendor_purchase_invoice_info')
+                        ->where_in('vendor_purchase_invoice_id', $clean_ids)
+                        ->get()
+                        ->result_array();
+                    $invoice_nos = array_column($invoices_res, 'invoice_no');
+                    $invoice_no_str = implode(', ', $invoice_nos);
+                }
+            }
+
             $ins = array(
                 'ac_type_opt' => $ac_type_opt,
                 'bank_id' => $bank_id,
                 'cash_category_id' => $cash_category_id,
                 'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
                 'vendor_id' => $this->input->post('vendor_id'),
-                'vendor_po_id' => $this->input->post('vendor_po_id'),
+                'vendor_po_id' => $this->input->post('vendor_po_id') ?: null,
+                'invoice_ids' => !empty($invoice_ids_str) ? $invoice_ids_str : null,
+                'invoice_no' => !empty($invoice_no_str) ? $invoice_no_str : null,
                 'adv_payment_date' => $this->input->post('adv_payment_date') ? date('Y-m-d', strtotime($this->input->post('adv_payment_date'))) : null,
                 'adv_payment_amt' => $this->input->post('adv_payment_amt'),
                 'status' => $this->input->post('status') ? $this->input->post('status') : 'Active',
@@ -6329,13 +6369,32 @@ class Vendor extends CI_Controller
             $bank_id = ($ac_type_opt == 'Bank') ? ($this->input->post('bank_id') ?: null) : null;
             $cash_category_id = ($ac_type_opt == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null;
 
+            $invoice_ids = $this->input->post('invoice_ids');
+            $invoice_ids_str = '';
+            $invoice_no_str = '';
+            if (!empty($invoice_ids) && is_array($invoice_ids)) {
+                $clean_ids = array_filter(array_map('intval', $invoice_ids));
+                if (!empty($clean_ids)) {
+                    $invoice_ids_str = implode(',', $clean_ids);
+                    $invoices_res = $this->db->select('invoice_no')
+                        ->from('vendor_purchase_invoice_info')
+                        ->where_in('vendor_purchase_invoice_id', $clean_ids)
+                        ->get()
+                        ->result_array();
+                    $invoice_nos = array_column($invoices_res, 'invoice_no');
+                    $invoice_no_str = implode(', ', $invoice_nos);
+                }
+            }
+
             $upd = array(
                 'ac_type_opt' => $ac_type_opt,
                 'bank_id' => $bank_id,
                 'cash_category_id' => $cash_category_id,
                 'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
                 'vendor_id' => $this->input->post('vendor_id'),
-                'vendor_po_id' => $this->input->post('vendor_po_id'),
+                'vendor_po_id' => $this->input->post('vendor_po_id') ?: null,
+                'invoice_ids' => !empty($invoice_ids_str) ? $invoice_ids_str : null,
+                'invoice_no' => !empty($invoice_no_str) ? $invoice_no_str : null,
                 'adv_payment_date' => $this->input->post('adv_payment_date') ? date('Y-m-d', strtotime($this->input->post('adv_payment_date'))) : null,
                 'adv_payment_amt' => $this->input->post('adv_payment_amt'),
                 'status' => $this->input->post('status') ? $this->input->post('status') : 'Active',
@@ -6453,9 +6512,41 @@ class Vendor extends CI_Controller
 
         $query = $this->db->query($sql);
 
-        $data['record_list'] = array();
+        $raw_records = $query->result_array();
+        $all_inv_ids = [];
+        foreach ($raw_records as $r) {
+            if (!empty($r['invoice_ids'])) {
+                foreach (explode(',', $r['invoice_ids']) as $iid) {
+                    $iid = (int) trim($iid);
+                    if ($iid > 0) $all_inv_ids[$iid] = $iid;
+                }
+            }
+        }
 
-        foreach ($query->result_array() as $row) {
+        $inv_map = [];
+        if (!empty($all_inv_ids)) {
+            $inv_rows = $this->db->select('vendor_purchase_invoice_id, invoice_no')
+                ->from('vendor_purchase_invoice_info')
+                ->where_in('vendor_purchase_invoice_id', array_values($all_inv_ids))
+                ->get()
+                ->result_array();
+            foreach ($inv_rows as $ir) {
+                $inv_map[$ir['vendor_purchase_invoice_id']] = $ir['invoice_no'];
+            }
+        }
+
+        $data['record_list'] = array();
+        foreach ($raw_records as $row) {
+            if (empty($row['invoice_no']) && !empty($row['invoice_ids'])) {
+                $mapped = [];
+                foreach (explode(',', $row['invoice_ids']) as $iid) {
+                    $iid = (int) trim($iid);
+                    if (isset($inv_map[$iid])) {
+                        $mapped[] = $inv_map[$iid];
+                    }
+                }
+                $row['invoice_no'] = implode(', ', $mapped);
+            }
             $data['record_list'][] = $row;
         }
 
@@ -6561,6 +6652,52 @@ class Vendor extends CI_Controller
         $pos = $query->result_array();
 
         echo json_encode($pos);
+        exit;
+    }
+
+    public function get_vendor_invoices_ajax()
+    {
+        $vendor_id = $this->input->post('vendor_id');
+        $tender_enquiry_id = $this->input->post('tender_enquiry_id');
+        $vendor_po_id = $this->input->post('vendor_po_id');
+        $selected_invoices = $this->input->post('selected_invoices');
+
+        if (empty($vendor_id) && empty($selected_invoices)) {
+            echo json_encode([]);
+            exit;
+        }
+
+        $this->db->select('vendor_purchase_invoice_id, invoice_no, invoice_date, total_amount, vendor_po_id, tender_enquiry_id');
+        $this->db->from('vendor_purchase_invoice_info');
+
+        $this->db->group_start();
+        $this->db->where('status !=', 'Delete');
+        if (!empty($vendor_id)) {
+            $this->db->where('vendor_id', $vendor_id);
+        }
+        if (!empty($vendor_po_id)) {
+            $this->db->where('vendor_po_id', $vendor_po_id);
+        } elseif (!empty($tender_enquiry_id)) {
+            $this->db->group_start();
+            $this->db->where('tender_enquiry_id', $tender_enquiry_id);
+            $this->db->or_where('tender_enquiry_id', 0);
+            $this->db->or_where('tender_enquiry_id IS NULL');
+            $this->db->group_end();
+        }
+        $this->db->group_end();
+
+        if (!empty($selected_invoices)) {
+            $sel_ids = array_filter(array_map('intval', explode(',', $selected_invoices)));
+            if (!empty($sel_ids)) {
+                $this->db->or_where_in('vendor_purchase_invoice_id', $sel_ids);
+            }
+        }
+
+        $this->db->order_by('vendor_purchase_invoice_id', 'DESC');
+        $query = $this->db->get();
+        $invoices = $query->result_array();
+
+        echo json_encode($invoices);
         exit;
     }
 }

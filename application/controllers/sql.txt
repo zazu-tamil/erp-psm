@@ -824,4 +824,10 @@ ALTER TABLE `petty_cash_transactions` ADD COLUMN `cash_category_id` INT(11) NULL
 28-08-2026
 
 -- Add bank_id to Tender Invoice Info
-ALTER TABLE `tender_enq_invoice_info` ADD COLUMN `bank_id` INT(11) NULL DEFAULT NULL AFTER `company_id`;
+ALTER TABLE `tender_enq_invoice_info` ADD COLUMN `bank_id` INT(11) NULL DEFAULT NULL AFTER `company_id`;
+
+02-09-2026
+
+-- Add invoice_ids and invoice_no to Vendor Advance Payment Info
+ALTER TABLE `vendor_advance_payment_info` ADD COLUMN `invoice_ids` TEXT NULL DEFAULT NULL AFTER `vendor_po_id`;
+ALTER TABLE `vendor_advance_payment_info` ADD COLUMN `invoice_no` VARCHAR(255) NULL DEFAULT NULL AFTER `invoice_ids`;

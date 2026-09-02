@@ -354,6 +354,9 @@ $route['get-customer-balance-summary'] = 'payment/get_customer_balance_summary';
 //vendor adv payment
 $route['vendor-adv-payment'] = 'vendor/vendor_adv_payment_list';
 $route['vendor-adv-payment/(:any)'] = 'vendor/vendor_adv_payment_list/$1';
+$route['vendor/get_vendor_invoices_ajax'] = 'vendor/get_vendor_invoices_ajax';
+$route['vendor/get_vendor_by_tender_id_ajax'] = 'vendor/get_vendor_by_tender_id_ajax';
+$route['vendor/get_vendor_po_by_vendor_ajax'] = 'vendor/get_vendor_po_by_vendor_ajax';
 
 
 

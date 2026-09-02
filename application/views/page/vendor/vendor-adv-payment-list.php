@@ -38,7 +38,8 @@
                                 <label>Vendor</label>
                                 <?php echo form_dropdown('vendor_id', $vendor_opt, '', 'id="vendor_id" class="form-control select2" style="width:100%" required'); ?>
                             </div>
-                            
+                            <div class="clearfix"></div>
+
                             <div class="form-group col-md-6">
                                 <label>Vendor PO</label>
                                 <select name="vendor_po_id" id="vendor_po_id" class="form-control select2" style="width:100%">
@@ -46,21 +47,29 @@
                                 </select>
                             </div>
 
-                             <div class="form-group col-md-6">
-                                 <label>Account Type</label>
-                                 <?php echo form_dropdown('ac_type_opt', $ac_type_opt_list, '', 'id="ac_type_opt" class="form-control select2" style="width:100%" required'); ?>
-                             </div>
+                            <div class="form-group col-md-6">
+                                <label>Mapped Invoices (Multiple)</label>
+                                <select name="invoice_ids[]" id="invoice_ids" class="form-control select2" multiple="multiple" style="width:100%" data-placeholder="Select Invoices">
+                                </select>
+                            </div>
+                            <div class="clearfix"></div>
 
-                             <div class="form-group col-md-6" id="bank_div" style="display:none;">
-                                 <label>Select Bank <span class="text-red">*</span></label>
-                                 <?php echo form_dropdown('bank_id', ['' => 'Select Bank'] + $bank_opt, '', 'id="bank_id" class="form-control select2" style="width:100%"'); ?>
-                             </div>
+                            <div class="form-group col-md-6">
+                                <label>Account Type</label>
+                                <?php echo form_dropdown('ac_type_opt', $ac_type_opt_list, '', 'id="ac_type_opt" class="form-control select2" style="width:100%" required'); ?>
+                            </div>
 
-                             <div class="form-group col-md-6" id="cash_category_div" style="display:none;">
-                                 <label>Cash Category <span class="text-red">*</span></label>
-                                 <?php echo form_dropdown('cash_category_id', ['' => 'Select Cash Category'] + $cash_categories_opt, '', 'id="cash_category_id" class="form-control select2" style="width:100%"'); ?>
-                             </div>
-                        
+                            <div class="form-group col-md-6" id="bank_div" style="display:none;">
+                                <label>Select Bank <span class="text-red">*</span></label>
+                                <?php echo form_dropdown('bank_id', ['' => 'Select Bank'] + $bank_opt, '', 'id="bank_id" class="form-control select2" style="width:100%"'); ?>
+                            </div>
+
+                            <div class="form-group col-md-6" id="cash_category_div" style="display:none;">
+                                <label>Cash Category <span class="text-red">*</span></label>
+                                <?php echo form_dropdown('cash_category_id', ['' => 'Select Cash Category'] + $cash_categories_opt, '', 'id="cash_category_id" class="form-control select2" style="width:100%"'); ?>
+                            </div>
+                            <div class="clearfix"></div>
+
                             <div class="form-group col-md-6">
                                 <label for="adv_payment_date">Advance Payment Date</label>
                                 <input type="date" name="adv_payment_date" id="adv_payment_date" class="form-control" required>
@@ -70,7 +79,8 @@
                                 <label for="adv_payment_amt">Payment Amount</label>
                                 <input type="number" step="0.01" name="adv_payment_amt" id="adv_payment_amt" class="form-control" placeholder="0.00" required>
                             </div>
-                            
+                            <div class="clearfix"></div>
+
                             <div class="form-group col-md-6">
                                 <label>Status</label>
                                 <select name="status" id="status" class="form-control select2" style="width:100%">
@@ -79,6 +89,7 @@
                                     <option value="Inactive">Inactive</option>
                                 </select>
                             </div>
+                            <div class="clearfix"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -146,6 +157,7 @@
                         <th>Tender Enquiry No</th>
                         <th>Vendor Name</th>
                         <th>PO No</th>
+                        <th>Mapped Invoices</th>
                         <th>A/C Type</th>
                         <th class="text-right">Amount</th>
                         <th>Status </th>
@@ -163,7 +175,25 @@
                                 </td>
                                 <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['po_no'] ?? '-'); ?></td>
-                                 <td>
+                                <td>
+                                    <?php 
+                                        $display_invoices = !empty($row['invoice_no']) ? $row['invoice_no'] : '';
+                                        if (!empty($display_invoices)): 
+                                            $inv_arr = explode(',', $display_invoices);
+                                            foreach ($inv_arr as $inv_item):
+                                                $inv_item = trim($inv_item);
+                                                if (!empty($inv_item)):
+                                    ?>
+                                        <span class="label label-primary" style="display:inline-block; margin: 1px 2px; font-size: 85%;"><?php echo htmlspecialchars($inv_item); ?></span>
+                                    <?php 
+                                                endif;
+                                            endforeach;
+                                        else: 
+                                    ?>
+                                        <span class="text-muted">-</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
                                      <?php echo htmlspecialchars($row['ac_type_opt'] ?? '-'); ?>
                                      <?php if ($row['ac_type_opt'] == 'Bank' && !empty($row['bank_name'])): ?>
                                          <br><small class="text-muted">(<?php echo htmlspecialchars($row['bank_name']); ?>)</small>
@@ -180,6 +210,7 @@
                                              data-tender="<?php echo $row['tender_enquiry_id']; ?>"
                                              data-vendor="<?php echo $row['vendor_id']; ?>"
                                              data-po="<?php echo $row['vendor_po_id']; ?>"
+                                             data-invoices="<?php echo htmlspecialchars($row['invoice_ids'] ?? ''); ?>"
                                              data-ac="<?php echo $row['ac_type_opt']; ?>"
                                              data-bank="<?php echo $row['bank_id'] ?? ''; ?>"
                                              data-cash="<?php echo $row['cash_category_id'] ?? ''; ?>"
@@ -200,7 +231,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="10" class="text-center text-danger">No records found.</td>
+                            <td colspan="11" class="text-center text-danger">No records found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
