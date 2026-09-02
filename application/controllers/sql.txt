@@ -830,4 +830,13 @@ ALTER TABLE `tender_enq_invoice_info` ADD COLUMN `bank_id` INT(11) NULL DEFAULT 
 
 -- Add invoice_ids and invoice_no to Vendor Advance Payment Info
 ALTER TABLE `vendor_advance_payment_info` ADD COLUMN `invoice_ids` TEXT NULL DEFAULT NULL AFTER `vendor_po_id`;
-ALTER TABLE `vendor_advance_payment_info` ADD COLUMN `invoice_no` VARCHAR(255) NULL DEFAULT NULL AFTER `invoice_ids`;
+ALTER TABLE `vendor_advance_payment_info` ADD COLUMN `invoice_no` VARCHAR(255) NULL DEFAULT NULL AFTER `invoice_ids`;
+
+-- Add Customer and Vendor Pending Reports to menu_info
+INSERT INTO `menu_info` (`parent_id`, `menu_title`, `menu_slug`, `menu_icon`, `is_header`, `sort_order`, `status`)
+SELECT 49, 'Customer Pending Report', 'customer-pending-invoice-report', 'fa fa-file-text', 0, 53, 'Active'
+WHERE NOT EXISTS (SELECT 1 FROM `menu_info` WHERE `menu_slug` = 'customer-pending-invoice-report');
+
+INSERT INTO `menu_info` (`parent_id`, `menu_title`, `menu_slug`, `menu_icon`, `is_header`, `sort_order`, `status`)
+SELECT 49, 'Vendor Pending Report', 'vendor-pending-invoice-report', 'fa fa-file-text', 0, 54, 'Active'
+WHERE NOT EXISTS (SELECT 1 FROM `menu_info` WHERE `menu_slug` = 'vendor-pending-invoice-report');

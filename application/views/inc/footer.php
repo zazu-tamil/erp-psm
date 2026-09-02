@@ -86,9 +86,9 @@
 <script src="<?php echo base_url() ?>asset/dist/js/adminlte.min.js"></script>
 
 <?php
-//if(isset($js) && (!empty($js))) {
-include_once('inc-js/' . $js);
-//}
+if (isset($js) && !empty($js)) {
+    include_once('inc-js/' . $js);
+}
 ?>
 <script>
     $(document).ready(function () {

@@ -388,3 +388,10 @@ $route['role-management/delete/(:num)'] = 'menu_manager/delete_role/$1';
 $route['role-permission'] = 'menu_manager/role_permissions';
 $route['role-permission/(:num)'] = 'menu_manager/role_permissions/$1';
 $route['role-permission/save'] = 'menu_manager/save_role_permissions';
+
+
+$route['vendor-pending-invoice-report'] = 'vendor/vendor_pending_invoice_report';
+$route['vendor-pending-invoice-report/(:any)'] = 'vendor/vendor_pending_invoice_report/$1';
+$route['customer-pending-invoice-report'] = 'tender/customer_invoice_pending_report';
+$route['customer-pending-invoice-report/(:any)'] = 'tender/customer_invoice_pending_report/$1';
+

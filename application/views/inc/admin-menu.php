@@ -401,7 +401,7 @@ $report_m_grp = [
 
     <ul class="treeview-menu">
         <li
-            class="treeview <?= in_array($current_page, ['sales-nbr-report', 'purchase-nbr-report', 'tender-enquiry-timeline', 'tender-enquiry-summary-report', 'customer-invoice-pending-report', 'vendor-invoice-pending-report', 'vendor-statement-report', 'customer-statement-report', 'item-rate-report', 'supplier-summary-report', 'invoice-report', 'tender-progress-report', 'vat-statement-report']) ? 'active' : '' ?>">
+            class="treeview <?= in_array($current_page, ['sales-nbr-report', 'purchase-nbr-report', 'tender-enquiry-timeline', 'tender-enquiry-summary-report', 'customer-invoice-pending-report', 'customer-pending-invoice-report', 'vendor-invoice-pending-report', 'vendor-pending-invoice-report', 'vendor-statement-report', 'customer-statement-report', 'item-rate-report', 'supplier-summary-report', 'invoice-report', 'tender-progress-report', 'vat-statement-report']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-envelope"></i> Tender Info Report
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
@@ -427,15 +427,15 @@ $report_m_grp = [
                 </li>
 
                 <!-- NEW MENU -->
-                <li class="<?= ($current_page === 'customer-invoice-pending-report') ? 'active' : '' ?>">
-                    <a href="<?= site_url('customer-invoice-pending-report') ?>">
-                        <i class="fa fa-file-text"></i> Customer Invoice Report
+                <li class="<?= in_array($current_page, ['customer-invoice-pending-report', 'customer-pending-invoice-report']) ? 'active' : '' ?>">
+                    <a href="<?= site_url('customer-pending-invoice-report') ?>">
+                        <i class="fa fa-file-text"></i> Customer Pending Report
                     </a>
                 </li>
 
-                <li class="<?= ($current_page === 'vendor-invoice-pending-report') ? 'active' : '' ?>">
-                    <a href="<?= site_url('vendor-invoice-pending-report') ?>">
-                        <i class="fa fa-file-text"></i> Vendor Invoice Report
+                <li class="<?= in_array($current_page, ['vendor-invoice-pending-report', 'vendor-pending-invoice-report']) ? 'active' : '' ?>">
+                    <a href="<?= site_url('vendor-pending-invoice-report') ?>">
+                        <i class="fa fa-file-text"></i> Vendor Pending Report
                     </a>
                 </li>
 

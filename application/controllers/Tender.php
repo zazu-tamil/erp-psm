@@ -7119,4 +7119,190 @@ class Tender extends CI_Controller
         $this->load->view('page/tender/in-stock-item-list', $data);
     }
 
+    public function customer_invoice_pending_report($action = '')
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        if ($action === 'clear_filter') {
+            $this->session->unset_userdata('cpir_from_date');
+            $this->session->unset_userdata('cpir_to_date');
+            $this->session->unset_userdata('cpir_customer_id');
+            $this->session->unset_userdata('cpir_status');
+            redirect('customer-pending-invoice-report');
+        }
+
+        $data = array();
+        $data['title'] = 'Customer Pending Invoice Report';
+        $data['s_url'] = 'customer-pending-invoice-report';
+        $data['js'] = 'reports/reports.inc';
+
+        // Filter: Dates
+        if ($this->input->post('srch_from_date') !== null) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $this->session->set_userdata('cpir_from_date', $srch_from_date);
+        } elseif ($this->session->userdata('cpir_from_date')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('cpir_from_date');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = '';
+        }
+
+        if ($this->input->post('srch_to_date') !== null) {
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $this->session->set_userdata('cpir_to_date', $srch_to_date);
+        } elseif ($this->session->userdata('cpir_to_date')) {
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('cpir_to_date');
+        } else {
+            $data['srch_to_date'] = $srch_to_date = '';
+        }
+
+        // Filter: Customer
+        if ($this->input->post('srch_customer_id') !== null) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
+            $this->session->set_userdata('cpir_customer_id', $srch_customer_id);
+        } elseif ($this->session->userdata('cpir_customer_id')) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->session->userdata('cpir_customer_id');
+        } else {
+            $data['srch_customer_id'] = $srch_customer_id = '';
+        }
+
+        // Filter: Payment Status (Default to Pending)
+        if ($this->input->post('srch_status') !== null) {
+            $data['srch_status'] = $srch_status = $this->input->post('srch_status');
+            $this->session->set_userdata('cpir_status', $srch_status);
+        } elseif ($this->session->has_userdata('cpir_status')) {
+            $data['srch_status'] = $srch_status = $this->session->userdata('cpir_status');
+        } else {
+            $data['srch_status'] = $srch_status = 'Pending';
+        }
+
+        // Customer Options
+        $c_query = $this->db->query("SELECT customer_id, customer_name FROM customer_info WHERE status = 'Active' ORDER BY customer_name ASC");
+        $data['customer_opt'] = ['' => 'All Customers'];
+        foreach ($c_query->result_array() as $c) {
+            $data['customer_opt'][$c['customer_id']] = $c['customer_name'];
+        }
+
+        // Status Options
+        $data['status_opt'] = [
+            'Pending' => 'Pending (Outstanding Balance)',
+            'All' => 'All Invoices',
+            'Partial' => 'Partially Paid',
+            'Paid' => 'Fully Paid',
+            'Unpaid' => 'Unpaid (Zero Paid)'
+        ];
+
+        // Outer WHERE conditions
+        $where = "1=1";
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $where .= " AND (f.invoice_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "')";
+        } elseif (!empty($srch_from_date)) {
+            $where .= " AND f.invoice_date >= '" . $this->db->escape_str($srch_from_date) . "'";
+        } elseif (!empty($srch_to_date)) {
+            $where .= " AND f.invoice_date <= '" . $this->db->escape_str($srch_to_date) . "'";
+        }
+
+        if (!empty($srch_customer_id)) {
+            $where .= " AND f.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
+        }
+
+        $having = "1=1";
+        if ($srch_status === 'Pending') {
+            $having .= " AND balance_amount > 0.001";
+        } elseif ($srch_status === 'Paid') {
+            $having .= " AND balance_amount <= 0.001";
+        } elseif ($srch_status === 'Partial') {
+            $having .= " AND paid_amount > 0.001 AND balance_amount > 0.001";
+        } elseif ($srch_status === 'Unpaid') {
+            $having .= " AND paid_amount <= 0.001";
+        }
+
+        $sql = "
+            SELECT 
+                f.tender_enq_invoice_id,
+                f.tender_enquiry_id,
+                f.invoice_date,
+                f.invoice_no,
+                f.customer_id,
+                f.customer_name,
+                f.tax_amount,
+                f.total_amount,
+                f.bill_type,
+                get_tender_info(f.tender_enquiry_id) as tender_details,
+                IFNULL(r.paid_amount, 0) AS paid_amount,
+                ROUND((f.total_amount - IFNULL(r.paid_amount, 0)), 3) AS balance_amount,
+                CASE 
+                    WHEN (f.total_amount - IFNULL(r.paid_amount, 0)) <= 0.001 THEN 'Paid'
+                    WHEN IFNULL(r.paid_amount, 0) > 0.001 THEN 'Partial'
+                    ELSE 'Pending'
+                END AS payment_status
+            FROM (
+                -- 1. Invoices
+                SELECT
+                    a.tender_enq_invoice_id,
+                    a.tender_enquiry_id,
+                    a.invoice_date,
+                    a.invoice_no,
+                    a.customer_id,
+                    b.customer_name,
+                    IFNULL(a.tax_amount, 0) as tax_amount,
+                    a.total_amount,
+                    'Invoice' AS bill_type
+                FROM tender_enq_invoice_info AS a
+                LEFT JOIN customer_info AS b ON a.customer_id = b.customer_id AND b.status = 'Active'
+                WHERE a.status = 'Active'
+
+                UNION ALL
+
+                -- 2. Opening Balance
+                SELECT
+                    a.opening_id AS tender_enq_invoice_id,
+                    0 AS tender_enquiry_id,
+                    a.opening_date AS invoice_date,
+                    CONCAT('OB-', LPAD(a.opening_id, 3, '0')) AS invoice_no,
+                    a.customer_id,
+                    b.customer_name,
+                    0 AS tax_amount,
+                    a.opening_amount AS total_amount,
+                    'Opening Balance' AS bill_type
+                FROM customer_opening_balance_info AS a
+                LEFT JOIN customer_info AS b ON a.customer_id = b.customer_id AND b.status = 'Active'
+                WHERE a.balance_type = 'DR'
+            ) AS f
+
+            LEFT JOIN (
+                SELECT 
+                    tender_enq_invoice_id, 
+                    bill_type, 
+                    SUM(inv_amount) as paid_amount 
+                FROM tender_receipt_invoice_info 
+                WHERE status != 'Delete' AND status != 'Deleted'
+                GROUP BY tender_enq_invoice_id, bill_type
+            ) AS r ON r.tender_enq_invoice_id = f.tender_enq_invoice_id AND r.bill_type = f.bill_type
+
+            WHERE $where
+            HAVING $having
+            ORDER BY f.invoice_date DESC, f.tender_enq_invoice_id DESC
+        ";
+
+        $query = $this->db->query($sql);
+        $data['record_list'] = $query->result_array();
+
+        // Calculate KPI totals
+        $tot_amount = 0;
+        $tot_paid = 0;
+        $tot_balance = 0;
+        foreach ($data['record_list'] as $row) {
+            $tot_amount += floatval($row['total_amount']);
+            $tot_paid += floatval($row['paid_amount']);
+            $tot_balance += floatval($row['balance_amount']);
+        }
+        $data['tot_amount'] = $tot_amount;
+        $data['tot_paid'] = $tot_paid;
+        $data['tot_balance'] = $tot_balance;
+        $data['tot_count'] = count($data['record_list']);
+
+        $this->load->view('page/tender/customer-pending-invoice-report', $data);
+    }
 }

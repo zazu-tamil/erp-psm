@@ -6700,4 +6700,261 @@ class Vendor extends CI_Controller
         echo json_encode($invoices);
         exit;
     }
+
+    public function vendor_pending_invoice_report($action = '')
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        if ($action === 'clear_filter') {
+            $this->session->unset_userdata('vpir_from_date');
+            $this->session->unset_userdata('vpir_to_date');
+            $this->session->unset_userdata('vpir_vendor_id');
+            $this->session->unset_userdata('vpir_bill_type');
+            $this->session->unset_userdata('vpir_status');
+            redirect('vendor-pending-invoice-report');
+        }
+
+        $data = array();
+        $data['title'] = 'Vendor Pending Invoice Report';
+        $data['s_url'] = 'vendor-pending-invoice-report';
+        $data['js'] = 'reports/reports.inc';
+
+        // Filter: Dates
+        if ($this->input->post('srch_from_date') !== null) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $this->session->set_userdata('vpir_from_date', $srch_from_date);
+        } elseif ($this->session->userdata('vpir_from_date')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('vpir_from_date');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = '';
+        }
+
+        if ($this->input->post('srch_to_date') !== null) {
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $this->session->set_userdata('vpir_to_date', $srch_to_date);
+        } elseif ($this->session->userdata('vpir_to_date')) {
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('vpir_to_date');
+        } else {
+            $data['srch_to_date'] = $srch_to_date = '';
+        }
+
+        // Filter: Vendor
+        if ($this->input->post('srch_vendor_id') !== null) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->input->post('srch_vendor_id');
+            $this->session->set_userdata('vpir_vendor_id', $srch_vendor_id);
+        } elseif ($this->session->userdata('vpir_vendor_id')) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->session->userdata('vpir_vendor_id');
+        } else {
+            $data['srch_vendor_id'] = $srch_vendor_id = '';
+        }
+
+        // Filter: Bill Type
+        if ($this->input->post('srch_bill_type') !== null) {
+            $data['srch_bill_type'] = $srch_bill_type = $this->input->post('srch_bill_type');
+            $this->session->set_userdata('vpir_bill_type', $srch_bill_type);
+        } elseif ($this->session->userdata('vpir_bill_type')) {
+            $data['srch_bill_type'] = $srch_bill_type = $this->session->userdata('vpir_bill_type');
+        } else {
+            $data['srch_bill_type'] = $srch_bill_type = '';
+        }
+
+        // Filter: Payment Status (Default to Pending)
+        if ($this->input->post('srch_status') !== null) {
+            $data['srch_status'] = $srch_status = $this->input->post('srch_status');
+            $this->session->set_userdata('vpir_status', $srch_status);
+        } elseif ($this->session->has_userdata('vpir_status')) {
+            $data['srch_status'] = $srch_status = $this->session->userdata('vpir_status');
+        } else {
+            $data['srch_status'] = $srch_status = 'Pending';
+        }
+
+        // Vendor Options
+        $v_query = $this->db->query("SELECT vendor_id, vendor_name FROM vendor_info WHERE status = 'Active' ORDER BY vendor_name ASC");
+        $data['vendor_opt'] = ['' => 'All Vendors'];
+        foreach ($v_query->result_array() as $v) {
+            $data['vendor_opt'][$v['vendor_id']] = $v['vendor_name'];
+        }
+
+        // Bill Type Options
+        $data['bill_type_opt'] = [
+            '' => 'All Bill Types',
+            'Purchase Invoice' => 'Purchase Invoice',
+            'Local Bill' => 'Local Bill',
+            'Delivery Bill' => 'Delivery Bill',
+            'Customs Bill' => 'Customs Bill',
+            'Opening Balance' => 'Opening Balance'
+        ];
+
+        // Status Options
+        $data['status_opt'] = [
+            'Pending' => 'Pending (Outstanding Balance)',
+            'All' => 'All Invoices / Bills',
+            'Partial' => 'Partially Paid',
+            'Paid' => 'Fully Paid',
+            'Unpaid' => 'Unpaid (Zero Paid)'
+        ];
+
+        // Outer WHERE conditions
+        $where = "1=1";
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $where .= " AND (f.invoice_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "')";
+        } elseif (!empty($srch_from_date)) {
+            $where .= " AND f.invoice_date >= '" . $this->db->escape_str($srch_from_date) . "'";
+        } elseif (!empty($srch_to_date)) {
+            $where .= " AND f.invoice_date <= '" . $this->db->escape_str($srch_to_date) . "'";
+        }
+
+        if (!empty($srch_vendor_id)) {
+            $where .= " AND f.vendor_id = '" . $this->db->escape_str($srch_vendor_id) . "'";
+        }
+
+        if (!empty($srch_bill_type)) {
+            $where .= " AND f.bill_type = '" . $this->db->escape_str($srch_bill_type) . "'";
+        }
+
+        $having = "1=1";
+        if ($srch_status === 'Pending') {
+            $having .= " AND balance_amount > 0.001";
+        } elseif ($srch_status === 'Paid') {
+            $having .= " AND balance_amount <= 0.001";
+        } elseif ($srch_status === 'Partial') {
+            $having .= " AND paid_amount > 0.001 AND balance_amount > 0.001";
+        } elseif ($srch_status === 'Unpaid') {
+            $having .= " AND paid_amount <= 0.001";
+        }
+
+        $sql = "
+            SELECT 
+                f.bill_id,
+                f.invoice_date,
+                f.tender_enquiry_id,
+                f.invoice_no,
+                f.vendor_id,
+                f.vendor_name,
+                f.total_amount,
+                f.bill_type,
+                get_tender_info(f.tender_enquiry_id) as tender_details,
+                IFNULL(p.paid_amount, 0) AS paid_amount,
+                ROUND((f.total_amount - IFNULL(p.paid_amount, 0)), 3) AS balance_amount,
+                CASE 
+                    WHEN (f.total_amount - IFNULL(p.paid_amount, 0)) <= 0.001 THEN 'Paid'
+                    WHEN IFNULL(p.paid_amount, 0) > 0.001 THEN 'Partial'
+                    ELSE 'Pending'
+                END AS payment_status
+            FROM (
+                -- 1. Purchase Invoice
+                SELECT
+                    a.vendor_purchase_invoice_id AS bill_id,
+                    a.invoice_date,
+                    a.tender_enquiry_id,
+                    a.invoice_no,
+                    a.vendor_id,
+                    b.vendor_name,
+                    COALESCE(a.total_amount_inc_addl, a.total_amount, 0) AS total_amount,
+                    'Purchase Invoice' AS bill_type
+                FROM vendor_purchase_invoice_info a
+                LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active'
+
+                UNION ALL
+
+                -- 2. Local Bill
+                SELECT
+                    a.local_purchase_bill_id AS bill_id,
+                    a.invoice_date,
+                    a.tender_enquiry_id,
+                    a.invoice_no,
+                    a.vendor_id,
+                    b.vendor_name,
+                    a.tot_amt_with_tax AS total_amount,
+                    'Local Bill' AS bill_type
+                FROM local_purchase_bill_info a
+                LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active'
+
+                UNION ALL
+
+                -- 3. Delivery Bill
+                SELECT
+                    a.dp_bill_id AS bill_id,
+                    a.invoice_date,
+                    a.tender_enquiry_id,
+                    a.invoice_no,
+                    a.vendor_id,
+                    b.vendor_name,
+                    a.g_total AS total_amount,
+                    'Delivery Bill' AS bill_type
+                FROM dp_bill_info a
+                LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active'
+
+                UNION ALL
+
+                -- 4. Customs Bill
+                SELECT
+                    a.customs_bill_id AS bill_id,
+                    a.invoice_date,
+                    a.tender_enquiry_id,
+                    a.invoice_no,
+                    a.vendor_id,
+                    b.vendor_name,
+                    COALESCE(a.customs_payable, (a.bill_amount + a.vat_amt), 0) AS total_amount,
+                    'Customs Bill' AS bill_type
+                FROM customs_bill_info a
+                LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active' AND a.ac_type_opt = 'Accountable'
+
+                UNION ALL
+
+                -- 5. Opening Balance
+                SELECT
+                    a.opening_id AS bill_id,
+                    a.opening_date AS invoice_date,
+                    0 AS tender_enquiry_id,
+                    CONCAT('OB-', LPAD(a.opening_id, 3, '0')) AS invoice_no,
+                    a.vendor_id,
+                    b.vendor_name,
+                    a.opening_amount AS total_amount,
+                    'Opening Balance' AS bill_type
+                FROM vendor_opening_balance_info a
+                LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.balance_type = 'CR'
+            ) AS f
+
+            LEFT JOIN (
+                SELECT 
+                    bill_id, 
+                    bill_type, 
+                    SUM(bill_amount) as paid_amount 
+                FROM vendor_payment_bill_info 
+                WHERE status != 'Delete' AND status != 'Deleted'
+                GROUP BY bill_id, bill_type
+            ) AS p ON p.bill_id = f.bill_id AND p.bill_type = f.bill_type
+
+            WHERE $where
+            HAVING $having
+            ORDER BY f.invoice_date DESC, f.bill_id DESC
+        ";
+
+        $query = $this->db->query($sql);
+        $data['record_list'] = $query->result_array();
+
+        // Calculate KPI totals
+        $tot_amount = 0;
+        $tot_paid = 0;
+        $tot_balance = 0;
+        foreach ($data['record_list'] as $row) {
+            $tot_amount += floatval($row['total_amount']);
+            $tot_paid += floatval($row['paid_amount']);
+            $tot_balance += floatval($row['balance_amount']);
+        }
+        $data['tot_amount'] = $tot_amount;
+        $data['tot_paid'] = $tot_paid;
+        $data['tot_balance'] = $tot_balance;
+        $data['tot_count'] = count($data['record_list']);
+
+        $this->load->view('page/vendor/vendor-pending-invoice-report', $data);
+    }
 }

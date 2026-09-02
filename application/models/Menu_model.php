@@ -19,11 +19,92 @@ class Menu_model extends CI_Model {
      */
     public function get_all()
     {
+        $this->ensure_pending_reports_menu();
         $this->db->where('status !=', 'Delete');
         $this->db->order_by('parent_id', 'ASC');
         $this->db->order_by('sort_order', 'ASC');
         $this->db->order_by('menu_id', 'ASC');
         return $this->db->get('menu_info')->result_array();
+    }
+
+    /**
+     * Dynamically ensures that Customer and Vendor Pending Reports exist in menu_info
+     * and that all active roles have view permissions.
+     */
+    public function ensure_pending_reports_menu()
+    {
+        // 1. Find parent report menu (Tender Info Report, or Reports)
+        $parent_id = 0;
+        $parent = $this->db->where('menu_slug', 'tender-enquiry-timeline')->where('status !=', 'Delete')->get('menu_info')->row_array();
+        if (!empty($parent['parent_id'])) {
+            $parent_id = (int)$parent['parent_id'];
+        } else {
+            $parent = $this->db->where('menu_title', 'Tender Info Report')->where('parent_id >', 0)->where('status !=', 'Delete')->get('menu_info')->row_array();
+            if (!empty($parent['menu_id'])) {
+                $parent_id = (int)$parent['menu_id'];
+            }
+        }
+
+        if ($parent_id <= 0) {
+            return;
+        }
+
+        // 2. Ensure Customer Pending Report menu
+        $c_menu = $this->db->where('menu_slug', 'customer-pending-invoice-report')->where('status !=', 'Delete')->get('menu_info')->row_array();
+        if (!$c_menu) {
+            $this->db->insert('menu_info', array(
+                'parent_id' => $parent_id,
+                'menu_title' => 'Customer Pending Report',
+                'menu_slug' => 'customer-pending-invoice-report',
+                'menu_icon' => 'fa fa-file-text',
+                'is_header' => 0,
+                'sort_order' => 53,
+                'status' => 'Active'
+            ));
+            $c_menu_id = $this->db->insert_id();
+        } else {
+            $c_menu_id = $c_menu['menu_id'];
+        }
+
+        // 3. Ensure Vendor Pending Report menu
+        $v_menu = $this->db->where('menu_slug', 'vendor-pending-invoice-report')->where('status !=', 'Delete')->get('menu_info')->row_array();
+        if (!$v_menu) {
+            $this->db->insert('menu_info', array(
+                'parent_id' => $parent_id,
+                'menu_title' => 'Vendor Pending Report',
+                'menu_slug' => 'vendor-pending-invoice-report',
+                'menu_icon' => 'fa fa-file-text',
+                'is_header' => 0,
+                'sort_order' => 54,
+                'status' => 'Active'
+            ));
+            $v_menu_id = $this->db->insert_id();
+        } else {
+            $v_menu_id = $v_menu['menu_id'];
+        }
+
+        // 4. Ensure permissions in role_permission for all active roles
+        $roles = $this->db->where('status !=', 'Delete')->get('role_info')->result_array();
+        if (!empty($roles)) {
+            foreach ($roles as $role) {
+                $role_id = (int)$role['role_id'];
+                foreach (array($c_menu_id, $v_menu_id) as $mid) {
+                    if ($mid > 0) {
+                        $has_perm = $this->db->where('role_id', $role_id)->where('menu_id', $mid)->count_all_results('role_permission');
+                        if ($has_perm == 0) {
+                            $this->db->insert('role_permission', array(
+                                'role_id' => $role_id,
+                                'menu_id' => $mid,
+                                'can_view' => 1,
+                                'can_add' => 1,
+                                'can_edit' => 1,
+                                'can_delete' => 1
+                            ));
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
