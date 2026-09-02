@@ -119,7 +119,7 @@
             <div class="kpi-card kpi-info">
                 <div>
                     <div class="kpi-label">Total Bill Amount</div>
-                    <div class="kpi-value"><?php echo number_format($tot_amount, 2); ?></div>
+                    <div class="kpi-value"><?php echo number_format($tot_amount, 3); ?></div>
                 </div>
                 <div class="kpi-icon"><i class="fa fa-money"></i></div>
             </div>
@@ -129,7 +129,7 @@
             <div class="kpi-card kpi-success">
                 <div>
                     <div class="kpi-label">Total Paid Amount</div>
-                    <div class="kpi-value"><?php echo number_format($tot_paid, 2); ?></div>
+                    <div class="kpi-value"><?php echo number_format($tot_paid, 3); ?></div>
                 </div>
                 <div class="kpi-icon"><i class="fa fa-check-circle"></i></div>
             </div>
@@ -139,7 +139,7 @@
             <div class="kpi-card kpi-danger">
                 <div>
                     <div class="kpi-label">Total Pending / Outstanding</div>
-                    <div class="kpi-value"><?php echo number_format($tot_balance, 2); ?></div>
+                    <div class="kpi-value"><?php echo number_format($tot_balance, 3); ?></div>
                 </div>
                 <div class="kpi-icon"><i class="fa fa-exclamation-circle"></i></div>
             </div>
@@ -215,6 +215,7 @@
                         <th>Vendor Name</th>
                         <th>Tender / Project</th>
                         <th>Bill Type</th>
+                        <th class="text-center" style="width: 75px;">Currency</th>
                         <th class="text-right" style="width: 120px;">Bill Amount</th>
                         <th class="text-right" style="width: 120px;">Paid Amount</th>
                         <th class="text-right" style="width: 130px;">Outstanding Amount</th>
@@ -224,6 +225,10 @@
                 <tbody>
                     <?php if (!empty($record_list)): ?>
                         <?php foreach ($record_list as $idx => $row): ?>
+                            <?php 
+                                $dec = isset($row['decimal_point']) && is_numeric($row['decimal_point']) ? intval($row['decimal_point']) : 3;
+                                $currCode = htmlspecialchars($row['currency_code'] ?? 'BHD');
+                            ?>
                             <tr>
                                 <td class="text-center"><?php echo $idx + 1; ?></td>
                                 <td><?php echo $row['invoice_date'] ? date('d-m-Y', strtotime($row['invoice_date'])) : '-'; ?></td>
@@ -250,14 +255,17 @@
                                     ?>
                                     <span class="label <?php echo $bClass; ?>" style="font-size: 85%;"><?php echo htmlspecialchars($bt); ?></span>
                                 </td>
+                                <td class="text-center">
+                                    <span class="label label-default" style="font-weight: 600; font-size: 11px; background:#e0e7ee; color:#2c3e50; border:1px solid #c2d1df;"><?php echo $currCode; ?></span>
+                                </td>
                                 <td class="text-right" style="font-weight: 600;">
-                                    <?php echo number_format($row['total_amount'], 2); ?>
+                                    <?php echo number_format((float)$row['total_amount'], $dec); ?>
                                 </td>
                                 <td class="text-right text-green" style="font-weight: 600;">
-                                    <?php echo number_format($row['paid_amount'], 2); ?>
+                                    <?php echo number_format((float)$row['paid_amount'], $dec); ?>
                                 </td>
                                 <td class="text-right text-red" style="font-weight: 700; font-size: 13px;">
-                                    <?php echo number_format($row['balance_amount'], 2); ?>
+                                    <?php echo number_format((float)$row['balance_amount'], $dec); ?>
                                 </td>
                                 <td class="text-center">
                                     <?php if ($row['payment_status'] == 'Paid'): ?>
@@ -272,7 +280,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="10" class="text-center text-muted" style="padding: 30px;">
+                            <td colspan="11" class="text-center text-muted" style="padding: 30px;">
                                 <i class="fa fa-info-circle fa-2x"></i><br>
                                 No records found matching the specified filters.
                             </td>
@@ -281,10 +289,10 @@
                 </tbody>
                 <tfoot>
                     <tr style="background: #2c3e50; color: #ffffff; font-weight: bold; font-size: 14px;">
-                        <td colspan="6" class="text-right">GRAND TOTAL:</td>
-                        <td class="text-right"><?php echo number_format($tot_amount, 2); ?></td>
-                        <td class="text-right" style="color: #2ecc71;"><?php echo number_format($tot_paid, 2); ?></td>
-                        <td class="text-right" style="color: #e74c3c;"><?php echo number_format($tot_balance, 2); ?></td>
+                        <td colspan="7" class="text-right">GRAND TOTAL:</td>
+                        <td class="text-right"><?php echo number_format($tot_amount, 3); ?></td>
+                        <td class="text-right" style="color: #2ecc71;"><?php echo number_format($tot_paid, 3); ?></td>
+                        <td class="text-right" style="color: #e74c3c;"><?php echo number_format($tot_balance, 3); ?></td>
                         <td></td>
                     </tr>
                 </tfoot>

@@ -7229,9 +7229,11 @@ class Tender extends CI_Controller
                 f.tax_amount,
                 f.total_amount,
                 f.bill_type,
+                f.currency_code,
+                f.decimal_point,
                 get_tender_info(f.tender_enquiry_id) as tender_details,
                 IFNULL(r.paid_amount, 0) AS paid_amount,
-                ROUND((f.total_amount - IFNULL(r.paid_amount, 0)), 3) AS balance_amount,
+                ROUND((f.total_amount - IFNULL(r.paid_amount, 0)), f.decimal_point) AS balance_amount,
                 CASE 
                     WHEN (f.total_amount - IFNULL(r.paid_amount, 0)) <= 0.001 THEN 'Paid'
                     WHEN IFNULL(r.paid_amount, 0) > 0.001 THEN 'Partial'
@@ -7248,9 +7250,14 @@ class Tender extends CI_Controller
                     b.customer_name,
                     IFNULL(a.tax_amount, 0) as tax_amount,
                     a.total_amount,
-                    'Invoice' AS bill_type
+                    'Invoice' AS bill_type,
+                    COALESCE(cur.currency_code, po_cur.currency_code, 'BHD') AS currency_code,
+                    COALESCE(cur.decimal_point, po_cur.decimal_point, 3) AS decimal_point
                 FROM tender_enq_invoice_info AS a
                 LEFT JOIN customer_info AS b ON a.customer_id = b.customer_id AND b.status = 'Active'
+                LEFT JOIN currencies_info AS cur ON cur.currency_id = a.currency_id AND cur.status = 'Active'
+                LEFT JOIN customer_tender_po_info AS cpo ON cpo.tender_po_id = a.tender_po_id AND cpo.status = 'Active'
+                LEFT JOIN currencies_info AS po_cur ON po_cur.currency_id = cpo.currency_id AND po_cur.status = 'Active'
                 WHERE a.status = 'Active'
 
                 UNION ALL
@@ -7265,7 +7272,9 @@ class Tender extends CI_Controller
                     b.customer_name,
                     0 AS tax_amount,
                     a.opening_amount AS total_amount,
-                    'Opening Balance' AS bill_type
+                    'Opening Balance' AS bill_type,
+                    'BHD' AS currency_code,
+                    3 AS decimal_point
                 FROM customer_opening_balance_info AS a
                 LEFT JOIN customer_info AS b ON a.customer_id = b.customer_id AND b.status = 'Active'
                 WHERE a.balance_type = 'DR'

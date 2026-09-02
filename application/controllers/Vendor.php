@@ -6835,9 +6835,11 @@ class Vendor extends CI_Controller
                 f.vendor_name,
                 f.total_amount,
                 f.bill_type,
+                f.currency_code,
+                f.decimal_point,
                 get_tender_info(f.tender_enquiry_id) as tender_details,
                 IFNULL(p.paid_amount, 0) AS paid_amount,
-                ROUND((f.total_amount - IFNULL(p.paid_amount, 0)), 3) AS balance_amount,
+                ROUND((f.total_amount - IFNULL(p.paid_amount, 0)), f.decimal_point) AS balance_amount,
                 CASE 
                     WHEN (f.total_amount - IFNULL(p.paid_amount, 0)) <= 0.001 THEN 'Paid'
                     WHEN IFNULL(p.paid_amount, 0) > 0.001 THEN 'Partial'
@@ -6853,9 +6855,13 @@ class Vendor extends CI_Controller
                     a.vendor_id,
                     b.vendor_name,
                     COALESCE(a.total_amount_inc_addl, a.total_amount, 0) AS total_amount,
-                    'Purchase Invoice' AS bill_type
+                    'Purchase Invoice' AS bill_type,
+                    COALESCE(cur.currency_code, 'BHD') AS currency_code,
+                    COALESCE(cur.decimal_point, 3) AS decimal_point
                 FROM vendor_purchase_invoice_info a
                 LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                LEFT JOIN vendor_po_info vpo ON vpo.vendor_po_id = a.vendor_po_id AND vpo.status = 'Active'
+                LEFT JOIN currencies_info cur ON cur.currency_id = vpo.currency_id AND cur.status = 'Active'
                 WHERE a.status = 'Active'
 
                 UNION ALL
@@ -6869,7 +6875,9 @@ class Vendor extends CI_Controller
                     a.vendor_id,
                     b.vendor_name,
                     a.tot_amt_with_tax AS total_amount,
-                    'Local Bill' AS bill_type
+                    'Local Bill' AS bill_type,
+                    'BHD' AS currency_code,
+                    3 AS decimal_point
                 FROM local_purchase_bill_info a
                 LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
                 WHERE a.status = 'Active'
@@ -6885,7 +6893,9 @@ class Vendor extends CI_Controller
                     a.vendor_id,
                     b.vendor_name,
                     a.g_total AS total_amount,
-                    'Delivery Bill' AS bill_type
+                    'Delivery Bill' AS bill_type,
+                    'BHD' AS currency_code,
+                    3 AS decimal_point
                 FROM dp_bill_info a
                 LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
                 WHERE a.status = 'Active'
@@ -6901,7 +6911,9 @@ class Vendor extends CI_Controller
                     a.vendor_id,
                     b.vendor_name,
                     COALESCE(a.customs_payable, (a.bill_amount + a.vat_amt), 0) AS total_amount,
-                    'Customs Bill' AS bill_type
+                    'Customs Bill' AS bill_type,
+                    'BHD' AS currency_code,
+                    3 AS decimal_point
                 FROM customs_bill_info a
                 LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
                 WHERE a.status = 'Active' AND a.ac_type_opt = 'Accountable'
@@ -6917,7 +6929,9 @@ class Vendor extends CI_Controller
                     a.vendor_id,
                     b.vendor_name,
                     a.opening_amount AS total_amount,
-                    'Opening Balance' AS bill_type
+                    'Opening Balance' AS bill_type,
+                    'BHD' AS currency_code,
+                    3 AS decimal_point
                 FROM vendor_opening_balance_info a
                 LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
                 WHERE a.balance_type = 'CR'
