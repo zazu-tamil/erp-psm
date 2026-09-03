@@ -868,4 +868,8 @@ FOR EACH ROW BEGIN
         SET NEW.receipt_no = LPAD(NEW.tender_receipt_id, 4, '0');
     END IF;
 END$$
-DELIMITER ;
+DELIMITER ;
+
+
+
+
