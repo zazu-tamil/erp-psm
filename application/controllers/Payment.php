@@ -1670,4 +1670,93 @@ class Payment extends CI_Controller
         }
 
     }
+
+    public function vendor_payment_print($vendor_payment_id)
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $vendor_payment_id = (int)$vendor_payment_id;
+
+        $sql = "
+            SELECT 
+                a.vendor_payment_id,
+                a.payment_no,
+                DATE_FORMAT(a.payment_date, '%d-%m-%Y') AS payment_date,
+                a.payment_mode,
+                a.payment_type,
+                a.cheque_no,
+                a.cheque_date,
+                a.cheque_bank,
+                a.amount,
+                a.remarks,
+                b.bank_name,
+                c.category_name,
+                v.vendor_name,
+                bills.bill_nos,
+                bills.enquiry_nos,
+                bills.currency_code,
+                bills.currency_symbol,
+                comp.company_name,
+                comp.address AS company_address
+            FROM vendor_payment_info AS a
+            LEFT JOIN company_bank_info AS b ON b.bank_id = a.bank_id AND b.status = 'Active'
+            LEFT JOIN cash_category AS c ON c.cash_category_id = a.cash_category_id AND c.status = 'Active'
+            LEFT JOIN vendor_info AS v ON v.vendor_id = a.vendor_id AND v.status = 'Active'
+            LEFT JOIN (
+                SELECT 
+                    vpbi.vendor_payment_id,
+                    MAX(curr.currency_code) AS currency_code,
+                    MAX(curr.symbol) AS currency_symbol,
+                    MAX(COALESCE(vpi.company_id, vpo.company_id)) AS company_id,
+                    GROUP_CONCAT(DISTINCT 
+                        CASE 
+                            WHEN vpbi.bill_type = 'Purchase Invoice' THEN vpi.invoice_no
+                            WHEN vpbi.bill_type = 'Local Bill' THEN lpb.invoice_no
+                            WHEN vpbi.bill_type = 'Opening Balance' THEN CONCAT('OB-', LPAD(vob.opening_id, 3, '0'))
+                            ELSE vpbi.bill_id
+                        END
+                        SEPARATOR '<br>'
+                    ) AS bill_nos,
+                    GROUP_CONCAT(DISTINCT 
+                        CASE 
+                            WHEN vpbi.bill_type = 'Purchase Invoice' THEN get_tender_info(vpi.tender_enquiry_id)
+                            WHEN vpbi.bill_type = 'Local Bill' THEN get_tender_info(lpb.tender_enquiry_id)
+                            ELSE NULL
+                        END
+                        SEPARATOR '<br>'
+                    ) AS enquiry_nos
+                FROM vendor_payment_bill_info vpbi
+                LEFT JOIN vendor_purchase_invoice_info vpi ON vpi.vendor_purchase_invoice_id = vpbi.bill_id AND vpbi.bill_type = 'Purchase Invoice'
+                LEFT JOIN vendor_po_info vpo ON vpo.vendor_po_id = vpi.vendor_po_id
+                LEFT JOIN currencies_info curr ON curr.currency_id = vpo.currency_id
+                LEFT JOIN local_purchase_bill_info lpb ON lpb.local_purchase_bill_id = vpbi.bill_id AND vpbi.bill_type = 'Local Bill'
+                LEFT JOIN vendor_opening_balance_info vob ON vob.opening_id = vpbi.bill_id AND vpbi.bill_type = 'Opening Balance'
+                WHERE vpbi.status != 'Delete' AND vpbi.status != 'Deleted'
+                GROUP BY vpbi.vendor_payment_id
+            ) AS bills ON bills.vendor_payment_id = a.vendor_payment_id
+            LEFT JOIN company_info AS comp ON comp.company_id = bills.company_id AND comp.status = 'Active'
+            WHERE a.vendor_payment_id = ?
+        ";
+
+        $query = $this->db->query($sql, array($vendor_payment_id));
+        $data['payment'] = $query->row_array();
+
+        if (empty($data['payment'])) {
+            show_404();
+        }
+
+        if (empty($data['payment']['company_name']) || empty($data['payment']['company_address'])) {
+            $default_comp = $this->db->select('company_name, address')->where('status', 'Active')->get('company_info')->row_array();
+            if (empty($data['payment']['company_name'])) {
+                $data['payment']['company_name'] = $default_comp['company_name'] ?? 'AL HILLO TRADING CO W.L.L';
+            }
+            if (empty($data['payment']['company_address'])) {
+                $data['payment']['company_address'] = $default_comp['address'] ?? '';
+            }
+        }
+
+        $this->load->view('page/payment/voucher-print', $data);
+    }
 }

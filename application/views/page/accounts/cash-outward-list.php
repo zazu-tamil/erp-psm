@@ -70,6 +70,7 @@
                 <thead>
                     <tr>
                         <th class="text-center">S.No</th>
+                        <th class="text-center">Voucher No</th>
                         <th class="text-center">Enquiry Num </th>
                         <th>Outward Date</th>
                         <th>Account Head</th>
@@ -85,6 +86,7 @@
                     <?php foreach ($record_list as $j => $ls) { ?>
                         <tr>
                             <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
+                            <td class="text-center"><b><?php echo !empty($ls['vno']) ? str_pad((int)$ls['vno'], 4, '0', STR_PAD_LEFT) : ''; ?></b></td>
                             <td class="text-center">  
                                     <i class="label label-success"><?php echo $ls['tender_details'] ?></i></td>
                             <td><?php echo date('d-m-Y', strtotime($ls['outward_date'])) ?><br /><?php echo $ls['ac_type'] . ($ls['ac_type'] == 'Bank' && !empty($ls['bank_name']) ? ' (' . $ls['bank_name'] . ')' : '') . ($ls['ac_type'] == 'Cash' && !empty($ls['category_name']) ? ' (' . $ls['category_name'] . ')' : '') ?>
@@ -106,11 +108,11 @@
                                         title="Edit"><i class="fa fa-edit"></i></button>
                                 <?php } ?>
                             </td>
-                            <!-- <td class="text-center">
-                                <a href="<?php //echo site_url('print-voucher/' . $ls['cash_outward_id']); ?>"
-                                    target="_blank" class="btn btn-success btn-xs" title="Print Voucher"><i
+                            <td class="text-center">
+                                <a href="<?php echo site_url('print-voucher/' . $ls['cash_outward_id']); ?>"
+                                    target="_blank" class="btn btn-info btn-xs" title="Print Voucher"><i
                                         class="fa fa-print"></i></a>
-                            </td> -->
+                            </td>
 
                             <td class="text-center">
                                 <?php if (($this->session->userdata(SESS_HD . 'level') == "Admin")) { ?>

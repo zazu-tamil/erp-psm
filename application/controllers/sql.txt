@@ -870,29 +870,111 @@ FOR EACH ROW BEGIN
 END$$
 DELIMITER ;
 
--- Update existing vendor payment records to have auto-generated payment_no based on vendor_payment_id
-UPDATE `vendor_payment_info` 
-SET `payment_no` = LPAD(`vendor_payment_id`, 4, '0') 
-WHERE `payment_no` IS NULL OR `payment_no` = '';
 
--- Auto-generate payment_no before insert trigger
+
+
+-- ============================================================================
+-- LIVE DEPLOYMENT SCRIPT: SHARED UNIQUE 4-DIGIT VOUCHER NUMBERS (RESET PER FISCAL YEAR)
+-- Shared sequence across: vendor_payment_info (payment_no) & cb_cash_outward_info (vno)
+-- ============================================================================
+
+-- 1. Ensure cb_cash_outward_info.vno is INT(4) UNSIGNED ZEROFILL for 4-digit formatting
+ALTER TABLE `cb_cash_outward_info` MODIFY `vno` INT(4) UNSIGNED ZEROFILL;
+
+-- 2. Drop existing triggers if present
+DROP TRIGGER IF EXISTS `vendor_payment_info_before_insert`;
+DROP TRIGGER IF EXISTS `vendor_payment_info_before_update`;
+DROP TRIGGER IF EXISTS `cb_cash_outward_info_before_insert`;
+DROP TRIGGER IF EXISTS `cb_cash_outward_info_before_update`;
+
+-- 3. Trigger: vendor_payment_info_before_insert
 DELIMITER $$
 CREATE TRIGGER `vendor_payment_info_before_insert` BEFORE INSERT ON `vendor_payment_info`
 FOR EACH ROW BEGIN
-    DECLARE next_id INT DEFAULT 0;
-    IF NEW.payment_no IS NULL OR NEW.payment_no = '' THEN
-        SELECT IFNULL(MAX(vendor_payment_id), 0) + 1 INTO next_id FROM vendor_payment_info;
-        SET NEW.payment_no = LPAD(next_id, 4, '0');
+    DECLARE max_vp INT DEFAULT 0;
+    DECLARE max_co INT DEFAULT 0;
+    DECLARE next_no INT DEFAULT 1;
+    IF NEW.payment_no IS NULL OR NEW.payment_no = '' OR NEW.payment_no = '0' OR NEW.payment_no = '0000' THEN
+        SELECT IFNULL(MAX(CAST(payment_no AS UNSIGNED)), 0) INTO max_vp 
+        FROM vendor_payment_info 
+        WHERE status != 'Delete' AND fiscal_year(payment_date) = fiscal_year(NEW.payment_date);
+
+        SELECT IFNULL(MAX(CAST(vno AS UNSIGNED)), 0) INTO max_co 
+        FROM cb_cash_outward_info 
+        WHERE status != 'Delete' AND fiscal_year(outward_date) = fiscal_year(NEW.payment_date);
+
+        SET next_no = GREATEST(max_vp, max_co) + 1;
+        SET NEW.payment_no = LPAD(next_no, 4, '0');
     END IF;
 END$$
 DELIMITER ;
 
--- Auto-generate payment_no before update trigger
+-- 4. Trigger: vendor_payment_info_before_update
 DELIMITER $$
 CREATE TRIGGER `vendor_payment_info_before_update` BEFORE UPDATE ON `vendor_payment_info`
 FOR EACH ROW BEGIN
-    IF (NEW.payment_no IS NULL OR NEW.payment_no = '') AND NEW.vendor_payment_id > 0 THEN
-        SET NEW.payment_no = LPAD(NEW.vendor_payment_id, 4, '0');
+    DECLARE max_vp INT DEFAULT 0;
+    DECLARE max_co INT DEFAULT 0;
+    DECLARE next_no INT DEFAULT 1;
+    IF (NEW.payment_no IS NULL OR NEW.payment_no = '' OR NEW.payment_no = '0' OR NEW.payment_no = '0000') AND (OLD.payment_no IS NOT NULL AND OLD.payment_no != '' AND OLD.payment_no != '0') THEN
+        SET NEW.payment_no = OLD.payment_no;
+    ELSEIF NEW.payment_no IS NULL OR NEW.payment_no = '' OR NEW.payment_no = '0' OR NEW.payment_no = '0000' THEN
+        SELECT IFNULL(MAX(CAST(payment_no AS UNSIGNED)), 0) INTO max_vp 
+        FROM vendor_payment_info 
+        WHERE status != 'Delete' AND fiscal_year(payment_date) = fiscal_year(NEW.payment_date);
+
+        SELECT IFNULL(MAX(CAST(vno AS UNSIGNED)), 0) INTO max_co 
+        FROM cb_cash_outward_info 
+        WHERE status != 'Delete' AND fiscal_year(outward_date) = fiscal_year(NEW.payment_date);
+
+        SET next_no = GREATEST(max_vp, max_co) + 1;
+        SET NEW.payment_no = LPAD(next_no, 4, '0');
+    END IF;
+END$$
+DELIMITER ;
+
+-- 5. Trigger: cb_cash_outward_info_before_insert
+DELIMITER $$
+CREATE TRIGGER `cb_cash_outward_info_before_insert` BEFORE INSERT ON `cb_cash_outward_info`
+FOR EACH ROW BEGIN
+    DECLARE max_vp INT DEFAULT 0;
+    DECLARE max_co INT DEFAULT 0;
+    DECLARE next_no INT DEFAULT 1;
+    IF NEW.vno IS NULL OR NEW.vno = '' OR NEW.vno = 0 THEN
+        SELECT IFNULL(MAX(CAST(payment_no AS UNSIGNED)), 0) INTO max_vp 
+        FROM vendor_payment_info 
+        WHERE status != 'Delete' AND fiscal_year(payment_date) = fiscal_year(NEW.outward_date);
+
+        SELECT IFNULL(MAX(CAST(vno AS UNSIGNED)), 0) INTO max_co 
+        FROM cb_cash_outward_info 
+        WHERE status != 'Delete' AND fiscal_year(outward_date) = fiscal_year(NEW.outward_date);
+
+        SET next_no = GREATEST(max_vp, max_co) + 1;
+        SET NEW.vno = next_no;
+    END IF;
+END$$
+DELIMITER ;
+
+-- 6. Trigger: cb_cash_outward_info_before_update
+DELIMITER $$
+CREATE TRIGGER `cb_cash_outward_info_before_update` BEFORE UPDATE ON `cb_cash_outward_info`
+FOR EACH ROW BEGIN
+    DECLARE max_vp INT DEFAULT 0;
+    DECLARE max_co INT DEFAULT 0;
+    DECLARE next_no INT DEFAULT 1;
+    IF (NEW.vno IS NULL OR NEW.vno = '' OR NEW.vno = 0) AND OLD.vno > 0 THEN
+        SET NEW.vno = OLD.vno;
+    ELSEIF NEW.vno IS NULL OR NEW.vno = '' OR NEW.vno = 0 THEN
+        SELECT IFNULL(MAX(CAST(payment_no AS UNSIGNED)), 0) INTO max_vp 
+        FROM vendor_payment_info 
+        WHERE status != 'Delete' AND fiscal_year(payment_date) = fiscal_year(NEW.outward_date);
+
+        SELECT IFNULL(MAX(CAST(vno AS UNSIGNED)), 0) INTO max_co 
+        FROM cb_cash_outward_info 
+        WHERE status != 'Delete' AND fiscal_year(outward_date) = fiscal_year(NEW.outward_date);
+
+        SET next_no = GREATEST(max_vp, max_co) + 1;
+        SET NEW.vno = next_no;
     END IF;
 END$$
 DELIMITER ;

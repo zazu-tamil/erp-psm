@@ -95,21 +95,21 @@
                 <thead>
                     <tr>
                         <th class="text-center">S.No</th>
-                        <th>Payment No</th>
+                        <th class="text-center">Voucher No</th>
                         <th>Date</th>
                         <th>Enquiry No</th>
                         <th>Bill No</th>
                         <th>Vendor Name</th>
                         <th>Payment Mode</th>
                         <th class="text-right">Amount</th>
-                        <th colspan="2" class="text-center">Action</th>
+                        <th colspan="3" class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($record_list as $j => $ls): ?>
                         <tr>
                             <td class="text-center"><?php echo (($sno ?? 0) + $j + 1); ?></td>
-                            <td><?php echo $ls['payment_no'] ?? ''; ?></td>
+                            <td class="text-center"><b><?php echo !empty($ls['payment_no']) ? str_pad((int)$ls['payment_no'], 4, '0', STR_PAD_LEFT) : '-'; ?></b></td>
                             <td><?php echo $ls['payment_date'] ?? ''; ?></td>
                             <td><?php echo !empty($ls['enquiry_nos']) ? $ls['enquiry_nos'] : '-'; ?></td>
                             <td><?php echo !empty($ls['bill_nos']) ? $ls['bill_nos'] : '-'; ?></td>
@@ -135,6 +135,12 @@
                                 </button>
                             </td>
                             <td class="text-center">
+                                <a href="<?php echo site_url('vendor-payment-print/' . ($ls['vendor_payment_id'] ?? '')); ?>"
+                                    target="_blank" class="btn btn-info btn-xs" title="Print Voucher">
+                                    <i class="fa fa-print"></i>
+                                </a>
+                            </td>
+                            <td class="text-center">
                                 <button type="button" value="<?php echo $ls['vendor_payment_id'] ?? ''; ?>"
                                     class="del_record btn btn-danger btn-xs" title="Delete">
                                     <i class="fa fa-remove"></i>
@@ -144,7 +150,7 @@
                     <?php endforeach; ?>
                     <?php if (empty($record_list)): ?>
                         <tr>
-                            <td colspan="10" class="text-center text-muted">No records found.</td>
+                            <td colspan="11" class="text-center text-muted">No records found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
