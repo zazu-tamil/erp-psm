@@ -870,6 +870,29 @@ FOR EACH ROW BEGIN
 END$$
 DELIMITER ;
 
+-- Update existing vendor payment records to have auto-generated payment_no based on vendor_payment_id
+UPDATE `vendor_payment_info` 
+SET `payment_no` = LPAD(`vendor_payment_id`, 4, '0') 
+WHERE `payment_no` IS NULL OR `payment_no` = '';
 
+-- Auto-generate payment_no before insert trigger
+DELIMITER $$
+CREATE TRIGGER `vendor_payment_info_before_insert` BEFORE INSERT ON `vendor_payment_info`
+FOR EACH ROW BEGIN
+    DECLARE next_id INT DEFAULT 0;
+    IF NEW.payment_no IS NULL OR NEW.payment_no = '' THEN
+        SELECT IFNULL(MAX(vendor_payment_id), 0) + 1 INTO next_id FROM vendor_payment_info;
+        SET NEW.payment_no = LPAD(next_id, 4, '0');
+    END IF;
+END$$
+DELIMITER ;
 
-
+-- Auto-generate payment_no before update trigger
+DELIMITER $$
+CREATE TRIGGER `vendor_payment_info_before_update` BEFORE UPDATE ON `vendor_payment_info`
+FOR EACH ROW BEGIN
+    IF (NEW.payment_no IS NULL OR NEW.payment_no = '') AND NEW.vendor_payment_id > 0 THEN
+        SET NEW.payment_no = LPAD(NEW.vendor_payment_id, 4, '0');
+    END IF;
+END$$
+DELIMITER ;

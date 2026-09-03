@@ -883,7 +883,7 @@ class Payment extends CI_Controller
             if ($this->db->trans_status() === FALSE) {
                 $this->session->set_flashdata('error', 'Error updating data. Please try again.');
             } else {
-                $this->session->set_flashdata('success', 'Customer Receipt updated successfully.');
+                $this->session->set_flashdata('success', 'Supplier payment updated successfully.');
             }
 
             redirect('vendor-payment-list');
