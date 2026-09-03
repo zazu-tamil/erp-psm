@@ -897,10 +897,15 @@
             minLength: 1,
 
             select: function (event, ui) {
-                console.log(ui);
-                // $("#srch_company_id").val(ui.item.company_id);
+                $(this).val(ui.item.value);
                 $(".tender_enquiry_id_value_id").val(ui.item.tender_enquiry_id);
             },
+        });
+
+        $("#srch_enquiry_no").on("input", function () {
+            if ($(this).val().trim() === "") {
+                $(".tender_enquiry_id_value_id").val("");
+            }
         });
     });
 </script>

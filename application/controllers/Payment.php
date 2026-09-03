@@ -229,35 +229,74 @@ class Payment extends CI_Controller
 
         if ($this->input->post('srch_enquiry_no') !== null) {
             $data['srch_enquiry_no'] = $srch_enquiry_no = $this->input->post('srch_enquiry_no');
-            $this->session->set_userdata('srch_enquiry_no', $srch_enquiry_no);
-        } elseif ($this->session->userdata('srch_enquiry_no')) {
-            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->session->userdata('srch_enquiry_no');
+            $this->session->set_userdata('cust_rcpt_srch_enquiry_no', $srch_enquiry_no);
+        } elseif ($this->session->userdata('cust_rcpt_srch_enquiry_no')) {
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->session->userdata('cust_rcpt_srch_enquiry_no');
         } else {
             $data['srch_enquiry_no'] = $srch_enquiry_no = '';
         }
 
-
-
         if ($this->input->post('tender_enquiry_id_value_id') !== null) {
             $data['tender_enquiry_id_value_id'] = $tender_enquiry_id_value_id = $this->input->post('tender_enquiry_id_value_id');
-            $this->session->set_userdata('tender_enquiry_id_value_id', $tender_enquiry_id_value_id);
-        } elseif ($this->session->userdata('tender_enquiry_id_value_id')) {
-            $data['tender_enquiry_id_value_id'] = $tender_enquiry_id_value_id = $this->session->userdata('tender_enquiry_id_value_id');
+            $this->session->set_userdata('cust_rcpt_tender_enquiry_id_value_id', $tender_enquiry_id_value_id);
+        } elseif ($this->session->userdata('cust_rcpt_tender_enquiry_id_value_id')) {
+            $data['tender_enquiry_id_value_id'] = $tender_enquiry_id_value_id = $this->session->userdata('cust_rcpt_tender_enquiry_id_value_id');
         } else {
             $data['tender_enquiry_id_value_id'] = $tender_enquiry_id_value_id = '';
         }
 
         if (!empty($tender_enquiry_id_value_id)) {
-            $where .= " AND a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id_value_id) . "'";
+            $where .= " AND EXISTS (
+                SELECT 1 FROM tender_receipt_invoice_info trii_e
+                LEFT JOIN tender_enq_invoice_info tei_e ON tei_e.tender_enq_invoice_id = trii_e.tender_enq_invoice_id AND trii_e.bill_type = 'Invoice'
+                WHERE trii_e.tender_receipt_id = a.tender_receipt_id
+                AND trii_e.status != 'Delete' AND trii_e.status != 'Deleted'
+                AND COALESCE(trii_e.tender_enquiry_id, tei_e.tender_enquiry_id) = '" . $this->db->escape_str($tender_enquiry_id_value_id) . "'
+            )";
+        } elseif (!empty($srch_enquiry_no)) {
+            $where .= " AND EXISTS (
+                SELECT 1 FROM tender_receipt_invoice_info trii_e
+                LEFT JOIN tender_enq_invoice_info tei_e ON tei_e.tender_enq_invoice_id = trii_e.tender_enq_invoice_id AND trii_e.bill_type = 'Invoice'
+                LEFT JOIN tender_enquiry_info te_info ON te_info.tender_enquiry_id = COALESCE(trii_e.tender_enquiry_id, tei_e.tender_enquiry_id)
+                WHERE trii_e.tender_receipt_id = a.tender_receipt_id
+                AND trii_e.status != 'Delete' AND trii_e.status != 'Deleted'
+                AND (
+                    te_info.enquiry_no LIKE '%" . $this->db->escape_like_str($srch_enquiry_no) . "%'
+                    OR get_tender_info(COALESCE(trii_e.tender_enquiry_id, tei_e.tender_enquiry_id)) LIKE '%" . $this->db->escape_like_str($srch_enquiry_no) . "%'
+                )
+            )";
+        }
+
+        if ($this->input->post('srch_invoice_no') !== null) {
+            $data['srch_invoice_no'] = $srch_invoice_no = $this->input->post('srch_invoice_no');
+            $this->session->set_userdata('cust_rcpt_srch_invoice_no', $srch_invoice_no);
+        } elseif ($this->session->userdata('cust_rcpt_srch_invoice_no')) {
+            $data['srch_invoice_no'] = $srch_invoice_no = $this->session->userdata('cust_rcpt_srch_invoice_no');
+        } else {
+            $data['srch_invoice_no'] = $srch_invoice_no = '';
+        }
+
+        if (!empty($srch_invoice_no)) {
+            $where .= " AND EXISTS (
+                SELECT 1 FROM tender_receipt_invoice_info trii_i
+                LEFT JOIN tender_enq_invoice_info tei_i ON tei_i.tender_enq_invoice_id = trii_i.tender_enq_invoice_id AND trii_i.bill_type = 'Invoice'
+                LEFT JOIN customer_opening_balance_info cob_i ON cob_i.opening_id = trii_i.tender_enq_invoice_id AND trii_i.bill_type = 'Opening Balance'
+                WHERE trii_i.tender_receipt_id = a.tender_receipt_id
+                AND trii_i.status != 'Delete' AND trii_i.status != 'Deleted'
+                AND (
+                    tei_i.invoice_no LIKE '%" . $this->db->escape_like_str($srch_invoice_no) . "%'
+                    OR CONCAT('OB-', LPAD(cob_i.opening_id, 3, '0')) LIKE '%" . $this->db->escape_like_str($srch_invoice_no) . "%'
+                )
+            )";
         }
 
         // ===================== PAGINATION =====================
         $this->load->library('pagination');
 
-        $this->db->where('status != ', 'Delete');
-        $this->db->from('tender_receipt_info as a');
-        $this->db->where($where);
-        $data['total_records'] = $cnt = $this->db->count_all_results();
+        $cnt_sql = "SELECT COUNT(*) as cnt FROM tender_receipt_info as a WHERE a.status != 'Delete' AND $where";
+        $cnt_query = $this->db->query($cnt_sql);
+        $cnt_row = $cnt_query->row_array();
+        $data['total_records'] = $cnt = (int) ($cnt_row['cnt'] ?? 0);
 
         $offset = (int) ($this->uri->segment(3) ? $this->uri->segment(3) : $this->uri->segment(2, 0));
         $data['sno'] = $offset;
@@ -287,24 +326,52 @@ class Payment extends CI_Controller
 
         $limit = (int) $config['per_page'];
 
-
         $data['record_list'] = array();
 
         $sql = "
             SELECT
                 a.tender_receipt_id,
                 a.receipt_no,
-                a.receipt_date,
+                date_format(a.receipt_date, '%d-%m-%Y') as receipt_date,
                 a.customer_id,
+                cust.customer_name,
                 a.receipt_mode,
                 a.amount,
                 b.bank_name,
-                c.category_name
+                c.category_name,
+                bills.invoice_nos,
+                bills.enquiry_nos
             FROM tender_receipt_info AS a
             LEFT JOIN company_bank_info AS b ON b.bank_id = a.bank_id AND b.status = 'Active'
             LEFT JOIN cash_category AS c ON c.cash_category_id = a.cash_category_id AND c.status = 'Active'
+            LEFT JOIN customer_info AS cust ON cust.customer_id = a.customer_id AND cust.status = 'Active'
+            LEFT JOIN (
+                SELECT 
+                    trii.tender_receipt_id,
+                    GROUP_CONCAT(DISTINCT 
+                        CASE 
+                            WHEN trii.bill_type = 'Invoice' THEN tei.invoice_no
+                            WHEN trii.bill_type = 'Opening Balance' THEN CONCAT('OB-', LPAD(cob.opening_id, 3, '0'))
+                            ELSE tei.invoice_no
+                        END
+                        SEPARATOR '<br>'
+                    ) AS invoice_nos,
+                    GROUP_CONCAT(DISTINCT 
+                        CASE 
+                            WHEN trii.tender_enquiry_id > 0 THEN get_tender_info(trii.tender_enquiry_id)
+                            WHEN tei.tender_enquiry_id > 0 THEN get_tender_info(tei.tender_enquiry_id)
+                            ELSE NULL
+                        END
+                        SEPARATOR '<br>'
+                    ) AS enquiry_nos
+                FROM tender_receipt_invoice_info trii
+                LEFT JOIN tender_enq_invoice_info tei ON tei.tender_enq_invoice_id = trii.tender_enq_invoice_id AND trii.bill_type = 'Invoice'
+                LEFT JOIN customer_opening_balance_info cob ON cob.opening_id = trii.tender_enq_invoice_id AND trii.bill_type = 'Opening Balance'
+                WHERE trii.status != 'Delete' AND trii.status != 'Deleted'
+                GROUP BY trii.tender_receipt_id
+            ) AS bills ON bills.tender_receipt_id = a.tender_receipt_id
             WHERE a.status = 'Active'
-            and $where
+            AND $where
             ORDER BY a.tender_receipt_id DESC
             LIMIT ?, ?
         ";

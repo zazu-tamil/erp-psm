@@ -54,16 +54,20 @@
                     <div class="form-group col-md-3">
                         <label for="srch_enquiry_no">Our Enquiry No</label>
                         <input type="text" name="srch_enquiry_no" id="srch_enquiry_no" class="form-control"
-                            value="<?php echo set_value('srch_enquiry_no', $srch_enquiry_no); ?>"
+                            value="<?php echo set_value('srch_enquiry_no', $srch_enquiry_no ?? ''); ?>"
                             placeholder="Search the Our Enquiry No">
-                        <input type="hidden" name="tender_enquiry_id_value_id" class="tender_enquiry_id_value_id"
-                            value="<?php echo set_value('tender_enquiry_id_value_id', $tender_enquiry_id_value_id); ?>">
-
+                        <input type="hidden" name="tender_enquiry_id_value_id" id="tender_enquiry_id_value_id" class="tender_enquiry_id_value_id"
+                            value="<?php echo set_value('tender_enquiry_id_value_id', $tender_enquiry_id_value_id ?? ''); ?>">
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="srch_invoice_no">Invoice No</label>
+                        <input type="text" name="srch_invoice_no" id="srch_invoice_no" class="form-control"
+                            value="<?php echo set_value('srch_invoice_no', $srch_invoice_no ?? ''); ?>"
+                            placeholder="Search Invoice No">
                     </div>
                     <div class="form-group col-md-3 text-left">
                         <br>
                         <button type="submit" class="btn btn-success"><i class="fa fa-search"></i> Show</button>
-
                     </div>
                 </div>
             </form>
@@ -85,6 +89,9 @@
                         <th class="text-center">S.No</th>
                         <th>Receipt No</th>
                         <th>Date</th>
+                        <th>Enquiry No</th>
+                        <th>Invoice No</th>
+                        <th>Customer Name</th>
                         <th>Receipt Mode</th>
                         <th class="text-right">Amount</th>
                         <th colspan="2" class="text-center">Action</th>
@@ -93,9 +100,12 @@
                 <tbody>
                     <?php foreach ($record_list as $j => $ls): ?>
                         <tr>
-                            <td class="text-center"><?php echo ($j + 1); ?></td>
+                            <td class="text-center"><?php echo (($sno ?? 0) + $j + 1); ?></td>
                             <td><?php echo $ls['receipt_no'] ?? ''; ?></td>
                             <td><?php echo $ls['receipt_date'] ?? ''; ?></td>
+                            <td><?php echo !empty($ls['enquiry_nos']) ? $ls['enquiry_nos'] : '-'; ?></td>
+                            <td><?php echo !empty($ls['invoice_nos']) ? $ls['invoice_nos'] : '-'; ?></td>
+                            <td><?php echo $ls['customer_name'] ?? ''; ?></td>
                             <td>
                                 <?php if ($ls['receipt_mode'] == 'Bank'): ?>
                                     <span class="label label-success"><?php echo $ls['receipt_mode']; ?></span>
@@ -126,7 +136,7 @@
                     <?php endforeach; ?>
                     <?php if (empty($record_list)): ?>
                         <tr>
-                            <td colspan="7" class="text-center text-muted">No records found.</td>
+                            <td colspan="10" class="text-center text-muted">No records found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
