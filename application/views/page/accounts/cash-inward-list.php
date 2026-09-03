@@ -64,7 +64,8 @@
             <table class="table table-hover table-bordered table-striped">
                 <thead>
                     <tr>
-                        <th>S.No</th>
+                        <th class="text-center">S.No</th>
+                        <th class="text-center">Receipt No</th>
                         <th class="text-center">Enquiry Num</th>
                         <th>Inward Date / Account Group</th>
                         <th>Company</th>
@@ -79,6 +80,7 @@
                     <?php foreach ($record_list as $j => $ls) { ?>
                         <tr>
                             <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
+                            <td class="text-center"><b><?php echo !empty($ls['vno']) ? str_pad((int)$ls['vno'], 4, '0', STR_PAD_LEFT) : '-'; ?></b></td>
                             <td class="text-center"><i class="label label-info"><?php echo $ls['tender_details'] ?></i></td>
                             <td><?php echo date('d-m-Y', strtotime($ls['inward_date'])) ?><br /><?php echo $ls['ac_type'] . ($ls['ac_type'] == 'Bank' && !empty($ls['bank_name']) ? ' (' . $ls['bank_name'] . ')' : '') . ($ls['ac_type'] == 'Cash' && !empty($ls['category_name']) ? ' (' . $ls['category_name'] . ')' : '') ?>
                             </td>

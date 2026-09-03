@@ -978,3 +978,110 @@ FOR EACH ROW BEGIN
     END IF;
 END$$
 DELIMITER ;
+
+
+-- ============================================================================
+-- LIVE DEPLOYMENT SCRIPT: SHARED UNIQUE 4-DIGIT RECEIPT NUMBERS (RESET PER FISCAL YEAR)
+-- Shared sequence across: tender_receipt_info (receipt_no) & cb_cash_inward_info (vno)
+-- ============================================================================
+
+-- 1. Ensure cb_cash_inward_info.vno is INT(4) UNSIGNED ZEROFILL for 4-digit formatting
+ALTER TABLE `cb_cash_inward_info` MODIFY `vno` INT(4) UNSIGNED ZEROFILL;
+
+-- 2. Drop existing triggers if present
+DROP TRIGGER IF EXISTS `tender_receipt_info_before_insert`;
+DROP TRIGGER IF EXISTS `tender_receipt_info_before_update`;
+DROP TRIGGER IF EXISTS `cb_cash_inward_info_before_insert`;
+DROP TRIGGER IF EXISTS `cb_cash_inward_info_before_update`;
+
+-- 3. Trigger: tender_receipt_info_before_insert
+DELIMITER $$
+CREATE TRIGGER `tender_receipt_info_before_insert` BEFORE INSERT ON `tender_receipt_info`
+FOR EACH ROW BEGIN
+    DECLARE max_tr INT DEFAULT 0;
+    DECLARE max_ci INT DEFAULT 0;
+    DECLARE next_no INT DEFAULT 1;
+    IF NEW.receipt_no IS NULL OR NEW.receipt_no = '' OR NEW.receipt_no = '0' OR NEW.receipt_no = '0000' THEN
+        SELECT IFNULL(MAX(CAST(receipt_no AS UNSIGNED)), 0) INTO max_tr 
+        FROM tender_receipt_info 
+        WHERE status != 'Delete' AND fiscal_year(receipt_date) = fiscal_year(NEW.receipt_date);
+
+        SELECT IFNULL(MAX(CAST(vno AS UNSIGNED)), 0) INTO max_ci 
+        FROM cb_cash_inward_info 
+        WHERE status != 'Delete' AND fiscal_year(inward_date) = fiscal_year(NEW.receipt_date);
+
+        SET next_no = GREATEST(max_tr, max_ci) + 1;
+        SET NEW.receipt_no = LPAD(next_no, 4, '0');
+    END IF;
+END$$
+DELIMITER ;
+
+-- 4. Trigger: tender_receipt_info_before_update
+DELIMITER $$
+CREATE TRIGGER `tender_receipt_info_before_update` BEFORE UPDATE ON `tender_receipt_info`
+FOR EACH ROW BEGIN
+    DECLARE max_tr INT DEFAULT 0;
+    DECLARE max_ci INT DEFAULT 0;
+    DECLARE next_no INT DEFAULT 1;
+    IF (NEW.receipt_no IS NULL OR NEW.receipt_no = '' OR NEW.receipt_no = '0' OR NEW.receipt_no = '0000') AND (OLD.receipt_no IS NOT NULL AND OLD.receipt_no != '' AND OLD.receipt_no != '0') THEN
+        SET NEW.receipt_no = OLD.receipt_no;
+    ELSEIF NEW.receipt_no IS NULL OR NEW.receipt_no = '' OR NEW.receipt_no = '0' OR NEW.receipt_no = '0000' THEN
+        SELECT IFNULL(MAX(CAST(receipt_no AS UNSIGNED)), 0) INTO max_tr 
+        FROM tender_receipt_info 
+        WHERE status != 'Delete' AND fiscal_year(receipt_date) = fiscal_year(NEW.receipt_date);
+
+        SELECT IFNULL(MAX(CAST(vno AS UNSIGNED)), 0) INTO max_ci 
+        FROM cb_cash_inward_info 
+        WHERE status != 'Delete' AND fiscal_year(inward_date) = fiscal_year(NEW.receipt_date);
+
+        SET next_no = GREATEST(max_tr, max_ci) + 1;
+        SET NEW.receipt_no = LPAD(next_no, 4, '0');
+    END IF;
+END$$
+DELIMITER ;
+
+-- 5. Trigger: cb_cash_inward_info_before_insert
+DELIMITER $$
+CREATE TRIGGER `cb_cash_inward_info_before_insert` BEFORE INSERT ON `cb_cash_inward_info`
+FOR EACH ROW BEGIN
+    DECLARE max_tr INT DEFAULT 0;
+    DECLARE max_ci INT DEFAULT 0;
+    DECLARE next_no INT DEFAULT 1;
+    IF NEW.vno IS NULL OR NEW.vno = '' OR NEW.vno = 0 THEN
+        SELECT IFNULL(MAX(CAST(receipt_no AS UNSIGNED)), 0) INTO max_tr 
+        FROM tender_receipt_info 
+        WHERE status != 'Delete' AND fiscal_year(receipt_date) = fiscal_year(NEW.inward_date);
+
+        SELECT IFNULL(MAX(CAST(vno AS UNSIGNED)), 0) INTO max_ci 
+        FROM cb_cash_inward_info 
+        WHERE status != 'Delete' AND fiscal_year(inward_date) = fiscal_year(NEW.inward_date);
+
+        SET next_no = GREATEST(max_tr, max_ci) + 1;
+        SET NEW.vno = next_no;
+    END IF;
+END$$
+DELIMITER ;
+
+-- 6. Trigger: cb_cash_inward_info_before_update
+DELIMITER $$
+CREATE TRIGGER `cb_cash_inward_info_before_update` BEFORE UPDATE ON `cb_cash_inward_info`
+FOR EACH ROW BEGIN
+    DECLARE max_tr INT DEFAULT 0;
+    DECLARE max_ci INT DEFAULT 0;
+    DECLARE next_no INT DEFAULT 1;
+    IF (NEW.vno IS NULL OR NEW.vno = '' OR NEW.vno = 0) AND OLD.vno > 0 THEN
+        SET NEW.vno = OLD.vno;
+    ELSEIF NEW.vno IS NULL OR NEW.vno = '' OR NEW.vno = 0 THEN
+        SELECT IFNULL(MAX(CAST(receipt_no AS UNSIGNED)), 0) INTO max_tr 
+        FROM tender_receipt_info 
+        WHERE status != 'Delete' AND fiscal_year(receipt_date) = fiscal_year(NEW.inward_date);
+
+        SELECT IFNULL(MAX(CAST(vno AS UNSIGNED)), 0) INTO max_ci 
+        FROM cb_cash_inward_info 
+        WHERE status != 'Delete' AND fiscal_year(inward_date) = fiscal_year(NEW.inward_date);
+
+        SET next_no = GREATEST(max_tr, max_ci) + 1;
+        SET NEW.vno = next_no;
+    END IF;
+END$$
+DELIMITER ;

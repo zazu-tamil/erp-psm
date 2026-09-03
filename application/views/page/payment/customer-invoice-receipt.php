@@ -93,7 +93,7 @@
                 <thead>
                     <tr>
                         <th class="text-center">S.No</th>
-                        <th>Receipt No</th>
+                        <th class="text-center">Receipt No</th>
                         <th>Date</th>
                         <th>Enquiry No</th>
                         <th>Invoice No</th>
@@ -107,7 +107,7 @@
                     <?php foreach ($record_list as $j => $ls): ?>
                         <tr>
                             <td class="text-center"><?php echo (($sno ?? 0) + $j + 1); ?></td>
-                            <td><?php echo $ls['receipt_no'] ?? ''; ?></td>
+                            <td class="text-center"><b><?php echo !empty($ls['receipt_no']) ? str_pad((int)$ls['receipt_no'], 4, '0', STR_PAD_LEFT) : '-'; ?></b></td>
                             <td><?php echo $ls['receipt_date'] ?? ''; ?></td>
                             <td><?php echo !empty($ls['enquiry_nos']) ? $ls['enquiry_nos'] : '-'; ?></td>
                             <td><?php echo !empty($ls['invoice_nos']) ? $ls['invoice_nos'] : '-'; ?></td>
