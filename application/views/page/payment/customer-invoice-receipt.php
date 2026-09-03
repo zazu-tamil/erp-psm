@@ -100,7 +100,7 @@
                         <th>Customer Name</th>
                         <th>Receipt Mode</th>
                         <th class="text-right">Amount</th>
-                        <th colspan="2" class="text-center">Action</th>
+                        <th colspan="3" class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -133,6 +133,12 @@
                                 </button>
                             </td>
                             <td class="text-center">
+                                <a href="<?php echo site_url('customer-receipt-print/' . ($ls['tender_receipt_id'] ?? '')); ?>"
+                                    target="_blank" class="btn btn-info btn-xs" title="Print Receipt">
+                                    <i class="fa fa-print"></i>
+                                </a>
+                            </td>
+                            <td class="text-center">
                                 <button type="button" value="<?php echo $ls['tender_receipt_id'] ?? ''; ?>"
                                     class="del_record btn btn-danger btn-xs" title="Delete">
                                     <i class="fa fa-remove"></i>
@@ -142,7 +148,7 @@
                     <?php endforeach; ?>
                     <?php if (empty($record_list)): ?>
                         <tr>
-                            <td colspan="10" class="text-center text-muted">No records found.</td>
+                            <td colspan="11" class="text-center text-muted">No records found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>

@@ -1197,35 +1197,49 @@ class Accounts extends CI_Controller
 
     public function print_receipt($cash_inward_id)
     {
-        $this->load->model('cce_model');
-        $sql = "
-                select 
-                a.*,
-                fiscal_year(a.inward_date) as fyr,
-                b.account_head_name,
-                c.sub_account_head_name,
-                d.voucher_type_name,
-                d.prefix 
-                from cb_cash_inward_info as a 
-                left join cb_account_head_info as b on b.account_head_id = a.account_head_id and b.status != 'Delete'
-                left join cb_sub_account_head_info as c on c.sub_account_head_id = a.sub_account_head_id and c.status != 'Delete'
-                left join cb_voucher_type_info as d on d.voucher_type_id = a.voucher_type_id and d.status != 'Delete'
-                where a.status != 'Delete' and   
-                a.cash_inward_id = $cash_inward_id
-                order by a.status asc , a.inward_date desc 
-                              
-        ";
-
-        $query = $this->db->query($sql);
-
-        $data['record_list'] = array();
-
-        foreach ($query->result_array() as $row) {
-            $data['record_list'] = $row;
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
         }
 
-        $this->load->view('page/accounts/print-receipt', $data);
+        $cash_inward_id = (int)$cash_inward_id;
 
+        $sql = "
+            SELECT 
+                a.*,
+                fiscal_year(a.inward_date) AS fyr,
+                b.account_head_name,
+                c.sub_account_head_name,
+                comp.company_name,
+                comp.address AS company_address,
+                bank.bank_name,
+                cc.category_name
+            FROM cb_cash_inward_info AS a 
+            LEFT JOIN cb_account_head_info AS b ON b.account_head_id = a.account_head_id AND b.status != 'Delete'
+            LEFT JOIN cb_sub_account_head_info AS c ON c.sub_account_head_id = a.sub_account_head_id AND c.status != 'Delete'
+            LEFT JOIN company_info AS comp ON comp.company_id = a.company_id AND comp.status = 'Active'
+            LEFT JOIN company_bank_info AS bank ON bank.bank_id = a.bank_id AND bank.status != 'Delete'
+            LEFT JOIN cash_category AS cc ON cc.cash_category_id = a.cash_category_id AND cc.status = 'Active'
+            WHERE a.status != 'Delete' AND a.cash_inward_id = ?
+        ";
+
+        $query = $this->db->query($sql, array($cash_inward_id));
+        $data['inward'] = $query->row_array();
+
+        if (empty($data['inward'])) {
+            show_404();
+        }
+
+        if (empty($data['inward']['company_name']) || empty($data['inward']['company_address'])) {
+            $default_comp = $this->db->select('company_name, address')->where('status', 'Active')->get('company_info')->row_array();
+            if (empty($data['inward']['company_name'])) {
+                $data['inward']['company_name'] = $default_comp['company_name'] ?? 'AL HILLO TRADING CO W.L.L';
+            }
+            if (empty($data['inward']['company_address'])) {
+                $data['inward']['company_address'] = $default_comp['address'] ?? '';
+            }
+        }
+
+        $this->load->view('page/payment/voucher-print', $data);
     }
 
     public function cash_ledger()

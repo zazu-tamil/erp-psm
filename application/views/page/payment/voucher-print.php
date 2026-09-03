@@ -59,8 +59,10 @@ if (!function_exists('voucher_amount_to_words')) {
     }
 }
 
-// Extract view variables depending on whether called from vendor payment or cash outward
+// Extract view variables depending on whether called from vendor payment, cash outward, customer receipt, or cash inward
 if (!empty($payment)) {
+    $voucher_title = 'Voucher';
+    $meta_no_label = 'Voucher No';
     $vno_num = (int)($payment['payment_no'] ?? 0);
     $voucher_no = $vno_num > 0 ? str_pad($vno_num, 4, '0', STR_PAD_LEFT) : '0000';
     $voucher_date = $payment['payment_date'] ?? date('d-m-Y');
@@ -68,6 +70,7 @@ if (!empty($payment)) {
     $company_address = !empty($payment['company_address']) ? $payment['company_address'] : '';
     $party_label = 'Vendor Name';
     $party_name = $payment['vendor_name'] ?? '-';
+    $mode_label = 'Payment Mode';
     
     // Payment mode text
     $payment_mode = $payment['payment_mode'] ?? 'Cash';
@@ -97,23 +100,27 @@ if (!empty($payment)) {
         $curr_unit = 'bahraini dinars';
         $sub_unit = 'fils';
     } else {
-        $curr_symbol = '₹';
-        $curr_unit = 'rupees';
-        $sub_unit = 'paise';
+        $curr_symbol = 'BD';
+        $curr_unit = 'bahraini dinars';
+        $sub_unit = 'fils';
     }
     $amount_in_words = voucher_amount_to_words($amount, $curr_unit, $sub_unit, 3);
 
     $bill_label = 'Bill No';
     $bill_nos = $payment['bill_nos'] ?? '-';
     $back_url = function_exists('site_url') ? site_url('vendor-payment-list') : 'vendor-payment-list';
+    $receiver_sig_label = 'Receiver Signature';
 
 } elseif (!empty($outward)) {
+    $voucher_title = 'Voucher';
+    $meta_no_label = 'Voucher No';
     $vno_num = (int)($outward['vno'] ?? 0);
     $voucher_no = $vno_num > 0 ? str_pad($vno_num, 4, '0', STR_PAD_LEFT) : '0000';
     $voucher_date = $outward['outward_date'] ?? date('d-m-Y');
     $company_name = !empty($outward['company_name']) ? $outward['company_name'] : 'AL HILLO TRADING CO W.L.L';
     $company_address = !empty($outward['company_address']) ? $outward['company_address'] : '';
     $party_label = 'Paid To';
+    $mode_label = 'Payment Mode';
     
     $party_parts = array();
     if (!empty($outward['account_head_name'])) $party_parts[] = $outward['account_head_name'];
@@ -131,29 +138,123 @@ if (!empty($payment)) {
     }
 
     $amount = (float)($outward['amount'] ?? 0);
-    $curr_symbol = '₹';
-    $curr_unit = 'rupees';
-    $sub_unit = 'paise';
+    $curr_symbol = 'BD';
+    $curr_unit = 'bahraini dinars';
+    $sub_unit = 'fils';
     $amount_in_words = voucher_amount_to_words($amount, $curr_unit, $sub_unit, 3);
 
     $bill_label = 'Remarks';
     $bill_nos = !empty($outward['remarks']) ? nl2br(htmlspecialchars($outward['remarks'])) : '-';
     $back_url = function_exists('site_url') ? site_url('outward-list') : 'outward-list';
+    $receiver_sig_label = 'Receiver Signature';
+
+} elseif (!empty($receipt)) {
+    $voucher_title = 'Receipt';
+    $meta_no_label = 'Receipt No';
+    $rno_num = (int)($receipt['receipt_no'] ?? 0);
+    $voucher_no = $rno_num > 0 ? str_pad($rno_num, 4, '0', STR_PAD_LEFT) : '0000';
+    $voucher_date = $receipt['receipt_date'] ?? date('d-m-Y');
+    $company_name = !empty($receipt['company_name']) ? $receipt['company_name'] : 'AL HILLO TRADING CO W.L.L';
+    $company_address = !empty($receipt['company_address']) ? $receipt['company_address'] : '';
+    $party_label = 'Received From';
+    $party_name = $receipt['customer_name'] ?? '-';
+    $mode_label = 'Receipt Mode';
+    
+    // Receipt mode text
+    $receipt_mode = $receipt['receipt_mode'] ?? 'Cash';
+    if ($receipt_mode === 'Cash') {
+        $payment_mode_text = 'Cash' . (!empty($receipt['category_name']) ? ' (' . $receipt['category_name'] . ')' : '');
+    } elseif ($receipt_mode === 'Bank') {
+        $bank_extra = array();
+        if (!empty($receipt['bank_name'])) $bank_extra[] = $receipt['bank_name'];
+        if (!empty($receipt['cheque_no'])) $bank_extra[] = 'Cheque: ' . $receipt['cheque_no'];
+        $payment_mode_text = 'Bank' . (!empty($bank_extra) ? ' (' . implode(' - ', $bank_extra) . ')' : '');
+    } else {
+        $payment_mode_text = $receipt_mode;
+    }
+
+    $amount = (float)($receipt['amount'] ?? 0);
+    $curr_code = !empty($receipt['currency_code']) ? strtoupper($receipt['currency_code']) : '';
+    if ($curr_code === 'USD') {
+        $curr_symbol = '$';
+        $curr_unit = 'dollars';
+        $sub_unit = 'cents';
+    } elseif ($curr_code === 'EUR') {
+        $curr_symbol = '€';
+        $curr_unit = 'euros';
+        $sub_unit = 'cents';
+    } elseif ($curr_code === 'BHD' && !empty($receipt['currency_symbol']) && $receipt['currency_symbol'] !== '.د.ب' && $receipt['currency_symbol'] !== '.\u062f.\u0628') {
+        $curr_symbol = $receipt['currency_symbol'];
+        $curr_unit = 'bahraini dinars';
+        $sub_unit = 'fils';
+    } else {
+        $curr_symbol = 'BD';
+        $curr_unit = 'bahraini dinars';
+        $sub_unit = 'fils';
+    }
+    $amount_in_words = voucher_amount_to_words($amount, $curr_unit, $sub_unit, 3);
+
+    $bill_label = 'Invoice No';
+    $bill_nos = !empty($receipt['invoice_nos']) && $receipt['invoice_nos'] !== '-' ? $receipt['invoice_nos'] : '-';
+    $back_url = function_exists('site_url') ? site_url('customer-invoice-receipt') : 'customer-invoice-receipt';
+    $receiver_sig_label = 'Authorized / Received By Signature';
+
+} elseif (!empty($inward)) {
+    $voucher_title = 'Receipt';
+    $meta_no_label = 'Receipt No';
+    $rno_num = (int)($inward['vno'] ?? 0);
+    $voucher_no = $rno_num > 0 ? str_pad($rno_num, 4, '0', STR_PAD_LEFT) : '0000';
+    $voucher_date = !empty($inward['inward_date']) ? date('d-m-Y', strtotime($inward['inward_date'])) : date('d-m-Y');
+    $company_name = !empty($inward['company_name']) ? $inward['company_name'] : 'AL HILLO TRADING CO W.L.L';
+    $company_address = !empty($inward['company_address']) ? $inward['company_address'] : '';
+    $party_label = 'Received From';
+    $mode_label = 'Receipt Mode';
+    
+    $party_parts = array();
+    if (!empty($inward['account_head_name'])) $party_parts[] = $inward['account_head_name'];
+    if (!empty($inward['sub_account_head_name'])) $party_parts[] = $inward['sub_account_head_name'];
+    $party_name = !empty($party_parts) ? implode(' - ', $party_parts) : '-';
+
+    $ac_type = $inward['ac_type'] ?? 'Cash';
+    if ($ac_type === 'Cash') {
+        $payment_mode_text = 'Cash' . (!empty($inward['category_name']) ? ' (' . $inward['category_name'] . ')' : '');
+    } elseif ($ac_type === 'Bank') {
+        $bank_extra = array();
+        if (!empty($inward['bank_name'])) $bank_extra[] = $inward['bank_name'];
+        $payment_mode_text = 'Bank' . (!empty($bank_extra) ? ' (' . implode(' - ', $bank_extra) . ')' : '');
+    } else {
+        $payment_mode_text = $ac_type;
+    }
+
+    $amount = (float)($inward['amount'] ?? 0);
+    $curr_symbol = 'BD';
+    $curr_unit = 'bahraini dinars';
+    $sub_unit = 'fils';
+    $amount_in_words = voucher_amount_to_words($amount, $curr_unit, $sub_unit, 3);
+
+    $bill_label = 'Remarks';
+    $bill_nos = !empty($inward['remarks']) ? nl2br(htmlspecialchars($inward['remarks'])) : '-';
+    $back_url = function_exists('site_url') ? site_url('inward-list') : 'inward-list';
+    $receiver_sig_label = 'Authorized / Received By Signature';
 
 } else {
+    $voucher_title = 'Voucher';
+    $meta_no_label = 'Voucher No';
     $voucher_no = '0000';
     $voucher_date = date('d-m-Y');
     $company_name = 'AL HILLO TRADING CO W.L.L';
     $company_address = '';
-    $party_label = 'Vendor Name';
+    $party_label = 'Party Name';
     $party_name = '-';
+    $mode_label = 'Mode';
     $payment_mode_text = 'Cash';
     $amount = 0.000;
-    $curr_symbol = '₹';
-    $amount_in_words = 'zero rupees only';
-    $bill_label = 'Bill No';
+    $curr_symbol = 'BD';
+    $amount_in_words = 'zero bahraini dinars only';
+    $bill_label = 'Reference';
     $bill_nos = '-';
     $back_url = function_exists('site_url') ? site_url('vendor-payment-list') : 'vendor-payment-list';
+    $receiver_sig_label = 'Receiver Signature';
 }
 ?>
 <!DOCTYPE html>
@@ -161,7 +262,7 @@ if (!empty($payment)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voucher - <?php echo htmlspecialchars($voucher_no); ?></title>
+    <title><?php echo htmlspecialchars($voucher_title); ?> - <?php echo htmlspecialchars($voucher_no); ?></title>
     <link rel="stylesheet" href="<?php echo base_url(); ?>asset/bower_components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="<?php echo base_url(); ?>asset/bower_components/font-awesome/css/font-awesome.min.css">
     <style>
@@ -323,7 +424,7 @@ if (!empty($payment)) {
 
     <div class="action-bar no-print">
         <a href="<?php echo $back_url; ?>" onclick="goBack(event);" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back</a>
-        <button type="button" onclick="window.print()" class="btn btn-primary"><i class="fa fa-print"></i> Print Voucher</button>
+        <button type="button" onclick="window.print()" class="btn btn-primary"><i class="fa fa-print"></i> Print <?php echo htmlspecialchars($voucher_title); ?></button>
     </div>
 
     <div class="voucher-box">
@@ -337,11 +438,11 @@ if (!empty($payment)) {
                     <?php endif; ?>
                 </td>
                 <td class="title-col">
-                    Voucher
+                    <?php echo htmlspecialchars($voucher_title); ?>
                 </td>
                 <td class="meta-col">
                     <div class="meta-item">
-                        Voucher No &nbsp;:&nbsp; <?php echo htmlspecialchars($voucher_no); ?>
+                        <?php echo htmlspecialchars($meta_no_label); ?> &nbsp;:&nbsp; <?php echo htmlspecialchars($voucher_no); ?>
                     </div>
                     <div class="meta-divider"></div>
                     <div class="meta-item">
@@ -359,7 +460,7 @@ if (!empty($payment)) {
                 <td class="col-value"><?php echo htmlspecialchars($party_name); ?></td>
             </tr>
             <tr>
-                <td class="col-label">Payment Mode</td>
+                <td class="col-label"><?php echo htmlspecialchars($mode_label ?? 'Payment Mode'); ?></td>
                 <td class="col-colon">:</td>
                 <td class="col-value"><?php echo htmlspecialchars($payment_mode_text); ?></td>
             </tr>
@@ -382,7 +483,7 @@ if (!empty($payment)) {
         <table class="signatures-table">
             <tr>
                 <td class="sig-border">Accounts Manager Signature</td>
-                <td>Receiver Signature</td>
+                <td><?php echo htmlspecialchars($receiver_sig_label ?? 'Receiver Signature'); ?></td>
             </tr>
         </table>
     </div>

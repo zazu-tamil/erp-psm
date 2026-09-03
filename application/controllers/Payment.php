@@ -1759,4 +1759,92 @@ class Payment extends CI_Controller
 
         $this->load->view('page/payment/voucher-print', $data);
     }
+
+    public function customer_receipt_print($tender_receipt_id)
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $tender_receipt_id = (int)$tender_receipt_id;
+
+        $sql = "
+            SELECT 
+                a.tender_receipt_id,
+                a.receipt_no,
+                DATE_FORMAT(a.receipt_date, '%d-%m-%Y') AS receipt_date,
+                a.receipt_mode,
+                a.receipt_type,
+                a.cheque_no,
+                a.cheque_date,
+                a.cheque_bank,
+                a.amount,
+                a.remarks,
+                b.bank_name,
+                c.category_name,
+                cust.customer_name,
+                bills.invoice_nos,
+                bills.enquiry_nos,
+                bills.currency_code,
+                bills.currency_symbol,
+                comp.company_name,
+                comp.address AS company_address
+            FROM tender_receipt_info AS a
+            LEFT JOIN company_bank_info AS b ON b.bank_id = a.bank_id AND b.status = 'Active'
+            LEFT JOIN cash_category AS c ON c.cash_category_id = a.cash_category_id AND c.status = 'Active'
+            LEFT JOIN customer_info AS cust ON cust.customer_id = a.customer_id AND cust.status = 'Active'
+            LEFT JOIN (
+                SELECT 
+                    trii.tender_receipt_id,
+                    MAX(curr.currency_code) AS currency_code,
+                    MAX(curr.symbol) AS currency_symbol,
+                    MAX(tei.company_id) AS company_id,
+                    GROUP_CONCAT(DISTINCT 
+                        CASE 
+                            WHEN trii.bill_type = 'Invoice' THEN tei.invoice_no
+                            WHEN trii.bill_type = 'Opening Balance' THEN CONCAT('OB-', LPAD(cob.opening_id, 3, '0'))
+                            ELSE tei.invoice_no
+                        END
+                        SEPARATOR '<br>'
+                    ) AS invoice_nos,
+                    GROUP_CONCAT(DISTINCT 
+                        CASE 
+                            WHEN trii.tender_enquiry_id > 0 THEN get_tender_info(trii.tender_enquiry_id)
+                            WHEN tei.tender_enquiry_id > 0 THEN get_tender_info(tei.tender_enquiry_id)
+                            ELSE NULL
+                        END
+                        SEPARATOR '<br>'
+                    ) AS enquiry_nos
+                FROM tender_receipt_invoice_info trii
+                LEFT JOIN tender_enq_invoice_info tei ON tei.tender_enq_invoice_id = trii.tender_enq_invoice_id AND trii.bill_type = 'Invoice'
+                LEFT JOIN tender_enquiry_info te ON te.tender_enquiry_id = COALESCE(trii.tender_enquiry_id, tei.tender_enquiry_id)
+                LEFT JOIN tender_quotation_info tq ON tq.tender_enquiry_id = te.tender_enquiry_id
+                LEFT JOIN currencies_info curr ON curr.currency_id = tq.currency_id
+                LEFT JOIN customer_opening_balance_info cob ON cob.opening_id = trii.tender_enq_invoice_id AND trii.bill_type = 'Opening Balance'
+                WHERE trii.status != 'Delete' AND trii.status != 'Deleted'
+                GROUP BY trii.tender_receipt_id
+            ) AS bills ON bills.tender_receipt_id = a.tender_receipt_id
+            LEFT JOIN company_info AS comp ON comp.company_id = bills.company_id AND comp.status = 'Active'
+            WHERE a.tender_receipt_id = ?
+        ";
+
+        $query = $this->db->query($sql, array($tender_receipt_id));
+        $data['receipt'] = $query->row_array();
+
+        if (empty($data['receipt'])) {
+            show_404();
+        }
+
+        if (empty($data['receipt']['company_name']) || empty($data['receipt']['company_address'])) {
+            $default_comp = $this->db->select('company_name, address')->where('status', 'Active')->get('company_info')->row_array();
+            if (empty($data['receipt']['company_name'])) {
+                $data['receipt']['company_name'] = $default_comp['company_name'] ?? 'AL HILLO TRADING CO W.L.L';
+            }
+            if (empty($data['receipt']['company_address'])) {
+                $data['receipt']['company_address'] = $default_comp['address'] ?? '';
+            }
+        }
+
+        $this->load->view('page/payment/voucher-print', $data);
+    }
 }

@@ -318,6 +318,7 @@ $route['company-bank-list/(:num)'] = 'master/company_bank_list/$1';
 $route['customer-invoice-receipt'] = 'payment/customer_invoice_recipt';
 $route['customer-invoice-receipt/(:num)'] = 'payment/customer_invoice_recipt/$1';
 $route['customer-invoice-receipt/(:num)/(:num)'] = 'payment/customer_invoice_recipt/$2';
+$route['customer-receipt-print/(:num)'] = 'payment/customer_receipt_print/$1';
 
 $route['vendor-payment-list'] = 'payment/vendor_payment_list';
 $route['vendor-payment-list/(:num)'] = 'payment/vendor_payment_list/$1';
