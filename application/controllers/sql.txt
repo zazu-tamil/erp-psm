@@ -839,4 +839,33 @@ WHERE NOT EXISTS (SELECT 1 FROM `menu_info` WHERE `menu_slug` = 'customer-pendin
 
 INSERT INTO `menu_info` (`parent_id`, `menu_title`, `menu_slug`, `menu_icon`, `is_header`, `sort_order`, `status`)
 SELECT 49, 'Vendor Pending Report', 'vendor-pending-invoice-report', 'fa fa-file-text', 0, 54, 'Active'
-WHERE NOT EXISTS (SELECT 1 FROM `menu_info` WHERE `menu_slug` = 'vendor-pending-invoice-report');
+WHERE NOT EXISTS (SELECT 1 FROM `menu_info` WHERE `menu_slug` = 'vendor-pending-invoice-report');
+
+03-09-2026
+
+-- Update existing receipt records to have auto-generated receipt_no based on tender_receipt_id
+UPDATE `tender_receipt_info` 
+SET `receipt_no` = LPAD(`tender_receipt_id`, 4, '0') 
+WHERE `receipt_no` IS NULL OR `receipt_no` = '';
+
+-- Auto-generate receipt_no before insert trigger
+DELIMITER $$
+CREATE TRIGGER `tender_receipt_info_before_insert` BEFORE INSERT ON `tender_receipt_info`
+FOR EACH ROW BEGIN
+    DECLARE next_id INT DEFAULT 0;
+    IF NEW.receipt_no IS NULL OR NEW.receipt_no = '' THEN
+        SELECT IFNULL(MAX(tender_receipt_id), 0) + 1 INTO next_id FROM tender_receipt_info;
+        SET NEW.receipt_no = LPAD(next_id, 4, '0');
+    END IF;
+END$$
+DELIMITER ;
+
+-- Auto-generate receipt_no before update trigger
+DELIMITER $$
+CREATE TRIGGER `tender_receipt_info_before_update` BEFORE UPDATE ON `tender_receipt_info`
+FOR EACH ROW BEGIN
+    IF (NEW.receipt_no IS NULL OR NEW.receipt_no = '') AND NEW.tender_receipt_id > 0 THEN
+        SET NEW.receipt_no = LPAD(NEW.tender_receipt_id, 4, '0');
+    END IF;
+END$$
+DELIMITER ;

@@ -51,6 +51,12 @@
                         <label>Customer</label>
                         <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control select2"'); ?>
                     </div>
+                    <div class="form-group col-md-2">
+                        <label for="srch_receipt_no">Receipt No</label>
+                        <input type="text" name="srch_receipt_no" id="srch_receipt_no" class="form-control"
+                            value="<?php echo set_value('srch_receipt_no', $srch_receipt_no ?? ''); ?>"
+                            placeholder="Search Receipt No">
+                    </div>
                     <div class="form-group col-md-3">
                         <label for="srch_enquiry_no">Our Enquiry No</label>
                         <input type="text" name="srch_enquiry_no" id="srch_enquiry_no" class="form-control"
@@ -59,13 +65,13 @@
                         <input type="hidden" name="tender_enquiry_id_value_id" id="tender_enquiry_id_value_id" class="tender_enquiry_id_value_id"
                             value="<?php echo set_value('tender_enquiry_id_value_id', $tender_enquiry_id_value_id ?? ''); ?>">
                     </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <label for="srch_invoice_no">Invoice No</label>
                         <input type="text" name="srch_invoice_no" id="srch_invoice_no" class="form-control"
                             value="<?php echo set_value('srch_invoice_no', $srch_invoice_no ?? ''); ?>"
                             placeholder="Search Invoice No">
                     </div>
-                    <div class="form-group col-md-3 text-left">
+                    <div class="form-group col-md-2 text-left">
                         <br>
                         <button type="submit" class="btn btn-success"><i class="fa fa-search"></i> Show</button>
                     </div>
@@ -339,7 +345,7 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <h3 class="modal-title" id="editModalLabel"><strong>Edit Customer Receipt</strong></h3>
+                        <h3 class="modal-title" id="editModalLabel"><strong>Edit Customer Receipt</strong> <span id="edit_receipt_no_badge" class="badge bg-green" style="font-size:14px;"></span></h3>
                         <input type="hidden" name="mode" value="Edit" />
                         <input type="hidden" name="tender_receipt_id" id="edit_tender_receipt_id" value="" />
                     </div>

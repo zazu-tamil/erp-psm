@@ -87,6 +87,13 @@ class Payment extends CI_Controller
             $this->db->insert('tender_receipt_info', $ins);
             $tender_receipt_id = $this->db->insert_id();
 
+            // Ensure receipt_no is auto-generated based on receipt id (if not set by trigger)
+            $rec_chk = $this->db->select('receipt_no')->where('tender_receipt_id', $tender_receipt_id)->get('tender_receipt_info')->row_array();
+            if (empty($rec_chk['receipt_no'])) {
+                $auto_receipt_no = str_pad($tender_receipt_id, 4, '0', STR_PAD_LEFT);
+                $this->db->where('tender_receipt_id', $tender_receipt_id)->update('tender_receipt_info', ['receipt_no' => $auto_receipt_no]);
+            }
+
             $selected_idxs = $this->input->post('selected_items') ?? [];
             $tender_enq_invoice_id = $this->input->post('tender_enq_invoice_id') ?? [];
             $tender_enquiry_id = $this->input->post('tender_enquiry_id') ?? [];
@@ -149,6 +156,13 @@ class Payment extends CI_Controller
 
             $this->db->where('tender_receipt_id', $tender_receipt_id);
             $this->db->update('tender_receipt_info', $upd);
+
+            // Ensure receipt_no exists on edited record
+            $rec_chk = $this->db->select('receipt_no')->where('tender_receipt_id', $tender_receipt_id)->get('tender_receipt_info')->row_array();
+            if (empty($rec_chk['receipt_no'])) {
+                $auto_receipt_no = str_pad($tender_receipt_id, 4, '0', STR_PAD_LEFT);
+                $this->db->where('tender_receipt_id', $tender_receipt_id)->update('tender_receipt_info', ['receipt_no' => $auto_receipt_no]);
+            }
 
             // ✅ POST ARRAYS
             $selected_idxs = $this->input->post('selected_items') ?? [];
@@ -225,6 +239,19 @@ class Payment extends CI_Controller
 
         if (!empty($srch_customer_id)) {
             $where .= " AND a.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
+        }
+
+        if ($this->input->post('srch_receipt_no') !== null) {
+            $data['srch_receipt_no'] = $srch_receipt_no = $this->input->post('srch_receipt_no');
+            $this->session->set_userdata('cust_rcpt_srch_receipt_no', $srch_receipt_no);
+        } elseif ($this->session->userdata('cust_rcpt_srch_receipt_no')) {
+            $data['srch_receipt_no'] = $srch_receipt_no = $this->session->userdata('cust_rcpt_srch_receipt_no');
+        } else {
+            $data['srch_receipt_no'] = $srch_receipt_no = '';
+        }
+
+        if (!empty($srch_receipt_no)) {
+            $where .= " AND (a.receipt_no LIKE '%" . $this->db->escape_like_str($srch_receipt_no) . "%' OR a.tender_receipt_id = '" . $this->db->escape_str($srch_receipt_no) . "')";
         }
 
         if ($this->input->post('srch_enquiry_no') !== null) {

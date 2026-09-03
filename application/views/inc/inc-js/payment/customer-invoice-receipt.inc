@@ -684,6 +684,7 @@
                     }
 
                     $("#edit_tender_receipt_id").val(data.tender_receipt_id);
+                    $("#edit_receipt_no_badge").text(data.receipt_no ? '#' + data.receipt_no : '');
                     $("#edit_receipt_date").val(data.receipt_date);
                     $("#edit_remarks").val(data.remarks);
                     $("#edit_receipt_mode").val(data.receipt_mode).trigger("change"); // also toggles bank
