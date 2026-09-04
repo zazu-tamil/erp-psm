@@ -240,19 +240,25 @@ $menu = array(
         'i' => 'fa fa-area-chart',
         'c' => array(
             array(
-                't' => 'Tender Info Report',
-                'i' => 'fa fa-envelope',
+                't' => 'Tender Report',
+                'i' => 'fa fa-file-text-o',
                 'c' => array(
                     array('t' => 'Tender Timeline Report', 's' => 'tender-enquiry-timeline', 'i' => 'fa fa-list'),
                     array('t' => 'Tender Info Report', 's' => 'tender-enquiry-summary-report', 'i' => 'fa fa-list'),
                     array('t' => 'Item Rate Report', 's' => 'item-rate-report', 'i' => 'fa fa-file-text-o'),
                     array('t' => 'Customer Pending Report', 's' => 'customer-pending-invoice-report', 'i' => 'fa fa-file-text'),
-                    array('t' => 'Vendor Pending Report', 's' => 'vendor-pending-invoice-report', 'i' => 'fa fa-file-text'),
                     array('t' => 'Customer Statement Report', 's' => 'customer-statement-report', 'i' => 'fa fa-file-text'),
-                    array('t' => 'Vendor Statement Report', 's' => 'vendor-statement-report', 'i' => 'fa fa-file-text'),
-                    array('t' => 'PO Summary Report', 's' => 'supplier-summary-report', 'i' => 'fa fa-file-text'),
                     array('t' => 'Invoice Summary Report', 's' => 'invoice-report', 'i' => 'fa fa-file-text'),
                     array('t' => 'Tender Progress Report', 's' => 'tender-progress-report', 'i' => 'fa fa-line-chart'),
+                )
+            ),
+            array(
+                't' => 'Supplier Report',
+                'i' => 'fa fa-industry',
+                'c' => array(
+                    array('t' => 'Vendor Pending Report', 's' => 'vendor-pending-invoice-report', 'i' => 'fa fa-file-text'),
+                    array('t' => 'Vendor Statement Report', 's' => 'vendor-statement-report', 'i' => 'fa fa-file-text'),
+                    array('t' => 'PO Summary Report', 's' => 'supplier-summary-report', 'i' => 'fa fa-file-text'),
                 )
             ),
             array(

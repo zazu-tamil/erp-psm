@@ -19,7 +19,7 @@ class Menu_model extends CI_Model {
      */
     public function get_all()
     {
-        $this->ensure_pending_reports_menu();
+        $this->ensure_split_reports_menu();
         $this->db->where('status !=', 'Delete');
         $this->db->order_by('parent_id', 'ASC');
         $this->db->order_by('sort_order', 'ASC');
@@ -28,76 +28,211 @@ class Menu_model extends CI_Model {
     }
 
     /**
-     * Dynamically ensures that Customer and Vendor Pending Reports exist in menu_info
-     * and that all active roles have view permissions.
+     * Dynamically ensures that Reports menu is split into Tender Report and Supplier Report in menu_info,
+     * cleans up any duplicate pending/invoice report rows, and ensures view permissions for all roles.
      */
-    public function ensure_pending_reports_menu()
+    public function ensure_split_reports_menu()
     {
-        // 1. Find parent report menu (Tender Info Report, or Reports)
-        $parent_id = 0;
-        $parent = $this->db->where('menu_slug', 'tender-enquiry-timeline')->where('status !=', 'Delete')->get('menu_info')->row_array();
-        if (!empty($parent['parent_id'])) {
-            $parent_id = (int)$parent['parent_id'];
+        // 1. Find main "Reports" top-level dropdown menu (parent_id = 0, is_header = 0)
+        $reports_main = $this->db->where('parent_id', 0)
+                                 ->where('is_header', 0)
+                                 ->group_start()
+                                     ->where('menu_title', 'Reports')
+                                     ->or_where('menu_icon', 'fa fa-area-chart')
+                                 ->group_end()
+                                 ->where('status !=', 'Delete')
+                                 ->get('menu_info')
+                                 ->row_array();
+
+        if (!$reports_main) {
+            return;
+        }
+        $reports_main_id = (int)$reports_main['menu_id'];
+
+        // 2. Reparent any orphaned or mis-parented Tender Report / Supplier Report under $reports_main_id
+        $this->db->where_in('menu_title', array('Tender Report', 'Supplier Report'))
+                 ->where('is_header', 0)
+                 ->where('status !=', 'Delete')
+                 ->update('menu_info', array('parent_id' => $reports_main_id));
+
+        // 3. Find or create "Tender Report" parent under $reports_main_id
+        $tender_parent = $this->db->where('parent_id', $reports_main_id)
+                                  ->where('menu_title', 'Tender Report')
+                                  ->where('status !=', 'Delete')
+                                  ->get('menu_info')
+                                  ->row_array();
+
+        if ($tender_parent) {
+            $tender_parent_id = (int)$tender_parent['menu_id'];
+            $this->db->where('menu_id', $tender_parent_id)->update('menu_info', array(
+                'parent_id'  => $reports_main_id,
+                'menu_icon'  => 'fa fa-file-text-o',
+                'sort_order' => 1
+            ));
         } else {
-            $parent = $this->db->where('menu_title', 'Tender Info Report')->where('parent_id >', 0)->where('status !=', 'Delete')->get('menu_info')->row_array();
-            if (!empty($parent['menu_id'])) {
-                $parent_id = (int)$parent['menu_id'];
+            // Check if legacy Tender Info Report exists under $reports_main_id
+            $legacy = $this->db->where('parent_id', $reports_main_id)
+                               ->where('menu_title', 'Tender Info Report')
+                               ->where('status !=', 'Delete')
+                               ->get('menu_info')
+                               ->row_array();
+            if ($legacy) {
+                $this->db->where('menu_id', $legacy['menu_id'])->update('menu_info', array(
+                    'menu_title' => 'Tender Report',
+                    'menu_icon'  => 'fa fa-file-text-o',
+                    'sort_order' => 1
+                ));
+                $tender_parent_id = (int)$legacy['menu_id'];
+            } else {
+                $this->db->insert('menu_info', array(
+                    'parent_id'   => $reports_main_id,
+                    'menu_title'  => 'Tender Report',
+                    'menu_slug'   => null,
+                    'menu_icon'   => 'fa fa-file-text-o',
+                    'is_header'   => 0,
+                    'sort_order'  => 1,
+                    'status'      => 'Active'
+                ));
+                $tender_parent_id = $this->db->insert_id();
             }
         }
 
-        if ($parent_id <= 0) {
-            return;
+        // Clean up any extra legacy "Tender Info Report" under $reports_main_id
+        $this->db->where('parent_id', $reports_main_id)
+                 ->where('menu_title', 'Tender Info Report')
+                 ->where('menu_id !=', $tender_parent_id)
+                 ->update('menu_info', array('status' => 'Delete'));
+
+        // 4. Find or create "Supplier Report" parent under $reports_main_id
+        $supplier_parent = $this->db->where('parent_id', $reports_main_id)
+                                    ->where('menu_title', 'Supplier Report')
+                                    ->where('status !=', 'Delete')
+                                    ->get('menu_info')
+                                    ->row_array();
+
+        if ($supplier_parent) {
+            $supplier_parent_id = (int)$supplier_parent['menu_id'];
+            $this->db->where('menu_id', $supplier_parent_id)->update('menu_info', array(
+                'parent_id'  => $reports_main_id,
+                'menu_icon'  => 'fa fa-industry',
+                'sort_order' => 2
+            ));
+        } else {
+            $this->db->insert('menu_info', array(
+                'parent_id'   => $reports_main_id,
+                'menu_title'  => 'Supplier Report',
+                'menu_slug'   => null,
+                'menu_icon'   => 'fa fa-industry',
+                'is_header'   => 0,
+                'sort_order'  => 2,
+                'status'      => 'Active'
+            ));
+            $supplier_parent_id = $this->db->insert_id();
         }
 
-        // 2. Ensure Customer Pending Report menu
-        $c_menu = $this->db->where('menu_slug', 'customer-pending-invoice-report')->where('status !=', 'Delete')->get('menu_info')->row_array();
+        // 5. Clean up duplicate customer/vendor pending/invoice report rows
+        $this->db->where_in('menu_slug', array('customer-invoice-pending-report', 'vendor-invoice-pending-report'))
+                 ->update('menu_info', array('status' => 'Delete'));
+
+        // 6. Ensure customer-pending-invoice-report exists
+        $c_menu = $this->db->where('menu_slug', 'customer-pending-invoice-report')
+                           ->where('status !=', 'Delete')
+                           ->get('menu_info')
+                           ->row_array();
         if (!$c_menu) {
             $this->db->insert('menu_info', array(
-                'parent_id' => $parent_id,
+                'parent_id'  => $tender_parent_id,
                 'menu_title' => 'Customer Pending Report',
-                'menu_slug' => 'customer-pending-invoice-report',
-                'menu_icon' => 'fa fa-file-text',
-                'is_header' => 0,
-                'sort_order' => 53,
-                'status' => 'Active'
+                'menu_slug'  => 'customer-pending-invoice-report',
+                'menu_icon'  => 'fa fa-file-text',
+                'is_header'  => 0,
+                'sort_order' => 4,
+                'status'     => 'Active'
             ));
             $c_menu_id = $this->db->insert_id();
         } else {
-            $c_menu_id = $c_menu['menu_id'];
+            $c_menu_id = (int)$c_menu['menu_id'];
+            $this->db->where('menu_id', $c_menu_id)->update('menu_info', array(
+                'parent_id'  => $tender_parent_id,
+                'menu_title' => 'Customer Pending Report',
+                'menu_icon'  => 'fa fa-file-text'
+            ));
         }
 
-        // 3. Ensure Vendor Pending Report menu
-        $v_menu = $this->db->where('menu_slug', 'vendor-pending-invoice-report')->where('status !=', 'Delete')->get('menu_info')->row_array();
+        // 7. Ensure vendor-pending-invoice-report exists
+        $v_menu = $this->db->where('menu_slug', 'vendor-pending-invoice-report')
+                           ->where('status !=', 'Delete')
+                           ->get('menu_info')
+                           ->row_array();
         if (!$v_menu) {
             $this->db->insert('menu_info', array(
-                'parent_id' => $parent_id,
+                'parent_id'  => $supplier_parent_id,
                 'menu_title' => 'Vendor Pending Report',
-                'menu_slug' => 'vendor-pending-invoice-report',
-                'menu_icon' => 'fa fa-file-text',
-                'is_header' => 0,
-                'sort_order' => 54,
-                'status' => 'Active'
+                'menu_slug'  => 'vendor-pending-invoice-report',
+                'menu_icon'  => 'fa fa-file-text',
+                'is_header'  => 0,
+                'sort_order' => 1,
+                'status'     => 'Active'
             ));
             $v_menu_id = $this->db->insert_id();
         } else {
-            $v_menu_id = $v_menu['menu_id'];
+            $v_menu_id = (int)$v_menu['menu_id'];
+            $this->db->where('menu_id', $v_menu_id)->update('menu_info', array(
+                'parent_id'  => $supplier_parent_id,
+                'menu_title' => 'Vendor Pending Report',
+                'menu_icon'  => 'fa fa-file-text'
+            ));
         }
 
-        // 4. Ensure permissions in role_permission for all active roles
+        // 8. Update parent_id for Tender Reports
+        $tender_slugs = array(
+            'tender-enquiry-timeline',
+            'tender-enquiry-summary-report',
+            'item-rate-report',
+            'customer-pending-invoice-report',
+            'customer-statement-report',
+            'invoice-report',
+            'tender-progress-report'
+        );
+        $this->db->where_in('menu_slug', $tender_slugs)
+                 ->where('status !=', 'Delete')
+                 ->update('menu_info', array('parent_id' => $tender_parent_id));
+
+        // 9. Update parent_id for Supplier Reports
+        $supplier_slugs = array(
+            'vendor-pending-invoice-report',
+            'vendor-statement-report',
+            'supplier-summary-report'
+        );
+        $this->db->where_in('menu_slug', $supplier_slugs)
+                 ->where('status !=', 'Delete')
+                 ->update('menu_info', array('parent_id' => $supplier_parent_id));
+
+        // 10. Fix sort orders under Reports dropdown
+        $this->db->where('menu_id', $tender_parent_id)->update('menu_info', array('sort_order' => 1));
+        $this->db->where('menu_id', $supplier_parent_id)->update('menu_info', array('sort_order' => 2));
+        $this->db->where('parent_id', $reports_main_id)->where('menu_title', 'NBR Report')->update('menu_info', array('sort_order' => 3));
+        $this->db->where('parent_id', $reports_main_id)->where('menu_slug', 'pl-report')->update('menu_info', array('sort_order' => 4));
+        $this->db->where('parent_id', $reports_main_id)->where('menu_slug', 'account-trial-balance')->update('menu_info', array('sort_order' => 5));
+
+        // 11. Ensure role_permission for all active roles
         $roles = $this->db->where('status !=', 'Delete')->get('role_info')->result_array();
         if (!empty($roles)) {
+            $check_ids = array($tender_parent_id, $supplier_parent_id, $c_menu_id, $v_menu_id);
             foreach ($roles as $role) {
                 $role_id = (int)$role['role_id'];
-                foreach (array($c_menu_id, $v_menu_id) as $mid) {
+                foreach ($check_ids as $mid) {
                     if ($mid > 0) {
-                        $has_perm = $this->db->where('role_id', $role_id)->where('menu_id', $mid)->count_all_results('role_permission');
+                        $has_perm = $this->db->where('role_id', $role_id)
+                                             ->where('menu_id', $mid)
+                                             ->count_all_results('role_permission');
                         if ($has_perm == 0) {
                             $this->db->insert('role_permission', array(
-                                'role_id' => $role_id,
-                                'menu_id' => $mid,
-                                'can_view' => 1,
-                                'can_add' => 1,
-                                'can_edit' => 1,
+                                'role_id'    => $role_id,
+                                'menu_id'    => $mid,
+                                'can_view'   => 1,
+                                'can_add'    => 1,
+                                'can_edit'   => 1,
                                 'can_delete' => 1
                             ));
                         }

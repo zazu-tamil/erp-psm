@@ -1085,3 +1085,40 @@ FOR EACH ROW BEGIN
     END IF;
 END$$
 DELIMITER ;
+
+04-09-2026
+
+-- Split Reports menu into Tender Report and Supplier Report
+-- 1. Ensure "Supplier Report" parent menu exists under Reports (menu_id 48)
+INSERT INTO `menu_info` (`parent_id`, `menu_title`, `menu_slug`, `menu_icon`, `is_header`, `sort_order`, `status`)
+SELECT 48, 'Supplier Report', NULL, 'fa fa-industry', 0, 57, 'Active'
+WHERE NOT EXISTS (SELECT 1 FROM `menu_info` WHERE `parent_id` = 48 AND `menu_title` = 'Supplier Report' AND `status` != 'Delete');
+
+-- 2. Rename Tender Info Report to Tender Report
+UPDATE `menu_info`
+SET `menu_title` = 'Tender Report', `menu_icon` = 'fa fa-file-text-o'
+WHERE `parent_id` = 48 AND `menu_title` = 'Tender Info Report' AND `status` != 'Delete';
+
+-- 3. Move Supplier reports under Supplier Report parent
+UPDATE `menu_info`
+SET `parent_id` = (SELECT menu_id FROM (SELECT menu_id FROM `menu_info` WHERE `parent_id` = 48 AND `menu_title` = 'Supplier Report' AND `status` != 'Delete' LIMIT 1) tmp)
+WHERE `menu_slug` IN ('vendor-pending-invoice-report', 'vendor-statement-report', 'supplier-summary-report') AND `status` != 'Delete';
+
+-- 4. Move Tender reports under Tender Report parent
+UPDATE `menu_info`
+SET `parent_id` = (SELECT menu_id FROM (SELECT menu_id FROM `menu_info` WHERE `parent_id` = 48 AND `menu_title` = 'Tender Report' AND `status` != 'Delete' LIMIT 1) tmp)
+WHERE `menu_slug` IN ('tender-enquiry-timeline', 'tender-enquiry-summary-report', 'item-rate-report', 'customer-pending-invoice-report', 'customer-statement-report', 'invoice-report', 'tender-progress-report') AND `status` != 'Delete';
+
+-- 5. Soft-delete duplicate/legacy pending report items
+UPDATE `menu_info` SET `status` = 'Delete' WHERE `menu_slug` IN ('customer-invoice-pending-report', 'vendor-invoice-pending-report');
+
+-- 6. Grant permissions on Supplier Report to all active roles
+INSERT INTO `role_permission` (`role_id`, `menu_id`, `can_view`, `can_add`, `can_edit`, `can_delete`)
+SELECT r.role_id, m.menu_id, 1, 1, 1, 1
+FROM `role_info` r
+JOIN `menu_info` m ON m.menu_title = 'Supplier Report' AND m.parent_id = 48 AND m.status != 'Delete'
+WHERE r.status != 'Delete'
+  AND NOT EXISTS (
+    SELECT 1 FROM `role_permission` rp WHERE rp.role_id = r.role_id AND rp.menu_id = m.menu_id
+  );
+

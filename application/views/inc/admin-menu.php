@@ -367,24 +367,36 @@ $vendor_m_grp = [
 
 <!-- Report -->
 <?php
-$report_m_grp = [
-    'sales-purchase-report',
-    'sales-nbr-report',
-    'purchase-nbr-report',
+$tender_report_grp = [
     'tender-enquiry-timeline',
     'tender-enquiry-summary-report',
-    'customer-invoice-pending-report',
-    'vendor-invoice-pending-report',
-    'vendor-statement-report',
-    'customer-statement-report',
     'item-rate-report',
-    'pl-report',
-    'account-trial-balance',
-    'supplier-summary-report',
+    'customer-invoice-pending-report',
+    'customer-pending-invoice-report',
+    'customer-statement-report',
     'invoice-report',
-    'tender-progress-report',
-    'vat-statement-report'
+    'tender-progress-report'
 ];
+
+$supplier_report_grp = [
+    'vendor-invoice-pending-report',
+    'vendor-pending-invoice-report',
+    'vendor-statement-report',
+    'supplier-summary-report'
+];
+
+$report_m_grp = array_merge(
+    $tender_report_grp,
+    $supplier_report_grp,
+    [
+        'sales-purchase-report',
+        'sales-nbr-report',
+        'purchase-nbr-report',
+        'pl-report',
+        'account-trial-balance',
+        'vat-statement-report'
+    ]
+);
 ?>
 <li class="header">REPORTS</li>
 
@@ -400,10 +412,11 @@ $report_m_grp = [
     </a>
 
     <ul class="treeview-menu">
+        <!-- Tender Report -->
         <li
-            class="treeview <?= in_array($current_page, ['sales-nbr-report', 'purchase-nbr-report', 'tender-enquiry-timeline', 'tender-enquiry-summary-report', 'customer-invoice-pending-report', 'customer-pending-invoice-report', 'vendor-invoice-pending-report', 'vendor-pending-invoice-report', 'vendor-statement-report', 'customer-statement-report', 'item-rate-report', 'supplier-summary-report', 'invoice-report', 'tender-progress-report', 'vat-statement-report']) ? 'active' : '' ?>">
+            class="treeview <?= in_array($current_page, $tender_report_grp) ? 'active' : '' ?>">
             <a href="#">
-                <i class="fa fa-envelope"></i> Tender Info Report
+                <i class="fa fa-file-text-o"></i> Tender Report
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
             </a>
             <ul class="treeview-menu">
@@ -426,16 +439,9 @@ $report_m_grp = [
                     </a>
                 </li>
 
-                <!-- NEW MENU -->
                 <li class="<?= in_array($current_page, ['customer-invoice-pending-report', 'customer-pending-invoice-report']) ? 'active' : '' ?>">
                     <a href="<?= site_url('customer-pending-invoice-report') ?>">
                         <i class="fa fa-file-text"></i> Customer Pending Report
-                    </a>
-                </li>
-
-                <li class="<?= in_array($current_page, ['vendor-invoice-pending-report', 'vendor-pending-invoice-report']) ? 'active' : '' ?>">
-                    <a href="<?= site_url('vendor-pending-invoice-report') ?>">
-                        <i class="fa fa-file-text"></i> Vendor Pending Report
                     </a>
                 </li>
 
@@ -444,31 +450,48 @@ $report_m_grp = [
                         <i class="fa fa-file-text"></i> Customer Statement Report
                     </a>
                 </li>
-                <li class="<?= ($current_page === 'vendor-statement-report') ? 'active' : '' ?>">
-                    <a href="<?= site_url('vendor-statement-report') ?>">
-                        <i class="fa fa-file-text"></i> Vendor Statement Report
-                    </a>
-                </li>
-                <li class="<?= ($current_page === 'supplier-summary-report') ? 'active' : '' ?>">
-                    <a href="<?= site_url('supplier-summary-report') ?>">
-                        <i class="fa fa-file-text"></i> PO Summary Report
-                    </a>
-                </li>
+
                 <li class="<?= ($current_page === 'invoice-report') ? 'active' : '' ?>">
                     <a href="<?= site_url('invoice-report') ?>">
                         <i class="fa fa-file-text"></i> Invoice Summary Report
                     </a>
                 </li>
+
                 <li class="<?= ($current_page === 'tender-progress-report') ? 'active' : '' ?>">
                     <a href="<?= site_url('tender-progress-report') ?>">
                         <i class="fa fa-line-chart"></i> Tender Progress Report
                     </a>
                 </li>
-                <!-- <li class="<?= ($current_page === 'vat-statement-report') ? 'active' : '' ?>">
-                    <a href="<?= site_url('vat-statement-report') ?>">
-                        <i class="fa fa-percent"></i> VAT Statement Report
+
+            </ul>
+        </li>
+
+        <!-- Supplier Report -->
+        <li
+            class="treeview <?= in_array($current_page, $supplier_report_grp) ? 'active' : '' ?>">
+            <a href="#">
+                <i class="fa fa-industry"></i> Supplier Report
+                <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+            </a>
+            <ul class="treeview-menu">
+
+                <li class="<?= in_array($current_page, ['vendor-invoice-pending-report', 'vendor-pending-invoice-report']) ? 'active' : '' ?>">
+                    <a href="<?= site_url('vendor-pending-invoice-report') ?>">
+                        <i class="fa fa-file-text"></i> Vendor Pending Report
                     </a>
-                </li> -->
+                </li>
+
+                <li class="<?= ($current_page === 'vendor-statement-report') ? 'active' : '' ?>">
+                    <a href="<?= site_url('vendor-statement-report') ?>">
+                        <i class="fa fa-file-text"></i> Vendor Statement Report
+                    </a>
+                </li>
+
+                <li class="<?= ($current_page === 'supplier-summary-report') ? 'active' : '' ?>">
+                    <a href="<?= site_url('supplier-summary-report') ?>">
+                        <i class="fa fa-file-text"></i> PO Summary Report
+                    </a>
+                </li>
 
             </ul>
         </li>

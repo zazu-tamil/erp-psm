@@ -190,6 +190,8 @@ if (!function_exists('has_perm')) {
             'vendor-purchase-bill-edit'      => array('slug' => 'vendor-purchase-bill-list', 'action' => 'edit'),
             'credit-debit-note-add'          => array('slug' => 'credit-debit-note-list', 'action' => 'add'),
             'credit-debit-note-edit'         => array('slug' => 'credit-debit-note-list', 'action' => 'edit'),
+            'customer-invoice-pending-report' => array('slug' => 'customer-pending-invoice-report', 'action' => 'view'),
+            'vendor-invoice-pending-report'  => array('slug' => 'vendor-pending-invoice-report', 'action' => 'view'),
         );
 
         if (isset($aliases[$slug])) {
