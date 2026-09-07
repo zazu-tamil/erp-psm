@@ -37,7 +37,7 @@ class Invoice_report_model extends CI_Model
                 /*================ CUSTOMS BILL =================*/
                 cb.invoice_no AS customs_bill_no,
                 cb.invoice_date AS customs_bill_date,
-                cb.custom_duty AS customs_bill_amount
+                cb.customs_payable AS customs_bill_amount
 
             FROM customer_tender_po_info a
 
