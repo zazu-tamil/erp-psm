@@ -15,15 +15,16 @@
 	rel="stylesheet"
 	href="<?php echo base_url() ?>asset/plugins/timepicker/bootstrap-timepicker.min.css"
 />
-<!-- bootstrap datepicker -->
-<script src="<?php echo base_url() ?>asset/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
-<script src="<?php echo base_url() ?>asset/plugins/timepicker/bootstrap-timepicker.min.js"></script>
-<script src="<?php echo base_url() ?>asset/bower_components/select2/dist/js/select2.full.min.js"></script>
 <link
   rel="stylesheet"
   href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
 />
+<!-- jQuery UI for autocomplete -->
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<!-- bootstrap datepicker (loaded AFTER jquery-ui so Bootstrap datepicker wins $.fn.datepicker) -->
+<script src="<?php echo base_url() ?>asset/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script src="<?php echo base_url() ?>asset/plugins/timepicker/bootstrap-timepicker.min.js"></script>
+<script src="<?php echo base_url() ?>asset/bower_components/select2/dist/js/select2.full.min.js"></script>
 <style>
   .select2-container {
     width: 100% !important;
@@ -45,6 +46,13 @@
     padding-left: 0 !important;
     padding-right: 0 !important;
     height: auto !important;
+  }
+  /* Ensure datepicker dropdown is always above modals and sticky headers */
+  .datepicker.datepicker-dropdown {
+    z-index: 99999 !important;
+  }
+  .input-group.date .input-group-addon {
+    cursor: pointer;
   }
 </style>
 
@@ -254,9 +262,24 @@
 
 	 
 
-		$(".datepicker").datepicker({
-			autoclose: true,
-			format: "yyyy-mm-dd",
+		// Initialize datepickers
+		function initDatepickers(context) {
+			var $ctx = context ? $(context) : $(document);
+			$ctx.find('.datepicker, .input-group.date').datepicker({
+				autoclose: true,
+				format: "yyyy-mm-dd",
+				todayHighlight: true,
+				orientation: "bottom auto"
+			});
+		}
+		initDatepickers();
+
+		$("#add_modal, #edit_modal").on("shown.bs.modal", function () {
+			initDatepickers(this);
+		});
+
+		$(document).on("click", ".input-group.date .input-group-addon", function () {
+			$(this).closest(".input-group.date").find("input").focus();
 		});
 
 		$("#add_modal #account_head_id").change(function () {
@@ -357,7 +380,10 @@
 					$("#edit_modal #cash_outward_id").val(d1.cash_outward_id);
 					// $('#edit_modal #agent_id').val(d1.agent_id) ;
 					$("#edit_modal #voucher_type_id").val(d1.voucher_type_id);
-					$("#edit_modal #outward_date").val(d1.outward_date);
+					$("#edit_modal #outward_date, #edit_modal #edit_outward_date").val(d1.outward_date);
+					if ($.fn.datepicker) {
+						$("#edit_modal #edit_outward_date, #edit_modal #outward_date").datepicker('update', d1.outward_date);
+					}
 					$("#edit_modal #ac_type").val(d1.ac_type);
 					if (d1.ac_type === "Bank" && d1.bank_type) {
 						$("#edit_modal input[name='bank_type'][value='" + d1.bank_type + "']").prop("checked", true);
@@ -365,6 +391,9 @@
 						$("#edit_modal input[name='bank_type']").prop("checked", false);
 					}
 					$("#edit_modal #edit_cheque_date").val(d1.cheque_date || "");
+					if ($.fn.datepicker && d1.cheque_date) {
+						$("#edit_modal #edit_cheque_date").datepicker('update', d1.cheque_date);
+					}
 					$("#edit_modal #edit_cheque_no").val(d1.cheque_no || "");
 					$("#edit_modal #edit_cheque_bank").val(d1.cheque_bank || "");
 					$("#edit_modal #bank_id").val(d1.bank_id).trigger("change.select2");
