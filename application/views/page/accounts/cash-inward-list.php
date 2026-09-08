@@ -82,7 +82,20 @@
                             <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
                             <td class="text-center"><b><?php echo !empty($ls['vno']) ? str_pad((int)$ls['vno'], 4, '0', STR_PAD_LEFT) : '-'; ?></b></td>
                             <td class="text-center"><i class="label label-info"><?php echo $ls['tender_details'] ?></i></td>
-                            <td><?php echo date('d-m-Y', strtotime($ls['inward_date'])) ?><br /><?php echo $ls['ac_type'] . ($ls['ac_type'] == 'Bank' && !empty($ls['bank_name']) ? ' (' . $ls['bank_name'] . ')' : '') . ($ls['ac_type'] == 'Cash' && !empty($ls['category_name']) ? ' (' . $ls['category_name'] . ')' : '') ?>
+                            <td><?php echo date('d-m-Y', strtotime($ls['inward_date'])) ?><br />
+                                <?php 
+                                    $ac_details = $ls['ac_type'];
+                                    if ($ls['ac_type'] == 'Bank') {
+                                        $bank_details = array();
+                                        if (!empty($ls['bank_name'])) $bank_details[] = $ls['bank_name'];
+                                        if (!empty($ls['bank_type'])) $bank_details[] = $ls['bank_type'];
+                                        if ($ls['bank_type'] == 'Cheque' && !empty($ls['cheque_no'])) $bank_details[] = 'Chq: ' . $ls['cheque_no'];
+                                        if (!empty($bank_details)) $ac_details .= ' (' . implode(' - ', $bank_details) . ')';
+                                    } elseif ($ls['ac_type'] == 'Cash' && !empty($ls['category_name'])) {
+                                        $ac_details .= ' (' . $ls['category_name'] . ')';
+                                    }
+                                    echo $ac_details;
+                                ?>
                             </td>
                             <td>
                                 <?php echo $ls['company_name'] ?><br />
@@ -155,14 +168,42 @@
                                         <label>Account Group</label>
                                         <?php echo form_dropdown('ac_type', array('' => 'Select') + $ac_type_opt, set_value('ac_type'), ' id="ac_type" class="form-control" required="true"'); ?>
                                     </div>
-                                     <div class="form-group col-md-6" id="bank_div" style="display: none;">
-                                         <label>Bank</label>
-                                         <?php echo form_dropdown('bank_id', array('' => 'Select Bank') + $bank_opt, set_value('bank_id'), ' id="bank_id" class="form-control select2"'); ?>
-                                     </div>
-                                     <div class="form-group col-md-6" id="cash_category_div" style="display: none;">
-                                         <label>Cash Category <span class="text-red">*</span></label>
-                                         <?php echo form_dropdown('cash_category_id', array('' => 'Select Cash Category') + $cash_categories_opt, set_value('cash_category_id'), ' id="cash_category_id" class="form-control select2"'); ?>
-                                     </div>
+                                    <div class="form-group col-md-6" id="bank_type_div" style="display: none;">
+                                        <label>Bank Type <span class="text-red">*</span></label><br>
+                                        <label class="radio-inline">
+                                            <input type="radio" name="bank_type" value="Online"> Online
+                                        </label>
+                                        <label class="radio-inline">
+                                            <input type="radio" name="bank_type" value="Cheque"> Cheque
+                                        </label>
+                                    </div>
+                                    <div class="form-group col-md-6" id="bank_div" style="display: none;">
+                                        <label>Bank <span class="text-red">*</span></label>
+                                        <?php echo form_dropdown('bank_id', array('' => 'Select Bank') + $bank_opt, set_value('bank_id'), ' id="bank_id" class="form-control select2"'); ?>
+                                    </div>
+                                    <div class="form-group col-md-6" id="cash_category_div" style="display: none;">
+                                        <label>Cash Category <span class="text-red">*</span></label>
+                                        <?php echo form_dropdown('cash_category_id', array('' => 'Select Cash Category') + $cash_categories_opt, set_value('cash_category_id'), ' id="cash_category_id" class="form-control select2"'); ?>
+                                    </div>
+                                    <div id="cheque_details_div" style="display: none;">
+                                        <div class="form-group col-md-6">
+                                            <label>Cheque Date <span class="text-red">*</span></label>
+                                            <div class="input-group date">
+                                                <div class="input-group-addon">
+                                                    <i class="fa fa-calendar"></i>
+                                                </div>
+                                                <input class="form-control" type="date" name="cheque_date" id="cheque_date" value="<?php echo date('Y-m-d'); ?>">
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>Cheque No <span class="text-red">*</span></label>
+                                            <input class="form-control" type="text" name="cheque_no" id="cheque_no" placeholder="Ex: 0001">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>Cheque Bank <span class="text-red">*</span></label>
+                                            <input class="form-control" type="text" name="cheque_bank" id="cheque_bank" placeholder="Ex: SBI / NBB / BBK">
+                                        </div>
+                                    </div>
                                     <div class="form-group col-md-6">
                                         <label>Account Head</label>
                                         <?php echo form_dropdown('account_head_id', array('' => 'Select') + $account_head_opt, set_value('account_head_id'), ' id="account_head_id" class="form-control" required="true"'); ?>
@@ -246,14 +287,42 @@
                                         <label>Account Group</label>
                                         <?php echo form_dropdown('ac_type', array('' => 'Select') + $ac_type_opt, set_value('ac_type'), ' id="ac_type" class="form-control" required="true"'); ?>
                                     </div>
-                                     <div class="form-group col-md-6" id="edit_bank_div" style="display: none;">
-                                         <label>Bank</label>
-                                         <?php echo form_dropdown('bank_id', array('' => 'Select Bank') + $bank_opt, set_value('bank_id'), ' id="bank_id" class="form-control select2"'); ?>
-                                     </div>
-                                     <div class="form-group col-md-6" id="edit_cash_category_div" style="display: none;">
-                                         <label>Cash Category <span class="text-red">*</span></label>
-                                         <?php echo form_dropdown('cash_category_id', array('' => 'Select Cash Category') + $cash_categories_opt, set_value('cash_category_id'), ' id="cash_category_id" class="form-control select2"'); ?>
-                                     </div>
+                                    <div class="form-group col-md-6" id="edit_bank_type_div" style="display: none;">
+                                        <label>Bank Type <span class="text-red">*</span></label><br>
+                                        <label class="radio-inline">
+                                            <input type="radio" name="bank_type" value="Online"> Online
+                                        </label>
+                                        <label class="radio-inline">
+                                            <input type="radio" name="bank_type" value="Cheque"> Cheque
+                                        </label>
+                                    </div>
+                                    <div class="form-group col-md-6" id="edit_bank_div" style="display: none;">
+                                        <label>Bank <span class="text-red">*</span></label>
+                                        <?php echo form_dropdown('bank_id', array('' => 'Select Bank') + $bank_opt, set_value('bank_id'), ' id="bank_id" class="form-control select2"'); ?>
+                                    </div>
+                                    <div class="form-group col-md-6" id="edit_cash_category_div" style="display: none;">
+                                        <label>Cash Category <span class="text-red">*</span></label>
+                                        <?php echo form_dropdown('cash_category_id', array('' => 'Select Cash Category') + $cash_categories_opt, set_value('cash_category_id'), ' id="cash_category_id" class="form-control select2"'); ?>
+                                    </div>
+                                    <div id="edit_cheque_details_div" style="display: none;">
+                                        <div class="form-group col-md-6">
+                                            <label>Cheque Date <span class="text-red">*</span></label>
+                                            <div class="input-group date">
+                                                <div class="input-group-addon">
+                                                    <i class="fa fa-calendar"></i>
+                                                </div>
+                                                <input class="form-control" type="date" name="cheque_date" id="edit_cheque_date">
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>Cheque No <span class="text-red">*</span></label>
+                                            <input class="form-control" type="text" name="cheque_no" id="edit_cheque_no" placeholder="Ex: 0001">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>Cheque Bank <span class="text-red">*</span></label>
+                                            <input class="form-control" type="text" name="cheque_bank" id="edit_cheque_bank" placeholder="Ex: SBI / NBB / BBK">
+                                        </div>
+                                    </div>
                                     <div class="form-group col-md-6">
                                         <label>Account Head</label>
                                         <?php echo form_dropdown('account_head_id', array('' => 'Select') + $account_head_opt, set_value('account_head_id'), ' id="account_head_id" class="form-control" required="true"'); ?>

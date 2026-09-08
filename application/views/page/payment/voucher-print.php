@@ -132,7 +132,11 @@ if (!empty($payment)) {
     if ($ac_type === 'Cash') {
         $payment_mode_text = 'Cash' . (!empty($outward['category_name']) ? ' (' . $outward['category_name'] . ')' : '');
     } elseif ($ac_type === 'Bank') {
-        $payment_mode_text = 'Bank' . (!empty($outward['bank_name']) ? ' (' . $outward['bank_name'] . ')' : '');
+        $bank_extra = array();
+        if (!empty($outward['bank_name'])) $bank_extra[] = $outward['bank_name'];
+        if (!empty($outward['bank_type'])) $bank_extra[] = $outward['bank_type'];
+        if (!empty($outward['cheque_no'])) $bank_extra[] = 'Cheque: ' . $outward['cheque_no'];
+        $payment_mode_text = 'Bank' . (!empty($bank_extra) ? ' (' . implode(' - ', $bank_extra) . ')' : '');
     } else {
         $payment_mode_text = $ac_type;
     }
@@ -221,6 +225,8 @@ if (!empty($payment)) {
     } elseif ($ac_type === 'Bank') {
         $bank_extra = array();
         if (!empty($inward['bank_name'])) $bank_extra[] = $inward['bank_name'];
+        if (!empty($inward['bank_type'])) $bank_extra[] = $inward['bank_type'];
+        if (!empty($inward['cheque_no'])) $bank_extra[] = 'Cheque: ' . $inward['cheque_no'];
         $payment_mode_text = 'Bank' . (!empty($bank_extra) ? ' (' . implode(' - ', $bank_extra) . ')' : '');
     } else {
         $payment_mode_text = $ac_type;

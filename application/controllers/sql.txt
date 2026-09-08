@@ -1121,4 +1121,18 @@ WHERE r.status != 'Delete'
   AND NOT EXISTS (
     SELECT 1 FROM `role_permission` rp WHERE rp.role_id = r.role_id AND rp.menu_id = m.menu_id
   );
+07-09-2026
 
+-- Add Bank Type (Online / Cheque) and Cheque details to cb_cash_inward_info
+ALTER TABLE `cb_cash_inward_info`
+    ADD COLUMN `bank_type` VARCHAR(50) NULL DEFAULT NULL AFTER `ac_type`,
+    ADD COLUMN `cheque_date` DATE NULL DEFAULT NULL AFTER `cash_category_id`,
+    ADD COLUMN `cheque_no` VARCHAR(50) NULL DEFAULT NULL AFTER `cheque_date`,
+    ADD COLUMN `cheque_bank` VARCHAR(100) NULL DEFAULT NULL AFTER `cheque_no`;
+
+-- Add Bank Type (Online / Cheque) and Cheque details to cb_cash_outward_info
+ALTER TABLE `cb_cash_outward_info`
+    ADD COLUMN `bank_type` VARCHAR(50) NULL DEFAULT NULL AFTER `ac_type`,
+    ADD COLUMN `cheque_date` DATE NULL DEFAULT NULL AFTER `cash_category_id`,
+    ADD COLUMN `cheque_no` VARCHAR(50) NULL DEFAULT NULL AFTER `cheque_date`,
+    ADD COLUMN `cheque_bank` VARCHAR(100) NULL DEFAULT NULL AFTER `cheque_no`;

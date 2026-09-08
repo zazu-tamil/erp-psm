@@ -443,12 +443,51 @@ class Accounts extends CI_Controller
         }  */
 
         // Dynamically ensure columns exist in cb_cash_inward_info
+        $this->load->dbforge();
         if (!$this->db->field_exists('cash_category_id', 'cb_cash_inward_info')) {
-            $this->load->dbforge();
             $this->dbforge->add_column('cb_cash_inward_info', [
                 'cash_category_id' => [
                     'type' => 'INT',
                     'constraint' => 11,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+        if (!$this->db->field_exists('bank_type', 'cb_cash_inward_info')) {
+            $this->dbforge->add_column('cb_cash_inward_info', [
+                'bank_type' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 50,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+        if (!$this->db->field_exists('cheque_date', 'cb_cash_inward_info')) {
+            $this->dbforge->add_column('cb_cash_inward_info', [
+                'cheque_date' => [
+                    'type' => 'DATE',
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+        if (!$this->db->field_exists('cheque_no', 'cb_cash_inward_info')) {
+            $this->dbforge->add_column('cb_cash_inward_info', [
+                'cheque_no' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 50,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+        if (!$this->db->field_exists('cheque_bank', 'cb_cash_inward_info')) {
+            $this->dbforge->add_column('cb_cash_inward_info', [
+                'cheque_bank' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 100,
                     'null' => TRUE,
                     'default' => NULL
                 ]
@@ -459,8 +498,12 @@ class Accounts extends CI_Controller
 
         if ($this->input->post('mode') == 'Add') {
             $ac_type = $this->input->post('ac_type');
+            $bank_type = ($ac_type == 'Bank') ? ($this->input->post('bank_type') ?: null) : null;
             $bank_id = ($ac_type == 'Bank') ? ($this->input->post('bank_id') ?: null) : null;
             $cash_category_id = ($ac_type == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null;
+            $cheque_date = ($ac_type == 'Bank' && in_array($bank_type, ['Cheque', 'Check'])) ? ($this->input->post('cheque_date') ?: null) : null;
+            $cheque_no = ($ac_type == 'Bank' && in_array($bank_type, ['Cheque', 'Check'])) ? ($this->input->post('cheque_no') ?: null) : null;
+            $cheque_bank = ($ac_type == 'Bank' && in_array($bank_type, ['Cheque', 'Check'])) ? ($this->input->post('cheque_bank') ?: null) : null;
 
             $ins = array(
                 'franchise_id' => ($this->session->userdata('cr_franchise_id') == '' ? 0 : $this->session->userdata('cr_franchise_id')),
@@ -471,8 +514,12 @@ class Accounts extends CI_Controller
 
                 'vno' => $this->input->post('vno'),
                 'ac_type' => $ac_type,
+                'bank_type' => $bank_type,
                 'bank_id' => $bank_id,
                 'cash_category_id' => $cash_category_id,
+                'cheque_date' => $cheque_date,
+                'cheque_no' => $cheque_no,
+                'cheque_bank' => $cheque_bank,
                 'inward_date' => $this->input->post('inward_date'),
                 'account_head_id' => $this->input->post('account_head_id'),
                 'sub_account_head_id' => $this->input->post('sub_account_head_id'),
@@ -492,8 +539,12 @@ class Accounts extends CI_Controller
 
         if ($this->input->post('mode') == 'Edit') {
             $ac_type = $this->input->post('ac_type');
+            $bank_type = ($ac_type == 'Bank') ? ($this->input->post('bank_type') ?: null) : null;
             $bank_id = ($ac_type == 'Bank') ? ($this->input->post('bank_id') ?: null) : null;
             $cash_category_id = ($ac_type == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null;
+            $cheque_date = ($ac_type == 'Bank' && in_array($bank_type, ['Cheque', 'Check'])) ? ($this->input->post('cheque_date') ?: null) : null;
+            $cheque_no = ($ac_type == 'Bank' && in_array($bank_type, ['Cheque', 'Check'])) ? ($this->input->post('cheque_no') ?: null) : null;
+            $cheque_bank = ($ac_type == 'Bank' && in_array($bank_type, ['Cheque', 'Check'])) ? ($this->input->post('cheque_bank') ?: null) : null;
 
             $upd = array(
                 'franchise_id' => ($this->session->userdata('cr_franchise_id') == '' ? 0 : $this->session->userdata('cr_franchise_id')),
@@ -503,8 +554,12 @@ class Accounts extends CI_Controller
                 'agent_id' => $this->input->post('agent_id'),
                 'vno' => $this->input->post('vno'),
                 'ac_type' => $ac_type,
+                'bank_type' => $bank_type,
                 'bank_id' => $bank_id,
                 'cash_category_id' => $cash_category_id,
+                'cheque_date' => $cheque_date,
+                'cheque_no' => $cheque_no,
+                'cheque_bank' => $cheque_bank,
                 'inward_date' => $this->input->post('inward_date'),
                 'account_head_id' => $this->input->post('account_head_id'),
                 'sub_account_head_id' => $this->input->post('sub_account_head_id'),
@@ -788,12 +843,51 @@ class Accounts extends CI_Controller
         }  */
 
         // Dynamically ensure columns exist in cb_cash_outward_info
+        $this->load->dbforge();
         if (!$this->db->field_exists('cash_category_id', 'cb_cash_outward_info')) {
-            $this->load->dbforge();
             $this->dbforge->add_column('cb_cash_outward_info', [
                 'cash_category_id' => [
                     'type' => 'INT',
                     'constraint' => 11,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+        if (!$this->db->field_exists('bank_type', 'cb_cash_outward_info')) {
+            $this->dbforge->add_column('cb_cash_outward_info', [
+                'bank_type' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 50,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+        if (!$this->db->field_exists('cheque_date', 'cb_cash_outward_info')) {
+            $this->dbforge->add_column('cb_cash_outward_info', [
+                'cheque_date' => [
+                    'type' => 'DATE',
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+        if (!$this->db->field_exists('cheque_no', 'cb_cash_outward_info')) {
+            $this->dbforge->add_column('cb_cash_outward_info', [
+                'cheque_no' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 50,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+        if (!$this->db->field_exists('cheque_bank', 'cb_cash_outward_info')) {
+            $this->dbforge->add_column('cb_cash_outward_info', [
+                'cheque_bank' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 100,
                     'null' => TRUE,
                     'default' => NULL
                 ]
@@ -834,8 +928,12 @@ class Accounts extends CI_Controller
             }
 
             $ac_type = $this->input->post('ac_type');
+            $bank_type = ($ac_type == 'Bank') ? ($this->input->post('bank_type') ?: null) : null;
             $bank_id = ($ac_type == 'Bank') ? ($this->input->post('bank_id') ?: null) : null;
             $cash_category_id = ($ac_type == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null;
+            $cheque_date = ($ac_type == 'Bank' && in_array($bank_type, ['Cheque', 'Check'])) ? ($this->input->post('cheque_date') ?: null) : null;
+            $cheque_no = ($ac_type == 'Bank' && in_array($bank_type, ['Cheque', 'Check'])) ? ($this->input->post('cheque_no') ?: null) : null;
+            $cheque_bank = ($ac_type == 'Bank' && in_array($bank_type, ['Cheque', 'Check'])) ? ($this->input->post('cheque_bank') ?: null) : null;
 
             // Prepare data for insert
             $ins = array(
@@ -845,8 +943,12 @@ class Accounts extends CI_Controller
                 'voucher_type_id' => $this->input->post('voucher_type_id'),
                 'outward_date' => $this->input->post('outward_date'),
                 'ac_type' => $ac_type,
+                'bank_type' => $bank_type,
                 'bank_id' => $bank_id,
                 'cash_category_id' => $cash_category_id,
+                'cheque_date' => $cheque_date,
+                'cheque_no' => $cheque_no,
+                'cheque_bank' => $cheque_bank,
                 'account_head_id' => $this->input->post('account_head_id'),
                 'sub_account_head_id' => $this->input->post('sub_account_head_id'),
                 'sub_account_headlvl3_id' => $this->input->post('sub_account_headlvl3_id'),
@@ -895,8 +997,12 @@ class Accounts extends CI_Controller
             }
 
             $ac_type = $this->input->post('ac_type');
+            $bank_type = ($ac_type == 'Bank') ? ($this->input->post('bank_type') ?: null) : null;
             $bank_id = ($ac_type == 'Bank') ? ($this->input->post('bank_id') ?: null) : null;
             $cash_category_id = ($ac_type == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null;
+            $cheque_date = ($ac_type == 'Bank' && in_array($bank_type, ['Cheque', 'Check'])) ? ($this->input->post('cheque_date') ?: null) : null;
+            $cheque_no = ($ac_type == 'Bank' && in_array($bank_type, ['Cheque', 'Check'])) ? ($this->input->post('cheque_no') ?: null) : null;
+            $cheque_bank = ($ac_type == 'Bank' && in_array($bank_type, ['Cheque', 'Check'])) ? ($this->input->post('cheque_bank') ?: null) : null;
 
             // Prepare data for update
             $upd = array(
@@ -906,8 +1012,12 @@ class Accounts extends CI_Controller
                 'voucher_type_id' => $this->input->post('voucher_type_id'),
                 'outward_date' => $this->input->post('outward_date'),
                 'ac_type' => $ac_type,
+                'bank_type' => $bank_type,
                 'bank_id' => $bank_id,
                 'cash_category_id' => $cash_category_id,
+                'cheque_date' => $cheque_date,
+                'cheque_no' => $cheque_no,
+                'cheque_bank' => $cheque_bank,
                 'vno' => $this->input->post('vno'),
                 'account_head_id' => $this->input->post('account_head_id'),
                 'sub_account_head_id' => $this->input->post('sub_account_head_id'),
@@ -1150,6 +1260,10 @@ class Accounts extends CI_Controller
                 a.vno,
                 DATE_FORMAT(a.outward_date, '%d-%m-%Y') AS outward_date,
                 a.ac_type,
+                a.bank_type,
+                a.cheque_date,
+                a.cheque_no,
+                a.cheque_bank,
                 a.amount,
                 a.remarks,
                 b.account_head_name,
