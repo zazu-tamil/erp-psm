@@ -178,7 +178,7 @@ $current_page = $this->uri->segment(1, 0);
 
 <li class="header">In Stock Items</li>
 
-<li class="treeview <?= in_array($current_page, ['in-stock-item-list', 'in-stock-item-report']) ? 'active' : '' ?>">
+<li class="treeview <?= in_array($current_page, ['in-stock-item-list', 'in-stock-item-report', 'item-inward-outward-report']) ? 'active' : '' ?>">
     <a href="#">
         <i class="fa fa-file-text"></i>
         <span>In Stock Items</span>
@@ -198,6 +198,12 @@ $current_page = $this->uri->segment(1, 0);
         <li class="<?= ($current_page === 'in-stock-item-report') ? 'active' : '' ?>">
             <a href="<?= site_url('in-stock-item-report') ?>">
                 <i class="fa fa-list"></i> In Stock Item Report
+            </a>
+        </li>
+
+        <li class="<?= ($current_page === 'item-inward-outward-report') ? 'active' : '' ?>">
+            <a href="<?= site_url('item-inward-outward-report') ?>">
+                <i class="fa fa-exchange"></i> Item Inward &amp; Outward Report
             </a>
         </li>
 
@@ -371,6 +377,7 @@ $tender_report_grp = [
     'tender-enquiry-timeline',
     'tender-enquiry-summary-report',
     'item-rate-report',
+    'item-inward-outward-report',
     'customer-invoice-pending-report',
     'customer-pending-invoice-report',
     'customer-statement-report',
@@ -436,6 +443,12 @@ $report_m_grp = array_merge(
                 <li class="<?= ($current_page === 'item-rate-report') ? 'active' : '' ?>">
                     <a href="<?= site_url('item-rate-report') ?>">
                         <i class="fa fa-file-text-o"></i> Item Rate Report
+                    </a>
+                </li>
+
+                <li class="<?= ($current_page === 'item-inward-outward-report') ? 'active' : '' ?>">
+                    <a href="<?= site_url('item-inward-outward-report') ?>">
+                        <i class="fa fa-exchange"></i> Item Inward &amp; Outward Report
                     </a>
                 </li>
 

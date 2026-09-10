@@ -20,6 +20,7 @@ class Menu_model extends CI_Model {
     public function get_all()
     {
         $this->ensure_split_reports_menu();
+        $this->ensure_item_inward_outward_menu();
         $this->db->where('status !=', 'Delete');
         $this->db->order_by('parent_id', 'ASC');
         $this->db->order_by('sort_order', 'ASC');
@@ -236,6 +237,93 @@ class Menu_model extends CI_Model {
                                 'can_delete' => 1
                             ));
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Dynamically ensures that "Item Inward & Outward Report" exists in menu_info
+     * under "In Stock Items", with active status and view permissions granted to all active roles.
+     */
+    public function ensure_item_inward_outward_menu()
+    {
+        // 1. Find In Stock Items parent menu
+        $in_stock_rep = $this->db->where('menu_slug', 'in-stock-item-report')
+                                 ->where('status !=', 'Delete')
+                                 ->get('menu_info')
+                                 ->row_array();
+
+        $in_stock_parent_id = 0;
+        $sort_order = 3;
+        if ($in_stock_rep) {
+            $in_stock_parent_id = (int)$in_stock_rep['parent_id'];
+            $sort_order = (int)$in_stock_rep['sort_order'] + 1;
+        } else {
+            $in_stock_parent = $this->db->where('menu_title', 'In Stock Items')
+                                        ->where('is_header', 0)
+                                        ->where('status !=', 'Delete')
+                                        ->get('menu_info')
+                                        ->row_array();
+            if ($in_stock_parent) {
+                $in_stock_parent_id = (int)$in_stock_parent['menu_id'];
+            }
+        }
+
+        // 2. Check if item-inward-outward-report exists
+        $menu = $this->db->where('menu_slug', 'item-inward-outward-report')
+                         ->where('status !=', 'Delete')
+                         ->get('menu_info')
+                         ->row_array();
+
+        $menu_id = 0;
+        if (!$menu) {
+            $this->db->insert('menu_info', array(
+                'parent_id'   => $in_stock_parent_id,
+                'menu_title'  => 'Item Inward & Outward Report',
+                'menu_slug'   => 'item-inward-outward-report',
+                'menu_icon'   => 'fa fa-exchange',
+                'is_header'   => 0,
+                'sort_order'  => $sort_order,
+                'status'      => 'Active'
+            ));
+            $menu_id = $this->db->insert_id();
+        } else {
+            $menu_id = (int)$menu['menu_id'];
+            $upd = array(
+                'status'     => 'Active',
+                'menu_title' => 'Item Inward & Outward Report',
+                'menu_icon'  => 'fa fa-exchange'
+            );
+            if ($in_stock_parent_id > 0 && empty($menu['parent_id'])) {
+                $upd['parent_id'] = $in_stock_parent_id;
+            }
+            $this->db->where('menu_id', $menu_id)->update('menu_info', $upd);
+        }
+
+        // 3. Ensure role_permission has view/add/edit/delete for all active roles
+        if ($menu_id > 0) {
+            $roles = $this->db->where('status !=', 'Delete')->get('role_info')->result_array();
+            if (!empty($roles)) {
+                foreach ($roles as $role) {
+                    $role_id = (int)$role['role_id'];
+                    $has_perm = $this->db->where('role_id', $role_id)
+                                         ->where('menu_id', $menu_id)
+                                         ->count_all_results('role_permission');
+                    if ($has_perm == 0) {
+                        $this->db->insert('role_permission', array(
+                            'role_id'    => $role_id,
+                            'menu_id'    => $menu_id,
+                            'can_view'   => 1,
+                            'can_add'    => 1,
+                            'can_edit'   => 1,
+                            'can_delete' => 1
+                        ));
+                    } else {
+                        $this->db->where('role_id', $role_id)
+                                 ->where('menu_id', $menu_id)
+                                 ->update('role_permission', array('can_view' => 1));
                     }
                 }
             }

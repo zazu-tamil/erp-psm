@@ -178,6 +178,7 @@ $menu = array(
         'c' => array(
             array('t' => 'In Stock Item List', 's' => 'in-stock-item-list', 'i' => 'fa fa-plus-circle'),
             array('t' => 'In Stock Item Report', 's' => 'in-stock-item-report', 'i' => 'fa fa-list'),
+            array('t' => 'Item Inward & Outward Report', 's' => 'item-inward-outward-report', 'i' => 'fa fa-exchange'),
         )
     ),
 

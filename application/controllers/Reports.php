@@ -3129,4 +3129,501 @@ class Reports extends CI_Controller
             $this->load->view('page/reports/vat-statement-report', $data);
         }
     }
+
+    /**
+     * Item Wise Inward & Outward Report (Based on Month)
+     */
+    public function item_inward_outward_report()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data['title'] = 'Item Wise Inward & Outward Report';
+        $data['js'] = 'reports/item-inward-outward-report.inc';
+
+        // 1. Month and Quick Navigation handling
+        $srch_month = $this->input->post('srch_month');
+        $month_action = $this->input->post('month_action');
+
+        if (empty($srch_month)) {
+            $srch_month = $this->session->userdata('srch_item_io_month') ?: date('Y-m');
+        }
+
+        if ($month_action === 'prev') {
+            $srch_month = date('Y-m', strtotime($srch_month . '-01 -1 month'));
+        } elseif ($month_action === 'next') {
+            $srch_month = date('Y-m', strtotime($srch_month . '-01 +1 month'));
+        } elseif ($month_action === 'current') {
+            $srch_month = date('Y-m');
+        }
+
+        $this->session->set_userdata('srch_item_io_month', $srch_month);
+
+        $start_date = $srch_month . '-01';
+        $end_date = date('Y-m-t', strtotime($start_date));
+
+        $data['srch_month'] = $srch_month;
+        $data['start_date'] = $start_date;
+        $data['end_date'] = $end_date;
+        $data['month_label'] = date('F Y', strtotime($start_date));
+
+        // 2. Filters
+        $srch_keyword = trim($this->input->post('srch_keyword') ?? '');
+        $srch_view_mode = $this->input->post('srch_view_mode') ?? 'monthly';
+        $srch_movement = $this->input->post('srch_movement') ?? 'all'; // 'all', 'inward_only', 'outward_only'
+
+        $data['srch_keyword'] = $srch_keyword;
+        $data['srch_view_mode'] = $srch_view_mode;
+        $data['srch_movement'] = $srch_movement;
+
+        // Keyword LIKE filter for SQL
+        $kw_inw = !empty($srch_keyword) ? " AND (ii.item_code LIKE '%" . $this->db->escape_like_str($srch_keyword) . "%' OR ii.item_desc LIKE '%" . $this->db->escape_like_str($srch_keyword) . "%')" : "";
+        $kw_dc  = !empty($srch_keyword) ? " AND (di.item_code LIKE '%" . $this->db->escape_like_str($srch_keyword) . "%' OR di.item_desc LIKE '%" . $this->db->escape_like_str($srch_keyword) . "%')" : "";
+
+        // 3. Month Inward Quantity
+        $sql_inw = "
+            SELECT 
+                TRIM(ii.item_code) AS item_code,
+                MAX(ii.item_desc) AS item_desc,
+                MAX(ii.uom) AS uom,
+                SUM(ii.qty) AS month_inward_qty,
+                SUM(ii.amount) AS month_inward_amt,
+                COUNT(DISTINCT i.vendor_pur_inward_id) AS inward_tx_count
+            FROM vendor_pur_inward_item_info ii
+            JOIN vendor_pur_inward_info i ON ii.vendor_pur_inward_id = i.vendor_pur_inward_id
+            WHERE i.status = 'Active' AND ii.status = 'Active'
+              AND i.inward_date >= '$start_date' AND i.inward_date <= '$end_date'
+              $kw_inw
+            GROUP BY TRIM(ii.item_code)
+        ";
+        $inw_records = $this->db->query($sql_inw)->result_array();
+
+        // 4. Month Outward Quantity (Delivery Challan)
+        $sql_out = "
+            SELECT 
+                TRIM(di.item_code) AS item_code,
+                MAX(di.item_desc) AS item_desc,
+                MAX(di.uom) AS uom,
+                SUM(di.qty) AS month_outward_qty,
+                COUNT(DISTINCT d.tender_dc_id) AS outward_tx_count
+            FROM tender_dc_item_info di
+            JOIN tender_dc_info d ON di.tender_dc_id = d.tender_dc_id
+            WHERE d.status = 'Active' AND di.status = 'Active'
+              AND d.dc_date >= '$start_date' AND d.dc_date <= '$end_date'
+              $kw_dc
+            GROUP BY TRIM(di.item_code)
+        ";
+        $out_records = $this->db->query($sql_out)->result_array();
+
+        // 5. Prior Inward Quantity (Prior to start_date)
+        $sql_prior_inw = "
+            SELECT 
+                TRIM(ii.item_code) AS item_code,
+                SUM(ii.qty) AS prior_inward_qty
+            FROM vendor_pur_inward_item_info ii
+            JOIN vendor_pur_inward_info i ON ii.vendor_pur_inward_id = i.vendor_pur_inward_id
+            WHERE i.status = 'Active' AND ii.status = 'Active'
+              AND i.inward_date < '$start_date'
+            GROUP BY TRIM(ii.item_code)
+        ";
+        $prior_inw_records = $this->db->query($sql_prior_inw)->result_array();
+
+        // 6. Prior Outward Quantity (Prior to start_date)
+        $sql_prior_out = "
+            SELECT 
+                TRIM(di.item_code) AS item_code,
+                SUM(di.qty) AS prior_outward_qty
+            FROM tender_dc_item_info di
+            JOIN tender_dc_info d ON di.tender_dc_id = d.tender_dc_id
+            WHERE d.status = 'Active' AND di.status = 'Active'
+              AND d.dc_date < '$start_date'
+            GROUP BY TRIM(di.item_code)
+        ";
+        $prior_out_records = $this->db->query($sql_prior_out)->result_array();
+
+        // 7. Direct Initial Stock (in_stock_item_info)
+        $sql_instock = "
+            SELECT 
+                TRIM(stk.item_code) AS item_code,
+                MAX(stk.item_desc) AS item_desc,
+                MAX(stk.uom) AS uom,
+                SUM(stk.qty) AS initial_stock_qty
+            FROM in_stock_item_info stk
+            WHERE stk.status = 'Active'
+            GROUP BY TRIM(stk.item_code)
+        ";
+        $instock_records = $this->db->query($sql_instock)->result_array();
+
+        // 8. Item Catalog (item_info)
+        $sql_catalog = "
+            SELECT 
+                TRIM(item_code) AS item_code,
+                item_name,
+                item_description,
+                uom
+            FROM item_info
+            WHERE status != 'Delete'
+        ";
+        $catalog_records = $this->db->query($sql_catalog)->result_array();
+
+        // Assemble All Items
+        $items_map = [];
+
+        // Seed from Item Catalog
+        foreach ($catalog_records as $cat) {
+            $code = $cat['item_code'];
+            if ($code === '') continue;
+            $items_map[$code] = [
+                'item_code' => $code,
+                'item_desc' => !empty($cat['item_description']) ? $cat['item_description'] : $cat['item_name'],
+                'uom' => $cat['uom'] ?: '',
+                'opening_qty' => 0.0,
+                'month_inward_qty' => 0.0,
+                'month_inward_amt' => 0.0,
+                'month_outward_qty' => 0.0,
+                'inward_tx_count' => 0,
+                'outward_tx_count' => 0
+            ];
+        }
+
+        // Add In-Stock Items
+        foreach ($instock_records as $stk) {
+            $code = $stk['item_code'];
+            if ($code === '') continue;
+            if (!isset($items_map[$code])) {
+                $items_map[$code] = [
+                    'item_code' => $code,
+                    'item_desc' => $stk['item_desc'],
+                    'uom' => $stk['uom'] ?: '',
+                    'opening_qty' => 0.0,
+                    'month_inward_qty' => 0.0,
+                    'month_inward_amt' => 0.0,
+                    'month_outward_qty' => 0.0,
+                    'inward_tx_count' => 0,
+                    'outward_tx_count' => 0
+                ];
+            }
+            $items_map[$code]['opening_qty'] += floatval($stk['initial_stock_qty']);
+        }
+
+        // Add Prior Inwards to Opening
+        foreach ($prior_inw_records as $pinw) {
+            $code = $pinw['item_code'];
+            if ($code === '') continue;
+            if (!isset($items_map[$code])) {
+                $items_map[$code] = [
+                    'item_code' => $code,
+                    'item_desc' => '',
+                    'uom' => '',
+                    'opening_qty' => 0.0,
+                    'month_inward_qty' => 0.0,
+                    'month_inward_amt' => 0.0,
+                    'month_outward_qty' => 0.0,
+                    'inward_tx_count' => 0,
+                    'outward_tx_count' => 0
+                ];
+            }
+            $items_map[$code]['opening_qty'] += floatval($pinw['prior_inward_qty']);
+        }
+
+        // Deduct Prior Outwards from Opening
+        foreach ($prior_out_records as $pout) {
+            $code = $pout['item_code'];
+            if ($code === '') continue;
+            if (!isset($items_map[$code])) {
+                $items_map[$code] = [
+                    'item_code' => $code,
+                    'item_desc' => '',
+                    'uom' => '',
+                    'opening_qty' => 0.0,
+                    'month_inward_qty' => 0.0,
+                    'month_inward_amt' => 0.0,
+                    'month_outward_qty' => 0.0,
+                    'inward_tx_count' => 0,
+                    'outward_tx_count' => 0
+                ];
+            }
+            $items_map[$code]['opening_qty'] -= floatval($pout['prior_outward_qty']);
+        }
+
+        // Add Month Inwards
+        foreach ($inw_records as $inw) {
+            $code = $inw['item_code'];
+            if ($code === '') continue;
+            if (!isset($items_map[$code])) {
+                $items_map[$code] = [
+                    'item_code' => $code,
+                    'item_desc' => $inw['item_desc'],
+                    'uom' => $inw['uom'] ?: '',
+                    'opening_qty' => 0.0,
+                    'month_inward_qty' => 0.0,
+                    'month_inward_amt' => 0.0,
+                    'month_outward_qty' => 0.0,
+                    'inward_tx_count' => 0,
+                    'outward_tx_count' => 0
+                ];
+            }
+            if (empty($items_map[$code]['item_desc']) && !empty($inw['item_desc'])) {
+                $items_map[$code]['item_desc'] = $inw['item_desc'];
+            }
+            if (empty($items_map[$code]['uom']) && !empty($inw['uom'])) {
+                $items_map[$code]['uom'] = $inw['uom'];
+            }
+            $items_map[$code]['month_inward_qty'] += floatval($inw['month_inward_qty']);
+            $items_map[$code]['month_inward_amt'] += floatval($inw['month_inward_amt']);
+            $items_map[$code]['inward_tx_count'] += intval($inw['inward_tx_count']);
+        }
+
+        // Add Month Outwards
+        foreach ($out_records as $out) {
+            $code = $out['item_code'];
+            if ($code === '') continue;
+            if (!isset($items_map[$code])) {
+                $items_map[$code] = [
+                    'item_code' => $code,
+                    'item_desc' => $out['item_desc'],
+                    'uom' => $out['uom'] ?: '',
+                    'opening_qty' => 0.0,
+                    'month_inward_qty' => 0.0,
+                    'month_inward_amt' => 0.0,
+                    'month_outward_qty' => 0.0,
+                    'inward_tx_count' => 0,
+                    'outward_tx_count' => 0
+                ];
+            }
+            if (empty($items_map[$code]['item_desc']) && !empty($out['item_desc'])) {
+                $items_map[$code]['item_desc'] = $out['item_desc'];
+            }
+            if (empty($items_map[$code]['uom']) && !empty($out['uom'])) {
+                $items_map[$code]['uom'] = $out['uom'];
+            }
+            $items_map[$code]['month_outward_qty'] += floatval($out['month_outward_qty']);
+            $items_map[$code]['outward_tx_count'] += intval($out['outward_tx_count']);
+        }
+
+        // Final filtering and KPI calculation
+        $filtered_records = [];
+        $total_opening_qty = 0.0;
+        $total_month_inward_qty = 0.0;
+        $total_month_outward_qty = 0.0;
+        $total_net_movement_qty = 0.0;
+        $total_closing_qty = 0.0;
+        $total_inward_tx = 0;
+        $total_outward_tx = 0;
+
+        foreach ($items_map as $code => $item) {
+            // Keyword LIKE filter
+            if (!empty($srch_keyword)) {
+                $match_code = stripos($item['item_code'], $srch_keyword) !== false;
+                $match_desc = stripos($item['item_desc'], $srch_keyword) !== false;
+                if (!$match_code && !$match_desc) {
+                    continue;
+                }
+            }
+
+            $op = round($item['opening_qty'], 2);
+            $in_q = round($item['month_inward_qty'], 2);
+            $out_q = round($item['month_outward_qty'], 2);
+            $net_q = round($in_q - $out_q, 2);
+            $close_q = round($op + $in_q - $out_q, 2);
+
+            // Month-wise filter: Inward and Outward movement based
+            if ($srch_movement === 'inward_only') {
+                if ($in_q <= 0) continue;
+            } elseif ($srch_movement === 'outward_only') {
+                if ($out_q <= 0) continue;
+            } else {
+                // Must have inward or outward movement in this selected month
+                if ($in_q == 0 && $out_q == 0) continue;
+            }
+
+            $row_data = [
+                'item_code' => $item['item_code'],
+                'item_desc' => $item['item_desc'] ?: '-',
+                'uom' => $item['uom'] ?: '-',
+                'opening_qty' => $op,
+                'inward_qty' => $in_q,
+                'outward_qty' => $out_q,
+                'net_movement_qty' => $net_q,
+                'closing_qty' => $close_q,
+                'inward_tx_count' => $item['inward_tx_count'],
+                'outward_tx_count' => $item['outward_tx_count']
+            ];
+
+            $filtered_records[] = $row_data;
+
+            $total_opening_qty += $op;
+            $total_month_inward_qty += $in_q;
+            $total_month_outward_qty += $out_q;
+            $total_net_movement_qty += $net_q;
+            $total_closing_qty += $close_q;
+            $total_inward_tx += $item['inward_tx_count'];
+            $total_outward_tx += $item['outward_tx_count'];
+        }
+
+        // Sort records alphabetically by item_code
+        usort($filtered_records, function ($a, $b) {
+            return strnatcasecmp($a['item_code'], $b['item_code']);
+        });
+
+        $data['records'] = $filtered_records;
+        $data['kpi'] = [
+            'total_opening_qty' => $total_opening_qty,
+            'total_inward_qty' => $total_month_inward_qty,
+            'total_outward_qty' => $total_month_outward_qty,
+            'total_net_movement_qty' => $total_net_movement_qty,
+            'total_closing_qty' => $total_closing_qty,
+            'total_items_count' => count($filtered_records),
+            'total_inward_tx' => $total_inward_tx,
+            'total_outward_tx' => $total_outward_tx
+        ];
+
+        // 9. Yearly Trend Mode Data (if requested)
+        if ($srch_view_mode === 'yearly_trend') {
+            $year = substr($srch_month, 0, 4);
+            $year_start = $year . '-01-01';
+            $year_end = $year . '-12-31';
+            $data['trend_year'] = $year;
+
+            // Inwards by month
+            $trend_in_sql = "
+                SELECT 
+                    TRIM(ii.item_code) AS item_code,
+                    DATE_FORMAT(i.inward_date, '%m') AS m_num,
+                    SUM(ii.qty) AS qty
+                FROM vendor_pur_inward_item_info ii
+                JOIN vendor_pur_inward_info i ON ii.vendor_pur_inward_id = i.vendor_pur_inward_id
+                WHERE i.status = 'Active' AND ii.status = 'Active'
+                  AND i.inward_date >= '$year_start' AND i.inward_date <= '$year_end'
+                GROUP BY TRIM(ii.item_code), m_num
+            ";
+            $trend_in_res = $this->db->query($trend_in_sql)->result_array();
+
+            // Outwards by month
+            $trend_out_sql = "
+                SELECT 
+                    TRIM(di.item_code) AS item_code,
+                    DATE_FORMAT(d.dc_date, '%m') AS m_num,
+                    SUM(di.qty) AS qty
+                FROM tender_dc_item_info di
+                JOIN tender_dc_info d ON di.tender_dc_id = d.tender_dc_id
+                WHERE d.status = 'Active' AND di.status = 'Active'
+                  AND d.dc_date >= '$year_start' AND d.dc_date <= '$year_end'
+                GROUP BY TRIM(di.item_code), m_num
+            ";
+            $trend_out_res = $this->db->query($trend_out_sql)->result_array();
+
+            $yearly_matrix = [];
+            foreach ($filtered_records as $rec) {
+                $c = $rec['item_code'];
+                $yearly_matrix[$c] = [
+                    'item_code' => $c,
+                    'item_desc' => $rec['item_desc'],
+                    'uom' => $rec['uom'],
+                    'months' => array_fill(1, 12, ['in' => 0.0, 'out' => 0.0])
+                ];
+            }
+
+            foreach ($trend_in_res as $tr) {
+                $c = $tr['item_code'];
+                $m = intval($tr['m_num']);
+                if (isset($yearly_matrix[$c])) {
+                    $yearly_matrix[$c]['months'][$m]['in'] += floatval($tr['qty']);
+                }
+            }
+
+            foreach ($trend_out_res as $tr) {
+                $c = $tr['item_code'];
+                $m = intval($tr['m_num']);
+                if (isset($yearly_matrix[$c])) {
+                    $yearly_matrix[$c]['months'][$m]['out'] += floatval($tr['qty']);
+                }
+            }
+
+            $data['yearly_matrix'] = $yearly_matrix;
+        }
+
+        // 10. Check Excel Export
+        if ($this->input->get_post('export_excel') == '1' || $this->input->get('export') == 'excel') {
+            $this->load->helper('download');
+            $filename = "Item_Wise_Inward_Outward_Report_" . $srch_month . ".xls";
+            $content = $this->load->view('page/reports/item-inward-outward-report-xls', $data, TRUE);
+            force_download($filename, $content);
+            return;
+        }
+
+        $this->load->view('page/reports/item-inward-outward-report', $data);
+    }
+
+    /**
+     * AJAX: Get Item Inward & Outward Detailed Transactions for Modal
+     */
+    public function item_inward_outward_details_ajax()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            echo json_encode(['status' => false, 'message' => 'Unauthorized']);
+            return;
+        }
+
+        $item_code = trim($this->input->post('item_code') ?? '');
+        $month = trim($this->input->post('month') ?? date('Y-m'));
+
+        if (empty($item_code)) {
+            echo json_encode(['status' => false, 'message' => 'Item Code is required']);
+            return;
+        }
+
+        $start_date = $month . '-01';
+        $end_date = date('Y-m-t', strtotime($start_date));
+
+        // Inward Transactions
+        $sql_inw = "
+            SELECT 
+                i.vendor_pur_inward_id,
+                i.inward_no,
+                i.inward_date,
+                v.vendor_name,
+                ii.qty,
+                ii.rate,
+                ii.amount,
+                ii.uom
+            FROM vendor_pur_inward_item_info ii
+            JOIN vendor_pur_inward_info i ON ii.vendor_pur_inward_id = i.vendor_pur_inward_id
+            LEFT JOIN vendor_info v ON i.vendor_id = v.vendor_id
+            WHERE TRIM(ii.item_code) = ?
+              AND i.status = 'Active' AND ii.status = 'Active'
+              AND i.inward_date >= ? AND i.inward_date <= ?
+            ORDER BY i.inward_date ASC, i.vendor_pur_inward_id ASC
+        ";
+        $inwards = $this->db->query($sql_inw, [$item_code, $start_date, $end_date])->result_array();
+
+        // Outward Transactions (DC)
+        $sql_out = "
+            SELECT 
+                d.tender_dc_id,
+                d.dc_no,
+                d.dc_date,
+                c.customer_name,
+                di.qty,
+                di.uom
+            FROM tender_dc_item_info di
+            JOIN tender_dc_info d ON di.tender_dc_id = d.tender_dc_id
+            LEFT JOIN customer_info c ON d.customer_id = c.customer_id
+            WHERE TRIM(di.item_code) = ?
+              AND d.status = 'Active' AND di.status = 'Active'
+              AND d.dc_date >= ? AND d.dc_date <= ?
+            ORDER BY d.dc_date ASC, d.tender_dc_id ASC
+        ";
+        $outwards = $this->db->query($sql_out, [$item_code, $start_date, $end_date])->result_array();
+
+        echo json_encode([
+            'status' => true,
+            'item_code' => $item_code,
+            'month' => date('F Y', strtotime($start_date)),
+            'inwards' => $inwards,
+            'outwards' => $outwards
+        ]);
+    }
 }
+

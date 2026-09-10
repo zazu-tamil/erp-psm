@@ -335,6 +335,8 @@ $route['in-stock-item-list'] = 'tender/in_stock_item_list';
 $route['in-stock-item-list/(:num)'] = 'tender/in_stock_item_list/$1';
 
 $route['in-stock-item-report'] = 'reports/in_stock_item_report';
+$route['item-inward-outward-report'] = 'reports/item_inward_outward_report';
+$route['item-inward-outward-details-ajax'] = 'reports/item_inward_outward_details_ajax';
 $route['pl-report'] = 'reports/pl_report';
 
 
