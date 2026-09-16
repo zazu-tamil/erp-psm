@@ -6719,7 +6719,7 @@ class Vendor extends CI_Controller
         $data = array();
         $data['title'] = 'Vendor Pending Invoice Report';
         $data['s_url'] = 'vendor-pending-invoice-report';
-        $data['js'] = 'reports/reports.inc';
+        $data['js'] = 'vendor/vendor-pending-invoice-report.inc';
 
         // Filter: Dates
         if ($this->input->post('srch_from_date') !== null) {

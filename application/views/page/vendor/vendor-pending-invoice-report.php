@@ -1,4 +1,5 @@
 <?php include_once(VIEWPATH . 'inc/header.php'); ?>
+<link rel="stylesheet" href="<?php echo base_url('asset/bower_components/select2/dist/css/select2.min.css'); ?>">
 
 <style>
     .kpi-card {

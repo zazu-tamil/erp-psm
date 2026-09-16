@@ -43,10 +43,19 @@
 
 <script>
   jQuery(function ($) {
+    // Initialize standard select2 dropdowns
+    if (typeof $.fn.select2 !== 'undefined') {
+      $('.select2').select2({
+        width: '100%'
+      });
+    }
+
     // Initialize Select2 on the vendor selection dropdown
-    $("#stmt_vendor_select").select2({
-      width: '100%'
-    });
+    if ($("#stmt_vendor_select").length > 0) {
+      $("#stmt_vendor_select").select2({
+        width: '100%'
+      });
+    }
 
     // Check if initial vendor has opening balance
     function checkVendorOpening(vendor_id, isInitialLoad) {
@@ -107,29 +116,31 @@
       });
     }
 
-    // Trigger on drop-down change
-    $("#stmt_vendor_select").on("change", function () {
-      let val = $(this).val();
-      checkVendorOpening(val, false);
-    });
-
-    // Run once on load to establish correct state
-    let initialVendor = $("#stmt_vendor_select").val();
-    if (initialVendor) {
-      // Just set attributes but don't force-hide on page-load if it was validated by PHP
-      $.ajax({
-        url: "<?php echo site_url('get-vendor-opening-balance'); ?>",
-        type: "post",
-        data: { vendor_id: initialVendor },
-        dataType: "json",
-        success: function (res) {
-          if (res.status === 'success' && res.exists) {
-            $("#from_date, #to_date").attr('min', res.opening_date);
-          }
-        }
+    if ($("#stmt_vendor_select").length > 0) {
+      // Trigger on drop-down change
+      $("#stmt_vendor_select").on("change", function () {
+        let val = $(this).val();
+        checkVendorOpening(val, false);
       });
-    } else {
-      $("#div-from-date, #div-to-date, #div-submit").hide();
+
+      // Run once on load to establish correct state
+      let initialVendor = $("#stmt_vendor_select").val();
+      if (initialVendor) {
+        // Just set attributes but don't force-hide on page-load if it was validated by PHP
+        $.ajax({
+          url: "<?php echo site_url('get-vendor-opening-balance'); ?>",
+          type: "post",
+          data: { vendor_id: initialVendor },
+          dataType: "json",
+          success: function (res) {
+            if (res.status === 'success' && res.exists) {
+              $("#from_date, #to_date").attr('min', res.opening_date);
+            }
+          }
+        });
+      } else {
+        $("#div-from-date, #div-to-date, #div-submit").hide();
+      }
     }
 
     // Handle Export Excel button click
