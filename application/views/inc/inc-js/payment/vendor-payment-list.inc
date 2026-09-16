@@ -556,9 +556,8 @@
 
 
 
-        // On change of receipt type
-        $('input[name="payment_type"]').on('change', function () {
-
+        // On change of payment type for Add Modal
+        $('#frmadd input[name="payment_type"]').on('change', function () {
             if ($(this).val() === 'Cheque') {
                 $('#add_payment_type_div').show();
             } else {
@@ -567,12 +566,10 @@
                 $('#add_cheque_date').val('');
                 $('#add_cheque_bank').val('');
             }
-
         });
 
-        // On change of receipt type
-        $('input[name="payment_type"]').on('change', function () {
-
+        // On change of payment type for Edit Modal
+        $('#frmedit input[name="payment_type"]').on('change', function () {
             if ($(this).val() === 'Cheque') {
                 $('#edit_payment_type_div').show();
             } else {
@@ -581,9 +578,7 @@
                 $('#edit_cheque_date').val('');
                 $('#edit_cheque_bank').val('');
             }
-
         });
-
 
         function format3(val) {
             return parseFloat(val || 0).toFixed(3);
@@ -598,6 +593,13 @@
                 
                 $("#" + prefix + "_cash_category_div").hide();
                 $("#" + prefix + "_cash_category_id").val("").prop("required", false);
+
+                var pType = $("#frm" + prefix + ' input[name="payment_type"]:checked').val();
+                if (pType === "Cheque") {
+                    $("#" + prefix + "_payment_type_div").show();
+                } else {
+                    $("#" + prefix + "_payment_type_div").hide();
+                }
             } else if (mode === "Cash") {
                 $("#" + prefix + "_bank_div").hide();
                 $("#" + prefix + "_bank_id").val("").prop("required", false);
@@ -607,7 +609,7 @@
                 $("#" + prefix + "_cash_category_id").prop("required", true);
 
                 // Uncheck radios and hide details
-                $('input[name="payment_type"]').prop('checked', false);
+                $("#frm" + prefix + ' input[name="payment_type"]').prop('checked', false);
                 $('#' + prefix + '_payment_type_div').hide();
                 $('#' + prefix + '_cheque_no').val('');
                 $('#' + prefix + '_cheque_date').val('');
@@ -621,7 +623,7 @@
                 $("#" + prefix + "_cash_category_id").val("").prop("required", false);
 
                 // Uncheck radios and hide details
-                $('input[name="payment_type"]').prop('checked', false);
+                $("#frm" + prefix + ' input[name="payment_type"]').prop('checked', false);
                 $('#' + prefix + '_payment_type_div').hide();
                 $('#' + prefix + '_cheque_no').val('');
                 $('#' + prefix + '_cheque_date').val('');
@@ -953,19 +955,27 @@
                         .filter('[value="' + data.status + '"]')
                         .prop("checked", true);
 
-                    // Set receipt type radio
-                    $('#frmedit input[name="payment_type"]')
-                        .filter('[value="' + data.payment_type + '"]')
-                        .prop("checked", true);
+                    // Set payment type radio & populate cheque details
+                    var paymentType = (data.payment_type || '').trim();
+                    $('#frmedit input[name="payment_type"]').prop("checked", false);
+                    if (paymentType) {
+                        $('#frmedit input[name="payment_type"]').filter(function () {
+                            return this.value.toLowerCase() === paymentType.toLowerCase();
+                        }).prop("checked", true);
+                    }
 
-                    // Trigger change to auto show/hide
-                    $('#frmedit input[name="payment_type"]:checked').trigger('change');
-
-                    // If Cheque → set values
-                    if (data.receipt_type === 'Cheque') {
-                        $('#edit_cheque_no').val(data.cheque_no);
-                        $('#edit_cheque_date').val(data.cheque_date);
-                        $('#edit_cheque_bank').val(data.cheque_bank);
+                    var isCheque = (paymentType.toLowerCase() === 'cheque' || paymentType.toLowerCase() === 'check');
+                    if (data.payment_mode === 'Bank' && isCheque) {
+                        $('#edit_payment_type_div').show();
+                        $('#edit_cheque_no').val(data.cheque_no || '');
+                        var chqDate = (data.cheque_date && data.cheque_date !== '0000-00-00') ? data.cheque_date : '';
+                        $('#edit_cheque_date').val(chqDate);
+                        $('#edit_cheque_bank').val(data.cheque_bank || '');
+                    } else {
+                        $('#edit_payment_type_div').hide();
+                        $('#edit_cheque_no').val('');
+                        $('#edit_cheque_date').val('');
+                        $('#edit_cheque_bank').val('');
                     }
 
                     // Load vendor into dropdown and trigger bill list
@@ -977,28 +987,6 @@
                     alert("Error loading record.");
                 },
             });
-        });
-
-        function toggleReceiptType(type, mode = 'add') {
-
-            if (type === 'Cheque') {
-                $('#' + mode + '_receipt_type_div').show();
-            } else {
-                $('#' + mode + '_receipt_type_div').hide();
-                $('#' + mode + '_cheque_no').val('');
-                $('#' + mode + '_cheque_date').val('');
-                $('#' + mode + '_cheque_bank').val('');
-            }
-        }
-
-        // Add form
-        $('input[name="receipt_type"]').on('change', function () {
-            toggleReceiptType($(this).val(), 'add');
-        });
-
-        // Edit form
-        $('#frmedit input[name="receipt_type"]').on('change', function () {
-            toggleReceiptType($(this).val(), 'edit');
         });
 
 

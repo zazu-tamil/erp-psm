@@ -749,17 +749,23 @@ class Payment extends CI_Controller
 
             $payment_mode = $this->input->post('payment_mode');
             $cash_category_id = ($payment_mode == 'Cash') ? ($this->input->post('cash_category_id') ?: NULL) : NULL;
+            $bank_id = ($payment_mode == 'Bank') ? ($this->input->post('bank_id') ?: NULL) : NULL;
+            $payment_type = ($payment_mode == 'Bank') ? ($this->input->post('payment_type') ?: NULL) : NULL;
+            $is_cheque = ($payment_mode == 'Bank' && in_array($payment_type, ['Cheque', 'Check']));
+            $cheque_date = $is_cheque ? ($this->input->post('cheque_date') ?: NULL) : NULL;
+            $cheque_no = $is_cheque ? ($this->input->post('cheque_no') ?: NULL) : NULL;
+            $cheque_bank = $is_cheque ? ($this->input->post('cheque_bank') ?: NULL) : NULL;
 
             $ins = array(
                 'payment_date' => $this->input->post('payment_date'),
                 'vendor_id' => $this->input->post('vendor_id'),
                 'payment_mode' => $payment_mode,
-                'bank_id' => $this->input->post('bank_id'),
+                'bank_id' => $bank_id,
                 'cash_category_id' => $cash_category_id,
-                'payment_type' => $this->input->post('payment_type'),
-                'cheque_date' => $this->input->post('cheque_date'),
-                'cheque_no' => $this->input->post('cheque_no'),
-                'cheque_bank' => $this->input->post('cheque_bank'),
+                'payment_type' => $payment_type,
+                'cheque_date' => $cheque_date,
+                'cheque_no' => $cheque_no,
+                'cheque_bank' => $cheque_bank,
                 'amount' => $this->input->post('amount'),
                 'is_without_bill' => $this->input->post('is_without_bill') ? 1 : 0,
                 'without_bill_amount' => $this->input->post('without_bill_amount') ?: 0.000,
@@ -814,17 +820,23 @@ class Payment extends CI_Controller
 
             $payment_mode = $this->input->post('payment_mode');
             $cash_category_id = ($payment_mode == 'Cash') ? ($this->input->post('cash_category_id') ?: NULL) : NULL;
+            $bank_id = ($payment_mode == 'Bank') ? ($this->input->post('bank_id') ?: NULL) : NULL;
+            $payment_type = ($payment_mode == 'Bank') ? ($this->input->post('payment_type') ?: NULL) : NULL;
+            $is_cheque = ($payment_mode == 'Bank' && in_array($payment_type, ['Cheque', 'Check']));
+            $cheque_date = $is_cheque ? ($this->input->post('cheque_date') ?: NULL) : NULL;
+            $cheque_no = $is_cheque ? ($this->input->post('cheque_no') ?: NULL) : NULL;
+            $cheque_bank = $is_cheque ? ($this->input->post('cheque_bank') ?: NULL) : NULL;
 
             $upd = array(
                 'payment_date' => $this->input->post('payment_date'),
                 'vendor_id' => $this->input->post('vendor_id'),
                 'payment_mode' => $payment_mode,
-                'bank_id' => $this->input->post('bank_id'),
+                'bank_id' => $bank_id,
                 'cash_category_id' => $cash_category_id,
-                'payment_type' => $this->input->post('payment_type'),
-                'cheque_date' => $this->input->post('cheque_date'),
-                'cheque_no' => $this->input->post('cheque_no'),
-                'cheque_bank' => $this->input->post('cheque_bank'),
+                'payment_type' => $payment_type,
+                'cheque_date' => $cheque_date,
+                'cheque_no' => $cheque_no,
+                'cheque_bank' => $cheque_bank,
                 'amount' => $this->input->post('amount'),
                 'is_without_bill' => $this->input->post('is_without_bill') ? 1 : 0,
                 'without_bill_amount' => $this->input->post('without_bill_amount') ?: 0.000,
