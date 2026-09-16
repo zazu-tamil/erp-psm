@@ -22,8 +22,8 @@
                             <div class="input-group-addon">
                                 <i class="fa fa-calendar"></i>
                             </div>
-                            <input type="text" class="form-control pull-right datepicker" id="srch_from_date" name="srch_from_date"
-                                value="<?php echo set_value('srch_from_date', $srch_from_date); ?>" placeholder="YYYY-MM-DD" autocomplete="off">
+                            <input type="date" class="form-control pull-right" id="srch_from_date" name="srch_from_date"
+                                value="<?php echo set_value('srch_from_date', $srch_from_date); ?>" autocomplete="off">
                         </div>
                         <!-- /.input group -->
                     </div>
@@ -33,8 +33,8 @@
                             <div class="input-group-addon">
                                 <i class="fa fa-calendar"></i>
                             </div>
-                            <input type="text" class="form-control pull-right datepicker" id="srch_to_date" name="srch_to_date"
-                                value="<?php echo set_value('srch_to_date', $srch_to_date); ?>" placeholder="YYYY-MM-DD" autocomplete="off">
+                            <input type="date" class="form-control pull-right" id="srch_to_date" name="srch_to_date"
+                                value="<?php echo set_value('srch_to_date', $srch_to_date); ?>" autocomplete="off">
                         </div>
                         <!-- /.input group -->
                     </div>
@@ -147,8 +147,8 @@
                                             <div class="input-group-addon">
                                                 <i class="fa fa-calendar"></i>
                                             </div>
-                                            <input class="form-control datepicker" type="text" name="inward_date"
-                                                id="inward_date" value="<?php echo date('Y-m-d'); ?>" required="true" autocomplete="off" placeholder="YYYY-MM-DD">
+                                            <input class="form-control" type="date" name="inward_date"
+                                                id="inward_date" value="<?php echo date('Y-m-d'); ?>" required="true" autocomplete="off">
                                         </div>
                                     </div>
                                     <div class="form-group col-md-6">
@@ -192,7 +192,7 @@
                                                 <div class="input-group-addon">
                                                     <i class="fa fa-calendar"></i>
                                                 </div>
-                                                <input class="form-control datepicker" type="text" name="cheque_date" id="cheque_date" value="<?php echo date('Y-m-d'); ?>" autocomplete="off" placeholder="YYYY-MM-DD">
+                                                <input class="form-control" type="date" name="cheque_date" id="cheque_date" value="<?php echo date('Y-m-d'); ?>" autocomplete="off">
                                             </div>
                                         </div>
                                         <div class="form-group col-md-6">
@@ -267,8 +267,8 @@
                                             <div class="input-group-addon">
                                                 <i class="fa fa-calendar"></i>
                                             </div>
-                                            <input class="form-control datepicker" type="text" name="inward_date"
-                                                id="edit_inward_date" value="<?php echo date('Y-m-d'); ?>" required="true" autocomplete="off" placeholder="YYYY-MM-DD">
+                                            <input class="form-control" type="date" name="inward_date"
+                                                id="edit_inward_date" value="<?php echo date('Y-m-d'); ?>" required="true" autocomplete="off">
                                         </div>
                                     </div>
                                     <div class="form-group col-md-6">
@@ -311,7 +311,7 @@
                                                 <div class="input-group-addon">
                                                     <i class="fa fa-calendar"></i>
                                                 </div>
-                                                <input class="form-control datepicker" type="text" name="cheque_date" id="edit_cheque_date" autocomplete="off" placeholder="YYYY-MM-DD">
+                                                <input class="form-control" type="date" name="cheque_date" id="edit_cheque_date" autocomplete="off">
                                             </div>
                                         </div>
                                         <div class="form-group col-md-6">
