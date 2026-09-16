@@ -1972,7 +1972,7 @@ class Reports extends CI_Controller
                     a.invoice_date,
                     a.invoice_no,
                     b.vendor_name,
-                    (a.bill_amount + a.vat_amt) AS total_amount,
+                    a.customs_payable AS total_amount,
                     'Customer Bill' AS bill_type
                 FROM customs_bill_info AS a
                 LEFT JOIN vendor_info AS b 
@@ -2193,7 +2193,7 @@ class Reports extends CI_Controller
                         
                         UNION ALL
                         
-                        SELECT (bill_amount + vat_amt) AS total_amount FROM customs_bill_info
+                        SELECT customs_payable AS total_amount FROM customs_bill_info
                         WHERE status = 'Active' AND ac_type_opt = 'Accountable' AND vendor_id = '$esc_vendor' AND invoice_date >= '$esc_op' AND invoice_date < '$esc_from'
                         
                         UNION ALL
@@ -2253,7 +2253,7 @@ class Reports extends CI_Controller
                         
                         UNION ALL
                         
-                        SELECT (bill_amount + vat_amt) AS total_amount FROM customs_bill_info
+                        SELECT customs_payable AS total_amount FROM customs_bill_info
                         WHERE status = 'Active' AND ac_type_opt = 'Accountable' AND invoice_date < '$esc_from'
                         
                         UNION ALL
@@ -2359,7 +2359,7 @@ class Reports extends CI_Controller
                     a.invoice_date AS tr_date,
                     a.invoice_no AS voucher_no,
                     'Customer Bill' AS description,
-                    (a.bill_amount + a.vat_amt) AS purchase_amt,
+                    a.customs_payable AS purchase_amt,
                     0.000 AS paid_amt,
                     'purchase' AS type,
                     v.vendor_name
@@ -3179,7 +3179,7 @@ class Reports extends CI_Controller
 
         // Keyword LIKE filter for SQL
         $kw_inw = !empty($srch_keyword) ? " AND (ii.item_code LIKE '%" . $this->db->escape_like_str($srch_keyword) . "%' OR ii.item_desc LIKE '%" . $this->db->escape_like_str($srch_keyword) . "%')" : "";
-        $kw_dc  = !empty($srch_keyword) ? " AND (di.item_code LIKE '%" . $this->db->escape_like_str($srch_keyword) . "%' OR di.item_desc LIKE '%" . $this->db->escape_like_str($srch_keyword) . "%')" : "";
+        $kw_dc = !empty($srch_keyword) ? " AND (di.item_code LIKE '%" . $this->db->escape_like_str($srch_keyword) . "%' OR di.item_desc LIKE '%" . $this->db->escape_like_str($srch_keyword) . "%')" : "";
 
         // 3. Month Inward Quantity
         $sql_inw = "
@@ -3273,7 +3273,8 @@ class Reports extends CI_Controller
         // Seed from Item Catalog
         foreach ($catalog_records as $cat) {
             $code = $cat['item_code'];
-            if ($code === '') continue;
+            if ($code === '')
+                continue;
             $items_map[$code] = [
                 'item_code' => $code,
                 'item_desc' => !empty($cat['item_description']) ? $cat['item_description'] : $cat['item_name'],
@@ -3290,7 +3291,8 @@ class Reports extends CI_Controller
         // Add In-Stock Items
         foreach ($instock_records as $stk) {
             $code = $stk['item_code'];
-            if ($code === '') continue;
+            if ($code === '')
+                continue;
             if (!isset($items_map[$code])) {
                 $items_map[$code] = [
                     'item_code' => $code,
@@ -3310,7 +3312,8 @@ class Reports extends CI_Controller
         // Add Prior Inwards to Opening
         foreach ($prior_inw_records as $pinw) {
             $code = $pinw['item_code'];
-            if ($code === '') continue;
+            if ($code === '')
+                continue;
             if (!isset($items_map[$code])) {
                 $items_map[$code] = [
                     'item_code' => $code,
@@ -3330,7 +3333,8 @@ class Reports extends CI_Controller
         // Deduct Prior Outwards from Opening
         foreach ($prior_out_records as $pout) {
             $code = $pout['item_code'];
-            if ($code === '') continue;
+            if ($code === '')
+                continue;
             if (!isset($items_map[$code])) {
                 $items_map[$code] = [
                     'item_code' => $code,
@@ -3350,7 +3354,8 @@ class Reports extends CI_Controller
         // Add Month Inwards
         foreach ($inw_records as $inw) {
             $code = $inw['item_code'];
-            if ($code === '') continue;
+            if ($code === '')
+                continue;
             if (!isset($items_map[$code])) {
                 $items_map[$code] = [
                     'item_code' => $code,
@@ -3378,7 +3383,8 @@ class Reports extends CI_Controller
         // Add Month Outwards
         foreach ($out_records as $out) {
             $code = $out['item_code'];
-            if ($code === '') continue;
+            if ($code === '')
+                continue;
             if (!isset($items_map[$code])) {
                 $items_map[$code] = [
                     'item_code' => $code,
@@ -3430,12 +3436,15 @@ class Reports extends CI_Controller
 
             // Month-wise filter: Inward and Outward movement based
             if ($srch_movement === 'inward_only') {
-                if ($in_q <= 0) continue;
+                if ($in_q <= 0)
+                    continue;
             } elseif ($srch_movement === 'outward_only') {
-                if ($out_q <= 0) continue;
+                if ($out_q <= 0)
+                    continue;
             } else {
                 // Must have inward or outward movement in this selected month
-                if ($in_q == 0 && $out_q == 0) continue;
+                if ($in_q == 0 && $out_q == 0)
+                    continue;
             }
 
             $row_data = [
