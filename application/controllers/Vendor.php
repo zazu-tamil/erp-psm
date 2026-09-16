@@ -6518,7 +6518,8 @@ class Vendor extends CI_Controller
             if (!empty($r['invoice_ids'])) {
                 foreach (explode(',', $r['invoice_ids']) as $iid) {
                     $iid = (int) trim($iid);
-                    if ($iid > 0) $all_inv_ids[$iid] = $iid;
+                    if ($iid > 0)
+                        $all_inv_ids[$iid] = $iid;
                 }
             }
         }
@@ -6784,7 +6785,8 @@ class Vendor extends CI_Controller
             'Local Bill' => 'Local Bill',
             'Delivery Bill' => 'Delivery Bill',
             'Customs Bill' => 'Customs Bill',
-            'Opening Balance' => 'Opening Balance'
+            'Opening Balance' => 'Opening Balance',
+            'Advance Payment' => 'Vendor Advance Payment'
         ];
 
         // Status Options
@@ -6816,13 +6818,13 @@ class Vendor extends CI_Controller
 
         $having = "1=1";
         if ($srch_status === 'Pending') {
-            $having .= " AND balance_amount > 0.001";
+            $having .= " AND (balance_amount > 0.001 OR (f.bill_type = 'Advance Payment' AND advance_amount > 0.001))";
         } elseif ($srch_status === 'Paid') {
-            $having .= " AND balance_amount <= 0.001";
+            $having .= " AND balance_amount <= 0.001 AND f.bill_type != 'Advance Payment'";
         } elseif ($srch_status === 'Partial') {
-            $having .= " AND paid_amount > 0.001 AND balance_amount > 0.001";
+            $having .= " AND (paid_amount > 0.001 OR advance_amount > 0.001) AND balance_amount > 0.001 AND f.bill_type != 'Advance Payment'";
         } elseif ($srch_status === 'Unpaid') {
-            $having .= " AND paid_amount <= 0.001";
+            $having .= " AND paid_amount <= 0.001 AND advance_amount <= 0.001 AND f.bill_type != 'Advance Payment'";
         }
 
         $sql = "
@@ -6838,11 +6840,13 @@ class Vendor extends CI_Controller
                 f.currency_code,
                 f.decimal_point,
                 get_tender_info(f.tender_enquiry_id) as tender_details,
+                IFNULL(adv.advance_amount, 0) AS advance_amount,
                 IFNULL(p.paid_amount, 0) AS paid_amount,
-                ROUND((f.total_amount - IFNULL(p.paid_amount, 0)), f.decimal_point) AS balance_amount,
+                ROUND((f.total_amount - IFNULL(p.paid_amount, 0) - IFNULL(adv.advance_amount, 0)), f.decimal_point) AS balance_amount,
                 CASE 
-                    WHEN (f.total_amount - IFNULL(p.paid_amount, 0)) <= 0.001 THEN 'Paid'
-                    WHEN IFNULL(p.paid_amount, 0) > 0.001 THEN 'Partial'
+                    WHEN f.bill_type = 'Advance Payment' THEN 'Advance'
+                    WHEN (f.total_amount - (IFNULL(p.paid_amount, 0) + IFNULL(adv.advance_amount, 0))) <= 0.001 THEN 'Paid'
+                    WHEN (IFNULL(p.paid_amount, 0) + IFNULL(adv.advance_amount, 0)) > 0.001 THEN 'Partial'
                     ELSE 'Pending'
                 END AS payment_status
             FROM (
@@ -6910,7 +6914,7 @@ class Vendor extends CI_Controller
                     a.invoice_no,
                     a.vendor_id,
                     b.vendor_name,
-                    COALESCE(a.customs_payable, (a.bill_amount + a.vat_amt), 0) AS total_amount,
+                    a.customs_payable  AS total_amount,
                     'Customs Bill' AS bill_type,
                     'BHD' AS currency_code,
                     3 AS decimal_point
@@ -6935,6 +6939,26 @@ class Vendor extends CI_Controller
                 FROM vendor_opening_balance_info a
                 LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
                 WHERE a.balance_type = 'CR'
+
+                UNION ALL
+
+                -- 6. Unmapped Vendor Advance Payments
+                SELECT
+                    a.adv_payment_id AS bill_id,
+                    a.adv_payment_date AS invoice_date,
+                    a.tender_enquiry_id,
+                    CONCAT('ADV-', LPAD(a.adv_payment_id, 4, '0')) AS invoice_no,
+                    a.vendor_id,
+                    b.vendor_name,
+                    0.000 AS total_amount,
+                    'Advance Payment' AS bill_type,
+                    'BHD' AS currency_code,
+                    3 AS decimal_point
+                FROM vendor_advance_payment_info a
+                LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active'
+                AND (a.invoice_ids IS NULL OR TRIM(a.invoice_ids) = '')
+                AND (a.invoice_no IS NULL OR TRIM(a.invoice_no) = '')
             ) AS f
 
             LEFT JOIN (
@@ -6947,6 +6971,40 @@ class Vendor extends CI_Controller
                 GROUP BY bill_id, bill_type
             ) AS p ON p.bill_id = f.bill_id AND p.bill_type = f.bill_type
 
+            LEFT JOIN (
+                SELECT 
+                    bill_id, 
+                    bill_type, 
+                    SUM(adv_amount) AS advance_amount
+                FROM (
+                    -- Purchase Invoices mapped by invoice_ids or invoice_no
+                    SELECT 
+                        vpi.vendor_purchase_invoice_id AS bill_id,
+                        'Purchase Invoice' AS bill_type,
+                        (vap.adv_payment_amt / GREATEST(1, (LENGTH(REPLACE(vap.invoice_ids, ' ', '')) - LENGTH(REPLACE(REPLACE(vap.invoice_ids, ' ', ''), ',', '')) + 1))) AS adv_amount
+                    FROM vendor_advance_payment_info vap
+                    JOIN vendor_purchase_invoice_info vpi 
+                        ON (
+                            (vap.invoice_ids IS NOT NULL AND vap.invoice_ids != '' AND FIND_IN_SET(vpi.vendor_purchase_invoice_id, REPLACE(vap.invoice_ids, ' ', '')) > 0)
+                            OR ((vap.invoice_ids IS NULL OR vap.invoice_ids = '') AND vap.invoice_no IS NOT NULL AND vap.invoice_no != '' AND FIND_IN_SET(TRIM(vpi.invoice_no), REPLACE(vap.invoice_no, ' ', '')) > 0)
+                        )
+                    WHERE vap.status = 'Active' AND vpi.status = 'Active'
+
+                    UNION ALL
+
+                    -- Unmapped Advance Payments
+                    SELECT 
+                        vap.adv_payment_id AS bill_id,
+                        'Advance Payment' AS bill_type,
+                        vap.adv_payment_amt AS adv_amount
+                    FROM vendor_advance_payment_info vap
+                    WHERE vap.status = 'Active'
+                    AND (vap.invoice_ids IS NULL OR TRIM(vap.invoice_ids) = '')
+                    AND (vap.invoice_no IS NULL OR TRIM(vap.invoice_no) = '')
+                ) AS adv_combined
+                GROUP BY bill_id, bill_type
+            ) AS adv ON adv.bill_id = f.bill_id AND adv.bill_type = f.bill_type
+
             WHERE $where
             HAVING $having
             ORDER BY f.invoice_date DESC, f.bill_id DESC
@@ -6957,14 +7015,17 @@ class Vendor extends CI_Controller
 
         // Calculate KPI totals
         $tot_amount = 0;
+        $tot_advance = 0;
         $tot_paid = 0;
         $tot_balance = 0;
         foreach ($data['record_list'] as $row) {
             $tot_amount += floatval($row['total_amount']);
+            $tot_advance += floatval($row['advance_amount'] ?? 0);
             $tot_paid += floatval($row['paid_amount']);
             $tot_balance += floatval($row['balance_amount']);
         }
         $data['tot_amount'] = $tot_amount;
+        $data['tot_advance'] = $tot_advance;
         $data['tot_paid'] = $tot_paid;
         $data['tot_balance'] = $tot_balance;
         $data['tot_count'] = count($data['record_list']);

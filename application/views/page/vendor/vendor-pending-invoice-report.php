@@ -15,7 +15,7 @@
     .kpi-card .kpi-label {
         font-size: 13px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.5px; 
         opacity: 0.9;
         margin-bottom: 5px;
     }
@@ -29,6 +29,7 @@
     }
     .kpi-primary { background: linear-gradient(135deg, #1e88e5, #1565c0); }
     .kpi-info { background: linear-gradient(135deg, #00acc1, #00838f); }
+    .kpi-warning { background: linear-gradient(135deg, #f39c12, #d68910); }
     .kpi-success { background: linear-gradient(135deg, #43a047, #2e7d32); }
     .kpi-danger { background: linear-gradient(135deg, #e53935, #c62828); }
 
@@ -45,6 +46,15 @@
         background-color: #fff8e1;
         color: #f57f17;
         border: 1px solid #ffe082;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 11px;
+    }
+    .status-badge-advance {
+        background-color: #fff3e0;
+        color: #e65100;
+        border: 1px solid #ffe0b2;
         padding: 3px 8px;
         border-radius: 4px;
         font-weight: 600;
@@ -105,8 +115,8 @@
     </div>
 
     <!-- KPI Cards -->
-    <div class="row">
-        <div class="col-md-3 col-sm-6">
+    <div class="row" style="display: flex; flex-wrap: wrap;">
+        <div class="col-md-2 col-sm-4 col-xs-6" style="flex: 1; min-width: 190px;">
             <div class="kpi-card kpi-primary">
                 <div>
                     <div class="kpi-label">Total Bills / Invoices</div>
@@ -116,7 +126,7 @@
             </div>
         </div>
 
-        <div class="col-md-3 col-sm-6">
+        <div class="col-md-2 col-sm-4 col-xs-6" style="flex: 1; min-width: 190px;">
             <div class="kpi-card kpi-info">
                 <div>
                     <div class="kpi-label">Total Bill Amount</div>
@@ -126,7 +136,17 @@
             </div>
         </div>
 
-        <div class="col-md-3 col-sm-6">
+        <div class="col-md-2 col-sm-4 col-xs-6" style="flex: 1; min-width: 190px;">
+            <div class="kpi-card kpi-warning">
+                <div>
+                    <div class="kpi-label">Total Advance Paid</div>
+                    <div class="kpi-value"><?php echo number_format($tot_advance, 3); ?></div>
+                </div>
+                <div class="kpi-icon"><i class="fa fa-credit-card"></i></div>
+            </div>
+        </div>
+
+        <div class="col-md-2 col-sm-4 col-xs-6" style="flex: 1; min-width: 190px;">
             <div class="kpi-card kpi-success">
                 <div>
                     <div class="kpi-label">Total Paid Amount</div>
@@ -136,10 +156,10 @@
             </div>
         </div>
 
-        <div class="col-md-3 col-sm-6">
+        <div class="col-md-2 col-sm-4 col-xs-6" style="flex: 1; min-width: 190px;">
             <div class="kpi-card kpi-danger">
                 <div>
-                    <div class="kpi-label">Total Pending / Outstanding</div>
+                    <div class="kpi-label">Total Outstanding</div>
                     <div class="kpi-value"><?php echo number_format($tot_balance, 3); ?></div>
                 </div>
                 <div class="kpi-icon"><i class="fa fa-exclamation-circle"></i></div>
@@ -210,17 +230,18 @@
             <table class="table table-hover table-bordered table-striped" id="tblReport">
                 <thead>
                     <tr class="bg-gray" style="font-weight: 600;">
-                        <th class="text-center" style="width: 50px;">S.No</th>
-                        <th style="width: 95px;">Date</th>
+                        <th class="text-center" style="width: 45px;">S.No</th>
+                        <th style="width: 90px;">Date</th>
                         <th>Invoice / Bill No</th>
                         <th>Vendor Name</th>
                         <th>Tender / Project</th>
                         <th>Bill Type</th>
-                        <th class="text-center" style="width: 75px;">Currency</th>
-                        <th class="text-right" style="width: 120px;">Bill Amount</th>
-                        <th class="text-right" style="width: 120px;">Paid Amount</th>
-                        <th class="text-right" style="width: 130px;">Outstanding Amount</th>
-                        <th class="text-center" style="width: 90px;">Status</th>
+                        <th class="text-center" style="width: 70px;">Currency</th>
+                        <th class="text-right" style="width: 110px;">Bill Amount</th>
+                        <th class="text-right" style="width: 110px;">Advance Paid</th>
+                        <th class="text-right" style="width: 110px;">Paid Amount</th>
+                        <th class="text-right" style="width: 120px;">Outstanding Amount</th>
+                        <th class="text-center" style="width: 85px;">Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -253,6 +274,7 @@
                                         elseif ($bt == 'Delivery Bill') $bClass = 'label-warning';
                                         elseif ($bt == 'Customs Bill') $bClass = 'label-purple';
                                         elseif ($bt == 'Opening Balance') $bClass = 'label-success';
+                                        elseif ($bt == 'Advance Payment') $bClass = 'label-warning';
                                     ?>
                                     <span class="label <?php echo $bClass; ?>" style="font-size: 85%;"><?php echo htmlspecialchars($bt); ?></span>
                                 </td>
@@ -261,6 +283,9 @@
                                 </td>
                                 <td class="text-right" style="font-weight: 600;">
                                     <?php echo number_format((float)$row['total_amount'], $dec); ?>
+                                </td>
+                                <td class="text-right" style="font-weight: 600; color: #d68910;">
+                                    <?php echo number_format((float)($row['advance_amount'] ?? 0), $dec); ?>
                                 </td>
                                 <td class="text-right text-green" style="font-weight: 600;">
                                     <?php echo number_format((float)$row['paid_amount'], $dec); ?>
@@ -273,6 +298,8 @@
                                         <span class="status-badge-paid"><i class="fa fa-check"></i> Paid</span>
                                     <?php elseif ($row['payment_status'] == 'Partial'): ?>
                                         <span class="status-badge-partial"><i class="fa fa-adjust"></i> Partial</span>
+                                    <?php elseif ($row['payment_status'] == 'Advance'): ?>
+                                        <span class="status-badge-advance"><i class="fa fa-credit-card"></i> Advance</span>
                                     <?php else: ?>
                                         <span class="status-badge-pending"><i class="fa fa-hourglass-start"></i> Pending</span>
                                     <?php endif; ?>
@@ -281,7 +308,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="11" class="text-center text-muted" style="padding: 30px;">
+                            <td colspan="12" class="text-center text-muted" style="padding: 30px;">
                                 <i class="fa fa-info-circle fa-2x"></i><br>
                                 No records found matching the specified filters.
                             </td>
@@ -292,6 +319,7 @@
                     <tr style="background: #2c3e50; color: #ffffff; font-weight: bold; font-size: 14px;">
                         <td colspan="7" class="text-right">GRAND TOTAL:</td>
                         <td class="text-right"><?php echo number_format($tot_amount, 3); ?></td>
+                        <td class="text-right" style="color: #f39c12;"><?php echo number_format($tot_advance, 3); ?></td>
                         <td class="text-right" style="color: #2ecc71;"><?php echo number_format($tot_paid, 3); ?></td>
                         <td class="text-right" style="color: #e74c3c;"><?php echo number_format($tot_balance, 3); ?></td>
                         <td></td>
