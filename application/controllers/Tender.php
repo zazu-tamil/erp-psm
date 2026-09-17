@@ -4718,7 +4718,7 @@ class Tender extends CI_Controller
             $data['srch_tender_dc_no'] = $srch_tender_dc_no = '';
         }
         if (!empty($srch_tender_dc_no)) {
-            $where = " (a.tender_dc_id = '" . $this->db->escape_str($srch_tender_dc_no) . "')";
+            $where = " (a.dc_no = '" . $this->db->escape_str($srch_tender_dc_no) . "')";
             //srch_customer_id filter removed session 
         }
 
