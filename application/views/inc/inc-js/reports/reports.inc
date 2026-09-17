@@ -82,15 +82,13 @@
               // Constrain From and To Date fields
               $("#from_date, #to_date").attr('min', res.opening_date);
               
-              // Adjust dates if they are prior to opening date
-              let currentFrom = $("#from_date").val();
-              if (!currentFrom || currentFrom < res.opening_date) {
-                $("#from_date").val(res.opening_date);
-              }
+              // Always auto-load From Date with vendor's opening balance date on change
+              $("#from_date").val(res.opening_date);
               
               let currentTo = $("#to_date").val();
+              let today = new Date().toISOString().split('T')[0];
               if (!currentTo || currentTo < res.opening_date) {
-                $("#to_date").val(res.opening_date);
+                $("#to_date").val(today >= res.opening_date ? today : res.opening_date);
               }
             } else {
               // Opening balance is empty! Hide date inputs and alert user
@@ -135,6 +133,9 @@
           success: function (res) {
             if (res.status === 'success' && res.exists) {
               $("#from_date, #to_date").attr('min', res.opening_date);
+              if (!$("#from_date").val()) {
+                $("#from_date").val(res.opening_date);
+              }
             }
           }
         });

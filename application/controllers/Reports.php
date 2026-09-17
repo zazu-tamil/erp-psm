@@ -2098,36 +2098,60 @@ class Reports extends CI_Controller
         $this->load->view('page/reports/in-stock-item-report', $data);
     }
 
-    public function vendor_statement_report()
+    public function vendor_statement_report($action = '')
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in')) {
             redirect();
         }
 
+        // Handle Reset
+        if ($action === 'reset' || $this->input->post('reset') == '1' || $this->input->get('reset') == '1') {
+            $this->session->unset_userdata('stmt_vendor_id');
+            $this->session->unset_userdata('stmt_from_date');
+            $this->session->unset_userdata('stmt_to_date');
+            redirect('vendor-statement-report');
+            return;
+        }
+
+        // If accessed with GET query parameters (e.g. ?vendor_id=3&to_date=2026-09-12),
+        // save to session and immediately redirect to clean URL without query string
+        if ($this->input->server('REQUEST_METHOD') === 'GET' && ($this->input->get('vendor_id') !== null || $this->input->get('to_date') !== null || $this->input->get('from_date') !== null)) {
+            $get_vendor_id = $this->input->get('vendor_id');
+            $get_from_date = $this->input->get('from_date');
+            $get_to_date = $this->input->get('to_date');
+
+            if ($get_vendor_id !== null) {
+                $this->session->set_userdata('stmt_vendor_id', $get_vendor_id);
+            }
+            if ($get_from_date !== null) {
+                $this->session->set_userdata('stmt_from_date', $get_from_date);
+            }
+            if ($get_to_date !== null) {
+                $this->session->set_userdata('stmt_to_date', $get_to_date);
+            }
+
+            redirect('vendor-statement-report');
+            return;
+        }
+
         $data['title'] = 'Vendor Statement Report';
         $data['js'] = 'reports/reports.inc';
 
-        // Fetch inputs from either GET or POST
-        $vendor_id = $this->input->get_post('vendor_id');
-        $from_date = $this->input->get_post('from_date');
-        $to_date = $this->input->get_post('to_date');
+        // Process POST submission or read from session
+        if ($this->input->server('REQUEST_METHOD') === 'POST') {
+            $vendor_id = $this->input->post('vendor_id') !== null ? $this->input->post('vendor_id') : '';
+            $from_date = $this->input->post('from_date') !== null ? $this->input->post('from_date') : '';
+            $to_date = $this->input->post('to_date') !== null ? $this->input->post('to_date') : '';
 
-        // Store / Retrieve from session for sticky behavior
-        if ($vendor_id !== null) {
-            $this->session->set_userdata('stmt_vendor_id', $vendor_id);
+            // Only save into session if not a one-off export
+            if ($this->input->post('export_excel') != '1') {
+                $this->session->set_userdata('stmt_vendor_id', $vendor_id);
+                $this->session->set_userdata('stmt_from_date', $from_date);
+                $this->session->set_userdata('stmt_to_date', $to_date);
+            }
         } else {
             $vendor_id = $this->session->userdata('stmt_vendor_id') ?? '';
-        }
-
-        if ($from_date !== null) {
-            $this->session->set_userdata('stmt_from_date', $from_date);
-        } else {
             $from_date = $this->session->userdata('stmt_from_date') ?? '';
-        }
-
-        if ($to_date !== null) {
-            $this->session->set_userdata('stmt_to_date', $to_date);
-        } else {
             $to_date = $this->session->userdata('stmt_to_date') ?? '';
         }
 
@@ -2483,8 +2507,7 @@ class Reports extends CI_Controller
         // Check for Reset request (via action segment, POST, or fallback GET)
         if ($action === 'reset' || $this->input->post('reset') == '1' || $this->input->get('reset') == '1') {
             $this->session->unset_userdata('vbal_vendor_id');
-            $this->session->unset_userdata('vbal_from_date');
-            $this->session->unset_userdata('vbal_to_date');
+            $this->session->unset_userdata('vbal_as_on_date');
             $this->session->unset_userdata('vbal_hide_zero');
             redirect('vendor-balance-report');
             return;
@@ -2493,44 +2516,35 @@ class Reports extends CI_Controller
         // Process POST submission
         if ($this->input->server('REQUEST_METHOD') === 'POST') {
             $vendor_id = $this->input->post('vendor_id') ?? '';
-            $from_date = $this->input->post('from_date') ?? '';
-            $to_date = $this->input->post('to_date') ?? '';
+            $as_on_date = $this->input->post('as_on_date') ?? '';
             $hide_zero = $this->input->post('hide_zero') ? '1' : '0';
 
             // Only save into session for persistent filtering if not a one-off export
             if ($this->input->post('export_excel') != '1') {
                 $this->session->set_userdata('vbal_vendor_id', $vendor_id);
-                $this->session->set_userdata('vbal_from_date', $from_date);
-                $this->session->set_userdata('vbal_to_date', $to_date);
+                $this->session->set_userdata('vbal_as_on_date', $as_on_date);
                 $this->session->set_userdata('vbal_hide_zero', $hide_zero);
             }
         } else {
             // GET request (initial navigation or page refresh)
-            // Support fallback GET query if explicitly provided
-            if ($this->input->get('from_date') !== null || $this->input->get('vendor_id') !== null) {
+            if ($this->input->get('as_on_date') !== null || $this->input->get('vendor_id') !== null) {
                 $vendor_id = $this->input->get('vendor_id') ?? '';
-                $from_date = $this->input->get('from_date') ?? '';
-                $to_date = $this->input->get('to_date') ?? '';
+                $as_on_date = $this->input->get('as_on_date') ?? '';
                 $hide_zero = $this->input->get('hide_zero') ? '1' : '0';
             } else {
                 $vendor_id = $this->session->userdata('vbal_vendor_id') ?? '';
-                $from_date = $this->session->userdata('vbal_from_date');
-                $to_date = $this->session->userdata('vbal_to_date');
+                $as_on_date = $this->session->userdata('vbal_as_on_date');
                 $hide_zero = $this->session->userdata('vbal_hide_zero') ?? '0';
 
-                // Default to current month only if never saved in session
-                if ($from_date === null) {
-                    $from_date = date('Y-m-01');
-                }
-                if ($to_date === null) {
-                    $to_date = date('Y-m-d');
+                // Default to today's date if never saved in session
+                if ($as_on_date === null) {
+                    $as_on_date = date('Y-m-d');
                 }
             }
         }
 
         $data['vendor_id'] = $vendor_id;
-        $data['from_date'] = $from_date;
-        $data['to_date'] = $to_date;
+        $data['as_on_date'] = $as_on_date;
         $data['hide_zero'] = $hide_zero;
 
         // Fetch active vendors for dropdown
@@ -2548,36 +2562,7 @@ class Reports extends CI_Controller
             $vendor_where = " AND vendor_id = '$esc_v'";
         }
 
-        $esc_from = !empty($from_date) ? $this->db->escape_str($from_date) : '';
-        $esc_to = !empty($to_date) ? $this->db->escape_str($to_date) : '';
-
-        // Dynamic In-Period date conditions for each date column
-        $bill_date_cond = "";
-        if (!empty($from_date) && !empty($to_date)) {
-            $bill_date_cond = " AND invoice_date >= '$esc_from' AND invoice_date <= '$esc_to'";
-        } elseif (!empty($from_date)) {
-            $bill_date_cond = " AND invoice_date >= '$esc_from'";
-        } elseif (!empty($to_date)) {
-            $bill_date_cond = " AND invoice_date <= '$esc_to'";
-        }
-
-        $pay_date_cond = "";
-        if (!empty($from_date) && !empty($to_date)) {
-            $pay_date_cond = " AND payment_date >= '$esc_from' AND payment_date <= '$esc_to'";
-        } elseif (!empty($from_date)) {
-            $pay_date_cond = " AND payment_date >= '$esc_from'";
-        } elseif (!empty($to_date)) {
-            $pay_date_cond = " AND payment_date <= '$esc_to'";
-        }
-
-        $adv_date_cond = "";
-        if (!empty($from_date) && !empty($to_date)) {
-            $adv_date_cond = " AND adv_payment_date >= '$esc_from' AND adv_payment_date <= '$esc_to'";
-        } elseif (!empty($from_date)) {
-            $adv_date_cond = " AND adv_payment_date >= '$esc_from'";
-        } elseif (!empty($to_date)) {
-            $adv_date_cond = " AND adv_payment_date <= '$esc_to'";
-        }
+        $esc_as_on = !empty($as_on_date) ? $this->db->escape_str($as_on_date) : date('Y-m-d');
 
         // 1. Fetch Vendor Opening Balances configured in DB
         $op_sql = "SELECT vendor_id, opening_date, opening_amount, balance_type 
@@ -2591,127 +2576,72 @@ class Reports extends CI_Controller
             $op_map[$op['vendor_id']] = $op;
         }
 
-        // 2. Pre-Period Bills (only if from_date is specified)
-        $pre_bills_map = [];
-        if (!empty($from_date)) {
-            $pre_bills_sql = "
-                SELECT vendor_id, invoice_date, amount FROM (
-                    SELECT vendor_id, invoice_date, COALESCE(total_amount_inc_addl, total_amount) AS amount
-                    FROM vendor_purchase_invoice_info
-                    WHERE status = 'Active' AND invoice_date < '$esc_from' {$vendor_where}
-                    
-                    UNION ALL
-                    
-                    SELECT vendor_id, invoice_date, tot_amt_with_tax AS amount
-                    FROM local_purchase_bill_info
-                    WHERE status = 'Active' AND invoice_date < '$esc_from' {$vendor_where}
-                    
-                    UNION ALL
-                    
-                    SELECT vendor_id, invoice_date, g_total AS amount
-                    FROM dp_bill_info
-                    WHERE status = 'Active' AND invoice_date < '$esc_from' {$vendor_where}
-                    
-                    UNION ALL
-                    
-                    SELECT vendor_id, invoice_date, customs_payable AS amount
-                    FROM customs_bill_info
-                    WHERE status = 'Active' AND ac_type_opt = 'Accountable' AND invoice_date < '$esc_from' {$vendor_where}
-                ) AS pre_bills
-            ";
-            $pre_bills_rows = $this->db->query($pre_bills_sql)->result_array();
-            foreach ($pre_bills_rows as $pb) {
-                $vId = $pb['vendor_id'];
-                if (!isset($pre_bills_map[$vId])) {
-                    $pre_bills_map[$vId] = [];
-                }
-                $pre_bills_map[$vId][] = $pb;
-            }
-        }
-
-        // 3. Pre-Period Payments & Advances (only if from_date is specified)
-        $pre_pay_map = [];
-        if (!empty($from_date)) {
-            $pre_pay_sql = "
-                SELECT vendor_id, payment_date, amount FROM (
-                    SELECT vendor_id, payment_date, amount
-                    FROM vendor_payment_info
-                    WHERE status = 'Active' AND payment_date < '$esc_from' {$vendor_where}
-                    
-                    UNION ALL
-                    
-                    SELECT vendor_id, adv_payment_date AS payment_date, adv_payment_amt AS amount
-                    FROM vendor_advance_payment_info
-                    WHERE status = 'Active' AND adv_payment_date < '$esc_from' {$vendor_where}
-                ) AS pre_payments
-            ";
-            $pre_pay_rows = $this->db->query($pre_pay_sql)->result_array();
-            foreach ($pre_pay_rows as $pp) {
-                $vId = $pp['vendor_id'];
-                if (!isset($pre_pay_map[$vId])) {
-                    $pre_pay_map[$vId] = [];
-                }
-                $pre_pay_map[$vId][] = $pp;
-            }
-        }
-
-        // 4. In-Period Bills
-        $in_bills_sql = "
-            SELECT vendor_id, SUM(amount) AS total_bills FROM (
-                SELECT vendor_id, COALESCE(total_amount_inc_addl, total_amount) AS amount
+        // 2. Fetch all bills up to as_on_date
+        $bills_sql = "
+            SELECT vendor_id, invoice_date, amount FROM (
+                SELECT vendor_id, invoice_date, COALESCE(total_amount_inc_addl, total_amount) AS amount
                 FROM vendor_purchase_invoice_info
-                WHERE status = 'Active' {$bill_date_cond} {$vendor_where}
+                WHERE status = 'Active' AND invoice_date <= '$esc_as_on' {$vendor_where}
                 
                 UNION ALL
                 
-                SELECT vendor_id, tot_amt_with_tax AS amount
+                SELECT vendor_id, invoice_date, tot_amt_with_tax AS amount
                 FROM local_purchase_bill_info
-                WHERE status = 'Active' {$bill_date_cond} {$vendor_where}
+                WHERE status = 'Active' AND invoice_date <= '$esc_as_on' {$vendor_where}
                 
                 UNION ALL
                 
-                SELECT vendor_id, g_total AS amount
+                SELECT vendor_id, invoice_date, g_total AS amount
                 FROM dp_bill_info
-                WHERE status = 'Active' {$bill_date_cond} {$vendor_where}
+                WHERE status = 'Active' AND invoice_date <= '$esc_as_on' {$vendor_where}
                 
                 UNION ALL
                 
-                SELECT vendor_id, customs_payable AS amount
+                SELECT vendor_id, invoice_date, customs_payable AS amount
                 FROM customs_bill_info
-                WHERE status = 'Active' AND ac_type_opt = 'Accountable' {$bill_date_cond} {$vendor_where}
-            ) AS in_bills
-            GROUP BY vendor_id
+                WHERE status = 'Active' AND ac_type_opt = 'Accountable' AND invoice_date <= '$esc_as_on' {$vendor_where}
+            ) AS all_bills
         ";
-        $in_bills_rows = $this->db->query($in_bills_sql)->result_array();
-        $in_bills_map = [];
-        foreach ($in_bills_rows as $ib) {
-            $in_bills_map[$ib['vendor_id']] = (float) $ib['total_bills'];
+        $bills_rows = $this->db->query($bills_sql)->result_array();
+        $bills_map = [];
+        foreach ($bills_rows as $b) {
+            $vId = $b['vendor_id'];
+            if (!isset($bills_map[$vId])) {
+                $bills_map[$vId] = [];
+            }
+            $bills_map[$vId][] = $b;
         }
 
-        // 5. In-Period Advance Payments
-        $in_adv_sql = "
-            SELECT vendor_id, SUM(adv_payment_amt) AS total_advance
+        // 3. Fetch all advance payments up to as_on_date
+        $adv_sql = "
+            SELECT vendor_id, adv_payment_date, adv_payment_amt
             FROM vendor_advance_payment_info
-            WHERE status = 'Active' {$adv_date_cond} {$vendor_where}
-            GROUP BY vendor_id
+            WHERE status = 'Active' AND adv_payment_date <= '$esc_as_on' {$vendor_where}
         ";
-        $in_adv_rows = $this->db->query($in_adv_sql)->result_array();
-        $in_adv_map = [];
-        foreach ($in_adv_rows as $ia) {
-            $in_adv_map[$ia['vendor_id']] = (float) $ia['total_advance'];
+        $adv_rows = $this->db->query($adv_sql)->result_array();
+        $adv_map = [];
+        foreach ($adv_rows as $a) {
+            $vId = $a['vendor_id'];
+            if (!isset($adv_map[$vId])) {
+                $adv_map[$vId] = [];
+            }
+            $adv_map[$vId][] = $a;
         }
 
-        // 6. In-Period Bill Payments (regular payments)
-        $in_pay_sql = "
-            SELECT vendor_id, SUM(amount) AS total_paid
+        // 4. Fetch all bill payments up to as_on_date
+        $pay_sql = "
+            SELECT vendor_id, payment_date, amount
             FROM vendor_payment_info
-            WHERE status = 'Active' {$pay_date_cond} {$vendor_where}
-            GROUP BY vendor_id
+            WHERE status = 'Active' AND payment_date <= '$esc_as_on' {$vendor_where}
         ";
-        $in_pay_rows = $this->db->query($in_pay_sql)->result_array();
-        $in_pay_map = [];
-        foreach ($in_pay_rows as $ip) {
-            $in_pay_map[$ip['vendor_id']] = (float) $ip['total_paid'];
+        $pay_rows = $this->db->query($pay_sql)->result_array();
+        $pay_map = [];
+        foreach ($pay_rows as $p) {
+            $vId = $p['vendor_id'];
+            if (!isset($pay_map[$vId])) {
+                $pay_map[$vId] = [];
+            }
+            $pay_map[$vId][] = $p;
         }
 
         // Aggregate records per vendor
@@ -2735,60 +2665,83 @@ class Reports extends CI_Controller
                 continue;
             }
 
-            // Calculate Opening Balance as of from_date
             $opening_bal = 0.000;
+            $vendor_bills = 0.000;
+            $vendor_adv = 0.000;
+            $vendor_pay = 0.000;
+
             if (isset($op_map[$vId])) {
                 $op_row = $op_map[$vId];
                 $op_date = $op_row['opening_date'];
                 $base_op = ($op_row['balance_type'] === 'CR') ? (float) $op_row['opening_amount'] : -(float) $op_row['opening_amount'];
 
-                $pre_bills_sum = 0.000;
-                if (!empty($pre_bills_map[$vId])) {
-                    foreach ($pre_bills_map[$vId] as $item) {
-                        if (empty($op_date) || $item['invoice_date'] >= $op_date) {
-                            $pre_bills_sum += (float) $item['amount'];
+                if (empty($op_date) || $esc_as_on >= $op_date) {
+                    $opening_bal = $base_op;
+                    // Bills on or after opening_date up to as_on_date
+                    if (!empty($bills_map[$vId])) {
+                        foreach ($bills_map[$vId] as $item) {
+                            if (empty($op_date) || $item['invoice_date'] >= $op_date) {
+                                $vendor_bills += (float) $item['amount'];
+                            }
                         }
                     }
-                }
-
-                $pre_pay_sum = 0.000;
-                if (!empty($pre_pay_map[$vId])) {
-                    foreach ($pre_pay_map[$vId] as $item) {
-                        if (empty($op_date) || $item['payment_date'] >= $op_date) {
-                            $pre_pay_sum += (float) $item['amount'];
+                    // Advances on or after opening_date up to as_on_date
+                    if (!empty($adv_map[$vId])) {
+                        foreach ($adv_map[$vId] as $item) {
+                            if (empty($op_date) || $item['adv_payment_date'] >= $op_date) {
+                                $vendor_adv += (float) $item['adv_payment_amt'];
+                            }
                         }
                     }
-                }
-
-                // If from_date is set and from_date < op_date, opening_balance hasn't started yet
-                if (!empty($from_date) && !empty($op_date) && $from_date < $op_date) {
-                    $opening_bal = $pre_bills_sum - $pre_pay_sum;
+                    // Payments on or after opening_date up to as_on_date
+                    if (!empty($pay_map[$vId])) {
+                        foreach ($pay_map[$vId] as $item) {
+                            if (empty($op_date) || $item['payment_date'] >= $op_date) {
+                                $vendor_pay += (float) $item['amount'];
+                            }
+                        }
+                    }
                 } else {
-                    $opening_bal = $base_op + $pre_bills_sum - $pre_pay_sum;
+                    // as_on_date is prior to configured opening_date
+                    $opening_bal = 0.000;
+                    if (!empty($bills_map[$vId])) {
+                        foreach ($bills_map[$vId] as $item) {
+                            $vendor_bills += (float) $item['amount'];
+                        }
+                    }
+                    if (!empty($adv_map[$vId])) {
+                        foreach ($adv_map[$vId] as $item) {
+                            $vendor_adv += (float) $item['adv_payment_amt'];
+                        }
+                    }
+                    if (!empty($pay_map[$vId])) {
+                        foreach ($pay_map[$vId] as $item) {
+                            $vendor_pay += (float) $item['amount'];
+                        }
+                    }
                 }
             } else {
-                $pre_bills_sum = 0.000;
-                if (!empty($pre_bills_map[$vId])) {
-                    foreach ($pre_bills_map[$vId] as $item) {
-                        $pre_bills_sum += (float) $item['amount'];
+                // No configured opening balance record
+                $opening_bal = 0.000;
+                if (!empty($bills_map[$vId])) {
+                    foreach ($bills_map[$vId] as $item) {
+                        $vendor_bills += (float) $item['amount'];
                     }
                 }
-
-                $pre_pay_sum = 0.000;
-                if (!empty($pre_pay_map[$vId])) {
-                    foreach ($pre_pay_map[$vId] as $item) {
-                        $pre_pay_sum += (float) $item['amount'];
+                if (!empty($adv_map[$vId])) {
+                    foreach ($adv_map[$vId] as $item) {
+                        $vendor_adv += (float) $item['adv_payment_amt'];
                     }
                 }
-
-                $opening_bal = $pre_bills_sum - $pre_pay_sum;
+                if (!empty($pay_map[$vId])) {
+                    foreach ($pay_map[$vId] as $item) {
+                        $vendor_pay += (float) $item['amount'];
+                    }
+                }
             }
 
-            $in_bills = $in_bills_map[$vId] ?? 0.000;
-            $in_adv = $in_adv_map[$vId] ?? 0.000;
-            $in_pay = $in_pay_map[$vId] ?? 0.000;
-            $total_paid = $in_adv + $in_pay;
-            $closing_bal = $opening_bal + $in_bills - $total_paid;
+            $total_paid = $vendor_adv + $vendor_pay;
+            $closing_bal = $opening_bal + $vendor_bills - $total_paid;
 
             // Status
             if ($closing_bal > 0.001) {
@@ -2804,7 +2757,7 @@ class Reports extends CI_Controller
 
             // Check if hide_zero is active
             if ($hide_zero == '1') {
-                if (abs($opening_bal) < 0.001 && abs($in_bills) < 0.001 && abs($total_paid) < 0.001 && abs($closing_bal) < 0.001) {
+                if (abs($opening_bal) < 0.001 && abs($vendor_bills) < 0.001 && abs($total_paid) < 0.001 && abs($closing_bal) < 0.001) {
                     continue;
                 }
             }
@@ -2815,9 +2768,9 @@ class Reports extends CI_Controller
                 'crno' => $vend['crno'] ?? '',
                 'mobile' => $vend['mobile'] ?? '',
                 'opening_balance' => $opening_bal,
-                'total_bills' => $in_bills,
-                'advance_paid' => $in_adv,
-                'bill_payments' => $in_pay,
+                'total_bills' => $vendor_bills,
+                'advance_paid' => $vendor_adv,
+                'bill_payments' => $vendor_pay,
                 'total_paid' => $total_paid,
                 'closing_balance' => $closing_bal,
                 'status' => $status,
@@ -2828,9 +2781,9 @@ class Reports extends CI_Controller
 
             // Totals
             $total_summary['opening_balance'] += $opening_bal;
-            $total_summary['total_bills'] += $in_bills;
-            $total_summary['advance_paid'] += $in_adv;
-            $total_summary['bill_payments'] += $in_pay;
+            $total_summary['total_bills'] += $vendor_bills;
+            $total_summary['advance_paid'] += $vendor_adv;
+            $total_summary['bill_payments'] += $vendor_pay;
             $total_summary['total_paid'] += $total_paid;
             $total_summary['closing_balance'] += $closing_bal;
 
@@ -2860,7 +2813,7 @@ class Reports extends CI_Controller
         if ($this->input->get_post('export_excel') == '1') {
             header("Content-Type: application/vnd.ms-excel");
             $clean_vendor_name = preg_replace('/[^A-Za-z0-9_\-]/', '_', $selected_vendor_name);
-            $filename = "Vendor_Balance_Report_" . $clean_vendor_name . "_" . ($from_date ? $from_date : 'start') . "_to_" . ($to_date ? $to_date : 'end') . ".xls";
+            $filename = "Vendor_Balance_Report_" . $clean_vendor_name . "_As_On_" . ($as_on_date ? $as_on_date : date('Y-m-d')) . ".xls";
             header("Content-Disposition: attachment; filename=" . $filename);
             header("Pragma: no-cache");
             header("Expires: 0");

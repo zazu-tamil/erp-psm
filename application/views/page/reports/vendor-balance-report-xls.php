@@ -34,7 +34,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </tr>
         <tr>
             <td colspan="9" style="font-size: 10pt; color: #475569; padding-bottom: 12px; border-bottom: 2px solid #cbd5e1;">
-                <strong>Period:</strong> <?php echo !empty($from_date) ? date('d-M-Y', strtotime($from_date)) : 'All Time'; ?> to <?php echo !empty($to_date) ? date('d-M-Y', strtotime($to_date)) : date('d-M-Y'); ?> &nbsp;|&nbsp;
+                <strong>As On Date:</strong> <?php echo !empty($as_on_date) ? date('d-M-Y', strtotime($as_on_date)) : date('d-M-Y'); ?> &nbsp;|&nbsp;
                 <strong>Vendor:</strong> <?php echo htmlspecialchars($selected_vendor_name); ?> &nbsp;|&nbsp;
                 <strong>Generated On:</strong> <?php echo date('d-m-Y H:i:s'); ?>
             </td>

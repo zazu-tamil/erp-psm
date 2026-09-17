@@ -354,6 +354,11 @@ $route['customer-statement-report'] = 'reports/customer_statement_report';
 $route['get-customer-opening-balance'] = 'reports/get_customer_opening_balance_ajax';
 $route['get-customer-balance-summary'] = 'payment/get_customer_balance_summary';
 
+//vendor statement
+$route['vendor-statement-report'] = 'reports/vendor_statement_report';
+$route['vendor-statement-report/(:any)'] = 'reports/vendor_statement_report/$1';
+$route['get-vendor-opening-balance'] = 'reports/get_vendor_opening_balance_ajax';
+
 
 //vendor adv payment
 $route['vendor-adv-payment'] = 'vendor/vendor_adv_payment_list';

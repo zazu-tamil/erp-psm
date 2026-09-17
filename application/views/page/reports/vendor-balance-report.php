@@ -148,7 +148,7 @@
     <div class="print-header text-center">
         <h2 style="margin: 0 0 5px 0; font-size: 20px; font-weight: bold; text-transform: uppercase;">VENDOR BALANCE REPORT</h2>
         <p style="margin: 0; font-size: 13px; color: #555;">
-            <strong>Period:</strong> <?php echo !empty($from_date) ? date('d-M-Y', strtotime($from_date)) : 'All Time'; ?> to <?php echo !empty($to_date) ? date('d-M-Y', strtotime($to_date)) : date('d-M-Y'); ?>
+            <strong>As On Date:</strong> <?php echo !empty($as_on_date) ? date('d-M-Y', strtotime($as_on_date)) : date('d-M-Y'); ?>
             &nbsp;|&nbsp;
             <strong>Vendor:</strong> <?php echo htmlspecialchars($selected_vendor_name); ?>
         </p>
@@ -169,8 +169,8 @@
             <form method="post" action="<?php echo site_url('vendor-balance-report'); ?>" id="frmVendorBalance">
                 <input type="hidden" name="export_excel" id="export_excel" value="0">
                 <div class="row">
-                    <div class="form-group col-md-3">
-                        <label for="vendor_id">Vendor</label>
+                    <div class="form-group col-md-4">
+                        <label for="vendor_id">Vendor</label>   
                         <select name="vendor_id" id="vendor_id" class="form-control select2">
                             <option value="">All Vendors</option>
                             <?php foreach ($vendors as $v): ?>
@@ -181,16 +181,10 @@
                         </select>
                     </div>
 
-                    <div class="form-group col-md-2">
-                        <label for="from_date">From Date</label>
-                        <input type="date" name="from_date" id="from_date" class="form-control"
-                            value="<?php echo htmlspecialchars($from_date); ?>">
-                    </div>
-
-                    <div class="form-group col-md-2">
-                        <label for="to_date">To Date</label>
-                        <input type="date" name="to_date" id="to_date" class="form-control"
-                            value="<?php echo htmlspecialchars($to_date); ?>">
+                    <div class="form-group col-md-3">
+                        <label for="as_on_date">As On Date</label>
+                        <input type="date" name="as_on_date" id="as_on_date" class="form-control"
+                            value="<?php echo htmlspecialchars($as_on_date); ?>">
                     </div>
 
                     <div class="form-group col-md-2" style="padding-top: 28px;">
@@ -334,10 +328,13 @@
                                     </span>
                                 </td>
                                 <td class="text-center no-print">
-                                    <a href="<?php echo site_url('vendor-statement-report?vendor_id=' . $row['vendor_id'] . '&from_date=' . $from_date . '&to_date=' . $to_date); ?>" 
-                                       target="_blank" class="btn btn-info btn-xs" title="View Detailed Statement">
-                                        <i class="fa fa-file-text-o"></i> Statement
-                                    </a>
+                                    <form method="post" action="<?php echo site_url('vendor-statement-report'); ?>" target="_blank" style="display:inline-block; margin:0;">
+                                        <input type="hidden" name="vendor_id" value="<?php echo $row['vendor_id']; ?>">
+                                        <input type="hidden" name="to_date" value="<?php echo htmlspecialchars($as_on_date); ?>">
+                                        <button type="submit" class="btn btn-info btn-xs" title="View Detailed Statement">
+                                            <i class="fa fa-file-text-o"></i> Statement
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
