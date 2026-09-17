@@ -6644,12 +6644,14 @@ class Vendor extends CI_Controller
         $tender_enquiry_id = $this->input->post('tender_enquiry_id');
         $vendor_id = $this->input->post('vendor_id');
 
-        $sql = "
-            SELECT vendor_po_id, po_no 
-            FROM vendor_po_info 
-            WHERE tender_enquiry_id = ? AND vendor_id = ? AND status != 'Delete'
-        ";
-        $query = $this->db->query($sql, [$tender_enquiry_id, $vendor_id]);
+        $this->db->select('vendor_po_id, po_no');
+        $this->db->from('vendor_po_info');
+        $this->db->where('vendor_id', $vendor_id);
+        $this->db->where('status !=', 'Delete');
+        if (!empty($tender_enquiry_id)) {
+            $this->db->where('tender_enquiry_id', $tender_enquiry_id);
+        }
+        $query = $this->db->get();
         $pos = $query->result_array();
 
         echo json_encode($pos);

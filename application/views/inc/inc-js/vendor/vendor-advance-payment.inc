@@ -27,16 +27,22 @@
 
 <script>
     $(document).ready(function() {
-        // Initialize Select2 with modal parent and closeOnSelect for multiple select
+        // Cache full vendor options list from initial page render
+        var allVendorsHtml = $('#vendor_id').html();
+
+        // Initialize Select2: ONLY attach dropdownParent to modal elements!
         $('.select2').each(function() {
             var $this = $(this);
             var isMulti = $this.prop('multiple');
-            $this.select2({
+            var config = {
                 width: '100%',
-                dropdownParent: $('#addModal'),
                 closeOnSelect: isMulti ? true : true,
                 placeholder: $this.data('placeholder') || 'Select Option'
-            });
+            };
+            if ($this.closest('#addModal').length > 0) {
+                config.dropdownParent = $('#addModal');
+            }
+            $this.select2(config);
         });
 
         function fetchInvoices(tender_id, vendor_id, po_id, selected_ids, callback) {
@@ -98,8 +104,7 @@
             var tender_id = $(this).val();
             
             if (!window.isEditing) {
-                $('#vendor_id').html('<option value="">Select Vendor</option>').trigger('change');
-                $('#vendor_po_id').html('<option value="">Select PO</option>').trigger('change');
+                $('#vendor_po_id').html('<option value="">Select PO</option>').trigger('change.select2');
                 $('#invoice_ids').html('').trigger('change');
             }
 
@@ -110,21 +115,30 @@
                     data: {tender_enquiry_id: tender_id},
                     dataType: 'json',
                     success: function(response) {
-                        var html = '<option value="">Select Vendor</option>';
-                        $.each(response, function(i, item) {
-                            html += '<option value="'+item.vendor_id+'">'+item.vendor_name+'</option>';
-                        });
-                        $('#vendor_id').html(html);
+                        if (response && response.length > 0) {
+                            var html = '<option value="">Select Vendor</option>';
+                            $.each(response, function(i, item) {
+                                html += '<option value="'+item.vendor_id+'">'+item.vendor_name+'</option>';
+                            });
+                            $('#vendor_id').html(html);
+                        } else {
+                            // If tender has no specific vendor/PO yet, retain full vendor options
+                            $('#vendor_id').html(allVendorsHtml);
+                        }
                         
                         if (window.isEditing && window.editVendor) {
                             var v = window.editVendor;
                             window.editVendor = null;
                             $('#vendor_id').val(v).trigger('change');
                         } else if (!window.isEditing) {
-                            $('#vendor_id').val('').trigger('change');
+                            $('#vendor_id').val('').trigger('change.select2');
                         }
                     }
                 });
+            } else {
+                if (!window.isEditing) {
+                    $('#vendor_id').html(allVendorsHtml).val('').trigger('change.select2');
+                }
             }
         });
 
@@ -207,14 +221,20 @@
             $('#frmAdd')[0].reset();
             $('#mode').val('Add');
             $('#adv_payment_id').val('');
-            $('.select2').val('').trigger('change');
-            $('#invoice_ids').html('').val(null).trigger('change');
-            $('#invoice_ids').select2('close');
-            handleAcTypeChange('');
             window.isEditing = false;
             window.editVendor = null;
             window.editPo = null;
             window.editInvoices = null;
+
+            // Restore all vendors so the dropdown is fully populated
+            $('#vendor_id').html(allVendorsHtml);
+
+            // Reset modal select2 fields specifically
+            $('#addModal .select2').val('').trigger('change.select2');
+            $('#invoice_ids').html('').val(null).trigger('change');
+            $('#invoice_ids').select2('close');
+            $('#status').val('Active').trigger('change.select2');
+            handleAcTypeChange('');
             $('#addModal').modal('show');
         });
 
@@ -259,7 +279,8 @@
             $('#frmAdd')[0].reset();
             $('#mode').val('Add');
             $('#adv_payment_id').val('');
-            $('.select2').val('').trigger('change');
+            $('#vendor_id').html(allVendorsHtml);
+            $('#addModal .select2').val('').trigger('change.select2');
             $('#invoice_ids').html('').val(null).trigger('change');
             $('#invoice_ids').select2('close');
             handleAcTypeChange('');
