@@ -83,66 +83,64 @@
         </div>
 
         <div class="box-body table-responsive">
-            <table class="table table-hover table-bordered table-striped">
+            <table class="table table-hover table-bordered table-striped" id="tbl_tender_invoice">
                 <thead>
-                    <tr>
-                        <th class="text-center">S.No</th>
-                        <th>Invoice Date</th>
+                    <tr class="bg-gray">
+                        <th class="text-center" style="width: 50px;">S.No</th>
+                        <th style="width: 100px;">Invoice Date</th>
                         <th>Company / RFQ No</th>
                         <th>Customer</th>
                         <th>Invoice No</th>
-                        <th>Invoice Status</th>
-                        <th>Invoice Amount</th>
-                        <th class="text-center" colspan="3">Action</th>
+                        <th class="text-center" style="width: 110px;">Invoice Status</th>
+                        <th class="text-right" style="width: 120px;">Invoice Amount</th>
+                        <th class="text-center" style="width: 110px;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (!empty($record_list)): ?>
                         <?php foreach ($record_list as $j => $row): ?>
                             <tr>
-                                <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
-                                <td><?php echo date('d-m-Y', strtotime($row['invoice_date'])); ?></td>
-                                <td><?php echo htmlspecialchars($row['company_name'] ?? '-'); ?> <br><small
-                                        class="label label-success"><?php echo htmlspecialchars($row['tender_details'] ?? '-'); ?></small>
+                                <td class="text-center"><?php echo ($j + 1); ?></td>
+                                <td data-order="<?php echo !empty($row['invoice_date']) ? date('Y-m-d', strtotime($row['invoice_date'])) : ''; ?>">
+                                    <?php echo !empty($row['invoice_date']) ? date('d-m-Y', strtotime($row['invoice_date'])) : '-'; ?>
+                                </td>
+                                <td>
+                                    <?php echo htmlspecialchars($row['company_name'] ?? '-'); ?>
+                                    <?php if (!empty($row['tender_details'])): ?>
+                                        <br><small class="label label-success"><?php echo htmlspecialchars($row['tender_details']); ?></small>
+                                    <?php endif; ?>
                                 </td>
                                 <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
-                                <td><strong><?php echo htmlspecialchars($row['invoice_no']); ?></strong></td>
+                                <td><strong><?php echo htmlspecialchars($row['invoice_no'] ?? '-'); ?></strong></td>
 
                                 <?php
-                                $status = $row['invoice_status'];
-
+                                $status = $row['invoice_status'] ?? 'Pending';
                                 $badge_colors = [
                                     'Payment Paid' => 'success',
                                     'Pending' => 'info',
+                                    'Partial' => 'warning',
                                 ];
-
                                 $color = isset($badge_colors[$status]) ? $badge_colors[$status] : 'default';
                                 ?>
-                                <td>
+                                <td class="text-center">
                                     <span class="label label-<?php echo $color; ?>">
-                                        <?php echo $status; ?>
+                                        <?php echo htmlspecialchars($status); ?>
                                     </span>
                                 </td>
-                                <td class="text-right"><?php echo ($row['total_amount']) ?? 0; ?></td>
+                                <td class="text-right" data-order="<?php echo floatval($row['total_amount'] ?? 0); ?>" style="font-weight: 600;">
+                                    <?php echo number_format((float)($row['total_amount'] ?? 0), 3); ?>
+                                </td>
 
-
-
-                                <!-- PRINT / VIEW -->
-                                <td class="text-center">
+                                <!-- ACTION BUTTONS -->
+                                <td class="text-center" style="white-space: nowrap;">
                                     <a href="<?php echo site_url('tender-po-invoice-print/' . $row['tender_enq_invoice_id']); ?>"
                                         target="_blank" class="btn btn-info btn-xs" title="Print / View">
                                         <i class="fa fa-print"></i>
                                     </a>
-                                </td>
-                                <!-- EDIT -->
-                                <td class="text-center">
                                     <a href="<?php echo site_url('tender-po-invoice-edit/' . $row['tender_enq_invoice_id']); ?>"
                                         class="btn btn-primary btn-xs" title="Edit">
                                         <i class="fa fa-edit"></i>
                                     </a>
-                                </td>
-                                <!-- DELETE -->
-                                <td class="text-center">
                                     <button value="<?php echo $row['tender_enq_invoice_id']; ?>"
                                         class="del_record btn btn-danger btn-xs" title="Delete">
                                         <i class="fa fa-trash"></i>
@@ -152,20 +150,11 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="12" class="text-center text-danger">No records found.</td>
+                            <td colspan="8" class="text-center text-muted" style="padding: 20px;">No records found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
-        </div>
-
-        <div class="box-footer">
-            <div class="form-group col-sm-6">
-                <label>Total Records: <?php echo $total_records; ?></label>
-            </div>
-            <div class="form-group col-sm-6 text-right">
-                <?php echo $pagination; ?>
-            </div>
         </div>
     </div>
 </section>

@@ -1,12 +1,51 @@
 <script src="<?php echo base_url('asset/bower_components/ckeditor/ckeditor.js'); ?>"></script>
 
+<!-- DataTables -->
+<link rel="stylesheet" href="<?php echo base_url('asset/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css'); ?>">
+<script src="<?php echo base_url('asset/bower_components/datatables.net/js/jquery.dataTables.min.js'); ?>"></script>
+<script src="<?php echo base_url('asset/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js'); ?>"></script>
+
 <script>
   $(document).ready(function () {
- 
+    if ($.fn.DataTable.isDataTable('#tbl_tender_invoice')) {
+      $('#tbl_tender_invoice').DataTable().destroy();
+    }
 
+    var table = $('#tbl_tender_invoice').DataTable({
+      responsive: true,
+      paging: true,
+      lengthChange: true,
+      searching: true,
+      ordering: true,
+      info: true,
+      autoWidth: false,
+      pageLength: 25,
+      lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+      order: [[1, 'desc']], // Default sort order by Invoice Date DESC
+      columnDefs: [
+        { orderable: false, targets: [0, 7] }, // Disable sorting on S.No and Action
+        { searchable: false, targets: [7] }    // Disable search on Action
+      ],
+      language: {
+        search: "_INPUT_",
+        searchPlaceholder: "Search invoices...",
+        lengthMenu: "Show _MENU_ entries",
+        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+        infoEmpty: "Showing 0 to 0 of 0 entries",
+        infoFiltered: "(filtered from _MAX_ total entries)"
+      }
+    });
 
-    $(".del_record").click(function () {
-      if (confirm("Are you sure you want to delete this tender enquiry?")) {
+    // Automatically renumber S.No on search, sort, and pagination
+    table.on('order.dt search.dt page.dt', function () {
+      var info = table.page.info();
+      table.column(0, { search: 'applied', order: 'applied', page: 'applied' }).nodes().each(function (cell, i) {
+        cell.innerHTML = info.start + i + 1;
+      });
+    });
+
+    $(document).on("click", ".del_record", function () {
+      if (confirm("Are you sure you want to delete this tender invoice?")) {
         const id = $(this).val();
         //alert(id);
         $.post(
