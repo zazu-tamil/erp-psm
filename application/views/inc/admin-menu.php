@@ -389,6 +389,7 @@ $supplier_report_grp = [
     'vendor-invoice-pending-report',
     'vendor-pending-invoice-report',
     'vendor-statement-report',
+    'vendor-balance-report',
     'supplier-summary-report'
 ];
 
@@ -497,6 +498,12 @@ $report_m_grp = array_merge(
                 <li class="<?= ($current_page === 'vendor-statement-report') ? 'active' : '' ?>">
                     <a href="<?= site_url('vendor-statement-report') ?>">
                         <i class="fa fa-file-text"></i> Vendor Statement Report
+                    </a>
+                </li>
+
+                <li class="<?= ($current_page === 'vendor-balance-report') ? 'active' : '' ?>">
+                    <a href="<?= site_url('vendor-balance-report') ?>">
+                        <i class="fa fa-balance-scale"></i> Vendor Balance Report
                     </a>
                 </li>
 

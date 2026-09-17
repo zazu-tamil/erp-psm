@@ -185,6 +185,33 @@ class Menu_model extends CI_Model {
             ));
         }
 
+        // 7b. Ensure vendor-balance-report exists
+        $vb_menu = $this->db->where('menu_slug', 'vendor-balance-report')
+                            ->where('status !=', 'Delete')
+                            ->get('menu_info')
+                            ->row_array();
+        if (!$vb_menu) {
+            $this->db->insert('menu_info', array(
+                'parent_id'   => $supplier_parent_id,
+                'menu_title'  => 'Vendor Balance Report',
+                'menu_slug'   => 'vendor-balance-report',
+                'menu_icon'   => 'fa fa-balance-scale',
+                'is_header'   => 0,
+                'sort_order'  => 3,
+                'status'      => 'Active'
+            ));
+            $vb_menu_id = $this->db->insert_id();
+        } else {
+            $vb_menu_id = (int)$vb_menu['menu_id'];
+            $this->db->where('menu_id', $vb_menu_id)->update('menu_info', array(
+                'parent_id'  => $supplier_parent_id,
+                'menu_title' => 'Vendor Balance Report',
+                'menu_icon'  => 'fa fa-balance-scale',
+                'sort_order' => 3,
+                'status'     => 'Active'
+            ));
+        }
+
         // 8. Update parent_id for Tender Reports
         $tender_slugs = array(
             'tender-enquiry-timeline',
@@ -203,6 +230,7 @@ class Menu_model extends CI_Model {
         $supplier_slugs = array(
             'vendor-pending-invoice-report',
             'vendor-statement-report',
+            'vendor-balance-report',
             'supplier-summary-report'
         );
         $this->db->where_in('menu_slug', $supplier_slugs)
@@ -216,10 +244,16 @@ class Menu_model extends CI_Model {
         $this->db->where('parent_id', $reports_main_id)->where('menu_slug', 'pl-report')->update('menu_info', array('sort_order' => 4));
         $this->db->where('parent_id', $reports_main_id)->where('menu_slug', 'account-trial-balance')->update('menu_info', array('sort_order' => 5));
 
+        // Fix sort orders inside Supplier Report
+        $this->db->where('menu_slug', 'vendor-pending-invoice-report')->update('menu_info', array('sort_order' => 1));
+        $this->db->where('menu_slug', 'vendor-statement-report')->update('menu_info', array('sort_order' => 2));
+        $this->db->where('menu_slug', 'vendor-balance-report')->update('menu_info', array('sort_order' => 3));
+        $this->db->where('menu_slug', 'supplier-summary-report')->update('menu_info', array('sort_order' => 4));
+
         // 11. Ensure role_permission for all active roles
         $roles = $this->db->where('status !=', 'Delete')->get('role_info')->result_array();
         if (!empty($roles)) {
-            $check_ids = array($tender_parent_id, $supplier_parent_id, $c_menu_id, $v_menu_id);
+            $check_ids = array($tender_parent_id, $supplier_parent_id, $c_menu_id, $v_menu_id, $vb_menu_id);
             foreach ($roles as $role) {
                 $role_id = (int)$role['role_id'];
                 foreach ($check_ids as $mid) {

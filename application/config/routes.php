@@ -365,6 +365,9 @@ $route['vendor/get_vendor_po_by_vendor_ajax'] = 'vendor/get_vendor_po_by_vendor_
 
 
 $route['supplier-summary-report'] = 'reports/supplier_summary_report';
+$route['vendor-balance-report'] = 'reports/vendor_balance_report';
+$route['vendor-balance-report/reset'] = 'reports/vendor_balance_report/reset';
+$route['vendor-balance-report/(:any)'] = 'reports/vendor_balance_report/$1';
 $route['invoice-report'] = 'reports/invoice_report';
 $route['tender-progress-report'] = 'reports/tender_progress_report';
 $route['vat-statement-report'] = 'reports/vat_statement_report';

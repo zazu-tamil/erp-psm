@@ -4718,8 +4718,13 @@ class Tender extends CI_Controller
             $data['srch_tender_dc_no'] = $srch_tender_dc_no = '';
         }
         if (!empty($srch_tender_dc_no)) {
-            $where = " (a.dc_no = '" . $this->db->escape_str($srch_tender_dc_no) . "')";
-            //srch_customer_id filter removed session 
+            $where = " (a.dc_no LIKE '%" . $this->db->escape_like_str($srch_tender_dc_no) . "%')";
+            $data['srch_from_date'] = $srch_from_date = '';
+            $data['srch_to_date'] = $srch_to_date = '';
+            $data['srch_customer_id'] = $srch_customer_id = '';
+            $this->session->unset_userdata('srch_from_date');
+            $this->session->unset_userdata('srch_to_date');
+            $this->session->unset_userdata('srch_customer_id');
         }
 
         // echo $where; // For debugging (remove in production)
