@@ -3461,6 +3461,166 @@ class Reports extends CI_Controller
         exit;
     }
 
+    public function customer_invoice_report($action = '')
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data['title'] = 'Customer Invoice Report';
+        $data['js'] = 'reports/customer-invoice-report.inc';
+        $data['s_url'] = 'customer-invoice-report';
+
+        // Check for Reset request
+        if ($action === 'reset' || $this->input->post('reset') == '1' || $this->input->get('reset') == '1') {
+            $this->session->unset_userdata('cir_from_date');
+            $this->session->unset_userdata('cir_to_date');
+            $this->session->unset_userdata('cir_customer_id');
+            redirect('customer-invoice-report');
+            return;
+        }
+
+        // Process POST submission
+        if ($this->input->server('REQUEST_METHOD') === 'POST') {
+            $srch_from_date = $this->input->post('srch_from_date') ?? '';
+            $srch_to_date = $this->input->post('srch_to_date') ?? '';
+            $srch_customer_id = $this->input->post('srch_customer_id') ?? '';
+
+            if ($this->input->post('export_excel') != '1') {
+                $this->session->set_userdata('cir_from_date', $srch_from_date);
+                $this->session->set_userdata('cir_to_date', $srch_to_date);
+                $this->session->set_userdata('cir_customer_id', $srch_customer_id);
+            }
+        } else {
+            // GET request
+            if ($this->input->get('srch_from_date') !== null || $this->input->get('srch_to_date') !== null || $this->input->get('srch_customer_id') !== null) {
+                $srch_from_date = $this->input->get('srch_from_date') ?? '';
+                $srch_to_date = $this->input->get('srch_to_date') ?? '';
+                $srch_customer_id = $this->input->get('srch_customer_id') ?? '';
+            } else {
+                $srch_from_date = $this->session->userdata('cir_from_date');
+                $srch_to_date = $this->session->userdata('cir_to_date');
+                $srch_customer_id = $this->session->userdata('cir_customer_id') ?? '';
+
+                // Default to 1st of current month and today
+                if ($srch_from_date === null) {
+                    $srch_from_date = date('Y-m-01');
+                }
+                if ($srch_to_date === null) {
+                    $srch_to_date = date('Y-m-d');
+                }
+            }
+        }
+
+        $data['srch_from_date'] = $srch_from_date;
+        $data['srch_to_date'] = $srch_to_date;
+        $data['srch_customer_id'] = $srch_customer_id;
+
+        // Fetch active customers for dropdown
+        $sql = "
+            SELECT customer_id, customer_name 
+            FROM customer_info 
+            WHERE status = 'Active' 
+            ORDER BY customer_name ASC";
+        $data['customer_list'] = $this->db->query($sql)->result_array();
+
+        // Selected customer name for display
+        $selected_customer_name = 'All Customers';
+        if (!empty($srch_customer_id)) {
+            foreach ($data['customer_list'] as $c) {
+                if ($c['customer_id'] == $srch_customer_id) {
+                    $selected_customer_name = $c['customer_name'];
+                    break;
+                }
+            }
+        }
+        $data['selected_customer_name'] = $selected_customer_name;
+
+        // Build WHERE conditions
+        $where_clauses = ["a.status = 'Active'"];
+        $params = [];
+
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $where_clauses[] = "a.invoice_date BETWEEN ? AND ?";
+            $params[] = $srch_from_date;
+            $params[] = $srch_to_date;
+        } elseif (!empty($srch_from_date)) {
+            $where_clauses[] = "a.invoice_date >= ?";
+            $params[] = $srch_from_date;
+        } elseif (!empty($srch_to_date)) {
+            $where_clauses[] = "a.invoice_date <= ?";
+            $params[] = $srch_to_date;
+        }
+
+        if (!empty($srch_customer_id)) {
+            $where_clauses[] = "a.customer_id = ?";
+            $params[] = $srch_customer_id;
+        }
+
+        $where_sql = implode(' AND ', $where_clauses);
+
+        $sql = "
+            SELECT 
+                a.tender_enq_invoice_id,
+                a.tender_enquiry_id,
+                a.tender_po_id,
+                a.invoice_date,
+                a.invoice_no,
+                a.customer_id,
+                b.customer_name,
+                b.gst AS client_vat_no,
+                b.crno AS customer_crno,
+                cpo.customer_po_no,
+                cpo.our_po_no,
+                te.enquiry_no,
+                get_tender_info(a.tender_enquiry_id) AS tender_details,
+                COALESCE(cur.currency_code, po_cur.currency_code, 'BHD') AS currency_code,
+                COALESCE(cur.decimal_point, po_cur.decimal_point, 3) AS decimal_point,
+                (a.total_amount - IFNULL(a.tax_amount, 0)) AS taxable_amount,
+                IFNULL(a.tax_amount, 0) AS tax_amount,
+                a.total_amount
+            FROM tender_enq_invoice_info a
+            LEFT JOIN customer_info b ON a.customer_id = b.customer_id AND b.status = 'Active'
+            LEFT JOIN customer_tender_po_info cpo ON a.tender_po_id = cpo.tender_po_id AND cpo.status = 'Active'
+            LEFT JOIN tender_enquiry_info te ON a.tender_enquiry_id = te.tender_enquiry_id AND te.status = 'Active'
+            LEFT JOIN currencies_info cur ON cur.currency_id = a.currency_id AND cur.status = 'Active'
+            LEFT JOIN currencies_info po_cur ON po_cur.currency_id = cpo.currency_id AND po_cur.status = 'Active'
+            WHERE {$where_sql}
+            ORDER BY a.invoice_date ASC, a.invoice_no ASC, a.tender_enq_invoice_id ASC
+        ";
+
+        $records = $this->db->query($sql, $params)->result_array();
+        $data['records'] = $records;
+
+        // KPI metrics
+        $total_invoices = count($records);
+        $total_taxable = 0;
+        $total_vat = 0;
+        $grand_total = 0;
+
+        foreach ($records as $row) {
+            $total_taxable += (float)$row['taxable_amount'];
+            $total_vat += (float)$row['tax_amount'];
+            $grand_total += (float)$row['total_amount'];
+        }
+
+        $data['total_invoices'] = $total_invoices;
+        $data['total_taxable'] = $total_taxable;
+        $data['total_vat'] = $total_vat;
+        $data['grand_total'] = $grand_total;
+
+        // Excel Export
+        if ($this->input->post('export_excel') == '1' || $this->input->get('export') == 'excel') {
+            $this->load->helper('download');
+            $filename = "Customer_Invoice_Report_" . ($srch_from_date ? $srch_from_date : 'all') . "_to_" . ($srch_to_date ? $srch_to_date : 'all') . ".xls";
+            $content = $this->load->view('page/reports/customer-invoice-report-xls', $data, TRUE);
+            force_download($filename, $content);
+            return;
+        }
+
+        $this->load->view('page/reports/customer-invoice-report', $data);
+    }
+
     public function pl_report()
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in')) {

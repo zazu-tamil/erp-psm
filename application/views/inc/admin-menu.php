@@ -378,6 +378,7 @@ $tender_report_grp = [
     'tender-enquiry-summary-report',
     'item-rate-report',
     'item-inward-outward-report',
+    'customer-invoice-report',
     'customer-invoice-pending-report',
     'customer-pending-invoice-report',
     'customer-statement-report',
@@ -451,6 +452,12 @@ $report_m_grp = array_merge(
                 <li class="<?= ($current_page === 'item-inward-outward-report') ? 'active' : '' ?>">
                     <a href="<?= site_url('item-inward-outward-report') ?>">
                         <i class="fa fa-exchange"></i> Item Inward &amp; Outward Report
+                    </a>
+                </li>
+
+                <li class="<?= ($current_page === 'customer-invoice-report') ? 'active' : '' ?>">
+                    <a href="<?= site_url('customer-invoice-report') ?>">
+                        <i class="fa fa-file-text-o"></i> Customer Invoice Report
                     </a>
                 </li>
 

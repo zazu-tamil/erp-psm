@@ -354,6 +354,8 @@ $route['customer-statement-report'] = 'reports/customer_statement_report';
 $route['customer-statement-report/(:any)'] = 'reports/customer_statement_report/$1';
 $route['customer-balance-report'] = 'reports/customer_balance_report';
 $route['customer-balance-report/(:any)'] = 'reports/customer_balance_report/$1';
+$route['customer-invoice-report'] = 'reports/customer_invoice_report';
+$route['customer-invoice-report/(:any)'] = 'reports/customer_invoice_report/$1';
 $route['get-customer-opening-balance'] = 'reports/get_customer_opening_balance_ajax';
 $route['get-customer-balance-summary'] = 'payment/get_customer_balance_summary';
 
