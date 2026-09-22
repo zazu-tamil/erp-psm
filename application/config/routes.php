@@ -349,8 +349,11 @@ $route['vendor-opening-balance-list/(:num)'] = 'master/vendor_opening_balance_li
 $route['customer-opening-balance-list'] = 'master/customer_opening_balance_list';
 $route['customer-opening-balance-list/(:num)'] = 'master/customer_opening_balance_list/$1';
 
-//customer statement
+//customer statement & balance
 $route['customer-statement-report'] = 'reports/customer_statement_report';
+$route['customer-statement-report/(:any)'] = 'reports/customer_statement_report/$1';
+$route['customer-balance-report'] = 'reports/customer_balance_report';
+$route['customer-balance-report/(:any)'] = 'reports/customer_balance_report/$1';
 $route['get-customer-opening-balance'] = 'reports/get_customer_opening_balance_ajax';
 $route['get-customer-balance-summary'] = 'payment/get_customer_balance_summary';
 

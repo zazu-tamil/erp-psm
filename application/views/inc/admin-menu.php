@@ -381,6 +381,7 @@ $tender_report_grp = [
     'customer-invoice-pending-report',
     'customer-pending-invoice-report',
     'customer-statement-report',
+    'customer-balance-report',
     'invoice-report',
     'tender-progress-report'
 ];
@@ -462,6 +463,12 @@ $report_m_grp = array_merge(
                 <li class="<?= ($current_page === 'customer-statement-report') ? 'active' : '' ?>">
                     <a href="<?= site_url('customer-statement-report') ?>">
                         <i class="fa fa-file-text"></i> Customer Statement Report
+                    </a>
+                </li>
+
+                <li class="<?= ($current_page === 'customer-balance-report') ? 'active' : '' ?>">
+                    <a href="<?= site_url('customer-balance-report') ?>">
+                        <i class="fa fa-balance-scale"></i> Customer Balance Report
                     </a>
                 </li>
 

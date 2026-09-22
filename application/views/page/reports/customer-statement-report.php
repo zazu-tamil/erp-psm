@@ -182,7 +182,7 @@ $min_date_attr = (!empty($customer_id) && !empty($op_exists)) ? 'min="' . $op_de
             <h3 class="box-title"><i class="fa fa-filter"></i> Search Filter</h3>
         </div>
         <div class="box-body">
-            <form method="get" action="" id="report-filter-form">
+            <form method="post" action="<?php echo site_url('customer-statement-report'); ?>" id="report-filter-form">
                 <input type="hidden" name="export_excel" id="export_excel" value="0">
                 <div class="row">
                     <div class="col-md-3">
@@ -209,9 +209,14 @@ $min_date_attr = (!empty($customer_id) && !empty($op_exists)) ? 'min="' . $op_de
 
                     <div class="col-md-3" id="div-submit" style="<?php echo $show_dates_style; ?>">
                         <label>&nbsp;</label><br>
-                        <button type="submit" class="btn btn-primary btn-block" style="border-radius: 6px; font-weight: 600; padding: 7px 15px;">
-                            <i class="fa fa-search"></i> Filter Report
-                        </button>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="submit" class="btn btn-primary" style="flex: 1; border-radius: 6px; font-weight: 600; padding: 7px 10px;">
+                                <i class="fa fa-search"></i> Filter Report
+                            </button>
+                            <a href="<?php echo site_url('customer-statement-report/reset'); ?>" class="btn btn-default" style="border-radius: 6px; font-weight: 600; padding: 7px 12px;" title="Reset Filter">
+                                <i class="fa fa-refresh"></i> Reset
+                            </a>
+                        </div>
                     </div>
                 </div>
             </form>

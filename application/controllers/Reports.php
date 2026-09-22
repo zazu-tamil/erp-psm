@@ -2856,36 +2856,60 @@ class Reports extends CI_Controller
         exit;
     }
 
-    public function customer_statement_report()
+    public function customer_statement_report($action = '')
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in')) {
             redirect();
         }
 
+        // Handle Reset
+        if ($action === 'reset' || $this->input->post('reset') == '1' || $this->input->get('reset') == '1') {
+            $this->session->unset_userdata('stmt_customer_id');
+            $this->session->unset_userdata('stmt_cust_from_date');
+            $this->session->unset_userdata('stmt_cust_to_date');
+            redirect('customer-statement-report');
+            return;
+        }
+
+        // If accessed with GET query parameters (e.g. ?customer_id=3&to_date=...),
+        // save to session and immediately redirect to clean URL without query string
+        if ($this->input->server('REQUEST_METHOD') === 'GET' && ($this->input->get('customer_id') !== null || $this->input->get('to_date') !== null || $this->input->get('from_date') !== null)) {
+            $get_customer_id = $this->input->get('customer_id');
+            $get_from_date = $this->input->get('from_date');
+            $get_to_date = $this->input->get('to_date');
+
+            if ($get_customer_id !== null) {
+                $this->session->set_userdata('stmt_customer_id', $get_customer_id);
+            }
+            if ($get_from_date !== null) {
+                $this->session->set_userdata('stmt_cust_from_date', $get_from_date);
+            }
+            if ($get_to_date !== null) {
+                $this->session->set_userdata('stmt_cust_to_date', $get_to_date);
+            }
+
+            redirect('customer-statement-report');
+            return;
+        }
+
         $data['title'] = 'Customer Statement Report';
         $data['js'] = 'reports/customer-reports.inc';
 
-        // Fetch inputs from either GET or POST
-        $customer_id = $this->input->get_post('customer_id');
-        $from_date = $this->input->get_post('from_date');
-        $to_date = $this->input->get_post('to_date');
+        // Process POST submission or read from session
+        if ($this->input->server('REQUEST_METHOD') === 'POST') {
+            $customer_id = $this->input->post('customer_id') !== null ? $this->input->post('customer_id') : '';
+            $from_date = $this->input->post('from_date') !== null ? $this->input->post('from_date') : '';
+            $to_date = $this->input->post('to_date') !== null ? $this->input->post('to_date') : '';
 
-        // Store / Retrieve from session for sticky behavior
-        if ($customer_id !== null) {
-            $this->session->set_userdata('stmt_customer_id', $customer_id);
+            // Only save into session if not a one-off export
+            if ($this->input->post('export_excel') != '1') {
+                $this->session->set_userdata('stmt_customer_id', $customer_id);
+                $this->session->set_userdata('stmt_cust_from_date', $from_date);
+                $this->session->set_userdata('stmt_cust_to_date', $to_date);
+            }
         } else {
             $customer_id = $this->session->userdata('stmt_customer_id') ?? '';
-        }
-
-        if ($from_date !== null) {
-            $this->session->set_userdata('stmt_cust_from_date', $from_date);
-        } else {
             $from_date = $this->session->userdata('stmt_cust_from_date') ?? '';
-        }
-
-        if ($to_date !== null) {
-            $this->session->set_userdata('stmt_cust_to_date', $to_date);
-        } else {
             $to_date = $this->session->userdata('stmt_cust_to_date') ?? '';
         }
 
@@ -3115,6 +3139,294 @@ class Reports extends CI_Controller
         }
 
         $this->load->view('page/reports/customer-statement-report', $data);
+    }
+
+    public function customer_balance_report($action = '')
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data['title'] = 'Customer Balance Report';
+        $data['js'] = 'reports/customer-balance-report.inc';
+
+        // Check for Reset request (via action segment, POST, or fallback GET)
+        if ($action === 'reset' || $this->input->post('reset') == '1' || $this->input->get('reset') == '1') {
+            $this->session->unset_userdata('cbal_customer_id');
+            $this->session->unset_userdata('cbal_as_on_date');
+            $this->session->unset_userdata('cbal_hide_zero');
+            redirect('customer-balance-report');
+            return;
+        }
+
+        // Process POST submission
+        if ($this->input->server('REQUEST_METHOD') === 'POST') {
+            $customer_id = $this->input->post('customer_id') ?? '';
+            $as_on_date = $this->input->post('as_on_date') ?? '';
+            $hide_zero = $this->input->post('hide_zero') ? '1' : '0';
+
+            // Only save into session for persistent filtering if not a one-off export
+            if ($this->input->post('export_excel') != '1') {
+                $this->session->set_userdata('cbal_customer_id', $customer_id);
+                $this->session->set_userdata('cbal_as_on_date', $as_on_date);
+                $this->session->set_userdata('cbal_hide_zero', $hide_zero);
+            }
+        } else {
+            // GET request (initial navigation or page refresh)
+            if ($this->input->get('as_on_date') !== null || $this->input->get('customer_id') !== null) {
+                $customer_id = $this->input->get('customer_id') ?? '';
+                $as_on_date = $this->input->get('as_on_date') ?? '';
+                $hide_zero = $this->input->get('hide_zero') ? '1' : '0';
+            } else {
+                $customer_id = $this->session->userdata('cbal_customer_id') ?? '';
+                $as_on_date = $this->session->userdata('cbal_as_on_date');
+                $hide_zero = $this->session->userdata('cbal_hide_zero') ?? '0';
+
+                // Default to today's date if never saved in session
+                if ($as_on_date === null) {
+                    $as_on_date = date('Y-m-d');
+                }
+            }
+        }
+
+        $data['customer_id'] = $customer_id;
+        $data['as_on_date'] = $as_on_date;
+        $data['hide_zero'] = $hide_zero;
+
+        // Fetch active customers for dropdown
+        $sql = "
+            SELECT customer_id, customer_name, crno, mobile 
+            FROM customer_info 
+            WHERE status = 'Active' 
+            ORDER BY customer_name ASC";
+        $data['customers'] = $this->db->query($sql)->result_array();
+
+        // Customer filter condition
+        $cust_where = "";
+        if (!empty($customer_id)) {
+            $esc_c = $this->db->escape_str($customer_id);
+            $cust_where = " AND customer_id = '$esc_c'";
+        }
+
+        $esc_as_on = !empty($as_on_date) ? $this->db->escape_str($as_on_date) : date('Y-m-d');
+
+        // 1. Fetch Customer Opening Balances configured in DB
+        $op_sql = "SELECT customer_id, opening_date, opening_amount, balance_type 
+                   FROM customer_opening_balance_info";
+        if (!empty($customer_id)) {
+            $op_sql .= " WHERE customer_id = '$esc_c'";
+        }
+        $op_rows = $this->db->query($op_sql)->result_array();
+        $op_map = [];
+        foreach ($op_rows as $op) {
+            $op_map[$op['customer_id']] = $op;
+        }
+
+        // 2. Fetch all sales invoices up to as_on_date
+        $inv_sql = "
+            SELECT customer_id, invoice_date, total_amount AS amount
+            FROM tender_enq_invoice_info
+            WHERE status = 'Active' AND invoice_date <= '$esc_as_on' {$cust_where}
+        ";
+        $inv_rows = $this->db->query($inv_sql)->result_array();
+        $inv_map = [];
+        foreach ($inv_rows as $inv) {
+            $cId = $inv['customer_id'];
+            if (!isset($inv_map[$cId])) {
+                $inv_map[$cId] = [];
+            }
+            $inv_map[$cId][] = $inv;
+        }
+
+        // 3. Fetch all receipts up to as_on_date
+        $rec_sql = "
+            SELECT customer_id, receipt_date, amount, is_without_bill
+            FROM tender_receipt_info
+            WHERE status = 'Active' AND receipt_date <= '$esc_as_on' {$cust_where}
+        ";
+        $rec_rows = $this->db->query($rec_sql)->result_array();
+        $rec_map = [];
+        foreach ($rec_rows as $r) {
+            $cId = $r['customer_id'];
+            if (!isset($rec_map[$cId])) {
+                $rec_map[$cId] = [];
+            }
+            $rec_map[$cId][] = $r;
+        }
+
+        // Aggregate records per customer
+        $record_list = [];
+        $total_summary = [
+            'opening_balance' => 0.000,
+            'total_invoices' => 0.000,
+            'advance_received' => 0.000,
+            'invoice_receipts' => 0.000,
+            'total_received' => 0.000,
+            'closing_balance' => 0.000,
+            'total_receivable' => 0.000,
+            'total_advance' => 0.000,
+        ];
+
+        foreach ($data['customers'] as $cust) {
+            $cId = $cust['customer_id'];
+
+            // Skip if single customer filter is active and this is not the customer
+            if (!empty($customer_id) && $customer_id != $cId) {
+                continue;
+            }
+
+            $opening_bal = 0.000;
+            $cust_invoices = 0.000;
+            $cust_adv_rec = 0.000;
+            $cust_inv_rec = 0.000;
+
+            if (isset($op_map[$cId])) {
+                $op_row = $op_map[$cId];
+                $op_date = $op_row['opening_date'];
+                // DR is positive receivable (customer owes us), CR is negative advance (we owe customer)
+                $base_op = ($op_row['balance_type'] === 'DR') ? (float) $op_row['opening_amount'] : -(float) $op_row['opening_amount'];
+
+                if (empty($op_date) || $esc_as_on >= $op_date) {
+                    $opening_bal = $base_op;
+                    // Invoices on or after opening_date up to as_on_date
+                    if (!empty($inv_map[$cId])) {
+                        foreach ($inv_map[$cId] as $item) {
+                            if (empty($op_date) || $item['invoice_date'] >= $op_date) {
+                                $cust_invoices += (float) $item['amount'];
+                            }
+                        }
+                    }
+                    // Receipts on or after opening_date up to as_on_date
+                    if (!empty($rec_map[$cId])) {
+                        foreach ($rec_map[$cId] as $item) {
+                            if (empty($op_date) || $item['receipt_date'] >= $op_date) {
+                                if (!empty($item['is_without_bill']) && $item['is_without_bill'] == 1) {
+                                    $cust_adv_rec += (float) $item['amount'];
+                                } else {
+                                    $cust_inv_rec += (float) $item['amount'];
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // as_on_date is prior to configured opening_date
+                    $opening_bal = 0.000;
+                    if (!empty($inv_map[$cId])) {
+                        foreach ($inv_map[$cId] as $item) {
+                            $cust_invoices += (float) $item['amount'];
+                        }
+                    }
+                    if (!empty($rec_map[$cId])) {
+                        foreach ($rec_map[$cId] as $item) {
+                            if (!empty($item['is_without_bill']) && $item['is_without_bill'] == 1) {
+                                $cust_adv_rec += (float) $item['amount'];
+                            } else {
+                                $cust_inv_rec += (float) $item['amount'];
+                            }
+                        }
+                    }
+                }
+            } else {
+                // No configured opening balance record
+                $opening_bal = 0.000;
+                if (!empty($inv_map[$cId])) {
+                    foreach ($inv_map[$cId] as $item) {
+                        $cust_invoices += (float) $item['amount'];
+                    }
+                }
+                if (!empty($rec_map[$cId])) {
+                    foreach ($rec_map[$cId] as $item) {
+                        if (!empty($item['is_without_bill']) && $item['is_without_bill'] == 1) {
+                            $cust_adv_rec += (float) $item['amount'];
+                        } else {
+                            $cust_inv_rec += (float) $item['amount'];
+                        }
+                    }
+                }
+            }
+
+            $total_received = $cust_adv_rec + $cust_inv_rec;
+            $closing_bal = $opening_bal + $cust_invoices - $total_received;
+
+            // Status: positive = Receivable, negative = Advance, zero = Settled
+            if ($closing_bal > 0.001) {
+                $status = 'Receivable';
+                $status_color = 'danger';
+            } elseif ($closing_bal < -0.001) {
+                $status = 'Advance';
+                $status_color = 'primary';
+            } else {
+                $status = 'Settled';
+                $status_color = 'success';
+            }
+
+            // Check if hide_zero is active
+            if ($hide_zero == '1') {
+                if (abs($opening_bal) < 0.001 && abs($cust_invoices) < 0.001 && abs($total_received) < 0.001 && abs($closing_bal) < 0.001) {
+                    continue;
+                }
+            }
+
+            $row_data = [
+                'customer_id' => $cId,
+                'customer_name' => $cust['customer_name'],
+                'crno' => $cust['crno'] ?? '',
+                'mobile' => $cust['mobile'] ?? '',
+                'opening_balance' => $opening_bal,
+                'total_invoices' => $cust_invoices,
+                'advance_received' => $cust_adv_rec,
+                'invoice_receipts' => $cust_inv_rec,
+                'total_received' => $total_received,
+                'closing_balance' => $closing_bal,
+                'status' => $status,
+                'status_color' => $status_color
+            ];
+
+            $record_list[] = $row_data;
+
+            // Totals
+            $total_summary['opening_balance'] += $opening_bal;
+            $total_summary['total_invoices'] += $cust_invoices;
+            $total_summary['advance_received'] += $cust_adv_rec;
+            $total_summary['invoice_receipts'] += $cust_inv_rec;
+            $total_summary['total_received'] += $total_received;
+            $total_summary['closing_balance'] += $closing_bal;
+
+            if ($closing_bal > 0) {
+                $total_summary['total_receivable'] += $closing_bal;
+            } else {
+                $total_summary['total_advance'] += abs($closing_bal);
+            }
+        }
+
+        $data['record_list'] = $record_list;
+        $data['summary'] = $total_summary;
+
+        // Selected customer name for titles and export
+        $selected_customer_name = 'All_Customers';
+        if (!empty($customer_id)) {
+            foreach ($data['customers'] as $c) {
+                if ($c['customer_id'] == $customer_id) {
+                    $selected_customer_name = $c['customer_name'];
+                    break;
+                }
+            }
+        }
+        $data['selected_customer_name'] = $selected_customer_name;
+
+        // Excel Export
+        if ($this->input->get_post('export_excel') == '1') {
+            header("Content-Type: application/vnd.ms-excel");
+            $clean_customer_name = preg_replace('/[^A-Za-z0-9_\-]/', '_', $selected_customer_name);
+            $filename = "Customer_Balance_Report_" . $clean_customer_name . "_As_On_" . ($as_on_date ? $as_on_date : date('Y-m-d')) . ".xls";
+            header("Content-Disposition: attachment; filename=" . $filename);
+            header("Pragma: no-cache");
+            header("Expires: 0");
+            $this->load->view('page/reports/customer-balance-report-xls', $data);
+            return;
+        }
+
+        $this->load->view('page/reports/customer-balance-report', $data);
     }
 
     public function get_customer_opening_balance_ajax()
