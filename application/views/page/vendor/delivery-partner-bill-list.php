@@ -84,14 +84,15 @@
                     <tr>
                         <th class="text-center">S.No</th>
                         <th>Sub A/C Head</th>
-                        <th>Deliver Partner</th>
-                        <th>Customer</th>
+                        <th>Deliver Partner</th> 
                         <th>Our Enquiry No</th>
                         <th>Invoice No</th>
                         <th>Invoice Date</th>
                         <th>Remarks</th>
-                        <th>Amt W/O DP</th> 
-                        <th>Amt With Tax/DP</th>
+                        <th class="text-right">Amt W/O DP</th> 
+                        <th class="text-right">Vat Amt</th> 
+                        <th class="text-right">Amt With Tax/DP</th>
+                        <th class="text-right">Gr Total Amt</th> 
                         <th colspan="2" class="text-center">Action</th>
                     </tr>
                 </thead>
@@ -103,17 +104,23 @@
                         <td class="text-center"><?php echo ($j + 1); ?></td>
                         <td><?php echo htmlspecialchars($ls['sub_account_head_name'] ?? ''); ?></td>
                         <td><?php echo htmlspecialchars($ls['vendor_name'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($ls['customer_name'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($ls['tender_info'] ?? ''); ?></td>
+                         <td><?php echo htmlspecialchars($ls['tender_info'] ?? ''); ?></td>
                         <td><?php echo htmlspecialchars($ls['invoice_no'] ?? ''); ?></td>
                         <td><?php echo (!empty($ls['invoice_date']) && $ls['invoice_date'] != '0000-00-00') ? date('d-m-Y', strtotime($ls['invoice_date'])) : ''; ?></td>
                         <td><?php echo htmlspecialchars($ls['remarks'] ?? ''); ?></td>
                         <td class="text-right">
-                            <?php echo number_format((float) ($ls['tot_amt_wo_dp'] ?? 0), 3); ?>
+                            <?php echo number_format((float) ($ls['dp_charges'] ?? 0), 3); ?>
+                        </td>
+                        <td class="text-right">
+                            <?php echo number_format((float) ($ls['dp_vat_amt'] ?? 0), 3); ?>
+                        </td>
+                        <td class="text-right">
+                            <?php echo number_format((float) ($ls['dp_vat_amt'] + $ls['dp_charges'] ?? 0), 3); ?>
                         </td>
                         <td class="text-right">
                             <?php echo number_format((float) ($ls['g_total'] ?? 0), 3); ?>
                         </td>
+
                         <td class="text-center">
                             <button data-toggle="modal" data-target="#edit_modal"
                                 value="<?php echo $ls['dp_bill_id'] ?? ''; ?>"

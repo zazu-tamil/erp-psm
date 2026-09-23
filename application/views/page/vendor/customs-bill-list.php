@@ -34,8 +34,12 @@
                     <div class="form-group col-md-6">
                         <label>Is Bill</label><br>
                         <label class="radio-inline"><input type="radio" name="srch_ac_type_opt" value="" <?php echo ($srch_ac_type_opt == '') ? 'checked' : ''; ?>> All</label>
-                        <label class="radio-inline"><input type="radio" name="srch_ac_type_opt" value="Accountable" <?php echo ($srch_ac_type_opt == 'Accountable') ? 'checked' : ''; ?>> For NBR & Company Account</label>
-                        <label class="radio-inline"><input type="radio" name="srch_ac_type_opt" value="Not-Accountable" <?php echo ($srch_ac_type_opt == 'Not-Accountable') ? 'checked' : ''; ?>> For NBR Only</label>
+                        <label class="radio-inline"><input type="radio" name="srch_ac_type_opt" value="Accountable"
+                                <?php echo ($srch_ac_type_opt == 'Accountable') ? 'checked' : ''; ?>> For NBR & Company
+                            Account</label>
+                        <label class="radio-inline"><input type="radio" name="srch_ac_type_opt" value="Not-Accountable"
+                                <?php echo ($srch_ac_type_opt == 'Not-Accountable') ? 'checked' : ''; ?>> For NBR
+                            Only</label>
                     </div>
                 </div>
 
@@ -87,12 +91,12 @@
                         <th>Inv Date</th>
                         <th>Is Bill</th>
                         <th>Supplier / Supplier 2</th>
-                        <th>Customer</th>
                         <th>Our Enquiry No</th>
                         <th>Invoice No</th>
                         <th>Remarks</th>
                         <th class="text-right">Amt W/O VAT</th>
                         <th class="text-right">Customs Payable</th>
+                        <th class="text-right">Vat Amt</th>
                         <th class="text-right">Customs Total</th>
                         <th colspan="2" class="text-center">Action</th>
                     </tr>
@@ -113,16 +117,20 @@
                                     <?= htmlspecialchars($ls['vendor_name_2'] ?? '-', ENT_QUOTES, 'UTF-8'); ?>
                                 </span>
                             </td>
-                            <td><?php echo htmlspecialchars($ls['customer_name'] ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($ls['tender_info'] ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($ls['invoice_no'] ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($ls['remarks'] ?? ''); ?></td>
                             <td class="text-right">
-                                <?php echo number_format((float) ($ls['tot_amt_wo_vat'] ?? 0), 3); ?>
+                                <?php echo number_format((float) ($ls['custom_stamp_fee']  + $ls['custom_duty'] ?? 0), 3); ?>
                             </td>
                             <td class="text-right">
                                 <?php echo number_format((float) ($ls['customs_payable'] ?? 0), 3); ?>
                             </td>
+                            <td class="text-right">
+                                <?php echo number_format((float) ($ls['vat_amt'] ?? 0), 3); ?>
+                            </td>
+
+
                             <td class="text-right">
                                 <?php echo number_format((float) ($ls['customs_tot_amt'] ?? 0), 3); ?>
                             </td>

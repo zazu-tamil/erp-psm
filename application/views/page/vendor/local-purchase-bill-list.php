@@ -85,12 +85,12 @@
                     <tr>
                         <th class="text-center">S.No</th>
                         <th>Sub A/C Head</th>
-                        <th>Supplier / Supplier 2</th>
-                        <th>Customer</th>
+                        <th>Supplier / Supplier 2</th> 
                         <th>Our Enquiry No</th>
                         <th>Invoice No</th>
                         <th>Remarks</th>
                         <th class="text-right">Amt W/O Tax</th>
+                        <th class="text-right">Vat Amt</th> 
                         <th class="text-right">Amt With Tax</th>
                         <th colspan="2" class="text-center">Action</th>
                     </tr>
@@ -107,13 +107,15 @@
                                 <span class="label label-default">
                                     <?= htmlspecialchars($ls['vendor_name_2'] ?? '-', ENT_QUOTES, 'UTF-8'); ?>
                                 </span>
-                            </td> 
-                            <td><?php echo htmlspecialchars($ls['customer_name'] ?? ''); ?></td>
+                            </td>  
                             <td><?php echo htmlspecialchars($ls['tender_info'] ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($ls['invoice_no'] ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($ls['remarks'] ?? ''); ?></td>
                             <td class="text-right">
                                 <?php echo number_format((float) ($ls['tot_amt_wo_tax'] ?? 0), 3); ?>
+                            </td>
+                             <td class="text-right">
+                                <?php echo number_format((float) ($ls['vat_amt'] ?? 0), 3); ?>
                             </td>
                             <td class="text-right">
                                 <?php echo number_format((float) ($ls['tot_amt_with_tax'] ?? 0), 3); ?>
