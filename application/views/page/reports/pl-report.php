@@ -46,11 +46,11 @@
     <?php
     // --- Data Extraction & Calculation ---
     $sales_wo_tax = (float) (is_array($sales_summary ?? null) ? ($sales_summary['total_sales_wo_tax'] ?? 0) : ($sales ?? 0));
-    $sales_tax    = (float) (is_array($sales_summary ?? null) ? ($sales_summary['total_sales_tax'] ?? 0) : 0);
+    $sales_tax = (float) (is_array($sales_summary ?? null) ? ($sales_summary['total_sales_tax'] ?? 0) : 0);
     $sales_with_tax = (float) (is_array($sales_summary ?? null) ? ($sales_summary['total_sales_with_tax'] ?? $sales_wo_tax) : $sales_wo_tax);
 
     $purchases_wo_tax = (float) (is_array($purchases_summary ?? null) ? ($purchases_summary['total_purchases_wo_tax'] ?? 0) : ($purchases ?? 0));
-    $purchases_tax    = (float) (is_array($purchases_summary ?? null) ? ($purchases_summary['total_purchases_tax'] ?? 0) : 0);
+    $purchases_tax = (float) (is_array($purchases_summary ?? null) ? ($purchases_summary['total_purchases_tax'] ?? 0) : 0);
     $purchases_with_tax = (float) (is_array($purchases_summary ?? null) ? ($purchases_summary['total_purchases_with_tax'] ?? $purchases_wo_tax) : $purchases_wo_tax);
 
     // Group other income by parent head
@@ -196,11 +196,13 @@
             </div>
             <div class="kpi-content">
                 <div class="kpi-header-row">
-                    <span class="kpi-title">NET <?php echo $is_profit_wo_tax ? 'PROFIT' : 'LOSS'; ?> (WITHOUT TAX)</span>
+                    <span class="kpi-title">NET <?php echo $is_profit_wo_tax ? 'PROFIT' : 'LOSS'; ?> (WITHOUT
+                        TAX)</span>
                     <span class="kpi-tag kpi-tag-wo">Excl. Tax</span>
                 </div>
                 <h3 class="kpi-value"><?php echo number_format(abs($net_profit_wo_tax), 3); ?> <small>BHD</small></h3>
-                <p class="kpi-subtext">Income: <?php echo number_format($income_total_wo_tax, 3); ?> | Expense: <?php echo number_format($expense_total_wo_tax, 3); ?></p>
+                <p class="kpi-subtext">Income: <?php echo number_format($income_total_wo_tax, 3); ?> | Expense:
+                    <?php echo number_format($expense_total_wo_tax, 3); ?></p>
             </div>
         </div>
 
@@ -215,7 +217,8 @@
                     <span class="kpi-tag kpi-tag-with">Incl. Tax</span>
                 </div>
                 <h3 class="kpi-value"><?php echo number_format(abs($net_profit_with_tax), 3); ?> <small>BHD</small></h3>
-                <p class="kpi-subtext">Income: <?php echo number_format($income_total_with_tax, 3); ?> | Expense: <?php echo number_format($expense_total_with_tax, 3); ?></p>
+                <p class="kpi-subtext">Income: <?php echo number_format($income_total_with_tax, 3); ?> | Expense:
+                    <?php echo number_format($expense_total_with_tax, 3); ?></p>
             </div>
         </div>
 
@@ -230,7 +233,8 @@
                     <span class="kpi-tag kpi-tag-tax"><?php echo $net_tax_diff >= 0 ? 'Payable' : 'Credit'; ?></span>
                 </div>
                 <h3 class="kpi-value"><?php echo number_format(abs($net_tax_diff), 3); ?> <small>BHD</small></h3>
-                <p class="kpi-subtext">Output VAT: <?php echo number_format($income_total_tax, 3); ?> | Input VAT: <?php echo number_format($expense_total_tax, 3); ?></p>
+                <p class="kpi-subtext">Output VAT: <?php echo number_format($income_total_tax, 3); ?> | Input VAT:
+                    <?php echo number_format($expense_total_tax, 3); ?></p>
             </div>
         </div>
     </div>
@@ -304,7 +308,8 @@
                                 <div class="pl-group">
                                     <div class="pl-item pl-head">
                                         <span class="item-name">Purchases</span>
-                                        <span class="item-amount"><?php echo number_format($purchases_wo_tax, 3); ?></span>
+                                        <span
+                                            class="item-amount"><?php echo number_format($purchases_wo_tax, 3); ?></span>
                                     </div>
                                 </div>
 
@@ -312,15 +317,17 @@
                                 <div class="pl-group">
                                     <div class="pl-item pl-head">
                                         <span class="item-name">Indirect Expenses</span>
-                                        <span class="item-amount"><?php echo number_format($indirect_total_wo_tax, 3); ?></span>
+                                        <span
+                                            class="item-amount"><?php echo number_format($indirect_total_wo_tax, 3); ?></span>
                                     </div>
                                     <?php if (!empty($indirect_expenses)): ?>
                                         <div class="pl-sub-items">
                                             <?php foreach ($indirect_expenses as $expense): ?>
                                                 <div class="pl-item pl-sub-item">
-                                                    <span class="item-name text-capitalize"><?php echo strtolower($expense['exp_type']); ?></span>
+                                                    <span
+                                                        class="item-name text-capitalize"><?php echo strtolower($expense['exp_type']); ?></span>
                                                     <span class="item-amount">
-                                                        <?php echo number_format((float)($expense['exp_amt_wo_tax'] ?? $expense['exp_amt'] ?? 0), 3); ?>
+                                                        <?php echo number_format((float) ($expense['exp_amt_wo_tax'] ?? $expense['exp_amt'] ?? 0), 3); ?>
                                                     </span>
                                                 </div>
                                             <?php endforeach; ?>
@@ -329,7 +336,7 @@
                                 </div>
                             </div>
                             <div class="section-total">
-                                <span>Total Expenses</span>
+                                <span>Total Expenses (Without Tax)</span>
                                 <span class="total-amount"><?php echo number_format($expense_total_wo_tax, 3); ?></span>
                             </div>
                         </div>
@@ -361,7 +368,8 @@
                                             <div class="pl-sub-items">
                                                 <?php foreach ($head_data['sub_items'] as $sub_item): ?>
                                                     <div class="pl-item pl-sub-item">
-                                                        <span class="item-name"><?php echo htmlspecialchars($sub_item['name']); ?></span>
+                                                        <span
+                                                            class="item-name"><?php echo htmlspecialchars($sub_item['name']); ?></span>
                                                         <span class="item-amount">
                                                             <?php echo number_format($sub_item['amount_wo_tax'], 3); ?>
                                                         </span>
@@ -375,7 +383,7 @@
                                 <?php endif; ?>
                             </div>
                             <div class="section-total">
-                                <span>Total Income</span>
+                                <span>Total Income (Without Tax)</span>
                                 <span class="total-amount"><?php echo number_format($income_total_wo_tax, 3); ?></span>
                             </div>
                         </div>
@@ -384,11 +392,13 @@
                     <!-- NET RESULT (WITHOUT TAX) -->
                     <div class="net-result <?php echo $is_profit_wo_tax ? 'profit' : 'loss'; ?>">
                         <div class="result-icon">
-                            <i class="fa fa-<?php echo $is_profit_wo_tax ? 'check-circle' : 'exclamation-triangle'; ?>"></i>
+                            <i
+                                class="fa fa-<?php echo $is_profit_wo_tax ? 'check-circle' : 'exclamation-triangle'; ?>"></i>
                         </div>
                         <div class="result-text">
                             <h3>NET <?php echo $is_profit_wo_tax ? 'PROFIT' : 'LOSS'; ?> (WITHOUT TAX)</h3>
-                            <p class="result-amount"><?php echo number_format(abs($net_profit_wo_tax), 3); ?> <span class="currency">BHD</span></p>
+                            <p class="result-amount"><?php echo number_format(abs($net_profit_wo_tax), 3); ?> <span
+                                    class="currency">BHD</span></p>
                         </div>
                     </div>
                 </div>
@@ -413,7 +423,8 @@
                                 <div class="pl-group">
                                     <div class="pl-item pl-head">
                                         <span class="item-name">Purchases</span>
-                                        <span class="item-amount"><?php echo number_format($purchases_with_tax, 3); ?></span>
+                                        <span
+                                            class="item-amount"><?php echo number_format($purchases_with_tax, 3); ?></span>
                                     </div>
                                 </div>
 
@@ -421,15 +432,17 @@
                                 <div class="pl-group">
                                     <div class="pl-item pl-head">
                                         <span class="item-name">Indirect Expenses</span>
-                                        <span class="item-amount"><?php echo number_format($indirect_total_with_tax, 3); ?></span>
+                                        <span
+                                            class="item-amount"><?php echo number_format($indirect_total_with_tax, 3); ?></span>
                                     </div>
                                     <?php if (!empty($indirect_expenses)): ?>
                                         <div class="pl-sub-items">
                                             <?php foreach ($indirect_expenses as $expense): ?>
                                                 <div class="pl-item pl-sub-item">
-                                                    <span class="item-name text-capitalize"><?php echo strtolower($expense['exp_type']); ?></span>
+                                                    <span
+                                                        class="item-name text-capitalize"><?php echo strtolower($expense['exp_type']); ?></span>
                                                     <span class="item-amount">
-                                                        <?php echo number_format((float)($expense['exp_amt_with_tax'] ?? $expense['exp_amt'] ?? 0), 3); ?>
+                                                        <?php echo number_format((float) ($expense['exp_amt_with_tax'] ?? $expense['exp_amt'] ?? 0), 3); ?>
                                                     </span>
                                                 </div>
                                             <?php endforeach; ?>
@@ -438,8 +451,14 @@
                                 </div>
                             </div>
                             <div class="section-total">
-                                <span>Total Expenses</span>
-                                <span class="total-amount"><?php echo number_format($expense_total_with_tax, 3); ?></span>
+                                <span>Total Expenses (With Tax)</span>
+                                <span
+                                    class="total-amount"><?php echo number_format($expense_total_with_tax, 3); ?></span>
+                            </div>
+                            <div class="section-total"
+                                style="font-size: 13px; color: #64748b; border-top: 1px dashed #e2e8f0; padding-top: 10px; margin-top: -5px;">
+                                <span>Total Tax (With Tax)</span>
+                                <span class="total-amount"><?php echo number_format($expense_total_tax, 3); ?></span>
                             </div>
                         </div>
 
@@ -453,7 +472,8 @@
                                 <div class="pl-group">
                                     <div class="pl-item pl-head">
                                         <span class="item-name">Sales</span>
-                                        <span class="item-amount"><?php echo number_format($sales_with_tax, 3); ?></span>
+                                        <span
+                                            class="item-amount"><?php echo number_format($sales_with_tax, 3); ?></span>
                                     </div>
                                 </div>
 
@@ -470,7 +490,8 @@
                                             <div class="pl-sub-items">
                                                 <?php foreach ($head_data['sub_items'] as $sub_item): ?>
                                                     <div class="pl-item pl-sub-item">
-                                                        <span class="item-name"><?php echo htmlspecialchars($sub_item['name']); ?></span>
+                                                        <span
+                                                            class="item-name"><?php echo htmlspecialchars($sub_item['name']); ?></span>
                                                         <span class="item-amount">
                                                             <?php echo number_format($sub_item['amount_with_tax'], 3); ?>
                                                         </span>
@@ -484,8 +505,14 @@
                                 <?php endif; ?>
                             </div>
                             <div class="section-total">
-                                <span>Total Income</span>
-                                <span class="total-amount"><?php echo number_format($income_total_with_tax, 3); ?></span>
+                                <span>Total Income (With Tax)</span>
+                                <span
+                                    class="total-amount"><?php echo number_format($income_total_with_tax, 3); ?></span>
+                            </div>
+                            <div class="section-total"
+                                style="font-size: 13px; color: #64748b; border-top: 1px dashed #e2e8f0; padding-top: 10px; margin-top: -5px;">
+                                <span>Total Tax (With Tax)</span>
+                                <span class="total-amount"><?php echo number_format($income_total_tax, 3); ?></span>
                             </div>
                         </div>
                     </div>
@@ -493,11 +520,13 @@
                     <!-- NET RESULT (WITH TAX) -->
                     <div class="net-result <?php echo $is_profit_with_tax ? 'profit' : 'loss'; ?>">
                         <div class="result-icon">
-                            <i class="fa fa-<?php echo $is_profit_with_tax ? 'check-circle' : 'exclamation-triangle'; ?>"></i>
+                            <i
+                                class="fa fa-<?php echo $is_profit_with_tax ? 'check-circle' : 'exclamation-triangle'; ?>"></i>
                         </div>
                         <div class="result-text">
                             <h3>NET <?php echo $is_profit_with_tax ? 'PROFIT' : 'LOSS'; ?> (WITH TAX)</h3>
-                            <p class="result-amount"><?php echo number_format(abs($net_profit_with_tax), 3); ?> <span class="currency">BHD</span></p>
+                            <p class="result-amount"><?php echo number_format(abs($net_profit_with_tax), 3); ?> <span
+                                    class="currency">BHD</span></p>
                         </div>
                     </div>
                 </div>
@@ -510,7 +539,8 @@
         <!-- ============================================================== -->
         <div id="view-wo-tax" class="pl-view-panel screen-view">
             <div class="single-view-banner wo-tax-banner">
-                <i class="fa fa-info-circle"></i> Showing Profit & Loss Statement based on <strong>Without Tax</strong> (Base / Taxable Values)
+                <i class="fa fa-info-circle"></i> Showing Profit & Loss Statement based on <strong>Without Tax</strong>
+                (Base / Taxable Values)
             </div>
             <div class="pl-grid">
                 <!-- EXPENSE SECTION -->
@@ -537,9 +567,10 @@
                                 <div class="pl-sub-items">
                                     <?php foreach ($indirect_expenses as $expense): ?>
                                         <div class="pl-item pl-sub-item">
-                                            <span class="item-name text-capitalize"><?php echo strtolower($expense['exp_type']); ?></span>
+                                            <span
+                                                class="item-name text-capitalize"><?php echo strtolower($expense['exp_type']); ?></span>
                                             <span class="item-amount">
-                                                <?php echo number_format((float)($expense['exp_amt_wo_tax'] ?? $expense['exp_amt'] ?? 0), 3); ?>
+                                                <?php echo number_format((float) ($expense['exp_amt_wo_tax'] ?? $expense['exp_amt'] ?? 0), 3); ?>
                                             </span>
                                         </div>
                                     <?php endforeach; ?>
@@ -548,7 +579,7 @@
                         </div>
                     </div>
                     <div class="section-total">
-                        <span>Total Expenses</span>
+                        <span>Total Expenses (Without Tax)</span>
                         <span class="total-amount"><?php echo number_format($expense_total_wo_tax, 3); ?></span>
                     </div>
                 </div>
@@ -592,7 +623,7 @@
                         <?php endif; ?>
                     </div>
                     <div class="section-total">
-                        <span>Total Income</span>
+                        <span>Total Income (Without Tax)</span>
                         <span class="total-amount"><?php echo number_format($income_total_wo_tax, 3); ?></span>
                     </div>
                 </div>
@@ -615,7 +646,8 @@
         <!-- ============================================================== -->
         <div id="view-with-tax" class="pl-view-panel screen-view">
             <div class="single-view-banner with-tax-banner">
-                <i class="fa fa-info-circle"></i> Showing Profit & Loss Statement based on <strong>With Tax</strong> (Gross / Inclusive Values)
+                <i class="fa fa-info-circle"></i> Showing Profit & Loss Statement based on <strong>With Tax</strong>
+                (Gross / Inclusive Values)
             </div>
             <div class="pl-grid">
                 <!-- EXPENSE SECTION -->
@@ -636,15 +668,17 @@
                         <div class="pl-group">
                             <div class="pl-item pl-head">
                                 <span class="item-name">Indirect Expenses</span>
-                                <span class="item-amount"><?php echo number_format($indirect_total_with_tax, 3); ?></span>
+                                <span
+                                    class="item-amount"><?php echo number_format($indirect_total_with_tax, 3); ?></span>
                             </div>
                             <?php if (!empty($indirect_expenses)): ?>
                                 <div class="pl-sub-items">
                                     <?php foreach ($indirect_expenses as $expense): ?>
                                         <div class="pl-item pl-sub-item">
-                                            <span class="item-name text-capitalize"><?php echo strtolower($expense['exp_type']); ?></span>
+                                            <span
+                                                class="item-name text-capitalize"><?php echo strtolower($expense['exp_type']); ?></span>
                                             <span class="item-amount">
-                                                <?php echo number_format((float)($expense['exp_amt_with_tax'] ?? $expense['exp_amt'] ?? 0), 3); ?>
+                                                <?php echo number_format((float) ($expense['exp_amt_with_tax'] ?? $expense['exp_amt'] ?? 0), 3); ?>
                                             </span>
                                         </div>
                                     <?php endforeach; ?>
@@ -653,8 +687,13 @@
                         </div>
                     </div>
                     <div class="section-total">
-                        <span>Total Expenses</span>
+                        <span>Total Expenses (With Tax)</span>
                         <span class="total-amount"><?php echo number_format($expense_total_with_tax, 3); ?></span>
+                    </div>
+                    <div class="section-total"
+                        style="font-size: 13px; color: #64748b; border-top: 1px dashed #e2e8f0; padding-top: 10px; margin-top: -5px;">
+                        <span>Total Tax (With Tax)</span>
+                        <span class="total-amount"><?php echo number_format($expense_total_tax, 3); ?></span>
                     </div>
                 </div>
 
@@ -697,8 +736,13 @@
                         <?php endif; ?>
                     </div>
                     <div class="section-total">
-                        <span>Total Income</span>
+                        <span>Total Income (With Tax)</span>
                         <span class="total-amount"><?php echo number_format($income_total_with_tax, 3); ?></span>
+                    </div>
+                    <div class="section-total"
+                        style="font-size: 13px; color: #64748b; border-top: 1px dashed #e2e8f0; padding-top: 10px; margin-top: -5px;">
+                        <span>Total Tax (With Tax)</span>
+                        <span class="total-amount"><?php echo number_format($income_total_tax, 3); ?></span>
                     </div>
                 </div>
             </div>
@@ -742,16 +786,18 @@
                         <?php for ($i = 0; $i < $max_table_rows; $i++):
                             $exp_row = $expense_table_rows[$i] ?? null;
                             $inc_row = $income_table_rows[$i] ?? null;
-                        ?>
+                            ?>
                             <tr>
                                 <!-- Expense Side -->
-                                <td class="<?php echo ($exp_row && $exp_row['is_head']) ? 'cell-head' : ''; ?> <?php echo ($exp_row && $exp_row['is_sub']) ? 'cell-sub' : ''; ?>">
+                                <td
+                                    class="<?php echo ($exp_row && $exp_row['is_head']) ? 'cell-head' : ''; ?> <?php echo ($exp_row && $exp_row['is_sub']) ? 'cell-sub' : ''; ?>">
                                     <?php echo $exp_row ? htmlspecialchars($exp_row['text']) : ''; ?>
                                 </td>
                                 <td class="text-right <?php echo ($exp_row && $exp_row['is_head']) ? 'cell-head' : ''; ?>">
                                     <?php echo $exp_row ? number_format($exp_row['wo_tax'], 3) : ''; ?>
                                 </td>
-                                <td class="text-right <?php echo ($exp_row && $exp_row['is_head']) ? 'cell-head text-muted' : 'text-muted'; ?>">
+                                <td
+                                    class="text-right <?php echo ($exp_row && $exp_row['is_head']) ? 'cell-head text-muted' : 'text-muted'; ?>">
                                     <?php echo $exp_row ? number_format($exp_row['tax'], 3) : ''; ?>
                                 </td>
                                 <td class="text-right <?php echo ($exp_row && $exp_row['is_head']) ? 'cell-head' : ''; ?>">
@@ -759,13 +805,15 @@
                                 </td>
 
                                 <!-- Income Side -->
-                                <td class="<?php echo ($inc_row && $inc_row['is_head']) ? 'cell-head' : ''; ?> <?php echo ($inc_row && $inc_row['is_sub']) ? 'cell-sub' : ''; ?>">
+                                <td
+                                    class="<?php echo ($inc_row && $inc_row['is_head']) ? 'cell-head' : ''; ?> <?php echo ($inc_row && $inc_row['is_sub']) ? 'cell-sub' : ''; ?>">
                                     <?php echo $inc_row ? htmlspecialchars($inc_row['text']) : ''; ?>
                                 </td>
                                 <td class="text-right <?php echo ($inc_row && $inc_row['is_head']) ? 'cell-head' : ''; ?>">
                                     <?php echo $inc_row ? number_format($inc_row['wo_tax'], 3) : ''; ?>
                                 </td>
-                                <td class="text-right <?php echo ($inc_row && $inc_row['is_head']) ? 'cell-head text-muted' : 'text-muted'; ?>">
+                                <td
+                                    class="text-right <?php echo ($inc_row && $inc_row['is_head']) ? 'cell-head text-muted' : 'text-muted'; ?>">
                                     <?php echo $inc_row ? number_format($inc_row['tax'], 3) : ''; ?>
                                 </td>
                                 <td class="text-right <?php echo ($inc_row && $inc_row['is_head']) ? 'cell-head' : ''; ?>">
@@ -777,27 +825,35 @@
                         <!-- Grand Total Row -->
                         <tr class="table-total-row">
                             <td><strong>Total Expenses</strong></td>
-                            <td class="text-right"><strong><?php echo number_format($expense_total_wo_tax, 3); ?></strong></td>
-                            <td class="text-right"><strong><?php echo number_format($expense_total_tax, 3); ?></strong></td>
-                            <td class="text-right"><strong><?php echo number_format($expense_total_with_tax, 3); ?></strong></td>
+                            <td class="text-right">
+                                <strong><?php echo number_format($expense_total_wo_tax, 3); ?></strong></td>
+                            <td class="text-right"><strong><?php echo number_format($expense_total_tax, 3); ?></strong>
+                            </td>
+                            <td class="text-right">
+                                <strong><?php echo number_format($expense_total_with_tax, 3); ?></strong></td>
 
                             <td><strong>Total Income</strong></td>
-                            <td class="text-right"><strong><?php echo number_format($income_total_wo_tax, 3); ?></strong></td>
-                            <td class="text-right"><strong><?php echo number_format($income_total_tax, 3); ?></strong></td>
-                            <td class="text-right"><strong><?php echo number_format($income_total_with_tax, 3); ?></strong></td>
+                            <td class="text-right">
+                                <strong><?php echo number_format($income_total_wo_tax, 3); ?></strong></td>
+                            <td class="text-right"><strong><?php echo number_format($income_total_tax, 3); ?></strong>
+                            </td>
+                            <td class="text-right">
+                                <strong><?php echo number_format($income_total_with_tax, 3); ?></strong></td>
                         </tr>
 
                         <!-- Net Profit / Loss Row -->
                         <tr class="table-net-row">
                             <td colspan="4" class="text-center font-bold">
                                 NET <?php echo $is_profit_wo_tax ? 'PROFIT' : 'LOSS'; ?> (WITHOUT TAX):
-                                <span class="<?php echo $is_profit_wo_tax ? 'text-success' : 'text-danger'; ?>" style="font-size:16px; margin-left:8px;">
+                                <span class="<?php echo $is_profit_wo_tax ? 'text-success' : 'text-danger'; ?>"
+                                    style="font-size:16px; margin-left:8px;">
                                     <?php echo number_format(abs($net_profit_wo_tax), 3); ?> BHD
                                 </span>
                             </td>
                             <td colspan="4" class="text-center font-bold">
                                 NET <?php echo $is_profit_with_tax ? 'PROFIT' : 'LOSS'; ?> (WITH TAX):
-                                <span class="<?php echo $is_profit_with_tax ? 'text-success' : 'text-danger'; ?>" style="font-size:16px; margin-left:8px;">
+                                <span class="<?php echo $is_profit_with_tax ? 'text-success' : 'text-danger'; ?>"
+                                    style="font-size:16px; margin-left:8px;">
                                     <?php echo number_format(abs($net_profit_with_tax), 3); ?> BHD
                                 </span>
                             </td>
@@ -831,21 +887,31 @@
                 </tr>
                 <tr>
                     <td style="padding:6px 8px; border:1px solid #ccc; font-weight:bold;">Total Income</td>
-                    <td style="padding:6px 8px; border:1px solid #ccc; text-align:right;"><?php echo number_format($income_total_wo_tax, 3); ?></td>
-                    <td style="padding:6px 8px; border:1px solid #ccc; text-align:right;"><?php echo number_format($income_total_tax, 3); ?></td>
-                    <td style="padding:6px 8px; border:1px solid #ccc; text-align:right; font-weight:bold;"><?php echo number_format($income_total_with_tax, 3); ?></td>
+                    <td style="padding:6px 8px; border:1px solid #ccc; text-align:right;">
+                        <?php echo number_format($income_total_wo_tax, 3); ?></td>
+                    <td style="padding:6px 8px; border:1px solid #ccc; text-align:right;">
+                        <?php echo number_format($income_total_tax, 3); ?></td>
+                    <td style="padding:6px 8px; border:1px solid #ccc; text-align:right; font-weight:bold;">
+                        <?php echo number_format($income_total_with_tax, 3); ?></td>
                 </tr>
                 <tr>
                     <td style="padding:6px 8px; border:1px solid #ccc; font-weight:bold;">Total Expenses</td>
-                    <td style="padding:6px 8px; border:1px solid #ccc; text-align:right;"><?php echo number_format($expense_total_wo_tax, 3); ?></td>
-                    <td style="padding:6px 8px; border:1px solid #ccc; text-align:right;"><?php echo number_format($expense_total_tax, 3); ?></td>
-                    <td style="padding:6px 8px; border:1px solid #ccc; text-align:right; font-weight:bold;"><?php echo number_format($expense_total_with_tax, 3); ?></td>
+                    <td style="padding:6px 8px; border:1px solid #ccc; text-align:right;">
+                        <?php echo number_format($expense_total_wo_tax, 3); ?></td>
+                    <td style="padding:6px 8px; border:1px solid #ccc; text-align:right;">
+                        <?php echo number_format($expense_total_tax, 3); ?></td>
+                    <td style="padding:6px 8px; border:1px solid #ccc; text-align:right; font-weight:bold;">
+                        <?php echo number_format($expense_total_with_tax, 3); ?></td>
                 </tr>
                 <tr style="background:<?php echo $is_profit_wo_tax ? '#e8f5e9' : '#ffebee'; ?>;">
-                    <td style="padding:8px; border:1px solid #ccc; font-weight:bold; font-size:13px;">NET <?php echo $is_profit_wo_tax ? 'PROFIT' : 'LOSS'; ?></td>
-                    <td style="padding:8px; border:1px solid #ccc; text-align:right; font-weight:bold; font-size:13px;"><?php echo number_format(abs($net_profit_wo_tax), 3); ?></td>
-                    <td style="padding:8px; border:1px solid #ccc; text-align:right; font-weight:bold; font-size:13px;"><?php echo number_format($net_tax_diff, 3); ?></td>
-                    <td style="padding:8px; border:1px solid #ccc; text-align:right; font-weight:bold; font-size:13px;"><?php echo number_format(abs($net_profit_with_tax), 3); ?></td>
+                    <td style="padding:8px; border:1px solid #ccc; font-weight:bold; font-size:13px;">NET
+                        <?php echo $is_profit_wo_tax ? 'PROFIT' : 'LOSS'; ?></td>
+                    <td style="padding:8px; border:1px solid #ccc; text-align:right; font-weight:bold; font-size:13px;">
+                        <?php echo number_format(abs($net_profit_wo_tax), 3); ?></td>
+                    <td style="padding:8px; border:1px solid #ccc; text-align:right; font-weight:bold; font-size:13px;">
+                        <?php echo number_format($net_tax_diff, 3); ?></td>
+                    <td style="padding:8px; border:1px solid #ccc; text-align:right; font-weight:bold; font-size:13px;">
+                        <?php echo number_format(abs($net_profit_with_tax), 3); ?></td>
                 </tr>
             </table>
 
@@ -853,8 +919,10 @@
             <table class="print-table" style="width:100%; border-collapse:collapse;">
                 <thead>
                     <tr style="background:#333; color:#fff;">
-                        <th colspan="4" style="text-align:center; padding:8px; border:1px solid #333;">PARTICULARS (EXPENSES)</th>
-                        <th colspan="4" style="text-align:center; padding:8px; border:1px solid #333;">PARTICULARS (INCOME)</th>
+                        <th colspan="4" style="text-align:center; padding:8px; border:1px solid #333;">PARTICULARS
+                            (EXPENSES)</th>
+                        <th colspan="4" style="text-align:center; padding:8px; border:1px solid #333;">PARTICULARS
+                            (INCOME)</th>
                     </tr>
                     <tr style="background:#eee; font-size:11px;">
                         <th style="text-align:left; padding:6px; border:1px solid #ccc; width:22%;">Description</th>
@@ -872,33 +940,51 @@
                     <?php for ($i = 0; $i < $max_table_rows; $i++):
                         $exp_row = $expense_table_rows[$i] ?? null;
                         $inc_row = $income_table_rows[$i] ?? null;
-                    ?>
+                        ?>
                         <tr style="font-size:11px;">
                             <!-- Expense Side -->
-                            <td style="padding:5px 6px; border:1px solid #ddd; vertical-align:top; <?php if ($exp_row) { if ($exp_row['is_head']) echo 'font-weight:bold;'; if ($exp_row['is_sub']) echo 'padding-left:18px; color:#555;'; } ?>">
+                            <td
+                                style="padding:5px 6px; border:1px solid #ddd; vertical-align:top; <?php if ($exp_row) {
+                                    if ($exp_row['is_head'])
+                                        echo 'font-weight:bold;';
+                                    if ($exp_row['is_sub'])
+                                        echo 'padding-left:18px; color:#555;';
+                                } ?>">
                                 <?php echo $exp_row ? htmlspecialchars($exp_row['text']) : ''; ?>
                             </td>
-                            <td style="text-align:right; padding:5px 6px; border:1px solid #ddd; vertical-align:top; <?php echo ($exp_row && $exp_row['is_head']) ? 'font-weight:bold;' : ''; ?>">
+                            <td
+                                style="text-align:right; padding:5px 6px; border:1px solid #ddd; vertical-align:top; <?php echo ($exp_row && $exp_row['is_head']) ? 'font-weight:bold;' : ''; ?>">
                                 <?php echo $exp_row ? number_format($exp_row['wo_tax'], 3) : ''; ?>
                             </td>
-                            <td style="text-align:right; padding:5px 6px; border:1px solid #ddd; vertical-align:top; color:#777;">
+                            <td
+                                style="text-align:right; padding:5px 6px; border:1px solid #ddd; vertical-align:top; color:#777;">
                                 <?php echo $exp_row ? number_format($exp_row['tax'], 3) : ''; ?>
                             </td>
-                            <td style="text-align:right; padding:5px 6px; border:1px solid #ddd; vertical-align:top; <?php echo ($exp_row && $exp_row['is_head']) ? 'font-weight:bold;' : ''; ?>">
+                            <td
+                                style="text-align:right; padding:5px 6px; border:1px solid #ddd; vertical-align:top; <?php echo ($exp_row && $exp_row['is_head']) ? 'font-weight:bold;' : ''; ?>">
                                 <?php echo $exp_row ? number_format($exp_row['with_tax'], 3) : ''; ?>
                             </td>
 
                             <!-- Income Side -->
-                            <td style="padding:5px 6px; border:1px solid #ddd; vertical-align:top; <?php if ($inc_row) { if ($inc_row['is_head']) echo 'font-weight:bold;'; if ($inc_row['is_sub']) echo 'padding-left:18px; color:#555;'; } ?>">
+                            <td
+                                style="padding:5px 6px; border:1px solid #ddd; vertical-align:top; <?php if ($inc_row) {
+                                    if ($inc_row['is_head'])
+                                        echo 'font-weight:bold;';
+                                    if ($inc_row['is_sub'])
+                                        echo 'padding-left:18px; color:#555;';
+                                } ?>">
                                 <?php echo $inc_row ? htmlspecialchars($inc_row['text']) : ''; ?>
                             </td>
-                            <td style="text-align:right; padding:5px 6px; border:1px solid #ddd; vertical-align:top; <?php echo ($inc_row && $inc_row['is_head']) ? 'font-weight:bold;' : ''; ?>">
+                            <td
+                                style="text-align:right; padding:5px 6px; border:1px solid #ddd; vertical-align:top; <?php echo ($inc_row && $inc_row['is_head']) ? 'font-weight:bold;' : ''; ?>">
                                 <?php echo $inc_row ? number_format($inc_row['wo_tax'], 3) : ''; ?>
                             </td>
-                            <td style="text-align:right; padding:5px 6px; border:1px solid #ddd; vertical-align:top; color:#777;">
+                            <td
+                                style="text-align:right; padding:5px 6px; border:1px solid #ddd; vertical-align:top; color:#777;">
                                 <?php echo $inc_row ? number_format($inc_row['tax'], 3) : ''; ?>
                             </td>
-                            <td style="text-align:right; padding:5px 6px; border:1px solid #ddd; vertical-align:top; <?php echo ($inc_row && $inc_row['is_head']) ? 'font-weight:bold;' : ''; ?>">
+                            <td
+                                style="text-align:right; padding:5px 6px; border:1px solid #ddd; vertical-align:top; <?php echo ($inc_row && $inc_row['is_head']) ? 'font-weight:bold;' : ''; ?>">
                                 <?php echo $inc_row ? number_format($inc_row['with_tax'], 3) : ''; ?>
                             </td>
                         </tr>
@@ -907,24 +993,31 @@
                     <!-- Total Rows -->
                     <tr style="font-weight:bold; background:#f9f9f9; font-size:11px;">
                         <td style="padding:6px; border:1px solid #999;">Total Expenses</td>
-                        <td style="text-align:right; padding:6px; border:1px solid #999;"><?php echo number_format($expense_total_wo_tax, 3); ?></td>
-                        <td style="text-align:right; padding:6px; border:1px solid #999;"><?php echo number_format($expense_total_tax, 3); ?></td>
-                        <td style="text-align:right; padding:6px; border:1px solid #999;"><?php echo number_format($expense_total_with_tax, 3); ?></td>
+                        <td style="text-align:right; padding:6px; border:1px solid #999;">
+                            <?php echo number_format($expense_total_wo_tax, 3); ?></td>
+                        <td style="text-align:right; padding:6px; border:1px solid #999;">
+                            <?php echo number_format($expense_total_tax, 3); ?></td>
+                        <td style="text-align:right; padding:6px; border:1px solid #999;">
+                            <?php echo number_format($expense_total_with_tax, 3); ?></td>
 
                         <td style="padding:6px; border:1px solid #999;">Total Income</td>
-                        <td style="text-align:right; padding:6px; border:1px solid #999;"><?php echo number_format($income_total_wo_tax, 3); ?></td>
-                        <td style="text-align:right; padding:6px; border:1px solid #999;"><?php echo number_format($income_total_tax, 3); ?></td>
-                        <td style="text-align:right; padding:6px; border:1px solid #999;"><?php echo number_format($income_total_with_tax, 3); ?></td>
+                        <td style="text-align:right; padding:6px; border:1px solid #999;">
+                            <?php echo number_format($income_total_wo_tax, 3); ?></td>
+                        <td style="text-align:right; padding:6px; border:1px solid #999;">
+                            <?php echo number_format($income_total_tax, 3); ?></td>
+                        <td style="text-align:right; padding:6px; border:1px solid #999;">
+                            <?php echo number_format($income_total_with_tax, 3); ?></td>
                     </tr>
 
                     <!-- Net Profit/Loss Row -->
-                    <tr style="font-weight:bold; font-size:12px; background:<?php echo $is_profit_wo_tax ? '#f0fff4' : '#fff5f5'; ?>;">
+                    <tr
+                        style="font-weight:bold; font-size:12px; background:<?php echo $is_profit_wo_tax ? '#f0fff4' : '#fff5f5'; ?>;">
                         <td colspan="4" style="padding:10px 8px; text-align:center; border:2px solid #000;">
-                            NET <?php echo $is_profit_wo_tax ? 'PROFIT' : 'LOSS'; ?> (WITHOUT TAX): 
+                            NET <?php echo $is_profit_wo_tax ? 'PROFIT' : 'LOSS'; ?> (WITHOUT TAX):
                             <?php echo number_format(abs($net_profit_wo_tax), 3); ?> BHD
                         </td>
                         <td colspan="4" style="padding:10px 8px; text-align:center; border:2px solid #000;">
-                            NET <?php echo $is_profit_with_tax ? 'PROFIT' : 'LOSS'; ?> (WITH TAX): 
+                            NET <?php echo $is_profit_with_tax ? 'PROFIT' : 'LOSS'; ?> (WITH TAX):
                             <?php echo number_format(abs($net_profit_with_tax), 3); ?> BHD
                         </td>
                     </tr>
