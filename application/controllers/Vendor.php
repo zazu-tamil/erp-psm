@@ -5720,6 +5720,28 @@ class Vendor extends CI_Controller
 
         $where = "1=1";
 
+        // Date Filter
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $this->session->set_userdata('dp_bill_srch_from_date', $srch_from_date);
+            $this->session->set_userdata('dp_bill_srch_to_date', $srch_to_date);
+        } elseif ($this->session->userdata('dp_bill_srch_from_date') !== NULL) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('dp_bill_srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('dp_bill_srch_to_date');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = '';
+            $data['srch_to_date'] = $srch_to_date = '';
+        }
+
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $where .= " AND a.invoice_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'";
+        } elseif (!empty($srch_from_date)) {
+            $where .= " AND a.invoice_date >= '" . $this->db->escape_str($srch_from_date) . "'";
+        } elseif (!empty($srch_to_date)) {
+            $where .= " AND a.invoice_date <= '" . $this->db->escape_str($srch_to_date) . "'";
+        }
+
         // Customer Filter
         if ($this->input->post('srch_customer_id') !== null) {
             $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
@@ -5760,7 +5782,7 @@ class Vendor extends CI_Controller
             $data['srch_invoice_no'] = $srch_invoice_no = '';
         }
         if (!empty($srch_invoice_no)) {
-            $where = " (a.invoice_no = '" . $this->db->escape_str($srch_invoice_no) . "')";
+            $where .= " AND (a.invoice_no = '" . $this->db->escape_str($srch_invoice_no) . "')";
         }
 
 
@@ -5777,7 +5799,7 @@ class Vendor extends CI_Controller
 
         if (!empty($srch_enquiry_no)) {
             //$where = " ( concat(ifnull(com.company_code,'') , '/', ifnull(t.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(t.customer_sno,''),  '/' , DATE_FORMAT(t.enquiry_date,'%Y') ) like '%" . $this->db->escape_str($srch_enquiry_no) . "%' ) ";
-            $where = "(get_tender_info(a.tender_enquiry_id) like '%" . $this->db->escape_str($srch_enquiry_no) . "%') ";
+            $where .= " AND (get_tender_info(a.tender_enquiry_id) like '%" . $this->db->escape_str($srch_enquiry_no) . "%') ";
             $data['srch_customer_id'] = $srch_customer_id = '';
         }
 
@@ -5786,6 +5808,7 @@ class Vendor extends CI_Controller
         $this->load->library('pagination');
 
         $this->db->where('status != ', 'Delete');
+        $this->db->where($where);
         $this->db->from('dp_bill_info as a');
         $data['total_records'] = $cnt = $this->db->count_all_results();
 
