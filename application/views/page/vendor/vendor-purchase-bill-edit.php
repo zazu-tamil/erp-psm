@@ -531,7 +531,24 @@
                                     </thead>
                                     <tbody id="tb_addt_chrg_list">
                                         <?php if (!empty($addt_charges_list)): ?>
-                                        <?php foreach($addt_charges_list as $row): ?>
+                                        <?php 
+                                        $default_item_c_rate = 1.00000;
+                                        if (!empty($header['total_convert_amount']) && (float)$header['total_convert_amount'] > 0) {
+                                            $default_item_c_rate = (float)$header['total_convert_amount'];
+                                        } elseif (!empty($all_po_items)) {
+                                            foreach ($all_po_items as $po_it) {
+                                                if (isset($saved_item_ids[$po_it['vendor_po_item_id']]['conversion_rate']) && (float)$saved_item_ids[$po_it['vendor_po_item_id']]['conversion_rate'] > 0) {
+                                                    $default_item_c_rate = (float)$saved_item_ids[$po_it['vendor_po_item_id']]['conversion_rate'];
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        ?>
+                                        <?php foreach($addt_charges_list as $row): 
+                                            $row_c_rate = (!empty($row['conversion_rate']) && (float)$row['conversion_rate'] > 0) ? (float)$row['conversion_rate'] : $default_item_c_rate;
+                                            $row_amt = (float)($row['addt_charges_amt'] ?? 0);
+                                            $row_c_amt = (!empty($row['conversion_amt']) && (float)$row['conversion_amt'] > 0) ? (float)$row['conversion_amt'] : ($row_amt * $row_c_rate);
+                                        ?>
                                         <tr>
                                             <td>
                                                 <input type="checkbox" class="chk_vendor_po_addtchrg_id"
@@ -557,12 +574,12 @@
                                             <td>
                                                 <input type="number" step="any" class="form-control addt_charges_conversion_rate"
                                                      name="addt_charges_conversion_rate[<?php echo $row['vendor_po_addtchrg_id']; ?>]"
-                                                     value="<?php echo number_format($row['conversion_rate'] > 0 ? $row['conversion_rate'] : 1.000, 3, '.', ''); ?>">     
+                                                     value="<?php echo number_format($row_c_rate, 5, '.', ''); ?>">     
                                             </td>
                                             <td>
                                                 <input type="number" step="any" class="form-control addt_charges_conversion_amt"
                                                      name="addt_charges_conversion_amt[<?php echo $row['vendor_po_addtchrg_id']; ?>]"
-                                                     value="<?php echo number_format($row['conversion_amt'] > 0 ? $row['conversion_amt'] : $row['addt_charges_amt'], 3, '.', ''); ?>" readonly>     
+                                                     value="<?php echo number_format($row_c_amt, 3, '.', ''); ?>" readonly>     
                                             </td>
                                             <td>
                                                 <input type="number" step="any" class="form-control addt_charges_vat"
@@ -1025,7 +1042,7 @@ $(document).ready(function() {
 
             $("#total_amount_wo_convert").val(bf_c_amt.toFixed(3)); 
 
-            $("#total_convert_amount").val(c_rate.toFixed(4)); 
+            $("#total_convert_amount").val(c_rate.toFixed(5)); 
 
             $("#total_amount_after_convert").val((bf_c_amt * c_rate).toFixed(3));     
         }
@@ -1037,7 +1054,11 @@ $(document).ready(function() {
     function calculateRowAddt(row) {
         let amt = parseFloat(row.find(".addt_charges_amt").val()) || 0;
         let rate = parseFloat(row.find(".addt_charges_conversion_rate").val());
-        if (isNaN(rate) || rate <= 0) rate = 1;
+        if (isNaN(rate) || rate <= 0) {
+            let defaultRate = parseFloat($(".conversion_rate").first().val()) || parseFloat($("#total_convert_amount").val()) || 1;
+            rate = defaultRate;
+            row.find(".addt_charges_conversion_rate").val(rate.toFixed(5));
+        }
         let vat = parseFloat(row.find(".addt_charges_vat").val()) || 0;
 
         let conversion_amt = amt * rate;
@@ -1052,15 +1073,24 @@ $(document).ready(function() {
     // Additional charges enable/disable
     $(document).on("change", ".chk_vendor_po_addtchrg_id", function () {
         let row = $(this).closest("tr");
+        let defaultRate = parseFloat($(".conversion_rate").first().val()) || parseFloat($("#total_convert_amount").val()) || 1;
 
         if ($(this).is(":checked")) {
             row.find(".addt_charges_amt, .addt_charges_conversion_rate, .addt_charges_conversion_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt").prop("disabled", false);
+            let curRate = parseFloat(row.find(".addt_charges_conversion_rate").val());
+            if (isNaN(curRate) || curRate <= 0) {
+                row.find(".addt_charges_conversion_rate").val(defaultRate.toFixed(5));
+            }
             calculateRowAddt(row);
         } else {
-            row.find(".addt_charges_amt, .addt_charges_conversion_rate, .addt_charges_conversion_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt")
+            row.find(".addt_charges_amt, .addt_charges_conversion_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt")
                 .prop("disabled", true)
                 .val("0.000");
-            row.find(".addt_charges_conversion_rate").val("1.000");
+            row.find(".addt_charges_conversion_rate").prop("disabled", true);
+            let curRate = parseFloat(row.find(".addt_charges_conversion_rate").val());
+            if (isNaN(curRate) || curRate <= 0) {
+                row.find(".addt_charges_conversion_rate").val(defaultRate.toFixed(5));
+            }
         }
 
         calculateTotalAmount_addt();

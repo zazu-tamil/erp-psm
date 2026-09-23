@@ -3898,14 +3898,19 @@ class Reports extends CI_Controller
 
 
         $this->load->model('Pl_model');
-        $data['sales'] = $this->Pl_model->get_sales_summary($srch_from_date, $srch_to_date);
-        $data['other_income'] = $this->Pl_model->get_otherincome_summary($srch_from_date, $srch_to_date);
-        $data['purchases'] = $this->Pl_model->get_purchases_summary($srch_from_date, $srch_to_date);
-        $data['indirect_expenses'] = $this->Pl_model->get_indirect_expenses_summary($srch_from_date, $srch_to_date);
+        $sales_summary = $this->Pl_model->get_sales_summary($srch_from_date, $srch_to_date);
+        $purchases_summary = $this->Pl_model->get_purchases_summary($srch_from_date, $srch_to_date);
+        $other_income = $this->Pl_model->get_otherincome_summary($srch_from_date, $srch_to_date);
+        $indirect_expenses = $this->Pl_model->get_indirect_expenses_summary($srch_from_date, $srch_to_date);
 
-        //print_r($data['other_income']);
+        $data['sales_summary'] = $sales_summary;
+        $data['purchases_summary'] = $purchases_summary;
+        $data['sales'] = is_array($sales_summary) ? ($sales_summary['total_sales_wo_tax'] ?? 0) : $sales_summary;
+        $data['purchases'] = is_array($purchases_summary) ? ($purchases_summary['total_purchases_wo_tax'] ?? 0) : $purchases_summary;
+        $data['other_income'] = $other_income;
+        $data['indirect_expenses'] = $indirect_expenses;
 
-        // For now, we'll just load the view. The actual P&L logic can be implemented later.
+        // Load the Profit & Loss report view
         $this->load->view('page/reports/pl-report', $data);
     }
 

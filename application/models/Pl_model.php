@@ -6,11 +6,22 @@ class Pl_model extends CI_Model
 
     public function get_sales_summary($from_date, $to_date)
     {
-        $this->db->select('(SUM(total_amount - ifnull(tax_amount, 0))) as total_sales');
+        $this->db->select('
+            COALESCE(SUM(total_amount - IFNULL(tax_amount, 0)), 0) AS total_sales_wo_tax,
+            COALESCE(SUM(IFNULL(tax_amount, 0)), 0) AS total_sales_tax,
+            COALESCE(SUM(total_amount), 0) AS total_sales_with_tax,
+            COALESCE(SUM(total_amount - IFNULL(tax_amount, 0)), 0) AS total_sales
+        ');
 
         $this->db->where("invoice_date between '$from_date' AND '$to_date'");
         $this->db->where('status =', 'Active');
-        return $this->db->get('tender_enq_invoice_info')->row('total_sales');
+        $row = $this->db->get('tender_enq_invoice_info')->row_array();
+        return $row ?: [
+            'total_sales_wo_tax' => 0,
+            'total_sales_tax' => 0,
+            'total_sales_with_tax' => 0,
+            'total_sales' => 0
+        ];
     }
 
     public function get_otherincome_summary($from_date, $to_date)
@@ -18,7 +29,10 @@ class Pl_model extends CI_Model
         $this->db->select("
             c.account_head_name AS inc_type,
             b.sub_account_head_name AS sub_typ,
-            SUM(a.amount) AS inc_amt
+            SUM(a.amount) AS inc_amt,
+            SUM(a.amount) AS inc_amt_wo_tax,
+            0 AS tax_amt,
+            SUM(a.amount) AS inc_amt_with_tax
         ");
         $this->db->from('cb_cash_inward_info AS a');
         $this->db->join(
@@ -37,7 +51,6 @@ class Pl_model extends CI_Model
         $this->db->where('b.status', 'Active');
         $this->db->where('c.status', 'Active');
         $this->db->where('c.nature_type', 'Income');
-        // $this->db->where_between('a.inward_date', $from_date, $to_date);
 
         $this->db->group_by(array(
             'a.account_head_id',
@@ -52,95 +65,114 @@ class Pl_model extends CI_Model
 
     public function get_purchases_summary($from_date, $to_date)
     {
-        $this->db->select('SUM(total_amount_wo_tax) as total_purchases');
+        $this->db->select('
+            COALESCE(SUM(COALESCE(total_amount_wo_tax, (total_amount - IFNULL(tax_amount, 0)), 0)), 0) AS total_purchases_wo_tax,
+            COALESCE(SUM(IFNULL(tax_amount, 0)), 0) AS total_purchases_tax,
+            COALESCE(SUM(COALESCE(total_amount_inc_addl, total_amount, 0)), 0) AS total_purchases_with_tax,
+            COALESCE(SUM(COALESCE(total_amount_wo_tax, (total_amount - IFNULL(tax_amount, 0)), 0)), 0) AS total_purchases
+        ');
         $this->db->where('invoice_date >=', $from_date);
         $this->db->where('invoice_date <=', $to_date);
         $this->db->where('status =', 'Active');
-        return $this->db->get('vendor_purchase_invoice_info')->row('');
+        $row = $this->db->get('vendor_purchase_invoice_info')->row_array();
+        return $row ?: [
+            'total_purchases_wo_tax' => 0,
+            'total_purchases_tax' => 0,
+            'total_purchases_with_tax' => 0,
+            'total_purchases' => 0
+        ];
     }
 
     public function get_indirect_expenses_summary($from_date, $to_date)
     {
-    $sql = "
-        SELECT
-            exp_type,
-            SUM(exp_amt) AS exp_amt
-        FROM
-        (
-            /* -----------------------------------------
-             * 1. CASH / BANK OUTWARD EXPENSES
-             * ----------------------------------------- */
+        $sql = "
             SELECT
-                b.sub_account_head_name AS exp_type,
-                SUM(COALESCE(a.amount, 0)) AS exp_amt
-            FROM cb_cash_outward_info AS a
-            INNER JOIN cb_sub_account_head_info AS b
-                ON b.sub_account_head_id = a.sub_account_head_id
-            WHERE a.status = 'Active'
-                AND b.status = 'Active'
-                AND b.nature_type = 'Expense'
-                AND a.outward_date BETWEEN ? AND ?
-            GROUP BY
-                a.sub_account_head_id,
-                b.sub_account_head_name
+                exp_type,
+                SUM(exp_amt_wo_tax) AS exp_amt_wo_tax,
+                SUM(tax_amt) AS tax_amt,
+                SUM(exp_amt_with_tax) AS exp_amt_with_tax,
+                SUM(exp_amt_wo_tax) AS exp_amt
+            FROM
+            (
+                /* -----------------------------------------
+                 * 1. CASH / BANK OUTWARD EXPENSES
+                 * ----------------------------------------- */
+                SELECT
+                    b.sub_account_head_name AS exp_type,
+                    SUM(COALESCE(a.amount, 0)) AS exp_amt_wo_tax,
+                    0 AS tax_amt,
+                    SUM(COALESCE(a.amount, 0)) AS exp_amt_with_tax
+                FROM cb_cash_outward_info AS a
+                INNER JOIN cb_sub_account_head_info AS b
+                    ON b.sub_account_head_id = a.sub_account_head_id
+                WHERE a.status = 'Active'
+                    AND b.status = 'Active'
+                    AND b.nature_type = 'Expense'
+                    AND a.outward_date BETWEEN ? AND ?
+                GROUP BY
+                    a.sub_account_head_id,
+                    b.sub_account_head_name
 
-            UNION ALL
+                UNION ALL
 
-            /* -----------------------------------------
-             * 2. LOCAL PURCHASE BILL EXPENSES
-             * ----------------------------------------- */
-            SELECT
-                b.sub_account_head_name AS exp_type,
-                SUM(COALESCE(a.tot_amt_wo_tax, 0)) AS exp_amt
-            FROM local_purchase_bill_info AS a
-            INNER JOIN cb_sub_account_head_info AS b
-                ON b.sub_account_head_id = a.sub_account_head_id
-            WHERE a.status = 'Active'
-                AND b.status = 'Active'
-                AND b.nature_type = 'Expense'
-                AND a.invoice_date BETWEEN ? AND ?
-            GROUP BY
-                a.sub_account_head_id,
-                b.sub_account_head_name
+                /* -----------------------------------------
+                 * 2. LOCAL PURCHASE BILL EXPENSES
+                 * ----------------------------------------- */
+                SELECT
+                    b.sub_account_head_name AS exp_type,
+                    SUM(COALESCE(a.tot_amt_wo_tax, 0)) AS exp_amt_wo_tax,
+                    SUM(COALESCE(a.vat_amt, 0)) AS tax_amt,
+                    SUM(COALESCE(a.tot_amt_with_tax, (COALESCE(a.tot_amt_wo_tax, 0) + COALESCE(a.vat_amt, 0)))) AS exp_amt_with_tax
+                FROM local_purchase_bill_info AS a
+                INNER JOIN cb_sub_account_head_info AS b
+                    ON b.sub_account_head_id = a.sub_account_head_id
+                WHERE a.status = 'Active'
+                    AND b.status = 'Active'
+                    AND b.nature_type = 'Expense'
+                    AND a.invoice_date BETWEEN ? AND ?
+                GROUP BY
+                    a.sub_account_head_id,
+                    b.sub_account_head_name
 
-            UNION ALL
+                UNION ALL
 
-            /* -----------------------------------------
-             * 3. DP BILL EXPENSES
-             * ----------------------------------------- */
-            SELECT
-                b.sub_account_head_name AS exp_type,
-                SUM(COALESCE(a.dp_charges, 0)) AS exp_amt
-            FROM dp_bill_info AS a
-            INNER JOIN cb_sub_account_head_info AS b
-                ON b.sub_account_head_id = a.sub_account_head_id
-            WHERE a.status = 'Active'
-                AND b.status = 'Active'
-                AND b.nature_type = 'Expense'
-                AND a.invoice_date BETWEEN ? AND ?
-            GROUP BY
-                a.sub_account_head_id,
-                b.sub_account_head_name
+                /* -----------------------------------------
+                 * 3. DP BILL EXPENSES
+                 * ----------------------------------------- */
+                SELECT
+                    b.sub_account_head_name AS exp_type,
+                    SUM(COALESCE(a.dp_charges, 0)) AS exp_amt_wo_tax,
+                    SUM(COALESCE(a.dp_vat_amt, 0)) AS tax_amt,
+                    SUM(COALESCE(a.g_total, (COALESCE(a.dp_charges, 0) + COALESCE(a.dp_vat_amt, 0)))) AS exp_amt_with_tax
+                FROM dp_bill_info AS a
+                INNER JOIN cb_sub_account_head_info AS b
+                    ON b.sub_account_head_id = a.sub_account_head_id
+                WHERE a.status = 'Active'
+                    AND b.status = 'Active'
+                    AND b.nature_type = 'Expense'
+                    AND a.invoice_date BETWEEN ? AND ?
+                GROUP BY
+                    a.sub_account_head_id,
+                    b.sub_account_head_name
 
-            UNION ALL
+                UNION ALL
 
-            /* -----------------------------------------
-             * 4. CUSTOMS EXPENSE
-             * ----------------------------------------- */
-            SELECT
-                'Customs & Others Dutys' AS exp_type,
-                SUM(
-                    COALESCE(a.custom_stamp_fee, 0)
-                    + COALESCE(a.custom_duty, 0)
-                ) AS exp_amt
-            FROM customs_bill_info AS a
-            WHERE a.status = 'Active'
-                AND a.invoice_date BETWEEN ? AND ?
-        ) AS x
+                /* -----------------------------------------
+                 * 4. CUSTOMS EXPENSE
+                 * ----------------------------------------- */
+                SELECT
+                    'Customs & Others Dutys' AS exp_type,
+                    SUM(COALESCE(a.tot_amt_wo_vat, (COALESCE(a.custom_stamp_fee, 0) + COALESCE(a.custom_duty, 0)))) AS exp_amt_wo_tax,
+                    SUM(COALESCE(a.vat_amt, 0)) AS tax_amt,
+                    SUM(COALESCE(a.customs_tot_amt, a.customs_payable, (COALESCE(a.custom_stamp_fee, 0) + COALESCE(a.custom_duty, 0) + COALESCE(a.vat_amt, 0)))) AS exp_amt_with_tax
+                FROM customs_bill_info AS a
+                WHERE a.status = 'Active'
+                    AND a.invoice_date BETWEEN ? AND ?
+            ) AS x
 
-        GROUP BY exp_type
-        ORDER BY exp_type
-    ";
+            GROUP BY exp_type
+            ORDER BY exp_type
+        ";
 
         $query = $this->db->query($sql, array(
             // Cash / Bank Outward
