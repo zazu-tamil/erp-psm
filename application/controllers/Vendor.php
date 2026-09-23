@@ -4635,7 +4635,10 @@ class Vendor extends CI_Controller
                 a.invoice_date,
                 c.customer_name,
                 v.vendor_name,
-                t.enquiry_no as customer_rfq_no,
+                a.total_amount_wo_tax_inc_addl as amt_without_vat,
+                a.tax_amount as vat_amt,
+                a.total_amount as total_amt_with_vat,
+               
                 a.company_id,
                 a.customer_id, 
                 ci.company_name,

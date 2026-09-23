@@ -93,9 +93,9 @@
                         <th>Invoice Date</th>
                         <th>Invoice No</th>
                         <th>Company / RFQ No</th>
-                        <th>Customer</th>
-                        <th>Customer RFQ</th>
-                        <th>Vendor</th>
+                        <th>Amt Without Vat</th>
+                        <th>Vat Amt</th>
+                        <th>Total Amt With Vat</th>
                         <th class="text-center" colspan="3">Action</th>
                     </tr>
                 </thead>
@@ -109,9 +109,9 @@
                                 <td><?php echo htmlspecialchars($row['company_name'] ?? '-'); ?> <br><small
                                         class="label label-success"><?php echo htmlspecialchars($row['tender_details'] ?? '-'); ?></small>
                                 </td>
-                                <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
-                                <td><?php echo htmlspecialchars($row['customer_rfq_no'] ?? '-'); ?></td>
-                                <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
+                                <td><?php echo htmlspecialchars($row['amt_without_vat'] ?? '-'); ?></td>
+                                <td><?php echo htmlspecialchars($row['vat_amt'] ?? '-'); ?></td>
+                                <td><?php echo htmlspecialchars($row['total_amt_with_vat'] ?? '-'); ?></td>
 
                                 <!-- EDIT -->
                                 <td class="text-center">
