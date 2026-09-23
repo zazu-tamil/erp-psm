@@ -140,10 +140,16 @@ class Pl_model extends CI_Model
                  * 3. DP BILL EXPENSES
                  * ----------------------------------------- */
                 SELECT
-                    b.sub_account_head_name AS exp_type,
-                    SUM(COALESCE(a.dp_charges, 0)) AS exp_amt_wo_tax,
-                    SUM(COALESCE(a.dp_vat_amt, 0)) AS tax_amt,
-                    SUM(COALESCE(a.g_total, (COALESCE(a.dp_charges, 0) + COALESCE(a.dp_vat_amt, 0)))) AS exp_amt_with_tax
+                     b.sub_account_head_name AS exp_type,
+
+                        SUM(COALESCE(a.dp_charges, 0)) AS exp_amt_wo_tax,
+
+                        SUM(COALESCE(a.dp_vat_amt, 0)) AS tax_amt,
+
+                        SUM(
+                            COALESCE(a.dp_charges, 0)
+                            + COALESCE(a.dp_vat_amt, 0)
+                        ) AS exp_amt_with_tax
                 FROM dp_bill_info AS a
                 INNER JOIN cb_sub_account_head_info AS b
                     ON b.sub_account_head_id = a.sub_account_head_id
@@ -162,9 +168,9 @@ class Pl_model extends CI_Model
                  * ----------------------------------------- */
                 SELECT
                     'Customs & Others Dutys' AS exp_type,
-                    SUM(COALESCE(a.tot_amt_wo_vat, (COALESCE(a.custom_stamp_fee, 0) + COALESCE(a.custom_duty, 0)))) AS exp_amt_wo_tax,
+                    SUM(COALESCE(a.custom_stamp_fee, 0) + COALESCE(a.custom_duty, 0)) AS exp_amt_wo_tax,
                     SUM(COALESCE(a.vat_amt, 0)) AS tax_amt,
-                    SUM(COALESCE(a.customs_tot_amt, a.customs_payable, (COALESCE(a.custom_stamp_fee, 0) + COALESCE(a.custom_duty, 0) + COALESCE(a.vat_amt, 0)))) AS exp_amt_with_tax
+                    SUM(COALESCE(a.custom_stamp_fee, 0) + COALESCE(a.custom_duty, 0) + COALESCE(a.vat_amt, 0)) AS exp_amt_with_tax
                 FROM customs_bill_info AS a
                 WHERE a.status = 'Active'
                     AND a.invoice_date BETWEEN ? AND ?

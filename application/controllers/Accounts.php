@@ -1083,7 +1083,7 @@ class Accounts extends CI_Controller
 
         $config['base_url'] = trim(site_url('outward-list/'), '/' . $this->uri->segment(2, 0));
         $config['total_rows'] = $cnt;
-        $config['per_page'] = 25;
+        $config['per_page'] = 100;
         $config['uri_segment'] = 2;
         //$config['num_links'] = 2; 
         $config['attributes'] = array('class' => 'page-link');
@@ -1253,7 +1253,7 @@ class Accounts extends CI_Controller
 
     public function print_voucher($cash_outward_id)
     {
-        $cash_outward_id = (int)$cash_outward_id;
+        $cash_outward_id = (int) $cash_outward_id;
         $sql = "
             SELECT 
                 a.cash_outward_id,
@@ -1315,7 +1315,7 @@ class Accounts extends CI_Controller
             redirect();
         }
 
-        $cash_inward_id = (int)$cash_inward_id;
+        $cash_inward_id = (int) $cash_inward_id;
 
         $sql = "
             SELECT 
