@@ -93,6 +93,7 @@
                         <th>Invoice Date</th>
                         <th>Invoice No</th>
                         <th>Company / RFQ No</th>
+                        <th>Supplier</th>
                         <th>Amt Without Vat</th>
                         <th>Vat Amt</th>
                         <th>Total Amt With Vat</th>
@@ -109,6 +110,7 @@
                                 <td><?php echo htmlspecialchars($row['company_name'] ?? '-'); ?> <br><small
                                         class="label label-success"><?php echo htmlspecialchars($row['tender_details'] ?? '-'); ?></small>
                                 </td>
+                                <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['amt_without_vat'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['vat_amt'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['total_amt_with_vat'] ?? '-'); ?></td>
@@ -131,7 +133,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="12" class="text-center text-danger">No records found.</td>
+                            <td colspan="13" class="text-center text-danger">No records found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
