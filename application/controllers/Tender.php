@@ -3605,7 +3605,19 @@ ORDER BY
                a.*,
                get_tender_info(a.tender_enquiry_id) as tender_details,
                b.company_name,
-               c.customer_name 
+               c.customer_name,
+               (
+                   IFNULL((SELECT SUM(qty * rate) FROM tender_enq_invoice_item_info i WHERE i.tender_enq_invoice_id = a.tender_enq_invoice_id AND i.status != 'Delete'), 0) 
+                   + IFNULL((SELECT SUM(addt_charges_amt) FROM tender_invoice_addtchrg_info ac WHERE ac.tender_enq_invoice_id = a.tender_enq_invoice_id AND ac.status != 'Delete'), 0)
+               ) AS amt_wo_tax,
+               (
+                   IFNULL((SELECT SUM((qty * rate) * (gst / 100)) FROM tender_enq_invoice_item_info i WHERE i.tender_enq_invoice_id = a.tender_enq_invoice_id AND i.status != 'Delete'), 0)
+                   + IFNULL((SELECT SUM(addt_charges_vat_amt) FROM tender_invoice_addtchrg_info ac WHERE ac.tender_enq_invoice_id = a.tender_enq_invoice_id AND ac.status != 'Delete'), 0)
+               ) AS amt_tax,
+               (
+                   IFNULL((SELECT SUM(amount) FROM tender_enq_invoice_item_info i WHERE i.tender_enq_invoice_id = a.tender_enq_invoice_id AND i.status != 'Delete'), 0)
+                   + IFNULL((SELECT SUM(addt_charges_tot_amt) FROM tender_invoice_addtchrg_info ac WHERE ac.tender_enq_invoice_id = a.tender_enq_invoice_id AND ac.status != 'Delete'), 0)
+               ) AS amt_with_tax 
             FROM tender_enq_invoice_info a
             LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status = 'Active'
             LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'

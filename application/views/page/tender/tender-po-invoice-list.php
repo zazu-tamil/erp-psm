@@ -92,7 +92,9 @@
                         <th>Customer</th>
                         <th>Invoice No</th>
                         <th class="text-center" style="width: 110px;">Invoice Status</th>
-                        <th class="text-right" style="width: 120px;">Invoice Amount</th>
+                        <th class="text-right">Amt W/O Tax</th>
+                        <th class="text-right">Amt Tax</th>
+                        <th class="text-right">Amt With Tax</th>
                         <th class="text-center" style="width: 110px;">Action</th>
                     </tr>
                 </thead>
@@ -127,9 +129,9 @@
                                         <?php echo htmlspecialchars($status); ?>
                                     </span>
                                 </td>
-                                <td class="text-right" data-order="<?php echo floatval($row['total_amount'] ?? 0); ?>" style="font-weight: 600;">
-                                    <?php echo number_format((float)($row['total_amount'] ?? 0), 3); ?>
-                                </td>
+                                <td class="text-right"><?php echo $row['amt_wo_tax'] == 0 ? '' : number_format($row['amt_wo_tax'], 3); ?></td>
+                                <td class="text-right"><?php echo $row['amt_tax'] == 0 ? '' : number_format($row['amt_tax'], 3); ?></td>
+                                <td class="text-right" style="font-weight: bold; color: #00a65a;"><?php echo $row['amt_with_tax'] == 0 ? '' : number_format($row['amt_with_tax'], 3); ?></td>
 
                                 <!-- ACTION BUTTONS -->
                                 <td class="text-center" style="white-space: nowrap;">
