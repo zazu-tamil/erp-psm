@@ -95,8 +95,8 @@
                         <th>Invoice No</th>
                         <th>Remarks</th>
                         <th class="text-right">Amt W/O VAT</th>
-                        <th class="text-right">Customs Payable</th>
                         <th class="text-right">Vat Amt</th>
+                        <th class="text-right">Customs Payable</th> 
                         <th class="text-right">Customs Total</th>
                         <th colspan="2" class="text-center">Action</th>
                     </tr>
@@ -121,15 +121,14 @@
                             <td><?php echo htmlspecialchars($ls['invoice_no'] ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($ls['remarks'] ?? ''); ?></td>
                             <td class="text-right">
-                                <?php echo number_format((float) ($ls['custom_stamp_fee']  + $ls['custom_duty'] ?? 0), 3); ?>
-                            </td>
-                            <td class="text-right">
-                                <?php echo number_format((float) ($ls['customs_payable'] ?? 0), 3); ?>
+                                <?php echo number_format((float) ($ls['custom_stamp_fee'] + $ls['custom_duty'] ?? 0), 3); ?>
                             </td>
                             <td class="text-right">
                                 <?php echo number_format((float) ($ls['vat_amt'] ?? 0), 3); ?>
                             </td>
-
+                            <td class="text-right">
+                                <?php echo number_format((float) ($ls['customs_payable'] ?? 0), 3); ?>
+                            </td>
 
                             <td class="text-right">
                                 <?php echo number_format((float) ($ls['customs_tot_amt'] ?? 0), 3); ?>
