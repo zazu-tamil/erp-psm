@@ -3122,27 +3122,110 @@ class Tender extends CI_Controller
 
         // === FETCH RECORDS ===
         $sql = "
-            SELECT 
-                a.tender_po_id,
-                a.our_po_no,
-                a.customer_po_no,
-                a.po_date,
-                a.delivery_date,
-                a.po_status,
-                a.status,
-                b.company_name,
-                c.customer_name,
-                t.enquiry_no,
-                tq.quotation_no,
-                concat(ifnull(b.company_code,'') , '/', ifnull(t.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(t.customer_sno,''),  '/' , DATE_FORMAT(t.enquiry_date,'%Y') ) as tender_details
-            FROM customer_tender_po_info a
-            LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status = 'Active'
-            LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
-            LEFT JOIN tender_enquiry_info t ON t.tender_enquiry_id = a.tender_enquiry_id AND t.status='Active'
-            LEFT JOIN tender_quotation_info tq ON tq.tender_quotation_id = a.tender_quotation_id AND c.status='Active'
-            WHERE a.status != 'Delete'
-            and $where
-            ORDER BY a.po_date desc , a.tender_po_id DESC
+        SELECT
+    a.tender_po_id,
+    a.our_po_no,
+    a.customer_po_no,
+    a.po_date,
+    a.delivery_date,
+    a.po_status,
+    a.status,
+
+    b.company_name,
+    c.customer_name,
+    t.enquiry_no,
+    tq.quotation_no,
+
+    CONCAT(
+        IFNULL(b.company_code, ''),
+        '/',
+        IFNULL(t.company_sno, ''),
+        '/',
+        IFNULL(c.customer_code, ''),
+        '/',
+        IFNULL(t.customer_sno, ''),
+        '/',
+        DATE_FORMAT(t.enquiry_date, '%Y')
+    ) AS tender_details,
+
+    /* PO ITEM AMOUNTS */
+    IFNULL(pi.amt_wo_tax, 0) +
+    IFNULL(ac.amt_wo_tax, 0) AS amt_wo_tax,
+
+    IFNULL(pi.amt_tax, 0) +
+    IFNULL(ac.amt_tax, 0) AS amt_tax,
+
+    IFNULL(pi.amt_with_tax, 0) +
+    IFNULL(ac.amt_with_tax, 0) AS amt_with_tax
+
+FROM customer_tender_po_info a
+
+/* COMPANY */
+LEFT JOIN company_info b
+    ON b.company_id = a.company_id
+    AND b.status = 'Active'
+
+/* CUSTOMER */
+LEFT JOIN customer_info c
+    ON c.customer_id = a.customer_id
+    AND c.status = 'Active'
+
+/* TENDER */
+LEFT JOIN tender_enquiry_info t
+    ON t.tender_enquiry_id = a.tender_enquiry_id
+    AND t.status = 'Active'
+
+/* QUOTATION */
+LEFT JOIN tender_quotation_info tq
+    ON tq.tender_quotation_id = a.tender_quotation_id
+    AND tq.status = 'Active'
+
+/* PO ITEMS */
+LEFT JOIN (
+    SELECT
+        tender_po_id,
+
+        SUM(qty * rate) AS amt_wo_tax,
+
+        SUM(
+            (qty * rate) * (gst / 100)
+        ) AS amt_tax,
+
+        SUM(amount) AS amt_with_tax
+
+    FROM tender_po_item_info
+
+    WHERE status != 'Delete'
+
+    GROUP BY tender_po_id
+) pi
+    ON pi.tender_po_id = a.tender_po_id
+
+/* ADDITIONAL CHARGES */
+LEFT JOIN (
+    SELECT
+        tender_po_id,
+
+        SUM(addt_charges_amt) AS amt_wo_tax,
+
+        SUM(addt_charges_vat_amt) AS amt_tax,
+
+        SUM(addt_charges_tot_amt) AS amt_with_tax
+
+    FROM tender_po_addtchrg_info
+
+    WHERE status != 'Delete'
+
+    GROUP BY tender_po_id
+) ac
+    ON ac.tender_po_id = a.tender_po_id
+
+WHERE a.status != 'Delete'
+  AND $where
+
+ORDER BY
+    a.po_date DESC,
+    a.tender_po_id DESC
             LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
         $query = $this->db->query($sql);

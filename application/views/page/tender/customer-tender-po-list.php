@@ -113,6 +113,9 @@
                         <th>Customer PO No</th>
                         <th>Delivery Date</th>
                         <th>PO Status</th>
+                        <th class="text-right">Amt W/O Tax </th>
+                        <th class="text-right">Amt Tax </th>
+                        <th class="text-right">Amt With Tax </th>
                         <th class="text-center" colspan="3">Action</th>
                     </tr>
                 </thead>
@@ -151,6 +154,10 @@
                                     </span>
                                 </td>
 
+                                <td class="text-right"><?php echo $row['amt_wo_tax'] == 0 ? '' : number_format($row['amt_wo_tax'], 3); ?></td>
+                                <td class="text-right"><?php echo $row['amt_tax'] == 0 ? '' : number_format($row['amt_tax'], 3); ?></td>
+                                <td class="text-right" style="font-weight: bold; color: #00a65a;"><?php echo $row['amt_with_tax'] == 0 ? '' : number_format($row['amt_with_tax'], 3); ?></td>
+
                                 <!-- VIEW -->
                                 <!-- <td class="text-center">
                                     <a href="<?php echo site_url('customer-tender-po-view/' . $row['tender_po_id']); ?>"
@@ -178,7 +185,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="11" class="text-center text-danger">No records found.</td>
+                            <td colspan="14" class="text-center text-danger">No records found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
