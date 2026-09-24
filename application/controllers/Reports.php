@@ -3637,6 +3637,7 @@ class Reports extends CI_Controller
             $this->session->unset_userdata('sir_to_date');
             $this->session->unset_userdata('sir_vendor_id');
             $this->session->unset_userdata('sir_bill_type');
+            $this->session->unset_userdata('sir_sub_account_head_id');
             redirect('supplier-invoice-report');
             return;
         }
@@ -3647,25 +3648,29 @@ class Reports extends CI_Controller
             $srch_to_date = $this->input->post('srch_to_date') ?? '';
             $srch_vendor_id = $this->input->post('srch_vendor_id') ?? '';
             $srch_bill_type = $this->input->post('srch_bill_type') ?? '';
+            $srch_sub_account_head_id = $this->input->post('srch_sub_account_head_id') ?? '';
 
             if ($this->input->post('export_excel') != '1') {
                 $this->session->set_userdata('sir_from_date', $srch_from_date);
                 $this->session->set_userdata('sir_to_date', $srch_to_date);
                 $this->session->set_userdata('sir_vendor_id', $srch_vendor_id);
                 $this->session->set_userdata('sir_bill_type', $srch_bill_type);
+                $this->session->set_userdata('sir_sub_account_head_id', $srch_sub_account_head_id);
             }
         } else {
             // GET request
-            if ($this->input->get('srch_from_date') !== null || $this->input->get('srch_to_date') !== null || $this->input->get('srch_vendor_id') !== null || $this->input->get('srch_bill_type') !== null) {
+            if ($this->input->get('srch_from_date') !== null || $this->input->get('srch_to_date') !== null || $this->input->get('srch_vendor_id') !== null || $this->input->get('srch_bill_type') !== null || $this->input->get('srch_sub_account_head_id') !== null) {
                 $srch_from_date = $this->input->get('srch_from_date') ?? '';
                 $srch_to_date = $this->input->get('srch_to_date') ?? '';
                 $srch_vendor_id = $this->input->get('srch_vendor_id') ?? '';
                 $srch_bill_type = $this->input->get('srch_bill_type') ?? '';
+                $srch_sub_account_head_id = $this->input->get('srch_sub_account_head_id') ?? '';
             } else {
                 $srch_from_date = $this->session->userdata('sir_from_date');
                 $srch_to_date = $this->session->userdata('sir_to_date');
                 $srch_vendor_id = $this->session->userdata('sir_vendor_id') ?? '';
                 $srch_bill_type = $this->session->userdata('sir_bill_type') ?? '';
+                $srch_sub_account_head_id = $this->session->userdata('sir_sub_account_head_id') ?? '';
 
                 // Default to 1st of current month and today
                 if ($srch_from_date === null) {
@@ -3681,6 +3686,15 @@ class Reports extends CI_Controller
         $data['srch_to_date'] = $srch_to_date;
         $data['srch_vendor_id'] = $srch_vendor_id;
         $data['srch_bill_type'] = $srch_bill_type;
+        $data['srch_sub_account_head_id'] = $srch_sub_account_head_id;
+
+        // Fetch active sub accounts for dropdown
+        $sql = "
+            SELECT sub_account_head_id, sub_account_head_name 
+            FROM cb_sub_account_head_info 
+            WHERE status = 'Active' 
+            ORDER BY sub_account_head_name ASC";
+        $data['sub_account_list'] = $this->db->query($sql)->result_array();
 
         // Fetch active vendors/suppliers for dropdown
         $sql = "
@@ -3741,6 +3755,11 @@ class Reports extends CI_Controller
             $params[] = $srch_bill_type;
         }
 
+        if (!empty($srch_sub_account_head_id)) {
+            $where_clauses[] = "all_bills.sub_account_head_id = ?";
+            $params[] = $srch_sub_account_head_id;
+        }
+
         $where_sql = implode(' AND ', $where_clauses);
 
         $sql = "
@@ -3761,7 +3780,9 @@ class Reports extends CI_Controller
                     IFNULL(a.total_tax_amount_inc_addl, 0) AS tax_amount,
                     a.total_amount_inc_addl AS total_amount,
 
-                    'Supplier Bill' AS bill_type
+                    'Supplier Bill' AS bill_type,
+                    NULL AS sub_account_head_id,
+                    'Purchases' AS sub_account_head_name
                 FROM vendor_purchase_invoice_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 LEFT JOIN vendor_po_info vpo ON vpo.vendor_po_id = a.vendor_po_id AND vpo.status = 'Active'
@@ -3783,9 +3804,12 @@ class Reports extends CI_Controller
                     IFNULL(a.tot_amt_wo_tax, 0) AS taxable_amount,
                     IFNULL(a.vat_amt, 0) AS tax_amount,
                     IFNULL(a.tot_amt_with_tax, 0) AS total_amount,
-                    'Local Supplier Bill' AS bill_type
+                    'Local Supplier Bill' AS bill_type,
+                    a.sub_account_head_id,
+                    s.sub_account_head_name
                  FROM local_purchase_bill_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
+                LEFT JOIN cb_sub_account_head_info s ON s.sub_account_head_id = a.sub_account_head_id
                 WHERE a.status = 'Active'  
             ) AS all_bills
             WHERE {$where_sql}
@@ -4685,7 +4709,8 @@ class Reports extends CI_Controller
             $this->session->unset_userdata('sir_to_date');
             $this->session->unset_userdata('sir_vendor_id');
             $this->session->unset_userdata('sir_bill_type');
-            redirect('supplier-invoice-report');
+            $this->session->unset_userdata('sir_sub_account_head_id');
+            redirect('dp-custom-invoice-report');
             return;
         }
 
@@ -4695,25 +4720,29 @@ class Reports extends CI_Controller
             $srch_to_date = $this->input->post('srch_to_date') ?? '';
             $srch_vendor_id = $this->input->post('srch_vendor_id') ?? '';
             $srch_bill_type = $this->input->post('srch_bill_type') ?? '';
+            $srch_sub_account_head_id = $this->input->post('srch_sub_account_head_id') ?? '';
 
             if ($this->input->post('export_excel') != '1') {
                 $this->session->set_userdata('sir_from_date', $srch_from_date);
                 $this->session->set_userdata('sir_to_date', $srch_to_date);
                 $this->session->set_userdata('sir_vendor_id', $srch_vendor_id);
                 $this->session->set_userdata('sir_bill_type', $srch_bill_type);
+                $this->session->set_userdata('sir_sub_account_head_id', $srch_sub_account_head_id);
             }
         } else {
             // GET request
-            if ($this->input->get('srch_from_date') !== null || $this->input->get('srch_to_date') !== null || $this->input->get('srch_vendor_id') !== null || $this->input->get('srch_bill_type') !== null) {
+            if ($this->input->get('srch_from_date') !== null || $this->input->get('srch_to_date') !== null || $this->input->get('srch_vendor_id') !== null || $this->input->get('srch_bill_type') !== null || $this->input->get('srch_sub_account_head_id') !== null) {
                 $srch_from_date = $this->input->get('srch_from_date') ?? '';
                 $srch_to_date = $this->input->get('srch_to_date') ?? '';
                 $srch_vendor_id = $this->input->get('srch_vendor_id') ?? '';
                 $srch_bill_type = $this->input->get('srch_bill_type') ?? '';
+                $srch_sub_account_head_id = $this->input->get('srch_sub_account_head_id') ?? '';
             } else {
                 $srch_from_date = $this->session->userdata('sir_from_date');
                 $srch_to_date = $this->session->userdata('sir_to_date');
                 $srch_vendor_id = $this->session->userdata('sir_vendor_id') ?? '';
                 $srch_bill_type = $this->session->userdata('sir_bill_type') ?? '';
+                $srch_sub_account_head_id = $this->session->userdata('sir_sub_account_head_id') ?? '';
 
                 // Default to 1st of current month and today
                 if ($srch_from_date === null) {
@@ -4729,6 +4758,15 @@ class Reports extends CI_Controller
         $data['srch_to_date'] = $srch_to_date;
         $data['srch_vendor_id'] = $srch_vendor_id;
         $data['srch_bill_type'] = $srch_bill_type;
+        $data['srch_sub_account_head_id'] = $srch_sub_account_head_id;
+
+        // Fetch active sub accounts for dropdown
+        $sql = "
+            SELECT sub_account_head_id, sub_account_head_name 
+            FROM cb_sub_account_head_info 
+            WHERE status = 'Active' 
+            ORDER BY sub_account_head_name ASC";
+        $data['sub_account_list'] = $this->db->query($sql)->result_array();
 
         // Fetch active vendors/suppliers for dropdown
         $sql = "
@@ -4789,6 +4827,11 @@ class Reports extends CI_Controller
             $params[] = $srch_bill_type;
         }
 
+        if (!empty($srch_sub_account_head_id)) {
+            $where_clauses[] = "all_bills.sub_account_head_id = ?";
+            $params[] = $srch_sub_account_head_id;
+        }
+
         $where_sql = implode(' AND ', $where_clauses);
 
         $sql = "
@@ -4808,9 +4851,12 @@ class Reports extends CI_Controller
                     IFNULL((a.dp_charges + a.dp_vat_amt), 0) AS payable,
                     IFNULL(a.dp_vat_amt, 0) AS vat_amt,
                     a.g_total AS grand_amount,
-                    'Delivery Partner Bill' AS bill_type 
+                    'Delivery Partner Bill' AS bill_type,
+                    a.sub_account_head_id,
+                    s.sub_account_head_name
                 FROM dp_bill_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
+                LEFT JOIN cb_sub_account_head_info s ON s.sub_account_head_id = a.sub_account_head_id
                 WHERE a.status = 'Active'
 
                 UNION ALL 
@@ -4828,7 +4874,9 @@ class Reports extends CI_Controller
                     IFNULL(a.customs_payable, 0) AS payable,
                     IFNULL(a.vat_amt, 0) AS vat_amt,
                     a.customs_tot_amt AS grand_amount,
-                    'Customs Bill' AS bill_type 
+                    'Customs Bill' AS bill_type,
+                    NULL AS sub_account_head_id,
+                    'Customs & Others Dutys' AS sub_account_head_name
                 FROM customs_bill_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status = 'Active'

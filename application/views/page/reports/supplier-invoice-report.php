@@ -254,8 +254,7 @@
                             <input type="date" name="srch_from_date" id="srch_from_date" class="form-control"
                                 value="<?php echo htmlspecialchars($srch_from_date); ?>">
                         </div>
-                    </div>
-
+                    </div> 
                     <div class="form-group col-md-2">
                         <label for="srch_to_date">To Date</label>
                         <div class="input-group">
@@ -265,7 +264,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <label for="srch_vendor_id">Supplier</label>
                         <select name="srch_vendor_id" id="srch_vendor_id" class="form-control select2">
                             <option value="">All Suppliers</option>
@@ -288,7 +287,19 @@
                         </select>
                     </div>
 
-                    <div class="form-group col-md-3 text-right" style="padding-top: 24px;">
+                    <div class="form-group col-md-2">
+                        <label for="srch_sub_account_head_id">Sub Account</label>
+                        <select name="srch_sub_account_head_id" id="srch_sub_account_head_id" class="form-control select2">
+                            <option value="">All Accounts</option>
+                            <?php foreach ($sub_account_list as $acc): ?>
+                                <option value="<?php echo $acc['sub_account_head_id']; ?>" <?php echo ($srch_sub_account_head_id == $acc['sub_account_head_id']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($acc['sub_account_head_name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-2" style="padding-top: 24px;">
                         <button type="submit" class="btn btn-primary" id="btnFilter" title="Search Report">
                             <i class="fa fa-search"></i> Show
                         </button>
@@ -369,6 +380,7 @@
                         <th style="width: 85px;" class="text-center">Date</th>
                         <th style="width: 110px;" class="text-center">Bill / Inv No</th>
                         <th style="width: 120px;" class="text-center">Bill Type</th>
+                        <th style="width: 130px;">Sub Account</th>
                         <th>Supplier Name</th>
                         <th style="width: 110px;" class="text-center">VAT / CR No</th>
                         <th>Tender / Order Ref</th>
@@ -405,6 +417,7 @@
                                         <?php echo htmlspecialchars($r['bill_type']); ?>
                                     </span>
                                 </td>
+                                <td><?php echo htmlspecialchars($r['sub_account_head_name'] ?? 'Purchases'); ?></td>
                                 <td><?php echo htmlspecialchars($r['vendor_name'] ?? '-'); ?></td>
                                 <td class="text-center">
                                     <?php echo htmlspecialchars($r['vendor_vat_cr'] ? $r['vendor_vat_cr'] : '-'); ?>
@@ -434,7 +447,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="10" class="text-center" style="padding: 30px; color: #888;">
+                            <td colspan="11" class="text-center" style="padding: 30px; color: #888;">
                                 <i class="fa fa-info-circle"
                                     style="font-size: 24px; display: block; margin-bottom: 8px;"></i>
                                 No supplier bills found matching the selected filter criteria.
@@ -444,7 +457,7 @@
                 </tbody>
                 <tfoot>
                     <tr style="font-weight: 700; background-color: #edf2f7;">
-                        <th colspan="7" class="text-right">
+                        <th colspan="8" class="text-right">
                             Total (Bills: <?php echo number_format($total_bills); ?>):
                         </th>
                         <th class="text-right"><?php echo number_format($total_taxable, 3); ?></th>

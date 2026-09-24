@@ -66,10 +66,10 @@ class Pl_model extends CI_Model
     public function get_purchases_summary($from_date, $to_date)
     {
         $this->db->select('
-            COALESCE(SUM(COALESCE(total_amount_wo_tax, (total_amount - IFNULL(tax_amount, 0)), 0)), 0) AS total_purchases_wo_tax,
-            COALESCE(SUM(IFNULL(tax_amount, 0)), 0) AS total_purchases_tax,
+            COALESCE(SUM(COALESCE(total_amount_wo_tax_inc_addl, total_amount_wo_tax, (total_amount - IFNULL(tax_amount, 0)), 0)), 0) AS total_purchases_wo_tax,
+            COALESCE(SUM(COALESCE(total_tax_amount_inc_addl, tax_amount, 0)), 0) AS total_purchases_tax,
             COALESCE(SUM(COALESCE(total_amount_inc_addl, total_amount, 0)), 0) AS total_purchases_with_tax,
-            COALESCE(SUM(COALESCE(total_amount_wo_tax, (total_amount - IFNULL(tax_amount, 0)), 0)), 0) AS total_purchases
+            COALESCE(SUM(COALESCE(total_amount_wo_tax_inc_addl, total_amount_wo_tax, (total_amount - IFNULL(tax_amount, 0)), 0)), 0) AS total_purchases
         ');
         $this->db->where('invoice_date >=', $from_date);
         $this->db->where('invoice_date <=', $to_date);
