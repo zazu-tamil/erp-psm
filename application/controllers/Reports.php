@@ -3599,9 +3599,9 @@ class Reports extends CI_Controller
         $grand_total = 0;
 
         foreach ($records as $row) {
-            $total_taxable += (float)$row['taxable_amount'];
-            $total_vat += (float)$row['tax_amount'];
-            $grand_total += (float)$row['total_amount'];
+            $total_taxable += (float) $row['taxable_amount'];
+            $total_vat += (float) $row['tax_amount'];
+            $grand_total += (float) $row['total_amount'];
         }
 
         $data['total_invoices'] = $total_invoices;
@@ -3694,9 +3694,7 @@ class Reports extends CI_Controller
         $data['bill_type_opt'] = [
             '' => 'All Bill Types',
             'Supplier Bill' => 'Supplier Bill (Purchase Invoice)',
-            'Local Supplier Bill' => 'Local Supplier Bill',
-            'Delivery Partner Bill' => 'Delivery Partner Bill',
-            'Customs Bill' => 'Customs Bill'
+            'Local Supplier Bill' => 'Local Supplier Bill'
         ];
 
         // Selected vendor name for display
@@ -3756,19 +3754,16 @@ class Reports extends CI_Controller
                     v.vendor_name,
                     COALESCE(v.gst, v.crno) AS vendor_vat_cr,
                     a.tender_enquiry_id,
-                    get_tender_info(a.tender_enquiry_id) AS tender_details,
-                    COALESCE(cur.currency_code, 'BHD') AS currency_code,
-                    COALESCE(cur.decimal_point, 3) AS decimal_point,
-                    COALESCE(a.total_amount_wo_tax, (a.total_amount - IFNULL(a.tax_amount, 0))) AS taxable_amount,
+                    get_tender_info(a.tender_enquiry_id) AS tender_details, 
+                    3 as decimal_point,
+                    a.total_amount_wo_tax_inc_addl AS taxable_amount,
                     IFNULL(a.tax_amount, 0) AS tax_amount,
-                    COALESCE(a.total_amount_inc_addl, a.total_amount) AS total_amount,
-                    'Supplier Bill' AS bill_type,
-                    CONCAT('vendor-purchase-bill-edit/', a.vendor_purchase_invoice_id) AS edit_url
+                    a.total_amount AS total_amount,
+                    'Supplier Bill' AS bill_type
                 FROM vendor_purchase_invoice_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 LEFT JOIN vendor_po_info vpo ON vpo.vendor_po_id = a.vendor_po_id AND vpo.status = 'Active'
-                LEFT JOIN currencies_info cur ON cur.currency_id = vpo.currency_id AND cur.status = 'Active'
-                WHERE a.status = 'Active'
+                 WHERE a.status = 'Active'
 
                 UNION ALL
 
@@ -3781,63 +3776,15 @@ class Reports extends CI_Controller
                     v.vendor_name,
                     COALESCE(v.gst, v.crno) AS vendor_vat_cr,
                     a.tender_enquiry_id,
-                    get_tender_info(a.tender_enquiry_id) AS tender_details,
-                    'BHD' AS currency_code,
+                    get_tender_info(a.tender_enquiry_id) AS tender_details, 
                     3 AS decimal_point,
                     IFNULL(a.tot_amt_wo_tax, 0) AS taxable_amount,
                     IFNULL(a.vat_amt, 0) AS tax_amount,
                     IFNULL(a.tot_amt_with_tax, 0) AS total_amount,
-                    'Local Supplier Bill' AS bill_type,
-                    CONCAT('local-purchase-bill-edit/', a.local_purchase_bill_id) AS edit_url
-                FROM local_purchase_bill_info a
+                    'Local Supplier Bill' AS bill_type
+                 FROM local_purchase_bill_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
-                WHERE a.status = 'Active'
-
-                UNION ALL
-
-                -- 3. Delivery Partner Bill
-                SELECT
-                    a.dp_bill_id AS bill_id,
-                    a.invoice_date,
-                    a.invoice_no,
-                    a.vendor_id,
-                    v.vendor_name,
-                    COALESCE(v.gst, v.crno) AS vendor_vat_cr,
-                    a.tender_enquiry_id,
-                    get_tender_info(a.tender_enquiry_id) AS tender_details,
-                    'BHD' AS currency_code,
-                    3 AS decimal_point,
-                    IFNULL(a.dp_charges, 0) AS taxable_amount,
-                    IFNULL(a.dp_vat_amt, 0) AS tax_amount,
-                    COALESCE(a.g_total, (IFNULL(a.dp_charges, 0) + IFNULL(a.dp_vat_amt, 0))) AS total_amount,
-                    'Delivery Partner Bill' AS bill_type,
-                    CONCAT('delivery-partner-bill-edit/', a.dp_bill_id) AS edit_url
-                FROM dp_bill_info a
-                LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
-                WHERE a.status = 'Active'
-
-                UNION ALL
-
-                -- 4. Customs Bill
-                SELECT
-                    a.customs_bill_id AS bill_id,
-                    COALESCE(NULLIF(a.declaration_date, '0000-00-00'), a.invoice_date) AS invoice_date,
-                    COALESCE(NULLIF(a.declaration_no, ''), a.invoice_no) AS invoice_no,
-                    a.vendor_id,
-                    v.vendor_name,
-                    COALESCE(v.gst, v.crno) AS vendor_vat_cr,
-                    a.tender_enquiry_id,
-                    get_tender_info(a.tender_enquiry_id) AS tender_details,
-                    'BHD' AS currency_code,
-                    3 AS decimal_point,
-                    IFNULL(a.tot_amt_wo_vat, 0) AS taxable_amount,
-                    IFNULL(a.vat_amt, 0) AS tax_amount,
-                    COALESCE(a.customs_tot_amt, a.customs_payable, 0) AS total_amount,
-                    'Customs Bill' AS bill_type,
-                    CONCAT('customs-bill-edit/', a.customs_bill_id) AS edit_url
-                FROM customs_bill_info a
-                LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
-                WHERE a.status = 'Active'
+                WHERE a.status = 'Active'  
             ) AS all_bills
             WHERE {$where_sql}
             ORDER BY all_bills.invoice_date ASC, all_bills.invoice_no ASC, all_bills.bill_id ASC
@@ -3853,9 +3800,9 @@ class Reports extends CI_Controller
         $grand_total = 0;
 
         foreach ($records as $row) {
-            $total_taxable += (float)$row['taxable_amount'];
-            $total_vat += (float)$row['tax_amount'];
-            $grand_total += (float)$row['total_amount'];
+            $total_taxable += (float) $row['taxable_amount'];
+            $total_vat += (float) $row['tax_amount'];
+            $grand_total += (float) $row['total_amount'];
         }
 
         $data['total_bills'] = $total_bills;
@@ -4718,5 +4665,208 @@ class Reports extends CI_Controller
             'outwards' => $outwards
         ]);
     }
-}
 
+
+    public function dp_custom_invoice_report($action = '')
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data['title'] = 'DP & Customs Invoice Report';
+        $data['js'] = 'reports/dp-custom-invoice-report.inc';
+        $data['s_url'] = 'dp-custom-invoice-report';
+
+        // Check for Reset request
+        if ($action === 'reset' || $this->input->post('reset') == '1' || $this->input->get('reset') == '1') {
+            $this->session->unset_userdata('sir_from_date');
+            $this->session->unset_userdata('sir_to_date');
+            $this->session->unset_userdata('sir_vendor_id');
+            $this->session->unset_userdata('sir_bill_type');
+            redirect('supplier-invoice-report');
+            return;
+        }
+
+        // Process POST submission
+        if ($this->input->server('REQUEST_METHOD') === 'POST') {
+            $srch_from_date = $this->input->post('srch_from_date') ?? '';
+            $srch_to_date = $this->input->post('srch_to_date') ?? '';
+            $srch_vendor_id = $this->input->post('srch_vendor_id') ?? '';
+            $srch_bill_type = $this->input->post('srch_bill_type') ?? '';
+
+            if ($this->input->post('export_excel') != '1') {
+                $this->session->set_userdata('sir_from_date', $srch_from_date);
+                $this->session->set_userdata('sir_to_date', $srch_to_date);
+                $this->session->set_userdata('sir_vendor_id', $srch_vendor_id);
+                $this->session->set_userdata('sir_bill_type', $srch_bill_type);
+            }
+        } else {
+            // GET request
+            if ($this->input->get('srch_from_date') !== null || $this->input->get('srch_to_date') !== null || $this->input->get('srch_vendor_id') !== null || $this->input->get('srch_bill_type') !== null) {
+                $srch_from_date = $this->input->get('srch_from_date') ?? '';
+                $srch_to_date = $this->input->get('srch_to_date') ?? '';
+                $srch_vendor_id = $this->input->get('srch_vendor_id') ?? '';
+                $srch_bill_type = $this->input->get('srch_bill_type') ?? '';
+            } else {
+                $srch_from_date = $this->session->userdata('sir_from_date');
+                $srch_to_date = $this->session->userdata('sir_to_date');
+                $srch_vendor_id = $this->session->userdata('sir_vendor_id') ?? '';
+                $srch_bill_type = $this->session->userdata('sir_bill_type') ?? '';
+
+                // Default to 1st of current month and today
+                if ($srch_from_date === null) {
+                    $srch_from_date = date('Y-m-01');
+                }
+                if ($srch_to_date === null) {
+                    $srch_to_date = date('Y-m-d');
+                }
+            }
+        }
+
+        $data['srch_from_date'] = $srch_from_date;
+        $data['srch_to_date'] = $srch_to_date;
+        $data['srch_vendor_id'] = $srch_vendor_id;
+        $data['srch_bill_type'] = $srch_bill_type;
+
+        // Fetch active vendors/suppliers for dropdown
+        $sql = "
+            SELECT vendor_id, vendor_name 
+            FROM vendor_info 
+            WHERE status = 'Active' 
+            ORDER BY vendor_name ASC";
+        $data['vendor_list'] = $this->db->query($sql)->result_array();
+
+        // Bill Type Options
+        $data['bill_type_opt'] = [
+            '' => 'All Bill Types',
+            'Delivery Partner Bill' => 'Delivery Partner Bill',
+            'Customs Bill' => 'Customs Bill'
+        ];
+
+        // Selected vendor name for display
+        $selected_vendor_name = 'All Suppliers';
+        if (!empty($srch_vendor_id)) {
+            foreach ($data['vendor_list'] as $v) {
+                if ($v['vendor_id'] == $srch_vendor_id) {
+                    $selected_vendor_name = $v['vendor_name'];
+                    break;
+                }
+            }
+        }
+        $data['selected_vendor_name'] = $selected_vendor_name;
+
+        // Selected bill type label
+        $selected_bill_type_label = !empty($srch_bill_type) && isset($data['bill_type_opt'][$srch_bill_type])
+            ? $data['bill_type_opt'][$srch_bill_type]
+            : 'All Bill Types';
+        $data['selected_bill_type_label'] = $selected_bill_type_label;
+
+        // Build outer WHERE conditions
+        $where_clauses = ["1=1"];
+        $params = [];
+
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $where_clauses[] = "all_bills.invoice_date BETWEEN ? AND ?";
+            $params[] = $srch_from_date;
+            $params[] = $srch_to_date;
+        } elseif (!empty($srch_from_date)) {
+            $where_clauses[] = "all_bills.invoice_date >= ?";
+            $params[] = $srch_from_date;
+        } elseif (!empty($srch_to_date)) {
+            $where_clauses[] = "all_bills.invoice_date <= ?";
+            $params[] = $srch_to_date;
+        }
+
+        if (!empty($srch_vendor_id)) {
+            $where_clauses[] = "all_bills.vendor_id = ?";
+            $params[] = $srch_vendor_id;
+        }
+
+        if (!empty($srch_bill_type)) {
+            $where_clauses[] = "all_bills.bill_type = ?";
+            $params[] = $srch_bill_type;
+        }
+
+        $where_sql = implode(' AND ', $where_clauses);
+
+        $sql = "
+            SELECT * FROM (
+              
+                SELECT
+                    a.dp_bill_id AS bill_id,
+                    a.invoice_date,
+                    a.invoice_no,
+                    a.vendor_id,
+                    v.vendor_name,
+                    COALESCE(v.gst, v.crno) AS vendor_vat_cr,
+                    a.tender_enquiry_id,
+                    get_tender_info(a.tender_enquiry_id) AS tender_details, 
+                    3 AS decimal_point,
+                    IFNULL(a.dp_charges, 0) AS amt_wo_vat,
+                    IFNULL((a.dp_charges + a.dp_vat_amt), 0) AS payable,
+                    IFNULL(a.dp_vat_amt, 0) AS vat_amt,
+                    a.g_total AS grand_amount,
+                    'Delivery Partner Bill' AS bill_type 
+                FROM dp_bill_info a
+                LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
+                WHERE a.status = 'Active'
+
+                UNION ALL 
+                SELECT
+                    a.customs_bill_id AS bill_id,
+                    COALESCE(NULLIF(a.declaration_date, '0000-00-00'), a.invoice_date) AS invoice_date,
+                    COALESCE(NULLIF(a.declaration_no, ''), a.invoice_no) AS invoice_no,
+                    a.vendor_id,
+                    v.vendor_name,
+                    COALESCE(v.gst, v.crno) AS vendor_vat_cr,
+                    a.tender_enquiry_id,
+                    get_tender_info(a.tender_enquiry_id) AS tender_details, 
+                    3 AS decimal_point,
+                    IFNULL((a.custom_stamp_fee + a.custom_duty), 0) AS amt_wo_vat,
+                    IFNULL(a.customs_payable, 0) AS payable,
+                    IFNULL(a.vat_amt, 0) AS vat_amt,
+                    a.customs_tot_amt AS grand_amount,
+                    'Customs Bill' AS bill_type 
+                FROM customs_bill_info a
+                LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
+                WHERE a.status = 'Active'
+            ) AS all_bills
+            WHERE {$where_sql}
+            ORDER BY all_bills.invoice_date ASC, all_bills.invoice_no ASC, all_bills.bill_id ASC
+        ";
+
+        $records = $this->db->query($sql, $params)->result_array();
+        $data['records'] = $records;
+
+        // KPI metrics
+        $total_bills = count($records);
+        $total_taxable = 0;
+        $total_vat = 0;
+        $total_payable = 0;
+        $grand_total = 0;
+
+        foreach ($records as $row) {
+            $total_taxable += (float) $row['amt_wo_vat'];
+            $total_vat += (float) $row['vat_amt'];
+            $total_payable += (float) $row['payable'];
+            $grand_total += (float) $row['grand_amount'];
+        }
+
+        $data['total_bills'] = $total_bills;
+        $data['total_taxable'] = $total_taxable;
+        $data['total_vat'] = $total_vat;
+        $data['total_payable'] = $total_payable;
+        $data['grand_total'] = $grand_total;
+
+        // Excel Export
+        if ($this->input->post('export_excel') == '1' || $this->input->get('export') == 'excel') {
+            $this->load->helper('download');
+            $filename = "DP_Custom_Invoice_Report_" . ($srch_from_date ? $srch_from_date : 'all') . "_to_" . ($srch_to_date ? $srch_to_date : 'all') . ".xls";
+            $content = $this->load->view('page/reports/dp-custom-invoice-report-xls', $data, TRUE);
+            force_download($filename, $content);
+            return;
+        }
+
+        $this->load->view('page/reports/dp-custom-invoice-report', $data);
+    }
+}

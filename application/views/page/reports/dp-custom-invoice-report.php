@@ -244,7 +244,7 @@
             </div>
         </div>
         <div class="box-body">
-            <form method="post" action="<?php echo site_url('supplier-invoice-report'); ?>" id="frmSupplierInvoice">
+            <form method="post" action="<?php echo site_url('dp-custom-invoice-report'); ?>" id="frmSupplierInvoice">
                 <input type="hidden" name="export_excel" id="export_excel" value="0">
                 <div class="row">
                     <div class="form-group col-md-2">
@@ -292,7 +292,7 @@
                         <button type="submit" class="btn btn-primary" id="btnFilter" title="Search Report">
                             <i class="fa fa-search"></i> Show
                         </button>
-                        <a href="<?php echo site_url('supplier-invoice-report/reset'); ?>" class="btn btn-default"
+                        <a href="<?php echo site_url('dp-custom-invoice-report/reset'); ?>" class="btn btn-default"
                             title="Reset Filters">
                             <i class="fa fa-refresh"></i> Reset
                         </a>
@@ -372,9 +372,10 @@
                         <th>Supplier Name</th>
                         <th style="width: 110px;" class="text-center">VAT / CR No</th>
                         <th>Tender / Order Ref</th>
-                        <th style="width: 110px;" class="text-right">Taxable Amt</th>
-                        <th style="width: 90px;" class="text-right">VAT</th>
+                        <th style="width: 110px;" class="text-right">Amt W/O VAT</th>
+                        <th style="width: 90px;" class="text-right">VAT Amt</th> 
                         <th style="width: 110px;" class="text-right">Total Amount</th>
+                        <th style="width: 110px;" class="text-right">Grand Amount</th>
                         <!-- <th style="width: 55px;" class="text-center no-print">Action</th> -->
                     </tr>
                 </thead>
@@ -407,18 +408,26 @@
                                 </td>
                                 <td><?php echo htmlspecialchars($r['vendor_name'] ?? '-'); ?></td>
                                 <td class="text-center">
-                                    <?php echo htmlspecialchars($r['vendor_vat_cr'] ? $r['vendor_vat_cr'] : '-'); ?>
-                                </td>
+                                    <?php echo htmlspecialchars($r['vendor_vat_cr'] ? $r['vendor_vat_cr'] : '-'); ?></td>
                                 <td><?php echo htmlspecialchars($r['tender_details'] ? $r['tender_details'] : '-'); ?></td>
-                                <td class="text-right" data-order="<?php echo (float) $r['taxable_amount']; ?>">
-                                    <?php echo number_format((float) $r['taxable_amount'], (int) $r['decimal_point']); ?>
+
+
+                                <td class="text-right" data-order="<?php echo (float) $r['amt_wo_vat']; ?>">
+                                    <?php echo number_format((float) $r['amt_wo_vat'], (int) $r['decimal_point']); ?>
                                 </td>
-                                <td class="text-right" data-order="<?php echo (float) $r['tax_amount']; ?>">
-                                    <?php echo number_format((float) $r['tax_amount'], (int) $r['decimal_point']); ?>
+
+                                <td class="text-right" data-order="<?php echo (float) $r['vat_amt']; ?>">
+                                    <?php echo number_format((float) $r['vat_amt'], (int) $r['decimal_point']); ?>
                                 </td>
-                                <td class="text-right" data-order="<?php echo (float) $r['total_amount']; ?>"
+
+                                <td class="text-right" data-order="<?php echo (float) $r['payable']; ?>"
                                     style="font-weight: 700; color: #00a65a;">
-                                    <?php echo number_format((float) $r['total_amount'], (int) $r['decimal_point']); ?>
+                                    <?php echo number_format((float) $r['payable'], (int) $r['decimal_point']); ?>
+                                </td>
+
+                                <td class="text-right" data-order="<?php echo (float) $r['grand_amount']; ?>"
+                                    style="font-weight: 700; color: #00a65a;">
+                                    <?php echo number_format((float) $r['grand_amount'], (int) $r['decimal_point']); ?>
                                 </td>
                                 <!-- <td class="text-center no-print">
                                     <?php if (!empty($r['edit_url'])): ?>
@@ -449,10 +458,10 @@
                         </th>
                         <th class="text-right"><?php echo number_format($total_taxable, 3); ?></th>
                         <th class="text-right"><?php echo number_format($total_vat, 3); ?></th>
+                        <th class="text-right" style="color: #00a65a;"><?php echo number_format($total_payable, 3); ?></th>
                         <th class="text-right" style="color: #00a65a;"><?php echo number_format($grand_total, 3); ?>
                         </th>
-                        <th class="no-print"></th>
-                    </tr>
+                     </tr>
                 </tfoot>
             </table>
         </div>

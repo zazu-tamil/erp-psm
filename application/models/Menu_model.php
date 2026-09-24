@@ -293,6 +293,33 @@ class Menu_model extends CI_Model {
             ));
         }
 
+        // 7f. Ensure dp-custom-invoice-report exists
+        $dpc_menu = $this->db->where('menu_slug', 'dp-custom-invoice-report')
+                             ->where('status !=', 'Delete')
+                             ->get('menu_info')
+                             ->row_array();
+        if (!$dpc_menu) {
+            $this->db->insert('menu_info', array(
+                'parent_id'   => $supplier_parent_id,
+                'menu_title'  => 'DP & Custom Invoice Report',
+                'menu_slug'   => 'dp-custom-invoice-report',
+                'menu_icon'   => 'fa fa-files-o',
+                'is_header'   => 0,
+                'sort_order'  => 3,
+                'status'      => 'Active'
+            ));
+            $dpc_menu_id = $this->db->insert_id();
+        } else {
+            $dpc_menu_id = (int)$dpc_menu['menu_id'];
+            $this->db->where('menu_id', $dpc_menu_id)->update('menu_info', array(
+                'parent_id'  => $supplier_parent_id,
+                'menu_title' => 'DP & Custom Invoice Report',
+                'menu_icon'  => 'fa fa-files-o',
+                'sort_order' => 3,
+                'status'     => 'Active'
+            ));
+        }
+
         // 8. Update parent_id for Tender Reports
         $tender_slugs = array(
             'tender-enquiry-timeline',

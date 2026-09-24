@@ -391,6 +391,7 @@ $supplier_report_grp = [
     'vendor-invoice-pending-report',
     'vendor-pending-invoice-report',
     'supplier-invoice-report',
+    'dp-custom-invoice-report',
     'vendor-statement-report',
     'vendor-balance-report',
     'supplier-summary-report'
@@ -513,6 +514,12 @@ $report_m_grp = array_merge(
                 <li class="<?= ($current_page === 'supplier-invoice-report') ? 'active' : '' ?>">
                     <a href="<?= site_url('supplier-invoice-report') ?>">
                         <i class="fa fa-files-o"></i> Supplier Invoice Report
+                    </a>
+                </li>
+
+                <li class="<?= ($current_page === 'dp-custom-invoice-report') ? 'active' : '' ?>">
+                    <a href="<?= site_url('dp-custom-invoice-report') ?>">
+                        <i class="fa fa-files-o"></i> DP & Custom Invoice Report
                     </a>
                 </li>
 
