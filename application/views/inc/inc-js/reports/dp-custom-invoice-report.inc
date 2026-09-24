@@ -17,11 +17,11 @@ $(document).ready(function () {
     });
 
     // Initialize DataTable
-    if ($.fn.DataTable.isDataTable('#tbl_customer_invoice')) {
-        $('#tbl_customer_invoice').DataTable().destroy();
+    if ($.fn.DataTable.isDataTable('#tbl_supplier_invoice')) {
+        $('#tbl_supplier_invoice').DataTable().destroy();
     }
 
-    var table = $('#tbl_customer_invoice').DataTable({
+    var table = $('#tbl_supplier_invoice').DataTable({
         responsive: true,
         paging: true,
         lengthChange: true,
@@ -33,8 +33,7 @@ $(document).ready(function () {
         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
         order: [[1, 'asc']], // Default sort: Date ASC (chronological from earliest to latest)
         columnDefs: [
-            { orderable: false, targets: [0, 11] }, // S.No and Action columns non-orderable
-            { searchable: false, targets: [11] },
+            { orderable: false, targets: [0] }, // S.No columns non-orderable
             { type: 'date', targets: [1] }
         ],
         language: {

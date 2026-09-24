@@ -31,8 +31,7 @@ $(document).ready(function () {
         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
         order: [[1, 'asc']], // Default sort: Date ASC (chronological)
         columnDefs: [
-            { orderable: false, targets: [0, 11] }, // S.No and Action non-orderable
-            { searchable: false, targets: [11] },
+            { orderable: false, targets: [0] }, // S.No non-orderable
             { type: 'date', targets: [1] }
         ],
         language: {

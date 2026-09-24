@@ -443,7 +443,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="12" class="text-center" style="padding: 30px; color: #888;">
+                            <td colspan="11" class="text-center" style="padding: 30px; color: #888;">
                                 <i class="fa fa-info-circle"
                                     style="font-size: 24px; display: block; margin-bottom: 8px;"></i>
                                 No supplier bills found matching the selected filter criteria.

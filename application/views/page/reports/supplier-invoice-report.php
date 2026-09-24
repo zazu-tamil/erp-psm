@@ -434,7 +434,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="12" class="text-center" style="padding: 30px; color: #888;">
+                            <td colspan="10" class="text-center" style="padding: 30px; color: #888;">
                                 <i class="fa fa-info-circle"
                                     style="font-size: 24px; display: block; margin-bottom: 8px;"></i>
                                 No supplier bills found matching the selected filter criteria.
@@ -451,7 +451,7 @@
                         <th class="text-right"><?php echo number_format($total_vat, 3); ?></th>
                         <th class="text-right" style="color: #00a65a;"><?php echo number_format($grand_total, 3); ?>
                         </th>
-                        <th class="no-print"></th>
+                        <!-- <th class="no-print"></th> -->
                     </tr>
                 </tfoot>
             </table>

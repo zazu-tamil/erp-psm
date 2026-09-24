@@ -257,9 +257,9 @@
                             title="Reset Filters">
                             <i class="fa fa-refresh"></i> Reset
                         </a>
-                        <button type="button" class="btn btn-success" id="btnExportExcel" title="Export to Excel">
+                        <!-- <button type="button" class="btn btn-success" id="btnExportExcel" title="Export to Excel">
                             <i class="fa fa-file-excel-o"></i> Excel
-                        </button>
+                        </button> -->
                         <button type="button" class="btn btn-info" onclick="window.print();" title="Print Report">
                             <i class="fa fa-print"></i> Print
                         </button>
@@ -331,7 +331,6 @@
                         <th style="width: 110px;" class="text-center">VAT / CR No</th>
                         <th>Tender / Order Ref</th>
                         <th>Customer PO No</th>
-                        <th style="width: 50px;" class="text-center">Curr</th>
                         <th style="width: 110px;" class="text-right">Taxable Amt</th>
                         <th style="width: 90px;" class="text-right">VAT</th>
                         <th style="width: 110px;" class="text-right">Total Amount</th>
@@ -357,8 +356,7 @@
                                 </td>
                                 <td><?php echo htmlspecialchars($r['customer_po_no'] ? $r['customer_po_no'] : ($r['our_po_no'] ? $r['our_po_no'] : '-')); ?>
                                 </td>
-                                <td class="text-center"><span
-                                        class="badge bg-gray"><?php echo htmlspecialchars($r['currency_code']); ?></span></td>
+                              
                                 <td class="text-right" data-order="<?php echo (float) $r['taxable_amount']; ?>">
                                     <?php echo number_format((float) $r['taxable_amount'], (int) $r['decimal_point']); ?></td>
                                 <td class="text-right" data-order="<?php echo (float) $r['tax_amount']; ?>">
@@ -377,7 +375,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="12" class="text-center" style="padding: 30px; color: #888;">
+                            <td colspan="11" class="text-center" style="padding: 30px; color: #888;">
                                 <i class="fa fa-info-circle"
                                     style="font-size: 24px; display: block; margin-bottom: 8px;"></i>
                                 No invoices found matching the selected filter criteria.
@@ -387,7 +385,7 @@
                 </tbody>
                 <tfoot>
                     <tr style="font-weight: 700; background-color: #edf2f7;">
-                        <th colspan="8" class="text-right">
+                        <th colspan="7" class="text-right">
                             Total (Invoices: <?php echo number_format($total_invoices); ?>):
                         </th>
                         <th class="text-right"><?php echo number_format($total_taxable, 3); ?></th>
