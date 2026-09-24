@@ -95,6 +95,9 @@
                         <th>Quotation No</th>
                         <th>Is Technical BID</th>
                         <th>Quotation Status</th>
+                        <th class="text-right">Amt W/O Tax </th>
+                        <th class="text-right">Amt Tax </th>
+                        <th class="text-right">Amt With Tax </th>
                         <th class="text-center" colspan="4">Action</th>
                     </tr>
                 </thead>
@@ -130,7 +133,9 @@
                             </span>
                         </td>
 
-
+                        <td class="text-right"><?php echo $row['amt_wo_tax'] == 0 ? '' : number_format($row['amt_wo_tax'], 3); ?></td>
+                        <td class="text-right"><?php echo $row['amt_tax'] == 0 ? '' : number_format($row['amt_tax'], 3); ?></td>
+                        <td class="text-right" style="font-weight: bold; color: #00a65a;"><?php echo $row['amt_with_tax'] == 0 ? '' : number_format($row['amt_with_tax'], 3); ?></td>
 
                         <!-- PRINT -->
                         <td class="text-center">

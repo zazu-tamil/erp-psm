@@ -1523,7 +1523,19 @@ class Tender extends CI_Controller
                 c.customer_name,
                 concat(ifnull(b.company_code,'') , '/', ifnull(d.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(d.customer_sno,''),  '/' , DATE_FORMAT(d.enquiry_date,'%Y') ) as tender_details,
                 d.enquiry_no, 
-                d.customer_sno
+                d.customer_sno,
+                (
+                    IFNULL((SELECT SUM(qty * rate) FROM tender_quotation_item_info i WHERE i.tender_quotation_id = a.tender_quotation_id AND i.status != 'Delete'), 0) 
+                    + IFNULL((SELECT SUM(addt_charges_amt) FROM tender_quote_addtchrg_info ac WHERE ac.tender_quotation_id = a.tender_quotation_id AND ac.status != 'Delete'), 0)
+                ) AS amt_wo_tax,
+                (
+                    IFNULL((SELECT SUM((qty * rate) * (gst / 100)) FROM tender_quotation_item_info i WHERE i.tender_quotation_id = a.tender_quotation_id AND i.status != 'Delete'), 0)
+                    + IFNULL((SELECT SUM(addt_charges_vat_amt) FROM tender_quote_addtchrg_info ac WHERE ac.tender_quotation_id = a.tender_quotation_id AND ac.status != 'Delete'), 0)
+                ) AS amt_tax,
+                (
+                    IFNULL((SELECT SUM(amount) FROM tender_quotation_item_info i WHERE i.tender_quotation_id = a.tender_quotation_id AND i.status != 'Delete'), 0)
+                    + IFNULL((SELECT SUM(addt_charges_tot_amt) FROM tender_quote_addtchrg_info ac WHERE ac.tender_quotation_id = a.tender_quotation_id AND ac.status != 'Delete'), 0)
+                ) AS amt_with_tax
             FROM tender_quotation_info a
             LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status = 'Active'
             LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
