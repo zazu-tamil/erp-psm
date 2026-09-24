@@ -4636,8 +4636,8 @@ class Vendor extends CI_Controller
                 c.customer_name,
                 v.vendor_name,
                 a.total_amount_wo_tax_inc_addl as amt_without_vat,
-                a.tax_amount as vat_amt,
-                a.total_amount as total_amt_with_vat,
+                a.total_tax_amount_inc_addl as vat_amt,
+                a.total_amount_inc_addl as total_amt_with_vat,
                
                 a.company_id,
                 a.customer_id, 

@@ -3756,9 +3756,11 @@ class Reports extends CI_Controller
                     a.tender_enquiry_id,
                     get_tender_info(a.tender_enquiry_id) AS tender_details, 
                     3 as decimal_point,
+
                     a.total_amount_wo_tax_inc_addl AS taxable_amount,
-                    IFNULL(a.tax_amount, 0) AS tax_amount,
-                    a.total_amount AS total_amount,
+                    IFNULL(a.total_tax_amount_inc_addl, 0) AS tax_amount,
+                    a.total_amount_inc_addl AS total_amount,
+
                     'Supplier Bill' AS bill_type
                 FROM vendor_purchase_invoice_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'

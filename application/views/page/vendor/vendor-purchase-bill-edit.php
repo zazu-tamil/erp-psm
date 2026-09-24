@@ -545,9 +545,18 @@
                                         }
                                         ?>
                                         <?php foreach($addt_charges_list as $row): 
-                                            $row_c_rate = (!empty($row['conversion_rate']) && (float)$row['conversion_rate'] > 0) ? (float)$row['conversion_rate'] : $default_item_c_rate;
                                             $row_amt = (float)($row['addt_charges_amt'] ?? 0);
-                                            $row_c_amt = (!empty($row['conversion_amt']) && (float)$row['conversion_amt'] > 0) ? (float)$row['conversion_amt'] : ($row_amt * $row_c_rate);
+                                            $row_c_amt = (!empty($row['conversion_amt']) && (float)$row['conversion_amt'] > 0) ? (float)$row['conversion_amt'] : 0;
+                                            
+                                            if ($row_c_amt > 0 && $row_amt > 0) {
+                                                $row_c_rate = $row_c_amt / $row_amt;
+                                            } else {
+                                                $row_c_rate = (!empty($row['conversion_rate']) && (float)$row['conversion_rate'] > 0) ? (float)$row['conversion_rate'] : $default_item_c_rate;
+                                            }
+                                            
+                                            if ($row_c_amt == 0) {
+                                                $row_c_amt = $row_amt * $row_c_rate;
+                                            }
                                         ?>
                                         <tr>
                                             <td>
@@ -1137,9 +1146,24 @@ $(document).ready(function() {
         }
     });
 
-    // Trigger on page load
+    // Trigger on page load without recalculating DB values
     setTimeout(function() {
-        $("#tb_addt_chrg_list .chk_vendor_po_addtchrg_id").trigger("change");
+        let defaultRate = parseFloat($(".conversion_rate").first().val()) || parseFloat($("#total_convert_amount").val()) || 1;
+        $("#tb_addt_chrg_list .chk_vendor_po_addtchrg_id").each(function() {
+            let row = $(this).closest("tr");
+            if ($(this).is(":checked")) {
+                row.find(".addt_charges_amt, .addt_charges_conversion_rate, .addt_charges_conversion_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt").prop("disabled", false);
+                let curRate = parseFloat(row.find(".addt_charges_conversion_rate").val());
+                if (isNaN(curRate) || curRate <= 0) {
+                    row.find(".addt_charges_conversion_rate").val(defaultRate.toFixed(5));
+                }
+            } else {
+                row.find(".addt_charges_amt, .addt_charges_conversion_rate, .addt_charges_conversion_amt, .addt_charges_vat, .addt_charges_vat_amt, .addt_charges_tot_amt").prop("disabled", true);
+            }
+        });
+        // We do NOT call calculateTotalAmount_addt() here because the DB values 
+        // are already printed in the Total Amount Including Additional Charges HTML.
+        // Recalculating it here might cause floating point drift.
     }, 100);
 
 
