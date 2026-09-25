@@ -92,7 +92,7 @@
                         <th class="text-right">Amt W/O Tax</th>
                         <th class="text-right">Vat Amt</th>
                         <th class="text-right">Amt With Tax</th>
-                        <th colspan="2" class="text-center">Action</th>
+                        <th colspan="3" class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -119,6 +119,14 @@
                             </td>
                             <td class="text-right">
                                 <?php echo number_format((float) ($ls['tot_amt_with_tax'] ?? 0), 3); ?>
+                            </td>
+
+                            <!-- EDIT -->
+                            <td class="text-center">
+                                <a href="<?php echo site_url('local-purchase-bill-print/' . $ls['local_purchase_bill_id']); ?>"
+                                    class="btn btn-success btn-xs" title="Print">
+                                    <i class="fa fa-print"></i>
+                                </a>
                             </td>
                             <td class="text-center">
                                 <button data-toggle="modal" data-target="#edit_modal"
@@ -288,74 +296,74 @@
                                     value="" />
                             </div>
                             <?php /*
-             <!-- <div class="modal-body">
-                 <div
-                     style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
-                     <div class="row">
-                         <div class="col-md-6 form-group">
-                             <label>A/c Sub Head</label>
-                             <?php echo form_dropdown('account_head_id', $ac_sub_head_opt, set_value('account_head_id'), 'id="edit_account_head_id" class="form-control"'); ?>
-                         </div>
-                         <div class="col-md-6 form-group">
-                             <label>Vendor Name <span class="text-red">*</span></label>
-                             <?php echo form_dropdown('vendor_id', ['' => 'Select'] + $vendor_opt, set_value('vendor_id'), 'id="edit_vendor_id" class="form-control" required'); ?>
-                         </div>
-                     </div>
-                 </div>
+        <!-- <div class="modal-body">
+            <div
+                style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label>A/c Sub Head</label>
+                        <?php echo form_dropdown('account_head_id', $ac_sub_head_opt, set_value('account_head_id'), 'id="edit_account_head_id" class="form-control"'); ?>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Vendor Name <span class="text-red">*</span></label>
+                        <?php echo form_dropdown('vendor_id', ['' => 'Select'] + $vendor_opt, set_value('vendor_id'), 'id="edit_vendor_id" class="form-control" required'); ?>
+                    </div>
+                </div>
+            </div>
 
-                 <div class="row">
-                     <div class="form-group col-md-4">
-                         <label>Inward Date</label>
-                         <input type="date" name="inward_date" id="edit_inward_date"
-                             class="form-control">
-                     </div>
-                     <div class="form-group col-md-4">
-                         <label>Invoice No <span class="text-red">*</span></label>
-                         <input type="text" name="invoice_no" id="edit_invoice_no" class="form-control"
-                             required>
-                     </div>
-                     <div class="form-group col-md-4">
-                         <label>Entry Date</label>
-                         <input type="date" name="entry_date" id="edit_entry_date" class="form-control">
-                     </div>
-                 </div>
+            <div class="row">
+                <div class="form-group col-md-4">
+                    <label>Inward Date</label>
+                    <input type="date" name="inward_date" id="edit_inward_date"
+                        class="form-control">
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Invoice No <span class="text-red">*</span></label>
+                    <input type="text" name="invoice_no" id="edit_invoice_no" class="form-control"
+                        required>
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Entry Date</label>
+                    <input type="date" name="entry_date" id="edit_entry_date" class="form-control">
+                </div>
+            </div>
 
-                 <div class="row">
-                     <div class="form-group col-md-12">
-                         <label>VAT Payer Sales / Purchase Group</label>
-                         <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('vat_payer_purchase_grp'), 'id="edit_vat_payer_purchase_grp" class="form-control"'); ?>
-                     </div>
-                 </div>
+            <div class="row">
+                <div class="form-group col-md-12">
+                    <label>VAT Payer Sales / Purchase Group</label>
+                    <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('vat_payer_purchase_grp'), 'id="edit_vat_payer_purchase_grp" class="form-control"'); ?>
+                </div>
+            </div>
 
-                 <div class="row">
-                     <div class="form-group col-md-4">
-                         <label>Tax Percentage</label>
-                         <input type="number" step="0.01" name="tax_percentage" id="edit_tax_percentage"
-                             class="form-control">
-                     </div>
-                     <div class="form-group col-md-4">
-                         <label>Total Amount W/O Tax</label>
-                         <input type="number" step="any" name="total_amount_wo_tax"
-                             id="edit_total_amount_wo_tax" class="form-control">
-                     </div>
-                     <div class="form-group col-md-4">
-                         <label>Total Amount With Tax</label>
-                         <input type="number" step="any" name="tot_amt_with_tax"
-                             id="edit_total_amount_with_tax" class="form-control" readonly>
-                     </div>
-                 </div>
+            <div class="row">
+                <div class="form-group col-md-4">
+                    <label>Tax Percentage</label>
+                    <input type="number" step="0.01" name="tax_percentage" id="edit_tax_percentage"
+                        class="form-control">
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Total Amount W/O Tax</label>
+                    <input type="number" step="any" name="total_amount_wo_tax"
+                        id="edit_total_amount_wo_tax" class="form-control">
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Total Amount With Tax</label>
+                    <input type="number" step="any" name="tot_amt_with_tax"
+                        id="edit_total_amount_with_tax" class="form-control" readonly>
+                </div>
+            </div>
 
-                 <div class="row">
-                     <div class="form-group col-md-4">
-                         <label>Status</label><br>
-                         <label class="radio-inline"><input type="radio" name="status" value="Active"
-                                 id="edit_status_active"> Active</label>
-                         <label class="radio-inline"><input type="radio" name="status" value="InActive"
-                                 id="edit_status_inactive"> InActive</label>
-                     </div>
-                 </div>
-             </div> -->
-             */ ?>
+            <div class="row">
+                <div class="form-group col-md-4">
+                    <label>Status</label><br>
+                    <label class="radio-inline"><input type="radio" name="status" value="Active"
+                            id="edit_status_active"> Active</label>
+                    <label class="radio-inline"><input type="radio" name="status" value="InActive"
+                            id="edit_status_inactive"> InActive</label>
+                </div>
+            </div>
+        </div> -->
+        */ ?>
                             <div class="modal-body">
                                 <div
                                     style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
