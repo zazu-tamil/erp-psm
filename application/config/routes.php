@@ -268,6 +268,8 @@ $route['local-purchase-bill-list'] = 'vendor/local_purchase_bill_list';
 $route['local-purchase-bill-list/(:num)'] = 'vendor/local_purchase_bill_list/$1';
 
 $route['local-purchase-bill-print/(:num)'] = 'vendor/local_purchase_bill_print/$1';
+$route['dp-bill-print/(:num)'] = 'vendor/dp_bill_print/$1';
+$route['customs-bill-print/(:num)'] = 'vendor/customs_bill_print/$1';
 
 $route['delivery-partner-bill-list'] = 'vendor/delivery_partner_bill_list';
 $route['delivery-partner-bill-list/(:num)'] = 'vendor/delivery_partner_bill_list/$1';

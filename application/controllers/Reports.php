@@ -4887,6 +4887,19 @@ class Reports extends CI_Controller
         ";
 
         $records = $this->db->query($sql, $params)->result_array();
+
+        // Add print_url for each record
+        foreach ($records as &$row) {
+            if ($row['bill_type'] == 'Delivery Partner Bill') {
+                $row['print_url'] = 'dp-bill-print/' . $row['bill_id'];
+            } elseif ($row['bill_type'] == 'Customs Bill') {
+                $row['print_url'] = 'customs-bill-print/' . $row['bill_id'];
+            } else {
+                $row['print_url'] = '';
+            }
+        }
+        unset($row);
+
         $data['records'] = $records;
 
         // KPI metrics

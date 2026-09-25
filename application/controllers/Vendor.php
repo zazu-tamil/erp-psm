@@ -7233,4 +7233,86 @@ class Vendor extends CI_Controller
 
         $this->load->view('page/vendor/local-purchase-bill-print', $data);
     }
+
+    public function dp_bill_print($dp_bill_id = 0)
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        if (!$dp_bill_id)
+            show_404();
+
+        $sql = "
+            SELECT 
+                a.*, 
+                ci.company_name,
+                ci.ltr_header_img,
+                v.vendor_name as supplier_name, 
+                v.address as supplier_address,
+                v.mobile as supplier_mobile,
+                v.email as supplier_email,
+                COALESCE(v.gst, v.crno) as supplier_vat_cr,
+
+                c.customer_name as customer_name,
+                c.address as customer_address,
+                c.mobile as customer_mobile,
+                c.email as customer_email,
+                COALESCE(c.gst, c.crno) as customer_vat_cr
+
+            FROM dp_bill_info a
+            LEFT JOIN tender_enquiry_info t ON a.tender_enquiry_id = t.tender_enquiry_id AND t.status != 'Delete'
+            LEFT JOIN company_info ci ON t.company_id = ci.company_id AND ci.status = 'Active'
+            LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id
+            LEFT JOIN customer_info c ON a.customer_id = c.customer_id
+            WHERE a.dp_bill_id = ? AND a.status = 'Active'
+        ";
+        $data['header'] = $this->db->query($sql, [$dp_bill_id])->row_array();
+
+        if (empty($data['header'])) {
+            show_404();
+        }
+
+        $this->load->view('page/vendor/dp-bill-print', $data);
+    }
+
+    public function customs_bill_print($customs_bill_id = 0)
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        if (!$customs_bill_id)
+            show_404();
+
+        $sql = "
+            SELECT 
+                a.*, 
+                ci.company_name,
+                ci.ltr_header_img,
+                v.vendor_name as supplier_name, 
+                v.address as supplier_address,
+                v.mobile as supplier_mobile,
+                v.email as supplier_email,
+                COALESCE(v.gst, v.crno) as supplier_vat_cr,
+
+                c.customer_name as customer_name,
+                c.address as customer_address,
+                c.mobile as customer_mobile,
+                c.email as customer_email,
+                COALESCE(c.gst, c.crno) as customer_vat_cr
+
+            FROM customs_bill_info a
+            LEFT JOIN tender_enquiry_info t ON a.tender_enquiry_id = t.tender_enquiry_id AND t.status != 'Delete'
+            LEFT JOIN company_info ci ON t.company_id = ci.company_id AND ci.status = 'Active'
+            LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id
+            LEFT JOIN customer_info c ON a.customer_id = c.customer_id
+            WHERE a.customs_bill_id = ? AND a.status = 'Active'
+        ";
+        $data['header'] = $this->db->query($sql, [$customs_bill_id])->row_array();
+
+        if (empty($data['header'])) {
+            show_404();
+        }
+
+        $this->load->view('page/vendor/customs-bill-print', $data);
+    }
 }

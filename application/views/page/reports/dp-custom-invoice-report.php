@@ -389,7 +389,7 @@
                         <th style="width: 90px;" class="text-right">VAT Amt</th> 
                         <th style="width: 110px;" class="text-right">Total Amount</th>
                         <th style="width: 110px;" class="text-right">Grand Amount</th>
-                        <!-- <th style="width: 55px;" class="text-center no-print">Action</th> -->
+                        <th style="width: 55px;" class="text-center no-print">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -443,21 +443,21 @@
                                     style="font-weight: 700; color: #00a65a;">
                                     <?php echo number_format((float) $r['grand_amount'], (int) $r['decimal_point']); ?>
                                 </td>
-                                <!-- <td class="text-center no-print">
-                                    <?php if (!empty($r['edit_url'])): ?>
-                                        <a href="<?php echo site_url($r['edit_url']); ?>"
-                                           class="btn btn-default btn-xs" target="_blank" title="View / Edit Bill">
-                                            <i class="fa fa-eye text-primary"></i>
+                                <td class="text-center no-print">
+                                    <?php if (!empty($r['print_url'])): ?>
+                                        <a href="<?php echo site_url($r['print_url']); ?>"
+                                           class="btn btn-default btn-xs" target="_blank" title="Print / View Invoice">
+                                            <i class="fa fa-print text-primary"></i>
                                         </a>
                                     <?php else: ?>
                                         -
                                     <?php endif; ?>
-                                </td> -->
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="12" class="text-center" style="padding: 30px; color: #888;">
+                            <td colspan="13" class="text-center" style="padding: 30px; color: #888;">
                                 <i class="fa fa-info-circle"
                                     style="font-size: 24px; display: block; margin-bottom: 8px;"></i>
                                 No supplier bills found matching the selected filter criteria.
@@ -475,6 +475,7 @@
                         <th class="text-right" style="color: #00a65a;"><?php echo number_format($total_payable, 3); ?></th>
                         <th class="text-right" style="color: #00a65a;"><?php echo number_format($grand_total, 3); ?>
                         </th>
+                        <th class="no-print"></th>
                      </tr>
                 </tfoot>
             </table>
