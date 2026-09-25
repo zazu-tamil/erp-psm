@@ -254,7 +254,7 @@
                             <input type="date" name="srch_from_date" id="srch_from_date" class="form-control"
                                 value="<?php echo htmlspecialchars($srch_from_date); ?>">
                         </div>
-                    </div> 
+                    </div>
                     <div class="form-group col-md-2">
                         <label for="srch_to_date">To Date</label>
                         <div class="input-group">
@@ -289,7 +289,8 @@
 
                     <div class="form-group col-md-2">
                         <label for="srch_sub_account_head_id">Sub Account</label>
-                        <select name="srch_sub_account_head_id" id="srch_sub_account_head_id" class="form-control select2">
+                        <select name="srch_sub_account_head_id" id="srch_sub_account_head_id"
+                            class="form-control select2">
                             <option value="">All Accounts</option>
                             <?php foreach ($sub_account_list as $acc): ?>
                                 <option value="<?php echo $acc['sub_account_head_id']; ?>" <?php echo ($srch_sub_account_head_id == $acc['sub_account_head_id']) ? 'selected' : ''; ?>>
@@ -387,7 +388,7 @@
                         <th style="width: 110px;" class="text-right">Taxable Amt</th>
                         <th style="width: 90px;" class="text-right">VAT</th>
                         <th style="width: 110px;" class="text-right">Total Amount</th>
-                        <!-- <th style="width: 55px;" class="text-center no-print">Action</th> -->
+                        <th style="width: 55px;" class="text-center no-print">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -433,16 +434,16 @@
                                     style="font-weight: 700; color: #00a65a;">
                                     <?php echo number_format((float) $r['total_amount'], (int) $r['decimal_point']); ?>
                                 </td>
-                                <!-- <td class="text-center no-print">
-                                    <?php if (!empty($r['edit_url'])): ?>
-                                        <a href="<?php echo site_url($r['edit_url']); ?>"
-                                           class="btn btn-default btn-xs" target="_blank" title="View / Edit Bill">
-                                            <i class="fa fa-eye text-primary"></i>
+                                <td class="text-center no-print">
+                                    <?php if (!empty($r['print_url'])): ?>
+                                        <a href="<?php echo site_url($r['print_url']); ?>"
+                                           class="btn btn-default btn-xs" target="_blank" title="Print / View Invoice">
+                                            <i class="fa fa-print text-primary"></i>
                                         </a>
                                     <?php else: ?>
                                         -
                                     <?php endif; ?>
-                                </td> -->
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>

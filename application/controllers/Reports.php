@@ -3782,7 +3782,8 @@ class Reports extends CI_Controller
 
                     'Supplier Bill' AS bill_type,
                     NULL AS sub_account_head_id,
-                    'Purchases' AS sub_account_head_name
+                    'Purchases' AS sub_account_head_name,
+                    CONCAT('vendor-purchase-bill-print/', a.vendor_purchase_invoice_id) AS print_url
                 FROM vendor_purchase_invoice_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 LEFT JOIN vendor_po_info vpo ON vpo.vendor_po_id = a.vendor_po_id AND vpo.status = 'Active'
@@ -3806,7 +3807,8 @@ class Reports extends CI_Controller
                     IFNULL(a.tot_amt_with_tax, 0) AS total_amount,
                     'Local Supplier Bill' AS bill_type,
                     a.sub_account_head_id,
-                    s.sub_account_head_name
+                    s.sub_account_head_name,
+                    CONCAT('local-purchase-bill-print/', a.local_purchase_bill_id) AS print_url
                  FROM local_purchase_bill_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 LEFT JOIN cb_sub_account_head_info s ON s.sub_account_head_id = a.sub_account_head_id
@@ -3843,8 +3845,7 @@ class Reports extends CI_Controller
             $content = $this->load->view('page/reports/supplier-invoice-report-xls', $data, TRUE);
             force_download($filename, $content);
             return;
-        }
-
+        } 
         $this->load->view('page/reports/supplier-invoice-report', $data);
     }
 

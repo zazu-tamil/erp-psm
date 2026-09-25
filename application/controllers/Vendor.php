@@ -7060,4 +7060,153 @@ class Vendor extends CI_Controller
 
         $this->load->view('page/vendor/vendor-pending-invoice-report', $data);
     }
+
+    public function vendor_purchase_bill_print($vendor_purchase_invoice_id = 0)
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        if (!$vendor_purchase_invoice_id)
+            show_404();
+
+        // === MAIN LOCAL PURCHASE INVOICE RECORD ===
+        $sql = "
+            SELECT 
+                a.*,
+                c.customer_name,
+                c.address,
+                c.country AS customer_country,
+                ci.company_name AS our_company,
+                ci.ltr_header_img,
+                v.vendor_name,
+                vc.contact_person_name AS vendor_contact_person,
+                vc.designation,
+
+                a.total_amount_wo_tax_inc_addl AS taxable_amount,
+                IFNULL(a.total_tax_amount_inc_addl, 0) AS tax_amount,
+                a.total_amount_inc_addl AS total_amount
+
+            FROM vendor_purchase_invoice_info AS a
+
+            LEFT JOIN customer_info AS c
+                ON a.customer_id = c.customer_id
+                AND c.status = 'Active'
+
+            LEFT JOIN company_info AS ci
+                ON a.company_id = ci.company_id
+                AND ci.status = 'Active'
+
+            LEFT JOIN vendor_info AS v
+                ON a.vendor_id = v.vendor_id
+                AND v.status = 'Active'
+
+
+
+            LEFT JOIN vendor_contact_info AS vc
+                ON vc.vendor_contact_id = a.vendor_contact_person_id
+                AND vc.status = 'Active'
+
+            WHERE 
+                a.vendor_purchase_invoice_id = ?
+                AND a.status != 'Delete'
+        ";
+
+        $query = $this->db->query($sql, [$vendor_purchase_invoice_id]);
+        $data['header'] = $query->row_array();
+
+    
+        if (empty($data['header'])) {
+            show_404();
+        }
+
+        // === LOCAL PURCHASE INVOICE ITEMS ===
+        $sql = "
+            SELECT
+                a.vendor_purchase_invoice_item_id,
+                a.vendor_purchase_invoice_id,
+                a.vendor_po_item_id,
+                a.category_id,
+                a.item_id,
+                a.item_code,
+                a.item_desc,
+                a.uom,
+                a.qty,
+                a.rate,
+                a.conversion_rate,
+                a.duty,
+                a.gst,
+                a.amount,
+
+                (IFNULL(a.qty, 0) * IFNULL(a.rate, 0)) AS net_amount,
+
+                (
+                    (IFNULL(a.qty, 0) * IFNULL(a.rate, 0))
+                    * IFNULL(a.gst, 0) / 100
+                ) AS vat_amt
+
+            FROM vendor_purchase_invoice_item_info AS a
+
+            WHERE 
+                a.vendor_purchase_invoice_id = ?
+                AND a.status = 'Active'
+
+            ORDER BY a.vendor_purchase_invoice_item_id ASC
+        ";
+
+        $query = $this->db->query($sql, [$vendor_purchase_invoice_id]);
+        $data['item_list'] = $query->result_array();
+
+
+
+        // === LOCAL PURCHASE ADDITIONAL CHARGES ===
+        $sql = "
+            SELECT
+                a.*,
+                b.addt_charges_type_name
+
+            FROM vendor_purchase_invoice_addtchrg_info AS a
+
+            LEFT JOIN addt_charges_type_info AS b
+                ON b.addt_charges_type_id = a.addt_charges_type_id
+                AND b.status = 'Active'
+
+            WHERE
+                a.vendor_purchase_invoice_id = ?
+                AND a.status = 'Active'
+
+            ORDER BY b.addt_charges_type_name ASC
+        ";
+
+        $query = $this->db->query($sql, [$vendor_purchase_invoice_id]);
+        $data['addt_chrg_list'] = $query->result_array();
+
+        $this->load->view('page/vendor/vendor-purchase-bill-print', $data);
+    }
+
+    public function local_purchase_bill_print($local_purchase_bill_id = 0)
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in'))
+            redirect();
+
+        if (!$local_purchase_bill_id)
+            show_404();
+
+        $sql = "
+            SELECT a.*, v.vendor_name as supplier_name, c.customer_name as customer_name
+            FROM local_purchase_bill_info a
+            LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id
+            LEFT JOIN customer_info c ON a.customer_id = c.customer_id
+            WHERE a.local_purchase_bill_id = ? AND a.status = 'Active'
+        ";
+        $data['header'] = $this->db->query($sql, [$local_purchase_bill_id])->row_array();
+
+        if (empty($data['header'])) {
+            show_404();
+        }
+        
+        // Fetch company
+        $data['company_info'] = [];
+
+        $this->load->view('page/vendor/local-purchase-bill-print', $data);
+    }
 }

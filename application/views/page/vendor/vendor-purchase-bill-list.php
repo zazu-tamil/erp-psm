@@ -43,7 +43,7 @@
                         <label for="">OR</label>
                     </div>
                 </div>
-                <div class="row"> 
+                <div class="row">
                     <div class="form-group col-md-3">
                         <label for="srch_customer_rfq_no">Customer RFQ No</label>
                         <input type="text" name="srch_customer_rfq_no" id="srch_customer_rfq_no" class="form-control"
@@ -116,6 +116,12 @@
                                 <td><?php echo htmlspecialchars($row['total_amt_with_vat'] ?? '-'); ?></td>
 
                                 <!-- EDIT -->
+                                <td class="text-center">
+                                    <a href="<?php echo site_url('vendor-purchase-bill-print/' . $row['vendor_purchase_invoice_id']); ?>"
+                                        class="btn btn-success btn-xs" title="Print">
+                                        <i class="fa fa-print"></i>
+                                    </a>
+                                </td>
                                 <td class="text-center">
                                     <a href="<?php echo site_url('vendor-purchase-bill-edit/' . $row['vendor_purchase_invoice_id']); ?>"
                                         class="btn btn-primary btn-xs" title="Edit">

@@ -1,0 +1,373 @@
+<!--
+<?php
+// echo "<pre>";
+// print_r($addt_chrg_list);
+// echo "</pre>";
+?>
+-->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Enquiry No -
+        <?= htmlspecialchars(str_replace('/', '', $header['tender_details'] ?? 'N/A'), ENT_QUOTES, 'UTF-8'); ?>
+    </title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        #print-header {
+            display: none !important;
+        }
+
+        @media print {
+            body {
+                margin-top: 0px;
+            }
+
+            #screen-header-row {
+                display: table-row !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            tr {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            td,
+            th {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            @page {
+                margin-top: 10mm !important;
+                margin-bottom: 15mm;
+                margin-left: 10mm;
+                margin-right: 10mm;
+
+                @bottom-right {
+                    content: "Page " counter(page);
+                    font-size: 12px;
+                    font-family: Arial, Helvetica, sans-serif;
+                }
+            }
+        }
+
+        /* ============================================================ */
+
+        .main-table {
+            width: 800px;
+            margin: auto;
+            border-collapse: collapse;
+        }
+
+        .main-table td {
+            padding: 5px;
+        }
+
+        .header-img {
+            width: 100%;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 4px;
+        }
+
+        .items-table {
+            width: 95%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .items-table th {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .items-table td {
+            border: 1px solid #000;
+            padding: 8px;
+        }
+
+        tr.items-table th,
+        tr.items-table td {
+            border: 1px solid #000;
+            padding: 8px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .total {
+            font-weight: bold;
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            margin: 0 10px;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: #0066cc;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #0052a3;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <?php if (!empty($header['ltr_header_img'])): ?>
+        <!-- ============================================================
+         FIXED PRINT HEADER — renders on every printed page
+         ============================================================ -->
+        <div id="print-header">
+            <img src="<?php echo base_url('') . $header['ltr_header_img']; ?>" alt="Company Header">
+        </div>
+    <?php endif; ?>
+
+    <table class="main-table" id="quoteTable">
+
+        <!-- Screen Header (hidden during print; replaced by fixed #print-header above) -->
+        <tr id="screen-header-row">
+            <td colspan="7" height="200px;" style="border:0px solid red;">
+                <?php if (!empty($header['ltr_header_img'])): ?>
+                    <img src="<?php echo base_url('') . $header['ltr_header_img']; ?>" alt="Company Header"
+                        class="header-img">
+                <?php endif; ?>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="7" class="title">
+               Supplier Invoice
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="3">
+               &nbsp;
+            </td>
+            <td align="right" colspan="4">
+                Date :
+                <?php echo !empty($header['invoice_date']) ? date('d/m/Y', strtotime($header['invoice_date'])) : date('d/m/Y', strtotime($header['quote_date'] ?? date('Y-m-d'))); ?><br>
+                Invoice No :
+                <?php echo htmlspecialchars(   $header['invoice_no'] ?? ''); ?>
+            </td>
+        </tr>
+
+        <?php
+        $decimal_point = isset($header['decimal_point']) ? intval($header['decimal_point']) : 3;
+        $currency_code = $header['currency_code'] ?? 'BHD';
+        ?>
+
+        <tr>
+            <td colspan="4">
+                <b>To,</b><br><br>
+                <span>
+                    <strong><?php echo htmlspecialchars($header['customer_name'] ?? 'N/A'); ?></strong><br>
+                    <?php echo nl2br(htmlspecialchars($header['address'] ?? 'N/A')); ?><br>
+                    <?php if (!empty($header['customer_country'])): ?>
+                        <b><?php echo htmlspecialchars($header['customer_country']); ?></b><br>
+                    <?php endif; ?>
+                    <?php if (!empty($header['vat_account_no'])): ?>
+                        VAT Account. No: <?php echo htmlspecialchars($header['vat_account_no']); ?>
+                    <?php endif; ?>
+                </span>
+            </td>
+            <td colspan="3" align="right">
+             &nbsp;
+            </td>
+        </tr>
+<!-- 
+        <?php if (!empty($header['contact_person'])): ?>
+            <tr>
+                <td colspan="7" class="title1">
+                    <i><b>Attn: <?php echo htmlspecialchars($header['contact_person']); ?>
+                            <?php echo (!empty($header['designation']) ? " - " . $header['designation'] : ''); ?></b></i>
+                </td>
+            </tr>
+        <?php endif; ?>
+
+        <?php if (!empty($header['tender_ref_no'])): ?>
+            <tr>
+                <td colspan="7" align="center">
+                    <u>SUB: Your Enquiry Ref:
+                        <?php echo htmlspecialchars($header['tender_ref_no']); ?>, Dated:
+                        <?php echo date('d/m/Y', strtotime($header['tender_enquiry_date'] ?? '')); ?>.</u>
+                </td>
+            </tr>
+        <?php endif; ?> -->
+
+        <tr>
+            <td colspan="7">
+                Dear Sir,<br><br>
+                Thank you for the supply of goods
+            </td>
+        </tr>
+
+        <!-- Items Table Header -->
+        <tr class="items-table">
+            <!-- <th width="8%">#</th> -->
+            <th width="8%">Serial No</th>
+            <th width="40%" align="left">Description</th>
+            <th width="8%">Qty</th>
+            <th width="8%">Unit</th>
+            <th width="12%">Unit Rate</th>
+            <th width="12%">Net Price</th>
+            <th width="10%">VAT %</th>
+        </tr>
+
+        <?php if (!empty($item_list)):
+            $tot_vat = [];
+            ?>
+            <?php foreach ($item_list as $i => $item):
+                $net_amount = floatval($item['net_amount'] ?? $item['Net_amount'] ?? 0);
+                $vat_percentage = floatval($item['gst'] ?? 0);
+                ?>
+                <tr class="items-table">
+                    <td class="text-center"><?php echo $item['serial_no'] ?? ($i + 1); ?></td>
+                    <td class="text-left">
+                        <div class="item-description">
+                            <?php if (!empty($item['item_code'])): ?>
+                                <div class="item-code"><?php echo htmlspecialchars($item['item_code']); ?></div>
+                            <?php endif; ?>
+                            <?php if (!empty($item['item_desc']))
+                                echo nl2br(htmlspecialchars($item['item_desc'])); ?>
+                        </div>
+                    </td>
+                    <td class="text-center"><?php echo number_format($item['qty'] ?? 0, 0); ?></td>
+                    <td class="text-center"><?php echo htmlspecialchars($item['uom'] ?? '-'); ?></td>
+                    <td class="text-right"><?php echo number_format($item['rate'] ?? 0, $decimal_point); ?></td>
+                    <td class="text-right"><?php echo number_format($net_amount, $decimal_point); ?></td>
+                    <td class="text-center"><?php echo number_format($vat_percentage, 2); ?></td>
+                </tr>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <tr class="items-table">
+                <td colspan="7" class="text-center" style="padding:30px; color:#999;">No items found</td>
+            </tr>
+        <?php endif; ?>
+
+        <!-- Additional Charges -->
+        <?php if (!empty($addt_chrg_list)):
+            foreach ($addt_chrg_list as $i => $addt_chrg): ?>
+                <tr class="items-table">
+                    <td colspan="5" class="text-right">
+                        <strong><?php echo htmlspecialchars($addt_chrg['addt_charges_type_name']); ?></strong>
+                    </td>
+                    <td colspan="2" class="text-right">
+                        <strong><?php echo number_format($addt_chrg['addt_charges_amt'], $decimal_point); ?></strong>
+                    </td>
+                </tr>
+            <?php endforeach;
+        endif; ?>
+
+        <!-- Total Excl. VAT -->
+        <tr class="items-table">
+            <td colspan="5" class="text-right"><strong>TOTAL EXCL. VAT (TAXABLE AMOUNT)</strong></td>
+            <td colspan="2" class="text-right">
+                <strong><?php echo number_format($header['taxable_amount'] ?? 0, $decimal_point); ?></strong>
+            </td>
+        </tr>
+
+        <!-- VAT Total -->
+        <tr class="items-table">
+            <td colspan="5" class="text-right"><strong>TOTAL VAT AMOUNT</strong></td>
+            <td colspan="2" class="text-right">
+                <strong><?php echo number_format($header['tax_amount'] ?? 0, $decimal_point); ?></strong>
+            </td>
+        </tr>
+
+        <!-- Grand Total -->
+        <tr class="items-table" style="background:#ffff; color:#000;">
+            <td colspan="5" class="text-right">
+                <strong>TOTAL</strong>
+                <i class="text-sm"> &nbsp;</i>
+            </td>
+            <td colspan="2" class="text-right">
+                <strong><?php echo number_format($header['total_amount'] ?? 0, $decimal_point); ?></strong>
+            </td>
+        </tr>
+
+
+        <!-- <tr>
+            <td colspan="7" height="80"></td>
+        </tr> -->
+
+        <tr>
+            <td colspan="7" align="right">
+                For <?php echo htmlspecialchars($header['our_company'] ?? $header['company_name'] ?? 'Our Company'); ?>
+                <br><br>
+                ____________________________
+            </td>
+        </tr>
+
+    </table>
+
+    <?php if (!isset($_POST['export_xls'])): ?>
+        <div class="button-container no-print">
+            <form action="<?php echo site_url('vendor-purchase-bill-list/' . ($header['vendor_purchase_bill_id'] ?? '')) ?>"
+                method="post">
+                <button type="button" class="btn btn-primary"
+                    onclick="window.location.href='<?= site_url('vendor-purchase-bill-list') ?>'">
+                    ← Back To List
+                </button>
+                <button type="button" class="btn btn-success" onclick="window.print()">
+                    🖨️ Print
+                </button> 
+            </form>
+        </div>
+    <?php endif; ?>
+
+</body>
+
+</html>
