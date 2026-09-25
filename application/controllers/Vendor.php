@@ -7192,9 +7192,29 @@ class Vendor extends CI_Controller
             show_404();
 
         $sql = "
-            SELECT a.*, v.vendor_name as supplier_name, c.customer_name as customer_name
+            SELECT 
+                a.*, 
+                v.vendor_name as supplier_name, 
+                v.address as supplier_address,
+                v.mobile as supplier_mobile,
+                v.email as supplier_email,
+                COALESCE(v.gst, v.crno) as supplier_vat_cr,
+
+                v2.vendor_name as supplier2_name,
+                v2.address as supplier2_address,
+                v2.mobile as supplier2_mobile,
+                v2.email as supplier2_email,
+                COALESCE(v2.gst, v2.crno) as supplier2_vat_cr,
+
+                c.customer_name as customer_name,
+                c.address as customer_address,
+                c.mobile as customer_mobile,
+                c.email as customer_email,
+                COALESCE(c.gst, c.crno) as customer_vat_cr
+
             FROM local_purchase_bill_info a
             LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id
+            LEFT JOIN vendor_info v2 ON a.vendor_id_2 = v2.vendor_id
             LEFT JOIN customer_info c ON a.customer_id = c.customer_id
             WHERE a.local_purchase_bill_id = ? AND a.status = 'Active'
         ";

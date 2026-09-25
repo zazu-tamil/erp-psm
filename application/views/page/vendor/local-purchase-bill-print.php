@@ -200,15 +200,50 @@
 
         <tr>
             <td colspan="4">
-                <b>Supplier Details,</b><br><br>
+                <?php if (!empty($header['supplier2_name'])): ?>
+                    <b>Supplier / Supplier 2 Details,</b><br><br>
+                <?php else: ?>
+                    <b>Supplier Details,</b><br><br>
+                <?php endif; ?>
                 <span>
                     <strong><?php echo htmlspecialchars($header['supplier_name'] ?? 'N/A'); ?></strong><br>
+                    <?php if (!empty($header['supplier_address'])): ?>
+                        <?php echo nl2br(htmlspecialchars($header['supplier_address'])); ?><br>
+                    <?php endif; ?>
+                    <?php if (!empty($header['supplier_mobile'])): ?>
+                        Mobile: <?php echo htmlspecialchars($header['supplier_mobile']); ?><br>
+                    <?php endif; ?>
+                    <?php if (!empty($header['supplier_vat_cr'])): ?>
+                        VAT / CR No: <?php echo htmlspecialchars($header['supplier_vat_cr']); ?><br>
+                    <?php endif; ?>
+
+                    <?php if (!empty($header['supplier2_name'])): ?>
+                        <br><strong><?php echo htmlspecialchars($header['supplier2_name']); ?></strong><br>
+                        <?php if (!empty($header['supplier2_address'])): ?>
+                            <?php echo nl2br(htmlspecialchars($header['supplier2_address'])); ?><br>
+                        <?php endif; ?>
+                        <?php if (!empty($header['supplier2_mobile'])): ?>
+                            Mobile: <?php echo htmlspecialchars($header['supplier2_mobile']); ?><br>
+                        <?php endif; ?>
+                        <?php if (!empty($header['supplier2_vat_cr'])): ?>
+                            VAT / CR No: <?php echo htmlspecialchars($header['supplier2_vat_cr']); ?><br>
+                        <?php endif; ?>
+                    <?php endif; ?>
                 </span>
             </td>
-            <td colspan="3">
+            <td colspan="3" valign="top">
                 <b>Customer Details,</b><br><br>
                 <span>
                     <strong><?php echo htmlspecialchars($header['customer_name'] ?? 'N/A'); ?></strong><br>
+                    <?php if (!empty($header['customer_address'])): ?>
+                        <?php echo nl2br(htmlspecialchars($header['customer_address'])); ?><br>
+                    <?php endif; ?>
+                    <?php if (!empty($header['customer_mobile'])): ?>
+                        Mobile: <?php echo htmlspecialchars($header['customer_mobile']); ?><br>
+                    <?php endif; ?>
+                    <?php if (!empty($header['customer_vat_cr'])): ?>
+                        VAT / CR No: <?php echo htmlspecialchars($header['customer_vat_cr']); ?><br>
+                    <?php endif; ?>
                 </span>
             </td>
         </tr>
