@@ -7194,6 +7194,8 @@ class Vendor extends CI_Controller
         $sql = "
             SELECT 
                 a.*, 
+                ci.company_name,
+                ci.ltr_header_img,
                 v.vendor_name as supplier_name, 
                 v.address as supplier_address,
                 v.mobile as supplier_mobile,
@@ -7213,6 +7215,8 @@ class Vendor extends CI_Controller
                 COALESCE(c.gst, c.crno) as customer_vat_cr
 
             FROM local_purchase_bill_info a
+            LEFT JOIN tender_enquiry_info t ON a.tender_enquiry_id = t.tender_enquiry_id AND t.status != 'Delete'
+            LEFT JOIN company_info ci ON t.company_id = ci.company_id AND ci.status = 'Active'
             LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id
             LEFT JOIN vendor_info v2 ON a.vendor_id_2 = v2.vendor_id
             LEFT JOIN customer_info c ON a.customer_id = c.customer_id

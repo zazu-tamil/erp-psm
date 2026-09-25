@@ -179,7 +179,12 @@
 
         <tr>
             <td colspan="7" class="title">
-                LOCAL PURCHASE BILL
+                Local Purchase Bill
+            </td>
+        </tr>
+        <tr>
+            <td colspan="7">
+                &nbsp;
             </td>
         </tr>
 
