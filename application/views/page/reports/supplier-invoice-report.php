@@ -465,7 +465,7 @@
                         <th class="text-right"><?php echo number_format($total_vat, 3); ?></th>
                         <th class="text-right" style="color: #00a65a;"><?php echo number_format($grand_total, 3); ?>
                         </th>
-                        <!-- <th class="no-print"></th> -->
+                        <th class="no-print"></th>
                     </tr>
                 </tfoot>
             </table>
