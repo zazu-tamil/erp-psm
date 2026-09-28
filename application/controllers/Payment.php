@@ -376,11 +376,16 @@ class Payment extends CI_Controller
                 SELECT 
                     trii.tender_receipt_id,
                     GROUP_CONCAT(DISTINCT 
-                        CASE 
-                            WHEN trii.bill_type = 'Invoice' THEN tei.invoice_no
-                            WHEN trii.bill_type = 'Opening Balance' THEN CONCAT('OB-', LPAD(cob.opening_id, 3, '0'))
-                            ELSE tei.invoice_no
-                        END
+                        CONCAT(
+                            CASE 
+                                WHEN trii.bill_type = 'Invoice' THEN tei.invoice_no
+                                WHEN trii.bill_type = 'Opening Balance' THEN CONCAT('OB-', LPAD(cob.opening_id, 3, '0'))
+                                ELSE tei.invoice_no
+                            END,
+                            '    [ ',
+                            FORMAT(trii.inv_amount, 3),
+                            ' ] '
+                        )
                         SEPARATOR '<br>'
                     ) AS invoice_nos,
                     GROUP_CONCAT(DISTINCT 
@@ -1689,7 +1694,7 @@ class Payment extends CI_Controller
             redirect();
         }
 
-        $vendor_payment_id = (int)$vendor_payment_id;
+        $vendor_payment_id = (int) $vendor_payment_id;
 
         $sql = "
             SELECT 
@@ -1778,7 +1783,7 @@ class Payment extends CI_Controller
             redirect();
         }
 
-        $tender_receipt_id = (int)$tender_receipt_id;
+        $tender_receipt_id = (int) $tender_receipt_id;
 
         $sql = "
             SELECT 
@@ -1812,11 +1817,16 @@ class Payment extends CI_Controller
                     MAX(curr.symbol) AS currency_symbol,
                     MAX(tei.company_id) AS company_id,
                     GROUP_CONCAT(DISTINCT 
-                        CASE 
-                            WHEN trii.bill_type = 'Invoice' THEN tei.invoice_no
-                            WHEN trii.bill_type = 'Opening Balance' THEN CONCAT('OB-', LPAD(cob.opening_id, 3, '0'))
-                            ELSE tei.invoice_no
-                        END
+                        CONCAT(
+                            CASE 
+                                WHEN trii.bill_type = 'Invoice' THEN tei.invoice_no
+                                WHEN trii.bill_type = 'Opening Balance' THEN CONCAT('OB-', LPAD(cob.opening_id, 3, '0'))
+                                ELSE tei.invoice_no
+                            END,
+                            ' [ ',
+                            FORMAT(trii.inv_amount, 3),
+                            ' ] '
+                        )
                         SEPARATOR '<br>'
                     ) AS invoice_nos,
                     GROUP_CONCAT(DISTINCT 

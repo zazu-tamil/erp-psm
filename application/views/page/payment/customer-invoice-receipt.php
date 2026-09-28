@@ -62,7 +62,8 @@
                         <input type="text" name="srch_enquiry_no" id="srch_enquiry_no" class="form-control"
                             value="<?php echo set_value('srch_enquiry_no', $srch_enquiry_no ?? ''); ?>"
                             placeholder="Search the Our Enquiry No">
-                        <input type="hidden" name="tender_enquiry_id_value_id" id="tender_enquiry_id_value_id" class="tender_enquiry_id_value_id"
+                        <input type="hidden" name="tender_enquiry_id_value_id" id="tender_enquiry_id_value_id"
+                            class="tender_enquiry_id_value_id"
                             value="<?php echo set_value('tender_enquiry_id_value_id', $tender_enquiry_id_value_id ?? ''); ?>">
                     </div>
                     <div class="form-group col-md-2">
@@ -107,7 +108,9 @@
                     <?php foreach ($record_list as $j => $ls): ?>
                         <tr>
                             <td class="text-center"><?php echo (($sno ?? 0) + $j + 1); ?></td>
-                            <td class="text-center"><b><?php echo !empty($ls['receipt_no']) ? str_pad((int)$ls['receipt_no'], 4, '0', STR_PAD_LEFT) : '-'; ?></b></td>
+                            <td class="text-center">
+                                <b><?php echo !empty($ls['receipt_no']) ? str_pad((int) $ls['receipt_no'], 4, '0', STR_PAD_LEFT) : '-'; ?></b>
+                            </td>
                             <td><?php echo $ls['receipt_date'] ?? ''; ?></td>
                             <td><?php echo !empty($ls['enquiry_nos']) ? $ls['enquiry_nos'] : '-'; ?></td>
                             <td><?php echo !empty($ls['invoice_nos']) ? $ls['invoice_nos'] : '-'; ?></td>
@@ -125,18 +128,18 @@
                             </td>
                             <td class="text-right"><?php echo number_format((float) ($ls['amount'] ?? 0), 3); ?></td>
                             <td class="text-center">
+                                <a href="<?php echo site_url('customer-receipt-print/' . ($ls['tender_receipt_id'] ?? '')); ?>"
+                                    target="_blank" class="btn btn-info btn-xs" title="Print Receipt">
+                                    <i class="fa fa-print"></i>
+                                </a>
+                            </td>
+                            <td class="text-center">
                                 <button type="button" data-toggle="modal" data-target="#edit_modal"
                                     data-id="<?php echo $ls['tender_receipt_id'] ?? ''; ?>"
                                     data-customer-id="<?php echo $ls['customer_id'] ?? ''; ?>"
                                     class="edit_record btn btn-primary btn-xs" title="Edit">
                                     <i class="fa fa-edit"></i>
                                 </button>
-                            </td>
-                            <td class="text-center">
-                                <a href="<?php echo site_url('customer-receipt-print/' . ($ls['tender_receipt_id'] ?? '')); ?>"
-                                    target="_blank" class="btn btn-info btn-xs" title="Print Receipt">
-                                    <i class="fa fa-print"></i>
-                                </a>
                             </td>
                             <td class="text-center">
                                 <button type="button" value="<?php echo $ls['tender_receipt_id'] ?? ''; ?>"
@@ -196,12 +199,14 @@
 
                         <!-- Customer Balance Summary (inside Add Modal) -->
                         <div id="add_customer_balance_panel" style="display:none; margin-bottom:12px;">
-                            <div style="background:#f0f4ff; border:1px solid #c5cae9; border-radius:6px; padding:8px 14px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                            <div
+                                style="background:#f0f4ff; border:1px solid #c5cae9; border-radius:6px; padding:8px 14px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
                                 <span style="font-size:12px; font-weight:700; color:#1a237e;">
                                     <i class="fa fa-bar-chart"></i>&nbsp; Current Balance
                                     (<span id="add_bal_customer_name" style="color:#283593;"></span>) :
                                 </span>
-                                <span id="add_bal_current" style="font-size:20px; font-weight:800; color:#c62828;">0.000</span>
+                                <span id="add_bal_current"
+                                    style="font-size:20px; font-weight:800; color:#c62828;">0.000</span>
                                 <span id="add_bal_current_label"></span>
                             </div>
                         </div>
@@ -299,7 +304,8 @@
                         </div>
                         <!-- Auto Allocate Info Panel -->
                         <div id="add_allocate_info" style="display:none; margin-bottom:8px;">
-                            <div style="background:#fffde7; border:1px solid #f9a825; border-radius:5px; padding:7px 14px; font-size:13px;">
+                            <div
+                                style="background:#fffde7; border:1px solid #f9a825; border-radius:5px; padding:7px 14px; font-size:13px;">
                                 <i class="fa fa-info-circle text-warning"></i>
                                 &nbsp;<strong id="add_allocate_msg"></strong>
                             </div>
@@ -351,7 +357,8 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <h3 class="modal-title" id="editModalLabel"><strong>Edit Customer Receipt</strong> <span id="edit_receipt_no_badge" class="badge bg-green" style="font-size:14px;"></span></h3>
+                        <h3 class="modal-title" id="editModalLabel"><strong>Edit Customer Receipt</strong> <span
+                                id="edit_receipt_no_badge" class="badge bg-green" style="font-size:14px;"></span></h3>
                         <input type="hidden" name="mode" value="Edit" />
                         <input type="hidden" name="tender_receipt_id" id="edit_tender_receipt_id" value="" />
                     </div>
@@ -470,7 +477,8 @@
                         <br>
                         <!-- Auto Allocate Info Panel -->
                         <div id="edit_allocate_info" style="display:none; margin-bottom:8px;">
-                            <div style="background:#fffde7; border:1px solid #f9a825; border-radius:5px; padding:7px 14px; font-size:13px;">
+                            <div
+                                style="background:#fffde7; border:1px solid #f9a825; border-radius:5px; padding:7px 14px; font-size:13px;">
                                 <i class="fa fa-info-circle text-warning"></i>
                                 &nbsp;<strong id="edit_allocate_msg"></strong>
                             </div>
