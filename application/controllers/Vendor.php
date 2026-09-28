@@ -2688,7 +2688,7 @@ class Vendor extends CI_Controller
         $data['quotation_status_opt'] = ['' => 'Select Tender Status', 'Completed' => 'Completed', 'Pending' => 'Pending', 'Rejected' => 'Rejected'];
         // === FETCH RECORDS ===
         $sql = "
-            select 
+              select 
             a.company_id,
             a.customer_id,
             a.vendor_quote_id,
@@ -2702,12 +2702,18 @@ class Vendor extends CI_Controller
             a.quote_date,
             a.quote_no,
 			e.vendor_name ,           
-            d.enquiry_no as customer_rfq_no
+            d.enquiry_no as customer_rfq_no,
+            COALESCE((SELECT SUM(qty * rate) FROM vendor_quote_item_info WHERE vendor_quote_id = a.vendor_quote_id AND status = 'Active'), 0) + 
+            COALESCE((SELECT SUM(addt_charges_amt) FROM vendor_quote_addtchrg_info WHERE vendor_quote_id = a.vendor_quote_id AND status = 'Active'), 0) as total_amount_wo_tax,
+            COALESCE((SELECT SUM((qty * rate) * gst / 100) FROM vendor_quote_item_info WHERE vendor_quote_id = a.vendor_quote_id AND status = 'Active'), 0) + 
+            COALESCE((SELECT SUM(addt_charges_vat_amt) FROM vendor_quote_addtchrg_info WHERE vendor_quote_id = a.vendor_quote_id AND status = 'Active'), 0) as total_tax_amount,
+            COALESCE((SELECT SUM(amount) FROM vendor_quote_item_info WHERE vendor_quote_id = a.vendor_quote_id AND status = 'Active'), 0) + 
+            COALESCE((SELECT SUM(addt_charges_tot_amt) FROM vendor_quote_addtchrg_info WHERE vendor_quote_id = a.vendor_quote_id AND status = 'Active'), 0) as total_amount_with_tax
             from vendor_quotation_info as a 
             left join company_info as b on a.company_id = b.company_id and b.`status`='Active'
             left join customer_info as c on a.customer_id = c.customer_id and c.`status`='Active'
             left join tender_enquiry_info as d on a.tender_enquiry_id = d.tender_enquiry_id and d.`status`='Active'
-            left join vendor_info as e on a.vendor_id = e.vendor_id and e.`status`='Active'
+            left join vendor_info as e on a.vendor_id = e.vendor_id and e.`status`='A`ctive'
             where a.`status`='Active'
             AND $where 
             order by a.quote_date desc, a.vendor_quote_id desc 
@@ -7114,7 +7120,7 @@ class Vendor extends CI_Controller
         $query = $this->db->query($sql, [$vendor_purchase_invoice_id]);
         $data['header'] = $query->row_array();
 
-    
+
         if (empty($data['header'])) {
             show_404();
         }
@@ -7227,7 +7233,7 @@ class Vendor extends CI_Controller
         if (empty($data['header'])) {
             show_404();
         }
-        
+
         // Fetch company
         $data['company_info'] = [];
 

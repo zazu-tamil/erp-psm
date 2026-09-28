@@ -32,7 +32,7 @@
                         <div class="form-group">
                             <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control select2" '); ?>
                         </div>
-                    </div> 
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12 text-center">
@@ -40,7 +40,7 @@
                     </div>
                 </div>
                 <div class="row">
-                     <div class="form-group col-md-3">
+                    <div class="form-group col-md-3">
                         <label for="srch_customer_rfq_no">Customer RFQ No</label>
                         <input type="text" name="srch_customer_rfq_no" id="srch_customer_rfq_no" class="form-control"
                             value="<?php echo set_value('srch_customer_rfq_no', $srch_customer_rfq_no); ?>"
@@ -96,9 +96,11 @@
                         <th>Quotation Date</th>
                         <th>Company / RFQ No</th>
                         <th>Customer</th>
-                        <th>Customer RFQ No</th>
                         <th>Vendor Name</th>
                         <th>Quotation No</th>
+                        <th class="text-right">Amt W/O Tax </th>
+                        <th class="text-right">Amt Tax </th>
+                        <th class="text-right">Amt With Tax </th>
                         <th>Quotation Status</th>
                         <th class="text-center" colspan="3">Action</th>
                     </tr>
@@ -113,9 +115,11 @@
                                         class="label label-success"><?php echo htmlspecialchars($row['tender_enquery_no'] ?? '-'); ?></small>
                                 </td>
                                 <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
-                                <td><?php echo htmlspecialchars($row['customer_rfq_no'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['quote_no'] ?? '-'); ?></td>
+                                <td class="text-right"><?php echo number_format($row['total_amount_wo_tax'] ?? 0, 3, '.', ''); ?></td>
+                                <td class="text-right"><?php echo number_format($row['total_tax_amount'] ?? 0, 3, '.', ''); ?></td>
+                                <td class="text-right"><?php echo number_format($row['total_amount_with_tax'] ?? 0, 3, '.', ''); ?></td>
                                 <?php
                                 $status = isset($row['quote_status']) ? $row['quote_status'] : '';
 
