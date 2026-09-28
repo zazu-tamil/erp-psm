@@ -2496,6 +2496,8 @@ class Tender extends CI_Controller
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
                 'po_status' => $this->input->post('po_status'),
+                'is_discount' => $this->input->post('is_discount') ? 1 : 0,
+                'discount' => $this->input->post('discount') ? $this->input->post('discount') : 0,
                 'status' => 'Active',
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s')
@@ -2630,6 +2632,7 @@ class Tender extends CI_Controller
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
+       
         $data['js'] = 'tender/customer-tender-po-edit.inc';
         $data['title'] = 'Edit Tender PO';
 
@@ -2664,7 +2667,7 @@ class Tender extends CI_Controller
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
                 'po_status' => $this->input->post('po_status'),
-                'status' => $this->input->post('status'),
+                'status' => $this->input->post('status'), 
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'updated_date' => date('Y-m-d H:i:s')
             ];
@@ -3349,6 +3352,8 @@ ORDER BY
                 'terms' => $this->input->post('terms'),
                 'total_amount' => $this->input->post('total_amount'),
                 'tax_amount' => $this->input->post('tax_amount'),
+                'is_discount' => $this->input->post('is_discount') ? 1 : 0,
+                'discount' => $this->input->post('discount') ? $this->input->post('discount') : 0,
                 'status' => 'Active',
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s')
@@ -3720,6 +3725,14 @@ ORDER BY
             ]);
         }
 
+        if (!$this->db->field_exists('is_discount', 'tender_enq_invoice_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('tender_enq_invoice_info', [
+                'is_discount' => ['type' => 'TINYINT', 'constraint' => 1, 'default' => 0],
+                'discount' => ['type' => 'DECIMAL', 'constraint' => '10,3', 'default' => 0.000]
+            ]);
+        }
+
         $data['js'] = 'tender/tender-po-invoice-edit.inc';
         $data['title'] = 'Edit Tender PO Invoice';
 
@@ -3746,6 +3759,8 @@ ORDER BY
                 'declaration_no' => $this->input->post('declaration_no'),
                 'declaration_date' => $this->input->post('declaration_date'),
                 'status' => $this->input->post('status'),
+                'is_discount' => $this->input->post('is_discount') ? 1 : 0,
+                'discount' => $this->input->post('discount') ? $this->input->post('discount') : 0,
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'updated_date' => date('Y-m-d H:i:s'),
             ];
@@ -4130,7 +4145,9 @@ ORDER BY
             f.currency_code,
             f.decimal_point,
             a.remarks,
-            a.terms
+            a.terms,
+            a.is_discount,
+            a.discount
             from tender_enq_invoice_info  as a
             left join customer_tender_po_info as b on a.tender_po_id = b.tender_po_id and b.`status`='Active' 
             left join company_info as d on a.company_id = d.company_id and d.status='Active'

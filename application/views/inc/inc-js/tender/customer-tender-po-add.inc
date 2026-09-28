@@ -98,6 +98,25 @@
     });
 
 
+    $(document).on('change', '#is_discount', function() {
+        if ($(this).is(':checked')) {
+            $('#discount_amount').show();
+        } else {
+            $('#discount_amount').hide().val('');
+        }
+        calculateTotalAmount_addt();
+    });
+
+    $(document).on('input', '#discount_amount', function() {
+        calculateTotalAmount_addt();
+    });
+
+    $(document).on('blur', '#discount_amount', function() {
+        if ($(this).val() !== '') {
+            $(this).val(parseFloat($(this).val()).toFixed(3));
+        }
+    });
+
     function calculateTotalAmount_addt() {
         let total_addt_amt_wo_tax = 0;
         $(".addt_charges_amt").each(function() {  
@@ -105,8 +124,13 @@
                 total_addt_amt_wo_tax += parseFloat($(this).val()) || 0;
             }
         });
-        //alert("TEST" + $("#total_amount_wo_tax").text());
-        total_addt_amt_wo_tax = parseFloat($("#total_amount_wo_tax").text()) + parseFloat(total_addt_amt_wo_tax);
+        
+        let discount_amt = 0;
+        if ($("#is_discount").is(':checked')) {
+            discount_amt = parseFloat($("#discount_amount").val()) || 0;
+        }
+
+        total_addt_amt_wo_tax = parseFloat($("#total_amount_wo_tax").text()) + parseFloat(total_addt_amt_wo_tax) - discount_amt;
         $("#total_amount_wo_tax_addt").text(total_addt_amt_wo_tax.toFixed(3));
 
 
@@ -116,7 +140,7 @@
                 total_addt_amt_w_tax += parseFloat($(this).val()) || 0;
             }
         });
-        total_addt_amt_w_tax = parseFloat($("#total_amount").text()) + parseFloat(total_addt_amt_w_tax);
+        total_addt_amt_w_tax = parseFloat($("#total_amount").text()) + parseFloat(total_addt_amt_w_tax) - discount_amt;
         $("#total_amount_addt").text(total_addt_amt_w_tax.toFixed(3));
 
 

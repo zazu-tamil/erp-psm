@@ -239,6 +239,18 @@
 
                             <div
                                 style="border-radius:10px; padding:30px; background-color:#f8f9fa; border:2px solid blue; margin-top:30px;margin-bottom:30px;">
+                                
+                                <div class="row mb-3" style="padding-bottom: 20px; border-bottom: 1px solid #ddd; margin-bottom: 20px;">
+                                    <div class="col-md-3 text-right">
+                                        <label style="font-size: 1.2em; color: #d81b60; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+                                            <input type="checkbox" id="is_discount" name="is_discount" value="1" style="transform: scale(1.5);"> Discount
+                                        </label>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" step="any" id="discount_amount" name="discount" class="form-control" placeholder="Enter discount amount" style="display: none; border: 2px solid #d81b60; font-size: 1.2em; color: #d81b60; font-weight: bold;" value="">
+                                    </div>
+                                </div>
+
                                 <div class="row">
                                     <div class="col-md-3 text-right ">
                                         <h3 class="text-red">Total Inc Addt Charges</h3>
@@ -352,6 +364,25 @@ $(document).ready(function() {
     });
 
 
+    $(document).on('change', '#is_discount', function() {
+        if ($(this).is(':checked')) {
+            $('#discount_amount').show();
+        } else {
+            $('#discount_amount').hide().val('');
+        }
+        calculateTotalAmount_addt();
+    });
+
+    $(document).on('input', '#discount_amount', function() {
+        calculateTotalAmount_addt();
+    });
+
+    $(document).on('blur', '#discount_amount', function() {
+        if ($(this).val() !== '') {
+            $(this).val(parseFloat($(this).val()).toFixed(3));
+        }
+    });
+
     function calculateTotalAmount_addt() {
         let total_addt_amt_wo_tax = 0;
         $(".addt_charges_amt").each(function() {
@@ -359,9 +390,14 @@ $(document).ready(function() {
                 total_addt_amt_wo_tax += parseFloat($(this).val()) || 0;
             }
         });
-        //alert("TEST" + $("#total_amount_wo_tax").text());
+        
+        let discount_amt = 0;
+        if ($("#is_discount").is(':checked')) {
+            discount_amt = parseFloat($("#discount_amount").val()) || 0;
+        }
+
         total_addt_amt_wo_tax = parseFloat($("#total_amount_wo_tax").text()) + parseFloat(
-            total_addt_amt_wo_tax);
+            total_addt_amt_wo_tax) - discount_amt;
         $("#total_amount_wo_tax_addt").text(total_addt_amt_wo_tax.toFixed(3));
 
 
@@ -371,7 +407,7 @@ $(document).ready(function() {
                 total_addt_amt_w_tax += parseFloat($(this).val()) || 0;
             }
         });
-        total_addt_amt_w_tax = parseFloat($("#total_amount").text()) + parseFloat(total_addt_amt_w_tax);
+        total_addt_amt_w_tax = parseFloat($("#total_amount").text()) + parseFloat(total_addt_amt_w_tax) - discount_amt;
         $("#total_amount_addt").text(total_addt_amt_w_tax.toFixed(3));
 
 

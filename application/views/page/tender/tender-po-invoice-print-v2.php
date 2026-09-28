@@ -605,6 +605,27 @@
                                                     </div>
                                                      
                                                 <?php endforeach; ?>
+                                                
+                                                <?php if (isset($record['is_discount']) && $record['is_discount'] == 1 && $record['discount'] > 0): ?>
+                                                <div class="summary-row" style="border-bottom:1px solid #000;">
+                                                    <span>TOTAL</span>
+                                                    <span><?php echo number_format($grand_total, $decimal_point); ?></span>
+                                                </div>
+                                                <div class="summary-row" style="border-bottom:1px solid #000;">
+                                                    <span>Discount</span>
+                                                    <span><?php echo number_format($record['discount'], $decimal_point); ?></span>
+                                                </div>
+                                                <?php 
+                                                    $grand_total -= floatval($record['discount']); 
+                                                    // Recalculate VAT based on discounted amount
+                                                    $current_vat_rate = $vat_percentage ?? 0;
+                                                    $total_vat_amount = $grand_total * ($current_vat_rate / 100);
+                                                ?>
+                                                <div class="summary-row" style="border-bottom:1px solid #000;">
+                                                    <span>TOTAL EXCL. VAT</span>
+                                                    <span><?php echo number_format($grand_total, $decimal_point); ?></span>
+                                                </div>
+                                                <?php endif; ?>
                                                 <div class="summary-row" style="border-bottom:1px solid #000;">
                                                     <span>VAT <?php echo number_format($vat_percentage ?? 0, 0); ?>%</span>
                                                     <span><?php echo number_format($total_vat_amount, $decimal_point); ?></span>
@@ -644,6 +665,39 @@
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    
+                                    <?php if (isset($record['is_discount']) && $record['is_discount'] == 1 && $record['discount'] > 0): ?>
+                                        <tr class="items-table">
+                                            <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
+                                                <strong>TOTAL</strong>
+                                            </td>
+                                            <td colspan="2" class="text-right" style="padding:10px; border:1px solid #000;">
+                                                <strong><?php echo number_format($grand_total, $decimal_point); ?></strong>
+                                            </td>
+                                        </tr>
+                                        <tr class="items-table">
+                                            <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
+                                                <strong>Discount</strong>
+                                            </td>
+                                            <td colspan="2" class="text-right" style="padding:10px; border:1px solid #000;">
+                                                <strong><?php echo number_format($record['discount'], $decimal_point); ?></strong>
+                                            </td>
+                                        </tr>
+                                        <?php 
+                                            $grand_total -= floatval($record['discount']); 
+                                            // Recalculate VAT based on discounted amount
+                                            $current_vat_rate = $vat_percentage ?? 0;
+                                            $total_vat_amount = $grand_total * ($current_vat_rate / 100);
+                                        ?>
+                                        <tr class="items-table">
+                                            <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
+                                                <strong>TOTAL EXCL. VAT</strong>
+                                            </td>
+                                            <td colspan="2" class="text-right" style="padding:10px; border:1px solid #000;">
+                                                <strong><?php echo number_format($grand_total, $decimal_point); ?></strong>
+                                            </td>
+                                        </tr>
+                                    <?php endif; ?>
                                     <tr>
                                         <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
                                             <strong>VAT <?php echo number_format($vat_percentage ?? 0, 0); ?>%</strong>
