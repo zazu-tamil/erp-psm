@@ -13,7 +13,7 @@
         <li class="active"><?php echo $title; ?></li>
     </ol>
 </section>
- 
+
 <!-- Toastr CSS -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 <!-- Toastr JS -->
@@ -61,7 +61,8 @@
                         <input type="text" name="srch_enquiry_no" id="srch_enquiry_no" class="form-control"
                             value="<?php echo set_value('srch_enquiry_no', $srch_enquiry_no ?? ''); ?>"
                             placeholder="Search the Our Enquiry No">
-                        <input type="hidden" name="tender_enquiry_id_value_id" id="tender_enquiry_id_value_id" class="tender_enquiry_id_value_id"
+                        <input type="hidden" name="tender_enquiry_id_value_id" id="tender_enquiry_id_value_id"
+                            class="tender_enquiry_id_value_id"
                             value="<?php echo set_value('tender_enquiry_id_value_id', $tender_enquiry_id_value_id ?? ''); ?>">
                     </div>
                     <div class="form-group col-md-3">
@@ -70,7 +71,7 @@
                             value="<?php echo set_value('srch_bill_no', $srch_bill_no ?? ''); ?>"
                             placeholder="Search Bill No">
                     </div>
- 
+
                     <div class="form-group col-md-3 text-left">
                         <br>
                         <button type="submit" class="btn btn-success"><i class="fa fa-search"></i> Show</button>
@@ -109,7 +110,9 @@
                     <?php foreach ($record_list as $j => $ls): ?>
                         <tr>
                             <td class="text-center"><?php echo (($sno ?? 0) + $j + 1); ?></td>
-                            <td class="text-center"><b><?php echo !empty($ls['payment_no']) ? str_pad((int)$ls['payment_no'], 4, '0', STR_PAD_LEFT) : '-'; ?></b></td>
+                            <td class="text-center">
+                                <b><?php echo !empty($ls['payment_no']) ? str_pad((int) $ls['payment_no'], 4, '0', STR_PAD_LEFT) : '-'; ?></b>
+                            </td>
                             <td><?php echo $ls['payment_date'] ?? ''; ?></td>
                             <td><?php echo !empty($ls['enquiry_nos']) ? $ls['enquiry_nos'] : '-'; ?></td>
                             <td><?php echo !empty($ls['bill_nos']) ? $ls['bill_nos'] : '-'; ?></td>
@@ -126,6 +129,14 @@
                                 <?php endif; ?>
                             </td>
                             <td class="text-right"><?php echo number_format((float) ($ls['amount'] ?? 0), 3); ?></td>
+
+                            <td class="text-center">
+                                <a href="<?php echo site_url('vendor-payment-print/' . ($ls['vendor_payment_id'] ?? '')); ?>"
+                                    target="_blank" class="btn btn-info btn-xs" title="Print Voucher">
+                                    <i class="fa fa-print"></i>
+                                </a>
+                            </td>
+
                             <td class="text-center">
                                 <button type="button" data-toggle="modal" data-target="#edit_modal"
                                     data-id="<?php echo $ls['vendor_payment_id'] ?? ''; ?>"
@@ -133,12 +144,6 @@
                                     class="edit_record btn btn-primary btn-xs" title="Edit">
                                     <i class="fa fa-edit"></i>
                                 </button>
-                            </td>
-                            <td class="text-center">
-                                <a href="<?php echo site_url('vendor-payment-print/' . ($ls['vendor_payment_id'] ?? '')); ?>"
-                                    target="_blank" class="btn btn-info btn-xs" title="Print Voucher">
-                                    <i class="fa fa-print"></i>
-                                </a>
                             </td>
                             <td class="text-center">
                                 <button type="button" value="<?php echo $ls['vendor_payment_id'] ?? ''; ?>"
@@ -188,11 +193,13 @@
                             <div class="form-group col-md-4">
                                 <label>Search Enquiry No</label>
                                 <div class="input-group">
-                                    <input type="text" name="srch_enq_no" id="add_srch_enq_no" class="form-control srch_enq_id"
-                                        placeholder="Search Enquiry No..." autocomplete="off">
+                                    <input type="text" name="srch_enq_no" id="add_srch_enq_no"
+                                        class="form-control srch_enq_id" placeholder="Search Enquiry No..."
+                                        autocomplete="off">
                                     <input type="hidden" name="tender_enquiry_id" id="add_tender_enquiry_id" value="">
                                     <span class="input-group-btn">
-                                        <button type="button" class="btn btn-default" id="add_clear_enq_btn" title="Clear Enquiry Filter">
+                                        <button type="button" class="btn btn-default" id="add_clear_enq_btn"
+                                            title="Clear Enquiry Filter">
                                             <i class="fa fa-times text-danger"></i>
                                         </button>
                                     </span>
@@ -211,12 +218,14 @@
 
                         <!-- Vendor Balance Summary (inside Add Modal) -->
                         <div id="add_vendor_balance_panel" style="display:none; margin-bottom:12px;">
-                            <div style="background:#f0f4ff; border:1px solid #c5cae9; border-radius:6px; padding:8px 14px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                            <div
+                                style="background:#f0f4ff; border:1px solid #c5cae9; border-radius:6px; padding:8px 14px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
                                 <span style="font-size:12px; font-weight:700; color:#1a237e;">
                                     <i class="fa fa-bar-chart"></i>&nbsp; Current Balance
                                     (<span id="add_bal_vendor_name" style="color:#283593;"></span>) :
                                 </span>
-                                <span id="add_bal_current" style="font-size:20px; font-weight:800; color:#c62828;">0.000</span>
+                                <span id="add_bal_current"
+                                    style="font-size:20px; font-weight:800; color:#c62828;">0.000</span>
                                 <span id="add_bal_current_label"></span>
                             </div>
                         </div>
@@ -288,12 +297,12 @@
                                 <label class="radio-inline">
                                     <input type="radio" name="status" value="InActive"> InActive
                                 </label>
-                            </div> 
+                            </div>
                             <div class="form-group col-md-6">
                                 <label>Amount <span class="text-red">*</span></label>
                                 <div class="input-group">
                                     <input type="number" step="any" name="amount" id="add_grand_total_amount"
-                                        class="form-control text-right" placeholder="0.000"> 
+                                        class="form-control text-right" placeholder="0.000">
                                     <span class="input-group-btn">
                                         <button type="button" class="btn btn-warning btn-sm" id="add_auto_allocate_btn"
                                             title="Auto allocate payment oldest bill first"
@@ -302,7 +311,7 @@
                                         </button>
                                     </span>
                                 </div>
-                            </div> 
+                            </div>
                             <div class="form-group col-md-3" style="display: none;">
                                 <label style="display: block; font-weight: bold; margin-bottom: 5px; cursor: pointer;">
                                     <input type="checkbox" name="is_without_bill" id="add_is_without_bill" value="1">
@@ -310,10 +319,11 @@
                                 </label>
                                 <input type="text" name="without_bill_amount" id="add_without_bill_amount"
                                     class="form-control text-right" placeholder="0.000" style="display: none;">
-                            </div> 
-                        </div> 
+                            </div>
+                        </div>
                         <div id="add_allocate_info" style="display:none; margin-bottom:8px;">
-                            <div style="background:#fffde7; border:1px solid #f9a825; border-radius:5px; padding:7px 14px; font-size:13px;">
+                            <div
+                                style="background:#fffde7; border:1px solid #f9a825; border-radius:5px; padding:7px 14px; font-size:13px;">
                                 <i class="fa fa-info-circle text-warning"></i>
                                 &nbsp;<strong id="add_allocate_msg"></strong>
                             </div>
@@ -376,11 +386,13 @@
                             <div class="form-group col-md-4">
                                 <label>Search Enquiry No</label>
                                 <div class="input-group">
-                                    <input type="text" name="srch_enq_no" id="edit_srch_enq_no" class="form-control srch_enq_id"
-                                        placeholder="Search Enquiry No..." autocomplete="off">
+                                    <input type="text" name="srch_enq_no" id="edit_srch_enq_no"
+                                        class="form-control srch_enq_id" placeholder="Search Enquiry No..."
+                                        autocomplete="off">
                                     <input type="hidden" name="tender_enquiry_id" id="edit_tender_enquiry_id" value="">
                                     <span class="input-group-btn">
-                                        <button type="button" class="btn btn-default" id="edit_clear_enq_btn" title="Clear Enquiry Filter">
+                                        <button type="button" class="btn btn-default" id="edit_clear_enq_btn"
+                                            title="Clear Enquiry Filter">
                                             <i class="fa fa-times text-danger"></i>
                                         </button>
                                     </span>
@@ -497,7 +509,8 @@
                         <br>
                         <!-- Auto Allocate Info Panel -->
                         <div id="edit_allocate_info" style="display:none; margin-bottom:8px;">
-                            <div style="background:#fffde7; border:1px solid #f9a825; border-radius:5px; padding:7px 14px; font-size:13px;">
+                            <div
+                                style="background:#fffde7; border:1px solid #f9a825; border-radius:5px; padding:7px 14px; font-size:13px;">
                                 <i class="fa fa-info-circle text-warning"></i>
                                 &nbsp;<strong id="edit_allocate_msg"></strong>
                             </div>

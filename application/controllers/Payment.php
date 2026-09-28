@@ -1060,14 +1060,19 @@ class Payment extends CI_Controller
                 SELECT 
                     vpbi.vendor_payment_id,
                     GROUP_CONCAT(DISTINCT 
-                        CASE 
-                            WHEN vpbi.bill_type = 'Purchase Invoice' THEN vpi.invoice_no
-                            WHEN vpbi.bill_type = 'Local Bill' THEN lpb.invoice_no
-                            WHEN vpbi.bill_type = 'Delivery Bill' THEN dpb.invoice_no
-                            WHEN vpbi.bill_type = 'Customs Bill' THEN cb.invoice_no
-                            WHEN vpbi.bill_type = 'Opening Balance' THEN CONCAT('OB-', LPAD(vob.opening_id, 3, '0'))
-                            ELSE NULL
-                        END
+                        CONCAT(
+                            CASE 
+                                WHEN vpbi.bill_type = 'Purchase Invoice' THEN vpi.invoice_no
+                                WHEN vpbi.bill_type = 'Local Bill' THEN lpb.invoice_no
+                                WHEN vpbi.bill_type = 'Delivery Bill' THEN dpb.invoice_no
+                                WHEN vpbi.bill_type = 'Customs Bill' THEN cb.invoice_no
+                                WHEN vpbi.bill_type = 'Opening Balance' THEN CONCAT('OB-', LPAD(vob.opening_id, 3, '0'))
+                                ELSE NULL
+                            END,
+                            ' [ ',
+                            FORMAT(vpbi.bill_amount, 3),
+                            ' ] '
+                        )
                         SEPARATOR '<br>'
                     ) AS bill_nos,
                     GROUP_CONCAT(DISTINCT 
@@ -1728,12 +1733,17 @@ class Payment extends CI_Controller
                     MAX(curr.symbol) AS currency_symbol,
                     MAX(COALESCE(vpi.company_id, vpo.company_id)) AS company_id,
                     GROUP_CONCAT(DISTINCT 
-                        CASE 
-                            WHEN vpbi.bill_type = 'Purchase Invoice' THEN vpi.invoice_no
-                            WHEN vpbi.bill_type = 'Local Bill' THEN lpb.invoice_no
-                            WHEN vpbi.bill_type = 'Opening Balance' THEN CONCAT('OB-', LPAD(vob.opening_id, 3, '0'))
-                            ELSE vpbi.bill_id
-                        END
+                        CONCAT(
+                            CASE 
+                                WHEN vpbi.bill_type = 'Purchase Invoice' THEN vpi.invoice_no
+                                WHEN vpbi.bill_type = 'Local Bill' THEN lpb.invoice_no
+                                WHEN vpbi.bill_type = 'Opening Balance' THEN CONCAT('OB-', LPAD(vob.opening_id, 3, '0'))
+                                ELSE vpbi.bill_id
+                            END,
+                            ' [ ',
+                            FORMAT(vpbi.bill_amount, 3),
+                            ' ] '
+                        )
                         SEPARATOR '<br>'
                     ) AS bill_nos,
                     GROUP_CONCAT(DISTINCT 
