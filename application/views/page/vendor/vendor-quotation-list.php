@@ -98,6 +98,7 @@
                         <th>Customer</th>
                         <th>Vendor Name</th>
                         <th>Quotation No</th>
+                        <th>Currency</th>
                         <th class="text-right">Amt W/O Tax </th>
                         <th class="text-right">Amt Tax </th>
                         <th class="text-right">Amt With Tax </th>
@@ -117,9 +118,17 @@
                                 <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['quote_no'] ?? '-'); ?></td>
-                                <td class="text-right"><?php echo number_format($row['total_amount_wo_tax'] ?? 0, 3, '.', ''); ?></td>
-                                <td class="text-right"><?php echo number_format($row['total_tax_amount'] ?? 0, 3, '.', ''); ?></td>
-                                <td class="text-right"><?php echo number_format($row['total_amount_with_tax'] ?? 0, 3, '.', ''); ?></td>
+                                <td>
+                                    <span class="label label-primary">
+                                        <?php echo htmlspecialchars($row['currency_code'] ?? '-'); ?>
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <?php echo number_format($row['total_amount_wo_tax'] ?? 0, 3, '.', ''); ?></td>
+                                <td class="text-right"><?php echo number_format($row['total_tax_amount'] ?? 0, 3, '.', ''); ?>
+                                </td>
+                                <td class="text-right">
+                                    <?php echo number_format($row['total_amount_with_tax'] ?? 0, 3, '.', ''); ?></td>
                                 <?php
                                 $status = isset($row['quote_status']) ? $row['quote_status'] : '';
 

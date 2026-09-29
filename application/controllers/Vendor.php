@@ -965,8 +965,29 @@ class Vendor extends CI_Controller
                 a.company_id,
                 a.customer_id, 
                 ci.company_name,
-                get_tender_info(a.tender_enquiry_id) as tender_details
+                get_tender_info(a.tender_enquiry_id) as tender_details,
+                COALESCE(item_totals.total_amount_wo_tax, 0) + COALESCE(addt_totals.total_addt_wo_tax, 0) AS total_amount_wo_tax,
+                COALESCE(item_totals.total_tax_amount, 0) + COALESCE(addt_totals.total_addt_tax, 0) AS total_tax_amount,
+                COALESCE(item_totals.total_amount_with_tax, 0) + COALESCE(addt_totals.total_addt_with_tax, 0) AS total_amount_with_tax
             FROM vendor_po_info as  a
+            LEFT JOIN (
+                SELECT vendor_po_id,
+                       SUM(qty * rate) as total_amount_wo_tax,
+                       SUM((qty * rate) * gst / 100) as total_tax_amount,
+                       SUM(amount) as total_amount_with_tax
+                FROM vendor_po_item_info
+                WHERE status = 'Active'
+                GROUP BY vendor_po_id
+            ) AS item_totals ON a.vendor_po_id = item_totals.vendor_po_id
+            LEFT JOIN (
+                SELECT vendor_po_id,
+                       SUM(addt_charges_amt) as total_addt_wo_tax,
+                       SUM(addt_charges_vat_amt) as total_addt_tax,
+                       SUM(addt_charges_tot_amt) as total_addt_with_tax
+                FROM vendor_po_addtchrg_info
+                WHERE status = 'Active'
+                GROUP BY vendor_po_id
+            ) AS addt_totals ON a.vendor_po_id = addt_totals.vendor_po_id
             LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
             LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
             LEFT JOIN tender_enquiry_info t ON a.tender_enquiry_id = t.tender_enquiry_id AND t.status != 'Delete'
@@ -2703,6 +2724,7 @@ class Vendor extends CI_Controller
             a.quote_no,
 			e.vendor_name ,           
             d.enquiry_no as customer_rfq_no,
+            f.currency_code,
             COALESCE((SELECT SUM(qty * rate) FROM vendor_quote_item_info WHERE vendor_quote_id = a.vendor_quote_id AND status = 'Active'), 0) + 
             COALESCE((SELECT SUM(addt_charges_amt) FROM vendor_quote_addtchrg_info WHERE vendor_quote_id = a.vendor_quote_id AND status = 'Active'), 0) as total_amount_wo_tax,
             COALESCE((SELECT SUM((qty * rate) * gst / 100) FROM vendor_quote_item_info WHERE vendor_quote_id = a.vendor_quote_id AND status = 'Active'), 0) + 
@@ -2713,7 +2735,8 @@ class Vendor extends CI_Controller
             left join company_info as b on a.company_id = b.company_id and b.`status`='Active'
             left join customer_info as c on a.customer_id = c.customer_id and c.`status`='Active'
             left join tender_enquiry_info as d on a.tender_enquiry_id = d.tender_enquiry_id and d.`status`='Active'
-            left join vendor_info as e on a.vendor_id = e.vendor_id and e.`status`='A`ctive'
+            left join vendor_info as e on a.vendor_id = e.vendor_id and e.`status`='Active'
+            left join currencies_info as f on a.currency_id = f.currency_id and f.`status`='Active'
             where a.`status`='Active'
             AND $where 
             order by a.quote_date desc, a.vendor_quote_id desc 

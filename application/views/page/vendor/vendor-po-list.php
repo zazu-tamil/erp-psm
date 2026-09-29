@@ -92,8 +92,12 @@
                         <th>PO Date</th>
                         <th>Company / RFQ No</th>
                         <th>Customer</th> 
+                        <th>Vendor</th>
                         <th>Po No</th> 
                         <th>PO Type</th>
+                        <th class="text-right">Amt W/O Tax </th>
+                        <th class="text-right">Amt Tax </th>
+                        <th class="text-right">Amt With Tax </th>
                         <th>Po Status</th>
 
 
@@ -110,9 +114,12 @@
                                         class="label label-success"><?php echo htmlspecialchars($row['tender_details'] ?? '-'); ?></small>
                                 </td>
                                 <td><?php echo htmlspecialchars($row['customer_name'] ?? '-'); ?></td>
-
+                                <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
                                 <td><strong><?php echo htmlspecialchars($row['po_no']); ?></strong></td> 
                                 <td><span class="label label-default"><?php echo htmlspecialchars($row['po_type'] ?? 'Local'); ?></span></td>
+                                <td class="text-right"><?php echo number_format($row['total_amount_wo_tax'] ?? 0, 3, '.', ''); ?></td>
+                                <td class="text-right"><?php echo number_format($row['total_tax_amount'] ?? 0, 3, '.', ''); ?></td>
+                                <td class="text-right"><?php echo number_format($row['total_amount_with_tax'] ?? 0, 3, '.', ''); ?></td>
 
                                 <?php
                                 $status = $row['po_status'];
