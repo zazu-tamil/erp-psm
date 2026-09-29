@@ -449,8 +449,20 @@
                                            class="btn btn-default btn-xs" target="_blank" title="Print / View Invoice">
                                             <i class="fa fa-print text-primary"></i>
                                         </a>
-                                    <?php else: ?>
-                                        -
+                                    <?php endif; ?>
+                                    
+                                    <?php if ($r['bill_type'] == 'Delivery Partner Bill'): ?>
+                                        <button type="button" data-toggle="modal" data-target="#edit_dp_modal"
+                                            value="<?php echo htmlspecialchars($r['bill_id'] ?? ''); ?>"
+                                            class="edit_dp_record btn btn-primary btn-xs" title="Edit DP Bill">
+                                            <i class="fa fa-edit"></i>
+                                        </button>
+                                    <?php elseif ($r['bill_type'] == 'Customs Bill'): ?>
+                                        <button type="button" data-toggle="modal" data-target="#edit_customs_modal"
+                                            value="<?php echo htmlspecialchars($r['bill_id'] ?? ''); ?>"
+                                            class="edit_customs_record btn btn-primary btn-xs" title="Edit Customs Bill">
+                                            <i class="fa fa-edit"></i>
+                                        </button>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -483,4 +495,445 @@
     </div>
 </section>
 
+            <div class="modal fade" id="edit_dp_modal" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <form method="post" action="<?php echo site_url('vendor/delivery_partner_bill_list'); ?>" id="frmedit"
+                            enctype="multipart/form-data">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                <h3 class="modal-title" id="scrollmodalLabel"><strong>Edit Delivery Partner Bill</strong>
+                                </h3>
+                                <input type="hidden" name="mode" value="Edit" /><input type="hidden" name="redirect_to" value="dp-custom-invoice-report" />
+                                <input type="hidden" name="dp_bill_id" id="dp_bill_id" value="" />
+                            </div>
+                             
+                            <div class="modal-body">
+                                <div
+                                    style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
+                                    <div class="row">
+                                        <div class="col-md-6 form-group">
+                                            <label for="srch_enq_id">Search Enquiry No</label>
+                                            <input type="text" name="srch_enq_id" class="form-control srch_enq_id"
+                                                value="" placeholder="Search Enquiry No" />
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label for="sub_account_head_id">A/c Sub Head</label>
+                                            <?php echo form_dropdown('sub_account_head_id', $ac_sub_head_opt, set_value('sub_account_head_id'), 'id="sub_account_head_id" class="form-control" '); ?>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label>Customer <span class="text-red">*</span></label>
+                                        <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="srch_customer_id" class="form-control" '); ?>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="tender_enquiry_id">Tender Enquiry No</label>
+                                        <?php echo form_dropdown('tender_enquiry_id', ['' => 'Select Enquiry'], set_value('tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" '); ?>
+                                    </div> 
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="vendor_id">Supplier Name <span class="text-red">*</span></label>
+                                        <div class="input-group1">
+                                            <?php echo form_dropdown('vendor_id', ['' => 'Select'] + $vendor_opt, set_value('vendor_id'), 'id="vendor_id" class="form-control srch_vendor_id" required'); ?>
+                                           
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Invoice Date</label>
+                                        <input type="date" name="invoice_date" id="invoice_date" class="form-control"
+                                            value="<?php echo set_value('invoice_date'); ?>" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label>Invoice No <span class="text-red">*</span></label>
+                                        <input type="text" name="invoice_no" id="invoice_no" class="form-control"
+                                            placeholder="Invoice No" required>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Entry Date</label>
+                                        <input type="date" name="inv_entry_date" id="inv_entry_date" class="form-control"
+                                            value="<?php echo set_value('inv_entry_date'); ?>">
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label>VAT Payer Sales / Purchase Group</label>
+                                        <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('vat_payer_purchase_grp'), 'id="vat_payer_purchase_grp" class="form-control"'); ?>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label>Remarks</label>
+                                        <textarea name="remarks" id="remarks" class="form-control" rows="3" placeholder="Remarks"></textarea>
+                                    </div>
+                                </div>
+                                 <div class="row">
+                                    <div class="form-group col-md-3">
+                                        <label>Custom Stamp Fee</label>
+                                        <input type="number" step="any" name="custom_stamp_fee"
+                                            id="custom_stamp_fee" class="form-control"
+                                            placeholder="Custom Stamp Fee" value="" >
+                                    </div>
+                                    <!-- <div class="form-group col-md-3">
+                                        <label>Custom Bill Amount</label>
+                                        <input type="number" step="any" name="custom_bill_amt"
+                                            id="custom_bill_amt" class="form-control"
+                                            placeholder="Custom Bill Amount" value="" >
+                                    </div> -->
+                                    <div class="form-group col-md-3">
+                                        <label>Custom Duty</label>
+                                        <input type="number" step="any" name="custom_duty" id="custom_duty"
+                                            class="form-control" placeholder="Custom Duty">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>Custom VAT Amount</label>
+                                        <input type="number" step="any" name="custom_vat_amt"
+                                            id="custom_vat_amt" class="form-control"
+                                            placeholder="Custom VAT Amount">
+                                    </div> 
+                                    <div class="form-group col-md-3">
+                                        <label>Total Amount <i class="text-sm">W/O DP Chrg & VAT</i> </label>
+                                        <input type="number" step="any" name="tot_amt_wo_dp"
+                                            id="tot_amt_wo_dp" class="form-control"
+                                            placeholder="Total Amount W/O DP">
+                                    </div>
+                                    
+                                </div>
+                                <div class="row">
+                                    
+                                   <div class="form-group col-md-3">
+                                        <label>DP Charges</label>
+                                        <input type="number" step="any" name="dp_charges"
+                                            id="dp_charges" class="form-control"
+                                            placeholder="DP Charges" value="0">
+                                    </div>
+                                    <!-- <div class="form-group col-md-3">
+                                        <label>DP VAT %</label>
+                                        <input type="number" step="any" name="dp_vat" id="dp_vat"
+                                            class="form-control" placeholder="DP VAT">
+                                    </div> -->
+                                    <div class="form-group col-md-3">
+                                        <label>DP VAT Amt</label>
+                                        <input type="number" step="any" name="dp_vat_amt" id="dp_vat_amt"
+                                            class="form-control" placeholder="DP VAT Amount">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>DP Total Amt</label>
+                                        <input type="number" step="any" name="dp_total_amt" id="dp_total_amt"
+                                            class="form-control" placeholder="DP Total Amount" readonly>
+                                    </div>
+                                     <div class="form-group col-md-3">
+                                        <label>Grand Total</label>
+                                        <input type="number" step="any" name="g_total"
+                                            id="g_total" class="form-control"
+                                            placeholder="Grand Total Amount">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>Status</label><br>
+                                        <label class="radio-inline"><input type="radio" name="status" value="Active"
+                                                checked> Active</label>
+                                        <label class="radio-inline"><input type="radio" name="status" value="InActive">
+                                            InActive</label>
+                                    </div> 
+                                </div>   
+                                 
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <input type="submit" name="Save" value="Update" class="btn btn-primary" />
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="modal fade" id="edit_customs_modal" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <form method="post" action="<?php echo site_url('vendor/customs_bill_list'); ?>" id="frmedit" enctype="multipart/form-data">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                <h3 class="modal-title" id="scrollmodalLabel"><strong>Edit Customs Bill</strong>
+                                </h3>
+                                <input type="hidden" name="mode" value="Edit" /><input type="hidden" name="redirect_to" value="dp-custom-invoice-report" />
+                                <input type="hidden" name="customs_bill_id" id="customs_bill_id" value="" />
+                            </div>
+
+                            <div class="modal-body">
+                                <div
+                                    style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
+                                    <div class="row">
+                                        <div class="col-md-6 form-group">
+                                            <label for="srch_enq_id">Search Enquiry No</label>
+                                            <input type="text" name="srch_enq_id" class="form-control srch_enq_id"
+                                                value="" placeholder="Search Enquiry No" />
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label>Is Bill</label><br>
+                                            <label class="radio-inline"><input type="radio" name="ac_type_opt"
+                                                    value="Accountable" checked> For NBR & Company Account</label>
+                                            <label class="radio-inline"><input type="radio" name="ac_type_opt"
+                                                    value="Not-Accountable">
+                                                For NBR Only</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label>Customer <span class="text-red">*</span></label>
+                                        <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="srch_customer_id" class="form-control" '); ?>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="tender_enquiry_id">Tender Enquiry No</label>
+                                        <?php echo form_dropdown('tender_enquiry_id', ['' => 'Select Enquiry'], set_value('tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" '); ?>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="vendor_id">Supplier Name <span class="text-red">*</span></label>
+                                        <div class="input-group1">
+                                            <?php echo form_dropdown('vendor_id', ['' => 'Select'] + $vendor_opt, set_value('vendor_id'), 'id="vendor_id" class="form-control srch_vendor_id select2" required style="width:100%"'); ?>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="vendor_id_2">Supplier2 Name</label>
+                                        <?php echo form_dropdown('vendor_id_2', ['' => 'Select'] + $vendor_opt, set_value('vendor_id_2'), 'id="vendor_id_2" class="form-control srch_vendor_id select2" style="width:100%"'); ?>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label>Invoice Date</label>
+                                        <input type="date" name="invoice_date" id="invoice_date" class="form-control"
+                                            value="<?php echo set_value('invoice_date'); ?>" required>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Invoice No <span class="text-red">*</span></label>
+                                        <input type="text" name="invoice_no" id="invoice_no" class="form-control"
+                                            placeholder="Invoice No" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label>Entry Date</label>
+                                        <input type="date" name="inv_entry_date" id="inv_entry_date"
+                                            class="form-control" value="<?php echo set_value('inv_entry_date'); ?>">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>VAT Payer Sales / Purchase Group</label>
+                                        <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('vat_payer_purchase_grp'), 'id="vat_payer_purchase_grp" class="form-control"'); ?>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label>Remarks</label>
+                                        <textarea name="remarks" id="remarks" class="form-control" rows="3"
+                                            placeholder="Remarks"></textarea>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label>Declaration No <span class="text-red">*</span></label>
+                                        <input type="text" name="declaration_no" id="declaration_no"
+                                            class="form-control" placeholder="Declaration No">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Declaration Date</label>
+                                        <input type="date" name="declaration_date" id="declaration_date"
+                                            class="form-control" value="<?php echo set_value('declaration_date'); ?>">
+                                    </div>
+                                </div>
+                                <div class="row">
+
+                                    <div class="form-group col-md-3">
+                                        <label>Custom Stamp Fee</label>
+                                        <input type="number" step="any" name="custom_stamp_fee" id="custom_stamp_fee"
+                                            class="form-control" placeholder="Custom Stamp Fee" value="0">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>Bill Amount</label>
+                                        <input type="number" step="any" name="bill_amount" id="bill_amount"
+                                            class="form-control" placeholder="Bill Amount">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>Custom Duty</label>
+                                        <input type="number" step="any" name="custom_duty" id="custom_duty"
+                                            class="form-control" placeholder="Custom Duty">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>Total Amount <i class="text-sm">W/O VAT</i> </label>
+                                        <input type="number" step="any" name="tot_amt_wo_vat" id="tot_amt_wo_vat"
+                                            class="form-control" placeholder="Total Amount W/O VAT">
+                                    </div>
+                                </div>
+                                <div class="row">
+
+                                    <div class="form-group col-md-3">
+                                        <label>VAT %</label>
+                                        <input type="number" step="any" name="vat" id="vat" class="form-control"
+                                            placeholder="VAT %">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>VAT Amount</label>
+                                        <input type="number" step="any" name="vat_amt" id="vat_amt" class="form-control"
+                                            placeholder="VAT Amount">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>Customs Payable</label>
+                                        <input type="number" step="any" name="customs_payable" id="customs_payable"
+                                            class="form-control" placeholder="Customs Payable">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>Customs Total Amount</label>
+                                        <input type="number" step="any" name="customs_tot_amt" id="customs_tot_amt"
+                                            class="form-control" placeholder="Customs Total Amount">
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Status</label><br>
+                                        <label class="radio-inline"><input type="radio" name="status" value="Active"
+                                                checked> Active</label>
+                                        <label class="radio-inline"><input type="radio" name="status" value="InActive">
+                                            InActive</label>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <input type="submit" name="Save" value="Update" class="btn btn-primary" />
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Vendor Modal (Child / Nested) -->
+
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
+
+<script>
+    $(document).ready(function() {
+        // DP Bill Edit
+        $(document).on('click', '.edit_dp_record', function() {
+            var id = $(this).val();
+            $.ajax({
+                url: "<?php echo site_url('vendor/get_data'); ?>",
+                type: "POST",
+                dataType: "json",
+                data: { tbl: "dp_bill_info", id: id },
+                success: function(res_ar) {
+                    let res = res_ar[0];
+                    $("#edit_dp_modal #dp_bill_id").val(res.dp_bill_id);
+                    $("#edit_dp_modal #sub_account_head_id").val(res.sub_account_head_id);
+                    $("#edit_dp_modal #srch_customer_id").val(res.customer_id);
+                    
+                    var dd = $("#edit_dp_modal #srch_tender_enquiry_id");
+                    dd.html('<option value="">Select Enquiry</option>');
+                    if (res.customer_id) {
+                        $.ajax({
+                            url: "<?php echo site_url('vendor/get_vendor_rate_enquiries_by_customer'); ?>",
+                            type: "POST", dataType: "json",
+                            data: { customer_id: res.customer_id },
+                            success: function(tres) {
+                                if (tres.length > 0) {
+                                    $.each(tres, function(i, row) {
+                                        dd.append($('<option>', { value: row.tender_enquiry_id, text: row.display }));
+                                    });
+                                    if(res.tender_enquiry_id) { dd.val(res.tender_enquiry_id).trigger('change'); }
+                                }
+                            }
+                        });
+                    }
+
+                    $("#edit_dp_modal #vendor_id").val(res.vendor_id).trigger('change');
+                    $("#edit_dp_modal #invoice_date").val(res.invoice_date);
+                    $("#edit_dp_modal #invoice_no").val(res.invoice_no);
+                    $("#edit_dp_modal #inv_entry_date").val(res.inv_entry_date);
+                    $("#edit_dp_modal #vat_payer_purchase_grp").val(res.vat_payer_purchase_grp);
+                    $("#edit_dp_modal #remarks").val(res.remarks);
+                    $("#edit_dp_modal #custom_stamp_fee").val(res.custom_stamp_fee);
+                    $("#edit_dp_modal #custom_duty").val(res.custom_duty);
+                    $("#edit_dp_modal #custom_vat_amt").val(res.custom_vat_amt);
+                    $("#edit_dp_modal #tot_amt_wo_dp").val(res.tot_amt_wo_dp);
+                    $("#edit_dp_modal #dp_charges").val(res.dp_charges);
+                    $("#edit_dp_modal #dp_vat").val(res.dp_vat);
+                    $("#edit_dp_modal #dp_vat_amt").val(res.dp_vat_amt);
+                    $("#edit_dp_modal #dp_total_amt").val(res.dp_total_amt);
+                    $("#edit_dp_modal #g_total").val(res.g_total);
+                    $("#edit_dp_modal input[name='status'][value='"+res.status+"']").prop("checked", true);
+                }
+            });
+        });
+
+        // Customs Bill Edit
+        $(document).on('click', '.edit_customs_record', function() {
+            var id = $(this).val();
+            $.ajax({
+                url: "<?php echo site_url('vendor/get_data'); ?>",
+                type: "POST",
+                dataType: "json",
+                data: { tbl: "customs_bill_info", id: id },
+                success: function(res_ar) {
+                    let res = res_ar[0];
+                    $("#edit_customs_modal #customs_bill_id").val(res.customs_bill_id);
+                    $("#edit_customs_modal input[name='ac_type_opt'][value='"+res.ac_type_opt+"']").prop("checked", true);
+                    $("#edit_customs_modal #srch_customer_id").val(res.customer_id);
+                    
+                    var dd = $("#edit_customs_modal #srch_tender_enquiry_id");
+                    dd.html('<option value="">Select Enquiry</option>');
+                    if (res.customer_id) {
+                        $.ajax({
+                            url: "<?php echo site_url('vendor/get_vendor_rate_enquiries_by_customer'); ?>",
+                            type: "POST", dataType: "json",
+                            data: { customer_id: res.customer_id },
+                            success: function(tres) {
+                                if (tres.length > 0) {
+                                    $.each(tres, function(i, row) {
+                                        dd.append($('<option>', { value: row.tender_enquiry_id, text: row.display }));
+                                    });
+                                    if(res.tender_enquiry_id) { dd.val(res.tender_enquiry_id).trigger('change'); }
+                                }
+                            }
+                        });
+                    }
+
+                    $("#edit_customs_modal #vendor_id").val(res.vendor_id).trigger('change');
+                    $("#edit_customs_modal #vendor_id_2").val(res.vendor_id_2).trigger('change');
+                    $("#edit_customs_modal #invoice_date").val(res.invoice_date);
+                    $("#edit_customs_modal #invoice_no").val(res.invoice_no);
+                    $("#edit_customs_modal #inv_entry_date").val(res.inv_entry_date);
+                    $("#edit_customs_modal #vat_payer_purchase_grp").val(res.vat_payer_purchase_grp);
+                    $("#edit_customs_modal #remarks").val(res.remarks);
+                    $("#edit_customs_modal #declaration_no").val(res.declaration_no);
+                    $("#edit_customs_modal #declaration_date").val(res.declaration_date);
+                    $("#edit_customs_modal #custom_stamp_fee").val(res.custom_stamp_fee);
+                    $("#edit_customs_modal #bill_amount").val(res.bill_amount);
+                    $("#edit_customs_modal #custom_duty").val(res.custom_duty);
+                    $("#edit_customs_modal #tot_amt_wo_vat").val(res.tot_amt_wo_vat);
+                    $("#edit_customs_modal #vat").val(res.vat);
+                    $("#edit_customs_modal #vat_amt").val(res.vat_amt);
+                    $("#edit_customs_modal #customs_payable").val(res.customs_payable);
+                    $("#edit_customs_modal #customs_tot_amt").val(res.customs_tot_amt);
+                    $("#edit_customs_modal input[name='status'][value='"+res.status+"']").prop("checked", true);
+                }
+            });
+        });
+    });
+</script>
+

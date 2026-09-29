@@ -2495,9 +2495,7 @@ class Tender extends CI_Controller
                 'delivery_date' => $this->input->post('delivery_date'),
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
-                'po_status' => $this->input->post('po_status'),
-                'is_discount' => $this->input->post('is_discount') ? 1 : 0,
-                'discount' => $this->input->post('discount') ? $this->input->post('discount') : 0,
+                'po_status' => $this->input->post('po_status'), 
                 'status' => 'Active',
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s')
@@ -3606,30 +3604,170 @@ ORDER BY
         // === FETCH RECORDS FOR DATATABLE ===
         $data['sno'] = 0;
         $sql = "
-            SELECT 
-               a.*,
-               get_tender_info(a.tender_enquiry_id) as tender_details,
-               b.company_name,
-               c.customer_name,
-               (
-                   IFNULL((SELECT SUM(qty * rate) FROM tender_enq_invoice_item_info i WHERE i.tender_enq_invoice_id = a.tender_enq_invoice_id AND i.status != 'Delete'), 0) 
-                   + IFNULL((SELECT SUM(addt_charges_amt) FROM tender_invoice_addtchrg_info ac WHERE ac.tender_enq_invoice_id = a.tender_enq_invoice_id AND ac.status != 'Delete'), 0)
-               ) AS amt_wo_tax,
-               (
-                   IFNULL((SELECT SUM((qty * rate) * (gst / 100)) FROM tender_enq_invoice_item_info i WHERE i.tender_enq_invoice_id = a.tender_enq_invoice_id AND i.status != 'Delete'), 0)
-                   + IFNULL((SELECT SUM(addt_charges_vat_amt) FROM tender_invoice_addtchrg_info ac WHERE ac.tender_enq_invoice_id = a.tender_enq_invoice_id AND ac.status != 'Delete'), 0)
-               ) AS amt_tax,
-               (
-                   IFNULL((SELECT SUM(amount) FROM tender_enq_invoice_item_info i WHERE i.tender_enq_invoice_id = a.tender_enq_invoice_id AND i.status != 'Delete'), 0)
-                   + IFNULL((SELECT SUM(addt_charges_tot_amt) FROM tender_invoice_addtchrg_info ac WHERE ac.tender_enq_invoice_id = a.tender_enq_invoice_id AND ac.status != 'Delete'), 0)
-               ) AS amt_with_tax 
-            FROM tender_enq_invoice_info a
-            LEFT JOIN company_info b ON a.company_id = b.company_id AND b.status = 'Active'
-            LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
-            LEFT JOIN tender_enquiry_info d ON a.tender_enquiry_id = d.tender_enquiry_id AND d.status = 'Active'
-            WHERE a.status != 'Delete' 
-            and $where
-            ORDER BY a.invoice_date DESC, a.tender_enq_invoice_id DESC";
+                SELECT 
+                a.*,
+                get_tender_info(a.tender_enquiry_id) AS tender_details,
+                b.company_name,
+                c.customer_name,
+
+                /* =========================================
+                ITEM AMOUNT
+                ========================================= */
+                IFNULL((
+                    SELECT SUM(i.qty * i.rate)
+                    FROM tender_enq_invoice_item_info i
+                    WHERE i.tender_enq_invoice_id = a.tender_enq_invoice_id
+                    AND i.status != 'Delete'
+                ), 0) AS item_amount,
+
+                /* =========================================
+                ADDITIONAL CHARGES
+                ONLY CHECKED / ACTIVE ROWS
+                ========================================= */
+                IFNULL((
+                    SELECT SUM(ac.addt_charges_amt)
+                    FROM tender_invoice_addtchrg_info ac
+                    WHERE ac.tender_enq_invoice_id = a.tender_enq_invoice_id
+                    AND ac.status = 'Active'
+                ), 0) AS additional_charge,
+
+                /* =========================================
+                DISCOUNT
+                ========================================= */
+                CASE
+                    WHEN a.is_discount = 1
+                    THEN IFNULL(a.discount, 0)
+                    ELSE 0
+                END AS discount_amount,
+
+                /* =========================================
+                TOTAL WITHOUT TAX
+                ITEM + ADDITIONAL CHARGES - DISCOUNT
+                ========================================= */
+                (
+                    IFNULL((
+                        SELECT SUM(i.qty * i.rate)
+                        FROM tender_enq_invoice_item_info i
+                        WHERE i.tender_enq_invoice_id = a.tender_enq_invoice_id
+                        AND i.status != 'Delete'
+                    ), 0)
+
+                    +
+
+                    IFNULL((
+                        SELECT SUM(ac.addt_charges_amt)
+                        FROM tender_invoice_addtchrg_info ac
+                        WHERE ac.tender_enq_invoice_id = a.tender_enq_invoice_id
+                        AND ac.status = 'Active'
+                    ), 0)
+
+                    -
+
+                    CASE
+                        WHEN a.is_discount = 1
+                        THEN IFNULL(a.discount, 0)
+                        ELSE 0
+                    END
+                ) AS amt_wo_tax,
+
+                /* =========================================
+                TOTAL TAX
+                ITEM TAX + ACTIVE ADDITIONAL CHARGE VAT
+                ========================================= */
+                (
+                    IFNULL((
+                        SELECT SUM(
+                            (i.qty * i.rate) * (i.gst / 100)
+                        )
+                        FROM tender_enq_invoice_item_info i
+                        WHERE i.tender_enq_invoice_id = a.tender_enq_invoice_id
+                        AND i.status != 'Delete'
+                    ), 0)
+
+                    +
+
+                    IFNULL((
+                        SELECT SUM(ac.addt_charges_vat_amt)
+                        FROM tender_invoice_addtchrg_info ac
+                        WHERE ac.tender_enq_invoice_id = a.tender_enq_invoice_id
+                        AND ac.status = 'Active'
+                    ), 0)
+                ) AS amt_tax,
+
+                /* =========================================
+                TOTAL WITH TAX
+                ========================================= */
+                (
+                    /* Item Amount */
+                    IFNULL((
+                        SELECT SUM(i.qty * i.rate)
+                        FROM tender_enq_invoice_item_info i
+                        WHERE i.tender_enq_invoice_id = a.tender_enq_invoice_id
+                        AND i.status != 'Delete'
+                    ), 0)
+
+                    +
+
+                    /* Active Additional Charges */
+                    IFNULL((
+                        SELECT SUM(ac.addt_charges_amt)
+                        FROM tender_invoice_addtchrg_info ac
+                        WHERE ac.tender_enq_invoice_id = a.tender_enq_invoice_id
+                        AND ac.status = 'Active'
+                    ), 0)
+
+                    -
+
+                    /* Discount */
+                    CASE
+                        WHEN a.is_discount = 1
+                        THEN IFNULL(a.discount, 0)
+                        ELSE 0
+                    END
+
+                    +
+
+                    /* Item Tax */
+                    IFNULL((
+                        SELECT SUM(
+                            (i.qty * i.rate) * (i.gst / 100)
+                        )
+                        FROM tender_enq_invoice_item_info i
+                        WHERE i.tender_enq_invoice_id = a.tender_enq_invoice_id
+                        AND i.status != 'Delete'
+                    ), 0)
+
+                    +
+
+                    /* Active Additional Charge Tax */
+                    IFNULL((
+                        SELECT SUM(ac.addt_charges_vat_amt)
+                        FROM tender_invoice_addtchrg_info ac
+                        WHERE ac.tender_enq_invoice_id = a.tender_enq_invoice_id
+                        AND ac.status = 'Active'
+                    ), 0)
+                ) AS amt_with_tax
+
+                FROM tender_enq_invoice_info a
+
+                LEFT JOIN company_info b
+                    ON a.company_id = b.company_id
+                    AND b.status = 'Active'
+
+                LEFT JOIN customer_info c
+                    ON a.customer_id = c.customer_id
+                    AND c.status = 'Active'
+
+                LEFT JOIN tender_enquiry_info d
+                    ON a.tender_enquiry_id = d.tender_enquiry_id
+                    AND d.status = 'Active'
+
+                WHERE a.status != 'Delete'
+                AND  $where 
+                ORDER BY 
+                    a.invoice_date DESC,
+                    a.tender_enq_invoice_id DESC
+        ";
 
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();

@@ -4821,6 +4821,30 @@ class Reports extends CI_Controller
             'Customs Bill' => 'Customs Bill'
         ];
 
+        $data['vendor_opt'] = [];
+        foreach ($data['vendor_list'] as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+        }
+
+        $data['customer_opt'] = [];
+        $sql = "SELECT customer_id,customer_name FROM customer_info WHERE status = 'Active' ORDER BY customer_name ASC";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
+        $data['ac_sub_head_opt'] = ['' => 'Select'];
+        foreach ($data['sub_account_list'] as $row) {
+            $data['ac_sub_head_opt'][$row['sub_account_head_id']] = $row['sub_account_head_name'];
+        }
+
+        $sql = "SELECT vat_filing_head_name FROM vat_filing_head_info WHERE status = 'Active' and vat_filing_head_type = 'Purchase' ORDER BY vat_filing_head_id ASC";
+        $query = $this->db->query($sql);
+        $data['vat_payer_purchase_opt'] = ['' => 'Select VAT Payer Purchase Category'];
+        foreach ($query->result_array() as $row) {
+            $data['vat_payer_purchase_opt'][$row['vat_filing_head_name']] = $row['vat_filing_head_name'];
+        }
+
         // Selected vendor name for display
         $selected_vendor_name = 'All Suppliers';
         if (!empty($srch_vendor_id)) {

@@ -5750,7 +5750,11 @@ class Vendor extends CI_Controller
             $this->db->where('dp_bill_id', $this->input->post('dp_bill_id'));
             $this->db->update('dp_bill_info', $upd);
 
-            redirect('delivery-partner-bill-list/' . $this->uri->segment(2, 0));
+            if ($this->input->post('redirect_to')) {
+                redirect($this->input->post('redirect_to'));
+            } else {
+                redirect('delivery-partner-bill-list/' . $this->uri->segment(2, 0));
+            }
         }
 
 
@@ -6079,7 +6083,11 @@ class Vendor extends CI_Controller
             $this->db->where('customs_bill_id', $this->input->post('customs_bill_id'));
             $this->db->update('customs_bill_info', $upd);
 
-            redirect('customs-bill-list/' . $this->uri->segment(2, 0));
+            if ($this->input->post('redirect_to')) {
+                redirect($this->input->post('redirect_to'));
+            } else {
+                redirect('customs-bill-list/' . $this->uri->segment(2, 0));
+            }
         }
 
 
