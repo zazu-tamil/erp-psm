@@ -435,14 +435,35 @@
                                     <?php echo number_format((float) $r['total_amount'], (int) $r['decimal_point']); ?>
                                 </td>
                                 <td class="text-center no-print">
+
                                     <?php if (!empty($r['print_url'])): ?>
-                                        <a href="<?php echo site_url($r['print_url']); ?>"
-                                           class="btn btn-default btn-xs" target="_blank" title="Print / View Invoice">
+                                        <a href="<?php echo site_url($r['print_url']); ?>" class="btn btn-default btn-xs"
+                                            target="_blank" title="Print / View Invoice">
                                             <i class="fa fa-print text-primary"></i>
                                         </a>
-                                    <?php else: ?>
-                                        -
                                     <?php endif; ?>
+
+                                    <?php if (!empty($r['edit_url'])): ?>
+
+                                        <?php if ($r['bill_type'] == 'Local Supplier Bill'): ?>
+
+                                            <button type="button" data-toggle="modal" data-target="#edit_modal"
+                                                value="<?php echo htmlspecialchars($r['edit_url'] ?? ''); ?>"
+                                                class="edit_record btn btn-primary btn-xs" title="Edit Invoice">
+                                                <i class="fa fa-edit"></i>
+                                            </button>
+
+                                        <?php else: ?>
+
+                                            <a href="<?php echo site_url($r['edit_url']); ?>" class="btn btn-default btn-xs"
+                                                target="_blank" title="Edit Invoice">
+                                                <i class="fa fa-edit text-success"></i>
+                                            </a>
+
+                                        <?php endif; ?>
+
+                                    <?php endif; ?>
+
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -472,5 +493,246 @@
         </div>
     </div>
 </section>
+<!-- Edit Modal -->
+<div class="modal fade" id="edit_modal" role="dialog" aria-labelledby="scrollmodalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <form method="post" action="<?php echo site_url('vendor/local_purchase_bill_list'); ?>" id="frmedit" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h3 class="modal-title" id="scrollmodalLabel"><strong>Edit Local Supplier Bill</strong>
+                    </h3>
+                    <input type="hidden" name="mode" value="Edit" />
+                    <input type="hidden" name="redirect_to" value="reports/supplier_invoice_report" />
+                    <input type="hidden" name="local_purchase_bill_id" id="local_purchase_bill_id" value="" />
+                </div>
+
+                <div class="modal-body">
+                    <div
+                        style="border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9; border-radius:5px;">
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label for="srch_enq_id">Search Enquiry No</label>
+                                <input type="text" name="srch_enq_id" class="form-control srch_enq_id" value=""
+                                    placeholder="Search Enquiry No" />
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="sub_account_head_id">A/c Sub Head</label>
+                                <?php echo form_dropdown('sub_account_head_id', $ac_sub_head_opt, set_value('sub_account_head_id'), 'id="sub_account_head_id" class="form-control" '); ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label>Customer <span class="text-red">*</span></label>
+                            <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="srch_customer_id" class="form-control" '); ?>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="tender_enquiry_id">Tender Enquiry No</label>
+                            <?php echo form_dropdown('tender_enquiry_id', ['' => 'Select Enquiry'], set_value('tender_enquiry_id'), 'id="srch_tender_enquiry_id" class="form-control" '); ?>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-4">
+                            <label for="vendor_id">Supplier Name <span class="text-red">*</span></label>
+                            <div class="input-group1">
+                                <?php echo form_dropdown('vendor_id', ['' => 'Select'] + $vendor_opt, set_value('vendor_id'), 'id="vendor_id" class="form-control srch_vendor_id select2" required style="width:100%"'); ?>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="vendor_id_2">Supplier2 Name</label>
+                            <?php echo form_dropdown('vendor_id_2', ['' => 'Select'] + $vendor_opt, set_value('vendor_id_2'), 'id="vendor_id_2" class="form-control srch_vendor_id select2" style="width:100%"'); ?>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Invoice Date</label>
+                            <input type="date" name="invoice_date" id="invoice_date" class="form-control"
+                                value="" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label>Invoice No <span class="text-red">*</span></label>
+                            <input type="text" name="invoice_no" id="invoice_no" class="form-control"
+                                placeholder="Invoice No" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Entry Date</label>
+                            <input type="date" name="inv_entry_date" id="inv_entry_date" class="form-control"
+                                value="">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label>VAT Payer Sales / Purchase Group</label>
+                            <?php echo form_dropdown('vat_payer_purchase_grp', $vat_payer_purchase_opt, set_value('vat_payer_purchase_grp'), 'id="vat_payer_purchase_grp" class="form-control"'); ?>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label>Remarks</label>
+                            <textarea name="remarks" id="remarks" class="form-control" rows="3"
+                                placeholder="Remarks"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            <label>Total Amount W/O Tax</label>
+                            <input type="number" step="any" name="tot_amt_wo_tax" id="tot_amt_wo_tax"
+                                class="form-control" placeholder="Total Amount W/O Tax">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>VAT Percentage</label>
+                            <input type="number" step="any" name="vat" id="vat" class="form-control"
+                                placeholder="VAT Percentage %">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>VAT Amount</label>
+                            <input type="number" step="any" name="vat_amt" id="vat_amt" class="form-control"
+                                placeholder="VAT Amount">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Total Amount With Tax</label>
+                            <input type="number" step="any" name="tot_amt_with_tax" id="tot_amt_with_tax"
+                                class="form-control" placeholder="Total Amount With Tax" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-4">
+                            <label>Status</label><br>
+                            <label class="radio-inline"><input type="radio" name="status" value="Active" checked>
+                                Active</label>
+                            <label class="radio-inline"><input type="radio" name="status" value="InActive">
+                                InActive</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <input type="submit" name="Save" value="Update" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
+
+<script>
+    $(document).ready(function() {
+
+        $(document).on('click', '.edit_record', function() {
+            var id = $(this).val();
+            
+            $.ajax({
+                url: "<?php echo site_url('vendor/get_data'); ?>",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    tbl: "local_purchase_bill_info",
+                    id: id
+                },
+                success: function(res_ar) {
+                    console.log(res_ar);
+                    let res = res_ar[0];
+                    $("#edit_modal #local_purchase_bill_id").val(res.local_purchase_bill_id);
+                    $("#edit_modal #sub_account_head_id").val(res.sub_account_head_id);
+                    $("#edit_modal #srch_customer_id").val(res.customer_id);
+                    
+                    // Trigger tender enquiry load if possible
+                    var t_enq_id = res.tender_enquiry_id || '';
+                    var customer_id = res.customer_id;
+                    var dd = $('#edit_modal #srch_tender_enquiry_id');
+                    dd.html('<option value="">Select Enquiry</option>');
+                    if (customer_id) {
+                        $.ajax({
+                            url: "<?php echo site_url('vendor/get_vendor_rate_enquiries_by_customer'); ?>",
+                            type: "POST",
+                            dataType: "json",
+                            data: { customer_id: customer_id },
+                            success: function(tres) {
+                                if (tres.length > 0) {
+                                    $.each(tres, function(i, row) {
+                                        dd.append($('<option>', { value: row.tender_enquiry_id, text: row.display }));
+                                    });
+                                    if (t_enq_id != '') { dd.val(t_enq_id).trigger('change'); }
+                                }
+                            }
+                        });
+                    }
+
+                    $("#edit_modal #vendor_id").val(res.vendor_id).trigger('change');
+                    $("#edit_modal #vendor_id_2").val(res.vendor_id_2).trigger('change');
+                    $("#edit_modal #invoice_date").val(res.invoice_date);
+                    $("#edit_modal #invoice_no").val(res.invoice_no);
+                    $("#edit_modal #inv_entry_date").val(res.inv_entry_date);
+                    $("#edit_modal #vat_payer_purchase_grp").val(res.vat_payer_purchase_grp);
+                    $("#edit_modal #remarks").val(res.remarks);
+                    $("#edit_modal #tot_amt_wo_tax").val(res.tot_amt_wo_tax);
+                    $("#edit_modal #vat").val(res.vat);
+                    $("#edit_modal #vat_amt").val(res.vat_amt);
+                    $("#edit_modal #tot_amt_with_tax").val(res.tot_amt_with_tax);
+                    $(`#edit_modal input[name="status"][value="${res.status}"]`).prop('checked', true);
+                    
+                    $('#edit_modal').modal('show');
+                } 
+            });
+        });
+        
+        $('#edit_modal #vat, #edit_modal #tot_amt_wo_tax').on('input', function() {  
+            var base = parseFloat($('#edit_modal #tot_amt_wo_tax').val()) || 0;
+            var rate = parseFloat($('#edit_modal #vat').val()) || 0;
+            var total = base + (base * rate / 100);
+            var vat_amt = (base * rate / 100); 
+            $('#edit_modal #vat_amt').val(vat_amt.toFixed(3));
+            $('#edit_modal #tot_amt_with_tax').val(total.toFixed(3));
+        });
+        
+        $('#edit_modal #srch_customer_id').on('change', function() {  
+            var customer_id = $(this).val();
+            var dd = $('#edit_modal #srch_tender_enquiry_id');
+            dd.html('<option value="">Select Enquiry</option>');
+            if (!customer_id) return;
+            $.ajax({
+                url: "<?php echo site_url('vendor/get_vendor_rate_enquiries_by_customer'); ?>",
+                type: "POST",
+                dataType: "json",
+                data: { customer_id: customer_id },
+                success: function(tres) {
+                    if (tres.length > 0) {
+                        $.each(tres, function(i, row) {
+                            dd.append($('<option>', { value: row.tender_enquiry_id, text: row.display }));
+                        });
+                    }
+                }
+            });
+        });
+        
+        $('#edit_modal #srch_tender_enquiry_id').on('change', function() {
+            var tender_enquiry_id = $(this).val();
+            var dd = $('#edit_modal #vendor_id_2');
+            dd.html('<option value="">Select</option>');
+            if (!tender_enquiry_id) return;
+            $.ajax({
+                url: "<?php echo site_url('vendor/get_vendor_by_tender_id_ajax'); ?>",
+                type: "POST",
+                dataType: "json",
+                data: { tender_enquiry_id: tender_enquiry_id },
+                success: function(res) {
+                    if (res && res.length > 0) {
+                        $.each(res, function(i, row) {
+                            dd.append($('<option>', { value: row.vendor_id, text: row.vendor_name }));
+                        });
+                    }
+                }
+            });
+        });
+    });
+</script>

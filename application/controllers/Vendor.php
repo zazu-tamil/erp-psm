@@ -5445,7 +5445,11 @@ class Vendor extends CI_Controller
             $this->db->where('local_purchase_bill_id', $this->input->post('local_purchase_bill_id'));
             $this->db->update('local_purchase_bill_info', $upd);
 
-            redirect('local-purchase-bill-list/' . $this->uri->segment(2, 0));
+            if ($this->input->post('redirect_to')) {
+                redirect($this->input->post('redirect_to'));
+            } else {
+                redirect('local-purchase-bill-list/' . $this->uri->segment(2, 0));
+            }
         }
 
 

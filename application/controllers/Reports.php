@@ -3783,7 +3783,8 @@ class Reports extends CI_Controller
                     'Supplier Bill' AS bill_type,
                     NULL AS sub_account_head_id,
                     'Purchases' AS sub_account_head_name,
-                    CONCAT('vendor-purchase-bill-print/', a.vendor_purchase_invoice_id) AS print_url
+                    CONCAT('vendor-purchase-bill-print/', a.vendor_purchase_invoice_id) AS print_url,
+                    CONCAT('vendor-purchase-bill-edit/', a.vendor_purchase_invoice_id) AS edit_url
                 FROM vendor_purchase_invoice_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 LEFT JOIN vendor_po_info vpo ON vpo.vendor_po_id = a.vendor_po_id AND vpo.status = 'Active'
@@ -3808,7 +3809,8 @@ class Reports extends CI_Controller
                     'Local Supplier Bill' AS bill_type,
                     a.sub_account_head_id,
                     s.sub_account_head_name,
-                    CONCAT('local-purchase-bill-print/', a.local_purchase_bill_id) AS print_url
+                    CONCAT('local-purchase-bill-print/', a.local_purchase_bill_id) AS print_url,
+                    a.local_purchase_bill_id AS edit_url
                  FROM local_purchase_bill_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 LEFT JOIN cb_sub_account_head_info s ON s.sub_account_head_id = a.sub_account_head_id
@@ -3838,6 +3840,41 @@ class Reports extends CI_Controller
         $data['total_vat'] = $total_vat;
         $data['grand_total'] = $grand_total;
 
+        // Fetch options for the edit modal
+        $data['vendor_opt'] = [];
+        if (!empty($data['vendor_list'])) {
+            foreach ($data['vendor_list'] as $row) {
+                $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+            }
+        }
+
+        $data['customer_opt'] = [];
+        $sql = "SELECT customer_id,customer_name FROM customer_info WHERE status = 'Active' ORDER BY customer_name ASC";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
+        $data['ac_sub_head_opt'] = [];
+        $sql = "SELECT sub_account_head_id, sub_account_head_name FROM cb_sub_account_head_info WHERE status != 'Delete' ORDER BY sub_account_head_name ASC";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['ac_sub_head_opt'][$row['sub_account_head_id']] = $row['sub_account_head_name'];
+        }
+
+        $sql = "
+            SELECT 
+            vat_filing_head_name 
+            FROM vat_filing_head_info 
+            WHERE status = 'Active' 
+            and vat_filing_head_type = 'Purchase'
+            ORDER BY vat_filing_head_id ASC
+            ";
+        $query = $this->db->query($sql);
+        $data['vat_payer_purchase_opt'] = ['' => 'Select VAT Payer Purchase Category'];
+        foreach ($query->result_array() as $row) {
+            $data['vat_payer_purchase_opt'][$row['vat_filing_head_name']] = $row['vat_filing_head_name'];
+        }
         // Excel Export
         if ($this->input->post('export_excel') == '1' || $this->input->get('export') == 'excel') {
             $this->load->helper('download');
@@ -3845,7 +3882,7 @@ class Reports extends CI_Controller
             $content = $this->load->view('page/reports/supplier-invoice-report-xls', $data, TRUE);
             force_download($filename, $content);
             return;
-        } 
+        }
         $this->load->view('page/reports/supplier-invoice-report', $data);
     }
 
