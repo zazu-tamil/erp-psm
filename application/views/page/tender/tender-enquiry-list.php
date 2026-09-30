@@ -32,6 +32,11 @@
                             value="<?php echo set_value('srch_to_date', $srch_to_date); ?>">
                     </div>
                     <div class="form-group col-md-4">
+                        <label for="srch_closing_date">Closing Date</label>
+                        <input type="date" name="srch_closing_date" id="srch_closing_date" class="form-control"
+                            value="<?php echo set_value('srch_closing_date', $srch_closing_date); ?>">
+                    </div>
+                    <div class="form-group col-md-4">
                         <label>Customer</label>
                         <div class="form-group">
                             <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, $srch_customer_id, 'id="srch_customer_id" class="form-control select2" '); ?>

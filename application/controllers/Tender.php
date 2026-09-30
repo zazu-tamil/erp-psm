@@ -438,6 +438,23 @@ class Tender extends CI_Controller
             $data['srch_to_date'] = $srch_to_date = '';
         }
 
+        //closeing date filter  $srch_closing_date
+
+        if (isset($_POST['srch_closing_date'])) {
+            $data['srch_closing_date'] = $srch_closing_date = $this->input->post('srch_closing_date');
+            $this->session->set_userdata('srch_closing_date', $this->input->post('srch_closing_date'));
+        } elseif ($this->session->userdata('srch_closing_date')) {
+            $data['srch_closing_date'] = $srch_closing_date = $this->session->userdata('srch_closing_date');
+        } else {
+            $data['srch_closing_date'] = $srch_closing_date = '';
+        }
+
+        if(!empty($srch_closing_date)) {
+            $where .=" AND DATE(a.closing_date) = '" . $this->db->escape_str($srch_closing_date) . "'";
+        }
+
+
+
         if (!empty($srch_from_date) && !empty($srch_to_date)) {
             $where .= " AND  ( a.enquiry_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "') ";
         }
@@ -494,6 +511,7 @@ class Tender extends CI_Controller
             $where = " ( concat(ifnull(b.company_code,'') , '/', ifnull(a.company_sno,'') ,  '/' , ifnull(c.customer_code,'') ,  '/' , ifnull(a.customer_sno,''),  '/' , DATE_FORMAT(a.enquiry_date,'%Y') ) like '%" . $this->db->escape_str($srch_enquiry_no) . "%' ) ";
             $data['srch_from_date'] = $srch_from_date = '';
             $data['srch_to_date'] = $srch_to_date = '';
+            $data['srch_closing_date'] = $srch_closing_date = '';
             $data['srch_customer_id'] = $srch_customer_id = '';
         }
 
@@ -2162,7 +2180,7 @@ class Tender extends CI_Controller
         $query = $this->db->query($sql, [$tender_quotation_id]);
         $data['item_list'] = $query->result_array();*/
 
-         $sql = "
+        $sql = "
            select
             c.serial_no,
             a.tender_quotation_id,
@@ -2495,7 +2513,7 @@ class Tender extends CI_Controller
                 'delivery_date' => $this->input->post('delivery_date'),
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
-                'po_status' => $this->input->post('po_status'), 
+                'po_status' => $this->input->post('po_status'),
                 'status' => 'Active',
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s')
@@ -2630,7 +2648,7 @@ class Tender extends CI_Controller
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
-       
+
         $data['js'] = 'tender/customer-tender-po-edit.inc';
         $data['title'] = 'Edit Tender PO';
 
@@ -2665,7 +2683,7 @@ class Tender extends CI_Controller
                 'remarks' => $this->input->post('remarks'),
                 'terms' => $this->input->post('terms'),
                 'po_status' => $this->input->post('po_status'),
-                'status' => $this->input->post('status'), 
+                'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'updated_date' => date('Y-m-d H:i:s')
             ];
@@ -4321,10 +4339,10 @@ ORDER BY
             $this->load->dbforge();
             $this->dbforge->add_column('tender_enq_invoice_info', [
                 'bank_id' => [
-                    'type'       => 'INT',
+                    'type' => 'INT',
                     'constraint' => 11,
-                    'null'       => TRUE,
-                    'default'    => NULL
+                    'null' => TRUE,
+                    'default' => NULL
                 ]
             ]);
         }
@@ -4488,10 +4506,10 @@ ORDER BY
             $this->load->dbforge();
             $this->dbforge->add_column('tender_enq_invoice_info', [
                 'bank_id' => [
-                    'type'       => 'INT',
+                    'type' => 'INT',
                     'constraint' => 11,
-                    'null'       => TRUE,
-                    'default'    => NULL
+                    'null' => TRUE,
+                    'default' => NULL
                 ]
             ]);
         }
