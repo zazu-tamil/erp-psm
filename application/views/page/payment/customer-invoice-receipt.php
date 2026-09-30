@@ -74,11 +74,19 @@
                     </div>
                     <div class="form-group col-md-2">
                         <label for="srch_receipt_mode">Receipt Mode</label>
-                        <?php echo form_dropdown('srch_receipt_mode', ['' => 'All', 'Cash' => 'Cash', 'Bank' => 'Bank'], $srch_receipt_mode ?? '', 'id="srch_receipt_mode" class="form-control"'); ?>
+                        <?php echo form_dropdown('srch_receipt_mode', ['' => 'All', 'Cash' => 'Cash', 'Bank' => 'Bank'], $srch_receipt_mode ?? '', 'id="srch_receipt_mode" class="form-control" onchange="toggleReceiptModeFilters()"'); ?>
                     </div>
-                    <div class="form-group col-md-2">
+                    <div class="form-group col-md-2 srch_receipt_type_div" style="display: <?php echo (($srch_receipt_mode ?? '') == 'Bank') ? 'block' : 'none'; ?>;">
                         <label for="srch_receipt_type">Receipt Type</label>
                         <?php echo form_dropdown('srch_receipt_type', ['' => 'All', 'Online' => 'Online', 'Cheque' => 'Cheque'], $srch_receipt_type ?? '', 'id="srch_receipt_type" class="form-control"'); ?>
+                    </div>
+                    <div class="form-group col-md-2 srch_bank_div" style="display: <?php echo (($srch_receipt_mode ?? '') == 'Bank') ? 'block' : 'none'; ?>;">
+                        <label>Bank</label>
+                        <?php echo form_dropdown('srch_bank_id', ['' => 'All'] + $bank_opt, $srch_bank_id ?? '', 'id="srch_bank_id" class="form-control"'); ?>
+                    </div>
+                    <div class="form-group col-md-2 srch_cash_category_div" style="display: <?php echo (($srch_receipt_mode ?? '') == 'Cash') ? 'block' : 'none'; ?>;">
+                        <label>Cash Category</label>
+                        <?php echo form_dropdown('srch_cash_category_id', ['' => 'All'] + $cash_categories_opt, $srch_cash_category_id ?? '', 'id="srch_cash_category_id" class="form-control"'); ?>
                     </div>
                     <div class="form-group col-md-2 text-left">
                         <br>
@@ -86,6 +94,46 @@
                     </div>
                 </div>
             </form>
+            <script>
+                function toggleReceiptModeFilters() {
+                    var mode = document.getElementById('srch_receipt_mode').value;
+                    var typeDiv = document.querySelector('.srch_receipt_type_div');
+                    var bankDiv = document.querySelector('.srch_bank_div');
+                    var cashDiv = document.querySelector('.srch_cash_category_div');
+                    
+                    if (mode === 'Bank') {
+                        if(typeDiv) typeDiv.style.display = 'block';
+                        if(bankDiv) bankDiv.style.display = 'block';
+                        if(cashDiv) {
+                            cashDiv.style.display = 'none';
+                            document.getElementById('srch_cash_category_id').value = '';
+                        }
+                    } else if (mode === 'Cash') {
+                        if(cashDiv) cashDiv.style.display = 'block';
+                        if(typeDiv) {
+                            typeDiv.style.display = 'none';
+                            document.getElementById('srch_receipt_type').value = '';
+                        }
+                        if(bankDiv) {
+                            bankDiv.style.display = 'none';
+                            document.getElementById('srch_bank_id').value = '';
+                        }
+                    } else {
+                        if(typeDiv) {
+                            typeDiv.style.display = 'none';
+                            document.getElementById('srch_receipt_type').value = '';
+                        }
+                        if(bankDiv) {
+                            bankDiv.style.display = 'none';
+                            document.getElementById('srch_bank_id').value = '';
+                        }
+                        if(cashDiv) {
+                            cashDiv.style.display = 'none';
+                            document.getElementById('srch_cash_category_id').value = '';
+                        }
+                    }
+                }
+            </script>
         </div>
     </div>
 

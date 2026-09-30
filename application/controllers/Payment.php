@@ -343,6 +343,32 @@ class Payment extends CI_Controller
             $where .= " AND a.receipt_type = '" . $this->db->escape_str($srch_receipt_type) . "'";
         }
 
+        if ($this->input->post('srch_cash_category_id') !== null) {
+            $data['srch_cash_category_id'] = $srch_cash_category_id = $this->input->post('srch_cash_category_id');
+            $this->session->set_userdata('cust_rcpt_srch_cash_category_id', $srch_cash_category_id);
+        } elseif ($this->session->userdata('cust_rcpt_srch_cash_category_id')) {
+            $data['srch_cash_category_id'] = $srch_cash_category_id = $this->session->userdata('cust_rcpt_srch_cash_category_id');
+        } else {
+            $data['srch_cash_category_id'] = $srch_cash_category_id = '';
+        }
+
+        if (!empty($srch_cash_category_id)) {
+            $where .= " AND a.cash_category_id = '" . $this->db->escape_str($srch_cash_category_id) . "'";
+        }
+
+        if ($this->input->post('srch_bank_id') !== null) {
+            $data['srch_bank_id'] = $srch_bank_id = $this->input->post('srch_bank_id');
+            $this->session->set_userdata('cust_rcpt_srch_bank_id', $srch_bank_id);
+        } elseif ($this->session->userdata('cust_rcpt_srch_bank_id')) {
+            $data['srch_bank_id'] = $srch_bank_id = $this->session->userdata('cust_rcpt_srch_bank_id');
+        } else {
+            $data['srch_bank_id'] = $srch_bank_id = '';
+        }
+
+        if (!empty($srch_bank_id)) {
+            $where .= " AND a.bank_id = '" . $this->db->escape_str($srch_bank_id) . "'";
+        }
+
         // ===================== PAGINATION =====================
         $this->load->library('pagination');
 
