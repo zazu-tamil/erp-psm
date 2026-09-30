@@ -1049,6 +1049,7 @@ class Payment extends CI_Controller
                 )
             )";
         }
+        
         if ($this->input->post('srch_payment_mode') !== null) {
             $data['srch_payment_mode'] = $srch_payment_mode = $this->input->post('srch_payment_mode');
             $this->session->set_userdata('vendor_payment_srch_payment_mode', $srch_payment_mode);

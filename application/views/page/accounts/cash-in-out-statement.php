@@ -17,7 +17,7 @@
         <div class="box-body">
             <form method="post" action="<?php echo site_url('cash-in-out-statement') ?>" id="frmsearch">
                 <div class="row">
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <label>From Date</label>
                         <div class="input-group date">
                             <div class="input-group-addon">
@@ -27,7 +27,7 @@
                                    value="<?php echo set_value('srch_from_date', $srch_from_date); ?>" required="true">
                         </div>
                     </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <label>To Date</label>
                         <div class="input-group date">
                             <div class="input-group-addon">
@@ -37,9 +37,13 @@
                                    value="<?php echo set_value('srch_to_date', $srch_to_date); ?>" required="true">
                         </div>
                     </div>
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-3">
                         <label>Bank Account</label>
                         <?php echo form_dropdown('srch_bank_cash', $bank_cash_options, set_value('srch_bank_cash', $srch_bank_cash), 'id="srch_bank_cash" class="form-control"'); ?>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label>Payment Type</label>
+                        <?php echo form_dropdown('srch_payment_type', ['' => 'All', 'Online' => 'Online', 'Cheque' => 'Cheque'], set_value('srch_payment_type', $srch_payment_type ?? ''), 'id="srch_payment_type" class="form-control"'); ?>
                     </div>
                     <div class="form-group col-md-2 text-left">
                         <br />

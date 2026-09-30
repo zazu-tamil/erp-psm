@@ -4462,10 +4462,12 @@ class Accounts extends CI_Controller
             $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
             $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
             $data['srch_bank_cash'] = $srch_bank_cash = $this->input->post('srch_bank_cash');
+            $data['srch_payment_type'] = $srch_payment_type = $this->input->post('srch_payment_type');
         } else {
             $data['srch_from_date'] = $srch_from_date = date('Y-m-') . '01';
             $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
             $data['srch_bank_cash'] = $srch_bank_cash = 'all';
+            $data['srch_payment_type'] = $srch_payment_type = '';
         }
 
         // Get bank list for filter dropdown
@@ -4504,6 +4506,17 @@ class Accounts extends CI_Controller
             $bank_id = (int) str_replace('bank_', '', $srch_bank_cash);
             $w_ce_to = "ce.to_bank_id = $bank_id";
             $w_ce_from = "ce.from_bank_id = $bank_id";
+        }
+
+        if (!empty($srch_payment_type)) {
+            $w_tr .= " AND tr.receipt_type = '" . $this->db->escape_str($srch_payment_type) . "'";
+            $w_vp .= " AND vp.payment_type = '" . $this->db->escape_str($srch_payment_type) . "'";
+            $w_cin .= " AND cin.bank_type = '" . $this->db->escape_str($srch_payment_type) . "'";
+            $w_cout .= " AND cout.bank_type = '" . $this->db->escape_str($srch_payment_type) . "'";
+            $w_pt .= " AND 1=0";
+            $w_ce_from .= " AND 1=0";
+            $w_ce_to .= " AND 1=0";
+            $w_op .= " AND 1=0";
         }
 
         // 1. Calculate Opening Balance:
