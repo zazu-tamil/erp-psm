@@ -1049,6 +1049,57 @@ class Payment extends CI_Controller
                 )
             )";
         }
+        if ($this->input->post('srch_payment_mode') !== null) {
+            $data['srch_payment_mode'] = $srch_payment_mode = $this->input->post('srch_payment_mode');
+            $this->session->set_userdata('vendor_payment_srch_payment_mode', $srch_payment_mode);
+        } elseif ($this->session->userdata('vendor_payment_srch_payment_mode')) {
+            $data['srch_payment_mode'] = $srch_payment_mode = $this->session->userdata('vendor_payment_srch_payment_mode');
+        } else {
+            $data['srch_payment_mode'] = $srch_payment_mode = '';
+        }
+
+        if (!empty($srch_payment_mode)) {
+            $where .= " AND a.payment_mode = '" . $this->db->escape_str($srch_payment_mode) . "'";
+        }
+
+        if ($this->input->post('srch_payment_type') !== null) {
+            $data['srch_payment_type'] = $srch_payment_type = $this->input->post('srch_payment_type');
+            $this->session->set_userdata('vendor_payment_srch_payment_type', $srch_payment_type);
+        } elseif ($this->session->userdata('vendor_payment_srch_payment_type')) {
+            $data['srch_payment_type'] = $srch_payment_type = $this->session->userdata('vendor_payment_srch_payment_type');
+        } else {
+            $data['srch_payment_type'] = $srch_payment_type = '';
+        }
+
+        if (!empty($srch_payment_type)) {
+            $where .= " AND a.payment_type = '" . $this->db->escape_str($srch_payment_type) . "'";
+        }
+
+        if ($this->input->post('srch_cash_category_id') !== null) {
+            $data['srch_cash_category_id'] = $srch_cash_category_id = $this->input->post('srch_cash_category_id');
+            $this->session->set_userdata('vendor_payment_srch_cash_category_id', $srch_cash_category_id);
+        } elseif ($this->session->userdata('vendor_payment_srch_cash_category_id')) {
+            $data['srch_cash_category_id'] = $srch_cash_category_id = $this->session->userdata('vendor_payment_srch_cash_category_id');
+        } else {
+            $data['srch_cash_category_id'] = $srch_cash_category_id = '';
+        }
+
+        if (!empty($srch_cash_category_id)) {
+            $where .= " AND a.cash_category_id = '" . $this->db->escape_str($srch_cash_category_id) . "'";
+        }
+
+        if ($this->input->post('srch_bank_id') !== null) {
+            $data['srch_bank_id'] = $srch_bank_id = $this->input->post('srch_bank_id');
+            $this->session->set_userdata('vendor_payment_srch_bank_id', $srch_bank_id);
+        } elseif ($this->session->userdata('vendor_payment_srch_bank_id')) {
+            $data['srch_bank_id'] = $srch_bank_id = $this->session->userdata('vendor_payment_srch_bank_id');
+        } else {
+            $data['srch_bank_id'] = $srch_bank_id = '';
+        }
+
+        if (!empty($srch_bank_id)) {
+            $where .= " AND a.bank_id = '" . $this->db->escape_str($srch_bank_id) . "'";
+        }
 
         $this->load->library('pagination');
 
@@ -1095,6 +1146,7 @@ class Payment extends CI_Controller
                 c.vendor_name,
                 a.vendor_payment_id,
                 a.payment_mode,
+                a.payment_type,
                 a.cheque_date,
                 a.cheque_no,
                 a.cheque_bank,

@@ -52,11 +52,11 @@
         <div class="box-body">
             <form method="post" action="<?php echo site_url('vendor-payment-list'); ?>" id="frmsearch">
                 <div class="row">
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <label>Vendor</label>
                         <?php echo form_dropdown('srch_vendor_id', ['' => 'All'] + $vendor_opt, $srch_vendor_id, 'id="srch_vendor_id" class="form-control select2"'); ?>
                     </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <label for="srch_enquiry_no">Our Enquiry No</label>
                         <input type="text" name="srch_enquiry_no" id="srch_enquiry_no" class="form-control"
                             value="<?php echo set_value('srch_enquiry_no', $srch_enquiry_no ?? ''); ?>"
@@ -65,19 +65,75 @@
                             class="tender_enquiry_id_value_id"
                             value="<?php echo set_value('tender_enquiry_id_value_id', $tender_enquiry_id_value_id ?? ''); ?>">
                     </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <label for="srch_bill_no">Bill No</label>
                         <input type="text" name="srch_bill_no" id="srch_bill_no" class="form-control"
                             value="<?php echo set_value('srch_bill_no', $srch_bill_no ?? ''); ?>"
                             placeholder="Search Bill No">
                     </div>
+                    <div class="form-group col-md-2">
+                        <label for="srch_payment_mode">Payment Mode</label>
+                        <?php echo form_dropdown('srch_payment_mode', ['' => 'All', 'Cash' => 'Cash', 'Bank' => 'Bank'], $srch_payment_mode ?? '', 'id="srch_payment_mode" class="form-control" onchange="togglePaymentModeFilters()"'); ?>
+                    </div>
+                    <div class="form-group col-md-2 srch_payment_type_div" style="display: <?php echo (($srch_payment_mode ?? '') == 'Bank') ? 'block' : 'none'; ?>;">
+                        <label for="srch_payment_type">Payment Type</label>
+                        <?php echo form_dropdown('srch_payment_type', ['' => 'All', 'Online' => 'Online', 'Cheque' => 'Cheque'], $srch_payment_type ?? '', 'id="srch_payment_type" class="form-control"'); ?>
+                    </div>
+                    <div class="form-group col-md-2 srch_bank_div" style="display: <?php echo (($srch_payment_mode ?? '') == 'Bank') ? 'block' : 'none'; ?>;">
+                        <label>Bank</label>
+                        <?php echo form_dropdown('srch_bank_id', ['' => 'All'] + $bank_opt, $srch_bank_id ?? '', 'id="srch_bank_id" class="form-control"'); ?>
+                    </div>
+                    <div class="form-group col-md-2 srch_cash_category_div" style="display: <?php echo (($srch_payment_mode ?? '') == 'Cash') ? 'block' : 'none'; ?>;">
+                        <label>Cash Category</label>
+                        <?php echo form_dropdown('srch_cash_category_id', ['' => 'All'] + $cash_categories_opt, $srch_cash_category_id ?? '', 'id="srch_cash_category_id" class="form-control"'); ?>
+                    </div>
 
-                    <div class="form-group col-md-3 text-left">
+                    <div class="form-group col-md-2 text-left">
                         <br>
                         <button type="submit" class="btn btn-success"><i class="fa fa-search"></i> Show</button>
                     </div>
                 </div>
             </form>
+            <script>
+                function togglePaymentModeFilters() {
+                    var mode = document.getElementById('srch_payment_mode').value;
+                    var typeDiv = document.querySelector('.srch_payment_type_div');
+                    var bankDiv = document.querySelector('.srch_bank_div');
+                    var cashDiv = document.querySelector('.srch_cash_category_div');
+                    
+                    if (mode === 'Bank') {
+                        if(typeDiv) typeDiv.style.display = 'block';
+                        if(bankDiv) bankDiv.style.display = 'block';
+                        if(cashDiv) {
+                            cashDiv.style.display = 'none';
+                            document.getElementById('srch_cash_category_id').value = '';
+                        }
+                    } else if (mode === 'Cash') {
+                        if(cashDiv) cashDiv.style.display = 'block';
+                        if(typeDiv) {
+                            typeDiv.style.display = 'none';
+                            document.getElementById('srch_payment_type').value = '';
+                        }
+                        if(bankDiv) {
+                            bankDiv.style.display = 'none';
+                            document.getElementById('srch_bank_id').value = '';
+                        }
+                    } else {
+                        if(typeDiv) {
+                            typeDiv.style.display = 'none';
+                            document.getElementById('srch_payment_type').value = '';
+                        }
+                        if(bankDiv) {
+                            bankDiv.style.display = 'none';
+                            document.getElementById('srch_bank_id').value = '';
+                        }
+                        if(cashDiv) {
+                            cashDiv.style.display = 'none';
+                            document.getElementById('srch_cash_category_id').value = '';
+                        }
+                    }
+                }
+            </script>
         </div>
     </div>
 
@@ -120,6 +176,9 @@
                             <td>
                                 <?php if ($ls['payment_mode'] == 'Bank'): ?>
                                     <span class="label label-success"><?php echo $ls['payment_mode']; ?></span>
+                                    <?php if (!empty($ls['payment_type'])): ?>
+                                        <span class="label label-info"><?php echo $ls['payment_type']; ?></span>
+                                    <?php endif; ?>
                                     <br>(<?php echo $ls['bank_name'] ?? ''; ?>)
                                 <?php elseif ($ls['payment_mode'] == 'Cash'): ?>
                                     <span class="label label-success"><?php echo $ls['payment_mode']; ?></span>
