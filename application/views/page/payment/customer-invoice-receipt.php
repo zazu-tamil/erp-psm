@@ -72,6 +72,14 @@
                             value="<?php echo set_value('srch_invoice_no', $srch_invoice_no ?? ''); ?>"
                             placeholder="Search Invoice No">
                     </div>
+                    <div class="form-group col-md-2">
+                        <label for="srch_receipt_mode">Receipt Mode</label>
+                        <?php echo form_dropdown('srch_receipt_mode', ['' => 'All', 'Cash' => 'Cash', 'Bank' => 'Bank'], $srch_receipt_mode ?? '', 'id="srch_receipt_mode" class="form-control"'); ?>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="srch_receipt_type">Receipt Type</label>
+                        <?php echo form_dropdown('srch_receipt_type', ['' => 'All', 'Online' => 'Online', 'Cheque' => 'Cheque'], $srch_receipt_type ?? '', 'id="srch_receipt_type" class="form-control"'); ?>
+                    </div>
                     <div class="form-group col-md-2 text-left">
                         <br>
                         <button type="submit" class="btn btn-success"><i class="fa fa-search"></i> Show</button>
@@ -118,6 +126,9 @@
                             <td>
                                 <?php if ($ls['receipt_mode'] == 'Bank'): ?>
                                     <span class="label label-success"><?php echo $ls['receipt_mode']; ?></span>
+                                    <?php if (!empty($ls['receipt_type'])): ?>
+                                        <span class="label label-info"><?php echo $ls['receipt_type']; ?></span>
+                                    <?php endif; ?>
                                     <br>(<?php echo $ls['bank_name'] ?? ''; ?>)
                                 <?php elseif ($ls['receipt_mode'] == 'Cash'): ?>
                                     <span class="label label-success"><?php echo $ls['receipt_mode']; ?></span>

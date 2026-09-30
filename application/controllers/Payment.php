@@ -317,6 +317,32 @@ class Payment extends CI_Controller
             )";
         }
 
+        if ($this->input->post('srch_receipt_mode') !== null) {
+            $data['srch_receipt_mode'] = $srch_receipt_mode = $this->input->post('srch_receipt_mode');
+            $this->session->set_userdata('cust_rcpt_srch_receipt_mode', $srch_receipt_mode);
+        } elseif ($this->session->userdata('cust_rcpt_srch_receipt_mode')) {
+            $data['srch_receipt_mode'] = $srch_receipt_mode = $this->session->userdata('cust_rcpt_srch_receipt_mode');
+        } else {
+            $data['srch_receipt_mode'] = $srch_receipt_mode = '';
+        }
+
+        if (!empty($srch_receipt_mode)) {
+            $where .= " AND a.receipt_mode = '" . $this->db->escape_str($srch_receipt_mode) . "'";
+        }
+
+        if ($this->input->post('srch_receipt_type') !== null) {
+            $data['srch_receipt_type'] = $srch_receipt_type = $this->input->post('srch_receipt_type');
+            $this->session->set_userdata('cust_rcpt_srch_receipt_type', $srch_receipt_type);
+        } elseif ($this->session->userdata('cust_rcpt_srch_receipt_type')) {
+            $data['srch_receipt_type'] = $srch_receipt_type = $this->session->userdata('cust_rcpt_srch_receipt_type');
+        } else {
+            $data['srch_receipt_type'] = $srch_receipt_type = '';
+        }
+
+        if (!empty($srch_receipt_type)) {
+            $where .= " AND a.receipt_type = '" . $this->db->escape_str($srch_receipt_type) . "'";
+        }
+
         // ===================== PAGINATION =====================
         $this->load->library('pagination');
 
@@ -363,6 +389,7 @@ class Payment extends CI_Controller
                 a.customer_id,
                 cust.customer_name,
                 a.receipt_mode,
+                a.receipt_type,
                 a.amount,
                 b.bank_name,
                 c.category_name,
