@@ -180,6 +180,12 @@
                                         <span class="label label-info"><?php echo $ls['payment_type']; ?></span>
                                     <?php endif; ?>
                                     <br>(<?php echo $ls['bank_name'] ?? ''; ?>)
+                                    <?php if ($ls['payment_type'] == 'Cheque' && !empty($ls['cheque_no'])): ?>
+                                        <br><small class='text-muted'>Chq: <?php echo htmlspecialchars($ls['cheque_no']); ?>
+                                        <?php if(!empty($ls['cheque_date']) && $ls['cheque_date'] != '0000-00-00'): ?> | Dt: <?php echo date('d-m-Y', strtotime($ls['cheque_date'])); ?><?php endif; ?>
+                                        <?php if(!empty($ls['cheque_bank'])): ?> | Bk: <?php echo htmlspecialchars($ls['cheque_bank']); ?><?php endif; ?>
+                                        </small>
+                                    <?php endif; ?>
                                 <?php elseif ($ls['payment_mode'] == 'Cash'): ?>
                                     <span class="label label-success"><?php echo $ls['payment_mode']; ?></span>
                                     <?php if (!empty($ls['category_name'])): ?>
