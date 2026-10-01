@@ -552,7 +552,7 @@ class Reports extends CI_Controller
     }
 
 
-    public function tender_enquiry_summary_report()
+    public function tender_enquiry_summary_report($id = null)
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in')) {
             redirect();
@@ -565,29 +565,34 @@ class Reports extends CI_Controller
 
         $where = "1=1";
 
-
-        // Company Filter
-        if ($this->input->post('srch_enquiry_no_id') !== null) {
-            $data['srch_enquiry_no_id'] = $srch_enquiry_no_id = $this->input->post('srch_enquiry_no_id');
-            $this->session->set_userdata('srch_enquiry_no_id', $srch_enquiry_no_id);
-        } elseif ($this->session->userdata('srch_enquiry_no_id')) {
-            $data['srch_enquiry_no_id'] = $srch_enquiry_no_id = $this->session->userdata('srch_enquiry_no_id');
-        } else {
-            $data['srch_enquiry_no_id'] = $srch_enquiry_no_id = '';
-        }
-        if (!empty($srch_enquiry_no_id)) {
-            $where = " (a.tender_enquiry_id = '" . $this->db->escape_str($srch_enquiry_no_id) . "')";
-        }
-
-        // Company Filter
-        if ($this->input->post('tender_enquiry_id') !== null) {
-            $data['tender_enquiry_id'] = $tender_enquiry_id = $this->input->post('tender_enquiry_id');
+        if ($id !== null) {
+            $data['tender_enquiry_id'] = $tender_enquiry_id = $id;
             $this->session->set_userdata('tender_enquiry_id', $tender_enquiry_id);
-        } elseif ($this->session->userdata('tender_enquiry_id')) {
-            $data['tender_enquiry_id'] = $tender_enquiry_id = $this->session->userdata('tender_enquiry_id');
         } else {
-            $data['tender_enquiry_id'] = $tender_enquiry_id = '';
+            // Company Filter
+            if ($this->input->post('srch_enquiry_no_id') !== null) {
+                $data['srch_enquiry_no_id'] = $srch_enquiry_no_id = $this->input->post('srch_enquiry_no_id');
+                $this->session->set_userdata('srch_enquiry_no_id', $srch_enquiry_no_id);
+            } elseif ($this->session->userdata('srch_enquiry_no_id')) {
+                $data['srch_enquiry_no_id'] = $srch_enquiry_no_id = $this->session->userdata('srch_enquiry_no_id');
+            } else {
+                $data['srch_enquiry_no_id'] = $srch_enquiry_no_id = '';
+            }
+            if (!empty($srch_enquiry_no_id)) {
+                $where = " (a.tender_enquiry_id = '" . $this->db->escape_str($srch_enquiry_no_id) . "')";
+            }
+
+            // Company Filter
+            if ($this->input->post('tender_enquiry_id') !== null) {
+                $data['tender_enquiry_id'] = $tender_enquiry_id = $this->input->post('tender_enquiry_id');
+                $this->session->set_userdata('tender_enquiry_id', $tender_enquiry_id);
+            } elseif ($this->session->userdata('tender_enquiry_id')) {
+                $data['tender_enquiry_id'] = $tender_enquiry_id = $this->session->userdata('tender_enquiry_id');
+            } else {
+                $data['tender_enquiry_id'] = $tender_enquiry_id = '';
+            }
         }
+
         if (!empty($tender_enquiry_id)) {
             $where = " (a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "')";
         }

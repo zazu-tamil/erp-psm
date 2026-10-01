@@ -306,6 +306,7 @@ $route['addt-charges-type-list/(:num)'] = 'master/addt_charges_type_list/$1';
 
 //report
 $route['tender-enquiry-summary-report'] = 'reports/tender_enquiry_summary_report';
+$route['tender-enquiry-summary-report/(:num)'] = 'reports/tender_enquiry_summary_report/$1';
 
 $route['sales-nbr-report'] = 'reports/sales_nbr_report';
 $route['purchase-nbr-report'] = 'reports/purchase_nbr_report';

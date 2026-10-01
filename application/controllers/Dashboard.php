@@ -177,6 +177,27 @@ class Dashboard extends MY_Controller
         ";
         $data['recent_tenders'] = $this->db->query($recent_tenders_sql)->result_array();
 
+        // 7b. Tenders Closing Today
+        $closing_today_sql = "
+            SELECT 
+                te.tender_enquiry_id, 
+                get_tender_info(te.tender_enquiry_id) as enquiry_no,
+                te.enquiry_date,
+                te.closing_date,
+                te.tender_name,
+                te.tender_status,
+                c.customer_name,
+                comp.company_name
+            FROM tender_enquiry_info te
+            LEFT JOIN customer_info c ON te.customer_id = c.customer_id
+            LEFT JOIN company_info comp ON te.company_id = comp.company_id
+            WHERE te.status = 'Active' 
+            AND DATE(te.closing_date) = CURDATE()
+            ORDER BY te.tender_enquiry_id DESC
+        ";
+        $data['tenders_closing_today'] = $this->db->query($closing_today_sql)->result_array();
+        $data['tenders_closing_today_count'] = count($data['tenders_closing_today']);
+
         // 8. Cash Inflow Sum
         $inward_sum_sql = "SELECT SUM(amount) AS total FROM cb_cash_inward_info WHERE status='Active'";
         $inward_row = $this->db->query($inward_sum_sql)->row();

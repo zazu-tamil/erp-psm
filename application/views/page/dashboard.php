@@ -603,6 +603,13 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
         color: #94a3b8;
     }
 
+    /* Modal Table Header Theme Color */
+    .tender-table-header th {
+        background-color: #004b8d !important;
+        color: #ffffff !important;
+        border-bottom: none !important;
+    }
+
     /* ════════════════════════════════════
        Responsive Media Queries — All Devices
     ════════════════════════════════════ */
@@ -861,87 +868,27 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
         </div>
     </div>
 
-    <!-- Operations & CRM KPIs Row -->
-    <div class="dashboard-section-header">Operational Summary</div>
+    <!-- Tenders Closing Today -->
+    <div class="dashboard-section-header">Tenders Closing Today</div>
     <div class="kpi-row">
-        <!-- Total Tenders Card -->
-        <div class="col-md-3 kpi-col" style="width: 20%;">
-            <div class="kpi-card tenders">
-                <div class="kpi-info">
-                    <div class="kpi-label">Total Tenders</div>
-                    <div class="kpi-value"><?php echo $total_tenders; ?></div>
-                    <div class="kpi-change up">
-                        <i class="fa fa-gavel"></i> Active bids
+        <!-- Closing Today Card -->
+        <div class="col-md-3 kpi-col" style="width: 25%;">
+            <a href="#" data-toggle="modal" data-target="#closingTendersModal" style="text-decoration: none;">
+                <div class="kpi-card tenders" style="cursor: pointer;">
+                    <div class="kpi-info">
+                        <div class="kpi-label">Closing Today</div>
+                        <div class="kpi-value">
+                            <?php echo isset($tenders_closing_today_count) ? $tenders_closing_today_count : 0; ?>
+                        </div>
+                        <div class="kpi-change up" style="color: #ef4444;">
+                            <i class="fa fa-clock-o"></i> View Tenders
+                        </div>
+                    </div>
+                    <div class="kpi-icon-wrapper">
+                        <i class="fa fa-exclamation-triangle" style="color: #ef4444;"></i>
                     </div>
                 </div>
-                <div class="kpi-icon-wrapper">
-                    <i class="fa fa-file-text-o"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Customers Card -->
-        <div class="col-md-3 kpi-col" style="width: 20%;">
-            <div class="kpi-card customers">
-                <div class="kpi-info">
-                    <div class="kpi-label">Customers</div>
-                    <div class="kpi-value"><?php echo $customer_count; ?></div>
-                    <div class="kpi-change neutral">
-                        <i class="fa fa-users"></i> Registered clients
-                    </div>
-                </div>
-                <div class="kpi-icon-wrapper">
-                    <i class="fa fa-user"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Vendors Card -->
-        <div class="col-md-3 kpi-col" style="width: 20%;">
-            <div class="kpi-card vendors">
-                <div class="kpi-info">
-                    <div class="kpi-label">Vendors</div>
-                    <div class="kpi-value"><?php echo $vendor_count; ?></div>
-                    <div class="kpi-change neutral">
-                        <i class="fa fa-industry"></i> Active suppliers
-                    </div>
-                </div>
-                <div class="kpi-icon-wrapper">
-                    <i class="fa fa-handshake-o"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Items Card -->
-        <div class="col-md-3 kpi-col" style="width: 20%;">
-            <div class="kpi-card items">
-                <div class="kpi-info">
-                    <div class="kpi-label">In-Stock Items</div>
-                    <div class="kpi-value"><?php echo $total_items; ?></div>
-                    <div class="kpi-change neutral">
-                        <i class="fa fa-cubes"></i> Inventory items
-                    </div>
-                </div>
-                <div class="kpi-icon-wrapper">
-                    <i class="fa fa-archive"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Categories Card -->
-        <div class="col-md-3 kpi-col" style="width: 20%;">
-            <div class="kpi-card categories">
-                <div class="kpi-info">
-                    <div class="kpi-label">Categories</div>
-                    <div class="kpi-value"><?php echo $total_category; ?></div>
-                    <div class="kpi-change neutral">
-                        <i class="fa fa-list"></i> Category groups
-                    </div>
-                </div>
-                <div class="kpi-icon-wrapper">
-                    <i class="fa fa-folder-open"></i>
-                </div>
-            </div>
+            </a>
         </div>
     </div>
 
@@ -1124,6 +1071,151 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
             </div>
         </div>
     </div>
+
+  
+    <!-- Closing Tenders Modal -->
+    <div class="modal fade" id="closingTendersModal" tabindex="-1" role="dialog"
+        aria-labelledby="closingTendersModalLabel">
+        <div class="modal-dialog modal-lg" role="document" style="width: 90%; max-width: 1200px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="closingTendersModalLabel">Tenders Closing Today</h4>
+                </div>
+                <div class="modal-body table-responsive">
+                    <table id="closingTendersTable" class="table table-bordered table-striped custom-table"
+                        style="width:100%">
+
+                        <thead class="tender-table-header">
+                            <tr>
+                                <th>Sr.No</th>
+                                <th>Enquiry No</th>
+                                <th>Enquiry Date</th>
+                                <th>Closing Date</th>
+                                <th>Customer Name</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <?php if (!empty($tenders_closing_today)): ?>
+
+                                <?php foreach ($tenders_closing_today as $index => $tender): ?>
+
+                                    <?php
+                                    $url = base_url(
+                                        'tender-enquiry-summary-report/' .
+                                        $tender['tender_enquiry_id']
+                                    );
+
+                                    $status = !empty($tender['tender_status'])
+                                        ? $tender['tender_status']
+                                        : 'Open';
+
+                                    switch (strtolower($status)) {
+                                        case 'open':
+                                            $status_class = 'label-success';
+                                            break;
+
+                                        case 'closed':
+                                            $status_class = 'label-danger';
+                                            break;
+
+                                        case 'pending':
+                                            $status_class = 'label-warning';
+                                            break;
+
+                                        default:
+                                            $status_class = 'label-default';
+                                    }
+                                    ?>
+
+                                    <tr style="cursor:pointer;" onclick="window.location='<?php echo $url; ?>';">
+
+                                        <!-- Sr.No -->
+                                        <td>
+                                            <?php echo $index + 1; ?>
+                                        </td>
+
+                                        <!-- Enquiry No -->
+                                        <td>
+                                            <a href="<?php echo $url; ?>" onclick="event.stopPropagation();"
+                                                style="font-weight:600; color:#4f46e5;">
+                                                <?php echo htmlspecialchars($tender['enquiry_no']); ?>
+                                            </a>
+                                        </td>
+
+                                        <!-- Enquiry Date -->
+                                        <td>
+                                            <?php
+                                            echo !empty($tender['enquiry_date'])
+                                                ? date('d-m-Y', strtotime($tender['enquiry_date']))
+                                                : '-';
+                                            ?>
+                                        </td>
+
+                                        <!-- Closing Date -->
+                                        <td>
+                                            <span class="label label-danger">
+                                                <?php
+                                                echo !empty($tender['closing_date'])
+                                                    ? date('d-m-Y', strtotime($tender['closing_date']))
+                                                    : '-';
+                                                ?>
+                                            </span>
+                                        </td>
+
+                                        <!-- Customer -->
+                                        <td style="white-space:normal;">
+                                            <?php
+                                            echo !empty($tender['customer_name'])
+                                                ? htmlspecialchars($tender['customer_name'])
+                                                : '-';
+                                            ?>
+                                        </td>
+
+                                        <!-- Action -->
+                                        <td class="text-center">
+                                            <a href="<?php echo $url; ?>" onclick="event.stopPropagation();" target="_blank"
+                                                class="btn btn-primary btn-xs" title="Navigate to Tender">
+                                                <i class="fa fa-arrow-right"></i>
+                                            </a>
+                                        </td>
+
+                                    </tr>
+
+                                <?php endforeach; ?>
+
+                            <?php endif; ?>
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Check if jQuery and DataTables are loaded before binding
+            var initClosingTendersTable = function () {
+                if (typeof $ !== 'undefined' && $.fn.DataTable) {
+                    $('#closingTendersModal').on('shown.bs.modal', function () {
+                        if (!$.fn.DataTable.isDataTable('#closingTendersTable')) {
+                            $('#closingTendersTable').DataTable({
+                                "order": [],
+                                "scrollX": true
+                            });
+                        }
+                    });
+                } else {
+                    setTimeout(initClosingTendersTable, 100);
+                }
+            };
+            initClosingTendersTable();
+        });
+    </script>
 </div>
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
