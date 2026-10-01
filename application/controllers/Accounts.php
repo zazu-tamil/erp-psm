@@ -1045,7 +1045,7 @@ class Accounts extends CI_Controller
             $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
             $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
             $data['srch_enquiry_no'] = $srch_enquiry_no = $this->input->post('srch_enquiry_no');
-            
+
             $data['srch_account_head_id'] = $srch_account_head_id = $this->input->post('srch_account_head_id');
             $data['srch_sub_account_head_id'] = $srch_sub_account_head_id = $this->input->post('srch_sub_account_head_id');
             $data['srch_account_group_id'] = $srch_account_group_id = $this->input->post('srch_account_group_id');
@@ -1056,7 +1056,7 @@ class Accounts extends CI_Controller
             $this->session->set_userdata('srch_outward_from_date', $srch_from_date);
             $this->session->set_userdata('srch_outward_to_date', $srch_to_date);
             $this->session->set_userdata('srch_outward_enquiry_no', $srch_enquiry_no);
-            
+
             $this->session->set_userdata('srch_outward_account_head_id', $srch_account_head_id);
             $this->session->set_userdata('srch_outward_sub_account_head_id', $srch_sub_account_head_id);
             $this->session->set_userdata('srch_outward_account_group_id', $srch_account_group_id);
@@ -1068,7 +1068,7 @@ class Accounts extends CI_Controller
             $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_outward_from_date');
             $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_outward_to_date');
             $data['srch_enquiry_no'] = $srch_enquiry_no = $this->session->userdata('srch_outward_enquiry_no');
-            
+
             $data['srch_account_head_id'] = $srch_account_head_id = $this->session->userdata('srch_outward_account_head_id');
             $data['srch_sub_account_head_id'] = $srch_sub_account_head_id = $this->session->userdata('srch_outward_sub_account_head_id');
             $data['srch_account_group_id'] = $srch_account_group_id = $this->session->userdata('srch_outward_account_group_id');
@@ -1079,7 +1079,7 @@ class Accounts extends CI_Controller
             $data['srch_from_date'] = $srch_from_date = date('Y-m-') . '01';
             $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
             $data['srch_enquiry_no'] = $srch_enquiry_no = '';
-            
+
             $data['srch_account_head_id'] = $srch_account_head_id = '';
             $data['srch_sub_account_head_id'] = $srch_sub_account_head_id = '';
             $data['srch_account_group_id'] = $srch_account_group_id = '';

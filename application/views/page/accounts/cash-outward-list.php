@@ -115,15 +115,25 @@
                                     <i class="label label-success"><?php echo $ls['tender_details'] ?></i></td>
                             <td><?php echo date('d-m-Y', strtotime($ls['outward_date'])) ?><br />
                                 <?php 
-                                    $ac_details = $ls['ac_type'];
+                                    $ac_details = '<span class="label label-success">' . $ls['ac_type'] . '</span>';
                                     if ($ls['ac_type'] == 'Bank') {
-                                        $bank_details = array();
-                                        if (!empty($ls['bank_name'])) $bank_details[] = $ls['bank_name'];
-                                        if (!empty($ls['bank_type'])) $bank_details[] = $ls['bank_type'];
-                                        if ($ls['bank_type'] == 'Cheque' && !empty($ls['cheque_no'])) $bank_details[] = 'Chq: ' . $ls['cheque_no'];
-                                        if (!empty($bank_details)) $ac_details .= ' (' . implode(' - ', $bank_details) . ')';
+                                        if (!empty($ls['bank_type'])) {
+                                            $ac_details .= ' <span class="label label-info">' . $ls['bank_type'] . '</span>';
+                                        }
+                                        $ac_details .= '<br>(' . ($ls['bank_name'] ?? '') . ')';
+                                        
+                                        if ($ls['bank_type'] == 'Cheque' && !empty($ls['cheque_no'])) {
+                                            $ac_details .= "<br><small class='text-muted'>Chq: " . htmlspecialchars($ls['cheque_no']);
+                                            if(!empty($ls['cheque_date']) && $ls['cheque_date'] != '0000-00-00') {
+                                                $ac_details .= " | Dt: " . date('d-m-Y', strtotime($ls['cheque_date']));
+                                            }
+                                            if(!empty($ls['cheque_bank'])) {
+                                                $ac_details .= " | Bk: " . htmlspecialchars($ls['cheque_bank']);
+                                            }
+                                            $ac_details .= "</small>";
+                                        }
                                     } elseif ($ls['ac_type'] == 'Cash' && !empty($ls['category_name'])) {
-                                        $ac_details .= ' (' . $ls['category_name'] . ')';
+                                        $ac_details .= '<br>(' . htmlspecialchars($ls['category_name']) . ')';
                                     }
                                     echo $ac_details;
                                 ?>
