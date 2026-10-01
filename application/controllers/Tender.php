@@ -523,32 +523,11 @@ class Tender extends CI_Controller
         $this->db->where($where);
         $data['total_records'] = $this->db->count_all_results();
 
-        // === PAGINATION ===
-        $data['sno'] = $this->uri->segment(2, 0);
-        $this->load->library('pagination');
-        $config['base_url'] = trim(site_url($data['s_url']), '/' . $this->uri->segment(2, 0));
-        $config['total_rows'] = $data['total_records'];
-        $config['per_page'] = 10;
-        $config['uri_segment'] = 2;
-        $config['attributes'] = ['class' => 'page-link'];
-        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
-        $config['full_tag_close'] = '</ul>';
-        $config['num_tag_open'] = '<li class="page-item">';
-        $config['num_tag_close'] = '</li>';
-        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
-        $config['cur_tag_close'] = '</a></li>';
-        $config['prev_tag_open'] = '<li class="page-item">';
-        $config['prev_tag_close'] = '</li>';
-        $config['next_tag_open'] = '<li class="page-item">';
-        $config['next_tag_close'] = '</li>';
-        $config['first_tag_open'] = '<li class="page-item">';
-        $config['first_tag_close'] = '</li>';
-        $config['last_tag_open'] = '<li class="page-item">';
-        $config['last_tag_close'] = '</li>';
-        $config['prev_link'] = 'Prev';
-        $config['next_link'] = 'Next';
-        $this->pagination->initialize($config);
-        $data['pagination'] = $this->pagination->create_links();
+        // === PAGINATION (Disabled in favor of DataTables) ===
+        // $data['sno'] = $this->uri->segment(2, 0);
+        $data['sno'] = 0;
+        // ... pagination config removed
+        $data['pagination'] = '';
 
         $sql = "
            SELECT 
@@ -571,8 +550,8 @@ class Tender extends CI_Controller
                 ON a.customer_contact_id = d.customer_contact_id AND d.status = 'Active'
             WHERE a.status != 'Delete' 
             AND $where    
-            ORDER BY a.enquiry_date desc , a.tender_enquiry_id DESC
-            LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
+            ORDER BY a.enquiry_date desc , a.tender_enquiry_id DESC";
+            // LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();

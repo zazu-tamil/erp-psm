@@ -103,7 +103,7 @@
         </div>
 
         <div class="box-body table-responsive">
-            <table class="table table-hover">
+            <table id="tender_enquiry_table" class="table table-hover table-striped">
                 <thead>
                     <tr>
                         <th class="text-center">S.No</th>
@@ -115,7 +115,7 @@
                         <th>RFQ No</th>
                         <th>Closing Date</th>
                         <th>Tender Status</th>
-                        <th class="text-center" colspan="2">Action</th>
+                        <th class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -158,8 +158,6 @@
                                         class="btn btn-primary btn-xs" title="Edit">
                                         <i class="fa fa-edit"></i>
                                     </a>
-                                </td>
-                                <td class="text-center">
                                     <button value="<?php echo $row['tender_enquiry_id']; ?>"
                                         class="del_record btn btn-danger btn-xs" title="Delete">
                                         <i class="fa fa-trash"></i>
@@ -169,7 +167,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="10" class="text-center text-danger">No records found.</td>
+                            <td colspan="9" class="text-center text-danger">No records found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -181,7 +179,7 @@
                 <label>Total Records: <?php echo $total_records; ?></label>
             </div>
             <div class="form-group col-sm-6 text-right">
-                <?php echo $pagination; ?>
+                <!-- Pagination handled by DataTables -->
             </div>
         </div>
     </div>
