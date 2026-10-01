@@ -4641,7 +4641,11 @@ class Accounts extends CI_Controller
                     CONVERT(COALESCE(b.bank_name, 'Cash') USING utf8) AS bank_name,
                     CONVERT(c.customer_name USING utf8) AS party_name, 
                     CONVERT(tr.remarks USING utf8) AS remarks,
-                    tr.created_date
+                    tr.created_date,
+                    CONVERT(tr.receipt_type USING utf8) AS bank_type,
+                    CONVERT(tr.cheque_no USING utf8) AS cheque_no,
+                    tr.cheque_date,
+                    CONVERT(tr.cheque_bank USING utf8) AS cheque_bank
                 FROM tender_receipt_info tr
                 LEFT JOIN customer_info c ON c.customer_id = tr.customer_id
                 LEFT JOIN company_bank_info b ON b.bank_id = tr.bank_id
@@ -4661,7 +4665,11 @@ class Accounts extends CI_Controller
                     CONVERT(COALESCE(b.bank_name, 'Cash') USING utf8) AS bank_name,
                     CONVERT(v.vendor_name USING utf8) AS party_name, 
                     CONVERT(vp.remarks USING utf8) AS remarks,
-                    vp.created_date
+                    vp.created_date,
+                    CONVERT(vp.payment_type USING utf8) AS bank_type,
+                    CONVERT(vp.cheque_no USING utf8) AS cheque_no,
+                    vp.cheque_date,
+                    CONVERT(vp.cheque_bank USING utf8) AS cheque_bank
                 FROM vendor_payment_info vp
                 LEFT JOIN vendor_info v ON v.vendor_id = vp.vendor_id
                 LEFT JOIN company_bank_info b ON b.bank_id = vp.bank_id
@@ -4681,7 +4689,11 @@ class Accounts extends CI_Controller
                     CONVERT(COALESCE(b.bank_name, 'Cash') USING utf8) AS bank_name,
                     CONVERT('Petty Cash' USING utf8) AS party_name, 
                     CONVERT(pt.remarks USING utf8) AS remarks,
-                    pt.created_at AS created_date
+                    pt.created_at AS created_date,
+                    CONVERT(NULL USING utf8) AS bank_type,
+                    CONVERT(NULL USING utf8) AS cheque_no,
+                    NULL AS cheque_date,
+                    CONVERT(NULL USING utf8) AS cheque_bank
                 FROM petty_cash_transactions pt
                 LEFT JOIN company_bank_info b ON b.bank_id = pt.bank_id
                 WHERE $w_pt AND pt.transaction_type IN ('Inward', 'Income') AND pt.transaction_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
@@ -4700,7 +4712,11 @@ class Accounts extends CI_Controller
                     CONVERT(COALESCE(b.bank_name, 'Cash') USING utf8) AS bank_name,
                     CONVERT('Petty Cash' USING utf8) AS party_name, 
                     CONVERT(pt.remarks USING utf8) AS remarks,
-                    pt.created_at AS created_date
+                    pt.created_at AS created_date,
+                    CONVERT(NULL USING utf8) AS bank_type,
+                    CONVERT(NULL USING utf8) AS cheque_no,
+                    NULL AS cheque_date,
+                    CONVERT(NULL USING utf8) AS cheque_bank
                 FROM petty_cash_transactions pt
                 LEFT JOIN company_bank_info b ON b.bank_id = pt.bank_id
                 WHERE $w_pt AND pt.transaction_type IN ('Outward', 'Cash', 'Expense') AND pt.transaction_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
@@ -4719,7 +4735,11 @@ class Accounts extends CI_Controller
                     CONVERT(COALESCE(b.bank_name, 'Cash') USING utf8) AS bank_name,
                     CONVERT(COALESCE(e.sub_account_headlvl3_name, sh.sub_account_head_name, ah.account_head_name) USING utf8) AS party_name, 
                     CONVERT(cin.remarks USING utf8) AS remarks,
-                    cin.created_datetime AS created_date
+                    cin.created_datetime AS created_date,
+                    CONVERT(cin.bank_type USING utf8) AS bank_type,
+                    CONVERT(cin.cheque_no USING utf8) AS cheque_no,
+                    cin.cheque_date,
+                    CONVERT(cin.cheque_bank USING utf8) AS cheque_bank
                 FROM cb_cash_inward_info cin
                 LEFT JOIN cb_account_head_info ah ON ah.account_head_id = cin.account_head_id
                 LEFT JOIN cb_sub_account_head_info sh ON sh.sub_account_head_id = cin.sub_account_head_id
@@ -4741,7 +4761,11 @@ class Accounts extends CI_Controller
                     CONVERT(COALESCE(b.bank_name, 'Cash') USING utf8) AS bank_name,
                     CONVERT(COALESCE(e.sub_account_headlvl3_name, sh.sub_account_head_name, ah.account_head_name) USING utf8) AS party_name, 
                     CONVERT(cout.remarks USING utf8) AS remarks,
-                    cout.created_datetime AS created_date
+                    cout.created_datetime AS created_date,
+                    CONVERT(cout.bank_type USING utf8) AS bank_type,
+                    CONVERT(cout.cheque_no USING utf8) AS cheque_no,
+                    cout.cheque_date,
+                    CONVERT(cout.cheque_bank USING utf8) AS cheque_bank
                 FROM cb_cash_outward_info cout
                 LEFT JOIN cb_account_head_info ah ON ah.account_head_id = cout.account_head_id
                 LEFT JOIN cb_sub_account_head_info sh ON sh.sub_account_head_id = cout.sub_account_head_id
@@ -4764,7 +4788,11 @@ class Accounts extends CI_Controller
                     CONVERT(COALESCE(b.bank_name, 'Cash') USING utf8) AS bank_name,
                     CONVERT(IF(ce.from_ac_type = 'Bank', fb.bank_name, CONCAT('Cash (', fcc.category_name, ')')) USING utf8) AS party_name, 
                     CONVERT(ce.to_remarks USING utf8) AS remarks,
-                    ce.created_at AS created_date
+                    ce.created_at AS created_date,
+                    CONVERT(NULL USING utf8) AS bank_type,
+                    CONVERT(NULL USING utf8) AS cheque_no,
+                    NULL AS cheque_date,
+                    CONVERT(NULL USING utf8) AS cheque_bank
                 FROM cb_contra_entry_info ce
                 LEFT JOIN company_bank_info b ON b.bank_id = ce.to_bank_id
                 LEFT JOIN company_bank_info fb ON fb.bank_id = ce.from_bank_id
@@ -4785,7 +4813,11 @@ class Accounts extends CI_Controller
                     CONVERT(COALESCE(b.bank_name, 'Cash') USING utf8) AS bank_name,
                     CONVERT(IF(ce.to_ac_type = 'Bank', tb.bank_name, CONCAT('Cash (', tcc.category_name, ')')) USING utf8) AS party_name, 
                     CONVERT(ce.from_remarks USING utf8) AS remarks,
-                    ce.created_at AS created_date
+                    ce.created_at AS created_date,
+                    CONVERT(NULL USING utf8) AS bank_type,
+                    CONVERT(NULL USING utf8) AS cheque_no,
+                    NULL AS cheque_date,
+                    CONVERT(NULL USING utf8) AS cheque_bank
                 FROM cb_contra_entry_info ce
                 LEFT JOIN company_bank_info b ON b.bank_id = ce.from_bank_id
                 LEFT JOIN company_bank_info tb ON tb.bank_id = ce.to_bank_id

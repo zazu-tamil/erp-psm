@@ -1,4 +1,29 @@
 <?php include_once(VIEWPATH . '/inc/header.php'); ?>
+<style>
+    @media print {
+        @page {
+            size: landscape;
+            margin: 10mm;
+        }
+        body {
+            font-size: 11px;
+        }
+        .table > thead > tr > th, 
+        .table > tbody > tr > th, 
+        .table > tfoot > tr > th, 
+        .table > thead > tr > td, 
+        .table > tbody > tr > td, 
+        .table > tfoot > tr > td {
+            padding: 4px !important;
+            font-size: 11px !important;
+        }
+        .badge, .label {
+            border: 1px solid #000;
+            color: #000 !important;
+            background: transparent !important;
+        }
+    }
+</style>
 <section class="content-header">
     <h1>Bank Statement</h1>
     <ol class="breadcrumb">
@@ -139,7 +164,23 @@
                                     <?php echo htmlspecialchars($row['mode']); ?>
                                 </span>
                             </td>
-                            <td><?php echo htmlspecialchars($row['bank_name']); ?></td>
+                            <td>
+                                <?php 
+                                echo htmlspecialchars($row['bank_name']); 
+                                if (in_array(strtolower($row['bank_type']), ['cheque', 'check']) && !empty($row['cheque_no'])) {
+                                    echo "<br><small class='text-muted'>Chq: " . htmlspecialchars($row['cheque_no']);
+                                    if (!empty($row['cheque_date'])) {
+                                        echo " | Dt: " . date('d-m-Y', strtotime($row['cheque_date']));
+                                    }
+                                    if (!empty($row['cheque_bank'])) {
+                                        echo " | Bk: " . htmlspecialchars($row['cheque_bank']);
+                                    }
+                                    echo "</small>";
+                                } elseif (strtolower($row['bank_type']) == 'online') {
+                                    echo "<br><small class='text-muted'>Online</small>";
+                                }
+                                ?>
+                            </td>
                             <td><?php echo $party_remarks; ?></td>
                             <td class="text-right text-green">
                                 <?php echo (float)$row['amount_in'] > 0 ? number_format((float)$row['amount_in'], 3) : '-'; ?>
