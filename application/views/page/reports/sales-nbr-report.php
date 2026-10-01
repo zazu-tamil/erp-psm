@@ -1,8 +1,13 @@
-<?php  include_once(VIEWPATH . '/inc/header.php'); 
+<?php 
+$is_excel_export = isset($is_excel) ? $is_excel : false;
+if (!$is_excel_export) {
+    include_once(VIEWPATH . '/inc/header.php'); 
+}
 // echo "<pre>";
 // print_r($record_list);  
 // echo "</pre>";
 ?>
+<?php if (!$is_excel_export): ?>
 <section class="content-header">
     <h1>Sales NBR Report</h1>
     <ol class="breadcrumb">
@@ -47,15 +52,18 @@
                                 <?php echo form_dropdown('vat_payer_sales_grp', $vat_payer_sales_opt, set_value('vat_payer_sales_grp',$vat_payer_sales_grp),'class="form-control" id="vat_payer_sales_grp"'); ?> 
                     </div>
 
-                    <div class="form-group col-md-2 text-left">
+                    <div class="form-group col-md-3 text-left">
                         <br />
-                        <button class="btn btn-success" name="btn_show" value="Show'"><i class="fa fa-search"></i>
+                        <button class="btn btn-success" name="btn_show" value="Show"><i class="fa fa-search"></i>
                             Show</button>
+                        <button class="btn btn-primary" name="btn_export" value="Export"><i class="fa fa-file-excel-o"></i>
+                            Export Excel</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
+    <?php endif; // End if not excel ?>
 
     <?php  if(!empty($record_list)) { ?>
     <div class="box box-info">
@@ -71,7 +79,7 @@
              echo ' <div class="box box-info"> <div class="box-header with-border bg-info"> ';
                 echo "<b>" . $records[0]['vat_payer_sales_grp'] . "</b>";
                 echo ' </div> <div class="box-body"> ';
-                echo "<table class='table table-bordered table-striped'>";
+                echo "<table border='1' class='table table-bordered table-striped'>";
                 echo "<thead>
                         <tr>
                             <th>VAT Return Field Number</th> 
@@ -118,7 +126,7 @@
                 echo ' <div class="box box-info"> <div class="box-header with-border bg-info"> ';
                 echo "<b>" . $records[0]['vat_payer_sales_grp'] . "</b>"; 
                 echo ' </div> <div class="box-body"> ';
-                echo "<table class='table table-bordered table-striped'>";
+                echo "<table border='1' class='table table-bordered table-striped'>";
                 echo "<thead>
                         <tr>
                             <th>VAT Return Field Number</th> 
@@ -157,7 +165,7 @@
                 echo ' <div class="box box-info"> <div class="box-header with-border bg-info"> ';
                 echo "<b>" . $records[0]['vat_payer_sales_grp'] . "</b>";
                 echo ' </div> <div class="box-body"> ';
-                echo "<table class='table table-bordered table-striped'>";
+                echo "<table border='1' class='table table-bordered table-striped'>";
                 echo "<thead>
                         <tr>
                             <th>VAT Return Field Number</th>
@@ -197,7 +205,7 @@
                 echo ' <div class="box box-info"> <div class="box-header with-border bg-info"> ';
                 echo "<b>" . $records[0]['vat_payer_sales_grp'] . "</b>";
                 echo ' </div> <div class="box-body"> ';
-                echo "<table class='table table-bordered table-striped'>";
+                echo "<table border='1' class='table table-bordered table-striped'>";
                 echo "<thead>
                         <tr>
                             <th>VAT Return Field Number</th> 
@@ -245,4 +253,6 @@
     }
 </style>
 <!-- /.content -->
+<?php if (!$is_excel_export): ?>
 <?php  include_once(VIEWPATH . 'inc/footer.php'); ?>
+<?php endif; ?>

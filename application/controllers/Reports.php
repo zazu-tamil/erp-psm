@@ -113,7 +113,18 @@ class Reports extends CI_Controller
             $data['vat_payer_sales_opt'][$row['vat_filing_head_name']] = $row['vat_filing_head_name'];
         }
 
-
+        $data['is_excel'] = false;
+        if ($this->input->post('btn_export') == 'Export') {
+            $from_str = date('d-m-Y', strtotime($srch_from_date));
+            $to_str = date('d-m-Y', strtotime($srch_to_date));
+            $filename = "Sales NBR Report [ " . $from_str . " to " . $to_str . " ].xls";
+            
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=\"$filename\"");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+            $data['is_excel'] = true;
+        }
 
         $this->load->view('page/reports/sales-nbr-report', $data);
     }
@@ -302,6 +313,19 @@ class Reports extends CI_Controller
         foreach ($query->result_array() as $row) {
             $data['vat_payer_purchase_opt'][$row['vat_filing_head_name']] = $row['vat_filing_head_name'];
         }
+        $data['is_excel'] = false;
+        if ($this->input->post('btn_export') == 'Export') {
+            $from_str = date('d-m-Y', strtotime($srch_from_date));
+            $to_str = date('d-m-Y', strtotime($srch_to_date));
+            $filename = "Purchase NBR Report [ " . $from_str . " to " . $to_str . " ].xls";
+            
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=\"$filename\"");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+            $data['is_excel'] = true;
+        }
+
         $this->load->view('page/reports/purchase-nbr-report', $data);
     }
 
