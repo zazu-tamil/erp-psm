@@ -21,7 +21,7 @@
         <div class="box-body">
             <form method="post" action="<?php echo site_url('outward-list') ?>" id="frmsearch">
                 <div class="row">
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <label>From Date</label>
                         <div class="input-group date">
                             <div class="input-group-addon">
@@ -30,9 +30,8 @@
                             <input type="date" class="form-control pull-right" id="srch_from_date" name="srch_from_date"
                                 value="<?php echo set_value('srch_from_date', $srch_from_date); ?>" autocomplete="off">
                         </div>
-                        <!-- /.input group -->
                     </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <label>To Date</label>
                         <div class="input-group date">
                             <div class="input-group-addon">
@@ -41,19 +40,44 @@
                             <input type="date" class="form-control pull-right" id="srch_to_date" name="srch_to_date"
                                 value="<?php echo set_value('srch_to_date', $srch_to_date); ?>" autocomplete="off">
                         </div>
-                        <!-- /.input group -->
                     </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <label>Search Enquiry No</label>
                         <input type="text" class="form-control" id="srch_enquiry_no" name="srch_enquiry_no"
                             value="<?php echo set_value('srch_enquiry_no', $srch_enquiry_no); ?>"
                             placeholder="Search Enquiry No">
                     </div>
+                    <div class="form-group col-md-3">
+                        <label>Account Head</label>
+                        <?php echo form_dropdown('srch_account_head_id', ['' => 'All'] + $account_head_opt, set_value('srch_account_head_id', $srch_account_head_id ?? ''), 'id="srch_account_head_id" class="form-control select2"'); ?>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label>Sub Account Head</label>
+                        <?php echo form_dropdown('srch_sub_account_head_id', ['' => 'All'] + $sub_account_head_opt, set_value('srch_sub_account_head_id', $srch_sub_account_head_id ?? ''), 'id="srch_sub_account_head_id" class="form-control select2"'); ?>
+                    </div>
+                    
+                    <div class="clearfix"></div>
+                    
+                    <div class="form-group col-md-3">
+                        <label>Account Group</label>
+                        <?php echo form_dropdown('srch_account_group_id', ['' => 'All'] + $account_group_opt, set_value('srch_account_group_id', $srch_account_group_id ?? ''), 'id="srch_account_group_id" class="form-control select2"'); ?>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label>Account Type</label>
+                        <?php echo form_dropdown('srch_ac_type', ['' => 'All', 'Bank' => 'Bank', 'Cash' => 'Cash'], set_value('srch_ac_type', $srch_ac_type ?? ''), 'id="srch_ac_type" class="form-control" onchange="toggleOutwardFilters()"'); ?>
+                    </div>
+                    <div class="form-group col-md-2" id="div_srch_bank_type" style="display: <?php echo (!empty($srch_ac_type) && $srch_ac_type == 'Bank') ? 'block' : 'none'; ?>;">
+                        <label>Bank Type</label>
+                        <?php echo form_dropdown('srch_bank_type', ['' => 'All', 'Online' => 'Online', 'Cheque' => 'Cheque'], set_value('srch_bank_type', $srch_bank_type ?? ''), 'id="srch_bank_type" class="form-control"'); ?>
+                    </div>
+                    <div class="form-group col-md-2" id="div_srch_cash_category" style="display: <?php echo (!empty($srch_ac_type) && $srch_ac_type == 'Cash') ? 'block' : 'none'; ?>;">
+                        <label>Cash Category</label>
+                        <?php echo form_dropdown('srch_cash_category_id', ['' => 'All'] + $cash_categories_opt, set_value('srch_cash_category_id', $srch_cash_category_id ?? ''), 'id="srch_cash_category_id" class="form-control select2"'); ?>
+                    </div>
 
                     <div class="form-group col-md-2 text-left">
                         <br />
-                        <button class="btn btn-success" name="btn_show" value="Show'"><i class="fa fa-search"></i>
-                            Show</button>
+                        <button class="btn btn-success" name="btn_show" value="Show"><i class="fa fa-search"></i> Show</button>
                     </div>
                 </div>
             </form>
@@ -434,4 +458,25 @@
 
 </section>
 <!-- /.content -->
+<script>
+    function toggleOutwardFilters() {
+        var ac_type = document.getElementById('srch_ac_type').value;
+        if (ac_type === 'Bank') {
+            document.getElementById('div_srch_bank_type').style.display = 'block';
+            document.getElementById('div_srch_cash_category').style.display = 'none';
+            document.getElementById('srch_cash_category_id').value = '';
+        } else if (ac_type === 'Cash') {
+            document.getElementById('div_srch_bank_type').style.display = 'none';
+            document.getElementById('div_srch_cash_category').style.display = 'block';
+            document.getElementById('srch_bank_type').value = '';
+        } else {
+            document.getElementById('div_srch_bank_type').style.display = 'none';
+            document.getElementById('div_srch_cash_category').style.display = 'none';
+            document.getElementById('srch_bank_type').value = '';
+            document.getElementById('srch_cash_category_id').value = '';
+        }
+    }
+
+
+</script>
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>

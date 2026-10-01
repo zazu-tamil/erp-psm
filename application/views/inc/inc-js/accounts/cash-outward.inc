@@ -477,7 +477,57 @@
 
 		$("#edit_modal #company_id").change(function () {
 			$("#edit_tender_enquiry_id").val("");
-			$("#edit_tender_enquiry_hidden").val("");
+		$("#edit_tender_enquiry_hidden").val("");
 		});
+
+        $('#srch_account_head_id').change(function() {
+            var id = $(this).val();
+            var targetId = '#srch_sub_account_head_id';
+            var defaultText = 'All';
+            
+            $(targetId).html('<option value="">' + defaultText + '</option>');
+            
+            if (id != '') {
+                $.ajax({
+                    type: "POST",
+                    url: "<?php echo site_url('general/get_data') ?>",
+                    data: { tbl: 'get-sub-account-head', id: id },
+                    dataType: "json",
+                    success: function(data) {
+                        $.each(data, function(key, value) {
+                            $(targetId).append('<option value="' + value.sub_account_head_id + '">' + value.sub_account_head_name + '</option>');
+                        });
+                        $(targetId).trigger('change');
+                    }
+                });
+            } else {
+                $(targetId).trigger('change');
+            }
+        });
+
+        $('#srch_sub_account_head_id').change(function() {
+            var id = $(this).val();
+            var targetId = '#srch_account_group_id';
+            var defaultText = 'All';
+            
+            $(targetId).html('<option value="">' + defaultText + '</option>');
+            
+            if (id != '') {
+                $.ajax({
+                    type: "POST",
+                    url: "<?php echo site_url('general/get_data') ?>",
+                    data: { tbl: 'get_sub_account_headlvl3', id: id },
+                    dataType: "json",
+                    success: function(data) {
+                        $.each(data, function(key, value) {
+                            $(targetId).append('<option value="' + value.id + '">' + value.val + '</option>');
+                        });
+                        $(targetId).trigger('change');
+                    }
+                });
+            } else {
+                $(targetId).trigger('change');
+            }
+        });
 	});
 </script>

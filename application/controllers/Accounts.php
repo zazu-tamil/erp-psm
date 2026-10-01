@@ -1045,18 +1045,47 @@ class Accounts extends CI_Controller
             $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
             $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
             $data['srch_enquiry_no'] = $srch_enquiry_no = $this->input->post('srch_enquiry_no');
-            $this->session->set_userdata('srch_from_date', $this->input->post('srch_from_date'));
-            $this->session->set_userdata('srch_to_date', $this->input->post('srch_to_date'));
-            $this->session->set_userdata('srch_enquiry_no', $this->input->post('srch_enquiry_no'));
+            
+            $data['srch_account_head_id'] = $srch_account_head_id = $this->input->post('srch_account_head_id');
+            $data['srch_sub_account_head_id'] = $srch_sub_account_head_id = $this->input->post('srch_sub_account_head_id');
+            $data['srch_account_group_id'] = $srch_account_group_id = $this->input->post('srch_account_group_id');
+            $data['srch_ac_type'] = $srch_ac_type = $this->input->post('srch_ac_type');
+            $data['srch_bank_type'] = $srch_bank_type = $this->input->post('srch_bank_type');
+            $data['srch_cash_category_id'] = $srch_cash_category_id = $this->input->post('srch_cash_category_id');
 
-        } elseif ($this->session->userdata('srch_from_date') || $this->session->userdata('srch_enquiry_no')) {
-            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_from_date');
-            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_to_date');
-            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->session->userdata('srch_enquiry_no');
+            $this->session->set_userdata('srch_outward_from_date', $srch_from_date);
+            $this->session->set_userdata('srch_outward_to_date', $srch_to_date);
+            $this->session->set_userdata('srch_outward_enquiry_no', $srch_enquiry_no);
+            
+            $this->session->set_userdata('srch_outward_account_head_id', $srch_account_head_id);
+            $this->session->set_userdata('srch_outward_sub_account_head_id', $srch_sub_account_head_id);
+            $this->session->set_userdata('srch_outward_account_group_id', $srch_account_group_id);
+            $this->session->set_userdata('srch_outward_ac_type', $srch_ac_type);
+            $this->session->set_userdata('srch_outward_bank_type', $srch_bank_type);
+            $this->session->set_userdata('srch_outward_cash_category_id', $srch_cash_category_id);
+
+        } elseif ($this->session->userdata('srch_outward_from_date') || $this->session->userdata('srch_outward_enquiry_no')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_outward_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_outward_to_date');
+            $data['srch_enquiry_no'] = $srch_enquiry_no = $this->session->userdata('srch_outward_enquiry_no');
+            
+            $data['srch_account_head_id'] = $srch_account_head_id = $this->session->userdata('srch_outward_account_head_id');
+            $data['srch_sub_account_head_id'] = $srch_sub_account_head_id = $this->session->userdata('srch_outward_sub_account_head_id');
+            $data['srch_account_group_id'] = $srch_account_group_id = $this->session->userdata('srch_outward_account_group_id');
+            $data['srch_ac_type'] = $srch_ac_type = $this->session->userdata('srch_outward_ac_type');
+            $data['srch_bank_type'] = $srch_bank_type = $this->session->userdata('srch_outward_bank_type');
+            $data['srch_cash_category_id'] = $srch_cash_category_id = $this->session->userdata('srch_outward_cash_category_id');
         } else {
             $data['srch_from_date'] = $srch_from_date = date('Y-m-') . '01';
             $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
             $data['srch_enquiry_no'] = $srch_enquiry_no = '';
+            
+            $data['srch_account_head_id'] = $srch_account_head_id = '';
+            $data['srch_sub_account_head_id'] = $srch_sub_account_head_id = '';
+            $data['srch_account_group_id'] = $srch_account_group_id = '';
+            $data['srch_ac_type'] = $srch_ac_type = '';
+            $data['srch_bank_type'] = $srch_bank_type = '';
+            $data['srch_cash_category_id'] = $srch_cash_category_id = '';
         }
 
         if (!empty($srch_from_date) && !empty($srch_to_date)) {
@@ -1067,7 +1096,24 @@ class Accounts extends CI_Controller
             $where .= " and ( concat(ifnull(f.company_code,'') , '/', ifnull(g.company_sno,'') ,  '/' , ifnull(h.customer_code,'') ,  '/' , ifnull(g.customer_sno,''),  '/' , DATE_FORMAT(g.enquiry_date,'%Y') ) like '%" . $this->db->escape_str($srch_enquiry_no) . "%' ) ";
         }
 
-
+        if (!empty($srch_account_head_id)) {
+            $where .= " AND a.account_head_id = '" . $this->db->escape_str($srch_account_head_id) . "'";
+        }
+        if (!empty($srch_sub_account_head_id)) {
+            $where .= " AND a.sub_account_head_id = '" . $this->db->escape_str($srch_sub_account_head_id) . "'";
+        }
+        if (!empty($srch_account_group_id)) {
+            $where .= " AND a.sub_account_headlvl3_id = '" . $this->db->escape_str($srch_account_group_id) . "'";
+        }
+        if (!empty($srch_ac_type)) {
+            $where .= " AND a.ac_type = '" . $this->db->escape_str($srch_ac_type) . "'";
+            if ($srch_ac_type == 'Bank' && !empty($srch_bank_type)) {
+                $where .= " AND a.bank_type = '" . $this->db->escape_str($srch_bank_type) . "'";
+            }
+            if ($srch_ac_type == 'Cash' && !empty($srch_cash_category_id)) {
+                $where .= " AND a.cash_category_id = '" . $this->db->escape_str($srch_cash_category_id) . "'";
+            }
+        }
         $this->load->library('pagination');
 
 
@@ -1176,6 +1222,34 @@ class Accounts extends CI_Controller
 
         foreach ($query->result_array() as $row) {
             $data['account_head_opt'][$row['account_head_id']] = $row['account_head_name'];
+        }
+
+        $sql = "
+                select 
+                a.sub_account_head_id,                
+                a.sub_account_head_name             
+                from cb_sub_account_head_info as a  
+                where a.status = 'Active' and a.type = 'Outward'
+                order by a.sub_account_head_name asc                 
+        ";
+        $query = $this->db->query($sql);
+        $data['sub_account_head_opt'] = array();
+        foreach ($query->result_array() as $row) {
+            $data['sub_account_head_opt'][$row['sub_account_head_id']] = $row['sub_account_head_name'];
+        }
+
+        $sql = "
+                select 
+                a.sub_account_headlvl3_id,                
+                a.sub_account_headlvl3_name             
+                from cb_sub_account_head_lvl3_info as a  
+                where a.status = 'Active' and a.type = 'Outward'
+                order by a.sub_account_headlvl3_name asc                 
+        ";
+        $query = $this->db->query($sql);
+        $data['account_group_opt'] = array();
+        foreach ($query->result_array() as $row) {
+            $data['account_group_opt'][$row['sub_account_headlvl3_id']] = $row['sub_account_headlvl3_name'];
         }
 
         $sql = "
