@@ -390,6 +390,7 @@ $tender_report_grp = [
 $supplier_report_grp = [
     'vendor-invoice-pending-report',
     'vendor-pending-invoice-report',
+    'vendor-invoice-without-inward-report',
     'supplier-invoice-report',
     'dp-custom-invoice-report',
     'vendor-statement-report',
@@ -508,6 +509,12 @@ $report_m_grp = array_merge(
                 <li class="<?= in_array($current_page, ['vendor-invoice-pending-report', 'vendor-pending-invoice-report']) ? 'active' : '' ?>">
                     <a href="<?= site_url('vendor-pending-invoice-report') ?>">
                         <i class="fa fa-file-text"></i> Vendor Pending Report
+                    </a>
+                </li>
+
+                <li class="<?= ($current_page === 'vendor-invoice-without-inward-report') ? 'active' : '' ?>">
+                    <a href="<?= site_url('vendor-invoice-without-inward-report') ?>">
+                        <i class="fa fa-file-text"></i> Invoice Without Inward
                     </a>
                 </li>
 

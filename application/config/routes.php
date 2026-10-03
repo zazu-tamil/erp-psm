@@ -336,6 +336,9 @@ $route['get-vendor-balance-summary'] = 'payment/get_vendor_balance_summary';
 
 $route['customer-invoice-pending-report'] = 'reports/customer_invoice_pending_report';
 $route['vendor-invoice-pending-report'] = 'reports/vendor_invoice_pending_report';
+$route['vendor-invoice-without-inward-report'] = 'reports/vendor_invoice_without_inward_report';
+
+$route['get-invoice-inward-item-comparison'] = 'reports/get_invoice_inward_item_comparison_ajax';
 
 //in_stock_item_info
 $route['in-stock-item-list'] = 'tender/in_stock_item_list';

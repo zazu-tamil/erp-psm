@@ -1897,6 +1897,164 @@ class Reports extends CI_Controller
 
         $this->load->view('page/reports/customer-invoice-pending-report', $data);
     }
+    public function vendor_invoice_without_inward_report()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $data = array();
+        $data['js'] = 'reports/vendor-invoice-without-inward-report.inc';
+        $data['s_url'] = 'vendor-invoice-without-inward-report';
+        $data['title'] = 'Vendor PO Invoice & Payment Report';
+
+        $where = "";
+        $having = "";
+
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $data['srch_po_from_date'] = $srch_po_from_date = $this->input->post('srch_po_from_date');
+            $data['srch_po_to_date'] = $srch_po_to_date = $this->input->post('srch_po_to_date');
+            $data['payment_status'] = $payment_status = $this->input->post('payment_status');
+
+            $this->session->set_userdata('viw_from_date', $srch_from_date);
+            $this->session->set_userdata('viw_to_date', $srch_to_date);
+            $this->session->set_userdata('viw_po_from_date', $srch_po_from_date);
+            $this->session->set_userdata('viw_po_to_date', $srch_po_to_date);
+            $this->session->set_userdata('viw_payment_status', $payment_status);
+        } elseif ($this->session->userdata('viw_from_date') || $this->session->userdata('viw_po_from_date')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('viw_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('viw_to_date');
+            $data['srch_po_from_date'] = $srch_po_from_date = $this->session->userdata('viw_po_from_date');
+            $data['srch_po_to_date'] = $srch_po_to_date = $this->session->userdata('viw_po_to_date');
+            $data['payment_status'] = $payment_status = $this->session->userdata('viw_payment_status');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = '';
+            $data['srch_to_date'] = $srch_to_date = '';
+            $data['srch_po_from_date'] = $srch_po_from_date = '';
+            $data['srch_po_to_date'] = $srch_po_to_date = '';
+            $data['payment_status'] = $payment_status = '';
+        }
+
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $where .= " AND  ( a.invoice_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "') ";
+        }
+        if (!empty($srch_po_from_date) && !empty($srch_po_to_date)) {
+            $where .= " AND  ( po.po_date BETWEEN '" . $this->db->escape_str($srch_po_from_date) . "' AND '" . $this->db->escape_str($srch_po_to_date) . "') ";
+        }
+
+        if ($payment_status == 'Paid') {
+            $having = " HAVING paid_amount >= total_amount ";
+        } elseif ($payment_status == 'Unpaid') {
+            $having = " HAVING paid_amount = 0 ";
+        } elseif ($payment_status == 'Partially Paid') {
+            $having = " HAVING paid_amount > 0 AND paid_amount < total_amount ";
+        }
+
+        // Vendor Filter
+        if ($this->input->post('vendor_id') !== null) {
+            $data['vendor_id'] = $vendor_id = $this->input->post('vendor_id');
+            $this->session->set_userdata('viw_vendor_id', $vendor_id);
+        } elseif ($this->session->userdata('viw_vendor_id')) {
+            $data['vendor_id'] = $vendor_id = $this->session->userdata('viw_vendor_id');
+        } else {
+            $data['vendor_id'] = $vendor_id = '';
+        }
+        
+        if (!empty($vendor_id)) {
+            $where .= " AND a.vendor_id = '" . $this->db->escape_str($vendor_id) . "'";
+        }
+
+        $sql = "
+            SELECT vendor_id, vendor_name 
+            FROM vendor_info 
+            WHERE status = 'Active' 
+            ORDER BY vendor_name ASC";
+        $query = $this->db->query($sql);
+        $data['vendor_opt'] = [];
+        $data['vendor_opt'][''] = 'All Vendors';
+        foreach ($query->result_array() as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+        }
+
+        $sql = "
+            SELECT
+                a.vendor_purchase_invoice_id,
+                a.vendor_po_id,
+                a.invoice_date,
+                a.invoice_no,
+                b.vendor_name,
+                COALESCE(a.total_amount_inc_addl, a.total_amount) AS total_amount,
+                po.po_no,
+                po.po_date,
+                'Purchase Invoice' AS bill_type,
+                COALESCE(SUM(pb.bill_amount), 0) AS paid_amount,
+                MAX(pay.payment_date) AS last_payment_date,
+
+                CASE
+                    WHEN a.vendor_po_id IS NULL OR a.vendor_po_id = 0
+                        THEN 'Direct Invoice'
+                    WHEN EXISTS (
+                        SELECT 1
+                        FROM vendor_purchase_invoice_item_info inv_i
+                        WHERE inv_i.vendor_purchase_invoice_id = a.vendor_purchase_invoice_id
+                          AND inv_i.status = 'Active'
+                          AND inv_i.qty > (
+                              SELECT COALESCE(SUM(inw_i.qty), 0)
+                              FROM vendor_pur_inward_item_info inw_i
+                              JOIN vendor_pur_inward_info inw ON inw_i.vendor_pur_inward_id = inw.vendor_pur_inward_id
+                              WHERE inw_i.vendor_po_item_id = inv_i.vendor_po_item_id
+                                AND inw_i.status = 'Active'
+                                AND inw.status = 'Active'
+                          )
+                    )
+                        THEN 'Inward Not Entered'
+                    ELSE 'Inward Entered'
+                END AS inward_status
+
+            FROM vendor_purchase_invoice_info AS a
+
+            LEFT JOIN vendor_info AS b
+                ON a.vendor_id = b.vendor_id
+                AND b.status = 'Active'
+
+            LEFT JOIN vendor_po_info AS po
+                ON a.vendor_po_id = po.vendor_po_id
+
+            LEFT JOIN vendor_payment_bill_info pb
+                ON pb.bill_id = a.vendor_purchase_invoice_id
+                AND pb.bill_type = 'Supplier Bill'
+                AND pb.status = 'Active'
+
+            LEFT JOIN vendor_payment_info pay
+                ON pay.vendor_payment_id = pb.vendor_payment_id
+                AND pay.status = 'Active'
+
+            WHERE a.status = 'Active'
+                $where
+
+            GROUP BY a.vendor_purchase_invoice_id
+
+            $having
+
+            ORDER BY a.invoice_date DESC
+        ";
+
+        $query = $this->db->query($sql);
+        $data['record_list'] = $query->result_array();
+
+        if ($this->input->post('export_excel') == '1') {
+            $filename = "Vendor_Invoice_Without_Inward_Report_" . date('YmdHis') . ".xls";
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=\"$filename\"");
+            echo $this->load->view('page/reports/vendor-invoice-without-inward-report-xls', $data, TRUE);
+            return;
+        }
+
+        $this->load->view('page/reports/vendor-invoice-without-inward-report', $data);
+    }
+
     public function vendor_invoice_pending_report()
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in')) {
@@ -4973,6 +5131,7 @@ class Reports extends CI_Controller
                 WHERE a.status = 'Active'
             ) AS all_bills
             WHERE {$where_sql}
+
             ORDER BY all_bills.invoice_date ASC, all_bills.invoice_no ASC, all_bills.bill_id ASC
         ";
 
@@ -5023,4 +5182,61 @@ class Reports extends CI_Controller
 
         $this->load->view('page/reports/dp-custom-invoice-report', $data);
     }
+
+    public function get_invoice_inward_item_comparison_ajax()
+    {
+        $invoice_id = $this->input->post('invoice_id');
+        $po_id = $this->input->post('po_id');
+
+        $sql = "
+            SELECT 
+                inv_item.item_code,
+                inv_item.item_desc,
+                inv_item.qty AS invoice_qty,
+                (
+                    SELECT COALESCE(SUM(inw_item.qty), 0)
+                    FROM vendor_pur_inward_item_info inw_item
+                    JOIN vendor_pur_inward_info inw ON inw.vendor_pur_inward_id = inw_item.vendor_pur_inward_id
+                    WHERE inw_item.vendor_po_item_id = inv_item.vendor_po_item_id
+                      AND inw_item.status = 'Active'
+                      AND inw.status = 'Active'
+                ) AS inward_qty
+            FROM vendor_purchase_invoice_item_info inv_item
+            WHERE inv_item.vendor_purchase_invoice_id = '" . $this->db->escape_str($invoice_id) . "'
+              AND inv_item.status = 'Active'
+        ";
+        $query = $this->db->query($sql);
+        $items = $query->result_array();
+
+        if (empty($items)) {
+            echo "<p>No items found for this invoice.</p>";
+            return;
+        }
+
+        $html = '<table class="table table-bordered table-striped">';
+        $html .= '<thead class="bg-primary"><tr>';
+        $html .= '<th>Item Code</th>';
+        $html .= '<th>Item Description</th>';
+        $html .= '<th class="text-right">Invoice Qty</th>';
+        $html .= '<th class="text-right">Total Inward Qty (For PO Item)</th>';
+        $html .= '<th class="text-right">Difference</th>';
+        $html .= '</tr></thead><tbody>';
+
+        foreach ($items as $item) {
+            $diff = $item['invoice_qty'] - $item['inward_qty'];
+            $diff_class = ($diff == 0) ? 'text-success' : 'text-danger';
+            
+            $html .= '<tr>';
+            $html .= '<td>' . htmlspecialchars($item['item_code']) . '</td>';
+            $html .= '<td>' . htmlspecialchars($item['item_desc']) . '</td>';
+            $html .= '<td align="right">' . number_format($item['invoice_qty'], 2) . '</td>';
+            $html .= '<td align="right">' . number_format($item['inward_qty'], 2) . '</td>';
+            $html .= '<td align="right" class="' . $diff_class . '"><b>' . number_format($diff, 2) . '</b></td>';
+            $html .= '</tr>';
+        }
+
+        $html .= '</tbody></table>';
+        echo $html;
+    }
+
 }

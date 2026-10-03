@@ -192,6 +192,7 @@ if (!function_exists('has_perm')) {
             'credit-debit-note-edit'         => array('slug' => 'credit-debit-note-list', 'action' => 'edit'),
             'customer-invoice-pending-report' => array('slug' => 'customer-pending-invoice-report', 'action' => 'view'),
             'vendor-invoice-pending-report'  => array('slug' => 'vendor-pending-invoice-report', 'action' => 'view'),
+            'vendor-invoice-without-inward-report'  => array('slug' => 'vendor-pending-invoice-report', 'action' => 'view'),
         );
 
         if (isset($aliases[$slug])) {
