@@ -4470,7 +4470,7 @@ class Vendor extends CI_Controller
         }
 
         if (!empty($srch_from_date) && !empty($srch_to_date)) {
-            $where .= " AND  ( a.invoice_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "') ";
+            $where .= " AND  ( a.entry_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "') ";
         }
 
 
@@ -5470,7 +5470,7 @@ class Vendor extends CI_Controller
         }
 
         if (!empty($srch_from_date) && !empty($srch_to_date)) {
-            $where .= " AND a.invoice_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'";
+            $where .= " AND a.inv_entry_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'";
         }
 
         // Customer Filter
@@ -5775,11 +5775,11 @@ class Vendor extends CI_Controller
         }
 
         if (!empty($srch_from_date) && !empty($srch_to_date)) {
-            $where .= " AND a.invoice_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'";
+            $where .= " AND a.inv_entry_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'";
         } elseif (!empty($srch_from_date)) {
-            $where .= " AND a.invoice_date >= '" . $this->db->escape_str($srch_from_date) . "'";
+            $where .= " AND a.inv_entry_date >= '" . $this->db->escape_str($srch_from_date) . "'";
         } elseif (!empty($srch_to_date)) {
-            $where .= " AND a.invoice_date <= '" . $this->db->escape_str($srch_to_date) . "'";
+            $where .= " AND a.inv_entry_date <= '" . $this->db->escape_str($srch_to_date) . "'";
         }
 
         // Customer Filter
@@ -6108,7 +6108,7 @@ class Vendor extends CI_Controller
         }
 
         if (!empty($srch_from_date) && !empty($srch_to_date)) {
-            $where .= " AND a.invoice_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'";
+            $where .= " AND a.inv_entry_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'";
         }
 
         // Customer Filter
