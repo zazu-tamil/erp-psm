@@ -1903,6 +1903,19 @@ class Reports extends CI_Controller
             redirect();
         }
 
+        // Handle Reset
+        if ($this->input->post('reset') == '1' || $this->input->get('reset') == '1') {
+            $this->session->unset_userdata('viw_from_date');
+            $this->session->unset_userdata('viw_to_date');
+            $this->session->unset_userdata('viw_po_from_date');
+            $this->session->unset_userdata('viw_po_to_date');
+            $this->session->unset_userdata('viw_payment_status');
+            $this->session->unset_userdata('viw_inward_status');
+            $this->session->unset_userdata('viw_vendor_id');
+            redirect('vendor-invoice-without-inward-report');
+            return;
+        }
+
         $data = array();
         $data['js'] = 'reports/vendor-invoice-without-inward-report.inc';
         $data['s_url'] = 'vendor-invoice-without-inward-report';
@@ -1917,24 +1930,28 @@ class Reports extends CI_Controller
             $data['srch_po_from_date'] = $srch_po_from_date = $this->input->post('srch_po_from_date');
             $data['srch_po_to_date'] = $srch_po_to_date = $this->input->post('srch_po_to_date');
             $data['payment_status'] = $payment_status = $this->input->post('payment_status');
+            $data['inward_status'] = $inward_status = $this->input->post('inward_status');
 
             $this->session->set_userdata('viw_from_date', $srch_from_date);
             $this->session->set_userdata('viw_to_date', $srch_to_date);
             $this->session->set_userdata('viw_po_from_date', $srch_po_from_date);
             $this->session->set_userdata('viw_po_to_date', $srch_po_to_date);
             $this->session->set_userdata('viw_payment_status', $payment_status);
-        } elseif ($this->session->userdata('viw_from_date') || $this->session->userdata('viw_po_from_date')) {
+            $this->session->set_userdata('viw_inward_status', $inward_status);
+        } elseif ($this->session->userdata('viw_from_date') || $this->session->userdata('viw_po_from_date') || $this->session->userdata('viw_payment_status') || $this->session->userdata('viw_inward_status')) {
             $data['srch_from_date'] = $srch_from_date = $this->session->userdata('viw_from_date');
             $data['srch_to_date'] = $srch_to_date = $this->session->userdata('viw_to_date');
             $data['srch_po_from_date'] = $srch_po_from_date = $this->session->userdata('viw_po_from_date');
             $data['srch_po_to_date'] = $srch_po_to_date = $this->session->userdata('viw_po_to_date');
             $data['payment_status'] = $payment_status = $this->session->userdata('viw_payment_status');
+            $data['inward_status'] = $inward_status = $this->session->userdata('viw_inward_status');
         } else {
             $data['srch_from_date'] = $srch_from_date = '';
             $data['srch_to_date'] = $srch_to_date = '';
             $data['srch_po_from_date'] = $srch_po_from_date = '';
             $data['srch_po_to_date'] = $srch_po_to_date = '';
             $data['payment_status'] = $payment_status = '';
+            $data['inward_status'] = $inward_status = '';
         }
 
         if (!empty($srch_from_date) && !empty($srch_to_date)) {
@@ -1944,12 +1961,21 @@ class Reports extends CI_Controller
             $where .= " AND  ( po.po_date BETWEEN '" . $this->db->escape_str($srch_po_from_date) . "' AND '" . $this->db->escape_str($srch_po_to_date) . "') ";
         }
 
+        $having_conds = array();
         if ($payment_status == 'Paid') {
-            $having = " HAVING paid_amount >= total_amount ";
+            $having_conds[] = " paid_amount >= total_amount ";
         } elseif ($payment_status == 'Unpaid') {
-            $having = " HAVING paid_amount = 0 ";
+            $having_conds[] = " paid_amount = 0 ";
         } elseif ($payment_status == 'Partially Paid') {
-            $having = " HAVING paid_amount > 0 AND paid_amount < total_amount ";
+            $having_conds[] = " paid_amount > 0 AND paid_amount < total_amount ";
+        }
+
+        if (!empty($inward_status)) {
+            $having_conds[] = " inward_status = '" . $this->db->escape_str($inward_status) . "' ";
+        }
+
+        if (!empty($having_conds)) {
+            $having = " HAVING " . implode(" AND ", $having_conds);
         }
 
         // Vendor Filter
@@ -1995,6 +2021,21 @@ class Reports extends CI_Controller
                 CASE
                     WHEN a.vendor_po_id IS NULL OR a.vendor_po_id = 0
                         THEN 'Direct Invoice'
+                    WHEN NOT EXISTS (
+                        SELECT 1
+                        FROM vendor_purchase_invoice_item_info inv_i
+                        WHERE inv_i.vendor_purchase_invoice_id = a.vendor_purchase_invoice_id
+                          AND inv_i.status = 'Active'
+                          AND (
+                              SELECT COALESCE(SUM(inw_i.qty), 0)
+                              FROM vendor_pur_inward_item_info inw_i
+                              JOIN vendor_pur_inward_info inw ON inw_i.vendor_pur_inward_id = inw.vendor_pur_inward_id
+                              WHERE inw_i.vendor_po_item_id = inv_i.vendor_po_item_id
+                                AND inw_i.status = 'Active'
+                                AND inw.status = 'Active'
+                          ) > 0
+                    )
+                        THEN 'Inward Not Entered'
                     WHEN EXISTS (
                         SELECT 1
                         FROM vendor_purchase_invoice_item_info inv_i
@@ -2009,7 +2050,7 @@ class Reports extends CI_Controller
                                 AND inw.status = 'Active'
                           )
                     )
-                        THEN 'Inward Not Entered'
+                        THEN 'Partial Inward'
                     ELSE 'Inward Entered'
                 END AS inward_status
 

@@ -50,9 +50,14 @@
                         <label for="payment_status">Payment Status</label>
                         <?php echo form_dropdown('payment_status', ['' => 'All', 'Paid' => 'Paid', 'Unpaid' => 'Unpaid', 'Partially Paid' => 'Partially Paid'], set_value('payment_status', $payment_status), 'id="payment_status" class="form-control "'); ?>
                     </div>
+                    <div class="form-group col-md-3">
+                        <label for="inward_status">Inward Status</label>
+                        <?php echo form_dropdown('inward_status', ['' => 'All', 'Inward Entered' => 'Inward Entered', 'Partial Inward' => 'Partial Inward', 'Inward Not Entered' => 'Inward Not Entered'], set_value('inward_status', $inward_status), 'id="inward_status" class="form-control "'); ?>
+                    </div>
                     <div class="form-group col-md-3 text-left">
                         <br>
                         <button type="submit" class="btn btn-success"><i class="fa fa-search"></i> Show</button>
+                        <a href="<?php echo site_url('vendor-invoice-without-inward-report?reset=1'); ?>" class="btn btn-default"><i class="fa fa-refresh"></i> Reset</a>
                     </div>
                 </div>
             </form>
@@ -117,10 +122,12 @@
                             <?php 
                                 if($row['inward_status'] == 'Inward Entered') {
                                     echo '<span class="label label-success">'.$row['inward_status'].'</span>';
+                                } elseif($row['inward_status'] == 'Partial Inward') {
+                                    echo '<span class="label label-warning">'.$row['inward_status'].'</span>';
                                 } elseif($row['inward_status'] == 'Inward Not Entered') {
                                     echo '<span class="label label-danger">'.$row['inward_status'].'</span>';
                                 } else {
-                                    echo '<span class="label label-warning">'.$row['inward_status'].'</span>';
+                                    echo '<span class="label label-default">'.$row['inward_status'].'</span>';
                                 }
                             ?>
                         </td>
