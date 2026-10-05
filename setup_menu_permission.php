@@ -258,6 +258,7 @@ $menu = array(
                 'i' => 'fa fa-industry',
                 'c' => array(
                     array('t' => 'Vendor Pending Report', 's' => 'vendor-pending-invoice-report', 'i' => 'fa fa-file-text'),
+                    array('t' => 'Invoice Without Inward', 's' => 'vendor-invoice-without-inward-report', 'i' => 'fa fa-file-text'),
                     array('t' => 'Vendor Statement Report', 's' => 'vendor-statement-report', 'i' => 'fa fa-file-text'),
                     array('t' => 'PO Summary Report', 's' => 'supplier-summary-report', 'i' => 'fa fa-file-text'),
                 )

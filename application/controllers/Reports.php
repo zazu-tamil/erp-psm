@@ -189,7 +189,7 @@ class Reports extends CI_Controller
             from vendor_purchase_invoice_info as a  
             where a.`status` = 'Active' 
             and (a.only_accounting_entry != 1 or a.only_accounting_entry = 0 or a.only_accounting_entry is null)
-            and a.invoice_date between '$srch_from_date' and '$srch_to_date'
+            and a.entry_date between '$srch_from_date' and '$srch_to_date'
             order by  a.invoice_date asc) 
             ";
 
@@ -209,7 +209,7 @@ class Reports extends CI_Controller
             '' as declaration_no
             from local_purchase_bill_info as a
             where a.`status` = 'Active'  
-            and a.invoice_date between '$srch_from_date' and '$srch_to_date'
+            and a.inv_entry_date between '$srch_from_date' and '$srch_to_date'
             order by  a.invoice_date asc) 
             ";
 
@@ -229,7 +229,7 @@ class Reports extends CI_Controller
             '' as declaration_no
             from dp_bill_info as a
             where a.`status` = 'Active'  
-            and a.invoice_date between '$srch_from_date' and '$srch_to_date'
+            and a.inv_entry_date between '$srch_from_date' and '$srch_to_date'
             order by a.invoice_date asc) 
             ";
         }
@@ -251,7 +251,7 @@ class Reports extends CI_Controller
         from customs_bill_info as a
         where a.`status` = 'Active'  
         $ac_type_cond_customs
-        and a.invoice_date between '$srch_from_date' and '$srch_to_date'
+        and a.inv_entry_date between '$srch_from_date' and '$srch_to_date'
         order by a.invoice_date asc) 
         ";
 
