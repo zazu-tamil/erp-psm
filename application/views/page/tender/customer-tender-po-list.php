@@ -98,25 +98,23 @@
         </div>
 
         <div class="box-body table-responsive">
-            <table class="table table-hover table-bordered table-striped">
+            <table id="customer_tender_po_table" class="table table-hover table-bordered table-striped">
                 <thead>
                     <tr>
-                        <th class="text-center">S.No</th>
-
+                        <th class="text-center" style="width: 50px;">S.No</th>
                         <th>PO Date</th>
                         <th>Our PO No</th>
                         <th>Company</th>
                         <th>Customer</th>
                         <th>Customer RFQ No</th>
                         <th>Quotation No</th>
-
                         <th>Customer PO No</th>
                         <th>Delivery Date</th>
                         <th>PO Status</th>
-                        <th class="text-right">Amt W/O Tax </th>
-                        <th class="text-right">Amt Tax </th>
-                        <th class="text-right">Amt With Tax </th>
-                        <th class="text-center" colspan="3">Action</th>
+                        <th class="text-right">Amt W/O Tax</th>
+                        <th class="text-right">Amt Tax</th>
+                        <th class="text-right">Amt With Tax</th>
+                        <th class="text-center" style="width: 90px;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -124,8 +122,7 @@
                         <?php foreach ($record_list as $j => $row): ?>
                             <tr>
                                 <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
-                                <td><?php echo $row['po_date'] ? date('d-m-Y', strtotime($row['po_date'])) : '-'; ?></td>
-
+                                <td data-order="<?php echo $row['po_date']; ?>"><?php echo $row['po_date'] ? date('d-m-Y', strtotime($row['po_date'])) : '-'; ?></td>
                                 <td><?php echo htmlspecialchars($row['our_po_no'] ?? '-'); ?></td>
                                 <td><?php echo $row['company_name']; ?><br>
                                     <span class="label label-success"><?php echo $row['tender_details']; ?></span>
@@ -134,8 +131,7 @@
                                 <td><?php echo htmlspecialchars($row['enquiry_no'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['quotation_no'] ?? '-'); ?></td>
                                 <td><strong><?php echo htmlspecialchars($row['customer_po_no'] ?? '-'); ?></strong></td>
-                                <td><?php echo $row['delivery_date'] ? date('d-m-Y', strtotime($row['delivery_date'])) : '-'; ?>
-                                </td>
+                                <td data-order="<?php echo $row['delivery_date']; ?>"><?php echo $row['delivery_date'] ? date('d-m-Y', strtotime($row['delivery_date'])) : '-'; ?></td>
                                 <?php
                                 $po_status = $row['po_status'];
 
@@ -154,28 +150,17 @@
                                     </span>
                                 </td>
 
-                                <td class="text-right"><?php echo $row['amt_wo_tax'] == 0 ? '' : number_format($row['amt_wo_tax'], 3); ?></td>
-                                <td class="text-right"><?php echo $row['amt_tax'] == 0 ? '' : number_format($row['amt_tax'], 3); ?></td>
-                                <td class="text-right" style="font-weight: bold; color: #00a65a;"><?php echo $row['amt_with_tax'] == 0 ? '' : number_format($row['amt_with_tax'], 3); ?></td>
+                                <td class="text-right" data-order="<?php echo (float)$row['amt_wo_tax']; ?>"><?php echo $row['amt_wo_tax'] == 0 ? '' : number_format($row['amt_wo_tax'], 3); ?></td>
+                                <td class="text-right" data-order="<?php echo (float)$row['amt_tax']; ?>"><?php echo $row['amt_tax'] == 0 ? '' : number_format($row['amt_tax'], 3); ?></td>
+                                <td class="text-right" data-order="<?php echo (float)$row['amt_with_tax']; ?>" style="font-weight: bold; color: #00a65a;"><?php echo $row['amt_with_tax'] == 0 ? '' : number_format($row['amt_with_tax'], 3); ?></td>
 
-                                <!-- VIEW -->
-                                <!-- <td class="text-center">
-                                    <a href="<?php echo site_url('customer-tender-po-view/' . $row['tender_po_id']); ?>"
-                                        class="btn btn-info btn-xs" title="View">
-                                        <i class="fa fa-eye"></i>
-                                    </a>
-                                </td> -->
-
-                                <!-- EDIT -->
-                                <td class="text-center">
+                                <td class="text-center" style="white-space: nowrap;">
+                                    <!-- EDIT -->
                                     <a href="<?php echo site_url('customer-tender-po-edit/' . $row['tender_po_id']); ?>"
                                         class="btn btn-primary btn-xs" title="Edit">
                                         <i class="fa fa-edit"></i>
                                     </a>
-                                </td>
-
-                                <!-- DELETE -->
-                                <td class="text-center">
+                                    <!-- DELETE -->
                                     <button value="<?php echo $row['tender_po_id']; ?>" class="del_record btn btn-danger btn-xs"
                                         title="Delete">
                                         <i class="fa fa-trash"></i>
@@ -183,24 +168,9 @@
                                 </td>
                             </tr>
                         <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="14" class="text-center text-danger">No records found.</td>
-                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
-        </div>
-
-        <div class="box-footer">
-            <div class="row">
-                <div class="col-sm-6">
-                    <label>Total Records: <strong><?php echo $total_records; ?></strong></label>
-                </div>
-                <div class="col-sm-6 text-right">
-                    <?php echo $pagination; ?>
-                </div>
-            </div>
         </div>
     </div>
 </section>

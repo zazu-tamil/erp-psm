@@ -1475,34 +1475,9 @@ class Tender extends CI_Controller
         $this->db->where($where);
 
         $data['total_records'] = $this->db->count_all_results();
-        // === PAGINATION ===
-        $data['sno'] = $this->uri->segment(2, 0);
-        $this->load->library('pagination');
-
-        $config['base_url'] = trim(site_url($data['s_url']), '/' . $this->uri->segment(2, 0));
-        $config['total_rows'] = $data['total_records'];
-        $config['per_page'] = 25;
-        $config['uri_segment'] = 2;
-        $config['attributes'] = ['class' => 'page-link'];
-        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
-        $config['full_tag_close'] = '</ul>';
-        $config['num_tag_open'] = '<li class="page-item">';
-        $config['num_tag_close'] = '</li>';
-        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
-        $config['cur_tag_close'] = '</a></li>';
-        $config['prev_tag_open'] = '<li class="page-item">';
-        $config['prev_tag_close'] = '</li>';
-        $config['next_tag_open'] = '<li class="page-item">';
-        $config['next_tag_close'] = '</li>';
-        $config['first_tag_open'] = '<li class="page-item">';
-        $config['first_tag_close'] = '</li>';
-        $config['last_tag_open'] = '<li class="page-item">';
-        $config['last_tag_close'] = '</li>';
-        $config['prev_link'] = 'Prev';
-        $config['next_link'] = 'Next';
-
-        $this->pagination->initialize($config);
-        $data['pagination'] = $this->pagination->create_links();
+        // === PAGINATION (Handled by DataTables) ===
+        $data['sno'] = 0;
+        $data['pagination'] = '';
 
         // === FETCH RECORDS ===
         $sql = "
@@ -1539,11 +1514,12 @@ class Tender extends CI_Controller
             LEFT JOIN tender_enquiry_info d ON a.tender_enquiry_id = d.tender_enquiry_id AND d.status = 'Active'
             WHERE  a.status != 'Delete'
             and  $where 
-            ORDER BY a.quote_date desc , a.tender_quotation_id DESC
-            LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
+            ORDER BY a.quote_date desc , a.tender_quotation_id DESC";
+            // LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();
+        $data['total_records'] = count($data['record_list']);
 
 
 
@@ -3089,34 +3065,9 @@ class Tender extends CI_Controller
         $data['total_records'] = $this->db->count_all_results();
 
 
-        // === PAGINATION ===
-        $data['sno'] = $this->uri->segment(2, 0);
-        $this->load->library('pagination');
-
-        $config['base_url'] = trim(site_url($data['s_url']), '/' . $this->uri->segment(2, 0));
-        $config['total_rows'] = $data['total_records'];
-        $config['per_page'] = 25;
-        $config['uri_segment'] = 2;
-        $config['attributes'] = ['class' => 'page-link'];
-        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
-        $config['full_tag_close'] = '</ul>';
-        $config['num_tag_open'] = '<li class="page-item">';
-        $config['num_tag_close'] = '</li>';
-        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
-        $config['cur_tag_close'] = '</a></li>';
-        $config['prev_tag_open'] = '<li class="page-item">';
-        $config['prev_tag_close'] = '</li>';
-        $config['next_tag_open'] = '<li class="page-item">';
-        $config['next_tag_close'] = '</li>';
-        $config['first_tag_open'] = '<li class="page-item">';
-        $config['first_tag_close'] = '</li>';
-        $config['last_tag_open'] = '<li class="page-item">';
-        $config['last_tag_close'] = '</li>';
-        $config['prev_link'] = 'Prev';
-        $config['next_link'] = 'Next';
-
-        $this->pagination->initialize($config);
-        $data['pagination'] = $this->pagination->create_links();
+        // === PAGINATION (Handled by DataTables) ===
+        $data['sno'] = 0;
+        $data['pagination'] = '';
 
         // === FETCH RECORDS ===
         $sql = "
@@ -3223,11 +3174,12 @@ WHERE a.status != 'Delete'
 
 ORDER BY
     a.po_date DESC,
-    a.tender_po_id DESC
-            LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
+    a.tender_po_id DESC";
+    // LIMIT " . $this->uri->segment(2, 0) . ", " . $config['per_page'];
 
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();
+        $data['total_records'] = count($data['record_list']);
         // === DROPDOWNS ===
         $sql = "SELECT company_id, company_name FROM company_info WHERE status = 'Active' ORDER BY company_name";
         $query = $this->db->query($sql);
