@@ -1961,21 +1961,22 @@ class Reports extends CI_Controller
             $where .= " AND  ( po.po_date BETWEEN '" . $this->db->escape_str($srch_po_from_date) . "' AND '" . $this->db->escape_str($srch_po_to_date) . "') ";
         }
 
-        $having_conds = array();
+        $outer_where_conds = array();
         if ($payment_status == 'Paid') {
-            $having_conds[] = " paid_amount >= total_amount ";
+            $outer_where_conds[] = " ROUND(paid_amount, 2) >= ROUND(total_amount, 2) ";
         } elseif ($payment_status == 'Unpaid') {
-            $having_conds[] = " paid_amount = 0 ";
+            $outer_where_conds[] = " ROUND(paid_amount, 2) <= 0 ";
         } elseif ($payment_status == 'Partially Paid') {
-            $having_conds[] = " paid_amount > 0 AND paid_amount < total_amount ";
+            $outer_where_conds[] = " ROUND(paid_amount, 2) > 0 AND ROUND(paid_amount, 2) < ROUND(total_amount, 2) ";
         }
 
         if (!empty($inward_status)) {
-            $having_conds[] = " inward_status = '" . $this->db->escape_str($inward_status) . "' ";
+            $outer_where_conds[] = " inward_status = '" . $this->db->escape_str(trim($inward_status)) . "' ";
         }
 
-        if (!empty($having_conds)) {
-            $having = " HAVING " . implode(" AND ", $having_conds);
+        $outer_where = "";
+        if (!empty($outer_where_conds)) {
+            $outer_where = " WHERE " . implode(" AND ", $outer_where_conds);
         }
 
         // Vendor Filter
@@ -2005,81 +2006,83 @@ class Reports extends CI_Controller
         }
 
         $sql = "
-            SELECT
-                a.vendor_purchase_invoice_id,
-                a.vendor_po_id,
-                a.invoice_date,
-                a.invoice_no,
-                b.vendor_name,
-                COALESCE(a.total_amount_inc_addl, a.total_amount) AS total_amount,
-                po.po_no,
-                po.po_date,
-                'Purchase Invoice' AS bill_type,
-                COALESCE(SUM(pb.bill_amount), 0) AS paid_amount,
-                MAX(pay.payment_date) AS last_payment_date,
+            SELECT * FROM (
+                SELECT
+                    a.vendor_purchase_invoice_id,
+                    a.vendor_po_id,
+                    a.invoice_date,
+                    a.invoice_no,
+                    b.vendor_name,
+                    COALESCE(a.total_amount_inc_addl, a.total_amount) AS total_amount,
+                    po.po_no,
+                    po.po_date,
+                    'Purchase Invoice' AS bill_type,
+                    COALESCE(SUM(CASE WHEN pay.status = 'Active' THEN pb.bill_amount ELSE 0 END), 0) AS paid_amount,
+                    MAX(pay.payment_date) AS last_payment_date,
 
-                CASE
-                    WHEN a.vendor_po_id IS NULL OR a.vendor_po_id = 0
-                        THEN 'Direct Invoice'
-                    WHEN NOT EXISTS (
-                        SELECT 1
-                        FROM vendor_purchase_invoice_item_info inv_i
-                        WHERE inv_i.vendor_purchase_invoice_id = a.vendor_purchase_invoice_id
-                          AND inv_i.status = 'Active'
-                          AND (
-                              SELECT COALESCE(SUM(inw_i.qty), 0)
-                              FROM vendor_pur_inward_item_info inw_i
-                              JOIN vendor_pur_inward_info inw ON inw_i.vendor_pur_inward_id = inw.vendor_pur_inward_id
-                              WHERE inw_i.vendor_po_item_id = inv_i.vendor_po_item_id
-                                AND inw_i.status = 'Active'
-                                AND inw.status = 'Active'
-                          ) > 0
-                    )
-                        THEN 'Inward Not Entered'
-                    WHEN EXISTS (
-                        SELECT 1
-                        FROM vendor_purchase_invoice_item_info inv_i
-                        WHERE inv_i.vendor_purchase_invoice_id = a.vendor_purchase_invoice_id
-                          AND inv_i.status = 'Active'
-                          AND inv_i.qty > (
-                              SELECT COALESCE(SUM(inw_i.qty), 0)
-                              FROM vendor_pur_inward_item_info inw_i
-                              JOIN vendor_pur_inward_info inw ON inw_i.vendor_pur_inward_id = inw.vendor_pur_inward_id
-                              WHERE inw_i.vendor_po_item_id = inv_i.vendor_po_item_id
-                                AND inw_i.status = 'Active'
-                                AND inw.status = 'Active'
-                          )
-                    )
-                        THEN 'Partial Inward'
-                    ELSE 'Inward Entered'
-                END AS inward_status
+                    CASE
+                        WHEN a.vendor_po_id IS NULL OR a.vendor_po_id = 0
+                            THEN 'Direct Invoice'
+                        WHEN NOT EXISTS (
+                            SELECT 1
+                            FROM vendor_purchase_invoice_item_info inv_i
+                            WHERE inv_i.vendor_purchase_invoice_id = a.vendor_purchase_invoice_id
+                              AND inv_i.status = 'Active'
+                              AND (
+                                  SELECT COALESCE(SUM(inw_i.qty), 0)
+                                  FROM vendor_pur_inward_item_info inw_i
+                                  JOIN vendor_pur_inward_info inw ON inw_i.vendor_pur_inward_id = inw.vendor_pur_inward_id
+                                  WHERE inw_i.vendor_po_item_id = inv_i.vendor_po_item_id
+                                    AND inw_i.status = 'Active'
+                                    AND inw.status = 'Active'
+                              ) > 0
+                        )
+                            THEN 'Inward Not Entered'
+                        WHEN EXISTS (
+                            SELECT 1
+                            FROM vendor_purchase_invoice_item_info inv_i
+                            WHERE inv_i.vendor_purchase_invoice_id = a.vendor_purchase_invoice_id
+                              AND inv_i.status = 'Active'
+                              AND inv_i.qty > (
+                                  SELECT COALESCE(SUM(inw_i.qty), 0)
+                                  FROM vendor_pur_inward_item_info inw_i
+                                  JOIN vendor_pur_inward_info inw ON inw_i.vendor_pur_inward_id = inw.vendor_pur_inward_id
+                                  WHERE inw_i.vendor_po_item_id = inv_i.vendor_po_item_id
+                                    AND inw_i.status = 'Active'
+                                    AND inw.status = 'Active'
+                              )
+                        )
+                            THEN 'Partial Inward'
+                        ELSE 'Inward Entered'
+                    END AS inward_status
 
-            FROM vendor_purchase_invoice_info AS a
+                FROM vendor_purchase_invoice_info AS a
 
-            LEFT JOIN vendor_info AS b
-                ON a.vendor_id = b.vendor_id
-                AND b.status = 'Active'
+                LEFT JOIN vendor_info AS b
+                    ON a.vendor_id = b.vendor_id
+                    AND b.status = 'Active'
 
-            LEFT JOIN vendor_po_info AS po
-                ON a.vendor_po_id = po.vendor_po_id
+                LEFT JOIN vendor_po_info AS po
+                    ON a.vendor_po_id = po.vendor_po_id
 
-            LEFT JOIN vendor_payment_bill_info pb
-                ON pb.bill_id = a.vendor_purchase_invoice_id
-                AND pb.bill_type = 'Supplier Bill'
-                AND pb.status = 'Active'
+                LEFT JOIN vendor_payment_bill_info pb
+                    ON pb.bill_id = a.vendor_purchase_invoice_id
+                    AND pb.bill_type = 'Purchase Invoice'
+                    AND pb.status = 'Active'
 
-            LEFT JOIN vendor_payment_info pay
-                ON pay.vendor_payment_id = pb.vendor_payment_id
-                AND pay.status = 'Active'
+                LEFT JOIN vendor_payment_info pay
+                    ON pay.vendor_payment_id = pb.vendor_payment_id
+                    AND pay.status = 'Active'
 
-            WHERE a.status = 'Active'
-                $where
+                WHERE a.status = 'Active'
+                    $where
 
-            GROUP BY a.vendor_purchase_invoice_id
+                GROUP BY a.vendor_purchase_invoice_id
+            ) AS subquery
 
-            $having
+            $outer_where
 
-            ORDER BY a.invoice_date DESC
+            ORDER BY invoice_date DESC
         ";
 
         $query = $this->db->query($sql);
