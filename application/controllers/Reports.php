@@ -2696,7 +2696,7 @@ class Reports extends CI_Controller
                   " . (!empty($from_date) ? "AND a.note_date >= '$esc_from'" : "") . "
                   " . (!empty($to_date) ? "AND a.note_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
             ) AS transactions
-            ORDER BY tr_date ASC, voucher_no ASC
+            ORDER BY tr_date ASC, CASE WHEN type = 'purchase' THEN 1 ELSE 2 END ASC, voucher_no ASC
         ";
 
         $query = $this->db->query($txn_sql);
@@ -3342,7 +3342,7 @@ class Reports extends CI_Controller
                   " . (!empty($from_date) ? "AND a.note_date >= '$esc_from'" : "") . "
                   " . (!empty($to_date) ? "AND a.note_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
             ) AS transactions
-            ORDER BY tr_date ASC, voucher_no ASC
+            ORDER BY tr_date ASC, CASE WHEN type = 'invoice' THEN 1 ELSE 2 END ASC, voucher_no ASC
         ";
 
         $query = $this->db->query($txn_sql);
