@@ -36,38 +36,63 @@ class Dashboard extends MY_Controller
         $this->db->where('status !=', 'Delete');
         $data['customer_count'] = $this->db->count_all_results('customer_info');
 
+        // Enquiries Added Today
         $sql = "
-            SELECT COUNT(*) AS total_enquiry 
-            FROM tender_enquiry_info 
-            WHERE status != 'Delete' 
-            AND DATE(created_date) = CURDATE()
+            SELECT 
+                te.tender_enquiry_id, 
+                get_tender_info(te.tender_enquiry_id) as enquiry_no,
+                te.enquiry_date,
+                te.tender_name,
+                te.tender_status,
+                c.customer_name,
+                comp.company_name
+            FROM tender_enquiry_info te
+            LEFT JOIN customer_info c ON te.customer_id = c.customer_id
+            LEFT JOIN company_info comp ON te.company_id = comp.company_id
+            WHERE te.status != 'Delete' 
+            AND DATE(te.created_date) = CURDATE()
+            ORDER BY te.tender_enquiry_id DESC
         ";
+        $data['enquiries_added_today_list'] = $this->db->query($sql)->result_array();
+        $data['total_enquiry'] = count($data['enquiries_added_today_list']);
 
-        $query = $this->db->query($sql);
-        $row = $query->row();
-        $data['total_enquiry'] = $row ? $row->total_enquiry : 0;
-
+        // Quotations Generated Today
         $sql = "
-            SELECT COUNT(*) AS tender_quotation_count 
-            FROM tender_quotation_info 
-            WHERE status != 'Delete' 
-            AND DATE(created_date) = CURDATE()
+            SELECT 
+                tq.tender_quotation_id, 
+                tq.quotation_no,
+                tq.quote_date,
+                get_tender_info(tq.tender_enquiry_id) as enquiry_no,
+                c.customer_name,
+                comp.company_name
+            FROM tender_quotation_info tq
+            LEFT JOIN customer_info c ON tq.customer_id = c.customer_id
+            LEFT JOIN company_info comp ON tq.company_id = comp.company_id
+            WHERE tq.status != 'Delete' 
+            AND DATE(tq.created_date) = CURDATE()
+            ORDER BY tq.tender_quotation_id DESC
         ";
+        $data['quotations_generated_today_list'] = $this->db->query($sql)->result_array();
+        $data['tender_quotation_count'] = count($data['quotations_generated_today_list']);
 
-        $query = $this->db->query($sql);
-        $row = $query->row();
-        $data['tender_quotation_count'] = $row ? $row->tender_quotation_count : 0;
-
+        // Vendor Rate Inquiries Today
         $sql = "
-            SELECT COUNT(*) AS vendor_enquiry_count 
-            FROM vendor_rate_enquiry_info 
-            WHERE status != 'Delete' 
-            AND DATE(created_date) = CURDATE()
+            SELECT 
+                vq.vendor_rate_enquiry_id, 
+                vq.enquiry_no as vendor_enquiry_no,
+                vq.enquiry_date,
+                get_tender_info(vq.tender_enquiry_id) as enquiry_no,
+                c.customer_name,
+                comp.company_name
+            FROM vendor_rate_enquiry_info vq
+            LEFT JOIN customer_info c ON vq.customer_id = c.customer_id
+            LEFT JOIN company_info comp ON vq.company_id = comp.company_id
+            WHERE vq.status != 'Delete' 
+            AND DATE(vq.created_date) = CURDATE()
+            ORDER BY vq.vendor_rate_enquiry_id DESC
         ";
-
-        $query = $this->db->query($sql);
-        $row = $query->row();
-        $data['vendor_enquiry_count'] = $row ? $row->vendor_enquiry_count : 0;
+        $data['vendor_inquiries_today_list'] = $this->db->query($sql)->result_array();
+        $data['vendor_enquiry_count'] = count($data['vendor_inquiries_today_list']);
 
         // Redesign Queries:
         // 1. Total Tenders (Active)

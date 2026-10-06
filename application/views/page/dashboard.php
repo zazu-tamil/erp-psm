@@ -868,13 +868,13 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
         </div>
     </div>
 
-    <!-- Tenders Closing Today -->
-    <div class="dashboard-section-header">Tenders Closing Today</div>
+    <!-- Today's Activity -->
+    <div class="dashboard-section-header">Today's Activity</div>
     <div class="kpi-row">
         <!-- Closing Today Card -->
         <div class="col-md-3 kpi-col" style="width: 25%;">
             <a href="#" data-toggle="modal" data-target="#closingTendersModal" style="text-decoration: none;">
-                <div class="kpi-card tenders" style="cursor: pointer;">
+                <div class="kpi-card tenders" style="cursor: pointer; border-left-color: #ef4444;">
                     <div class="kpi-info">
                         <div class="kpi-label">Closing Today</div>
                         <div class="kpi-value">
@@ -890,41 +890,65 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
                 </div>
             </a>
         </div>
-    </div>
 
-    <!-- Daily Activities Row (Created Today counters) -->
-    <div class="ops-row">
-        <!-- Today's Tender Enquiries -->
-        <div class="col-md-4 ops-col" style="width: 33.333%;">
-            <div class="ops-card">
-                <div class="ops-icon" style="color: #f59e0b;"><i class="fa fa-envelope-o"></i></div>
-                <div>
-                    <div class="ops-value"><?php echo $total_enquiry; ?></div>
-                    <div class="ops-label">Enquiries Added Today</div>
+        <!-- Enquiries Added Today -->
+        <div class="col-md-3 kpi-col" style="width: 25%;">
+            <a href="#" data-toggle="modal" data-target="#enquiriesTodayModal" style="text-decoration: none;">
+                <div class="kpi-card" style="cursor: pointer; border-left-color: #f59e0b;">
+                    <div class="kpi-info">
+                        <div class="kpi-label">Enquiries Added Today</div>
+                        <div class="kpi-value">
+                            <?php echo $total_enquiry; ?>
+                        </div>
+                        <div class="kpi-change up" style="color: #f59e0b;">
+                            <i class="fa fa-eye"></i> View Enquiries
+                        </div>
+                    </div>
+                    <div class="kpi-icon-wrapper">
+                        <i class="fa fa-envelope-o" style="color: #f59e0b;"></i>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
-        <!-- Today's Quotations -->
-        <div class="col-md-4 ops-col" style="width: 33.333%;">
-            <div class="ops-card">
-                <div class="ops-icon" style="color: #10b981;"><i class="fa fa-file-powerpoint-o"></i></div>
-                <div>
-                    <div class="ops-value"><?php echo $tender_quotation_count; ?></div>
-                    <div class="ops-label">Quotations Generated Today</div>
+        <!-- Quotations Generated Today -->
+        <div class="col-md-3 kpi-col" style="width: 25%;">
+            <a href="#" data-toggle="modal" data-target="#quotationsTodayModal" style="text-decoration: none;">
+                <div class="kpi-card" style="cursor: pointer; border-left-color: #10b981;">
+                    <div class="kpi-info">
+                        <div class="kpi-label">Quotations Today</div>
+                        <div class="kpi-value">
+                            <?php echo $tender_quotation_count; ?>
+                        </div>
+                        <div class="kpi-change up" style="color: #10b981;">
+                            <i class="fa fa-eye"></i> View Quotations
+                        </div>
+                    </div>
+                    <div class="kpi-icon-wrapper">
+                        <i class="fa fa-file-powerpoint-o" style="color: #10b981;"></i>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
-        <!-- Today's Vendor Enquiries -->
-        <div class="col-md-4 ops-col" style="width: 33.333%;">
-            <div class="ops-card">
-                <div class="ops-icon" style="color: #6366f1;"><i class="fa fa-question-circle-o"></i></div>
-                <div>
-                    <div class="ops-value"><?php echo $vendor_enquiry_count; ?></div>
-                    <div class="ops-label">Vendor Rate Inquiries Today</div>
+        <!-- Vendor Rate Inquiries Today -->
+        <div class="col-md-3 kpi-col" style="width: 25%;">
+            <a href="#" data-toggle="modal" data-target="#vendorInquiriesTodayModal" style="text-decoration: none;">
+                <div class="kpi-card" style="cursor: pointer; border-left-color: #6366f1;">
+                    <div class="kpi-info">
+                        <div class="kpi-label">Vendor Inquiries Today</div>
+                        <div class="kpi-value">
+                            <?php echo $vendor_enquiry_count; ?>
+                        </div>
+                        <div class="kpi-change up" style="color: #6366f1;">
+                            <i class="fa fa-eye"></i> View Vendor Inquiries
+                        </div>
+                    </div>
+                    <div class="kpi-icon-wrapper">
+                        <i class="fa fa-question-circle-o" style="color: #6366f1;"></i>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
     </div>
 
@@ -1196,24 +1220,186 @@ $cash_balance = $total_cash_inward - $total_cash_outward;
         </div>
     </div>
 
+    <!-- Enquiries Added Today Modal -->
+    <div class="modal fade" id="enquiriesTodayModal" tabindex="-1" role="dialog" aria-labelledby="enquiriesTodayModalLabel">
+        <div class="modal-dialog modal-lg" role="document" style="width: 90%; max-width: 1200px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="enquiriesTodayModalLabel">Enquiries Added Today</h4>
+                </div>
+                <div class="modal-body table-responsive">
+                    <table id="enquiriesTodayTable" class="table table-bordered table-striped custom-table" style="width:100%">
+                        <thead class="tender-table-header">
+                            <tr>
+                                <th>Sr.No</th>
+                                <th>Enquiry No</th>
+                                <th>Enquiry Date</th>
+                                <th>Customer Name</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (!empty($enquiries_added_today_list)): ?>
+                                <?php foreach ($enquiries_added_today_list as $index => $enq): ?>
+                                    <?php 
+                                    $url = base_url('tender-enquiry-summary-report/' . $enq['tender_enquiry_id']); 
+                                    $status = !empty($enq['tender_status']) ? $enq['tender_status'] : 'Open';
+                                    ?>
+                                    <tr style="cursor:pointer;" onclick="window.location='<?php echo $url; ?>';">
+                                        <td><?php echo $index + 1; ?></td>
+                                        <td>
+                                            <a href="<?php echo $url; ?>" onclick="event.stopPropagation();" style="font-weight:600; color:#f59e0b;">
+                                                <?php echo htmlspecialchars($enq['enquiry_no']); ?>
+                                            </a>
+                                        </td>
+                                        <td><?php echo !empty($enq['enquiry_date']) ? date('d-m-Y', strtotime($enq['enquiry_date'])) : '-'; ?></td>
+                                        <td style="white-space:normal;"><?php echo !empty($enq['customer_name']) ? htmlspecialchars($enq['customer_name']) : '-'; ?></td>
+                                        <td><?php echo htmlspecialchars($status); ?></td>
+                                        <td class="text-center">
+                                            <a href="<?php echo $url; ?>" onclick="event.stopPropagation();" target="_blank" class="btn btn-warning btn-xs" title="Navigate">
+                                                <i class="fa fa-arrow-right"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quotations Generated Today Modal -->
+    <div class="modal fade" id="quotationsTodayModal" tabindex="-1" role="dialog" aria-labelledby="quotationsTodayModalLabel">
+        <div class="modal-dialog modal-lg" role="document" style="width: 90%; max-width: 1200px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="quotationsTodayModalLabel">Quotations Generated Today</h4>
+                </div>
+                <div class="modal-body table-responsive">
+                    <table id="quotationsTodayTable" class="table table-bordered table-striped custom-table" style="width:100%">
+                        <thead class="tender-table-header">
+                            <tr>
+                                <th>Sr.No</th>
+                                <th>Quotation No</th>
+                                <th>Quote Date</th>
+                                <th>Tender Enquiry No</th>
+                                <th>Customer Name</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (!empty($quotations_generated_today_list)): ?>
+                                <?php foreach ($quotations_generated_today_list as $index => $q): ?>
+                                    <?php $url = base_url('tender-quotation-edit/' . $q['tender_quotation_id']); ?>
+                                    <tr style="cursor:pointer;" onclick="window.location='<?php echo $url; ?>';">
+                                        <td><?php echo $index + 1; ?></td>
+                                        <td>
+                                            <a href="<?php echo $url; ?>" onclick="event.stopPropagation();" style="font-weight:600; color:#10b981;">
+                                                <?php echo htmlspecialchars($q['quotation_no']); ?>
+                                            </a>
+                                        </td>
+                                        <td><?php echo !empty($q['quote_date']) ? date('d-m-Y', strtotime($q['quote_date'])) : '-'; ?></td>
+                                        <td><?php echo htmlspecialchars($q['enquiry_no']); ?></td>
+                                        <td style="white-space:normal;"><?php echo !empty($q['customer_name']) ? htmlspecialchars($q['customer_name']) : '-'; ?></td>
+                                        <td class="text-center">
+                                            <a href="<?php echo $url; ?>" onclick="event.stopPropagation();" target="_blank" class="btn btn-success btn-xs" title="Navigate">
+                                                <i class="fa fa-arrow-right"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vendor Rate Inquiries Today Modal -->
+    <div class="modal fade" id="vendorInquiriesTodayModal" tabindex="-1" role="dialog" aria-labelledby="vendorInquiriesTodayModalLabel">
+        <div class="modal-dialog modal-lg" role="document" style="width: 90%; max-width: 1200px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="vendorInquiriesTodayModalLabel">Vendor Rate Inquiries Today</h4>
+                </div>
+                <div class="modal-body table-responsive">
+                    <table id="vendorInquiriesTodayTable" class="table table-bordered table-striped custom-table" style="width:100%">
+                        <thead class="tender-table-header">
+                            <tr>
+                                <th>Sr.No</th>
+                                <th>Vendor Enquiry No</th>
+                                <th>Enquiry Date</th>
+                                <th>Tender Enquiry No</th>
+                                <th>Customer Name</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (!empty($vendor_inquiries_today_list)): ?>
+                                <?php foreach ($vendor_inquiries_today_list as $index => $v): ?>
+                                    <?php $url = base_url('vendor-rate-enquiry-edit/' . $v['vendor_rate_enquiry_id']); ?>
+                                    <tr style="cursor:pointer;" onclick="window.location='<?php echo $url; ?>';">
+                                        <td><?php echo $index + 1; ?></td>
+                                        <td>
+                                            <a href="<?php echo $url; ?>" onclick="event.stopPropagation();" style="font-weight:600; color:#6366f1;">
+                                                <?php echo htmlspecialchars($v['vendor_enquiry_no']); ?>
+                                            </a>
+                                        </td>
+                                        <td><?php echo !empty($v['enquiry_date']) ? date('d-m-Y', strtotime($v['enquiry_date'])) : '-'; ?></td>
+                                        <td><?php echo htmlspecialchars($v['enquiry_no']); ?></td>
+                                        <td style="white-space:normal;"><?php echo !empty($v['customer_name']) ? htmlspecialchars($v['customer_name']) : '-'; ?></td>
+                                        <td class="text-center">
+                                            <a href="<?php echo $url; ?>" onclick="event.stopPropagation();" target="_blank" class="btn btn-primary btn-xs" title="Navigate">
+                                                <i class="fa fa-arrow-right"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             // Check if jQuery and DataTables are loaded before binding
-            var initClosingTendersTable = function () {
+            var initTables = function () {
                 if (typeof $ !== 'undefined' && $.fn.DataTable) {
                     $('#closingTendersModal').on('shown.bs.modal', function () {
                         if (!$.fn.DataTable.isDataTable('#closingTendersTable')) {
-                            $('#closingTendersTable').DataTable({
-                                "order": [],
-                                "scrollX": true
-                            });
+                            $('#closingTendersTable').DataTable({ "order": [], "scrollX": true });
+                        }
+                    });
+                    $('#enquiriesTodayModal').on('shown.bs.modal', function () {
+                        if (!$.fn.DataTable.isDataTable('#enquiriesTodayTable')) {
+                            $('#enquiriesTodayTable').DataTable({ "order": [], "scrollX": true });
+                        }
+                    });
+                    $('#quotationsTodayModal').on('shown.bs.modal', function () {
+                        if (!$.fn.DataTable.isDataTable('#quotationsTodayTable')) {
+                            $('#quotationsTodayTable').DataTable({ "order": [], "scrollX": true });
+                        }
+                    });
+                    $('#vendorInquiriesTodayModal').on('shown.bs.modal', function () {
+                        if (!$.fn.DataTable.isDataTable('#vendorInquiriesTodayTable')) {
+                            $('#vendorInquiriesTodayTable').DataTable({ "order": [], "scrollX": true });
                         }
                     });
                 } else {
-                    setTimeout(initClosingTendersTable, 100);
+                    setTimeout(initTables, 100);
                 }
             };
-            initClosingTendersTable();
+            initTables();
         });
     </script>
 </div>
