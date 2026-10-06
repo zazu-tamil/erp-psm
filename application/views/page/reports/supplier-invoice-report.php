@@ -308,9 +308,10 @@
                             title="Reset Filters">
                             <i class="fa fa-refresh"></i> Reset
                         </a>
-                        <!-- <button type="button" class="btn btn-success" id="btnExportExcel" title="Export to Excel">
+                        <button type="button" class="btn btn-success" id="btnExportExcel" title="Export to Excel"
+                            onclick="document.getElementById('export_excel').value='1'; document.getElementById('frmSupplierInvoice').submit();">
                             <i class="fa fa-file-excel-o"></i> Excel
-                        </button> -->
+                        </button>
                         <button type="button" class="btn btn-info" onclick="window.print();" title="Print Report">
                             <i class="fa fa-print"></i> Print
                         </button>
