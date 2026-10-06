@@ -68,6 +68,7 @@
                     <tr>
                         <th class="text-center">S.No</th>
                         <th>Vendor</th>
+                        <th>Tender Info</th>
                         <th>Item Code</th>
                         <th>Item Desc</th>
                         <th>UOM</th>
@@ -81,6 +82,7 @@
                         <tr>
                             <td class="text-center"><?php echo ($j + 1); ?></td>
                             <td><?php echo $ls['vendor_name']; ?></td>
+                            <td><?php echo $ls['tender_details']; ?></td>
                             <td><?php echo $ls['item_code']; ?></td>
                             <td><?php echo $ls['item_desc']; ?></td>
                             <td><?php echo $ls['uom']; ?></td>
@@ -91,7 +93,7 @@
                     <?php endforeach; ?>
                     <?php if (empty($record_list)): ?>
                         <tr>
-                            <td colspan="7" class="text-center text-muted">No records found.</td>
+                            <td colspan="9" class="text-center text-muted">No records found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
