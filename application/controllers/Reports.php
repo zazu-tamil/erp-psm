@@ -118,7 +118,7 @@ class Reports extends CI_Controller
             $from_str = date('d-m-Y', strtotime($srch_from_date));
             $to_str = date('d-m-Y', strtotime($srch_to_date));
             $filename = "Sales NBR Report [ " . $from_str . " to " . $to_str . " ].xls";
-            
+
             header("Content-Type: application/vnd.ms-excel");
             header("Content-Disposition: attachment; filename=\"$filename\"");
             header("Pragma: no-cache");
@@ -318,7 +318,7 @@ class Reports extends CI_Controller
             $from_str = date('d-m-Y', strtotime($srch_from_date));
             $to_str = date('d-m-Y', strtotime($srch_to_date));
             $filename = "Purchase NBR Report [ " . $from_str . " to " . $to_str . " ].xls";
-            
+
             header("Content-Type: application/vnd.ms-excel");
             header("Content-Disposition: attachment; filename=\"$filename\"");
             header("Pragma: no-cache");
@@ -435,7 +435,7 @@ class Reports extends CI_Controller
             from vendor_purchase_invoice_info as a  
             where a.`status` = 'Active' 
             and (a.only_accounting_entry != 1 or a.only_accounting_entry = 0 or a.only_accounting_entry is null)
-            and a.invoice_date between '$srch_from_date' and '$srch_to_date'
+            and a.entry_date between '$srch_from_date' and '$srch_to_date'
             order by  a.invoice_date asc) 
             ";
 
@@ -455,7 +455,7 @@ class Reports extends CI_Controller
             '' as declaration_no
             from local_purchase_bill_info as a
             where a.`status` = 'Active'  
-            and a.invoice_date between '$srch_from_date' and '$srch_to_date'
+            and a.inv_entry_date between '$srch_from_date' and '$srch_to_date'
             order by  a.invoice_date asc) 
             ";
 
@@ -475,7 +475,7 @@ class Reports extends CI_Controller
             '' as declaration_no
             from dp_bill_info as a
             where a.`status` = 'Active'  
-            and a.invoice_date between '$srch_from_date' and '$srch_to_date'
+            and a.inv_entry_date between '$srch_from_date' and '$srch_to_date'
             order by a.invoice_date asc) 
             ";
         }
@@ -497,7 +497,7 @@ class Reports extends CI_Controller
         from customs_bill_info as a
         where a.`status` = 'Active'  
         $ac_type_cond_customs
-        and a.invoice_date between '$srch_from_date' and '$srch_to_date'
+        and a.inv_entry_date between '$srch_from_date' and '$srch_to_date'
         order by a.invoice_date asc) 
         ";
 
@@ -1988,7 +1988,7 @@ class Reports extends CI_Controller
         } else {
             $data['vendor_id'] = $vendor_id = '';
         }
-        
+
         if (!empty($vendor_id)) {
             $where .= " AND a.vendor_id = '" . $this->db->escape_str($vendor_id) . "'";
         }
@@ -5271,7 +5271,7 @@ class Reports extends CI_Controller
         foreach ($items as $item) {
             $diff = $item['invoice_qty'] - $item['inward_qty'];
             $diff_class = ($diff == 0) ? 'text-success' : 'text-danger';
-            
+
             $html .= '<tr>';
             $html .= '<td>' . htmlspecialchars($item['item_code']) . '</td>';
             $html .= '<td>' . htmlspecialchars($item['item_desc']) . '</td>';
