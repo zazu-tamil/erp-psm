@@ -1061,32 +1061,6 @@ class Master extends CI_Controller
             redirect('vendor-list/');
         }
 
-        $this->load->library('pagination');
-
-        $this->db->where('status != ', 'Delete');
-        $this->db->from('vendor_info');
-        $data['total_records'] = $cnt = $this->db->count_all_results();
-
-        $data['sno'] = $this->uri->segment(2, 0);
-
-        $config['base_url'] = site_url('vendor-list');
-        $config['total_rows'] = $cnt;
-        $config['per_page'] = 10;
-        $config['uri_segment'] = 2;
-        $config['attributes'] = array('class' => 'page-link');
-        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
-        $config['full_tag_close'] = '</ul>';
-        $config['num_tag_open'] = '<li class="page-item">';
-        $config['num_tag_close'] = '</li>';
-        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
-        $config['cur_tag_close'] = '</a></li>';
-        $config['prev_tag_open'] = '<li class="page-item">';
-        $config['prev_tag_close'] = '</li>';
-        $config['next_tag_open'] = '<li class="page-item">';
-        $config['next_tag_close'] = '</li>';
-        $config['prev_link'] = "Prev";
-        $config['next_link'] = "Next";
-        $this->pagination->initialize($config);
         $sql = "
           SELECT
                 a.country_id,
@@ -1108,17 +1082,12 @@ class Master extends CI_Controller
         $sql = "
             SELECT v.* 
             FROM vendor_info v
-           
             WHERE v.status != 'Delete'
             ORDER BY v.status ASC, v.vendor_name ASC 
-            LIMIT " . $this->uri->segment(2, 0) . "," . $config['per_page'] . "
         ";
 
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();
-
-
-        $data['pagination'] = $this->pagination->create_links();
 
         $this->load->view('page/master/vendor-list', $data);
     }

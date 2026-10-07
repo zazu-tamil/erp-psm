@@ -1,5 +1,11 @@
+<link rel="stylesheet" href="<?php echo base_url() ?>asset/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+<script src="<?php echo base_url() ?>asset/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="<?php echo base_url() ?>asset/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
 <script>
   jQuery(function ($) {
+    $("#vendor_list").DataTable();
+    
     // 🔹 Capture current location and fill inputs
     function captureLocation(modalId) {
       if (navigator.geolocation) {

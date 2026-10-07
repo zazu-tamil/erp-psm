@@ -39,7 +39,7 @@
                         <th>Email</th>
                         <th class="text-center">Map Loqation</th>
                         <th>Status</th>
-                        <th colspan="2" class="text-center">Action</th>
+                        <th class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -71,14 +71,12 @@
                             </td>
                             <td><?php echo $ls['status']; ?></td>
 
-                            <td>
+                            <td class="text-center">
                                 <button data-toggle="modal" data-target="#edit_modal"
                                     value="<?php echo $ls['vendor_id']; ?>" class="edit_record btn btn-primary btn-xs"
                                     title="Edit">
                                     <i class="fa fa-edit"></i>
                                 </button>
-                            </td>
-                            <td>
                                 <?php if ($this->session->userdata(SESS_HD . 'level') == 'Admin') { ?>
                                     <button value="<?php echo $ls['vendor_id']; ?>" class="del_record btn btn-danger btn-xs"
                                         title="Delete">
@@ -309,7 +307,8 @@
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Balance Type</label>
-                                        <select name="balance_type" id="balance_type" class="form-control" required="true">
+                                        <select name="balance_type" id="balance_type" class="form-control"
+                                            required="true">
                                             <option value="CR">CR (Payable to Vendor)</option>
                                             <option value="DR">DR (Advance Paid to Vendor)</option>
                                         </select>
@@ -318,8 +317,8 @@
                                 <div class="row">
                                     <div class="form-group col-md-12">
                                         <label>Opening Amount</label>
-                                        <input class="form-control" type="number" step="0.01" name="opening_amount" id="opening_amount"
-                                            placeholder="0.000" required="true">
+                                        <input class="form-control" type="number" step="0.01" name="opening_amount"
+                                            id="opening_amount" placeholder="0.000" required="true">
                                     </div>
                                 </div>
                                 <div class="row">
@@ -388,18 +387,7 @@
 
 
 
-        </div>
-        <div class="box-footer">
-            <div class="form-group col-sm-6">
-                <label>Total Records : <?php echo $total_records; ?></label>
-            </div>
-            <div class="form-group col-sm-6">
-                <?php echo $pagination; ?>
-            </div>
-        </div>
-
-
-
+        </div> 
     </div>
 </section>
 
