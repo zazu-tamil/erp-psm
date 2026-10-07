@@ -31,7 +31,12 @@
 
                     <div class="form-group col-md-3">
                         <label for="srch_customer_id">Customer <span style="color:red;">*</span></label>
-                        <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, set_value('srch_customer_id', $srch_customer_id), 'id="srch_customer_id" class="form-control select2"'); ?>
+                        <?php echo form_dropdown('srch_customer_id', ['' => 'All'] + $customer_opt, set_value('srch_customer_id', $srch_customer_id), 'id="srch_customer_id" class="form-control select2" style="width: 100%;"'); ?>
+                    </div>
+
+                    <div class="form-group col-md-3">
+                        <label for="srch_vendor_id">Vendor</label>
+                        <?php echo form_dropdown('srch_vendor_id', ['' => 'All'] + $vendor_opt, set_value('srch_vendor_id', $srch_vendor_id), 'id="srch_vendor_id" class="form-control select2" style="width: 100%;"'); ?>
                     </div>
                 </div>
                 <div class="row">

@@ -797,6 +797,19 @@ class Vendor extends CI_Controller
             $data['srch_enquiry_no'] = $srch_enquiry_no = '';
         }
 
+        // Vendor Filter
+        if ($this->input->post('srch_vendor_id') !== null) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->input->post('srch_vendor_id');
+            $this->session->set_userdata('srch_vendor_id', $srch_vendor_id);
+        } elseif ($this->session->userdata('srch_vendor_id')) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->session->userdata('srch_vendor_id');
+        } else {
+            $data['srch_vendor_id'] = $srch_vendor_id = '';
+        }
+        if (!empty($srch_vendor_id)) {
+            $where .= " AND a.vendor_id = '" . $this->db->escape_str($srch_vendor_id) . "'";
+        }
+
         // Vendor RFQ Filter
         if ($this->input->post('srch_customer_rfq_no') !== null) {
             $data['srch_customer_rfq_no'] = $srch_customer_rfq_no = $this->input->post('srch_customer_rfq_no');
@@ -902,6 +915,19 @@ class Vendor extends CI_Controller
         foreach ($query->result_array() as $row) {
             $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
         }
+
+        $sql = "
+            SELECT vendor_id, vendor_name
+            FROM vendor_info 
+            WHERE status='Active' 
+            ORDER BY vendor_name ASC
+        ";
+        $query = $this->db->query($sql);
+        $data['vendor_opt'] = [];
+        foreach ($query->result_array() as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+        }
+
         $data['tender_enquiry_opt'] = [];
         if (!empty($srch_customer_id)) {
             // $sql = "
