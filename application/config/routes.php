@@ -177,6 +177,21 @@ $route['vendor-purchase-bill-print/(:num)'] = 'vendor/vendor_purchase_bill_print
 $route['vendor-purchase-bill-list'] = 'vendor/vendor_purchase_bill_list';
 $route['vendor-purchase-bill-list/(:num)'] = 'vendor/vendor_purchase_bill_list/$1';
 
+
+
+$route['vendor-purchase-bill-multiple-customer-add'] = 'Multiple_customer_vendor/vendor_purchase_bill_multiple_customer_add';
+$route['vendor-purchase-bill-multiple-customer-add/(:num)'] = 'Multiple_customer_vendor/vendor_purchase_bill_multiple_customer_add/$1';
+$route['vendor/get_multi_customer_po_items'] = 'Multiple_customer_vendor/get_multi_customer_po_items';
+
+
+$route['vendor-purchase-bill-multiple-customer-list'] = 'Multiple_customer_vendor/vendor_purchase_bill_multiple_customer_list';
+$route['vendor-purchase-bill-multiple-customer-list/(:num)'] = 'Multiple_customer_vendor/vendor_purchase_bill_multiple_customer_list/$1';
+
+$route['vendor-purchase-bill-multiple-customer-edit'] = 'Multiple_customer_vendor/vendor_purchase_bill_multiple_customer_edit';
+$route['vendor-purchase-bill-multiple-customer-edit/(:num)'] = 'Multiple_customer_vendor/vendor_purchase_bill_multiple_customer_edit/$1';
+
+
+
 $route['tender-invoice-add'] = 'tender/tender_invoice_add';
 $route['tender-invoice-list'] = 'tender/tender_po_invoice_list';
 $route['tender-invoice-list/(:num)'] = 'tender/tender_po_invoice_list/$1';
