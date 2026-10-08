@@ -1,21 +1,45 @@
 <?php
 // Function to convert amount to words
 if (!function_exists('voucher_amount_to_words')) {
-    function voucher_amount_to_words($amount, $currency_unit = 'rupees', $sub_unit = 'paise', $decimals = 3) {
+    function voucher_amount_to_words($amount, $currency_unit = 'rupees', $sub_unit = 'paise', $decimals = 3)
+    {
         $ones = array(
-            0 => '', 1 => 'one', 2 => 'two', 3 => 'three', 4 => 'four', 5 => 'five',
-            6 => 'six', 7 => 'seven', 8 => 'eight', 9 => 'nine', 10 => 'ten',
-            11 => 'eleven', 12 => 'twelve', 13 => 'thirteen', 14 => 'fourteen', 15 => 'fifteen',
-            16 => 'sixteen', 17 => 'seventeen', 18 => 'eighteen', 19 => 'nineteen'
+            0 => '',
+            1 => 'one',
+            2 => 'two',
+            3 => 'three',
+            4 => 'four',
+            5 => 'five',
+            6 => 'six',
+            7 => 'seven',
+            8 => 'eight',
+            9 => 'nine',
+            10 => 'ten',
+            11 => 'eleven',
+            12 => 'twelve',
+            13 => 'thirteen',
+            14 => 'fourteen',
+            15 => 'fifteen',
+            16 => 'sixteen',
+            17 => 'seventeen',
+            18 => 'eighteen',
+            19 => 'nineteen'
         );
         $tens = array(
-            2 => 'twenty', 3 => 'thirty', 4 => 'forty', 5 => 'fifty',
-            6 => 'sixty', 7 => 'seventy', 8 => 'eighty', 9 => 'ninety'
+            2 => 'twenty',
+            3 => 'thirty',
+            4 => 'forty',
+            5 => 'fifty',
+            6 => 'sixty',
+            7 => 'seventy',
+            8 => 'eighty',
+            9 => 'ninety'
         );
 
-        $num_to_words_group = function($n) use ($ones, $tens, &$num_to_words_group) {
-            $n = (int)$n;
-            if ($n == 0) return '';
+        $num_to_words_group = function ($n) use ($ones, $tens, &$num_to_words_group) {
+            $n = (int) $n;
+            if ($n == 0)
+                return '';
             $str = '';
             if ($n >= 10000000) {
                 $str .= $num_to_words_group(floor($n / 10000000)) . ' crore ';
@@ -43,7 +67,7 @@ if (!function_exists('voucher_amount_to_words')) {
             return trim($str);
         };
 
-        $amount = (float)$amount;
+        $amount = (float) $amount;
         $whole = floor($amount);
         $multiplier = pow(10, $decimals);
         $fraction = round(($amount - $whole) * $multiplier);
@@ -61,9 +85,9 @@ if (!function_exists('voucher_amount_to_words')) {
 
 // Extract view variables depending on whether called from vendor payment, cash outward, customer receipt, or cash inward
 if (!empty($payment)) {
-    $voucher_title = 'Voucher';
+    $voucher_title = 'Payment Voucher';
     $meta_no_label = 'Voucher No';
-    $vno_num = (int)($payment['payment_no'] ?? 0);
+    $vno_num = (int) ($payment['payment_no'] ?? 0);
     $voucher_no = $vno_num > 0 ? str_pad($vno_num, 4, '0', STR_PAD_LEFT) : '0000';
     $voucher_date = $payment['payment_date'] ?? date('d-m-Y');
     $company_name = !empty($payment['company_name']) ? $payment['company_name'] : 'AL HILLO TRADING CO W.L.L';
@@ -71,21 +95,49 @@ if (!empty($payment)) {
     $party_label = 'Vendor Name';
     $party_name = $payment['vendor_name'] ?? '-';
     $mode_label = 'Payment Mode';
-    
+
     // Payment mode text
     $payment_mode = $payment['payment_mode'] ?? 'Cash';
     if ($payment_mode === 'Cash') {
-        $payment_mode_text = 'Cash' . (!empty($payment['category_name']) ? ' (' . $payment['category_name'] . ')' : '');
+        $payment_mode_text = 'Cash';
     } elseif ($payment_mode === 'Bank') {
+        $payment_type = $payment['payment_type'] ?? '';
         $bank_extra = array();
-        if (!empty($payment['bank_name'])) $bank_extra[] = $payment['bank_name'];
-        if (!empty($payment['cheque_no'])) $bank_extra[] = 'Cheque: ' . $payment['cheque_no'];
-        $payment_mode_text = 'Bank' . (!empty($bank_extra) ? ' (' . implode(' - ', $bank_extra) . ')' : '');
+
+        if (strtolower($payment_type) === 'online') {
+            $bank_extra[] = 'Online';
+            if (!empty($payment['bank_name'])) {
+                $bank_extra[] = $payment['bank_name'];
+            }
+        } elseif (strtolower($payment_type) === 'cheque') {
+            $bank_extra[] = 'Cheque';
+            if (!empty($payment['cheque_date']) && $payment['cheque_date'] !== '0000-00-00' && $payment['cheque_date'] !== '1970-01-01') {
+                $bank_extra[] = 'Date: ' . date('d-m-Y', strtotime($payment['cheque_date']));
+            }
+            if (!empty($payment['cheque_no'])) {
+                $bank_extra[] = 'No: ' . $payment['cheque_no'];
+            }
+            if (!empty($payment['cheque_bank'])) {
+                $bank_extra[] = 'Bank: ' . $payment['cheque_bank'];
+            }
+        } else {
+            if (!empty($payment_type)) {
+                $bank_extra[] = $payment_type;
+            }
+            if (!empty($payment['bank_name'])) {
+                $bank_extra[] = $payment['bank_name'];
+            }
+            if (!empty($payment['cheque_no'])) {
+                $bank_extra[] = 'Cheque: ' . $payment['cheque_no'];
+            }
+        }
+
+        $payment_mode_text = (!empty($bank_extra) ? '' . implode(' | ', $bank_extra) . '' : '');
     } else {
         $payment_mode_text = $payment_mode;
     }
 
-    $amount = (float)($payment['amount'] ?? 0);
+    $amount = (float) ($payment['amount'] ?? 0);
     $curr_code = !empty($payment['currency_code']) ? strtoupper($payment['currency_code']) : '';
     if ($curr_code === 'USD') {
         $curr_symbol = '$';
@@ -112,36 +164,66 @@ if (!empty($payment)) {
     $receiver_sig_label = 'Receiver Signature';
 
 } elseif (!empty($outward)) {
-    $voucher_title = 'Voucher';
+    $voucher_title = 'Payment Voucher';
     $meta_no_label = 'Voucher No';
-    $vno_num = (int)($outward['vno'] ?? 0);
+    $vno_num = (int) ($outward['vno'] ?? 0);
     $voucher_no = $vno_num > 0 ? str_pad($vno_num, 4, '0', STR_PAD_LEFT) : '0000';
     $voucher_date = $outward['outward_date'] ?? date('d-m-Y');
     $company_name = !empty($outward['company_name']) ? $outward['company_name'] : 'AL HILLO TRADING CO W.L.L';
     $company_address = !empty($outward['company_address']) ? $outward['company_address'] : '';
     $party_label = 'Paid To';
     $mode_label = 'Payment Mode';
-    
+
     $party_parts = array();
-    if (!empty($outward['account_head_name'])) $party_parts[] = $outward['account_head_name'];
-    if (!empty($outward['sub_account_head_name'])) $party_parts[] = $outward['sub_account_head_name'];
-    if (!empty($outward['out_for'])) $party_parts[] = $outward['out_for'];
+    if (!empty($outward['account_head_name']))
+        $party_parts[] = $outward['account_head_name'];
+    if (!empty($outward['sub_account_head_name']))
+        $party_parts[] = $outward['sub_account_head_name'];
+    if (!empty($outward['out_for']))
+        $party_parts[] = $outward['out_for'];
     $party_name = !empty($party_parts) ? implode(' - ', $party_parts) : (!empty($outward['cash_received_by']) ? $outward['cash_received_by'] : '-');
 
     $ac_type = $outward['ac_type'] ?? 'Cash';
     if ($ac_type === 'Cash') {
-        $payment_mode_text = 'Cash' . (!empty($outward['category_name']) ? ' (' . $outward['category_name'] . ')' : '');
+        $payment_mode_text = 'Cash' ?? '';
     } elseif ($ac_type === 'Bank') {
+        $bank_type = $outward['bank_type'] ?? '';
         $bank_extra = array();
-        if (!empty($outward['bank_name'])) $bank_extra[] = $outward['bank_name'];
-        if (!empty($outward['bank_type'])) $bank_extra[] = $outward['bank_type'];
-        if (!empty($outward['cheque_no'])) $bank_extra[] = 'Cheque: ' . $outward['cheque_no'];
-        $payment_mode_text = 'Bank' . (!empty($bank_extra) ? ' (' . implode(' - ', $bank_extra) . ')' : '');
+
+        if (strtolower($bank_type) === 'online') {
+            $bank_extra[] = 'Online';
+            if (!empty($outward['bank_name'])) {
+                $bank_extra[] = $outward['bank_name'];
+            }
+        } elseif (strtolower($bank_type) === 'cheque') {
+            $bank_extra[] = 'Cheque';
+            if (!empty($outward['cheque_date']) && $outward['cheque_date'] !== '0000-00-00' && $outward['cheque_date'] !== '1970-01-01') {
+                $bank_extra[] = 'Date: ' . date('d-m-Y', strtotime($outward['cheque_date']));
+            }
+            if (!empty($outward['cheque_no'])) {
+                $bank_extra[] = 'No: ' . $outward['cheque_no'];
+            }
+            if (!empty($outward['cheque_bank'])) {
+                $bank_extra[] = 'Bank: ' . $outward['cheque_bank'];
+            }
+        } else {
+            if (!empty($bank_type)) {
+                $bank_extra[] = $bank_type;
+            }
+            if (!empty($outward['bank_name'])) {
+                $bank_extra[] = $outward['bank_name'];
+            }
+            if (!empty($outward['cheque_no'])) {
+                $bank_extra[] = 'Cheque: ' . $outward['cheque_no'];
+            }
+        }
+
+        $payment_mode_text = (!empty($bank_extra) ? implode(' | ', $bank_extra) : 'Bank');
     } else {
         $payment_mode_text = $ac_type;
     }
 
-    $amount = (float)($outward['amount'] ?? 0);
+    $amount = (float) ($outward['amount'] ?? 0);
     $curr_symbol = 'BD';
     $curr_unit = 'bahraini dinars';
     $sub_unit = 'fils';
@@ -155,7 +237,7 @@ if (!empty($payment)) {
 } elseif (!empty($receipt)) {
     $voucher_title = 'Receipt';
     $meta_no_label = 'Receipt No';
-    $rno_num = (int)($receipt['receipt_no'] ?? 0);
+    $rno_num = (int) ($receipt['receipt_no'] ?? 0);
     $voucher_no = $rno_num > 0 ? str_pad($rno_num, 4, '0', STR_PAD_LEFT) : '0000';
     $voucher_date = $receipt['receipt_date'] ?? date('d-m-Y');
     $company_name = !empty($receipt['company_name']) ? $receipt['company_name'] : 'AL HILLO TRADING CO W.L.L';
@@ -163,21 +245,49 @@ if (!empty($payment)) {
     $party_label = 'Received From';
     $party_name = $receipt['customer_name'] ?? '-';
     $mode_label = 'Receipt Mode';
-    
+
     // Receipt mode text
     $receipt_mode = $receipt['receipt_mode'] ?? 'Cash';
     if ($receipt_mode === 'Cash') {
-        $payment_mode_text = 'Cash' . (!empty($receipt['category_name']) ? ' (' . $receipt['category_name'] . ')' : '');
+        $payment_mode_text = 'Cash' ?? '';
     } elseif ($receipt_mode === 'Bank') {
+        $receipt_type = $receipt['receipt_type'] ?? '';
         $bank_extra = array();
-        if (!empty($receipt['bank_name'])) $bank_extra[] = $receipt['bank_name'];
-        if (!empty($receipt['cheque_no'])) $bank_extra[] = 'Cheque: ' . $receipt['cheque_no'];
-        $payment_mode_text = 'Bank' . (!empty($bank_extra) ? ' (' . implode(' - ', $bank_extra) . ')' : '');
+
+        if (strtolower($receipt_type) === 'online') {
+            $bank_extra[] = 'Online';
+            if (!empty($receipt['bank_name'])) {
+                $bank_extra[] = $receipt['bank_name'];
+            }
+        } elseif (strtolower($receipt_type) === 'cheque') {
+            $bank_extra[] = 'Cheque';
+            if (!empty($receipt['cheque_date']) && $receipt['cheque_date'] !== '0000-00-00' && $receipt['cheque_date'] !== '1970-01-01') {
+                $bank_extra[] = 'Date: ' . date('d-m-Y', strtotime($receipt['cheque_date']));
+            }
+            if (!empty($receipt['cheque_no'])) {
+                $bank_extra[] = 'No: ' . $receipt['cheque_no'];
+            }
+            if (!empty($receipt['cheque_bank'])) {
+                $bank_extra[] = 'Bank: ' . $receipt['cheque_bank'];
+            }
+        } else {
+            if (!empty($receipt_type)) {
+                $bank_extra[] = $receipt_type;
+            }
+            if (!empty($receipt['bank_name'])) {
+                $bank_extra[] = $receipt['bank_name'];
+            }
+            if (!empty($receipt['cheque_no'])) {
+                $bank_extra[] = 'Cheque: ' . $receipt['cheque_no'];
+            }
+        }
+
+        $payment_mode_text = (!empty($bank_extra) ? implode(' | ', $bank_extra) : 'Bank');
     } else {
         $payment_mode_text = $receipt_mode;
     }
 
-    $amount = (float)($receipt['amount'] ?? 0);
+    $amount = (float) ($receipt['amount'] ?? 0);
     $curr_code = !empty($receipt['currency_code']) ? strtoupper($receipt['currency_code']) : '';
     if ($curr_code === 'USD') {
         $curr_symbol = '$';
@@ -206,33 +316,62 @@ if (!empty($payment)) {
 } elseif (!empty($inward)) {
     $voucher_title = 'Receipt';
     $meta_no_label = 'Receipt No';
-    $rno_num = (int)($inward['vno'] ?? 0);
+    $rno_num = (int) ($inward['vno'] ?? 0);
     $voucher_no = $rno_num > 0 ? str_pad($rno_num, 4, '0', STR_PAD_LEFT) : '0000';
     $voucher_date = !empty($inward['inward_date']) ? date('d-m-Y', strtotime($inward['inward_date'])) : date('d-m-Y');
     $company_name = !empty($inward['company_name']) ? $inward['company_name'] : 'AL HILLO TRADING CO W.L.L';
     $company_address = !empty($inward['company_address']) ? $inward['company_address'] : '';
     $party_label = 'Received From';
     $mode_label = 'Receipt Mode';
-    
+
     $party_parts = array();
-    if (!empty($inward['account_head_name'])) $party_parts[] = $inward['account_head_name'];
-    if (!empty($inward['sub_account_head_name'])) $party_parts[] = $inward['sub_account_head_name'];
+    if (!empty($inward['account_head_name']))
+        $party_parts[] = $inward['account_head_name'];
+    if (!empty($inward['sub_account_head_name']))
+        $party_parts[] = $inward['sub_account_head_name'];
     $party_name = !empty($party_parts) ? implode(' - ', $party_parts) : '-';
 
     $ac_type = $inward['ac_type'] ?? 'Cash';
     if ($ac_type === 'Cash') {
-        $payment_mode_text = 'Cash' . (!empty($inward['category_name']) ? ' (' . $inward['category_name'] . ')' : '');
+        $payment_mode_text = 'Cash' ?? '';
     } elseif ($ac_type === 'Bank') {
+        $bank_type = $inward['bank_type'] ?? '';
         $bank_extra = array();
-        if (!empty($inward['bank_name'])) $bank_extra[] = $inward['bank_name'];
-        if (!empty($inward['bank_type'])) $bank_extra[] = $inward['bank_type'];
-        if (!empty($inward['cheque_no'])) $bank_extra[] = 'Cheque: ' . $inward['cheque_no'];
-        $payment_mode_text = 'Bank' . (!empty($bank_extra) ? ' (' . implode(' - ', $bank_extra) . ')' : '');
+
+        if (strtolower($bank_type) === 'online') {
+            $bank_extra[] = 'Online';
+            if (!empty($inward['bank_name'])) {
+                $bank_extra[] = $inward['bank_name'];
+            }
+        } elseif (strtolower($bank_type) === 'cheque') {
+            $bank_extra[] = 'Cheque';
+            if (!empty($inward['cheque_date']) && $inward['cheque_date'] !== '0000-00-00' && $inward['cheque_date'] !== '1970-01-01') {
+                $bank_extra[] = 'Date: ' . date('d-m-Y', strtotime($inward['cheque_date']));
+            }
+            if (!empty($inward['cheque_no'])) {
+                $bank_extra[] = 'No: ' . $inward['cheque_no'];
+            }
+            if (!empty($inward['cheque_bank'])) {
+                $bank_extra[] = 'Bank: ' . $inward['cheque_bank'];
+            }
+        } else {
+            if (!empty($bank_type)) {
+                $bank_extra[] = $bank_type;
+            }
+            if (!empty($inward['bank_name'])) {
+                $bank_extra[] = $inward['bank_name'];
+            }
+            if (!empty($inward['cheque_no'])) {
+                $bank_extra[] = 'Cheque: ' . $inward['cheque_no'];
+            }
+        }
+
+        $payment_mode_text = (!empty($bank_extra) ? implode(' | ', $bank_extra) : 'Bank');
     } else {
         $payment_mode_text = $ac_type;
     }
 
-    $amount = (float)($inward['amount'] ?? 0);
+    $amount = (float) ($inward['amount'] ?? 0);
     $curr_symbol = 'BD';
     $curr_unit = 'bahraini dinars';
     $sub_unit = 'fils';
@@ -265,6 +404,7 @@ if (!empty($payment)) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -277,12 +417,14 @@ if (!empty($payment)) {
             margin: 0;
             padding: 0;
         }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background: #f0f2f5;
             color: #000;
             padding: 30px 15px;
         }
+
         .action-bar {
             max-width: 950px;
             margin: 0 auto 15px auto;
@@ -290,26 +432,31 @@ if (!empty($payment)) {
             justify-content: flex-end;
             gap: 10px;
         }
+
         .voucher-box {
             max-width: 950px;
             margin: 0 auto;
             background: #fff;
             border: 2px solid #000;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
         }
+
         .header-table {
             width: 100%;
             border-collapse: collapse;
             border-bottom: 2px solid #000;
         }
+
         .header-table td {
             vertical-align: middle;
         }
+
         .company-col {
             padding: 16px 22px;
             width: 40%;
             line-height: 1.35;
         }
+
         .company-name {
             font-size: 19px;
             font-weight: 800;
@@ -317,6 +464,7 @@ if (!empty($payment)) {
             letter-spacing: 0.5px;
             color: #000;
         }
+
         .company-address {
             font-size: 12.5px;
             font-weight: 500;
@@ -324,62 +472,75 @@ if (!empty($payment)) {
             line-height: 1.35;
             margin-top: 5px;
         }
+
         .title-col {
-            font-size: 32px;
+            font-size: 22px;
             font-weight: 900;
             text-align: center;
             width: 32%;
             letter-spacing: 1px;
             padding: 20px 10px;
         }
+
         .meta-col {
             width: 28%;
             border-left: 2px solid #000;
             padding: 0;
         }
+
         .meta-item {
             padding: 10px 18px;
             font-size: 15px;
             font-weight: 700;
             white-space: nowrap;
         }
+
         .meta-divider {
             border-top: 1px solid #000;
         }
+
         .content-table {
             width: 100%;
             border-collapse: collapse;
         }
+
         .content-table tr {
             border-bottom: 1px solid #000;
         }
+
         .content-table tr:last-child {
             border-bottom: 2px solid #000;
         }
+
         .content-table td {
             padding: 14px 20px;
             font-size: 16px;
             vertical-align: top;
             line-height: 1.5;
         }
+
         .col-label {
             width: 190px;
             font-weight: 800;
             color: #111;
         }
+
         .col-colon {
             width: 35px;
             font-weight: 800;
             text-align: center;
         }
+
         .col-value {
             font-weight: 500;
             color: #000;
         }
+
         .amount-main {
             font-size: 17px;
             font-weight: 700;
         }
+
         .amount-sub {
             display: block;
             margin-top: 4px;
@@ -387,11 +548,13 @@ if (!empty($payment)) {
             font-weight: 400;
             color: #222;
         }
+
         .signatures-table {
             width: 100%;
             border-collapse: collapse;
             height: 140px;
         }
+
         .signatures-table td {
             width: 50%;
             height: 140px;
@@ -401,17 +564,21 @@ if (!empty($payment)) {
             font-size: 15.5px;
             font-weight: 700;
         }
+
         .sig-border {
             border-right: 2px solid #000;
         }
+
         @media print {
             body {
                 background: #fff !important;
                 padding: 0 !important;
             }
+
             .action-bar {
                 display: none !important;
             }
+
             .voucher-box {
                 border: 2px solid #000 !important;
                 box-shadow: none !important;
@@ -419,6 +586,7 @@ if (!empty($payment)) {
                 max-width: 100% !important;
                 width: 100% !important;
             }
+
             @page {
                 size: A4 portrait;
                 margin: 1.5cm 1cm;
@@ -426,11 +594,14 @@ if (!empty($payment)) {
         }
     </style>
 </head>
+
 <body>
 
     <div class="action-bar no-print">
-        <a href="<?php echo $back_url; ?>" onclick="goBack(event);" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back</a>
-        <button type="button" onclick="window.print()" class="btn btn-primary"><i class="fa fa-print"></i> Print <?php echo htmlspecialchars($voucher_title); ?></button>
+        <a href="<?php echo $back_url; ?>" onclick="goBack(event);" class="btn btn-default"><i
+                class="fa fa-arrow-left"></i> Back</a>
+        <button type="button" onclick="window.print()" class="btn btn-primary"><i class="fa fa-print"></i> Print
+            <?php echo htmlspecialchars($voucher_title); ?></button>
     </div>
 
     <div class="voucher-box">
@@ -448,7 +619,8 @@ if (!empty($payment)) {
                 </td>
                 <td class="meta-col">
                     <div class="meta-item">
-                        <?php echo htmlspecialchars($meta_no_label); ?> &nbsp;:&nbsp; <?php echo htmlspecialchars($voucher_no); ?>
+                        <?php echo htmlspecialchars($meta_no_label); ?> &nbsp;:&nbsp;
+                        <?php echo htmlspecialchars($voucher_no); ?>
                     </div>
                     <div class="meta-divider"></div>
                     <div class="meta-item">
@@ -474,7 +646,8 @@ if (!empty($payment)) {
                 <td class="col-label">Amount</td>
                 <td class="col-colon">:</td>
                 <td class="col-value">
-                    <span class="amount-main"><?php echo htmlspecialchars($curr_symbol) . ' ' . number_format($amount, 3); ?></span>
+                    <span
+                        class="amount-main"><?php echo htmlspecialchars($curr_symbol) . ' ' . number_format($amount, 3); ?></span>
                     <span class="amount-sub">(the sum of <?php echo htmlspecialchars($amount_in_words); ?>)</span>
                 </td>
             </tr>
@@ -500,7 +673,7 @@ if (!empty($payment)) {
             if (window.opener) {
                 if (e && e.preventDefault) e.preventDefault();
                 window.close();
-                setTimeout(function() {
+                setTimeout(function () {
                     window.location.href = "<?php echo $back_url; ?>";
                 }, 150);
                 return;
@@ -515,4 +688,5 @@ if (!empty($payment)) {
         }
     </script>
 </body>
+
 </html>
