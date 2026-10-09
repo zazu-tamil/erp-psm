@@ -21,6 +21,7 @@ class Menu_model extends CI_Model {
     {
         $this->ensure_split_reports_menu();
         $this->ensure_item_inward_outward_menu();
+        $this->ensure_multi_customer_bill_menu();
         $this->db->where('status !=', 'Delete');
         $this->db->order_by('parent_id', 'ASC');
         $this->db->order_by('sort_order', 'ASC');
@@ -502,6 +503,105 @@ class Menu_model extends CI_Model {
                         $this->db->where('role_id', $role_id)
                                  ->where('menu_id', $menu_id)
                                  ->update('role_permission', array('can_view' => 1));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Dynamically ensures that "Multi Customer Bill" menus exist in menu_info
+     * under "Supplier Invoice/Bill", with active status and permissions granted to all active roles.
+     */
+    public function ensure_multi_customer_bill_menu()
+    {
+        $parent = $this->db->where('menu_slug', 'vendor-purchase-bill-list')
+                           ->where('status !=', 'Delete')
+                           ->get('menu_info')
+                           ->row_array();
+        $parent_id = $parent ? (int)$parent['parent_id'] : 0;
+        if ($parent_id <= 0) {
+            $parent_menu = $this->db->where('menu_title', 'Supplier Invoice/Bill')
+                                    ->where('status !=', 'Delete')
+                                    ->get('menu_info')
+                                    ->row_array();
+            if ($parent_menu) {
+                $parent_id = (int)$parent_menu['menu_id'];
+            }
+        }
+
+        $menus_to_ensure = array(
+            array(
+                'slug'       => 'vendor-purchase-bill-multiple-customer-add',
+                'title'      => 'Add Multi Customer Bill Entry',
+                'icon'       => 'fa fa-plus-square',
+                'sort_order' => 3
+            ),
+            array(
+                'slug'       => 'vendor-purchase-bill-multiple-customer-list',
+                'title'      => 'Multi Customer Bill List',
+                'icon'       => 'fa fa-list',
+                'sort_order' => 4
+            ),
+        );
+
+        $ensured_ids = array();
+        foreach ($menus_to_ensure as $m) {
+            $existing = $this->db->where('menu_slug', $m['slug'])
+                                 ->where('status !=', 'Delete')
+                                 ->get('menu_info')
+                                 ->row_array();
+            if (!$existing) {
+                $this->db->insert('menu_info', array(
+                    'parent_id'   => $parent_id,
+                    'menu_title'  => $m['title'],
+                    'menu_slug'   => $m['slug'],
+                    'menu_icon'   => $m['icon'],
+                    'is_header'   => 0,
+                    'sort_order'  => $m['sort_order'],
+                    'status'      => 'Active'
+                ));
+                $ensured_ids[] = $this->db->insert_id();
+            } else {
+                $m_id = (int)$existing['menu_id'];
+                $ensured_ids[] = $m_id;
+                $upd = array(
+                    'status'     => 'Active',
+                    'menu_title' => $m['title'],
+                    'menu_icon'  => $m['icon']
+                );
+                if ($parent_id > 0 && empty($existing['parent_id'])) {
+                    $upd['parent_id'] = $parent_id;
+                }
+                $this->db->where('menu_id', $m_id)->update('menu_info', $upd);
+            }
+        }
+
+        if (!empty($ensured_ids)) {
+            $roles = $this->db->where('status !=', 'Delete')->get('role_info')->result_array();
+            if (!empty($roles)) {
+                foreach ($roles as $role) {
+                    $role_id = (int)$role['role_id'];
+                    foreach ($ensured_ids as $mid) {
+                        if ($mid > 0) {
+                            $has_perm = $this->db->where('role_id', $role_id)
+                                                 ->where('menu_id', $mid)
+                                                 ->count_all_results('role_permission');
+                            if ($has_perm == 0) {
+                                $this->db->insert('role_permission', array(
+                                    'role_id'    => $role_id,
+                                    'menu_id'    => $mid,
+                                    'can_view'   => 1,
+                                    'can_add'    => 1,
+                                    'can_edit'   => 1,
+                                    'can_delete' => 1
+                                ));
+                            } else {
+                                $this->db->where('role_id', $role_id)
+                                         ->where('menu_id', $mid)
+                                         ->update('role_permission', array('can_view' => 1));
+                            }
+                        }
                     }
                 }
             }

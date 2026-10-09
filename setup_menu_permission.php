@@ -225,6 +225,8 @@ $menu = array(
                 'c' => array(
                     array('t' => 'Add Supplier Bill Entry', 's' => 'vendor-purchase-bill-add', 'i' => 'fa fa-plus-square'),
                     array('t' => 'Supplier Bill List', 's' => 'vendor-purchase-bill-list', 'i' => 'fa fa-list'),
+                    array('t' => 'Add Multi Customer Bill Entry', 's' => 'vendor-purchase-bill-multiple-customer-add', 'i' => 'fa fa-plus-square'),
+                    array('t' => 'Multi Customer Bill List', 's' => 'vendor-purchase-bill-multiple-customer-list', 'i' => 'fa fa-list'),
                     array('t' => 'Local Supplier Bill List', 's' => 'local-purchase-bill-list', 'i' => 'fa fa-list'),
                     array('t' => 'Delivery Partner Bill List', 's' => 'delivery-partner-bill-list', 'i' => 'fa fa-list'),
                     array('t' => 'Customs Bill List', 's' => 'customs-bill-list', 'i' => 'fa fa-list'),

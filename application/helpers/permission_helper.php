@@ -188,6 +188,8 @@ if (!function_exists('has_perm')) {
             'vendor-pur-inward-edit'         => array('slug' => 'vendor-pur-inward-list', 'action' => 'edit'),
             'vendor-purchase-bill-add'       => array('slug' => 'vendor-purchase-bill-list', 'action' => 'add'),
             'vendor-purchase-bill-edit'      => array('slug' => 'vendor-purchase-bill-list', 'action' => 'edit'),
+            'vendor-purchase-bill-multiple-customer-add'  => array('slug' => 'vendor-purchase-bill-multiple-customer-list', 'action' => 'add'),
+            'vendor-purchase-bill-multiple-customer-edit' => array('slug' => 'vendor-purchase-bill-multiple-customer-list', 'action' => 'edit'),
             'credit-debit-note-add'          => array('slug' => 'credit-debit-note-list', 'action' => 'add'),
             'credit-debit-note-edit'         => array('slug' => 'credit-debit-note-list', 'action' => 'edit'),
             'customer-invoice-pending-report' => array('slug' => 'customer-pending-invoice-report', 'action' => 'view'),

@@ -229,6 +229,9 @@ $vendor_m_grp = [
     'vendor-purchase-bill-add',
     'vendor-purchase-bill-list',
     'vendor-purchase-bill-edit',
+    'vendor-purchase-bill-multiple-customer-add',
+    'vendor-purchase-bill-multiple-customer-list',
+    'vendor-purchase-bill-multiple-customer-edit',
     'local-purchase-bill-list',
     'delivery-partner-bill-list',
     'customs-bill-list',
@@ -328,7 +331,7 @@ $vendor_m_grp = [
         </li>
 
         <li
-            class="treeview <?= in_array($current_page, ['vendor-purchase-bill-add', 'vendor-purchase-bill-list', 'vendor-purchase-bill-edit', 'local-purchase-bill-list', 'delivery-partner-bill-list', 'customs-bill-list']) ? 'active' : '' ?>">
+            class="treeview <?= in_array($current_page, ['vendor-purchase-bill-add', 'vendor-purchase-bill-list', 'vendor-purchase-bill-edit', 'vendor-purchase-bill-multiple-customer-add', 'vendor-purchase-bill-multiple-customer-list', 'vendor-purchase-bill-multiple-customer-edit', 'local-purchase-bill-list', 'delivery-partner-bill-list', 'customs-bill-list']) ? 'active' : '' ?>">
             <a href="#">
                 <i class="fa fa-files-o"></i> Supplier Invoice/Bill
                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
@@ -341,6 +344,12 @@ $vendor_m_grp = [
                 <li class="<?= ($current_page === 'vendor-purchase-bill-list') ? 'active' : '' ?>">
                     <a href="<?= site_url('vendor-purchase-bill-list') ?>"><i class="fa fa-list"></i> Supplier Bill
                         List</a>
+                </li>
+                <li class="<?= ($current_page === 'vendor-purchase-bill-multiple-customer-add') ? 'active' : '' ?>">
+                    <a href="<?= site_url('vendor-purchase-bill-multiple-customer-add') ?>"><i class="fa fa-plus-square"></i> Add Multi Customer Bill Entry</a>
+                </li>
+                <li class="<?= ($current_page === 'vendor-purchase-bill-multiple-customer-list') ? 'active' : '' ?>">
+                    <a href="<?= site_url('vendor-purchase-bill-multiple-customer-list') ?>"><i class="fa fa-list"></i> Multi Customer Bill List</a>
                 </li>
 
                 <li class="<?= ($current_page === 'local-purchase-bill-list') ? 'active' : '' ?>">

@@ -46,7 +46,7 @@ class Multiple_customer_vendor extends CI_Controller
             $header = [
                 'company_id' => $this->input->post('srch_company_id'),
                 'vendor_id' => $this->input->post('srch_vendor_id'),
-                 'vendor_contact_person_id' => $this->input->post('srch_vendor_contact_person_id'),
+                'vendor_contact_person_id' => $this->input->post('srch_vendor_contact_person_id'),
                 'invoice_date' => $this->input->post('invoice_date'),
                 'entry_date' => $this->input->post('entry_date'),
                 'invoice_no' => $this->input->post('invoice_no'),
@@ -153,7 +153,7 @@ class Multiple_customer_vendor extends CI_Controller
 
             }
 
-            redirect('vendor-purchase-bill-multiple customer-add');
+            redirect('vendor-purchase-bill-multiple-customer-list');
         }
 
         $sql = "
@@ -251,6 +251,11 @@ class Multiple_customer_vendor extends CI_Controller
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in')) {
             redirect();
+        }
+
+        if (!authorize_page()) {
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
         }
 
         $data = array();
@@ -369,7 +374,7 @@ class Multiple_customer_vendor extends CI_Controller
             LEFT JOIN company_info as ci on a.company_id = ci.company_id and ci.status = 'Active'
             WHERE a.status != 'Delete' AND $where 
             ORDER BY a.invoice_date desc, a.vendor_purchase_multiple_invoice_id DESC
-            LIMIT " . (int)$this->uri->segment(2, 0) . ", " . (int)$config['per_page'];
+            LIMIT " . (int) $this->uri->segment(2, 0) . ", " . (int) $config['per_page'];
 
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();
@@ -683,7 +688,7 @@ class Multiple_customer_vendor extends CI_Controller
                         'addt_charges_tot_amt' => $addt_charges_tot_amt[$chk_id] ?? 0,
                         'status' => 'Active'
                     ];
-                    
+
                     if (!empty($vendor_purchase_multiple_invoice_addtchrg_id[$chk_id]) && $vendor_purchase_multiple_invoice_addtchrg_id[$chk_id] > 0) {
                         $this->db->where('vendor_purchase_multiple_invoice_addtchrg_id', $vendor_purchase_multiple_invoice_addtchrg_id[$chk_id]);
                         $this->db->update('vendor_purchase_multiple_invoice_addtchrg_info', $addt_charges_data);
@@ -742,7 +747,7 @@ class Multiple_customer_vendor extends CI_Controller
         $this->db->where('status', 'Active');
         $query = $this->db->get('vendor_purchase_multiple_invoice_addtchrg_info');
         $saved_addt_charges = $query->result_array();
-        
+
         $data['saved_addt_charges'] = [];
         foreach ($saved_addt_charges as $sac) {
             $data['saved_addt_charges'][$sac['addt_charges_type_id']] = $sac;
