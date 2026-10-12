@@ -76,15 +76,18 @@
                         <label for="srch_receipt_mode">Receipt Mode</label>
                         <?php echo form_dropdown('srch_receipt_mode', ['' => 'All', 'Cash' => 'Cash', 'Bank' => 'Bank'], $srch_receipt_mode ?? '', 'id="srch_receipt_mode" class="form-control" onchange="toggleReceiptModeFilters()"'); ?>
                     </div>
-                    <div class="form-group col-md-2 srch_receipt_type_div" style="display: <?php echo (($srch_receipt_mode ?? '') == 'Bank') ? 'block' : 'none'; ?>;">
+                    <div class="form-group col-md-2 srch_receipt_type_div"
+                        style="display: <?php echo (($srch_receipt_mode ?? '') == 'Bank') ? 'block' : 'none'; ?>;">
                         <label for="srch_receipt_type">Receipt Type</label>
                         <?php echo form_dropdown('srch_receipt_type', ['' => 'All', 'Online' => 'Online', 'Cheque' => 'Cheque'], $srch_receipt_type ?? '', 'id="srch_receipt_type" class="form-control"'); ?>
                     </div>
-                    <div class="form-group col-md-2 srch_bank_div" style="display: <?php echo (($srch_receipt_mode ?? '') == 'Bank') ? 'block' : 'none'; ?>;">
+                    <div class="form-group col-md-2 srch_bank_div"
+                        style="display: <?php echo (($srch_receipt_mode ?? '') == 'Bank') ? 'block' : 'none'; ?>;">
                         <label>Bank</label>
                         <?php echo form_dropdown('srch_bank_id', ['' => 'All'] + $bank_opt, $srch_bank_id ?? '', 'id="srch_bank_id" class="form-control"'); ?>
                     </div>
-                    <div class="form-group col-md-2 srch_cash_category_div" style="display: <?php echo (($srch_receipt_mode ?? '') == 'Cash') ? 'block' : 'none'; ?>;">
+                    <div class="form-group col-md-2 srch_cash_category_div"
+                        style="display: <?php echo (($srch_receipt_mode ?? '') == 'Cash') ? 'block' : 'none'; ?>;">
                         <label>Cash Category</label>
                         <?php echo form_dropdown('srch_cash_category_id', ['' => 'All'] + $cash_categories_opt, $srch_cash_category_id ?? '', 'id="srch_cash_category_id" class="form-control"'); ?>
                     </div>
@@ -100,34 +103,34 @@
                     var typeDiv = document.querySelector('.srch_receipt_type_div');
                     var bankDiv = document.querySelector('.srch_bank_div');
                     var cashDiv = document.querySelector('.srch_cash_category_div');
-                    
+
                     if (mode === 'Bank') {
-                        if(typeDiv) typeDiv.style.display = 'block';
-                        if(bankDiv) bankDiv.style.display = 'block';
-                        if(cashDiv) {
+                        if (typeDiv) typeDiv.style.display = 'block';
+                        if (bankDiv) bankDiv.style.display = 'block';
+                        if (cashDiv) {
                             cashDiv.style.display = 'none';
                             document.getElementById('srch_cash_category_id').value = '';
                         }
                     } else if (mode === 'Cash') {
-                        if(cashDiv) cashDiv.style.display = 'block';
-                        if(typeDiv) {
+                        if (cashDiv) cashDiv.style.display = 'block';
+                        if (typeDiv) {
                             typeDiv.style.display = 'none';
                             document.getElementById('srch_receipt_type').value = '';
                         }
-                        if(bankDiv) {
+                        if (bankDiv) {
                             bankDiv.style.display = 'none';
                             document.getElementById('srch_bank_id').value = '';
                         }
                     } else {
-                        if(typeDiv) {
+                        if (typeDiv) {
                             typeDiv.style.display = 'none';
                             document.getElementById('srch_receipt_type').value = '';
                         }
-                        if(bankDiv) {
+                        if (bankDiv) {
                             bankDiv.style.display = 'none';
                             document.getElementById('srch_bank_id').value = '';
                         }
-                        if(cashDiv) {
+                        if (cashDiv) {
                             cashDiv.style.display = 'none';
                             document.getElementById('srch_cash_category_id').value = '';
                         }
@@ -180,8 +183,10 @@
                                     <br>(<?php echo $ls['bank_name'] ?? ''; ?>)
                                     <?php if ($ls['receipt_type'] == 'Cheque' && !empty($ls['cheque_no'])): ?>
                                         <br><small class='text-muted'>Chq: <?php echo htmlspecialchars($ls['cheque_no']); ?>
-                                        <?php if(!empty($ls['cheque_date']) && $ls['cheque_date'] != '0000-00-00'): ?> | Dt: <?php echo date('d-m-Y', strtotime($ls['cheque_date'])); ?><?php endif; ?>
-                                        <?php if(!empty($ls['cheque_bank'])): ?> | Bk: <?php echo htmlspecialchars($ls['cheque_bank']); ?><?php endif; ?>
+                                            <?php if (!empty($ls['cheque_date']) && $ls['cheque_date'] != '0000-00-00'): ?> | Dt:
+                                                <?php echo date('d-m-Y', strtotime($ls['cheque_date'])); ?>            <?php endif; ?>
+                                            <?php if (!empty($ls['cheque_bank'])): ?> | Bk:
+                                                <?php echo htmlspecialchars($ls['cheque_bank']); ?>            <?php endif; ?>
                                         </small>
                                     <?php endif; ?>
                                 <?php elseif ($ls['receipt_mode'] == 'Cash'): ?>
@@ -343,12 +348,24 @@
                                 </label>
                             </div>
 
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-4">
+                                <label>Allocation Mode <span class="text-red">*</span></label><br>
+                                <label class="radio-inline">
+                                    <input type="radio" name="allocation_mode" value="auto" checked>
+                                    <strong><i class="fa fa-magic text-warning"></i> Auto Allocate</strong>
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="allocation_mode" value="manual">
+                                    <strong><i class="fa fa-hand-pointer-o text-primary"></i> Manual</strong>
+                                </label>
+                            </div>
+
+                            <div class="form-group col-md-5">
                                 <label>Amount <span class="text-red">*</span></label>
                                 <div class="input-group">
                                     <input type="text" name="amount" id="add_grand_total_amount"
                                         class="form-control text-right" placeholder="0.000">
-                                    <span class="input-group-btn">
+                                    <span class="input-group-btn" id="add_auto_allocate_btn_container">
                                         <button type="button" class="btn btn-warning btn-sm" id="add_auto_allocate_btn"
                                             title="Auto allocate receipt oldest invoice first"
                                             style="height:34px; white-space:nowrap;">
@@ -514,12 +531,24 @@
                                 </label>
                             </div>
 
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-4">
+                                <label>Allocation Mode <span class="text-red">*</span></label><br>
+                                <label class="radio-inline">
+                                    <input type="radio" name="allocation_mode" value="auto" checked>
+                                    <strong><i class="fa fa-magic text-warning"></i> Auto Allocate</strong>
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="allocation_mode" value="manual">
+                                    <strong><i class="fa fa-hand-pointer-o text-primary"></i> Manual</strong>
+                                </label>
+                            </div>
+
+                            <div class="form-group col-md-5">
                                 <label>Amount <span class="text-red">*</span></label>
                                 <div class="input-group">
                                     <input type="text" name="amount" id="edit_grand_total_amount"
                                         class="form-control text-right" placeholder="0.000">
-                                    <span class="input-group-btn">
+                                    <span class="input-group-btn" id="edit_auto_allocate_btn_container">
                                         <button type="button" class="btn btn-warning btn-sm" id="edit_auto_allocate_btn"
                                             title="Auto allocate receipt oldest invoice first"
                                             style="height:34px; white-space:nowrap;">

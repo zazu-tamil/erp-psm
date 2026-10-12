@@ -45,6 +45,16 @@ class Payment extends CI_Controller
                 ]
             ]);
         }
+        if (!$this->db->field_exists('allocation_mode', 'tender_receipt_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('tender_receipt_info', [
+                'allocation_mode' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 20,
+                    'default' => 'auto'
+                ]
+            ]);
+        }
         if (!$this->db->field_exists('bill_type', 'tender_receipt_invoice_info')) {
             $this->load->dbforge();
             $this->dbforge->add_column('tender_receipt_invoice_info', [
@@ -79,6 +89,7 @@ class Payment extends CI_Controller
                 'amount' => $this->input->post('amount'),
                 'is_without_bill' => $this->input->post('is_without_bill') ? 1 : 0,
                 'without_bill_amount' => $this->input->post('without_bill_amount') ?: 0.000,
+                'allocation_mode' => $this->input->post('allocation_mode') ?: 'auto',
                 'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
@@ -148,6 +159,7 @@ class Payment extends CI_Controller
                 'amount' => $this->input->post('amount'),
                 'is_without_bill' => $this->input->post('is_without_bill') ? 1 : 0,
                 'without_bill_amount' => $this->input->post('without_bill_amount') ?: 0.000,
+                'allocation_mode' => $this->input->post('allocation_mode') ?: 'auto',
                 'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
@@ -1052,7 +1064,7 @@ class Payment extends CI_Controller
                 )
             )";
         }
-        
+
         if ($this->input->post('srch_payment_mode') !== null) {
             $data['srch_payment_mode'] = $srch_payment_mode = $this->input->post('srch_payment_mode');
             $this->session->set_userdata('vendor_payment_srch_payment_mode', $srch_payment_mode);
