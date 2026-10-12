@@ -46,13 +46,13 @@
         }
 
         /* Header cell — contains the company letterhead image */
-        table.page-table > thead > tr > td {
+        table.page-table>thead>tr>td {
             /* padding: 6mm 10mm 3mm 10mm; */
-             padding: 0;
+            padding: 0;
             text-align: center;
         }
 
-        table.page-table > thead > tr > td img {
+        table.page-table>thead>tr>td img {
             width: 100%;
             max-height: 200px;
             display: block;
@@ -61,7 +61,7 @@
         }
 
         /* Body cell — contains all invoice content */
-        table.page-table > tbody > tr > td {
+        table.page-table>tbody>tr>td {
             padding: 2mm 10mm 10mm 10mm;
             vertical-align: top;
         }
@@ -89,7 +89,9 @@
             margin-left: 30px;
         }
 
-        .reference-line { margin-bottom: 5px; }
+        .reference-line {
+            margin-bottom: 5px;
+        }
 
         /* ── CUSTOMER SECTION ── */
         .customer-section {
@@ -99,11 +101,21 @@
             min-height: 80px;
         }
 
-        .customer-label   { font-weight: bold; margin-bottom: 5px; }
-        .customer-address { line-height: 1.5; font-size: 9.5pt; }
+        .customer-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .customer-address {
+            line-height: 1.5;
+            font-size: 9.5pt;
+        }
 
         /* ── CURRENCY BADGE ── */
-        .currency-badge { text-align: right; margin: 10px 0; }
+        .currency-badge {
+            text-align: right;
+            margin: 10px 0;
+        }
 
         .currency-badge span {
             display: inline-block;
@@ -124,12 +136,12 @@
 
         .items-table thead {
             background: #ffffff;
-           border: 1px solid #b4b4b4;
+            border: 1px solid #b4b4b4;
         }
 
         .items-table thead th {
             padding: 8px 5px;
-           border: 1px solid #b4b4b4;
+            border: 1px solid #b4b4b4;
             font-weight: bold;
             text-align: center;
             font-size: 9pt;
@@ -137,33 +149,46 @@
 
         .items-table tbody td {
             padding: 6px 5px;
-           border: 1px solid #b4b4b4;
+            border: 1px solid #b4b4b4;
             vertical-align: top;
             font-size: 9pt;
         }
 
-        .items-table tbody tr { background: #fff; }
+        .items-table tbody tr {
+            background: #fff;
+        }
 
-        .item-description { font-size: 8.5pt; line-height: 1.4; }
-        .item-code        { font-weight: 600; margin-bottom: 3px; }
+        .item-description {
+            font-size: 8.5pt;
+            line-height: 1.4;
+        }
+
+        .item-code {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
 
         /* ── BANK DETAILS ── */
         .bank-details-section {
             background: #ffffff;
             padding: 8px;
-           border: 1px solid #b4b4b4;
+            border: 1px solid #b4b4b4;
             font-size: 8.5pt;
             line-height: 1.5;
         }
 
-        .bank-details-title { font-weight: bold; margin-bottom: 5px; text-decoration: underline; }
+        .bank-details-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-decoration: underline;
+        }
 
         /* ── SUMMARY ROWS ── */
         .summary-row {
             display: flex;
             justify-content: space-between;
             padding: 8px 10px;
-           border: 1px solid #b4b4b4;
+            border: 1px solid #b4b4b4;
             border-bottom: none;
             font-weight: bold;
             font-size: 10pt;
@@ -181,16 +206,23 @@
             margin: 10px 0;
             padding: 10px;
             background: #ffffff;
-           border: 1px solid #b4b4b4;
+            border: 1px solid #b4b4b4;
             font-weight: bold;
             font-size: 10pt;
             line-height: 1.5;
         }
 
-        .payment-terms { margin: 15px 0; font-size: 9.5pt; font-weight: bold; }
+        .payment-terms {
+            margin: 15px 0;
+            font-size: 9.5pt;
+            font-weight: bold;
+        }
 
         /* ── SIGNATURE ── */
-        .signature-section { margin-top: 30px; text-align: right; }
+        .signature-section {
+            margin-top: 30px;
+            text-align: right;
+        }
 
         .signature-box {
             display: inline-block;
@@ -198,15 +230,35 @@
             min-width: 250px;
         }
 
-        .signature-company { font-size: 10pt; }
-        .signature-line    { border-top: 1px solid #000; margin: 5px 0; }
+        .signature-company {
+            font-size: 10pt;
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            margin: 5px 0;
+        }
 
         /* ── UTILITY ── */
-        .text-center { text-align: center; }
-        .text-right  { text-align: right;  }
-        .text-left   { text-align: left;   }
-        .label-bold  { font-weight: bold;  }
-        .inline-label{ display: inline;    }
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        .label-bold {
+            font-weight: bold;
+        }
+
+        .inline-label {
+            display: inline;
+        }
 
         /* ── BUTTONS ── */
         .button-container {
@@ -229,28 +281,44 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
-        .btn-primary { background: #0066cc; color: #fff; }
-        .btn-primary:hover { background: #0052a3; transform: translateY(-2px); }
-        .btn-success { background: #28a745; color: #fff; }
-        .btn-success:hover { background: #218838; transform: translateY(-2px); }
+        .btn-primary {
+            background: #0066cc;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #0052a3;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
 
         /* ══════════════════════════════════════════
            PRINT STYLES
            ══════════════════════════════════════════ */
-         @page {
-             size: A4;
-             /* margin-top: 5mm;
+        @page {
+            size: A4;
+            /* margin-top: 5mm;
              margin-bottom: 15mm;
              margin-left: 5mm;
              margin-right: 5mm; */
-             margin: 10mm;
-             @bottom-right {
-                 content: "Page " counter(page);
-                 font-size: 11px;
-                 font-family: Arial, Helvetica, sans-serif;
-                 padding-right: 15mm;
-             }
-         }
+            margin: 10mm;
+
+            @bottom-right {
+                content: "Page " counter(page);
+                font-size: 11px;
+                font-family: Arial, Helvetica, sans-serif;
+                padding-right: 15mm;
+            }
+        }
 
         * @media print {
             body {
@@ -266,16 +334,18 @@
                 box-shadow: none;
             }
 
-             
-            table.page-table > thead {
+
+            table.page-table>thead {
                 display: table-header-group;
             }
 
-            table.page-table > tbody {
+            table.page-table>tbody {
                 display: table-row-group;
             }
 
-            .button-container { display: none; }
+            .button-container {
+                display: none;
+            }
 
             .items-table thead {
                 background: #ffffff !important;
@@ -296,11 +366,12 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
-        }  
+        }
 
-            @media print {
+        @media print {
 
-            html, body {
+            html,
+            body {
                 margin: 0;
                 padding: 0;
             }
@@ -320,7 +391,9 @@
                 display: table-row-group;
             }
 
-             .button-container { display: none; }
+            .button-container {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -333,15 +406,46 @@
     // Function to convert number to words in Bahraini Dinar format
     function convertAmountToWords($amount, $currency = 'BHD', $decimal_point = 3)
     {
-        $ones = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten',
-                 'Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
-        $tens = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
-        $hundreds = ['','One Hundred','Two Hundred','Three Hundred','Four Hundred','Five Hundred',
-                     'Six Hundred','Seven Hundred','Eight Hundred','Nine Hundred'];
+        $ones = [
+            '',
+            'One',
+            'Two',
+            'Three',
+            'Four',
+            'Five',
+            'Six',
+            'Seven',
+            'Eight',
+            'Nine',
+            'Ten',
+            'Eleven',
+            'Twelve',
+            'Thirteen',
+            'Fourteen',
+            'Fifteen',
+            'Sixteen',
+            'Seventeen',
+            'Eighteen',
+            'Nineteen'
+        ];
+        $tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+        $hundreds = [
+            '',
+            'One Hundred',
+            'Two Hundred',
+            'Three Hundred',
+            'Four Hundred',
+            'Five Hundred',
+            'Six Hundred',
+            'Seven Hundred',
+            'Eight Hundred',
+            'Nine Hundred'
+        ];
 
         function convertNumberToWords($number, $ones, $tens, $hundreds)
         {
-            if ($number == 0) return 'Zero';
+            if ($number == 0)
+                return 'Zero';
             $words = '';
             if ($number >= 1000000) {
                 $millions = floor($number / 1000000);
@@ -367,10 +471,10 @@
             return trim($words);
         }
 
-        $amount       = floatval($amount);
-        $amount       = round($amount, $decimal_point);
+        $amount = floatval($amount);
+        $amount = round($amount, $decimal_point);
         $integer_part = floor($amount);
-        $multiplier   = pow(10, $decimal_point);
+        $multiplier = pow(10, $decimal_point);
         $decimal_part = round(($amount - $integer_part) * $multiplier);
 
         if ($decimal_part >= $multiplier) {
@@ -383,14 +487,14 @@
             : 'Zero';
 
         if ($decimal_part > 0) {
-            if($currency == 'BHD') {
+            if ($currency == 'BHD') {
                 $words .= ' & Fils ' . $decimal_part . '/' . $multiplier;
-            } elseif($currency == 'EUR') {
+            } elseif ($currency == 'EUR') {
                 $words .= ' & Cents ' . $decimal_part . '/' . $multiplier;
             } else {
                 $words .= ' & ' . $decimal_part . '/' . $multiplier;
             }
-             
+
         }
 
         return $words;
@@ -411,8 +515,7 @@
                 <tr>
                     <td>
                         <?php if (!empty($record['ltr_header_img'])): ?>
-                            <img src="<?php echo base_url('') . $record['ltr_header_img']; ?>"
-                                 alt="Company Header">
+                            <img src="<?php echo base_url('') . $record['ltr_header_img']; ?>" alt="Company Header">
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -428,13 +531,15 @@
                             <?php if ($record['vat_payer_sales_grp'] == 'Exports (Line 5 of the VAT Return)'): ?>
                                 <div class="invoice-title">EXPORT INVOICE</div>
                                 <div style="float:right; text-align:right;">
-                                    Date : <?php echo htmlspecialchars(date('d/m/Y', strtotime($record['invoice_date']))); ?><br>
+                                    Date :
+                                    <?php echo htmlspecialchars(date('d/m/Y', strtotime($record['invoice_date']))); ?><br>
                                     Invoice No: <?php echo htmlspecialchars($record['invoice_no'] ?? 'N/A'); ?>
                                 </div>
                             <?php else: ?>
                                 <div class="invoice-title">TAX INVOICE</div>
                                 <div style="float:right; text-align:right;">
-                                    Date : <?php echo htmlspecialchars(date('d/m/Y', strtotime($record['invoice_date']))); ?><br>
+                                    Date :
+                                    <?php echo htmlspecialchars(date('d/m/Y', strtotime($record['invoice_date']))); ?><br>
                                     Invoice No: <?php echo htmlspecialchars($record['invoice_no'] ?? 'N/A'); ?>
                                 </div>
                             <?php endif; ?>
@@ -481,14 +586,14 @@
 
                         <!-- Currency Badge -->
                         <?php
-                        $decimal_point  = isset($record['decimal_point']) ? intval($record['decimal_point']) : 3;
-                        $currency_code  = $record['currency_code'] ?? 'BHD';
+                        $decimal_point = isset($record['decimal_point']) ? intval($record['decimal_point']) : 3;
+                        $currency_code = $record['currency_code'] ?? 'BHD';
 
-                        $subtotal  = 0;
+                        $subtotal = 0;
                         $total_vat = 0;
                         if (!empty($item_list)) {
                             foreach ($item_list as $item) {
-                                $subtotal  += floatval($item['Net_amount'] ?? 0);
+                                $subtotal += floatval($item['Net_amount'] ?? 0);
                                 $total_vat += (floatval($item['Net_amount'] ?? 0) * floatval($item['gst'] ?? 0)) / 100;
                             }
                         }
@@ -516,21 +621,22 @@
                                 <?php
                                 $total_net_amount = 0;
                                 $total_vat_amount = 0;
-                                $grand_total      = 0;
+                                $grand_total = 0;
 
                                 if (!empty($item_list)):
                                     foreach ($item_list as $i => $item):
-                                        $qty            = $item['qty']  ?? 0;
-                                        $rate           = $item['rate'] ?? 0;
-                                        $net            = $item['Net_Amount'] ?? ($qty * $rate);
-                                        $vat_percentage = $item['gst']  ?? 0;
-                                        $vat_amount     = ($net * $vat_percentage) / 100;
-                                        $vat           = $net * $vat_percentage / 100;
+                                        $qty = $item['qty'] ?? 0;
+                                        $rate = $item['rate'] ?? 0;
+                                        $net = $item['Net_Amount'] ?? ($qty * $rate);
+                                        $vat_percentage = $item['gst'] ?? 0;
+                                        $vat_amount = ($net * $vat_percentage) / 100;
+                                        $vat = $net * $vat_percentage / 100;
                                         $total_net_amount += $net;
                                         $total_vat_amount += $vat_amount;
-                                         if (!isset($tot_vat[$vat_percentage])) $tot_vat[$vat_percentage] = 0;
-                                            $tot_vat[$vat_percentage] += $vat;
-                                ?>
+                                        if (!isset($tot_vat[$vat_percentage]))
+                                            $tot_vat[$vat_percentage] = 0;
+                                        $tot_vat[$vat_percentage] += $vat;
+                                        ?>
                                         <tr>
                                             <!-- <td class="text-center"><?= $i + 1 ?></td> -->
                                             <td class="text-center"><?php echo $item['serial_no']; ?></td>
@@ -538,20 +644,20 @@
                                                 <?php if (!empty($item['item_code'])): ?>
                                                     <div><strong><?= htmlspecialchars($item['item_code']) ?></strong></div>
                                                 <?php endif; ?>
-                                                
+
                                                 <?= nl2br(htmlspecialchars($item['item_desc'] ?? '')) ?>
                                             </td>
                                             <td class="text-center"><?= number_format($qty, 0) ?></td>
                                             <td class="text-center"><?= htmlspecialchars($item['uom'] ?? '-') ?></td>
                                             <td class="text-right"><?= number_format($rate, $decimal_point) ?></td>
-                                            <td class="text-right"><?= number_format($net,  $decimal_point) ?></td>
+                                            <td class="text-right"><?= number_format($net, $decimal_point) ?></td>
                                             <td class="text-center"><?= number_format($vat_percentage, 2) ?></td>
                                         </tr>
-                                <?php
+                                        <?php
                                     endforeach;
                                     $grand_total = $total_net_amount + $total_vat_amount;
                                 else:
-                                ?>
+                                    ?>
                                     <tr>
                                         <td colspan="7" class="text-center" style="padding:30px;color:#999;">
                                             No items found
@@ -566,19 +672,24 @@
                                             <div class="bank-details-section">
                                                 <div class="bank-details-title">OUR BANK ACCOUNT DETAILS</div>
                                                 <?php if (!empty($bank_details['account_name'])): ?>
-                                                    <div><strong>ACCOUNT NAME:</strong> <?php echo htmlspecialchars($bank_details['account_name']); ?></div>
+                                                    <div><strong>ACCOUNT NAME:</strong>
+                                                        <?php echo htmlspecialchars($bank_details['account_name']); ?></div>
                                                 <?php endif; ?>
                                                 <?php if (!empty($bank_details['bank_name'])): ?>
-                                                    <div><strong>BANK NAME:</strong> <?php echo htmlspecialchars($bank_details['bank_name']); ?></div>
+                                                    <div><strong>BANK NAME:</strong>
+                                                        <?php echo htmlspecialchars($bank_details['bank_name']); ?></div>
                                                 <?php endif; ?>
                                                 <?php if (!empty($bank_details['account_number'])): ?>
-                                                    <div><strong>ACCOUNT NO.:</strong> <?php echo htmlspecialchars($bank_details['account_number']); ?></div>
+                                                    <div><strong>ACCOUNT NO.:</strong>
+                                                        <?php echo htmlspecialchars($bank_details['account_number']); ?></div>
                                                 <?php endif; ?>
                                                 <?php if (!empty($bank_details['iban_no'])): ?>
-                                                    <div><strong>IBAN NO:</strong> <?php echo htmlspecialchars($bank_details['iban_no']); ?></div>
+                                                    <div><strong>IBAN NO:</strong>
+                                                        <?php echo htmlspecialchars($bank_details['iban_no']); ?></div>
                                                 <?php endif; ?>
                                                 <?php if (!empty($bank_details['swift_code'])): ?>
-                                                    <div><strong>SWIFT/BIC:</strong> <?php echo htmlspecialchars($bank_details['swift_code']); ?></div>
+                                                    <div><strong>SWIFT/BIC:</strong>
+                                                        <?php echo htmlspecialchars($bank_details['swift_code']); ?></div>
                                                 <?php endif; ?>
                                             </div>
                                         </td>
@@ -598,35 +709,35 @@
                                                         $tot_vat[floatval($addt_chrg['addt_charges_vat'])] = 0;
                                                     $tot_vat[floatval($addt_chrg['addt_charges_vat'])] += $addt_chrg['addt_charges_vat_amt'];
                                                     $grand_total += $addt_chrg['addt_charges_amt'];
-                                                ?>
+                                                    ?>
                                                     <!-- <div class="summary-row" style="border-bottom:1px solid #000;">
                                                         <span><?php echo htmlspecialchars($addt_chrg['addt_charges_type_name']); ?></span>
                                                         <span><?php echo number_format($addt_chrg['addt_charges_amt'], $decimal_point); ?></span>
                                                     </div> -->
-                                                     
+
                                                 <?php endforeach; ?>
-                                                
+
                                                 <?php if (isset($record['is_discount']) && $record['is_discount'] == 1 && $record['discount'] > 0): ?>
-                                                <div class="summary-row" style="border-bottom:1px solid #000;">
-                                                    <span>TOTAL</span>
-                                                    <span><?php echo number_format($grand_total, $decimal_point); ?></span>
-                                                </div>
-                                                <div class="summary-row" style="border-bottom:1px solid #000;">
-                                                    <span>Discount</span>
-                                                    <span><?php echo number_format($record['discount'], $decimal_point); ?></span>
-                                                </div>
-                                                <?php 
-                                                    $grand_total -= floatval($record['discount']); 
-                                                ?>
-                                                <div class="summary-row" style="border-bottom:1px solid #000;">
-                                                    <span>TOTAL EXCL. VAT</span>
-                                                    <span><?php echo number_format($grand_total, $decimal_point); ?></span>
-                                                </div>
+                                                    <div class="summary-row" style="border-bottom:1px solid #000;">
+                                                        <span>TOTAL</span>
+                                                        <span><?php echo number_format($grand_total, $decimal_point); ?></span>
+                                                    </div>
+                                                    <div class="summary-row" style="border-bottom:1px solid #000;">
+                                                        <span>Discount</span>
+                                                        <span><?php echo number_format($record['discount'], $decimal_point); ?></span>
+                                                    </div>
+                                                    <?php
+                                                    $grand_total -= floatval($record['discount']);
+                                                    ?>
+                                                    <div class="summary-row" style="border-bottom:1px solid #000;">
+                                                        <span>TOTAL EXCL. VAT</span>
+                                                        <span><?php echo number_format($grand_total, $decimal_point); ?></span>
+                                                    </div>
                                                 <?php else: ?>
-                                                <div class="summary-row" style="border-bottom:1px solid #000;">
-                                                    <span>TOTAL EXCL. VAT</span>
-                                                    <span><?php echo number_format($grand_total, $decimal_point); ?></span>
-                                                </div>
+                                                    <div class="summary-row" style="border-bottom:1px solid #000;">
+                                                        <span>TOTAL EXCL. VAT</span>
+                                                        <span><?php echo number_format($grand_total, $decimal_point); ?></span>
+                                                    </div>
                                                 <?php endif; ?>
                                                 <div class="summary-row" style="border-bottom:1px solid #000;">
                                                     <span>VAT <?php echo number_format($vat_percentage ?? 0, 0); ?>%</span>
@@ -657,7 +768,7 @@
                                             $tot_vat[floatval($addt_chrg['addt_charges_vat'])] = 0;
                                         $tot_vat[floatval($addt_chrg['addt_charges_vat'])] += $addt_chrg['addt_charges_vat_amt'];
                                         $grand_total += $addt_chrg['addt_charges_amt'];
-                                    ?>
+                                        ?>
                                         <tr class="items-table">
                                             <td colspan="5" class="text-right">
                                                 <strong><?php echo htmlspecialchars($addt_chrg['addt_charges_type_name']); ?></strong>
@@ -667,7 +778,7 @@
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
-                                    
+
                                     <?php if (isset($record['is_discount']) && $record['is_discount'] == 1 && $record['discount'] > 0): ?>
                                         <tr class="items-table">
                                             <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
@@ -685,8 +796,8 @@
                                                 <strong><?php echo number_format($record['discount'], $decimal_point); ?></strong>
                                             </td>
                                         </tr>
-                                        <?php 
-                                            $grand_total -= floatval($record['discount']); 
+                                        <?php
+                                        $grand_total -= floatval($record['discount']);
                                         ?>
                                         <tr class="items-table">
                                             <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
@@ -697,14 +808,14 @@
                                             </td>
                                         </tr>
                                     <?php else: ?>
-                                        <tr class="items-table">
+                                        <!-- <tr class="items-table">
                                             <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
                                                 <strong>TOTAL EXCL. VAT</strong>
                                             </td>
                                             <td colspan="2" class="text-right" style="padding:10px; border:1px solid #000;">
                                                 <strong><?php echo number_format($grand_total, $decimal_point); ?></strong>
                                             </td>
-                                        </tr>
+                                        </tr> -->
                                     <?php endif; ?>
                                     <tr>
                                         <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
@@ -715,10 +826,12 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="5" class="text-right" style="padding:12px; border:1px solid #000; font-size:11pt;">
+                                        <td colspan="5" class="text-right"
+                                            style="padding:12px; border:1px solid #000; font-size:11pt;">
                                             <strong>TOTAL <?php echo htmlspecialchars($currency_code); ?></strong>
                                         </td>
-                                        <td colspan="2" class="text-right" style="padding:12px; border:1px solid #000; font-size:11pt;">
+                                        <td colspan="2" class="text-right"
+                                            style="padding:12px; border:1px solid #000; font-size:11pt;">
                                             <strong><?php echo number_format(($grand_total + $total_vat_amount), $decimal_point); ?></strong>
                                         </td>
                                     </tr>
@@ -758,7 +871,8 @@
                         <div class="signature-section">
                             <div class="signature-box">
                                 <div class="signature-company">
-                                    For <?php echo htmlspecialchars($record['our_company'] ?? $record['company_name'] ?? 'Our Company'); ?>
+                                    For
+                                    <?php echo htmlspecialchars($record['our_company'] ?? $record['company_name'] ?? 'Our Company'); ?>
                                 </div>
                             </div>
                         </div>
@@ -783,4 +897,5 @@
     </div>
 
 </body>
+
 </html>
