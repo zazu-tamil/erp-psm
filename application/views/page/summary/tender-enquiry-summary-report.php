@@ -32,7 +32,7 @@
                     </div>
 
                     <!-- Open All Checkbox -->
-                    <div class="form-group col-md-3" style="margin-top:25px;">
+                    <div class="form-group col-md-2" style="margin-top:25px;">
                         <label>
                             <input type="checkbox" id="chk_open_all" name="chk_open_all" value="1" <?php
                             if (($this->input->post('chk_open_all') != '') && $this->input->post('chk_open_all') == 1) {
@@ -50,11 +50,52 @@
                         </button>
                     </div>
 
+                    <!-- Change Customer & Change Vendor Action Buttons -->
+                    <div class="form-group col-md-5 text-right" style="margin-top:20px;">
+                        <button type="button" class="btn btn-primary btn-flat" id="btn_change_customer" title="Change Customer across all tables for this Tender Enquiry">
+                            <i class="fa fa-user"></i> Change Customer
+                        </button>
+                        <button type="button" class="btn btn-warning btn-flat" id="btn_change_vendor" style="margin-left: 8px;" title="Change Vendor across all tables for this Tender Enquiry">
+                            <i class="fa fa-truck"></i> Change Vendor
+                        </button>
+                    </div>
+
                 </div>
 
             </form>
         </div>
     </div>
+
+    <?php if (!empty($tender_enquiry_id)): ?>
+        <!-- Active Tender Enquiry Information Banner -->
+        <div class="callout callout-info no-print" style="margin-bottom: 15px; background-color: #f4f8fb !important; border-left: 5px solid #00a65a !important; color: #333 !important; padding: 10px 15px;">
+            <div class="row" style="display: flex; align-items: center; flex-wrap: wrap;">
+                <div class="col-sm-8" style="padding-top: 4px; padding-bottom: 4px;">
+                    <i class="fa fa-check-circle text-success" style="font-size: 16px;"></i>
+                    <strong style="margin-left: 5px;">Active Tender Enquiry:</strong>
+                    <span class="label label-success" style="font-size: 13px; margin-left: 4px;">
+                        <?= !empty($current_tender_info['enquiry_no']) ? htmlspecialchars($current_tender_info['enquiry_no']) : ('#' . $tender_enquiry_id); ?>
+                    </span>
+                    <span style="margin-left: 15px;">
+                        <strong>Customer:</strong> <span class="text-primary font-weight-bold"><?= !empty($current_tender_info['customer_name']) ? htmlspecialchars($current_tender_info['customer_name']) : 'None'; ?></span>
+                    </span>
+                    <?php if (!empty($current_vendor_info['vendor_name'])): ?>
+                        <span style="margin-left: 15px;">
+                            <strong>Supplier/Vendor:</strong> <span class="text-warning font-weight-bold" style="color: #c08000;"><?= htmlspecialchars($current_vendor_info['vendor_name']); ?></span>
+                        </span>
+                    <?php endif; ?>
+                </div>
+                <div class="col-sm-4 text-right">
+                    <button type="button" class="btn btn-sm btn-primary btn-flat" onclick="$('#btn_change_customer').click();">
+                        <i class="fa fa-pencil"></i> Change Customer
+                    </button>
+                    <button type="button" class="btn btn-sm btn-warning btn-flat" style="margin-left: 6px;" onclick="$('#btn_change_vendor').click();">
+                        <i class="fa fa-pencil"></i> Change Vendor
+                    </button>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
 
 
     <!-- Styles -->
@@ -2155,6 +2196,177 @@
     </div>
 
 
+    <!-- ================= MODAL: CHANGE CUSTOMER ================= -->
+    <div class="modal fade" id="modalChangeCustomer" tabindex="-1" role="dialog" aria-labelledby="modalChangeCustomerLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form id="formChangeCustomer" method="post">
+                    <div class="modal-header bg-primary" style="color: #fff; background-color: #337ab7;">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: #fff; opacity: 0.8;">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title" id="modalChangeCustomerLabel">
+                            <i class="fa fa-user"></i> Change Customer
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="tender_enquiry_id" id="modal_cust_tender_enquiry_id" value="<?php echo isset($tender_enquiry_id) ? $tender_enquiry_id : ''; ?>">
+
+                        <!-- Tender Enquiry Info Summary -->
+                        <div class="well well-sm" style="background-color: #f7f9fa; border-left: 4px solid #337ab7; margin-bottom: 15px;">
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <label style="margin-bottom: 2px; color: #555;">Tender Enquiry:</label>
+                                    <div><b id="lbl_cust_enquiry_no"><?php echo !empty($current_tender_info['enquiry_no']) ? htmlspecialchars($current_tender_info['enquiry_no']) : (!empty($tender_enquiry_id) ? '#' . $tender_enquiry_id : 'Not Selected'); ?></b> (ID: <span id="lbl_cust_tender_id"><?php echo isset($tender_enquiry_id) ? $tender_enquiry_id : '-'; ?></span>)</div>
+                                </div>
+                                <div class="col-xs-6">
+                                    <label style="margin-bottom: 2px; color: #555;">Current Customer:</label>
+                                    <div><span class="label label-info" id="lbl_current_customer_name" style="font-size: 12px;"><?php echo !empty($current_tender_info['customer_name']) ? htmlspecialchars($current_tender_info['customer_name']) : 'None'; ?></span></div>
+                                    <?php if (!empty($current_tender_info['customer_contact_person'])): ?>
+                                        <small class="text-muted" id="lbl_current_customer_contact"><i class="fa fa-phone"></i> <?php echo htmlspecialchars($current_tender_info['customer_contact_person']); ?></small>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Manual Enquiry Selector if not pre-selected -->
+                        <div class="form-group" id="group_manual_cust_enquiry" style="<?php echo !empty($tender_enquiry_id) ? 'display:none;' : ''; ?>">
+                            <label for="manual_cust_enquiry_no">Select / Search Tender Enquiry <span class="text-danger">*</span></label>
+                            <input type="text" id="manual_cust_enquiry_no" class="form-control" placeholder="Type enquiry number to search...">
+                            <small class="text-muted">Search and select the Tender Enquiry to update</small>
+                        </div>
+
+                        <!-- New Customer Selection -->
+                        <div class="form-group">
+                            <label for="modal_select_customer">New Customer <span class="text-danger">*</span></label>
+                            <select name="customer_id" id="modal_select_customer" class="form-control" required style="width: 100%;">
+                                <option value="">-- Select Customer --</option>
+                                <?php if (!empty($customer_list)): ?>
+                                    <?php foreach ($customer_list as $cust): ?>
+                                        <option value="<?php echo $cust['customer_id']; ?>">
+                                            <?php echo htmlspecialchars($cust['customer_name'] . (!empty($cust['customer_code']) ? ' [' . $cust['customer_code'] . ']' : '')); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                        </div>
+
+                        <!-- New Contact Person Selection -->
+                        <div class="form-group">
+                            <label for="modal_select_customer_contact">Contact Person <small class="text-muted">(Optional - defaults to primary contact if not selected)</small></label>
+                            <select name="customer_contact_id" id="modal_select_customer_contact" class="form-control" style="width: 100%;">
+                                <option value="">-- Select Contact Person --</option>
+                            </select>
+                        </div>
+
+                        <!-- Alert / Scope Information -->
+                        <div class="alert alert-info" style="font-size: 12px; margin-bottom: 0; padding: 10px;">
+                            <i class="fa fa-info-circle"></i> <b>Scope of Update:</b> Changing customer will update customer details in <b>all tables</b> linked to Tender Enquiry ID <b class="lbl_enq_id_display"><?= isset($tender_enquiry_id) && !empty($tender_enquiry_id) ? '#' . $tender_enquiry_id : ''; ?></b> (Tender Enquiry, Quotation, PO, DC, Invoices, Receipts, Supplier Inquiries/Quotes/POs/Inwards/Bills). <b>Line items, rates, and quantities remain unchanged.</b>
+                        </div>
+
+                        <div id="alert_change_customer_error" class="alert alert-danger" style="display: none; margin-top: 10px; font-size: 13px;"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="btn_submit_change_customer">
+                            <i class="fa fa-check"></i> Update Customer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================= MODAL: CHANGE VENDOR ================= -->
+    <div class="modal fade" id="modalChangeVendor" tabindex="-1" role="dialog" aria-labelledby="modalChangeVendorLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form id="formChangeVendor" method="post">
+                    <div class="modal-header bg-warning" style="color: #fff; background-color: #f39c12;">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: #fff; opacity: 0.8;">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title" id="modalChangeVendorLabel">
+                            <i class="fa fa-truck"></i> Change Vendor / Supplier
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="tender_enquiry_id" id="modal_vend_tender_enquiry_id" value="<?php echo isset($tender_enquiry_id) ? $tender_enquiry_id : ''; ?>">
+
+                        <!-- Tender Enquiry Info Summary -->
+                        <div class="well well-sm" style="background-color: #fcf8e3; border-left: 4px solid #f39c12; margin-bottom: 15px;">
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <label style="margin-bottom: 2px; color: #555;">Tender Enquiry:</label>
+                                    <div><b id="lbl_vend_enquiry_no"><?php echo !empty($current_tender_info['enquiry_no']) ? htmlspecialchars($current_tender_info['enquiry_no']) : (!empty($tender_enquiry_id) ? '#' . $tender_enquiry_id : 'Not Selected'); ?></b> (ID: <span id="lbl_vend_tender_id"><?php echo isset($tender_enquiry_id) ? $tender_enquiry_id : '-'; ?></span>)</div>
+                                </div>
+                                <div class="col-xs-6">
+                                    <label style="margin-bottom: 2px; color: #555;">Current Supplier / Vendor:</label>
+                                    <div><span class="label label-warning" id="lbl_current_vendor_name" style="font-size: 12px;"><?php echo !empty($current_vendor_info['vendor_name']) ? htmlspecialchars($current_vendor_info['vendor_name']) : 'None'; ?></span></div>
+                                    <?php if (!empty($current_vendor_info['vendor_contact_person'])): ?>
+                                        <small class="text-muted" id="lbl_current_vendor_contact"><i class="fa fa-phone"></i> <?php echo htmlspecialchars($current_vendor_info['vendor_contact_person']); ?></small>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Manual Enquiry Selector if not pre-selected -->
+                        <div class="form-group" id="group_manual_vend_enquiry" style="<?php echo !empty($tender_enquiry_id) ? 'display:none;' : ''; ?>">
+                            <label for="manual_vend_enquiry_no">Select / Search Tender Enquiry <span class="text-danger">*</span></label>
+                            <input type="text" id="manual_vend_enquiry_no" class="form-control" placeholder="Type enquiry number to search...">
+                            <small class="text-muted">Search and select the Tender Enquiry to update</small>
+                        </div>
+
+                        <!-- New Vendor Selection -->
+                        <div class="form-group">
+                            <label for="modal_select_vendor">New Vendor / Supplier <span class="text-danger">*</span></label>
+                            <select name="vendor_id" id="modal_select_vendor" class="form-control" required style="width: 100%;">
+                                <option value="">-- Select Vendor / Supplier --</option>
+                                <?php if (!empty($vendor_list)): ?>
+                                    <?php foreach ($vendor_list as $vend): ?>
+                                        <option value="<?php echo $vend['vendor_id']; ?>">
+                                            <?php echo htmlspecialchars($vend['vendor_name']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                        </div>
+
+                        <!-- New Contact Person Selection -->
+                        <div class="form-group">
+                            <label for="modal_select_vendor_contact">Contact Person <small class="text-muted">(Optional - defaults to primary contact if not selected)</small></label>
+                            <select name="vendor_contact_person_id" id="modal_select_vendor_contact" class="form-control" style="width: 100%;">
+                                <option value="">-- Select Contact Person --</option>
+                            </select>
+                        </div>
+
+                        <!-- Bills Checkbox -->
+                        <div class="form-group">
+                            <label style="font-weight: normal; cursor: pointer;">
+                                <input type="checkbox" name="update_bills" id="chk_update_bills" value="1" checked> 
+                                Also update Local Supplier Bills, DP Bills, Customs Bills, and linked Payments
+                            </label>
+                        </div>
+
+                        <!-- Alert / Scope Information -->
+                        <div class="alert alert-warning" style="font-size: 12px; margin-bottom: 0; padding: 10px; color: #8a6d3b; background-color: #fcf8e3; border-color: #faebcc;">
+                            <i class="fa fa-info-circle"></i> <b>Scope of Update:</b> Changing vendor will update vendor details in <b>all supplier tables</b> linked to Tender Enquiry ID <b class="lbl_enq_id_display"><?= isset($tender_enquiry_id) && !empty($tender_enquiry_id) ? '#' . $tender_enquiry_id : ''; ?></b> (Supplier Inquiries, Quotations, POs, Inwards, Purchase Invoices, Advances, Bills & Payments). <b>Line items, rates, and quantities remain unchanged.</b>
+                        </div>
+
+                        <div id="alert_change_vendor_error" class="alert alert-danger" style="display: none; margin-top: 10px; font-size: 13px;"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-warning" id="btn_submit_change_vendor">
+                            <i class="fa fa-check"></i> Update Vendor
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </section>
 
 <?php include_once(VIEWPATH . 'inc/footer.php'); ?>
@@ -2217,6 +2429,217 @@
 
         // Run on checkbox change
         $("#chk_open_all").on("change", toggleBoxes);
+
+        // ================= CHANGE CUSTOMER & CHANGE VENDOR SCRIPTS =================
+
+        function setupModalEnquiryAutocomplete(inputSelector, targetHiddenId, labelSelector, idSelector) {
+            $(inputSelector).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "<?php echo base_url('reports/tender_enquiry_id_search'); ?>",
+                        type: "POST",
+                        data: { search: request.term },
+                        dataType: "json",
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 1,
+                select: function (event, ui) {
+                    $(targetHiddenId).val(ui.item.tender_enquiry_id);
+                    $(labelSelector).text(ui.item.enquiry_no || ui.item.label);
+                    $(idSelector).text(ui.item.tender_enquiry_id);
+                    $('.lbl_enq_id_display').text('#' + ui.item.tender_enquiry_id);
+                }
+            });
+        }
+
+        // Open Change Customer Modal
+        $('#btn_change_customer').on('click', function () {
+            var tid = $('#tender_enquiry_id').val();
+            var enq_text = $('#srch_enquiry_no_id').val();
+            if (tid) {
+                $('#modal_cust_tender_enquiry_id').val(tid);
+                $('#lbl_cust_tender_id').text(tid);
+                if (enq_text) $('#lbl_cust_enquiry_no').text(enq_text);
+                $('.lbl_enq_id_display').text('#' + tid);
+                $('#group_manual_cust_enquiry').hide();
+            } else {
+                $('#group_manual_cust_enquiry').show();
+            }
+            $('#alert_change_customer_error').hide().text('');
+            $('#modalChangeCustomer').modal('show');
+        });
+
+        // Open Change Vendor Modal
+        $('#btn_change_vendor').on('click', function () {
+            var tid = $('#tender_enquiry_id').val();
+            var enq_text = $('#srch_enquiry_no_id').val();
+            if (tid) {
+                $('#modal_vend_tender_enquiry_id').val(tid);
+                $('#lbl_vend_tender_id').text(tid);
+                if (enq_text) $('#lbl_vend_enquiry_no').text(enq_text);
+                $('.lbl_enq_id_display').text('#' + tid);
+                $('#group_manual_vend_enquiry').hide();
+            } else {
+                $('#group_manual_vend_enquiry').show();
+            }
+            $('#alert_change_vendor_error').hide().text('');
+            $('#modalChangeVendor').modal('show');
+        });
+
+        // Setup autocompletes inside modals if opened without pre-selected enquiry
+        setupModalEnquiryAutocomplete('#manual_cust_enquiry_no', '#modal_cust_tender_enquiry_id', '#lbl_cust_enquiry_no', '#lbl_cust_tender_id');
+        setupModalEnquiryAutocomplete('#manual_vend_enquiry_no', '#modal_vend_tender_enquiry_id', '#lbl_vend_enquiry_no', '#lbl_vend_tender_id');
+
+        // Customer change -> dynamic contacts
+        $('#modal_select_customer').on('change', function () {
+            var customerId = $(this).val();
+            var $contactSelect = $('#modal_select_customer_contact');
+            $contactSelect.html('<option value="">-- Loading contacts... --</option>');
+            if (!customerId) {
+                $contactSelect.html('<option value="">-- Select Contact Person (Optional) --</option>');
+                return;
+            }
+            $.ajax({
+                url: "<?php echo site_url('get-customer-contacts'); ?>",
+                type: "POST",
+                data: { customer_id: customerId },
+                dataType: "json",
+                success: function (data) {
+                    var options = '<option value="">-- Select Contact Person (Optional) --</option>';
+                    if (data && data.length > 0) {
+                        $.each(data, function (index, item) {
+                            options += '<option value="' + item.customer_contact_id + '">' + item.contact_person_name + '</option>';
+                        });
+                    }
+                    $contactSelect.html(options);
+                },
+                error: function () {
+                    $contactSelect.html('<option value="">-- Select Contact Person (Optional) --</option>');
+                }
+            });
+        });
+
+        // Vendor change -> dynamic contacts
+        $('#modal_select_vendor').on('change', function () {
+            var vendorId = $(this).val();
+            var $contactSelect = $('#modal_select_vendor_contact');
+            $contactSelect.html('<option value="">-- Loading contacts... --</option>');
+            if (!vendorId) {
+                $contactSelect.html('<option value="">-- Select Contact Person (Optional) --</option>');
+                return;
+            }
+            $.ajax({
+                url: "<?php echo site_url('get-vendor-contacts'); ?>",
+                type: "POST",
+                data: { vendor_id: vendorId },
+                dataType: "json",
+                success: function (data) {
+                    var options = '<option value="">-- Select Contact Person (Optional) --</option>';
+                    if (data && data.length > 0) {
+                        $.each(data, function (index, item) {
+                            options += '<option value="' + item.vendor_contact_id + '">' + item.contact_person_name + '</option>';
+                        });
+                    }
+                    $contactSelect.html(options);
+                },
+                error: function () {
+                    $contactSelect.html('<option value="">-- Select Contact Person (Optional) --</option>');
+                }
+            });
+        });
+
+        // Submit Change Customer
+        $('#formChangeCustomer').on('submit', function (e) {
+            e.preventDefault();
+            var tid = $('#modal_cust_tender_enquiry_id').val();
+            var cid = $('#modal_select_customer').val();
+
+            if (!tid) {
+                $('#alert_change_customer_error').show().text('Please select or search a Tender Enquiry first.');
+                return false;
+            }
+            if (!cid) {
+                $('#alert_change_customer_error').show().text('Please select a new customer.');
+                return false;
+            }
+
+            if (!confirm('Are you sure you want to change the customer for Tender Enquiry ID #' + tid + '? This will update customer details across all related tables.')) {
+                return false;
+            }
+
+            var $btn = $('#btn_submit_change_customer');
+            $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Updating...');
+            $('#alert_change_customer_error').hide();
+
+            $.ajax({
+                url: "<?php echo site_url('update-tender-customer'); ?>",
+                type: "POST",
+                data: $(this).serialize(),
+                dataType: "json",
+                success: function (res) {
+                    $btn.prop('disabled', false).html('<i class="fa fa-check"></i> Update Customer');
+                    if (res && res.status) {
+                        $('#modalChangeCustomer').modal('hide');
+                        alert(res.message);
+                        window.location.href = "<?php echo site_url('tender-enquiry-summary-report'); ?>/" + tid;
+                    } else {
+                        $('#alert_change_customer_error').show().text((res && res.message) ? res.message : 'Error updating customer.');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $btn.prop('disabled', false).html('<i class="fa fa-check"></i> Update Customer');
+                    $('#alert_change_customer_error').show().text('Server error occurred: ' + error);
+                }
+            });
+        });
+
+        // Submit Change Vendor
+        $('#formChangeVendor').on('submit', function (e) {
+            e.preventDefault();
+            var tid = $('#modal_vend_tender_enquiry_id').val();
+            var vid = $('#modal_select_vendor').val();
+
+            if (!tid) {
+                $('#alert_change_vendor_error').show().text('Please select or search a Tender Enquiry first.');
+                return false;
+            }
+            if (!vid) {
+                $('#alert_change_vendor_error').show().text('Please select a new vendor.');
+                return false;
+            }
+
+            if (!confirm('Are you sure you want to change the vendor for Tender Enquiry ID #' + tid + '? This will update vendor details across all related supplier tables.')) {
+                return false;
+            }
+
+            var $btn = $('#btn_submit_change_vendor');
+            $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Updating...');
+            $('#alert_change_vendor_error').hide();
+
+            $.ajax({
+                url: "<?php echo site_url('update-tender-vendor'); ?>",
+                type: "POST",
+                data: $(this).serialize(),
+                dataType: "json",
+                success: function (res) {
+                    $btn.prop('disabled', false).html('<i class="fa fa-check"></i> Update Vendor');
+                    if (res && res.status) {
+                        $('#modalChangeVendor').modal('hide');
+                        alert(res.message);
+                        window.location.href = "<?php echo site_url('tender-enquiry-summary-report'); ?>/" + tid;
+                    } else {
+                        $('#alert_change_vendor_error').show().text((res && res.message) ? res.message : 'Error updating vendor.');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $btn.prop('disabled', false).html('<i class="fa fa-check"></i> Update Vendor');
+                    $('#alert_change_vendor_error').show().text('Server error occurred: ' + error);
+                }
+            });
+        });
 
     });
 </script>

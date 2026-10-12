@@ -636,7 +636,56 @@ class Reports extends CI_Controller
         $data['vendor_pur_inward_list'] = array();
         $data['vendor_purchase_invoice_list'] = array();
 
+        // Customers & Vendors for change customer / vendor modals
+        $data['customer_list'] = $this->db->query("
+            SELECT customer_id, customer_name, customer_code 
+            FROM customer_info 
+            WHERE status = 'Active' 
+            ORDER BY customer_name ASC
+        ")->result_array();
+
+        $data['vendor_list'] = $this->db->query("
+            SELECT vendor_id, vendor_name 
+            FROM vendor_info 
+            WHERE status = 'Active' 
+            ORDER BY vendor_name ASC
+        ")->result_array();
+
+        $data['current_tender_info'] = null;
+        $data['current_vendor_info'] = null;
+
         if (!empty($tender_enquiry_id)) {
+            $data['current_tender_info'] = $this->db->query("
+                SELECT a.tender_enquiry_id, a.enquiry_no, a.customer_id, a.customer_contact_id, 
+                       c.customer_name, cc.contact_person_name as customer_contact_person
+                FROM tender_enquiry_info a
+                LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
+                LEFT JOIN customer_contact_info cc ON a.customer_contact_id = cc.customer_contact_id AND cc.status = 'Active'
+                WHERE a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
+            ")->row_array();
+
+            $cur_vend = $this->db->query("
+                SELECT a.vendor_id, a.vendor_contact_person_id, v.vendor_name, vc.contact_person_name as vendor_contact_person
+                FROM vendor_rate_enquiry_info a
+                LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
+                LEFT JOIN vendor_contact_info vc ON a.vendor_contact_person_id = vc.vendor_contact_id AND vc.status = 'Active'
+                WHERE a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "' AND a.status = 'Active'
+                ORDER BY a.vendor_rate_enquiry_id ASC
+                LIMIT 1
+            ")->row_array();
+            if (empty($cur_vend)) {
+                $cur_vend = $this->db->query("
+                    SELECT a.vendor_id, a.vendor_contact_person_id, v.vendor_name, vc.contact_person_name as vendor_contact_person
+                    FROM vendor_po_info a
+                    LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
+                    LEFT JOIN vendor_contact_info vc ON a.vendor_contact_person_id = vc.vendor_contact_id AND vc.status = 'Active'
+                    WHERE a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "' AND a.status = 'Active'
+                    ORDER BY a.vendor_po_id ASC
+                    LIMIT 1
+                ")->row_array();
+            }
+            $data['current_vendor_info'] = $cur_vend;
+
             $sql = "
                 SELECT 
                     a.tender_enquiry_id,
@@ -1488,7 +1537,241 @@ class Reports extends CI_Controller
             ];
         }
         echo json_encode($result);
+    }
 
+    public function get_customer_contacts()
+    {
+        $customer_id = (int)$this->input->post('customer_id');
+        $result = [];
+        if (!empty($customer_id)) {
+            $query = $this->db->query("
+                SELECT customer_contact_id, contact_person_name 
+                FROM customer_contact_info 
+                WHERE customer_id = ? AND status = 'Active' 
+                ORDER BY contact_person_name ASC
+            ", [$customer_id]);
+            $result = $query->result_array();
+        }
+        echo json_encode($result);
+    }
+
+    public function get_vendor_contacts()
+    {
+        $vendor_id = (int)$this->input->post('vendor_id');
+        $result = [];
+        if (!empty($vendor_id)) {
+            $query = $this->db->query("
+                SELECT vendor_contact_id, contact_person_name 
+                FROM vendor_contact_info 
+                WHERE vendor_id = ? AND status = 'Active' 
+                ORDER BY contact_person_name ASC
+            ", [$vendor_id]);
+            $result = $query->result_array();
+        }
+        echo json_encode($result);
+    }
+
+    public function update_tender_customer()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            echo json_encode(['status' => false, 'message' => 'Session expired. Please log in again.']);
+            return;
+        }
+
+        $tender_enquiry_id = (int)$this->input->post('tender_enquiry_id');
+        $customer_id = (int)$this->input->post('customer_id');
+        $customer_contact_id = $this->input->post('customer_contact_id') !== '' ? (int)$this->input->post('customer_contact_id') : 0;
+
+        if (empty($tender_enquiry_id) || empty($customer_id)) {
+            echo json_encode(['status' => false, 'message' => 'Tender Enquiry ID and Customer are required.']);
+            return;
+        }
+
+        // Verify tender enquiry exists
+        $enq = $this->db->query("SELECT tender_enquiry_id, enquiry_no FROM tender_enquiry_info WHERE tender_enquiry_id = ?", [$tender_enquiry_id])->row_array();
+        if (empty($enq)) {
+            echo json_encode(['status' => false, 'message' => 'Invalid Tender Enquiry ID #' . $tender_enquiry_id]);
+            return;
+        }
+
+        // Get contact person to set
+        if (!empty($customer_contact_id)) {
+            $contact_to_set = $customer_contact_id;
+        } else {
+            $first_contact = $this->db->query("
+                SELECT customer_contact_id 
+                FROM customer_contact_info 
+                WHERE customer_id = ? AND status = 'Active' 
+                ORDER BY customer_contact_id ASC 
+                LIMIT 1
+            ", [$customer_id])->row_array();
+            $contact_to_set = !empty($first_contact) ? (int)$first_contact['customer_contact_id'] : null;
+        }
+
+        $user_id = $this->session->userdata(SESS_HD . 'user_id') ?: 1;
+        $now = date('Y-m-d H:i:s');
+
+        $this->db->trans_start();
+
+        // 1. tender_enquiry_info
+        $this->db->query("UPDATE tender_enquiry_info SET customer_id = ?, customer_contact_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$customer_id, $contact_to_set, $user_id, $now, $tender_enquiry_id]);
+
+        // 2. tender_quotation_info
+        $this->db->query("UPDATE tender_quotation_info SET customer_id = ?, customer_contact_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$customer_id, $contact_to_set, $user_id, $now, $tender_enquiry_id]);
+
+        // 3. customer_tender_po_info
+        $this->db->query("UPDATE customer_tender_po_info SET customer_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$customer_id, $user_id, $now, $tender_enquiry_id]);
+
+        // 4. tender_dc_info
+        $this->db->query("UPDATE tender_dc_info SET customer_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$customer_id, $user_id, $now, $tender_enquiry_id]);
+
+        // 5. tender_enq_invoice_info
+        $this->db->query("UPDATE tender_enq_invoice_info SET customer_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$customer_id, $user_id, $now, $tender_enquiry_id]);
+
+        // 6. tender_receipt_info (linked via tender_receipt_invoice_info)
+        $this->db->query("UPDATE tender_receipt_info SET customer_id = ? WHERE tender_receipt_id IN (SELECT tender_receipt_id FROM tender_receipt_invoice_info WHERE tender_enquiry_id = ?)", [$customer_id, $tender_enquiry_id]);
+
+        // 7. vendor_rate_enquiry_info
+        $this->db->query("UPDATE vendor_rate_enquiry_info SET customer_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$customer_id, $user_id, $now, $tender_enquiry_id]);
+
+        // 8. vendor_quotation_info
+        $this->db->query("UPDATE vendor_quotation_info SET customer_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$customer_id, $user_id, $now, $tender_enquiry_id]);
+
+        // 9. vendor_po_info
+        $this->db->query("UPDATE vendor_po_info SET customer_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$customer_id, $user_id, $now, $tender_enquiry_id]);
+
+        // 10. vendor_pur_inward_info
+        $this->db->query("UPDATE vendor_pur_inward_info SET customer_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$customer_id, $user_id, $now, $tender_enquiry_id]);
+
+        // 11. vendor_purchase_invoice_info
+        $this->db->query("UPDATE vendor_purchase_invoice_info SET customer_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$customer_id, $user_id, $now, $tender_enquiry_id]);
+
+        // 12. vendor_purchase_multiple_invoice_item_info
+        $this->db->query("UPDATE vendor_purchase_multiple_invoice_item_info SET customer_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$customer_id, $user_id, $now, $tender_enquiry_id]);
+
+        // 13. local_purchase_bill_info
+        $this->db->query("UPDATE local_purchase_bill_info SET customer_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$customer_id, $user_id, $now, $tender_enquiry_id]);
+
+        // 14. dp_bill_info
+        $this->db->query("UPDATE dp_bill_info SET customer_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$customer_id, $user_id, $now, $tender_enquiry_id]);
+
+        // 15. customs_bill_info
+        $this->db->query("UPDATE customs_bill_info SET customer_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$customer_id, $user_id, $now, $tender_enquiry_id]);
+
+        // 16. credit_debit_note_info
+        $this->db->query("UPDATE credit_debit_note_info SET customer_id = ? WHERE tender_enquiry_id = ? AND customer_id IS NOT NULL AND customer_id > 0", [$customer_id, $tender_enquiry_id]);
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE) {
+            echo json_encode(['status' => false, 'message' => 'Failed to update customer details. Database transaction failed.']);
+        } else {
+            echo json_encode([
+                'status' => true,
+                'message' => 'Customer details updated successfully across all tables for Tender Enquiry #' . ($enq['enquiry_no'] ?: $tender_enquiry_id) . '!',
+                'tender_enquiry_id' => $tender_enquiry_id
+            ]);
+        }
+    }
+
+    public function update_tender_vendor()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            echo json_encode(['status' => false, 'message' => 'Session expired. Please log in again.']);
+            return;
+        }
+
+        $tender_enquiry_id = (int)$this->input->post('tender_enquiry_id');
+        $vendor_id = (int)$this->input->post('vendor_id');
+        $vendor_contact_person_id = $this->input->post('vendor_contact_person_id') !== '' ? (int)$this->input->post('vendor_contact_person_id') : 0;
+        $update_bills = $this->input->post('update_bills') !== null ? (int)$this->input->post('update_bills') : 1;
+
+        if (empty($tender_enquiry_id) || empty($vendor_id)) {
+            echo json_encode(['status' => false, 'message' => 'Tender Enquiry ID and Vendor are required.']);
+            return;
+        }
+
+        // Verify tender enquiry exists
+        $enq = $this->db->query("SELECT tender_enquiry_id, enquiry_no FROM tender_enquiry_info WHERE tender_enquiry_id = ?", [$tender_enquiry_id])->row_array();
+        if (empty($enq)) {
+            echo json_encode(['status' => false, 'message' => 'Invalid Tender Enquiry ID #' . $tender_enquiry_id]);
+            return;
+        }
+
+        // Get contact person to set
+        if (!empty($vendor_contact_person_id)) {
+            $contact_to_set = $vendor_contact_person_id;
+        } else {
+            $first_contact = $this->db->query("
+                SELECT vendor_contact_id 
+                FROM vendor_contact_info 
+                WHERE vendor_id = ? AND status = 'Active' 
+                ORDER BY vendor_contact_id ASC 
+                LIMIT 1
+            ", [$vendor_id])->row_array();
+            $contact_to_set = !empty($first_contact) ? (int)$first_contact['vendor_contact_id'] : null;
+        }
+
+        $user_id = $this->session->userdata(SESS_HD . 'user_id') ?: 1;
+        $now = date('Y-m-d H:i:s');
+
+        $this->db->trans_start();
+
+        // 1. vendor_rate_enquiry_info
+        $this->db->query("UPDATE vendor_rate_enquiry_info SET vendor_id = ?, vendor_contact_person_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$vendor_id, $contact_to_set, $user_id, $now, $tender_enquiry_id]);
+
+        // 2. vendor_quotation_info
+        $this->db->query("UPDATE vendor_quotation_info SET vendor_id = ?, vendor_contact_person_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$vendor_id, $contact_to_set, $user_id, $now, $tender_enquiry_id]);
+
+        // 3. vendor_po_info
+        $this->db->query("UPDATE vendor_po_info SET vendor_id = ?, vendor_contact_person_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$vendor_id, $contact_to_set, $user_id, $now, $tender_enquiry_id]);
+
+        // 4. vendor_pur_inward_info
+        $this->db->query("UPDATE vendor_pur_inward_info SET vendor_id = ?, vendor_contact_person_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$vendor_id, $contact_to_set, $user_id, $now, $tender_enquiry_id]);
+
+        // 5. vendor_purchase_invoice_info
+        $this->db->query("UPDATE vendor_purchase_invoice_info SET vendor_id = ?, vendor_contact_person_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$vendor_id, $contact_to_set, $user_id, $now, $tender_enquiry_id]);
+
+        // 6. vendor_advance_payment_info
+        $this->db->query("UPDATE vendor_advance_payment_info SET vendor_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$vendor_id, $user_id, $now, $tender_enquiry_id]);
+
+        // 7, 8, 9. Bills if requested
+        if ($update_bills) {
+            $this->db->query("UPDATE local_purchase_bill_info SET vendor_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$vendor_id, $user_id, $now, $tender_enquiry_id]);
+            $this->db->query("UPDATE dp_bill_info SET vendor_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$vendor_id, $user_id, $now, $tender_enquiry_id]);
+            $this->db->query("UPDATE customs_bill_info SET vendor_id = ?, updated_by = ?, updated_date = ? WHERE tender_enquiry_id = ?", [$vendor_id, $user_id, $now, $tender_enquiry_id]);
+        }
+
+        // 10. credit_debit_note_info
+        $this->db->query("UPDATE credit_debit_note_info SET supplier_id = ? WHERE tender_enquiry_id = ? AND supplier_id IS NOT NULL AND supplier_id > 0", [$vendor_id, $tender_enquiry_id]);
+
+        // 11. vendor_payment_info
+        $this->db->query("
+            UPDATE vendor_payment_info 
+            SET vendor_id = ? 
+            WHERE vendor_payment_id IN (
+                SELECT b.vendor_payment_id 
+                FROM vendor_payment_bill_info b 
+                WHERE (
+                    (b.bill_type = 'Purchase Invoice' AND b.bill_id IN (SELECT vendor_purchase_invoice_id FROM vendor_purchase_invoice_info WHERE tender_enquiry_id = ?))
+                    OR (b.bill_type = 'Local Bill' AND b.bill_id IN (SELECT local_purchase_bill_id FROM local_purchase_bill_info WHERE tender_enquiry_id = ?))
+                    OR (b.bill_type = 'Delivery Bill' AND b.bill_id IN (SELECT dp_bill_id FROM dp_bill_info WHERE tender_enquiry_id = ?))
+                    OR (b.bill_type = 'Customs Bill' AND b.bill_id IN (SELECT customs_bill_id FROM customs_bill_info WHERE tender_enquiry_id = ?))
+                )
+            )
+        ", [$vendor_id, $tender_enquiry_id, $tender_enquiry_id, $tender_enquiry_id, $tender_enquiry_id]);
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE) {
+            echo json_encode(['status' => false, 'message' => 'Failed to update vendor details. Database transaction failed.']);
+        } else {
+            echo json_encode([
+                'status' => true,
+                'message' => 'Vendor details updated successfully across all tables for Tender Enquiry #' . ($enq['enquiry_no'] ?: $tender_enquiry_id) . '!',
+                'tender_enquiry_id' => $tender_enquiry_id
+            ]);
+        }
     }
 
 
