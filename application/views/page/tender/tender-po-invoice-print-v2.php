@@ -770,10 +770,10 @@
                                         $grand_total += $addt_chrg['addt_charges_amt'];
                                         ?>
                                         <tr class="items-table">
-                                            <td colspan="5" class="text-right">
+                                            <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
                                                 <strong><?php echo htmlspecialchars($addt_chrg['addt_charges_type_name']); ?></strong>
                                             </td>
-                                            <td colspan="2" class="text-right">
+                                            <td colspan="2" class="text-right" style="padding:10px; border:1px solid #000;">
                                                 <strong><?php echo number_format($addt_chrg['addt_charges_amt'], $decimal_point); ?></strong>
                                             </td>
                                         </tr>

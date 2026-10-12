@@ -334,9 +334,12 @@
                         <th style="width: 110px;" class="text-center">VAT / CR No</th>
                         <th>Tender / Order Ref</th>
                         <th>Customer PO No</th>
-                        <th style="width: 110px;" class="text-right">Taxable Amt</th>
-                        <th style="width: 90px;" class="text-right">VAT</th>
-                        <th style="width: 110px;" class="text-right">Total Amount</th>
+                        <th style="width: 110px;" class="text-right">Total</th>
+                        <th style="width: 110px;" class="text-right">Total Discount</th>
+                        <th style="width: 110px;" class="text-right">Total Addt Chr</th>
+                        <th style="width: 110px;" class="text-right">TOTAL EXCL. VAT</th>
+                        <th style="width: 90px;" class="text-right">Total Vat Amt</th>
+                        <th style="width: 110px;" class="text-right">Grand Total Amt </th>
                         <th style="width: 55px;" class="text-center no-print">Action</th>
                     </tr>
                 </thead>
@@ -360,13 +363,24 @@
                                 <td><?php echo htmlspecialchars($r['customer_po_no'] ? $r['customer_po_no'] : ($r['our_po_no'] ? $r['our_po_no'] : '-')); ?>
                                 </td>
                               
-                                <td class="text-right" data-order="<?php echo (float) $r['taxable_amount']; ?>">
-                                    <?php echo number_format((float) $r['taxable_amount'], (int) $r['decimal_point']); ?></td>
-                                <td class="text-right" data-order="<?php echo (float) $r['tax_amount']; ?>">
-                                    <?php echo number_format((float) $r['tax_amount'], (int) $r['decimal_point']); ?></td>
-                                <td class="text-right" data-order="<?php echo (float) $r['total_amount']; ?>"
+                                <td class="text-right" data-order="<?php echo (float) ($r['total'] ?? 0); ?>">
+                                    <?php echo number_format((float) ($r['total'] ?? 0), (int) $r['decimal_point']); ?>
+                                </td>
+                                <td class="text-right" data-order="<?php echo (float) ($r['total_discount'] ?? 0); ?>">
+                                    <?php echo number_format((float) ($r['total_discount'] ?? 0), (int) $r['decimal_point']); ?>
+                                </td>
+                                <td class="text-right" data-order="<?php echo (float) ($r['total_addt_chrg'] ?? 0); ?>">
+                                    <?php echo number_format((float) ($r['total_addt_chrg'] ?? 0), (int) $r['decimal_point']); ?>
+                                </td>
+                                <td class="text-right font-weight-bold" data-order="<?php echo (float) ($r['total_excl_vat'] ?? 0); ?>" style="font-weight: 600;">
+                                    <?php echo number_format((float) ($r['total_excl_vat'] ?? 0), (int) $r['decimal_point']); ?>
+                                </td>
+                                <td class="text-right" data-order="<?php echo (float) ($r['total_vat_amt'] ?? 0); ?>">
+                                    <?php echo number_format((float) ($r['total_vat_amt'] ?? 0), (int) $r['decimal_point']); ?>
+                                </td>
+                                <td class="text-right" data-order="<?php echo (float) ($r['grand_total_amt'] ?? 0); ?>"
                                     style="font-weight: 700; color: #00a65a;">
-                                    <?php echo number_format((float) $r['total_amount'], (int) $r['decimal_point']); ?>
+                                    <?php echo number_format((float) ($r['grand_total_amt'] ?? 0), (int) $r['decimal_point']); ?>
                                 </td>
                                 <td class="text-center no-print">
                                     <a href="<?php echo site_url('tender-po-invoice-print/' . $r['tender_enq_invoice_id']); ?>"
@@ -378,7 +392,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="11" class="text-center" style="padding: 30px; color: #888;">
+                            <td colspan="14" class="text-center" style="padding: 30px; color: #888;">
                                 <i class="fa fa-info-circle"
                                     style="font-size: 24px; display: block; margin-bottom: 8px;"></i>
                                 No invoices found matching the selected filter criteria.
@@ -391,10 +405,12 @@
                         <th colspan="7" class="text-right">
                             Total (Invoices: <?php echo number_format($total_invoices); ?>):
                         </th>
-                        <th class="text-right"><?php echo number_format($total_taxable, 3); ?></th>
-                        <th class="text-right"><?php echo number_format($total_vat, 3); ?></th>
-                        <th class="text-right" style="color: #00a65a;"><?php echo number_format($grand_total, 3); ?>
-                        </th>
+                        <th class="text-right"><?php echo number_format($total_items_sum, 3); ?></th>
+                        <th class="text-right"><?php echo number_format($total_discount_sum, 3); ?></th>
+                        <th class="text-right"><?php echo number_format($total_addt_chrg_sum, 3); ?></th>
+                        <th class="text-right"><?php echo number_format($total_excl_vat_sum, 3); ?></th>
+                        <th class="text-right"><?php echo number_format($total_vat_sum, 3); ?></th>
+                        <th class="text-right" style="color: #00a65a;"><?php echo number_format($grand_total_sum, 3); ?></th>
                         <th class="no-print"></th>
                     </tr>
                 </tfoot>

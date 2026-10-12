@@ -4083,6 +4083,8 @@ class Reports extends CI_Controller
                 a.invoice_date,
                 a.invoice_no,
                 a.customer_id,
+                a.is_discount,
+                a.discount,
                 b.customer_name,
                 b.gst AS client_vat_no,
                 b.crno AS customer_crno,
@@ -4092,10 +4094,30 @@ class Reports extends CI_Controller
                 get_tender_info(a.tender_enquiry_id) AS tender_details,
                 COALESCE(cur.currency_code, po_cur.currency_code, 'BHD') AS currency_code,
                 COALESCE(cur.decimal_point, po_cur.decimal_point, 3) AS decimal_point,
-                (a.total_amount - IFNULL(a.tax_amount, 0)) AS taxable_amount,
-                IFNULL(a.tax_amount, 0) AS tax_amount,
-                a.total_amount
+                IFNULL(itm.item_total, (a.total_amount - IFNULL(a.tax_amount, 0))) AS item_total,
+                IFNULL(itm.item_vat, IFNULL(a.tax_amount, 0)) AS item_vat,
+                CASE WHEN a.is_discount = 1 AND a.discount > 0 THEN a.discount ELSE 0.000 END AS total_discount,
+                IFNULL(ac.addt_chrg_amt, 0.000) AS total_addt_chrg,
+                IFNULL(ac.addt_chrg_vat, 0.000) AS total_addt_vat
             FROM tender_enq_invoice_info a
+            LEFT JOIN (
+                SELECT 
+                    tender_enq_invoice_id,
+                    SUM(qty * rate) AS item_total,
+                    SUM((qty * rate * gst) / 100) AS item_vat
+                FROM tender_enq_invoice_item_info
+                WHERE status = 'Active'
+                GROUP BY tender_enq_invoice_id
+            ) itm ON itm.tender_enq_invoice_id = a.tender_enq_invoice_id
+            LEFT JOIN (
+                SELECT 
+                    tender_enq_invoice_id,
+                    SUM(addt_charges_amt) AS addt_chrg_amt,
+                    SUM(addt_charges_vat_amt) AS addt_chrg_vat
+                FROM tender_invoice_addtchrg_info
+                WHERE status = 'Active'
+                GROUP BY tender_enq_invoice_id
+            ) ac ON ac.tender_enq_invoice_id = a.tender_enq_invoice_id
             LEFT JOIN customer_info b ON a.customer_id = b.customer_id AND b.status = 'Active'
             LEFT JOIN customer_tender_po_info cpo ON a.tender_po_id = cpo.tender_po_id AND cpo.status = 'Active'
             LEFT JOIN tender_enquiry_info te ON a.tender_enquiry_id = te.tender_enquiry_id AND te.status = 'Active'
@@ -4106,24 +4128,66 @@ class Reports extends CI_Controller
         ";
 
         $records = $this->db->query($sql, $params)->result_array();
+
+        // KPI and column metric calculations matching tender-po-invoice-print
+        $total_invoices = count($records);
+        $total_items_sum = 0;
+        $total_discount_sum = 0;
+        $total_addt_chrg_sum = 0;
+        $total_excl_vat_sum = 0;
+        $total_vat_sum = 0;
+        $grand_total_sum = 0;
+
+        foreach ($records as &$row) {
+            $item_total = (float) ($row['item_total'] ?? 0);
+            $total_discount = (float) ($row['total_discount'] ?? 0);
+            $total_addt_chrg = (float) ($row['total_addt_chrg'] ?? 0);
+            $item_vat = (float) ($row['item_vat'] ?? 0);
+            $total_addt_vat = (float) ($row['total_addt_vat'] ?? 0);
+
+            // TOTAL EXCL. VAT = Item Total - Discount + Addt Charges
+            $total_excl_vat = $item_total - $total_discount + $total_addt_chrg;
+
+            // Total Vat Amt = Item VAT + Addt Charges VAT
+            $total_vat_amt = $item_vat + $total_addt_vat;
+
+            // Grand Total Amt = TOTAL EXCL. VAT + Total Vat Amt
+            $grand_total_amt = $total_excl_vat + $total_vat_amt;
+
+            $row['total'] = $item_total;
+            $row['total_discount'] = $total_discount;
+            $row['total_addt_chrg'] = $total_addt_chrg;
+            $row['total_excl_vat'] = $total_excl_vat;
+            $row['total_vat_amt'] = $total_vat_amt;
+            $row['grand_total_amt'] = $grand_total_amt;
+
+            // Maintain legacy keys for backwards compatibility
+            $row['taxable_amount'] = $total_excl_vat;
+            $row['tax_amount'] = $total_vat_amt;
+            $row['total_amount'] = $grand_total_amt;
+
+            $total_items_sum += $item_total;
+            $total_discount_sum += $total_discount;
+            $total_addt_chrg_sum += $total_addt_chrg;
+            $total_excl_vat_sum += $total_excl_vat;
+            $total_vat_sum += $total_vat_amt;
+            $grand_total_sum += $grand_total_amt;
+        }
+        unset($row);
+
         $data['records'] = $records;
+        $data['total_invoices'] = $total_invoices;
+        $data['total_items_sum'] = $total_items_sum;
+        $data['total_discount_sum'] = $total_discount_sum;
+        $data['total_addt_chrg_sum'] = $total_addt_chrg_sum;
+        $data['total_excl_vat_sum'] = $total_excl_vat_sum;
+        $data['total_vat_sum'] = $total_vat_sum;
+        $data['grand_total_sum'] = $grand_total_sum;
 
         // KPI metrics
-        $total_invoices = count($records);
-        $total_taxable = 0;
-        $total_vat = 0;
-        $grand_total = 0;
-
-        foreach ($records as $row) {
-            $total_taxable += (float) $row['taxable_amount'];
-            $total_vat += (float) $row['tax_amount'];
-            $grand_total += (float) $row['total_amount'];
-        }
-
-        $data['total_invoices'] = $total_invoices;
-        $data['total_taxable'] = $total_taxable;
-        $data['total_vat'] = $total_vat;
-        $data['grand_total'] = $grand_total;
+        $data['total_taxable'] = $total_excl_vat_sum;
+        $data['total_vat'] = $total_vat_sum;
+        $data['grand_total'] = $grand_total_sum;
 
         // Excel Export
         if ($this->input->get_post('export_excel') == '1' || $this->input->get('export') == 'excel') {

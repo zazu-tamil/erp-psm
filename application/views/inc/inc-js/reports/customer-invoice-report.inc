@@ -33,8 +33,8 @@ $(document).ready(function () {
         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
         order: [[1, 'asc']], // Default sort: Date ASC (chronological from earliest to latest)
         columnDefs: [
-            { orderable: false, targets: [0, 10] }, // S.No and Action columns non-orderable
-            { searchable: false, targets: [10] },
+            { orderable: false, targets: [0, 13] }, // S.No and Action columns non-orderable
+            { searchable: false, targets: [13] },
             { type: 'date', targets: [1] }
         ],
         language: {
