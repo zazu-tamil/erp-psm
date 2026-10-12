@@ -257,9 +257,9 @@
                             title="Reset Filters">
                             <i class="fa fa-refresh"></i> Reset
                         </a>
-                        <!-- <button type="button" class="btn btn-success" id="btnExportExcel" title="Export to Excel">
+                        <button type="button" class="btn btn-success" id="btnExportExcel" title="Export to Excel">
                             <i class="fa fa-file-excel-o"></i> Excel
-                        </button> -->
+                        </button>
                         <button type="button" class="btn btn-info" onclick="window.print();" title="Print Report">
                             <i class="fa fa-print"></i> Print
                         </button>
@@ -313,6 +313,9 @@
                 </span>
             </h3>
             <div class="box-tools pull-right no-print">
+                <button type="button" class="btn btn-sm btn-success" onclick="$('#btnExportExcel').click();" title="Export to Excel" style="margin-right: 5px;">
+                    <i class="fa fa-file-excel-o"></i> Excel Export
+                </button>
                 <button type="button" class="btn btn-box-tool text-white" data-widget="collapse">
                     <i class="fa fa-minus"></i>
                 </button>

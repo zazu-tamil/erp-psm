@@ -4126,10 +4126,11 @@ class Reports extends CI_Controller
         $data['grand_total'] = $grand_total;
 
         // Excel Export
-        if ($this->input->post('export_excel') == '1' || $this->input->get('export') == 'excel') {
+        if ($this->input->get_post('export_excel') == '1' || $this->input->get('export') == 'excel') {
             $this->load->helper('download');
-            $filename = "Customer_Invoice_Report_" . ($srch_from_date ? $srch_from_date : 'all') . "_to_" . ($srch_to_date ? $srch_to_date : 'all') . ".xls";
-            $content = $this->load->view('page/reports/customer-invoice-report-xls', $data, TRUE);
+            $clean_customer_name = preg_replace('/[^A-Za-z0-9_\-]/', '_', $selected_customer_name);
+            $filename = "Customer_Invoice_Report_" . $clean_customer_name . "_" . ($srch_from_date ? $srch_from_date : 'all') . "_to_" . ($srch_to_date ? $srch_to_date : 'all') . ".xls";
+            $content = "\xEF\xBB\xBF" . $this->load->view('page/reports/customer-invoice-report-xls', $data, TRUE);
             force_download($filename, $content);
             return;
         }
