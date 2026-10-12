@@ -258,7 +258,7 @@
                             </div>
                             <div class="form-group col-md-6">
                                 <label>Customer <span class="text-red">*</span></label>
-                                <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="add_customer_id" class="form-control" required="true"'); ?>
+                                <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="add_customer_id" class="form-control select2" style="width: 100%;" required="true"'); ?>
                             </div>
                         </div>
 
@@ -438,7 +438,7 @@
                             </div>
                             <div class="form-group col-md-6">
                                 <label>Customer <span class="text-red">*</span></label>
-                                <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="edit_customer_id" class="form-control" required="true"'); ?>
+                                <?php echo form_dropdown('customer_id', ['' => 'Select Customer'] + $customer_opt, set_value('customer_id'), 'id="edit_customer_id" class="form-control select2" style="width: 100%;" required="true"'); ?>
                             </div>
                         </div>
 

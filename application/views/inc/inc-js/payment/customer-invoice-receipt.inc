@@ -7,7 +7,31 @@
     href="<?php echo base_url() ?>asset/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
 <script src="<?php echo base_url() ?>asset/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
 <script src="<?php echo base_url() ?>asset/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<!-- Select2 -->
+<link rel="stylesheet" href="<?php echo base_url('asset/bower_components/select2/dist/css/select2.min.css'); ?>" />
+<script src="<?php echo base_url('asset/bower_components/select2/dist/js/select2.full.min.js'); ?>"></script>
 <style>
+    /* Select2 Modal & Responsive Styles */
+    .select2-container {
+        width: 100% !important;
+    }
+
+    .select2-dropdown {
+        z-index: 99999999 !important;
+    }
+
+    .select2-container--default .select2-selection--single {
+        height: 34px !important;
+        padding: 6px 12px !important;
+        border: 1px solid #d2d6de !important;
+        border-radius: 0 !important;
+        background-color: #fff !important;
+    }
+
+    .select2-selection__arrow {
+        height: 32px !important;
+    }
+
     /* Lock background scrolling completely when modal is open */
     html:has(body.modal-open),
     html.modal-open,
@@ -48,6 +72,35 @@
 
 <script>
     $(document).ready(function () {
+
+        // Initialize Select2 for search filter
+        $('#srch_customer_id').select2({ width: '100%' });
+
+        // Initialize Select2 with dropdownParent for modals
+        $('#add_customer_id').select2({
+            dropdownParent: $('#add_modal'),
+            width: '100%'
+        });
+
+        $('#edit_customer_id').select2({
+            dropdownParent: $('#edit_modal'),
+            width: '100%'
+        });
+
+        // Ensure correct width & focus behavior when modal is shown
+        $('#add_modal').on('shown.bs.modal', function () {
+            $('#add_customer_id').select2({
+                dropdownParent: $('#add_modal'),
+                width: '100%'
+            });
+        });
+
+        $('#edit_modal').on('shown.bs.modal', function () {
+            $('#edit_customer_id').select2({
+                dropdownParent: $('#edit_modal'),
+                width: '100%'
+            });
+        });
 
         // Lock background scroll when modal opens, unlock when closed
         $(document).on('show.bs.modal shown.bs.modal', '.modal', function () {
@@ -456,6 +509,7 @@
         $("#add_modal").on("show.bs.modal", function () {
             $("#add_modal").data("initial_load", true);
             $("#frmadd")[0].reset();
+            $("#add_customer_id").val('').trigger('change.select2');
             $("#add_item_container").html("");
             $("#add_tender_enquiry_id")
                 .html('<option value="">Select Enquiry</option>')
@@ -648,6 +702,7 @@
 
             // Reset first
             $("#frmedit")[0].reset();
+            $("#edit_customer_id").val('').trigger('change.select2');
             $("#edit_item_container").html("");
             $("#edit_tender_enquiry_id")
                 .html('<option value="">Select Enquiry</option>')
@@ -755,7 +810,7 @@
             if (customer_id) {
                 edit_load_invoice_list(tender_receipt_id, customer_id);
             } else {
-                $("# #edit_item_container").html("");
+                $("#edit_item_container").html("");
                 calculateGrandTotal("edit");
             }
         });
