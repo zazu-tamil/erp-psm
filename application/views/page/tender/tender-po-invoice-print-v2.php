@@ -695,10 +695,10 @@
                                         </td>
                                         <td colspan="3" class="text-right" style="vertical-align:middle;">
                                             <div class="summary-section">
-                                                <!-- <div class="summary-row" style="border-bottom:1px solid #000;">
+                                                <div class="summary-row" style="border-bottom:1px solid #000;">
                                                     <span>TOTAL EXCL. VAT</span>
                                                     <span><?php echo number_format($total_net_amount, $decimal_point); ?></span>
-                                                </div> -->
+                                                </div>
 
                                                 <!-- Additional Charges -->
                                                 <?php
@@ -710,10 +710,10 @@
                                                     $tot_vat[floatval($addt_chrg['addt_charges_vat'])] += $addt_chrg['addt_charges_vat_amt'];
                                                     $grand_total += $addt_chrg['addt_charges_amt'];
                                                     ?>
-                                                    <!-- <div class="summary-row" style="border-bottom:1px solid #000;">
+                                                    <div class="summary-row" style="border-bottom:1px solid #000;">
                                                         <span><?php echo htmlspecialchars($addt_chrg['addt_charges_type_name']); ?></span>
                                                         <span><?php echo number_format($addt_chrg['addt_charges_amt'], $decimal_point); ?></span>
-                                                    </div> -->
+                                                    </div>
 
                                                 <?php endforeach; ?>
 
@@ -733,14 +733,14 @@
                                                         <span>TOTAL EXCL. VAT</span>
                                                         <span><?php echo number_format($grand_total, $decimal_point); ?></span>
                                                     </div>
-                                                <?php else: ?>
+                                                <?php elseif (!empty($addt_chrg_list)): ?>
                                                     <div class="summary-row" style="border-bottom:1px solid #000;">
                                                         <span>TOTAL EXCL. VAT</span>
                                                         <span><?php echo number_format($grand_total, $decimal_point); ?></span>
                                                     </div>
                                                 <?php endif; ?>
                                                 <div class="summary-row" style="border-bottom:1px solid #000;">
-                                                    <span>VAT <?php echo number_format($vat_percentage ?? 0, 0); ?>%</span>
+                                                    <span>VAT Amount</span>
                                                     <span><?php echo number_format($total_vat_amount, $decimal_point); ?></span>
                                                 </div>
                                                 <div class="summary-row">
@@ -807,19 +807,19 @@
                                                 <strong><?php echo number_format($grand_total, $decimal_point); ?></strong>
                                             </td>
                                         </tr>
-                                    <?php else: ?>
-                                        <!-- <tr class="items-table">
+                                    <?php elseif (!empty($addt_chrg_list)): ?>
+                                        <tr class="items-table">
                                             <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
                                                 <strong>TOTAL EXCL. VAT</strong>
                                             </td>
                                             <td colspan="2" class="text-right" style="padding:10px; border:1px solid #000;">
                                                 <strong><?php echo number_format($grand_total, $decimal_point); ?></strong>
                                             </td>
-                                        </tr> -->
+                                        </tr>
                                     <?php endif; ?>
                                     <tr>
                                         <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
-                                            <strong>VAT <?php echo number_format($vat_percentage ?? 0, 0); ?>%</strong>
+                                            <strong>VAT Amount</strong>
                                         </td>
                                         <td colspan="2" class="text-right" style="padding:10px; border:1px solid #000;">
                                             <strong><?php echo number_format(($total_vat_amount), $decimal_point); ?></strong>
