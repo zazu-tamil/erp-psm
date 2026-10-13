@@ -412,11 +412,12 @@
         `);
 
         // 4. Rate & Conversion
+        var displayCRate = (item.conversion_rate !== undefined && item.conversion_rate !== null && item.conversion_rate !== '') ? parseFloat(item.conversion_rate) : cRate;
         row.append(`
           <td>
             <input type="number" step="any" name="rate[${rowIdx}]" class="form-control rate-input" value="${rate.toFixed(3)}" data-uid="${uid}"> 
             <i class="text-sm">Conversion Rate</i> 
-            <input type="number" step="any" name="conversion_rate[${rowIdx}]" class="form-control conversion_rate_input" value="${cRate.toFixed(5)}" data-uid="${uid}">
+            <input type="number" step="any" name="conversion_rate[${rowIdx}]" class="form-control conversion_rate_input" value="${displayCRate}" data-uid="${uid}">
           </td>
         `);
 
@@ -445,6 +446,11 @@
 
         $tbody.append(row);
       });
+
+      if (keys.length > 0) {
+        var commonRate = (selectedItems[keys[0]].conversion_rate !== undefined && selectedItems[keys[0]].conversion_rate !== null && selectedItems[keys[0]].conversion_rate !== '') ? parseFloat(selectedItems[keys[0]].conversion_rate) : 1;
+        $(".addt_charges_conversion_rate").val(commonRate);
+      }
 
       calculateTotals();
     }
@@ -553,7 +559,7 @@
 
     $(document).on(
       "input",
-      ".addt_charges_amt, .addt_charges_conversion_rate, .addt_charges_vat",
+      ".addt_charges_amt, .addt_charges_vat",
       function () {
         var $row = $(this).closest("tr");
         if ($row.find(".chk_addt_charge").is(":checked")) {
@@ -562,19 +568,56 @@
       },
     );
 
+    // Sync conversion rate across all item and additional charges fields (flexible decimal points)
+    function syncAllConversionRates(sourceElem) {
+      var rawVal = $(sourceElem).val();
+      var newRate = parseFloat(rawVal);
+      if (!isNaN(newRate) && newRate > 0) {
+        $(".conversion_rate_input").not(sourceElem).val(rawVal);
+        $(".addt_charges_conversion_rate").not(sourceElem).val(rawVal);
+
+        $.each(selectedItems, function (u, it) {
+          it.conversion_rate = newRate;
+          var $r = $('tr.selected-item-row[data-uid="' + u + '"]');
+          if ($r.length) {
+            var q = parseFloat($r.find(".qty-input").val()) || 0;
+            var r = parseFloat($r.find(".rate-input").val()) || 0;
+            var g = parseFloat($r.find(".gst-input").val()) || 0;
+            var bAmt = q * r * newRate;
+            var vAmt = (bAmt * g) / 100;
+            var tot = bAmt + vAmt;
+            $r.find(".act_amt").val(bAmt.toFixed(3));
+            $r.find(".amountwotx").val(bAmt.toFixed(3));
+            $r.find(".amount-hidden").val(tot.toFixed(3));
+          }
+        });
+
+        calculateTotals();
+      }
+    }
+
+    $(document).on("input change", ".conversion_rate_input, .addt_charges_conversion_rate", function () {
+      syncAllConversionRates(this);
+    });
+
     $(document).on("change", ".chk_addt_charge", function () {
       var $row = $(this).closest("tr");
+      var defaultRate = $(".conversion_rate_input").first().val() || $(".addt_charges_conversion_rate").first().val() || "1";
       if ($(this).is(":checked")) {
         $row
           .find(".addt_charges_amt, .addt_charges_conversion_rate, .addt_charges_vat")
           .removeAttr("readonly");
+        $row.find(".addt_charges_conversion_rate").val(defaultRate);
       } else {
         $row
           .find(".addt_charges_amt, .addt_charges_conversion_rate, .addt_charges_vat")
           .attr("readonly", true);
         $row.find(".addt_charges_amt").val("0.000");
-        $row.find(".addt_charges_conversion_rate").val("1.00000");
+        $row.find(".addt_charges_conversion_rate").val(defaultRate);
         $row.find(".addt_charges_vat").val("0.00");
+        $row.find(".addt_charges_conversion_amt").val("0.000");
+        $row.find(".addt_charges_vat_amt").val("0.000");
+        $row.find(".addt_charges_tot_amt").val("0.000");
       }
       calculateTotals();
     });

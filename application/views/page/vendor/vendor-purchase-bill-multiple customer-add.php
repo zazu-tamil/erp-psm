@@ -271,7 +271,7 @@
                                         <input type="number" step="any" class="form-control addt_charges_amt" name="addt_charges_amt[<?php echo $id; ?>]" value="0.000" readonly>
                                     </td>
                                     <td>
-                                        <input type="number" step="any" class="form-control addt_charges_conversion_rate" name="addt_charges_conversion_rate[<?php echo $id; ?>]" value="1.00000" readonly>
+                                        <input type="number" step="any" class="form-control addt_charges_conversion_rate" name="addt_charges_conversion_rate[<?php echo $id; ?>]" value="1" readonly>
                                     </td>
                                     <td>
                                         <input type="number" step="any" class="form-control addt_charges_conversion_amt" name="addt_charges_conversion_amt[<?php echo $id; ?>]" value="0.000" readonly>

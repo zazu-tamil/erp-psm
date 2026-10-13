@@ -3,6 +3,41 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Multiple_customer_vendor extends CI_Controller
 {
+    public function __construct()
+    {
+        parent::__construct();
+        $this->ensure_schema();
+    }
+
+    private function ensure_schema()
+    {
+        try {
+            if ($this->db->table_exists('vendor_purchase_multiple_invoice_addtchrg_info')) {
+                $this->db->query("ALTER TABLE `vendor_purchase_multiple_invoice_addtchrg_info` MODIFY COLUMN `conversion_rate` DECIMAL(10,5) NULL DEFAULT '1'");
+            }
+            if ($this->db->table_exists('vendor_purchase_multiple_invoice_item_info')) {
+                $this->db->query("ALTER TABLE `vendor_purchase_multiple_invoice_item_info` MODIFY COLUMN `conversion_rate` DECIMAL(10,5) NULL DEFAULT '1'");
+            }
+            if ($this->db->table_exists('vendor_purchase_multiple_invoice_addtchrg_info') && $this->db->table_exists('vendor_purchase_multiple_invoice_item_info')) {
+                $this->db->query("
+                    UPDATE vendor_purchase_multiple_invoice_addtchrg_info a
+                    JOIN (
+                        SELECT vendor_purchase_multiple_invoice_id, MAX(conversion_rate) as item_rate
+                        FROM vendor_purchase_multiple_invoice_item_info
+                        WHERE status = 'Active' AND conversion_rate > 0
+                        GROUP BY vendor_purchase_multiple_invoice_id
+                    ) i ON a.vendor_purchase_multiple_invoice_id = i.vendor_purchase_multiple_invoice_id
+                    SET a.conversion_rate = i.item_rate,
+                        a.conversion_amt = ROUND(a.addt_charges_amt * i.item_rate, 3),
+                        a.addt_charges_tot_amt = ROUND(ROUND(a.addt_charges_amt * i.item_rate, 3) + a.addt_charges_vat_amt, 3)
+                    WHERE a.status = 'Active' 
+                      AND a.conversion_rate != i.item_rate
+                ");
+            }
+        } catch (\Exception $e) {
+            // Ignore schema update exceptions
+        }
+    }
 
     public function vendor_purchase_bill_multiple_customer_add()
     {
@@ -134,7 +169,7 @@ class Multiple_customer_vendor extends CI_Controller
                         'vendor_purchase_multiple_invoice_id' => $vendor_purchase_multiple_invoice_id,
                         'addt_charges_type_id' => $addt_charges_type_id[$chk_id] ?? 0,
                         'addt_charges_amt' => $addt_charges_amt[$chk_id] ?? 0,
-                        'conversion_rate' => $addt_charges_conversion_rate[$chk_id] ?? 0.000,
+                        'conversion_rate' => !empty($addt_charges_conversion_rate[$chk_id]) ? (float)$addt_charges_conversion_rate[$chk_id] : 1,
                         'conversion_amt' => $addt_charges_conversion_amt[$chk_id] ?? 0.000,
                         'addt_charges_vat' => $addt_charges_vat[$chk_id] ?? 0,
                         'addt_charges_vat_amt' => $addt_charges_vat_amt[$chk_id] ?? 0,
@@ -681,7 +716,7 @@ class Multiple_customer_vendor extends CI_Controller
                         'vendor_purchase_multiple_invoice_id' => $vendor_purchase_multiple_invoice_id,
                         'addt_charges_type_id' => $chk_id,
                         'addt_charges_amt' => $addt_charges_amt[$chk_id] ?? 0,
-                        'conversion_rate' => $addt_charges_conversion_rate[$chk_id] ?? 0.000,
+                        'conversion_rate' => !empty($addt_charges_conversion_rate[$chk_id]) ? (float)$addt_charges_conversion_rate[$chk_id] : 1,
                         'conversion_amt' => $addt_charges_conversion_amt[$chk_id] ?? 0.000,
                         'addt_charges_vat' => $addt_charges_vat[$chk_id] ?? 0,
                         'addt_charges_vat_amt' => $addt_charges_vat_amt[$chk_id] ?? 0,
@@ -741,6 +776,25 @@ class Multiple_customer_vendor extends CI_Controller
         $this->db->where('a.status', 'Active');
         $query = $this->db->get();
         $data['items'] = $query->result_array();
+
+        // Common invoice conversion rate
+        $invoice_conversion_rate = 1;
+        if (!empty($data['items'])) {
+            foreach ($data['items'] as &$it) {
+                if (!empty($it['conversion_rate']) && (float)$it['conversion_rate'] > 0) {
+                    $invoice_conversion_rate = (float)$it['conversion_rate'];
+                    break;
+                }
+            }
+            unset($it);
+            foreach ($data['items'] as &$it) {
+                if (isset($it['conversion_rate'])) {
+                    $it['conversion_rate'] = (float)$it['conversion_rate'];
+                }
+            }
+            unset($it);
+        }
+        $data['invoice_conversion_rate'] = $invoice_conversion_rate;
 
         // FETCH ADDITIONAL CHARGES
         $this->db->where('vendor_purchase_multiple_invoice_id', $vendor_purchase_multiple_invoice_id);

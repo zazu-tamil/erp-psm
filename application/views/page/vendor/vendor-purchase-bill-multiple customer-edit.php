@@ -262,16 +262,34 @@
                             </thead>
                             <tbody id="tb_addt_chrg_list">
                                 <?php if (!empty($addt_charges_list)) {
+                                    // Find default conversion rate from items
+                                    $default_item_c_rate = 1.0;
+                                    if (!empty($items)) {
+                                        foreach ($items as $it) {
+                                            if (!empty($it['conversion_rate']) && (float)$it['conversion_rate'] > 0) {
+                                                $default_item_c_rate = (float)$it['conversion_rate'];
+                                                break;
+                                            }
+                                        }
+                                    }
+
                                     foreach ($addt_charges_list as $charge) {
                                         $id = $charge['addt_charges_type_id'];
                                         $is_checked = isset($saved_addt_charges[$id]) ? 'checked' : '';
                                         $saved_chg = isset($saved_addt_charges[$id]) ? $saved_addt_charges[$id] : [];
-                                        $amt = isset($saved_chg['addt_charges_amt']) ? $saved_chg['addt_charges_amt'] : '0.000';
-                                        $c_rate = isset($saved_chg['conversion_rate']) ? $saved_chg['conversion_rate'] : '1.00000';
-                                        $c_amt = isset($saved_chg['conversion_amt']) ? $saved_chg['conversion_amt'] : '0.000';
-                                        $vat = isset($saved_chg['addt_charges_vat']) ? $saved_chg['addt_charges_vat'] : '0.00';
-                                        $vat_amt = isset($saved_chg['addt_charges_vat_amt']) ? $saved_chg['addt_charges_vat_amt'] : '0.000';
-                                        $tot = isset($saved_chg['addt_charges_tot_amt']) ? $saved_chg['addt_charges_tot_amt'] : '0.000';
+                                        $amt = isset($saved_chg['addt_charges_amt']) ? number_format((float)$saved_chg['addt_charges_amt'], 3, '.', '') : '0.000';
+                                        $c_rate = isset($invoice_conversion_rate) ? (float)$invoice_conversion_rate : (float)$default_item_c_rate;
+                                        if ($is_checked && (float)$amt > 0) {
+                                            $c_amt = number_format((float)$amt * $c_rate, 3, '.', '');
+                                            $vat = isset($saved_chg['addt_charges_vat']) ? number_format((float)$saved_chg['addt_charges_vat'], 2, '.', '') : '0.00';
+                                            $vat_amt = number_format(((float)$c_amt * (float)$vat) / 100, 3, '.', '');
+                                            $tot = number_format((float)$c_amt + (float)$vat_amt, 3, '.', '');
+                                        } else {
+                                            $c_amt = isset($saved_chg['conversion_amt']) ? number_format((float)$saved_chg['conversion_amt'], 3, '.', '') : '0.000';
+                                            $vat = isset($saved_chg['addt_charges_vat']) ? number_format((float)$saved_chg['addt_charges_vat'], 2, '.', '') : '0.00';
+                                            $vat_amt = isset($saved_chg['addt_charges_vat_amt']) ? number_format((float)$saved_chg['addt_charges_vat_amt'], 3, '.', '') : '0.000';
+                                            $tot = isset($saved_chg['addt_charges_tot_amt']) ? number_format((float)$saved_chg['addt_charges_tot_amt'], 3, '.', '') : '0.000';
+                                        }
                                         $readonly = $is_checked ? '' : 'readonly';
                                         $saved_id = isset($saved_chg['vendor_purchase_multiple_invoice_addtchrg_id']) ? $saved_chg['vendor_purchase_multiple_invoice_addtchrg_id'] : '';
                                 ?>
@@ -286,7 +304,7 @@
                                         <input type="number" step="any" class="form-control addt_charges_amt" name="addt_charges_amt[<?php echo $id; ?>]" value="<?php echo $amt; ?>" <?php echo $readonly; ?>>
                                     </td>
                                     <td>
-                                        <input type="number" step="any" class="form-control addt_charges_conversion_rate" name="addt_charges_conversion_rate[<?php echo $id; ?>]" value="<?php echo $c_rate; ?>" <?php echo $readonly; ?>>
+                                        <input type="number" step="any" class="form-control addt_charges_conversion_rate" name="addt_charges_conversion_rate[<?php echo $id; ?>]" value="<?php echo (float)$c_rate; ?>" <?php echo $readonly; ?>>
                                     </td>
                                     <td>
                                         <input type="number" step="any" class="form-control addt_charges_conversion_amt" name="addt_charges_conversion_amt[<?php echo $id; ?>]" value="<?php echo $c_amt; ?>" readonly>

@@ -533,13 +533,13 @@ class Menu_model extends CI_Model {
         $menus_to_ensure = array(
             array(
                 'slug'       => 'vendor-purchase-bill-multiple-customer-add',
-                'title'      => 'Add Multi Customer Bill Entry',
+                'title'      => 'Add Multi Supplier Bill Entry',
                 'icon'       => 'fa fa-plus-square',
                 'sort_order' => 3
             ),
             array(
                 'slug'       => 'vendor-purchase-bill-multiple-customer-list',
-                'title'      => 'Multi Customer Bill List',
+                'title'      => 'Multi Supplier Bill List',
                 'icon'       => 'fa fa-list',
                 'sort_order' => 4
             ),
