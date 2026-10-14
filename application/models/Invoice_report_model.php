@@ -50,9 +50,15 @@ class Invoice_report_model extends CI_Model
                 AND ci.status = 'Active'
 
             /* Supplier Invoice */
-            LEFT JOIN vendor_purchase_invoice_info vi
+            LEFT JOIN (
+                SELECT vendor_purchase_invoice_id, tender_enquiry_id, vendor_id, invoice_no, invoice_date, total_amount, status FROM vendor_purchase_invoice_info WHERE status = 'Active'
+                UNION ALL
+                SELECT a.vendor_purchase_multiple_invoice_id, mi.tender_enquiry_id, a.vendor_id, a.invoice_no, a.invoice_date, a.total_amount, a.status
+                FROM vendor_purchase_multiple_invoice_info a
+                JOIN vendor_purchase_multiple_invoice_item_info mi ON mi.vendor_purchase_multiple_invoice_id = a.vendor_purchase_multiple_invoice_id AND mi.status = 'Active'
+                WHERE a.status = 'Active'
+            ) vi
                 ON vi.tender_enquiry_id = a.tender_enquiry_id
-                AND vi.status = 'Active'
 
             LEFT JOIN vendor_info v
                 ON v.vendor_id = vi.vendor_id
@@ -268,6 +274,32 @@ class Invoice_report_model extends CI_Model
         $this->db->where('a.status', 'Active');
         $q1 = $this->db->get()->result_array();
         foreach ($q1 as $row) {
+            $row['type'] = 'Supplier Bill';
+            $results[] = $row;
+        }
+
+        // 1b. Multiple Customer Supplier Bills
+        $this->db->select("
+            mi.tender_enquiry_id,
+            a.invoice_date,
+            a.invoice_no,
+            v.vendor_name,
+            v.gst AS vendor_vat,
+            a.total_amount_wo_tax AS cif_val,
+            a.total_duty_amount AS duty,
+            (a.total_amount_wo_tax + a.total_duty_amount) AS total_val,
+            a.tax_amount AS vat,
+            a.tax_amount AS vat_paid,
+            a.total_amount AS grand_total
+        ");
+        $this->db->from('vendor_purchase_multiple_invoice_info a');
+        $this->db->join('vendor_purchase_multiple_invoice_item_info mi', 'mi.vendor_purchase_multiple_invoice_id = a.vendor_purchase_multiple_invoice_id AND mi.status = \'Active\'');
+        $this->db->join('vendor_info v', 'a.vendor_id = v.vendor_id AND v.status = \'Active\'', 'left');
+        $this->db->where_in('mi.tender_enquiry_id', $enquiry_ids);
+        $this->db->where('a.status', 'Active');
+        $this->db->group_by('a.vendor_purchase_multiple_invoice_id');
+        $q1b = $this->db->get()->result_array();
+        foreach ($q1b as $row) {
             $row['type'] = 'Supplier Bill';
             $results[] = $row;
         }

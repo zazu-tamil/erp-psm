@@ -112,9 +112,15 @@ class Supplier_summary_model extends CI_Model
             ON vpc.vendor_po_id=vpo.vendor_po_id
 
             /* Supplier Invoice */
-            LEFT JOIN vendor_purchase_invoice_info vi
+            LEFT JOIN (
+                SELECT vendor_purchase_invoice_id, tender_enquiry_id, vendor_id, invoice_no, invoice_date, total_amount, status FROM vendor_purchase_invoice_info WHERE status = 'Active'
+                UNION ALL
+                SELECT a.vendor_purchase_multiple_invoice_id, mi.tender_enquiry_id, a.vendor_id, a.invoice_no, a.invoice_date, a.total_amount, a.status
+                FROM vendor_purchase_multiple_invoice_info a
+                JOIN vendor_purchase_multiple_invoice_item_info mi ON mi.vendor_purchase_multiple_invoice_id = a.vendor_purchase_multiple_invoice_id AND mi.status = 'Active'
+                WHERE a.status = 'Active'
+            ) vi
             ON vi.tender_enquiry_id=a.tender_enquiry_id
-            AND vi.status='Active'
 
             LEFT JOIN vendor_info v
             ON v.vendor_id=vi.vendor_id

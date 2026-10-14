@@ -194,6 +194,27 @@ class Reports extends CI_Controller
             ";
 
             $union_parts[] = "
+            (select  
+            'Supplier Multiple Bill' as v_type,
+            a.vendor_id,  
+            a.invoice_no,
+            a.invoice_date as inv_date,  
+            a.vat_payer_purchase_grp,
+            'General trading' g_desc,
+            a.total_amount_wo_tax as items_tot_ex_tax,
+            (coalesce(a.total_amount_wo_tax_inc_addl, a.total_amount_wo_tax) - a.total_amount_wo_tax) as addl_amt_ex_tax,
+            coalesce(a.total_tax_amount_inc_addl, a.tax_amount) as tax_amount,
+            coalesce(a.total_amount_inc_addl, a.total_amount) as total_amount,
+            '' as declaration_date,
+            '' as declaration_no
+            from vendor_purchase_multiple_invoice_info as a  
+            where a.`status` = 'Active' 
+            and (a.only_accounting_entry != 1 or a.only_accounting_entry = 0 or a.only_accounting_entry is null)
+            and a.entry_date between '$srch_from_date' and '$srch_to_date'
+            order by a.invoice_date asc) 
+            ";
+
+            $union_parts[] = "
             (select 
             'Local Bill' as v_type,
             a.vendor_id,
@@ -437,6 +458,27 @@ class Reports extends CI_Controller
             and (a.only_accounting_entry != 1 or a.only_accounting_entry = 0 or a.only_accounting_entry is null)
             and a.entry_date between '$srch_from_date' and '$srch_to_date'
             order by  a.invoice_date asc) 
+            ";
+
+            $union_parts[] = "
+            (select  
+            'Supplier Bill' as v_type,
+            a.vendor_id,  
+            a.invoice_no,
+            a.invoice_date as inv_date,  
+            a.vat_payer_purchase_grp,
+            'General trading' g_desc,
+            a.total_amount_wo_tax as items_tot_ex_tax,
+            (coalesce(a.total_amount_wo_tax_inc_addl, a.total_amount_wo_tax) - a.total_amount_wo_tax) as addl_amt_ex_tax,
+            coalesce(a.total_tax_amount_inc_addl, a.tax_amount) as tax_amount,
+            coalesce(a.total_amount_inc_addl, a.total_amount) as total_amount,
+            '' as declaration_date,
+            '' as declaration_no
+            from vendor_purchase_multiple_invoice_info as a  
+            where a.`status` = 'Active' 
+            and (a.only_accounting_entry != 1 or a.only_accounting_entry = 0 or a.only_accounting_entry is null)
+            and a.entry_date between '$srch_from_date' and '$srch_to_date'
+            order by a.invoice_date asc) 
             ";
 
             $union_parts[] = "
@@ -1267,15 +1309,66 @@ class Reports extends CI_Controller
                 WHERE a.status='Active'
                 AND a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
 
-                ORDER BY a.vendor_purchase_invoice_id ASC, b.vendor_purchase_invoice_item_id ASC
+                UNION ALL
+
+                SELECT 
+                    a.vendor_purchase_multiple_invoice_id as vendor_purchase_invoice_id,
+                    a.invoice_no,
+                    a.invoice_date,
+                    a.entry_date,
+                    a.vat_payer_purchase_grp,
+                    a.total_amount_wo_tax,
+                    a.total_amount_wo_tax_inc_addl,
+                    a.total_tax_amount_inc_addl,
+                    a.total_amount_inc_addl,
+                    a.tax_amount,
+                    a.total_amount,
+                    b.tender_enquiry_id,
+                    a.remarks,
+                    c.company_name,
+                    d.customer_name,
+                    b.vendor_purchase_multiple_invoice_item_id as vendor_purchase_invoice_item_id,
+                    b.vendor_po_id,
+                    b.vendor_po_item_id,
+                    (SELECT item_code FROM item_info WHERE item_id = b.item_id LIMIT 1) AS item_code,
+                    b.item_desc,                    
+                    b.uom,
+                    b.qty,
+                    b.rate,
+                    b.gst,
+                    b.amount , 
+                    v.vendor_name,
+                    vc.contact_person_name
+
+                FROM vendor_purchase_multiple_invoice_info as a
+                JOIN vendor_purchase_multiple_invoice_item_info as b 
+                    ON a.vendor_purchase_multiple_invoice_id = b.vendor_purchase_multiple_invoice_id
+                    AND b.status='Active'
+
+                LEFT JOIN company_info as c 
+                    ON a.company_id = c.company_id 
+                    AND c.status='Active'    
+
+                LEFT JOIN customer_info as d 
+                    ON b.customer_id = d.customer_id 
+                    AND d.status='Active'   
+            
+                LEFT JOIN vendor_info as v on a.vendor_id = v.vendor_id and v.`status`='Active'
+                LEFT JOIN vendor_contact_info as vc on a.vendor_contact_person_id = vc.vendor_contact_id and vc.`status`='Active' 
+
+                WHERE a.status='Active'
+                AND b.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
+
+                ORDER BY vendor_purchase_invoice_id ASC, vendor_purchase_invoice_item_id ASC
             ";
 
             $query = $this->db->query($sql);
 
             // GROUP DATA BY INVOICE
             foreach ($query->result_array() as $row) {
-                $data['vendor_invoice_list'][$row['vendor_purchase_invoice_id']]['info'] = $row;
-                $data['vendor_invoice_list'][$row['vendor_purchase_invoice_id']]['items'][] = $row;
+                $group_key = ($row['invoice_no'] ?? '') . '_' . $row['vendor_purchase_invoice_id'];
+                $data['vendor_invoice_list'][$group_key]['info'] = $row;
+                $data['vendor_invoice_list'][$group_key]['items'][] = $row;
             }
 
             $sql = "
@@ -1379,7 +1472,30 @@ class Reports extends CI_Controller
                 where a.`status`='Active'
                 and b.bill_type ='Purchase Invoice'
                 and a.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
-                order by c.payment_date
+
+                UNION ALL
+
+                select
+                a.vendor_purchase_multiple_invoice_id as vendor_purchase_invoice_id, 
+                mi.tender_enquiry_id,
+                c.payment_no,
+                DATE_FORMAT(c.payment_date, '%d-%m-%Y') as payment_date ,
+                d.vendor_name,
+                c.payment_mode,
+                c.payment_type,
+                c.amount,
+
+                b.vendor_payment_id,
+                b.bill_id,
+                b.bill_type,
+                b.bill_amount
+                from vendor_purchase_multiple_invoice_info as a 
+                join vendor_purchase_multiple_invoice_item_info as mi on a.vendor_purchase_multiple_invoice_id = mi.vendor_purchase_multiple_invoice_id and mi.status='Active' and mi.tender_enquiry_id = '" . $this->db->escape_str($tender_enquiry_id) . "'
+                left join vendor_payment_bill_info as b on a.vendor_purchase_multiple_invoice_id = b.bill_id and b.bill_type = 'Multiple Purchase Invoice' and b.`status`='Active'
+                left join vendor_payment_info as c on b.vendor_payment_id = c.vendor_payment_id and c.`status`='Active'
+                left join vendor_info as d on c.vendor_id = d.vendor_id and d.`status`='Active'
+                where a.`status`='Active'
+                order by payment_date
             ";
 
             $query = $this->db->query($sql);
@@ -2456,6 +2572,19 @@ class Reports extends CI_Controller
 
                 UNION ALL
 
+                SELECT 
+                    a.invoice_date,
+                    a.invoice_no,
+                    b.vendor_name,
+                    COALESCE(a.total_amount_inc_addl, a.total_amount) AS total_amount,
+                    'Multiple Purchase Invoice' AS bill_type
+                FROM vendor_purchase_multiple_invoice_info AS a
+                LEFT JOIN vendor_info AS b 
+                    ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active' $where
+
+                UNION ALL
+
                 SELECT
                     a.invoice_date,
                     a.invoice_no,
@@ -2722,6 +2851,11 @@ class Reports extends CI_Controller
                         WHERE status = 'Active' AND vendor_id = '$esc_vendor' AND invoice_date >= '$esc_op' AND invoice_date < '$esc_from'
                         
                         UNION ALL
+
+                        SELECT COALESCE(total_amount_inc_addl, total_amount) AS total_amount FROM vendor_purchase_multiple_invoice_info
+                        WHERE status = 'Active' AND vendor_id = '$esc_vendor' AND invoice_date >= '$esc_op' AND invoice_date < '$esc_from'
+                        
+                        UNION ALL
                         
                         SELECT tot_amt_with_tax AS total_amount FROM local_purchase_bill_info
                         WHERE status = 'Active' AND vendor_id = '$esc_vendor' AND invoice_date >= '$esc_op' AND invoice_date < '$esc_from'
@@ -2779,6 +2913,11 @@ class Reports extends CI_Controller
                     SELECT IFNULL(SUM(total_amount), 0) AS total_purchases
                     FROM (
                         SELECT COALESCE(total_amount_inc_addl, total_amount) AS total_amount FROM vendor_purchase_invoice_info
+                        WHERE status = 'Active' AND invoice_date < '$esc_from'
+                        
+                        UNION ALL
+
+                        SELECT COALESCE(total_amount_inc_addl, total_amount) AS total_amount FROM vendor_purchase_multiple_invoice_info
                         WHERE status = 'Active' AND invoice_date < '$esc_from'
                         
                         UNION ALL
@@ -2853,6 +2992,23 @@ class Reports extends CI_Controller
                     'purchase' AS type,
                     v.vendor_name
                 FROM vendor_purchase_invoice_info a
+                LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
+                WHERE a.status = 'Active'
+                  " . (!empty($vendor_id) ? "AND a.vendor_id = '$esc_vendor'" : "") . "
+                  " . (!empty($from_date) ? "AND a.invoice_date >= '$esc_from'" : "") . "
+                  " . (!empty($to_date) ? "AND a.invoice_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
+                  
+                UNION ALL
+
+                SELECT 
+                    a.invoice_date AS tr_date,
+                    a.invoice_no AS voucher_no,
+                    'Multiple Purchase Invoice' AS description,
+                    COALESCE(a.total_amount_inc_addl, a.total_amount) AS purchase_amt,
+                    0.000 AS paid_amt,
+                    'purchase' AS type,
+                    v.vendor_name
+                FROM vendor_purchase_multiple_invoice_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status = 'Active'
                   " . (!empty($vendor_id) ? "AND a.vendor_id = '$esc_vendor'" : "") . "
@@ -3097,6 +3253,12 @@ class Reports extends CI_Controller
             SELECT vendor_id, invoice_date, amount FROM (
                 SELECT vendor_id, invoice_date, COALESCE(total_amount_inc_addl, total_amount) AS amount
                 FROM vendor_purchase_invoice_info
+                WHERE status = 'Active' AND invoice_date <= '$esc_as_on' {$vendor_where}
+                
+                UNION ALL
+
+                SELECT vendor_id, invoice_date, COALESCE(total_amount_inc_addl, total_amount) AS amount
+                FROM vendor_purchase_multiple_invoice_info
                 WHERE status = 'Active' AND invoice_date <= '$esc_as_on' {$vendor_where}
                 
                 UNION ALL
@@ -4289,6 +4451,7 @@ class Reports extends CI_Controller
         $data['bill_type_opt'] = [
             '' => 'All Bill Types',
             'Supplier Bill' => 'Supplier Bill (Purchase Invoice)',
+            'Supplier Bill (Multiple)' => 'Multiple Customer Supplier Bill',
             'Local Supplier Bill' => 'Local Supplier Bill'
         ];
 
@@ -4370,6 +4533,33 @@ class Reports extends CI_Controller
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 LEFT JOIN vendor_po_info vpo ON vpo.vendor_po_id = a.vendor_po_id AND vpo.status = 'Active'
                  WHERE a.status = 'Active'
+
+                UNION ALL
+
+                -- 1b. Multiple Customer Supplier Bill
+                SELECT
+                    a.vendor_purchase_multiple_invoice_id AS bill_id,
+                    a.invoice_date,
+                    a.invoice_no,
+                    a.vendor_id,
+                    v.vendor_name,
+                    COALESCE(v.gst, v.crno) AS vendor_vat_cr,
+                    (SELECT mi.tender_enquiry_id FROM vendor_purchase_multiple_invoice_item_info mi WHERE mi.vendor_purchase_multiple_invoice_id = a.vendor_purchase_multiple_invoice_id AND mi.status = 'Active' LIMIT 1) AS tender_enquiry_id,
+                    (SELECT GROUP_CONCAT(DISTINCT get_tender_info(mi.tender_enquiry_id) SEPARATOR '<br>') FROM vendor_purchase_multiple_invoice_item_info mi WHERE mi.vendor_purchase_multiple_invoice_id = a.vendor_purchase_multiple_invoice_id AND mi.status = 'Active' AND mi.tender_enquiry_id > 0) AS tender_details, 
+                    3 as decimal_point,
+
+                    COALESCE(a.total_amount_wo_tax_inc_addl, a.total_amount_wo_tax) AS taxable_amount,
+                    COALESCE(a.total_tax_amount_inc_addl, a.tax_amount, 0) AS tax_amount,
+                    COALESCE(a.total_amount_inc_addl, a.total_amount) AS total_amount,
+
+                    'Supplier Bill (Multiple)' AS bill_type,
+                    NULL AS sub_account_head_id,
+                    'Purchases' AS sub_account_head_name,
+                    NULL AS print_url,
+                    CONCAT('vendor-purchase-bill-multiple-customer-edit/', a.vendor_purchase_multiple_invoice_id) AS edit_url
+                FROM vendor_purchase_multiple_invoice_info a
+                LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
+                WHERE a.status = 'Active'
 
                 UNION ALL
 

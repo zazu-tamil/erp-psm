@@ -3405,8 +3405,11 @@ class Accounts extends CI_Controller
 
             $input_vat_gen = (float) $this->db->query("
                 SELECT SUM(COALESCE(total_tax_amount_inc_addl, tax_amount, 0)) AS amt 
-                FROM vendor_purchase_invoice_info 
-                WHERE status = 'Active' AND invoice_date <= '$esc_to'
+                FROM (
+                    SELECT total_tax_amount_inc_addl, tax_amount FROM vendor_purchase_invoice_info WHERE status = 'Active' AND invoice_date <= '$esc_to'
+                    UNION ALL
+                    SELECT total_tax_amount_inc_addl, tax_amount FROM vendor_purchase_multiple_invoice_info WHERE status = 'Active' AND invoice_date <= '$esc_to'
+                ) as vpi_all
             ")->row('amt');
 
             $input_vat_local = (float) $this->db->query("
@@ -3469,8 +3472,11 @@ class Accounts extends CI_Controller
 
             $bills_gen = (float) $this->db->query("
                 SELECT SUM(COALESCE(total_amount_inc_addl, total_amount)) AS amt 
-                FROM vendor_purchase_invoice_info 
-                WHERE status = 'Active' AND invoice_date <= '$esc_to'
+                FROM (
+                    SELECT total_amount_inc_addl, total_amount FROM vendor_purchase_invoice_info WHERE status = 'Active' AND invoice_date <= '$esc_to'
+                    UNION ALL
+                    SELECT total_amount_inc_addl, total_amount FROM vendor_purchase_multiple_invoice_info WHERE status = 'Active' AND invoice_date <= '$esc_to'
+                ) as vpi_all
             ")->row('amt');
 
             $bills_local = (float) $this->db->query("
@@ -3590,8 +3596,11 @@ class Accounts extends CI_Controller
             // 5. purchase (Expense normal balance)
             $purchases_amt = (float) $this->db->query("
                 SELECT SUM(total_amount_wo_tax) AS amt 
-                FROM vendor_purchase_invoice_info 
-                WHERE status = 'Active' AND entry_date BETWEEN '$esc_from' AND '$esc_to'
+                FROM (
+                    SELECT total_amount_wo_tax FROM vendor_purchase_invoice_info WHERE status = 'Active' AND entry_date BETWEEN '$esc_from' AND '$esc_to'
+                    UNION ALL
+                    SELECT total_amount_wo_tax FROM vendor_purchase_multiple_invoice_info WHERE status = 'Active' AND entry_date BETWEEN '$esc_from' AND '$esc_to'
+                ) as vpi_all
             ")->row('amt');
 
             $record_list[] = [

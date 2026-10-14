@@ -45,16 +45,7 @@ class Payment extends CI_Controller
                 ]
             ]);
         }
-        if (!$this->db->field_exists('allocation_mode', 'tender_receipt_info')) {
-            $this->load->dbforge();
-            $this->dbforge->add_column('tender_receipt_info', [
-                'allocation_mode' => [
-                    'type' => 'VARCHAR',
-                    'constraint' => 20,
-                    'default' => 'auto'
-                ]
-            ]);
-        }
+     
         if (!$this->db->field_exists('bill_type', 'tender_receipt_invoice_info')) {
             $this->load->dbforge();
             $this->dbforge->add_column('tender_receipt_invoice_info', [
@@ -89,7 +80,6 @@ class Payment extends CI_Controller
                 'amount' => $this->input->post('amount'),
                 'is_without_bill' => $this->input->post('is_without_bill') ? 1 : 0,
                 'without_bill_amount' => $this->input->post('without_bill_amount') ?: 0.000,
-                'allocation_mode' => $this->input->post('allocation_mode') ?: 'auto',
                 'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
@@ -159,7 +149,6 @@ class Payment extends CI_Controller
                 'amount' => $this->input->post('amount'),
                 'is_without_bill' => $this->input->post('is_without_bill') ? 1 : 0,
                 'without_bill_amount' => $this->input->post('without_bill_amount') ?: 0.000,
-                'allocation_mode' => $this->input->post('allocation_mode') ?: 'auto',
                 'remarks' => $this->input->post('remarks'),
                 'status' => $this->input->post('status'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
@@ -1012,26 +1001,28 @@ class Payment extends CI_Controller
             $where .= " AND EXISTS (
                 SELECT 1 FROM vendor_payment_bill_info vpbi_f
                 LEFT JOIN vendor_purchase_invoice_info vpi_f ON vpi_f.vendor_purchase_invoice_id = vpbi_f.bill_id AND vpbi_f.bill_type = 'Purchase Invoice'
+                LEFT JOIN vendor_purchase_multiple_invoice_item_info vpmii_f ON vpmii_f.vendor_purchase_multiple_invoice_id = vpbi_f.bill_id AND vpbi_f.bill_type = 'Multiple Purchase Invoice' AND vpmii_f.status = 'Active'
                 LEFT JOIN local_purchase_bill_info lpb_f ON lpb_f.local_purchase_bill_id = vpbi_f.bill_id AND vpbi_f.bill_type = 'Local Bill'
                 LEFT JOIN dp_bill_info dpb_f ON dpb_f.dp_bill_id = vpbi_f.bill_id AND vpbi_f.bill_type = 'Delivery Bill'
                 LEFT JOIN customs_bill_info cb_f ON cb_f.customs_bill_id = vpbi_f.bill_id AND vpbi_f.bill_type = 'Customs Bill'
                 WHERE vpbi_f.vendor_payment_id = a.vendor_payment_id
                 AND vpbi_f.status = 'Active'
-                AND COALESCE(vpi_f.tender_enquiry_id, lpb_f.tender_enquiry_id, dpb_f.tender_enquiry_id, cb_f.tender_enquiry_id) = '" . $this->db->escape_str($tender_enquiry_id_value_id) . "'
+                AND COALESCE(vpi_f.tender_enquiry_id, vpmii_f.tender_enquiry_id, lpb_f.tender_enquiry_id, dpb_f.tender_enquiry_id, cb_f.tender_enquiry_id) = '" . $this->db->escape_str($tender_enquiry_id_value_id) . "'
             )";
         } elseif (!empty($srch_enquiry_no)) {
             $where .= " AND EXISTS (
                 SELECT 1 FROM vendor_payment_bill_info vpbi_f
                 LEFT JOIN vendor_purchase_invoice_info vpi_f ON vpi_f.vendor_purchase_invoice_id = vpbi_f.bill_id AND vpbi_f.bill_type = 'Purchase Invoice'
+                LEFT JOIN vendor_purchase_multiple_invoice_item_info vpmii_f ON vpmii_f.vendor_purchase_multiple_invoice_id = vpbi_f.bill_id AND vpbi_f.bill_type = 'Multiple Purchase Invoice' AND vpmii_f.status = 'Active'
                 LEFT JOIN local_purchase_bill_info lpb_f ON lpb_f.local_purchase_bill_id = vpbi_f.bill_id AND vpbi_f.bill_type = 'Local Bill'
                 LEFT JOIN dp_bill_info dpb_f ON dpb_f.dp_bill_id = vpbi_f.bill_id AND vpbi_f.bill_type = 'Delivery Bill'
                 LEFT JOIN customs_bill_info cb_f ON cb_f.customs_bill_id = vpbi_f.bill_id AND vpbi_f.bill_type = 'Customs Bill'
-                LEFT JOIN tender_enquiry_info tei_f ON tei_f.tender_enquiry_id = COALESCE(vpi_f.tender_enquiry_id, lpb_f.tender_enquiry_id, dpb_f.tender_enquiry_id, cb_f.tender_enquiry_id)
+                LEFT JOIN tender_enquiry_info tei_f ON tei_f.tender_enquiry_id = COALESCE(vpi_f.tender_enquiry_id, vpmii_f.tender_enquiry_id, lpb_f.tender_enquiry_id, dpb_f.tender_enquiry_id, cb_f.tender_enquiry_id)
                 WHERE vpbi_f.vendor_payment_id = a.vendor_payment_id
                 AND vpbi_f.status = 'Active'
                 AND (
                     tei_f.enquiry_no LIKE '%" . $this->db->escape_like_str($srch_enquiry_no) . "%'
-                    OR get_tender_info(COALESCE(vpi_f.tender_enquiry_id, lpb_f.tender_enquiry_id, dpb_f.tender_enquiry_id, cb_f.tender_enquiry_id)) LIKE '%" . $this->db->escape_like_str($srch_enquiry_no) . "%'
+                    OR get_tender_info(COALESCE(vpi_f.tender_enquiry_id, vpmii_f.tender_enquiry_id, lpb_f.tender_enquiry_id, dpb_f.tender_enquiry_id, cb_f.tender_enquiry_id)) LIKE '%" . $this->db->escape_like_str($srch_enquiry_no) . "%'
                 )
             )";
         }
@@ -1049,6 +1040,7 @@ class Payment extends CI_Controller
             $where .= " AND EXISTS (
                 SELECT 1 FROM vendor_payment_bill_info vpbi_b
                 LEFT JOIN vendor_purchase_invoice_info vpi_b ON vpi_b.vendor_purchase_invoice_id = vpbi_b.bill_id AND vpbi_b.bill_type = 'Purchase Invoice'
+                LEFT JOIN vendor_purchase_multiple_invoice_info vpmi_b ON vpmi_b.vendor_purchase_multiple_invoice_id = vpbi_b.bill_id AND vpbi_b.bill_type = 'Multiple Purchase Invoice'
                 LEFT JOIN local_purchase_bill_info lpb_b ON lpb_b.local_purchase_bill_id = vpbi_b.bill_id AND vpbi_b.bill_type = 'Local Bill'
                 LEFT JOIN dp_bill_info dpb_b ON dpb_b.dp_bill_id = vpbi_b.bill_id AND vpbi_b.bill_type = 'Delivery Bill'
                 LEFT JOIN customs_bill_info cb_b ON cb_b.customs_bill_id = vpbi_b.bill_id AND vpbi_b.bill_type = 'Customs Bill'
@@ -1057,6 +1049,7 @@ class Payment extends CI_Controller
                 AND vpbi_b.status = 'Active'
                 AND (
                     vpi_b.invoice_no LIKE '%" . $this->db->escape_like_str($srch_bill_no) . "%'
+                    OR vpmi_b.invoice_no LIKE '%" . $this->db->escape_like_str($srch_bill_no) . "%'
                     OR lpb_b.invoice_no LIKE '%" . $this->db->escape_like_str($srch_bill_no) . "%'
                     OR dpb_b.invoice_no LIKE '%" . $this->db->escape_like_str($srch_bill_no) . "%'
                     OR cb_b.invoice_no LIKE '%" . $this->db->escape_like_str($srch_bill_no) . "%'
@@ -1184,6 +1177,7 @@ class Payment extends CI_Controller
                         CONCAT(
                             CASE 
                                 WHEN vpbi.bill_type = 'Purchase Invoice' THEN vpi.invoice_no
+                                WHEN vpbi.bill_type = 'Multiple Purchase Invoice' THEN vpmi.invoice_no
                                 WHEN vpbi.bill_type = 'Local Bill' THEN lpb.invoice_no
                                 WHEN vpbi.bill_type = 'Delivery Bill' THEN dpb.invoice_no
                                 WHEN vpbi.bill_type = 'Customs Bill' THEN cb.invoice_no
@@ -1199,6 +1193,7 @@ class Payment extends CI_Controller
                     GROUP_CONCAT(DISTINCT 
                         CASE 
                             WHEN vpbi.bill_type = 'Purchase Invoice' AND vpi.tender_enquiry_id > 0 THEN get_tender_info(vpi.tender_enquiry_id)
+                            WHEN vpbi.bill_type = 'Multiple Purchase Invoice' THEN (SELECT GROUP_CONCAT(DISTINCT get_tender_info(mi.tender_enquiry_id) SEPARATOR '<br>') FROM vendor_purchase_multiple_invoice_item_info mi WHERE mi.vendor_purchase_multiple_invoice_id = vpbi.bill_id AND mi.status = 'Active' AND mi.tender_enquiry_id > 0)
                             WHEN vpbi.bill_type = 'Local Bill' AND lpb.tender_enquiry_id > 0 THEN get_tender_info(lpb.tender_enquiry_id)
                             WHEN vpbi.bill_type = 'Delivery Bill' AND dpb.tender_enquiry_id > 0 THEN get_tender_info(dpb.tender_enquiry_id)
                             WHEN vpbi.bill_type = 'Customs Bill' AND cb.tender_enquiry_id > 0 THEN get_tender_info(cb.tender_enquiry_id)
@@ -1208,6 +1203,7 @@ class Payment extends CI_Controller
                     ) AS enquiry_nos
                 FROM vendor_payment_bill_info vpbi
                 LEFT JOIN vendor_purchase_invoice_info vpi ON vpi.vendor_purchase_invoice_id = vpbi.bill_id AND vpbi.bill_type = 'Purchase Invoice'
+                LEFT JOIN vendor_purchase_multiple_invoice_info vpmi ON vpmi.vendor_purchase_multiple_invoice_id = vpbi.bill_id AND vpbi.bill_type = 'Multiple Purchase Invoice'
                 LEFT JOIN local_purchase_bill_info lpb ON lpb.local_purchase_bill_id = vpbi.bill_id AND vpbi.bill_type = 'Local Bill'
                 LEFT JOIN dp_bill_info dpb ON dpb.dp_bill_id = vpbi.bill_id AND vpbi.bill_type = 'Delivery Bill'
                 LEFT JOIN customs_bill_info cb ON cb.customs_bill_id = vpbi.bill_id AND vpbi.bill_type = 'Customs Bill'
@@ -1301,6 +1297,15 @@ class Payment extends CI_Controller
                 FROM vendor_purchase_invoice_info a
                 JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
                 WHERE a.status = 'Active' AND a.tender_enquiry_id = ? $where_cust
+
+                UNION
+
+                -- Multiple Customer Vendor Purchase Invoices
+                SELECT a.vendor_id, b.vendor_name
+                FROM vendor_purchase_multiple_invoice_info a
+                JOIN vendor_purchase_multiple_invoice_item_info mi ON mi.vendor_purchase_multiple_invoice_id = a.vendor_purchase_multiple_invoice_id AND mi.status = 'Active'
+                JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active' AND mi.tender_enquiry_id = ? " . (!empty($customer_id) ? " AND mi.customer_id = " . (int) $customer_id : "") . "
 
                 UNION
 
@@ -1445,6 +1450,23 @@ class Payment extends CI_Controller
 
                 UNION ALL
 
+                -- Multiple Customer Purchase Bill
+                SELECT
+                    a.vendor_purchase_multiple_invoice_id AS bill_id,
+                    a.invoice_date,
+                    (SELECT mi.tender_enquiry_id FROM vendor_purchase_multiple_invoice_item_info mi WHERE mi.vendor_purchase_multiple_invoice_id = a.vendor_purchase_multiple_invoice_id AND mi.status = 'Active' LIMIT 1) AS tender_enquiry_id,
+                    a.invoice_no,
+                    b.vendor_name,
+                    COALESCE(a.total_amount_inc_addl, a.total_amount) AS total_amount,
+                    'Multiple Purchase Invoice' AS bill_type
+                FROM vendor_purchase_multiple_invoice_info a
+                LEFT JOIN vendor_info b 
+                    ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active' 
+                    AND a.vendor_id = $vendor_id
+
+                UNION ALL
+
                 -- Opening Balance
                 SELECT
                     a.opening_id AS bill_id,
@@ -1567,6 +1589,23 @@ class Payment extends CI_Controller
                     ON a.vendor_id = b.vendor_id AND b.status = 'Active'
                 WHERE a.status = 'Active' 
                     AND a.ac_type_opt = 'Accountable'
+                    AND a.vendor_id = $vendor_id
+
+                UNION ALL
+
+                -- Multiple Customer Purchase Bill
+                SELECT
+                    a.vendor_purchase_multiple_invoice_id AS bill_id,
+                    a.invoice_date,
+                    (SELECT mi.tender_enquiry_id FROM vendor_purchase_multiple_invoice_item_info mi WHERE mi.vendor_purchase_multiple_invoice_id = a.vendor_purchase_multiple_invoice_id AND mi.status = 'Active' LIMIT 1) AS tender_enquiry_id,
+                    a.invoice_no, 
+                    b.vendor_name,
+                    COALESCE(a.total_amount_inc_addl, a.total_amount) AS total_amount,
+                    'Multiple Purchase Invoice' AS bill_type
+                FROM vendor_purchase_multiple_invoice_info a
+                LEFT JOIN vendor_info b 
+                    ON a.vendor_id = b.vendor_id AND b.status = 'Active'
+                WHERE a.status = 'Active' 
                     AND a.vendor_id = $vendor_id
 
                 UNION ALL
@@ -1852,11 +1891,12 @@ class Payment extends CI_Controller
                     vpbi.vendor_payment_id,
                     MAX(curr.currency_code) AS currency_code,
                     MAX(curr.symbol) AS currency_symbol,
-                    MAX(COALESCE(vpi.company_id, vpo.company_id)) AS company_id,
+                    MAX(COALESCE(vpi.company_id, vpo.company_id, vpmi.company_id)) AS company_id,
                     GROUP_CONCAT(DISTINCT 
                         CONCAT(
                             CASE 
                                 WHEN vpbi.bill_type = 'Purchase Invoice' THEN vpi.invoice_no
+                                WHEN vpbi.bill_type = 'Multiple Purchase Invoice' THEN vpmi.invoice_no
                                 WHEN vpbi.bill_type = 'Local Bill' THEN lpb.invoice_no
                                 WHEN vpbi.bill_type = 'Opening Balance' THEN CONCAT('OB-', LPAD(vob.opening_id, 3, '0'))
                                 ELSE vpbi.bill_id
@@ -1870,6 +1910,7 @@ class Payment extends CI_Controller
                     GROUP_CONCAT(DISTINCT 
                         CASE 
                             WHEN vpbi.bill_type = 'Purchase Invoice' THEN get_tender_info(vpi.tender_enquiry_id)
+                            WHEN vpbi.bill_type = 'Multiple Purchase Invoice' THEN (SELECT GROUP_CONCAT(DISTINCT get_tender_info(mi.tender_enquiry_id) SEPARATOR '<br>') FROM vendor_purchase_multiple_invoice_item_info mi WHERE mi.vendor_purchase_multiple_invoice_id = vpbi.bill_id AND mi.status = 'Active' AND mi.tender_enquiry_id > 0)
                             WHEN vpbi.bill_type = 'Local Bill' THEN get_tender_info(lpb.tender_enquiry_id)
                             ELSE NULL
                         END
@@ -1877,6 +1918,7 @@ class Payment extends CI_Controller
                     ) AS enquiry_nos
                 FROM vendor_payment_bill_info vpbi
                 LEFT JOIN vendor_purchase_invoice_info vpi ON vpi.vendor_purchase_invoice_id = vpbi.bill_id AND vpbi.bill_type = 'Purchase Invoice'
+                LEFT JOIN vendor_purchase_multiple_invoice_info vpmi ON vpmi.vendor_purchase_multiple_invoice_id = vpbi.bill_id AND vpbi.bill_type = 'Multiple Purchase Invoice'
                 LEFT JOIN vendor_po_info vpo ON vpo.vendor_po_id = vpi.vendor_po_id
                 LEFT JOIN currencies_info curr ON curr.currency_id = vpo.currency_id
                 LEFT JOIN local_purchase_bill_info lpb ON lpb.local_purchase_bill_id = vpbi.bill_id AND vpbi.bill_type = 'Local Bill'

@@ -6877,6 +6877,7 @@ class Vendor extends CI_Controller
         $data['bill_type_opt'] = [
             '' => 'All Bill Types',
             'Purchase Invoice' => 'Purchase Invoice',
+            'Multiple Purchase Invoice' => 'Multiple Customer Purchase Invoice',
             'Local Bill' => 'Local Bill',
             'Delivery Bill' => 'Delivery Bill',
             'Customs Bill' => 'Customs Bill',
@@ -6961,6 +6962,24 @@ class Vendor extends CI_Controller
                 LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
                 LEFT JOIN vendor_po_info vpo ON vpo.vendor_po_id = a.vendor_po_id AND vpo.status = 'Active'
                 LEFT JOIN currencies_info cur ON cur.currency_id = vpo.currency_id AND cur.status = 'Active'
+                WHERE a.status = 'Active'
+
+                UNION ALL
+
+                -- 1b. Multiple Customer Purchase Invoice
+                SELECT
+                    a.vendor_purchase_multiple_invoice_id AS bill_id,
+                    a.invoice_date,
+                    (SELECT mi.tender_enquiry_id FROM vendor_purchase_multiple_invoice_item_info mi WHERE mi.vendor_purchase_multiple_invoice_id = a.vendor_purchase_multiple_invoice_id AND mi.status = 'Active' LIMIT 1) AS tender_enquiry_id,
+                    a.invoice_no,
+                    a.vendor_id,
+                    b.vendor_name,
+                    COALESCE(a.total_amount_inc_addl, a.total_amount, 0) AS total_amount,
+                    'Multiple Purchase Invoice' AS bill_type,
+                    'BHD' AS currency_code,
+                    3 AS decimal_point
+                FROM vendor_purchase_multiple_invoice_info a
+                LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
                 WHERE a.status = 'Active'
 
                 UNION ALL
@@ -7084,6 +7103,21 @@ class Vendor extends CI_Controller
                             OR ((vap.invoice_ids IS NULL OR vap.invoice_ids = '') AND vap.invoice_no IS NOT NULL AND vap.invoice_no != '' AND FIND_IN_SET(TRIM(vpi.invoice_no), REPLACE(vap.invoice_no, ' ', '')) > 0)
                         )
                     WHERE vap.status = 'Active' AND vpi.status = 'Active'
+
+                    UNION ALL
+
+                    -- Multiple Purchase Invoices mapped by invoice_ids or invoice_no
+                    SELECT 
+                        vpmi.vendor_purchase_multiple_invoice_id AS bill_id,
+                        'Multiple Purchase Invoice' AS bill_type,
+                        (vap.adv_payment_amt / GREATEST(1, (LENGTH(REPLACE(vap.invoice_ids, ' ', '')) - LENGTH(REPLACE(REPLACE(vap.invoice_ids, ' ', ''), ',', '')) + 1))) AS adv_amount
+                    FROM vendor_advance_payment_info vap
+                    JOIN vendor_purchase_multiple_invoice_info vpmi 
+                        ON (
+                            (vap.invoice_ids IS NOT NULL AND vap.invoice_ids != '' AND FIND_IN_SET(vpmi.vendor_purchase_multiple_invoice_id, REPLACE(vap.invoice_ids, ' ', '')) > 0)
+                            OR ((vap.invoice_ids IS NULL OR vap.invoice_ids = '') AND vap.invoice_no IS NOT NULL AND vap.invoice_no != '' AND FIND_IN_SET(TRIM(vpmi.invoice_no), REPLACE(vap.invoice_no, ' ', '')) > 0)
+                        )
+                    WHERE vap.status = 'Active' AND vpmi.status = 'Active'
 
                     UNION ALL
 

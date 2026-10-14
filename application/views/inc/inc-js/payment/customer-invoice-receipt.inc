@@ -18,6 +18,98 @@
 />
 <script src="<?php echo base_url('asset/bower_components/select2/dist/js/select2.full.min.js'); ?>"></script>
 <style>
+  /* Single Page Scrollbar Fix */
+  html {
+    height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+  body {
+    min-height: 100% !important;
+    height: auto !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+  }
+  .wrapper {
+    min-height: 100% !important;
+    height: auto !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+  }
+  .content-wrapper {
+    overflow: visible !important;
+  }
+
+  /* Lock background scrolling completely when modal is open */
+  html:has(body.modal-open),
+  html.modal-open,
+  body.modal-open {
+    overflow: hidden !important;
+  }
+
+  .modal {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  .modal-open .modal {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  #add_modal .modal-body,
+  #edit_modal .modal-body {
+    max-height: calc(100vh - 180px);
+    overflow-y: auto !important;
+    overflow-x: hidden;
+  }
+
+  /* Scrollable Invoice Table Container */
+  #add_modal .table-responsive,
+  #edit_modal .table-responsive {
+    max-height: 380px;
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+    border: 1px solid #d2d6de;
+    border-radius: 4px;
+    margin-top: 6px;
+  }
+
+  #add_modal .table-responsive thead th,
+  #edit_modal .table-responsive thead th {
+    position: sticky;
+    top: 0;
+    background-color: #00c0ef !important;
+    color: #fff !important;
+    z-index: 5;
+  }
+
+  #add_modal .table-responsive tfoot td,
+  #edit_modal .table-responsive tfoot td {
+    position: sticky;
+    bottom: 0;
+    background-color: #e8f5e9 !important;
+    z-index: 5;
+  }
+
+  .ui-autocomplete {
+    z-index: 9999999 !important;
+  }
+
+  #add_modal,
+  #edit_modal {
+    z-index: 1050 !important;
+  }
+
+  .modal-backdrop {
+    z-index: 1040 !important;
+  }
+
+  .invoice-amount-input {
+    width: 120px;
+    min-width: 100px;
+  }
+
   /* Select2 Modal & Responsive Styles */
   .select2-container {
     width: 100% !important;
@@ -37,36 +129,6 @@
 
   .select2-selection__arrow {
     height: 32px !important;
-  }
-
-  /* Lock background scrolling completely when modal is open */
-  html:has(body.modal-open),
-  html.modal-open,
-  body.modal-open {
-    overflow: hidden !important;
-  }
-
-  .modal {
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-  }
-
-  .ui-autocomplete {
-    z-index: 9999999 !important;
-  }
-
-  #add_modal,
-  #edit_modal {
-    z-index: 1050 !important;
-  }
-
-  .modal-backdrop {
-    z-index: 1040 !important;
-  }
-
-  .invoice-amount-input {
-    width: 120px;
-    min-width: 100px;
   }
 </style>
 <!-- Toastr CSS -->
@@ -138,7 +200,7 @@
           totalAllocated += val;
           $input.prop("readonly", false);
         } else if ($chk.length > 0) {
-          $input.prop("readonly", true);
+          $input.prop("readonly", false);
         }
       });
 
@@ -254,7 +316,7 @@
           $input.prop("readonly", false);
         } else {
           $chk.prop("checked", false);
-          $input.prop("readonly", true);
+          $input.prop("readonly", false);
         }
       });
 
@@ -267,27 +329,9 @@
         total > 0 && total === checked,
       );
 
-      $('#' + prefix + '_modal input[name="allocation_mode"][value="auto"]').prop("checked", true);
-      toggleAllocationMode(prefix, "auto");
       updateAllocatedFooter(prefix);
       toastr.success("Receipt auto-allocated successfully!");
     }
-
-    function toggleAllocationMode(prefix, mode) {
-      if (mode === "manual") {
-        $("#" + prefix + "_auto_allocate_btn_container").hide();
-      } else {
-        $("#" + prefix + "_auto_allocate_btn_container").show();
-      }
-      updateAllocatedFooter(prefix);
-    }
-
-    // Allocation Mode change handler
-    $(document).on("change", 'input[name="allocation_mode"]', function () {
-      var prefix =
-        $(this).closest(".modal").attr("id") === "add_modal" ? "add" : "edit";
-      toggleAllocationMode(prefix, $(this).val());
-    });
 
     // Wire up Auto Allocate buttons
     $("#add_auto_allocate_btn").on("click", function () {
@@ -390,6 +434,19 @@
       toggleBank("edit");
     });
 
+    // When clicking or focusing on any invoice amount input, make it writable & check the row
+    $(document).on("click focus", ".invoice-amount-input", function () {
+      $(this).prop("readonly", false);
+      var $chk = $(this).closest("tr").find(".select-item");
+      if (!$chk.is(":checked")) {
+        $chk.prop("checked", true);
+      }
+      var self = this;
+      setTimeout(function () {
+        self.select();
+      }, 50);
+    });
+
     $(document).on("change", ".select-item", function () {
       var $row = $(this).closest("tr");
       var $input = $row.find(".invoice-amount-input");
@@ -433,7 +490,7 @@
           }
         }
       } else {
-        $input.val("0.000").prop("readonly", true);
+        $input.val("0.000");
       }
 
       // Sync select all checkbox
@@ -454,11 +511,11 @@
         $(this).closest(".modal").attr("id") === "add_modal" ? "add" : "edit";
       var maxAmount =
         parseFloat($row.find(".select-item").attr("data-amount")) || 0;
-      var val = parseFloat($(this).val()) || 0;
+      var rawVal = $(this).val();
+      var val = parseFloat(rawVal) || 0;
 
-      if (val > maxAmount) {
-        val = maxAmount;
-        $(this).val(format3(val));
+      if (maxAmount > 0 && val > maxAmount) {
+        $(this).val(maxAmount);
       }
 
       if (val > 0) {
@@ -485,17 +542,15 @@
         parseFloat($row.find(".select-item").attr("data-amount")) || 0;
       var val = parseFloat($(this).val()) || 0;
 
-      if (val > maxAmount) val = maxAmount;
+      if (maxAmount > 0 && val > maxAmount) val = maxAmount;
       if (val < 0) val = 0;
 
       $(this).val(format3(val));
 
       if (val <= 0) {
         $row.find(".select-item").prop("checked", false);
-        $(this).prop("readonly", true);
       } else {
         $row.find(".select-item").prop("checked", true);
-        $(this).prop("readonly", false);
       }
 
       // Sync select all checkbox
@@ -555,9 +610,11 @@
             if (isChecked) {
               $input.prop("readonly", false);
               var maxAmount = parseFloat($chk.attr("data-amount")) || 0;
-              $input.val(format3(maxAmount));
+              if (parseFloat($input.val()) <= 0) {
+                $input.val(format3(maxAmount));
+              }
             } else {
-              $input.val("0.000").prop("readonly", true);
+              $input.val("0.000");
             }
           }
         });
@@ -588,8 +645,6 @@
     $("#add_modal").on("show.bs.modal", function () {
       $("#add_modal").data("initial_load", true);
       $("#frmadd")[0].reset();
-      $('#frmadd input[name="allocation_mode"][value="auto"]').prop("checked", true);
-      toggleAllocationMode("add", "auto");
       $("#add_customer_id").val("").trigger("change.select2");
       $("#add_item_container").html("");
       $("#add_tender_enquiry_id")
@@ -749,7 +804,7 @@
                 '<input type="text" name="inv_amount[' +
                 i +
                 ']"  ' +
-                ' class="form-control invoice-amount-input text-right">';
+                ' class="form-control invoice-amount-input text-right" value="0.000">';
             }
 
             $container.append(
@@ -893,11 +948,6 @@
             $("#edit_cheque_bank").val(data.cheque_bank);
           }
 
-          // Restore Allocation Mode
-          var allocMode = data.allocation_mode ? data.allocation_mode : "auto";
-          $('#frmedit input[name="allocation_mode"][value="' + allocMode + '"]').prop("checked", true);
-          toggleAllocationMode("edit", allocMode);
-
           // Customer → load enquiry dropdown → load invoice list
           $("#edit_customer_id").val(data.customer_id).trigger("change");
         },
@@ -940,9 +990,7 @@
     });
 
     function edit_load_invoice_list(tender_receipt_id, customer_id) {
-      var $container = $(
-        "#customer_invoice_receipt_list_table #edit_item_container",
-      );
+      var $container = $("#edit_item_container");
       $container.html("");
 
       if (!customer_id) return;
@@ -1023,7 +1071,7 @@
                   'name="inv_amount[' +
                   i +
                   ']" ' +
-                  'value="0.000" readonly>';
+                  'value="0.000">';
               }
 
               // ✅ Balance label

@@ -338,7 +338,7 @@
                         </div>
 
                         <div class="row">
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-6">
                                 <label>Status</label><br>
                                 <label class="radio-inline">
                                     <input type="radio" name="status" value="Active" checked> Active
@@ -348,19 +348,7 @@
                                 </label>
                             </div>
 
-                            <div class="form-group col-md-4">
-                                <label>Allocation Mode <span class="text-red">*</span></label><br>
-                                <label class="radio-inline">
-                                    <input type="radio" name="allocation_mode" value="auto" checked>
-                                    <strong><i class="fa fa-magic text-warning"></i> Auto Allocate</strong>
-                                </label>
-                                <label class="radio-inline">
-                                    <input type="radio" name="allocation_mode" value="manual">
-                                    <strong><i class="fa fa-hand-pointer-o text-primary"></i> Manual</strong>
-                                </label>
-                            </div>
-
-                            <div class="form-group col-md-5">
+                            <div class="form-group col-md-6">
                                 <label>Amount <span class="text-red">*</span></label>
                                 <div class="input-group">
                                     <input type="text" name="amount" id="add_grand_total_amount"
@@ -521,7 +509,7 @@
                         </div>
 
                         <div class="row">
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-6">
                                 <label>Status</label><br>
                                 <label class="radio-inline">
                                     <input type="radio" name="status" value="Active" checked> Active
@@ -531,19 +519,7 @@
                                 </label>
                             </div>
 
-                            <div class="form-group col-md-4">
-                                <label>Allocation Mode <span class="text-red">*</span></label><br>
-                                <label class="radio-inline">
-                                    <input type="radio" name="allocation_mode" value="auto" checked>
-                                    <strong><i class="fa fa-magic text-warning"></i> Auto Allocate</strong>
-                                </label>
-                                <label class="radio-inline">
-                                    <input type="radio" name="allocation_mode" value="manual">
-                                    <strong><i class="fa fa-hand-pointer-o text-primary"></i> Manual</strong>
-                                </label>
-                            </div>
-
-                            <div class="form-group col-md-5">
+                            <div class="form-group col-md-6">
                                 <label>Amount <span class="text-red">*</span></label>
                                 <div class="input-group">
                                     <input type="text" name="amount" id="edit_grand_total_amount"

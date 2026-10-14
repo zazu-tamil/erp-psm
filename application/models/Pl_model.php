@@ -65,16 +65,27 @@ class Pl_model extends CI_Model
 
     public function get_purchases_summary($from_date, $to_date)
     {
-        $this->db->select('
-            COALESCE(SUM(COALESCE(total_amount_wo_tax_inc_addl, total_amount_wo_tax, (total_amount - IFNULL(tax_amount, 0)), 0)), 0) AS total_purchases_wo_tax,
-            COALESCE(SUM(COALESCE(total_tax_amount_inc_addl, tax_amount, 0)), 0) AS total_purchases_tax,
-            COALESCE(SUM(COALESCE(total_amount_inc_addl, total_amount, 0)), 0) AS total_purchases_with_tax,
-            COALESCE(SUM(COALESCE(total_amount_wo_tax_inc_addl, total_amount_wo_tax, (total_amount - IFNULL(tax_amount, 0)), 0)), 0) AS total_purchases
-        ');
-        $this->db->where('invoice_date >=', $from_date);
-        $this->db->where('invoice_date <=', $to_date);
-        $this->db->where('status =', 'Active');
-        $row = $this->db->get('vendor_purchase_invoice_info')->row_array();
+        $esc_from = $this->db->escape_str($from_date);
+        $esc_to = $this->db->escape_str($to_date);
+        $sql = "
+            SELECT
+                COALESCE(SUM(COALESCE(total_amount_wo_tax_inc_addl, total_amount_wo_tax, (total_amount - IFNULL(tax_amount, 0)), 0)), 0) AS total_purchases_wo_tax,
+                COALESCE(SUM(COALESCE(total_tax_amount_inc_addl, tax_amount, 0)), 0) AS total_purchases_tax,
+                COALESCE(SUM(COALESCE(total_amount_inc_addl, total_amount, 0)), 0) AS total_purchases_with_tax,
+                COALESCE(SUM(COALESCE(total_amount_wo_tax_inc_addl, total_amount_wo_tax, (total_amount - IFNULL(tax_amount, 0)), 0)), 0) AS total_purchases
+            FROM (
+                SELECT total_amount_wo_tax_inc_addl, total_amount_wo_tax, total_tax_amount_inc_addl, tax_amount, total_amount_inc_addl, total_amount
+                FROM vendor_purchase_invoice_info
+                WHERE status = 'Active' AND invoice_date >= '$esc_from' AND invoice_date <= '$esc_to'
+
+                UNION ALL
+
+                SELECT total_amount_wo_tax_inc_addl, total_amount_wo_tax, total_tax_amount_inc_addl, tax_amount, total_amount_inc_addl, total_amount
+                FROM vendor_purchase_multiple_invoice_info
+                WHERE status = 'Active' AND invoice_date >= '$esc_from' AND invoice_date <= '$esc_to'
+            ) AS all_pur
+        ";
+        $row = $this->db->query($sql)->row_array();
         return $row ?: [
             'total_purchases_wo_tax' => 0,
             'total_purchases_tax' => 0,

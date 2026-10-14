@@ -111,8 +111,11 @@ class Dashboard extends MY_Controller
         // 3. Total Purchases (Active)
         $expense_sql = "
             SELECT SUM(COALESCE(total_amount_wo_tax, total_amount, 0)) AS total_purchases
-            FROM vendor_purchase_invoice_info
-            WHERE status = 'Active'
+            FROM (
+                SELECT total_amount_wo_tax, total_amount FROM vendor_purchase_invoice_info WHERE status = 'Active'
+                UNION ALL
+                SELECT total_amount_wo_tax, total_amount FROM vendor_purchase_multiple_invoice_info WHERE status = 'Active'
+            ) AS vpi_all
         ";
         $expense_row = $this->db->query($expense_sql)->row();
         $data['total_purchases'] = $expense_row ? floatval($expense_row->total_purchases) : 0;
@@ -137,9 +140,13 @@ class Dashboard extends MY_Controller
                 DATE_FORMAT(invoice_date, '%b %Y') AS month,
                 SUM(COALESCE(total_amount_wo_tax, total_amount, 0)) AS amount,
                 DATE_FORMAT(invoice_date, '%Y-%m') AS month_key
-            FROM vendor_purchase_invoice_info
-            WHERE status = 'Active'
-              AND invoice_date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+            FROM (
+                SELECT invoice_date, total_amount_wo_tax, total_amount FROM vendor_purchase_invoice_info
+                WHERE status = 'Active' AND invoice_date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+                UNION ALL
+                SELECT invoice_date, total_amount_wo_tax, total_amount FROM vendor_purchase_multiple_invoice_info
+                WHERE status = 'Active' AND invoice_date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+            ) AS vpi_all
             GROUP BY month_key
             ORDER BY month_key ASC
         ";
