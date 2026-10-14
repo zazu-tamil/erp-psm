@@ -1818,6 +1818,128 @@ class Payment extends CI_Controller
         exit;
     }
 
+    public function get_account_opening_balance()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        $payment_date = $this->input->post('payment_date') ?: ($this->input->post('receipt_date') ?: date('Y-m-d'));
+        $payment_mode = $this->input->post('payment_mode') ?: $this->input->post('receipt_mode'); // 'Bank' or 'Cash'
+        $bank_id = $this->input->post('bank_id') ? (int) $this->input->post('bank_id') : 0;
+        $cash_category_id = $this->input->post('cash_category_id') ? (int) $this->input->post('cash_category_id') : 0;
+        $exclude_payment_id = $this->input->post('exclude_payment_id') ? (int) $this->input->post('exclude_payment_id') : 0;
+        $exclude_receipt_id = $this->input->post('exclude_receipt_id') ? (int) $this->input->post('exclude_receipt_id') : 0;
+
+        $esc_date = $this->db->escape_str($payment_date);
+
+        $account_name = '';
+        $base_op = 0.000;
+        $total_inward = 0.000;
+        $total_outward = 0.000;
+        $opening_balance = 0.000;
+
+        if ($payment_mode === 'Bank') {
+            if ($bank_id > 0) {
+                $bank_row = $this->db->get_where('company_bank_info', ['bank_id' => $bank_id])->row_array();
+                $account_name = $bank_row ? $bank_row['bank_name'] . (!empty($bank_row['branch']) ? ' (' . $bank_row['branch'] . ')' : '') : 'Bank #' . $bank_id;
+
+                // 1. Base Opening Balance from cb_opening_balance_info up to payment_date
+                $sql_op = "SELECT COALESCE(SUM(amount), 0) AS base_amount 
+                           FROM cb_opening_balance_info 
+                           WHERE status != 'Delete' AND ac_type = 'Bank' AND (bank_id = $bank_id OR (bank_id IS NULL AND ac_type = 'Bank')) AND opening_date <= '$esc_date'";
+                $base_op = (float) $this->db->query($sql_op)->row('base_amount');
+
+                // 2. Inwards before payment_date
+                $w_tr_exclude = $exclude_receipt_id ? " AND tender_receipt_id != $exclude_receipt_id" : "";
+                $tr_in = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM tender_receipt_info WHERE status = 'Active' AND receipt_mode = 'Bank' AND bank_id = $bank_id AND receipt_date < '$esc_date' $w_tr_exclude")->row('amt');
+                $cin_in = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM cb_cash_inward_info WHERE status = 'Active' AND ac_type = 'Bank' AND bank_id = $bank_id AND inward_date < '$esc_date'")->row('amt');
+                $pt_in = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM petty_cash_transactions WHERE status != 'Deleted' AND ac_type = 'Bank' AND bank_id = $bank_id AND transaction_type IN ('Inward', 'Income') AND transaction_date < '$esc_date'")->row('amt');
+                $contra_in = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM cb_contra_entry_info WHERE status = 'Active' AND to_ac_type = 'Bank' AND to_bank_id = $bank_id AND entry_date < '$esc_date'")->row('amt');
+
+                $total_inward = $tr_in + $cin_in + $pt_in + $contra_in;
+
+                // 3. Outwards before payment_date
+                $w_vp_exclude = $exclude_payment_id ? " AND vendor_payment_id != $exclude_payment_id" : "";
+                $vp_out = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM vendor_payment_info WHERE status = 'Active' AND payment_mode = 'Bank' AND bank_id = $bank_id AND payment_date < '$esc_date' $w_vp_exclude")->row('amt');
+                $vap_out = (float) $this->db->query("SELECT COALESCE(SUM(adv_payment_amt), 0) AS amt FROM vendor_advance_payment_info WHERE status = 'Active' AND ac_type_opt = 'Bank' AND bank_id = $bank_id AND adv_payment_date < '$esc_date'")->row('amt');
+                $cout_out = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM cb_cash_outward_info WHERE status = 'Active' AND ac_type = 'Bank' AND bank_id = $bank_id AND outward_date < '$esc_date'")->row('amt');
+                $pt_out = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM petty_cash_transactions WHERE status != 'Deleted' AND ac_type = 'Bank' AND bank_id = $bank_id AND transaction_type IN ('Outward', 'Cash', 'Expense') AND transaction_date < '$esc_date'")->row('amt');
+                $contra_out = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM cb_contra_entry_info WHERE status = 'Active' AND from_ac_type = 'Bank' AND from_bank_id = $bank_id AND entry_date < '$esc_date'")->row('amt');
+
+                $total_outward = $vp_out + $vap_out + $cout_out + $pt_out + $contra_out;
+                $opening_balance = $base_op + $total_inward - $total_outward;
+            } else {
+                $account_name = 'Bank (Please select a bank)';
+            }
+        } elseif ($payment_mode === 'Cash') {
+            $w_cat_op = "";
+            $w_cat_tr = "";
+            $w_cat_cin = "";
+            $w_cat_pt = "";
+            $w_cat_ce_to = "";
+            $w_cat_ce_from = "";
+            $w_cat_vp = "";
+            $w_cat_vap = "";
+            $w_cat_cout = "";
+
+            if ($cash_category_id > 0) {
+                $cat_row = $this->db->get_where('cash_category', ['cash_category_id' => $cash_category_id])->row_array();
+                $account_name = $cat_row ? $cat_row['category_name'] : 'Cash Category #' . $cash_category_id;
+
+                $w_cat_op = " AND (cash_category_id = $cash_category_id OR (cash_category_id IS NULL AND ac_type = 'Cash'))";
+                $w_cat_tr = " AND cash_category_id = $cash_category_id";
+                $w_cat_cin = " AND cash_category_id = $cash_category_id";
+                $w_cat_pt = " AND cash_category_id = $cash_category_id";
+                $w_cat_ce_to = " AND to_cash_category_id = $cash_category_id";
+                $w_cat_ce_from = " AND from_cash_category_id = $cash_category_id";
+                $w_cat_vp = " AND cash_category_id = $cash_category_id";
+                $w_cat_vap = " AND cash_category_id = $cash_category_id";
+                $w_cat_cout = " AND cash_category_id = $cash_category_id";
+            } else {
+                $account_name = 'All Cash';
+            }
+
+            // 1. Base Opening Balance up to payment_date
+            $sql_op = "SELECT COALESCE(SUM(amount), 0) AS base_amount 
+                       FROM cb_opening_balance_info 
+                       WHERE status != 'Delete' AND ac_type = 'Cash' $w_cat_op AND opening_date <= '$esc_date'";
+            $base_op = (float) $this->db->query($sql_op)->row('base_amount');
+
+            // 2. Inwards before payment_date
+            $w_tr_exclude = $exclude_receipt_id ? " AND tender_receipt_id != $exclude_receipt_id" : "";
+            $tr_in = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM tender_receipt_info WHERE status = 'Active' AND receipt_mode = 'Cash' $w_cat_tr AND receipt_date < '$esc_date' $w_tr_exclude")->row('amt');
+            $cin_in = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM cb_cash_inward_info WHERE status = 'Active' AND ac_type = 'Cash' $w_cat_cin AND inward_date < '$esc_date'")->row('amt');
+            $pt_in = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM petty_cash_transactions WHERE status != 'Deleted' AND ac_type = 'Cash' $w_cat_pt AND transaction_type IN ('Inward', 'Income') AND transaction_date < '$esc_date'")->row('amt');
+            $contra_in = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM cb_contra_entry_info WHERE status = 'Active' AND to_ac_type = 'Cash' $w_cat_ce_to AND entry_date < '$esc_date'")->row('amt');
+
+            $total_inward = $tr_in + $cin_in + $pt_in + $contra_in;
+
+            // 3. Outwards before payment_date
+            $w_vp_exclude = $exclude_payment_id ? " AND vendor_payment_id != $exclude_payment_id" : "";
+            $vp_out = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM vendor_payment_info WHERE status = 'Active' AND payment_mode = 'Cash' $w_cat_vp AND payment_date < '$esc_date' $w_vp_exclude")->row('amt');
+            $vap_out = (float) $this->db->query("SELECT COALESCE(SUM(adv_payment_amt), 0) AS amt FROM vendor_advance_payment_info WHERE status = 'Active' AND ac_type_opt = 'Cash' $w_cat_vap AND adv_payment_date < '$esc_date'")->row('amt');
+            $cout_out = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM cb_cash_outward_info WHERE status = 'Active' AND ac_type = 'Cash' $w_cat_cout AND outward_date < '$esc_date'")->row('amt');
+            $pt_out = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM petty_cash_transactions WHERE status != 'Deleted' AND ac_type = 'Cash' $w_cat_pt AND transaction_type IN ('Outward', 'Cash', 'Expense') AND transaction_date < '$esc_date'")->row('amt');
+            $contra_out = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM cb_contra_entry_info WHERE status = 'Active' AND from_ac_type = 'Cash' $w_cat_ce_from AND entry_date < '$esc_date'")->row('amt');
+
+            $total_outward = $vp_out + $vap_out + $cout_out + $pt_out + $contra_out;
+            $opening_balance = $base_op + $total_inward - $total_outward;
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'payment_mode' => $payment_mode,
+            'account_name' => $account_name,
+            'payment_date' => date('d-m-Y', strtotime($payment_date)),
+            'opening_balance' => number_format($opening_balance, 3),
+            'raw_opening_balance' => (float) $opening_balance,
+            'is_positive' => ($opening_balance >= 0)
+        ]);
+        exit;
+    }
+
     public function delete_record()
     {
 

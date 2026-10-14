@@ -344,6 +344,23 @@
                             </div>
                         </div>
 
+                        <!-- Account Opening Balance Panel (Bank / Cash as of Payment Date) -->
+                        <div id="add_account_balance_panel" style="display:none; margin-bottom:14px;">
+                            <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                                <div>
+                                    <span style="font-size:13px; font-weight:700; color:#166534;">
+                                        <i class="fa fa-university" id="add_acc_icon"></i>&nbsp; <span id="add_acc_bal_title">Opening Balance</span>
+                                        (<span id="add_acc_bal_name" style="color:#15803d;"></span> as of <span id="add_acc_bal_date"></span>) :
+                                    </span>
+                                </div>
+                                <div class="text-right">
+                                    <span id="add_acc_bal_amount" style="font-size:20px; font-weight:800; color:#16a34a;">0.000</span>
+                                    <span style="font-size:12px; font-weight:700; color:#166534;">BHD</span>
+                                    <div id="add_acc_bal_status"></div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
@@ -524,6 +541,23 @@
                             </div>
 
 
+                        </div>
+
+                        <!-- Account Opening Balance Panel (Bank / Cash as of Payment Date) -->
+                        <div id="edit_account_balance_panel" style="display:none; margin-bottom:14px;">
+                            <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                                <div>
+                                    <span style="font-size:13px; font-weight:700; color:#166534;">
+                                        <i class="fa fa-university" id="edit_acc_icon"></i>&nbsp; <span id="edit_acc_bal_title">Opening Balance</span>
+                                        (<span id="edit_acc_bal_name" style="color:#15803d;"></span> as of <span id="edit_acc_bal_date"></span>) :
+                                    </span>
+                                </div>
+                                <div class="text-right">
+                                    <span id="edit_acc_bal_amount" style="font-size:20px; font-weight:800; color:#16a34a;">0.000</span>
+                                    <span style="font-size:12px; font-weight:700; color:#166534;">BHD</span>
+                                    <div id="edit_acc_bal_status"></div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="row">

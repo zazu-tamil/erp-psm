@@ -626,11 +626,12 @@ class PettyCash extends CI_Controller
             $w_cout .= " AND cout.cash_category_id = " . (int)$srch_cash_category_id;
             $w_ce_to = "ce.to_cash_category_id = " . (int)$srch_cash_category_id;
             $w_ce_from = "ce.from_cash_category_id = " . (int)$srch_cash_category_id;
+            $w_op .= " AND (cash_category_id = " . (int)$srch_cash_category_id . " OR (cash_category_id IS NULL AND ac_type = 'Cash'))";
         }
 
         // 1. Calculate Opening Balance before srch_from_date
         // A. Base Opening Balances from cb_opening_balance_info
-        $sql_cb_op = "SELECT COALESCE(SUM(amount), 0) AS op_amount FROM cb_opening_balance_info WHERE $w_op AND opening_date < '" . $this->db->escape_str($srch_from_date) . "'";
+        $sql_cb_op = "SELECT COALESCE(SUM(amount), 0) AS op_amount FROM cb_opening_balance_info WHERE $w_op AND opening_date <= '" . $this->db->escape_str($srch_from_date) . "'";
         $cb_op = (float)$this->db->query($sql_cb_op)->row()->op_amount;
 
         // B. Combined transactions before srch_from_date

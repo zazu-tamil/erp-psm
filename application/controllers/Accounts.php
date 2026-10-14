@@ -1734,15 +1734,9 @@ class Accounts extends CI_Controller
                 sum(w1.amount) as cash_in, 
                 0 as cash_out 
                 from cb_opening_balance_info as w1
-                where  w1.opening_balance_id  = (
-                	ifnull((
-                	select 
-                	(w.opening_balance_id)
-                	from cb_opening_balance_info as w
-                	where w.ac_type = w1.ac_type
-                	and w.opening_date <= '" . $srch_from_date . "' order by w.opening_date desc  limit 1)
-                	,'0') 
-                ) 
+                where w1.status != 'Delete'
+                and w1.opening_date <= '" . $srch_from_date . "'
+                $where
                 group by w1.ac_type 
              
              )   union all (  
@@ -1753,9 +1747,9 @@ class Accounts extends CI_Controller
                 from cb_cash_inward_info as a  
                 where a.inward_date between (
                 	ifnull((
-                	select max(w.opening_date)
+                	select min(w.opening_date)
                 	from cb_opening_balance_info as w
-                	where w.ac_type = a.ac_type
+                	where w.ac_type = a.ac_type and w.status != 'Delete'
                 	and w.opening_date <= '" . $srch_from_date . "')
                 	,'2024-04-01') 
                 ) and DATE_SUB('" . $srch_from_date . "',INTERVAL 1 day)  
@@ -1770,9 +1764,9 @@ class Accounts extends CI_Controller
                 from cb_cash_outward_info as a   
                 where a.outward_date between (
                 	ifnull((
-                	select max(w.opening_date)
+                	select min(w.opening_date)
                 	from cb_opening_balance_info as w
-                	where w.ac_type = a.ac_type
+                	where w.ac_type = a.ac_type and w.status != 'Delete'
                 	and w.opening_date <= '" . $srch_from_date . "')
                 	,'2024-04-01') 
                 ) and DATE_SUB('" . $srch_from_date . "',INTERVAL 1 day)    
@@ -3042,13 +3036,51 @@ class Accounts extends CI_Controller
         }
 
 
+        if (!$this->db->field_exists('bank_id', 'cb_opening_balance_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('cb_opening_balance_info', [
+                'bank_id' => [
+                    'type' => 'INT',
+                    'constraint' => 11,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+        if (!$this->db->field_exists('cash_category_id', 'cb_opening_balance_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('cb_opening_balance_info', [
+                'cash_category_id' => [
+                    'type' => 'INT',
+                    'constraint' => 11,
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+        if (!$this->db->field_exists('remarks', 'cb_opening_balance_info')) {
+            $this->load->dbforge();
+            $this->dbforge->add_column('cb_opening_balance_info', [
+                'remarks' => [
+                    'type' => 'TEXT',
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ]);
+        }
+
         $data['js'] = 'accounts/opening-balance.inc';
 
         if ($this->input->post('mode') == 'Add') {
+            $ac_type = $this->input->post('ac_type');
+            $amount = ($this->input->post('amount') !== null && $this->input->post('amount') !== '') ? (float) $this->input->post('amount') : 0;
             $ins = array(
                 'opening_date' => $this->input->post('opening_date'),
-                'ac_type' => $this->input->post('ac_type'),
-                'amount' => $this->input->post('amount'),
+                'ac_type' => $ac_type,
+                'bank_id' => ($ac_type == 'Bank') ? ($this->input->post('bank_id') ?: null) : null,
+                'cash_category_id' => ($ac_type == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null,
+                'amount' => $amount,
+                'remarks' => $this->input->post('remarks') ?: null,
             );
 
             $this->db->insert('cb_opening_balance_info', $ins);
@@ -3056,12 +3088,15 @@ class Accounts extends CI_Controller
         }
 
         if ($this->input->post('mode') == 'Edit') {
+            $ac_type = $this->input->post('ac_type');
+            $amount = ($this->input->post('amount') !== null && $this->input->post('amount') !== '') ? (float) $this->input->post('amount') : 0;
             $upd = array(
-
-                'opening_balance_id' => $this->input->post('opening_balance_id'),
                 'opening_date' => $this->input->post('opening_date'),
-                'ac_type' => $this->input->post('ac_type'),
-                'amount' => $this->input->post('amount'),
+                'ac_type' => $ac_type,
+                'bank_id' => ($ac_type == 'Bank') ? ($this->input->post('bank_id') ?: null) : null,
+                'cash_category_id' => ($ac_type == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null,
+                'amount' => $amount,
+                'remarks' => $this->input->post('remarks') ?: null,
             );
 
             $this->db->where('opening_balance_id', $this->input->post('opening_balance_id'));
@@ -3071,14 +3106,17 @@ class Accounts extends CI_Controller
         }
 
         $sql = "
-                select 
-                a.*
-                from cb_opening_balance_info as a 
-                where a.status != 'Delete'
-                order by a.opening_date desc,  a.opening_balance_id desc 
-         ";
-
-        //a.status = 'Booked'  
+            SELECT 
+                a.*,
+                b.bank_name,
+                b.branch,
+                cc.category_name AS cash_category_name
+            FROM cb_opening_balance_info AS a 
+            LEFT JOIN company_bank_info AS b ON b.bank_id = a.bank_id
+            LEFT JOIN cash_category AS cc ON cc.cash_category_id = a.cash_category_id
+            WHERE a.status != 'Delete'
+            ORDER BY a.opening_date DESC, a.opening_balance_id DESC 
+        ";
 
         $query = $this->db->query($sql);
 
@@ -3089,6 +3127,21 @@ class Accounts extends CI_Controller
 
         $data['ac_type_opt'] = array('Bank' => 'Bank', 'Cash' => 'Cash');
 
+        // Active Banks
+        $sql_banks = "SELECT bank_id, bank_name, branch FROM company_bank_info WHERE status = 'Active' ORDER BY bank_name ASC";
+        $data['bank_list'] = $this->db->query($sql_banks)->result_array();
+        $data['bank_opt'] = ['' => 'Select Bank'];
+        foreach ($data['bank_list'] as $b) {
+            $data['bank_opt'][$b['bank_id']] = $b['bank_name'] . (!empty($b['branch']) ? ' (' . $b['branch'] . ')' : '');
+        }
+
+        // Active Cash Categories
+        $sql_cash = "SELECT cash_category_id, category_name FROM cash_category WHERE status = 'Active' ORDER BY category_name ASC";
+        $data['cash_categories'] = $this->db->query($sql_cash)->result_array();
+        $data['cash_category_opt'] = ['' => 'Select Cash Category'];
+        foreach ($data['cash_categories'] as $c) {
+            $data['cash_category_opt'][$c['cash_category_id']] = $c['category_name'];
+        }
 
         $this->load->view('page/accounts/opening-balance-list', $data);
     }
@@ -3324,16 +3377,15 @@ class Accounts extends CI_Controller
         foreach ($ac_types_to_fetch as $type) {
             // Find base opening date and amount
             $base_sql = "
-                SELECT amount, opening_date 
+                SELECT COALESCE(SUM(amount), 0) AS amount, MIN(opening_date) AS opening_date 
                 FROM cb_opening_balance_info 
-                WHERE ac_type = ? AND status != 'Delete' AND opening_date <= ? 
-                ORDER BY opening_date DESC LIMIT 1
+                WHERE ac_type = ? AND status != 'Delete' AND opening_date <= ?
             ";
             $base_q = $this->db->query($base_sql, [$type, $srch_from_date])->row_array();
 
             $base_amount = 0;
             $base_date = '2024-04-01'; // Default backup start date
-            if ($base_q) {
+            if ($base_q && !empty($base_q['opening_date'])) {
                 $base_amount = (float) $base_q['amount'];
                 $base_date = $base_q['opening_date'];
             }
@@ -4581,6 +4633,7 @@ class Accounts extends CI_Controller
             $w_pt .= " AND pt.bank_id = $bank_id";
             $w_cin .= " AND cin.bank_id = $bank_id";
             $w_cout .= " AND cout.bank_id = $bank_id";
+            $w_op .= " AND (bank_id = $bank_id OR (bank_id IS NULL AND ac_type = 'Bank'))";
         }
 
         $w_ce_to = "1=1";
@@ -4604,7 +4657,7 @@ class Accounts extends CI_Controller
 
         // 1. Calculate Opening Balance:
         // A. Base Opening Balances from cb_opening_balance_info
-        $sql_cb_op = "SELECT COALESCE(SUM(amount), 0) AS op_amount FROM cb_opening_balance_info WHERE $w_op AND opening_date < '" . $this->db->escape_str($srch_from_date) . "'";
+        $sql_cb_op = "SELECT COALESCE(SUM(amount), 0) AS op_amount FROM cb_opening_balance_info WHERE $w_op AND opening_date <= '" . $this->db->escape_str($srch_from_date) . "'";
         $cb_op = (float) $this->db->query($sql_cb_op)->row('op_amount');
 
         // B. Combined transactions before srch_from_date

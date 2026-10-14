@@ -426,12 +426,82 @@
       }
     }
 
+    function loadAccountOpeningBalance(prefix) {
+      var mode = $("#" + prefix + "_receipt_mode").val();
+      var rDate = $("#" + prefix + "_receipt_date").val();
+      var bankId = $("#" + prefix + "_bank_id").val();
+      var cashCategoryId = $("#" + prefix + "_cash_category_id").val();
+      var excludeId = (prefix === "edit") ? ($("#edit_tender_receipt_id").val() || 0) : 0;
+
+      if (!mode || !rDate || (mode === "Bank" && !bankId) || (mode === "Cash" && !cashCategoryId)) {
+        $("#" + prefix + "_account_balance_panel").slideUp(150);
+        return;
+      }
+
+      $.ajax({
+        url: "<?php echo site_url('get-account-opening-balance'); ?>",
+        type: "POST",
+        data: {
+          receipt_date: rDate,
+          receipt_mode: mode,
+          bank_id: bankId,
+          cash_category_id: cashCategoryId,
+          exclude_receipt_id: excludeId
+        },
+        dataType: "json",
+        success: function (res) {
+          if (!res || res.status !== "success") {
+            $("#" + prefix + "_account_balance_panel").slideUp(150);
+            return;
+          }
+
+          var isBank = (mode === "Bank");
+          $("#" + prefix + "_acc_icon").attr("class", isBank ? "fa fa-university" : "fa fa-money");
+          $("#" + prefix + "_acc_bal_title").text(isBank ? "Bank Opening Balance" : "Cash Opening Balance");
+          $("#" + prefix + "_acc_bal_name").text(res.account_name);
+          $("#" + prefix + "_acc_bal_date").text(res.payment_date);
+          $("#" + prefix + "_acc_bal_amount").text(res.opening_balance);
+
+          if (res.raw_opening_balance >= 0) {
+            $("#" + prefix + "_acc_bal_amount").css("color", "#16a34a");
+            $("#" + prefix + "_acc_bal_status").html('<span class="label label-success" style="font-size:10px;">Available</span>');
+          } else {
+            $("#" + prefix + "_acc_bal_amount").css("color", "#dc2626");
+            $("#" + prefix + "_acc_bal_status").html('<span class="label label-danger" style="font-size:10px;">Overdrawn</span>');
+          }
+
+          $("#" + prefix + "_account_balance_panel").slideDown(200);
+        },
+        error: function () {
+          $("#" + prefix + "_account_balance_panel").slideUp(150);
+        }
+      });
+    }
+
+    $("#add_modal").on("show.bs.modal", function () {
+      $("#add_account_balance_panel").hide();
+      loadAccountOpeningBalance("add");
+    });
+    $("#edit_modal").on("hidden.bs.modal", function () {
+      $("#edit_account_balance_panel").hide();
+    });
+
     $("#add_receipt_mode").on("change", function () {
       toggleBank("add");
+      loadAccountOpeningBalance("add");
     });
 
     $("#edit_receipt_mode").on("change", function () {
       toggleBank("edit");
+      loadAccountOpeningBalance("edit");
+    });
+
+    $("#add_receipt_date, #add_bank_id, #add_cash_category_id").on("change input", function () {
+      loadAccountOpeningBalance("add");
+    });
+
+    $("#edit_receipt_date, #edit_bank_id, #edit_cash_category_id").on("change input", function () {
+      loadAccountOpeningBalance("edit");
     });
 
     // When clicking or focusing on any invoice amount input, make it writable & check the row
@@ -927,6 +997,8 @@
           if (data.cash_category_id) {
             $("#edit_cash_category_id").val(data.cash_category_id);
           }
+
+          loadAccountOpeningBalance("edit");
 
           // Status radio
           $('#frmedit input[name="status"]')

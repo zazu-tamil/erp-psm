@@ -584,12 +584,89 @@
             }
         }
 
+        function loadAccountOpeningBalance(prefix) {
+            var mode = $('#' + prefix + '_payment_mode').val();
+            var pDate = $('#' + prefix + '_payment_date').val();
+            var bankId = $('#' + prefix + '_bank_id').val();
+            var cashCategoryId = $('#' + prefix + '_cash_category_id').val();
+            var excludeId = (prefix === 'edit') ? ($('#edit_vendor_payment_id').val() || 0) : 0;
+
+            if (!mode || !pDate || (mode === 'Bank' && !bankId) || (mode === 'Cash' && !cashCategoryId)) {
+                $('#' + prefix + '_account_balance_panel').slideUp(150);
+                return;
+            }
+
+            $.ajax({
+                url: "<?php echo site_url('get-account-opening-balance'); ?>",
+                type: "POST",
+                data: {
+                    payment_date: pDate,
+                    payment_mode: mode,
+                    bank_id: bankId,
+                    cash_category_id: cashCategoryId,
+                    exclude_payment_id: excludeId
+                },
+                dataType: "json",
+                success: function (res) {
+                    if (!res || res.status !== 'success') {
+                        $('#' + prefix + '_account_balance_panel').slideUp(150);
+                        return;
+                    }
+
+                    var isBank = (mode === 'Bank');
+                    $('#' + prefix + '_acc_icon').attr('class', isBank ? 'fa fa-university' : 'fa fa-money');
+                    $('#' + prefix + '_acc_bal_title').text(isBank ? 'Bank Opening Balance' : 'Cash Opening Balance');
+                    $('#' + prefix + '_acc_bal_name').text(res.account_name);
+                    $('#' + prefix + '_acc_bal_date').text(res.payment_date);
+                    $('#' + prefix + '_acc_bal_amount').text(res.opening_balance);
+
+                    if (res.raw_opening_balance >= 0) {
+                        $('#' + prefix + '_acc_bal_amount').css('color', '#16a34a');
+                        $('#' + prefix + '_acc_bal_status').html('<span class="label label-success" style="font-size:10px;">Available</span>');
+                    } else {
+                        $('#' + prefix + '_acc_bal_amount').css('color', '#dc2626');
+                        $('#' + prefix + '_acc_bal_status').html('<span class="label label-danger" style="font-size:10px;">Overdrawn</span>');
+                    }
+
+                    $('#' + prefix + '_account_balance_panel').slideDown(200);
+                },
+                error: function () {
+                    $('#' + prefix + '_account_balance_panel').slideUp(150);
+                }
+            });
+        }
+
+        $('#add_modal').on('show.bs.modal', function () {
+            $('#add_account_balance_panel').hide();
+            loadAccountOpeningBalance('add');
+        });
+        $('#edit_modal').on('hidden.bs.modal', function () {
+            $('#edit_account_balance_panel').hide();
+        });
+
         $("#add_payment_mode").on("change", function () {
             toggleBank("add");
+            loadAccountOpeningBalance("add");
         });
 
         $("#edit_payment_mode").on("change", function () {
             toggleBank("edit");
+            loadAccountOpeningBalance("edit");
+        });
+
+        $("#add_payment_date, #add_bank_id, #add_cash_category_id").on("change input", function () {
+            loadAccountOpeningBalance("add");
+        });
+
+        $("#edit_payment_date, #edit_bank_id, #edit_cash_category_id").on("change input", function () {
+            loadAccountOpeningBalance("edit");
+        });
+
+        $("#add_payment_date").on("change", function () {
+            var vid = $("#add_vendor_id").val();
+            if (vid) {
+                loadAddModalVendorBalance(vid);
+            }
         });
 
         // When clicking or focusing on any invoice amount input, make it writable & check the row
@@ -826,6 +903,12 @@
             $('#add_allocate_info').hide();
             $('#add_alloc_tfoot').hide();
             $('#add_alloc_total').text('0.000');
+            // Reset account balance panel
+            $('#add_account_balance_panel').hide();
+            $('#add_acc_bal_name').text('');
+            $('#add_acc_bal_amount').text('0.000');
+            $('#add_acc_total_in').text('0.000');
+            $('#add_acc_total_out').text('0.000');
         });
 
 
@@ -943,6 +1026,11 @@
            
             $("#frmedit")[0].reset();
             $("#edit_item_container").html(""); 
+            $('#edit_account_balance_panel').hide();
+            $('#edit_acc_bal_name').text('');
+            $('#edit_acc_bal_amount').text('0.000');
+            $('#edit_acc_total_in').text('0.000');
+            $('#edit_acc_total_out').text('0.000');
 
             toggleBank("edit");
 
@@ -985,6 +1073,8 @@
                     if (data.cash_category_id) {
                         $("#edit_cash_category_id").val(data.cash_category_id);
                     }
+
+                    loadAccountOpeningBalance("edit");
 
                     // Status radio
                     $('#frmedit input[name="status"]')

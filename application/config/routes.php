@@ -351,6 +351,7 @@ $route['vendor-payment-list/(:num)'] = 'payment/vendor_payment_list/$1';
 $route['vendor-payment-list/(:num)/(:num)'] = 'payment/vendor_payment_list/$2';
 $route['vendor-payment-print/(:num)'] = 'payment/vendor_payment_print/$1';
 $route['get-vendor-balance-summary'] = 'payment/get_vendor_balance_summary';
+$route['get-account-opening-balance'] = 'payment/get_account_opening_balance';
 
 
 $route['customer-invoice-pending-report'] = 'reports/customer_invoice_pending_report';
