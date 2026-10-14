@@ -1657,7 +1657,7 @@ class Reports extends CI_Controller
 
     public function get_customer_contacts()
     {
-        $customer_id = (int)$this->input->post('customer_id');
+        $customer_id = (int) $this->input->post('customer_id');
         $result = [];
         if (!empty($customer_id)) {
             $query = $this->db->query("
@@ -1673,7 +1673,7 @@ class Reports extends CI_Controller
 
     public function get_vendor_contacts()
     {
-        $vendor_id = (int)$this->input->post('vendor_id');
+        $vendor_id = (int) $this->input->post('vendor_id');
         $result = [];
         if (!empty($vendor_id)) {
             $query = $this->db->query("
@@ -1694,9 +1694,9 @@ class Reports extends CI_Controller
             return;
         }
 
-        $tender_enquiry_id = (int)$this->input->post('tender_enquiry_id');
-        $customer_id = (int)$this->input->post('customer_id');
-        $customer_contact_id = $this->input->post('customer_contact_id') !== '' ? (int)$this->input->post('customer_contact_id') : 0;
+        $tender_enquiry_id = (int) $this->input->post('tender_enquiry_id');
+        $customer_id = (int) $this->input->post('customer_id');
+        $customer_contact_id = $this->input->post('customer_contact_id') !== '' ? (int) $this->input->post('customer_contact_id') : 0;
 
         if (empty($tender_enquiry_id) || empty($customer_id)) {
             echo json_encode(['status' => false, 'message' => 'Tender Enquiry ID and Customer are required.']);
@@ -1721,7 +1721,7 @@ class Reports extends CI_Controller
                 ORDER BY customer_contact_id ASC 
                 LIMIT 1
             ", [$customer_id])->row_array();
-            $contact_to_set = !empty($first_contact) ? (int)$first_contact['customer_contact_id'] : null;
+            $contact_to_set = !empty($first_contact) ? (int) $first_contact['customer_contact_id'] : null;
         }
 
         $user_id = $this->session->userdata(SESS_HD . 'user_id') ?: 1;
@@ -1797,10 +1797,10 @@ class Reports extends CI_Controller
             return;
         }
 
-        $tender_enquiry_id = (int)$this->input->post('tender_enquiry_id');
-        $vendor_id = (int)$this->input->post('vendor_id');
-        $vendor_contact_person_id = $this->input->post('vendor_contact_person_id') !== '' ? (int)$this->input->post('vendor_contact_person_id') : 0;
-        $update_bills = $this->input->post('update_bills') !== null ? (int)$this->input->post('update_bills') : 1;
+        $tender_enquiry_id = (int) $this->input->post('tender_enquiry_id');
+        $vendor_id = (int) $this->input->post('vendor_id');
+        $vendor_contact_person_id = $this->input->post('vendor_contact_person_id') !== '' ? (int) $this->input->post('vendor_contact_person_id') : 0;
+        $update_bills = $this->input->post('update_bills') !== null ? (int) $this->input->post('update_bills') : 1;
 
         if (empty($tender_enquiry_id) || empty($vendor_id)) {
             echo json_encode(['status' => false, 'message' => 'Tender Enquiry ID and Vendor are required.']);
@@ -1825,7 +1825,7 @@ class Reports extends CI_Controller
                 ORDER BY vendor_contact_id ASC 
                 LIMIT 1
             ", [$vendor_id])->row_array();
-            $contact_to_set = !empty($first_contact) ? (int)$first_contact['vendor_contact_id'] : null;
+            $contact_to_set = !empty($first_contact) ? (int) $first_contact['vendor_contact_id'] : null;
         }
 
         $user_id = $this->session->userdata(SESS_HD . 'user_id') ?: 1;
@@ -4451,7 +4451,7 @@ class Reports extends CI_Controller
         $data['bill_type_opt'] = [
             '' => 'All Bill Types',
             'Supplier Bill' => 'Supplier Bill (Purchase Invoice)',
-            'Supplier Bill (Multiple)' => 'Multiple Customer Supplier Bill',
+            'Supplier Bill (Multiple)' => 'Multiple Supplier Bill',
             'Local Supplier Bill' => 'Local Supplier Bill'
         ];
 
