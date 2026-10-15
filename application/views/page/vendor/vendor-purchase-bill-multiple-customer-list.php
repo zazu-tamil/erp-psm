@@ -68,59 +68,52 @@
         </div>
 
         <div class="box-body table-responsive">
-            <table class="table table-hover table-bordered table-striped">
+            <table class="table table-hover table-bordered table-striped" id="vendor_multi_invoice_table" style="width: 100%;">
                 <thead>
                     <tr>
-                        <th class="text-center">S.No</th>
-                        <th>Invoice Date</th>
+                        <th class="text-center" style="width: 45px;">S.No</th>
+                        <th style="width: 100px;">Invoice Date</th>
                         <th>Invoice No</th>
                         <th>Company</th>
                         <th>Supplier</th>
-                        <th>Amt Without Vat</th>
-                        <th>Vat Amt</th>
-                        <th>Total Amt With Vat</th>
-                        <th class="text-center" colspan="3">Action</th>
+                        <th class="text-right">Amt Without Vat</th>
+                        <th class="text-right">Vat Amt</th>
+                        <th class="text-right">Total Amt With Vat</th>
+                        <th class="text-center" style="width: 70px;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (!empty($record_list)): ?>
                         <?php foreach ($record_list as $j => $row): ?>
                             <tr>
-                                <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
-                                <td><?php echo date('d-m-Y', strtotime($row['invoice_date'])); ?></td>
+                                <td class="text-center"><?php echo ($j + 1); ?></td>
+                                <td data-order="<?php echo $row['invoice_date']; ?>"><?php echo date('d-m-Y', strtotime($row['invoice_date'])); ?></td>
                                 <td><strong><?php echo htmlspecialchars($row['invoice_no']); ?></strong></td>
                                 <td><?php echo htmlspecialchars($row['company_name'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['vendor_name'] ?? '-'); ?></td>
-                                <td><?php echo htmlspecialchars($row['amt_without_vat'] ?? '-'); ?></td>
-                                <td><?php echo htmlspecialchars($row['vat_amt'] ?? '-'); ?></td>
-                                <td><?php echo htmlspecialchars($row['total_amt_with_vat'] ?? '-'); ?></td>
-
-                                <!-- EDIT -->
-                                <td class="text-center">
-                                    <a href="<?php echo site_url('vendor-purchase-bill-print/' . $row['vendor_purchase_multiple_invoice_id']); ?>"
-                                        class="btn btn-success btn-xs" title="Print" disabled>
-                                        <i class="fa fa-print"></i>
-                                    </a>
+                                <td class="text-right" data-order="<?php echo (float)($row['amt_without_vat'] ?? 0); ?>">
+                                    <?php echo is_numeric($row['amt_without_vat']) ? number_format((float)$row['amt_without_vat'], 3) : htmlspecialchars($row['amt_without_vat'] ?? '-'); ?>
                                 </td>
-                                <td class="text-center">
+                                <td class="text-right" data-order="<?php echo (float)($row['vat_amt'] ?? 0); ?>">
+                                    <?php echo is_numeric($row['vat_amt']) ? number_format((float)$row['vat_amt'], 3) : htmlspecialchars($row['vat_amt'] ?? '-'); ?>
+                                </td>
+                                <td class="text-right" data-order="<?php echo (float)($row['total_amt_with_vat'] ?? 0); ?>" style="font-weight: bold; color: #00a65a;">
+                                    <?php echo is_numeric($row['total_amt_with_vat']) ? number_format((float)$row['total_amt_with_vat'], 3) : htmlspecialchars($row['total_amt_with_vat'] ?? '-'); ?>
+                                </td>
+                                <td class="text-center" style="white-space: nowrap;">
+                                    <!-- EDIT -->
                                     <a href="<?php echo site_url('vendor-purchase-bill-multiple-customer-edit/' . $row['vendor_purchase_multiple_invoice_id']); ?>"
                                         class="btn btn-primary btn-xs" title="Edit">
                                         <i class="fa fa-edit"></i>
                                     </a>
-                                </td>
-                                <!-- DELETE -->
-                                <td class="text-center">
+                                    <!-- DELETE -->
                                     <button value="<?php echo $row['vendor_purchase_multiple_invoice_id']; ?>"
-                                        class="del_record btn btn-danger btn-xs" title="Delete" disabled>
+                                        class="del_record btn btn-danger btn-xs" title="Delete">
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="11" class="text-center text-danger">No records found.</td>
-                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -131,7 +124,7 @@
                 <label>Total Records: <?php echo $total_records; ?></label>
             </div>
             <div class="form-group col-sm-6 text-right">
-                <?php echo $pagination; ?>
+                <!-- Pagination handled by DataTables -->
             </div>
         </div>
     </div>

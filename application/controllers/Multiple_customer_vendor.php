@@ -6,7 +6,7 @@ class Multiple_customer_vendor extends CI_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->ensure_schema();
+        // $this->ensure_schema(); // Avoid running ALTER TABLE queries on every page hit
     }
 
     private function ensure_schema()
@@ -337,46 +337,14 @@ class Multiple_customer_vendor extends CI_Controller
         } else {
             $data['srch_invoice_no'] = $srch_invoice_no = '';
         }
+
         if (!empty($srch_invoice_no)) {
             $where .= " AND (a.invoice_no = '" . $this->db->escape_str($srch_invoice_no) . "')";
             $data['srch_vendor_id'] = $srch_vendor_id = '';
         }
 
-        $this->db->from('vendor_purchase_multiple_invoice_info a');
-        $this->db->join('company_info ci', 'a.company_id = ci.company_id AND ci.status = "Active"', 'left');
-        $this->db->where('a.status !=', 'Delete');
-        $this->db->where($where);
-
-        $data['total_records'] = $this->db->count_all_results();
-
-        // === PAGINATION ===
-        $data['sno'] = $this->uri->segment(2, 0);
-        $this->load->library('pagination');
-
-        $config['base_url'] = trim(site_url($data['s_url']), '/' . $this->uri->segment(2, 0));
-        $config['total_rows'] = $data['total_records'];
-        $config['per_page'] = 25;
-        $config['uri_segment'] = 2;
-        $config['attributes'] = ['class' => 'page-link'];
-        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
-        $config['full_tag_close'] = '</ul>';
-        $config['num_tag_open'] = '<li class="page-item">';
-        $config['num_tag_close'] = '</li>';
-        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
-        $config['cur_tag_close'] = '</a></li>';
-        $config['prev_tag_open'] = '<li class="page-item">';
-        $config['prev_tag_close'] = '</li>';
-        $config['next_tag_open'] = '<li class="page-item">';
-        $config['next_tag_close'] = '</li>';
-        $config['first_tag_open'] = '<li class="page-item">';
-        $config['first_tag_close'] = '</li>';
-        $config['last_tag_open'] = '<li class="page-item">';
-        $config['last_tag_close'] = '</li>';
-        $config['prev_link'] = 'Prev';
-        $config['next_link'] = 'Next';
-
-        $this->pagination->initialize($config);
-        $data['pagination'] = $this->pagination->create_links();
+        $data['sno'] = 0;
+        $data['pagination'] = '';
 
         $data['vendor_opt'] = [];
         $sql = "
@@ -408,11 +376,11 @@ class Multiple_customer_vendor extends CI_Controller
             LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
             LEFT JOIN company_info as ci on a.company_id = ci.company_id and ci.status = 'Active'
             WHERE a.status != 'Delete' AND $where 
-            ORDER BY a.invoice_date desc, a.vendor_purchase_multiple_invoice_id DESC
-            LIMIT " . (int) $this->uri->segment(2, 0) . ", " . (int) $config['per_page'];
+            ORDER BY a.invoice_date desc, a.vendor_purchase_multiple_invoice_id DESC";
 
         $query = $this->db->query($sql);
         $data['record_list'] = $query->result_array();
+        $data['total_records'] = count($data['record_list']);
 
         $this->load->view('page/vendor/vendor-purchase-bill-multiple-customer-list', $data);
     }
