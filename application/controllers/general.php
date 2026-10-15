@@ -521,23 +521,20 @@ class General extends CI_Controller
 
         if ($table == 'opening_balance_info') {
             $query = $this->db->query("
-                select
-                a.*
-                from cb_opening_balance_info as a
-                where a.opening_balance_id = '" . $this->db->escape_str($rec_id) . "'
-                limit 1
+                SELECT a.*
+                FROM cb_opening_balance_info as a
+                WHERE a.opening_balance_id = '" . $this->db->escape_str($rec_id) . "'
+                LIMIT 1
             ");
-            $rec_list = array();
-            foreach ($query->result_array() as $row) {
-                $rec_list = $row;
-            }
+            $rec_list = $query->row_array() ?: [];
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode($rec_list);
+            exit;
         }
 
-        $this->db->close();
-
-        header('Content-Type: application/x-json; charset=utf-8');
-
-        echo (json_encode($rec_list));
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($rec_list);
+        exit;
     }
 
     public function delete_record()

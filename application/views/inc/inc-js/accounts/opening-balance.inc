@@ -84,7 +84,7 @@ jQuery(function($) {
         let id = $(this).val();
 
         $.ajax({
-            url: "<?= site_url('get-data'); ?>",
+            url: "<?= site_url('accounts/get_data'); ?>",
             type: "POST",
             data: { tbl: 'opening_balance_info', id: id },
             dataType: "json",

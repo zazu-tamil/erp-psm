@@ -613,7 +613,8 @@ class PettyCash extends CI_Controller
         $w_pt = "pt.status != 'Deleted' AND pt.ac_type = 'Cash'";
         $w_cin = "cin.status = 'Active' AND cin.ac_type = 'Cash'";
         $w_cout = "cout.status = 'Active' AND cout.ac_type = 'Cash'";
-        $w_op = "status != 'Delete' AND ac_type = 'Cash'";
+        $w_op = "(status != 'Delete' OR status IS NULL) AND ac_type = 'Cash'";
+        $w_op_main = "(op.status != 'Delete' OR op.status IS NULL) AND op.ac_type = 'Cash'";
 
         $w_ce_to = "1=1";
         $w_ce_from = "1=1";
@@ -626,13 +627,20 @@ class PettyCash extends CI_Controller
             $w_cout .= " AND cout.cash_category_id = " . (int)$srch_cash_category_id;
             $w_ce_to = "ce.to_cash_category_id = " . (int)$srch_cash_category_id;
             $w_ce_from = "ce.from_cash_category_id = " . (int)$srch_cash_category_id;
-            $w_op .= " AND (cash_category_id = " . (int)$srch_cash_category_id . " OR (cash_category_id IS NULL AND ac_type = 'Cash'))";
+            $has_specific_op = (int)$this->db->query("SELECT COUNT(*) AS c FROM cb_opening_balance_info WHERE (status != 'Delete' OR status IS NULL) AND ac_type = 'Cash' AND cash_category_id = " . (int)$srch_cash_category_id)->row('c');
+            if ($has_specific_op > 0) {
+                $w_op .= " AND cash_category_id = " . (int)$srch_cash_category_id;
+            } else {
+                $w_op .= " AND (cash_category_id = " . (int)$srch_cash_category_id . " OR cash_category_id IS NULL OR cash_category_id = 0)";
+            }
         }
 
         // 1. Calculate Opening Balance before srch_from_date
         // A. Base Opening Balances from cb_opening_balance_info
-        $sql_cb_op = "SELECT COALESCE(SUM(amount), 0) AS op_amount FROM cb_opening_balance_info WHERE $w_op AND opening_date <= '" . $this->db->escape_str($srch_from_date) . "'";
-        $cb_op = (float)$this->db->query($sql_cb_op)->row()->op_amount;
+        $sql_cb_op = "SELECT COALESCE(SUM(amount), 0) AS op_amount 
+                      FROM cb_opening_balance_info 
+                      WHERE $w_op";
+        $cb_op = (float)$this->db->query($sql_cb_op)->row('op_amount');
 
         // B. Combined transactions before srch_from_date
         $sql_tr_before = "

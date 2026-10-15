@@ -1845,10 +1845,15 @@ class Payment extends CI_Controller
                 $bank_row = $this->db->get_where('company_bank_info', ['bank_id' => $bank_id])->row_array();
                 $account_name = $bank_row ? $bank_row['bank_name'] . (!empty($bank_row['branch']) ? ' (' . $bank_row['branch'] . ')' : '') : 'Bank #' . $bank_id;
 
-                // 1. Base Opening Balance from cb_opening_balance_info up to payment_date
+                // 1. Base Opening Balance from cb_opening_balance_info
+                $w_bank_op = "(bank_id = $bank_id OR bank_id IS NULL OR bank_id = 0)";
+                $has_specific_bank_op = (int) $this->db->query("SELECT COUNT(*) AS c FROM cb_opening_balance_info WHERE (status != 'Delete' OR status IS NULL) AND ac_type = 'Bank' AND bank_id = $bank_id")->row('c');
+                if ($has_specific_bank_op > 0) {
+                    $w_bank_op = "bank_id = $bank_id";
+                }
                 $sql_op = "SELECT COALESCE(SUM(amount), 0) AS base_amount 
                            FROM cb_opening_balance_info 
-                           WHERE status != 'Delete' AND ac_type = 'Bank' AND (bank_id = $bank_id OR (bank_id IS NULL AND ac_type = 'Bank')) AND opening_date <= '$esc_date'";
+                           WHERE (status != 'Delete' OR status IS NULL) AND ac_type = 'Bank' AND $w_bank_op";
                 $base_op = (float) $this->db->query($sql_op)->row('base_amount');
 
                 // 2. Inwards before payment_date
@@ -1888,7 +1893,12 @@ class Payment extends CI_Controller
                 $cat_row = $this->db->get_where('cash_category', ['cash_category_id' => $cash_category_id])->row_array();
                 $account_name = $cat_row ? $cat_row['category_name'] : 'Cash Category #' . $cash_category_id;
 
-                $w_cat_op = " AND (cash_category_id = $cash_category_id OR (cash_category_id IS NULL AND ac_type = 'Cash'))";
+                $has_specific_cash_op = (int) $this->db->query("SELECT COUNT(*) AS c FROM cb_opening_balance_info WHERE (status != 'Delete' OR status IS NULL) AND ac_type = 'Cash' AND cash_category_id = $cash_category_id")->row('c');
+                if ($has_specific_cash_op > 0) {
+                    $w_cat_op = " AND cash_category_id = $cash_category_id";
+                } else {
+                    $w_cat_op = " AND (cash_category_id = $cash_category_id OR cash_category_id IS NULL OR cash_category_id = 0)";
+                }
                 $w_cat_tr = " AND cash_category_id = $cash_category_id";
                 $w_cat_cin = " AND cash_category_id = $cash_category_id";
                 $w_cat_pt = " AND cash_category_id = $cash_category_id";
@@ -1901,10 +1911,10 @@ class Payment extends CI_Controller
                 $account_name = 'All Cash';
             }
 
-            // 1. Base Opening Balance up to payment_date
+            // 1. Base Opening Balance
             $sql_op = "SELECT COALESCE(SUM(amount), 0) AS base_amount 
                        FROM cb_opening_balance_info 
-                       WHERE status != 'Delete' AND ac_type = 'Cash' $w_cat_op AND opening_date <= '$esc_date'";
+                       WHERE (status != 'Delete' OR status IS NULL) AND ac_type = 'Cash' $w_cat_op";
             $base_op = (float) $this->db->query($sql_op)->row('base_amount');
 
             // 2. Inwards before payment_date

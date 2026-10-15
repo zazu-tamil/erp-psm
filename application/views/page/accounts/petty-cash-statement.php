@@ -1,4 +1,72 @@
 <?php include_once(VIEWPATH . '/inc/header.php'); ?>
+<style>
+    /* Modern Metric Cards Styling */
+    .stat-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        padding: 16px 20px;
+        margin-bottom: 20px;
+        position: relative;
+        overflow: hidden;
+        border-left: 5px solid #3c8dbc;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+    }
+    .stat-card.opening { border-left-color: #f39c12; }
+    .stat-card.purchases { border-left-color: #00a65a; }
+    .stat-card.paid { border-left-color: #dd4b39; }
+    .stat-card.closing { border-left-color: #605ca8; }
+    
+    .stat-card .label-text {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #777d8c;
+        margin-bottom: 6px;
+        display: block;
+    }
+    .stat-card .value-text {
+        font-size: 22px;
+        font-weight: 700;
+        color: #2c3e50;
+        line-height: 1.2;
+    }
+    .stat-card .icon-bg {
+        position: absolute;
+        right: 15px;
+        bottom: 10px;
+        font-size: 38px;
+        color: rgba(0, 0, 0, 0.05);
+        pointer-events: none;
+    }
+    @media print {
+        @page {
+            size: landscape;
+            margin: 10mm;
+        }
+        body {
+            font-size: 11px;
+        }
+        .table > thead > tr > th, 
+        .table > tbody > tr > th, 
+        .table > tfoot > tr > th, 
+        .table > thead > tr > td, 
+        .table > tbody > tr > td, 
+        .table > tfoot > tr > td {
+            padding: 4px !important;
+            font-size: 11px !important;
+        }
+        .badge, .label {
+            border: 1px solid #000;
+            color: #000 !important;
+            background: transparent !important;
+        }
+    }
+</style>
 <section class="content-header">
     <h1>Cash Statement</h1>
     <ol class="breadcrumb">
@@ -50,6 +118,56 @@
         </div>
     </div>
 
+    <!-- Pre-calculate period statistics -->
+    <?php
+    $tot_in_calc = 0.000;
+    $tot_out_calc = 0.000;
+    if (!empty($records)) {
+        foreach ($records as $r) {
+            $tot_in_calc += (float)$r['amount_in'];
+            $tot_out_calc += (float)$r['amount_out'];
+        }
+    }
+    $closing_balance_calc = $opening_balance + $tot_in_calc - $tot_out_calc;
+    ?>
+
+    <!-- Modern Summary Statistics Grid -->
+    <div class="row no-print" style="margin-bottom: 5px;">
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card opening">
+                <span class="label-text"><i class="fa fa-folder-open text-warning"></i> Opening Balance</span>
+                <div class="value-text text-warning"><?php echo number_format($opening_balance, 3); ?> <small style="font-size: 13px; font-weight: normal; color: #777;">BHD</small></div>
+                <i class="fa fa-folder-open icon-bg"></i>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card purchases">
+                <span class="label-text"><i class="fa fa-arrow-circle-down text-green"></i> Total Cash In (Inward)</span>
+                <div class="value-text text-green"><?php echo number_format($tot_in_calc, 3); ?> <small style="font-size: 13px; font-weight: normal; color: #777;">BHD</small></div>
+                <i class="fa fa-arrow-down icon-bg"></i>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card paid">
+                <span class="label-text"><i class="fa fa-arrow-circle-up text-red"></i> Total Cash Out (Outward)</span>
+                <div class="value-text text-red"><?php echo number_format($tot_out_calc, 3); ?> <small style="font-size: 13px; font-weight: normal; color: #777;">BHD</small></div>
+                <i class="fa fa-arrow-up icon-bg"></i>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card closing">
+                <span class="label-text"><i class="fa fa-balance-scale text-purple"></i> Closing Balance</span>
+                <div class="value-text" style="color: #605ca8;">
+                    <?php echo number_format($closing_balance_calc, 3); ?> 
+                    <small style="font-size: 12px; font-weight: bold; padding: 2px 6px; border-radius: 4px; background: <?php echo $closing_balance_calc >= 0 ? '#e8f5e9; color: #2e7d32;' : '#ffebee; color: #c62828;'; ?>">
+                        <?php echo $closing_balance_calc >= 0 ? 'DR' : 'CR'; ?>
+                    </small>
+                </div>
+                <i class="fa fa-balance-scale icon-bg"></i>
+            </div>
+        </div>
+    </div>
+
     <!-- Report Box -->
     <div class="box box-info">
         <div class="box-header with-border">
@@ -86,10 +204,15 @@
                         <td>1</td>
                         <td><?php echo date('d-m-Y', strtotime($srch_from_date)); ?></td>
                         <td>-</td>
-                        <td colspan="3"><strong>Opening Balance</strong></td>
+                        <td colspan="3">
+                            <span class="label bg-orange" style="font-size: 11px; margin-right: 5px;">
+                                <i class="fa fa-folder-open"></i>
+                            </span>
+                            <strong>Opening Balance (as of <?php echo date('d-m-Y', strtotime($srch_from_date)); ?>)</strong>
+                        </td>
                         <td class="text-right">-</td>
                         <td class="text-right">-</td>
-                        <td class="text-right text-bold">
+                        <td class="text-right text-bold" style="font-size: 14px;">
                             <?php echo number_format($opening_balance, 3); ?>
                         </td>
                     </tr>

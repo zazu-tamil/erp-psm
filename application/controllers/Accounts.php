@@ -3067,7 +3067,7 @@ class Accounts extends CI_Controller
                     'default' => NULL
                 ]
             ]);
-        }
+        } 
 
         $data['js'] = 'accounts/opening-balance.inc';
 
@@ -3081,6 +3081,7 @@ class Accounts extends CI_Controller
                 'cash_category_id' => ($ac_type == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null,
                 'amount' => $amount,
                 'remarks' => $this->input->post('remarks') ?: null,
+                'status' => 'Active',
             );
 
             $this->db->insert('cb_opening_balance_info', $ins);
@@ -4579,6 +4580,19 @@ class Accounts extends CI_Controller
             $rec_list = $query->result_array();
         }
 
+        if ($table == 'opening_balance_info') {
+            $query = $this->db->query("
+                SELECT a.*
+                FROM cb_opening_balance_info as a
+                WHERE a.opening_balance_id = '" . $this->db->escape_str($rec_id) . "'
+                LIMIT 1
+            ");
+            $rec_list = $query->row_array() ?: [];
+            header('Content-Type: application/json');
+            echo json_encode($rec_list);
+            exit;
+        }
+
         // ✅ CLEAN OUTPUT
         header('Content-Type: application/json');
         echo json_encode($rec_list);
@@ -4621,19 +4635,28 @@ class Accounts extends CI_Controller
         // Build precise table-specific where clauses for filter (Bank Only)
         $w_tr = "tr.status = 'Active' AND tr.receipt_mode = 'Bank'";
         $w_vp = "vp.status = 'Active' AND vp.payment_mode = 'Bank'";
+        $w_vap = "vap.status = 'Active' AND vap.ac_type_opt = 'Bank'";
         $w_pt = "pt.status != 'Deleted' AND pt.ac_type = 'Bank'";
         $w_cin = "cin.status = 'Active' AND cin.ac_type = 'Bank'";
         $w_cout = "cout.status = 'Active' AND cout.ac_type = 'Bank'";
-        $w_op = "status != 'Delete' AND ac_type = 'Bank'";
+        $w_op = "(status != 'Delete' OR status IS NULL) AND ac_type = 'Bank'";
+        $w_op_main = "(op.status != 'Delete' OR op.status IS NULL) AND op.ac_type = 'Bank'";
 
         if (strpos($srch_bank_cash, 'bank_') === 0) {
             $bank_id = (int) str_replace('bank_', '', $srch_bank_cash);
             $w_tr .= " AND tr.bank_id = $bank_id";
             $w_vp .= " AND vp.bank_id = $bank_id";
+            $w_vap .= " AND vap.bank_id = $bank_id";
             $w_pt .= " AND pt.bank_id = $bank_id";
             $w_cin .= " AND cin.bank_id = $bank_id";
             $w_cout .= " AND cout.bank_id = $bank_id";
-            $w_op .= " AND (bank_id = $bank_id OR (bank_id IS NULL AND ac_type = 'Bank'))";
+            
+            $has_specific_bank_op = (int)$this->db->query("SELECT COUNT(*) AS c FROM cb_opening_balance_info WHERE (status != 'Delete' OR status IS NULL) AND ac_type = 'Bank' AND bank_id = $bank_id")->row('c');
+            if ($has_specific_bank_op > 0) {
+                $w_op .= " AND bank_id = $bank_id";
+            } else {
+                $w_op .= " AND (bank_id = $bank_id OR bank_id IS NULL OR bank_id = 0)";
+            }
         }
 
         $w_ce_to = "1=1";
@@ -4649,6 +4672,7 @@ class Accounts extends CI_Controller
             $w_vp .= " AND vp.payment_type = '" . $this->db->escape_str($srch_payment_type) . "'";
             $w_cin .= " AND cin.bank_type = '" . $this->db->escape_str($srch_payment_type) . "'";
             $w_cout .= " AND cout.bank_type = '" . $this->db->escape_str($srch_payment_type) . "'";
+            $w_vap .= " AND 1=0";
             $w_pt .= " AND 1=0";
             $w_ce_from .= " AND 1=0";
             $w_ce_to .= " AND 1=0";
@@ -4657,7 +4681,9 @@ class Accounts extends CI_Controller
 
         // 1. Calculate Opening Balance:
         // A. Base Opening Balances from cb_opening_balance_info
-        $sql_cb_op = "SELECT COALESCE(SUM(amount), 0) AS op_amount FROM cb_opening_balance_info WHERE $w_op AND opening_date <= '" . $this->db->escape_str($srch_from_date) . "'";
+        $sql_cb_op = "SELECT COALESCE(SUM(amount), 0) AS op_amount 
+                      FROM cb_opening_balance_info 
+                      WHERE $w_op";
         $cb_op = (float) $this->db->query($sql_cb_op)->row('op_amount');
 
         // B. Combined transactions before srch_from_date
@@ -4667,6 +4693,8 @@ class Accounts extends CI_Controller
                 SELECT receipt_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM tender_receipt_info tr WHERE $w_tr
                 UNION ALL
                 SELECT payment_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM vendor_payment_info vp WHERE $w_vp
+                UNION ALL
+                SELECT adv_payment_date AS tr_date, 0 AS amount_in, adv_payment_amt AS amount_out FROM vendor_advance_payment_info vap WHERE $w_vap
                 UNION ALL
                 SELECT transaction_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM petty_cash_transactions pt WHERE $w_pt AND pt.transaction_type IN ('Inward', 'Income')
                 UNION ALL
@@ -4736,6 +4764,30 @@ class Accounts extends CI_Controller
                 LEFT JOIN vendor_info v ON v.vendor_id = vp.vendor_id
                 LEFT JOIN company_bank_info b ON b.bank_id = vp.bank_id
                 WHERE $w_vp AND vp.payment_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+
+                UNION ALL
+
+                -- Vendor Advance Payments (Bank)
+                SELECT 
+                    CONVERT('Supplier Adv Payment' USING utf8) AS tr_type, 
+                    CONVERT('' USING utf8) AS ref_no, 
+                    vap.adv_payment_date AS tr_date, 
+                    0 AS amount_in, 
+                    vap.adv_payment_amt AS amount_out, 
+                    CONVERT(vap.ac_type_opt USING utf8) AS mode, 
+                    vap.bank_id, 
+                    CONVERT(COALESCE(b.bank_name, 'Cash') USING utf8) AS bank_name,
+                    CONVERT(v.vendor_name USING utf8) AS party_name, 
+                    CONVERT('Advance Payment' USING utf8) AS remarks,
+                    vap.created_date,
+                    CONVERT(NULL USING utf8) AS bank_type,
+                    CONVERT(NULL USING utf8) AS cheque_no,
+                    NULL AS cheque_date,
+                    CONVERT(NULL USING utf8) AS cheque_bank
+                FROM vendor_advance_payment_info vap
+                LEFT JOIN vendor_info v ON v.vendor_id = vap.vendor_id
+                LEFT JOIN company_bank_info b ON b.bank_id = vap.bank_id
+                WHERE $w_vap AND vap.adv_payment_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
 
                 UNION ALL
 
