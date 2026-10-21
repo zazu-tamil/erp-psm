@@ -5483,7 +5483,9 @@ ORDER BY
             i.tender_enq_invoice_item_id,
             if(i.tender_enq_invoice_item_id is null,  b.item_code, i.item_code) as item_code,
             if(i.tender_enq_invoice_item_id is null,  b.item_desc, i.item_desc) as item_desc,
-            if(i.tender_enq_invoice_item_id is null,  b.qty, i.qty) as qty
+            if(i.tender_enq_invoice_item_id is null,  b.qty, i.qty) as qty,
+            if(i.tender_enq_invoice_item_id is null,  h.rate, i.rate) as rate,
+            if(i.tender_enq_invoice_item_id is null,  h.gst, i.gst) as gst 
             from  tender_dc_info as a 
             left join tender_dc_item_info as b on b.tender_dc_id = a.tender_dc_id and b.status = 'Active'
             left join vendor_pur_inward_info as c on c.vendor_pur_inward_id = b.vendor_pur_inward_id  and c.status = 'Active'
