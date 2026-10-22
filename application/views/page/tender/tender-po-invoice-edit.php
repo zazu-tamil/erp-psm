@@ -728,37 +728,39 @@ $(document).ready(function() {
 
     function calculateTotalAmount_addt() {
         let total_addt_amt_wo_tax = 0;
+        let total_addt_vat_amt = 0;
         $(".addt_charges_amt").each(function() {
-            if ($(this).closest('tr').find('.chk_tender_po_addtchrg_id').is(':checked')) {
+            let row = $(this).closest('tr');
+            if (row.find('.chk_tender_po_addtchrg_id').is(':checked')) {
                 total_addt_amt_wo_tax += parseFloat($(this).val()) || 0;
+                total_addt_vat_amt += parseFloat(row.find('.addt_charges_vat_amt').val()) || 0;
             }
         });
-        //alert("TEST" + $("#total_amount_wo_tax").text());
+
+        let items_wo_tax = parseFloat($("#total_amount_wo_tax").text()) || 0;
+        let items_tax = parseFloat($("#total_tax_amount").text()) || 0;
+
+        let subtotal_before_discount = items_wo_tax + total_addt_amt_wo_tax;
+        let vat_before_discount = items_tax + total_addt_vat_amt;
+
         let discount_amt = 0;
         if ($("#is_discount").is(':checked')) {
             discount_amt = parseFloat($("#discount_amount").val()) || 0;
         }
 
-        total_addt_amt_wo_tax = parseFloat($("#total_amount_wo_tax").text()) + parseFloat(
-            total_addt_amt_wo_tax) - discount_amt;
-        $("#total_amount_wo_tax_addt").text(total_addt_amt_wo_tax.toFixed(3));
+        let subtotal_after_discount = Math.max(0, subtotal_before_discount - discount_amt);
+        let final_vat_amt = vat_before_discount;
+        if (discount_amt > 0 && subtotal_before_discount > 0) {
+            final_vat_amt = vat_before_discount * (1 - (discount_amt / subtotal_before_discount));
+        }
+        let final_total_w_tax = subtotal_after_discount + final_vat_amt;
 
+        $("#total_amount_wo_tax_addt").text(subtotal_after_discount.toFixed(3));
+        $("#total_amount_addt").text(final_total_w_tax.toFixed(3));
+        $("#total_tax_amount_addt").text(final_vat_amt.toFixed(3));
 
-        let total_addt_amt_w_tax = 0;
-        $(".addt_charges_tot_amt").each(function() {
-            if ($(this).closest('tr').find('.chk_tender_po_addtchrg_id').is(':checked')) {
-                total_addt_amt_w_tax += parseFloat($(this).val()) || 0;
-            }
-        });
-        total_addt_amt_w_tax = parseFloat($("#total_amount").text()) + parseFloat(total_addt_amt_w_tax) - discount_amt;
-        $("#total_amount_addt").text(total_addt_amt_w_tax.toFixed(3));
-
-
-        $("#total_tax_amount_addt").text((total_addt_amt_w_tax - total_addt_amt_wo_tax).toFixed(3));
-
-
-        $("#total_amount_hidden").val(total_addt_amt_w_tax.toFixed(3));
-        $("#tax_amount_hidden").val((total_addt_amt_w_tax - total_addt_amt_wo_tax).toFixed(3));
+        $("#total_amount_hidden").val(final_total_w_tax.toFixed(3));
+        $("#tax_amount_hidden").val(final_vat_amt.toFixed(3));
 
     }
 

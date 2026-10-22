@@ -398,8 +398,6 @@
     </style>
 </head>
 
-<option value=""></option>
-
 <body>
 
     <?php
@@ -487,14 +485,14 @@
             : 'Zero';
 
         if ($decimal_part > 0) {
+            $formatted_decimal = sprintf("%0{$decimal_point}d", $decimal_part);
             if ($currency == 'BHD') {
-                $words .= ' & Fils ' . $decimal_part . '/' . $multiplier;
+                $words .= ' & Fils ' . $formatted_decimal . '/' . $multiplier;
             } elseif ($currency == 'EUR') {
-                $words .= ' & Cents ' . $decimal_part . '/' . $multiplier;
+                $words .= ' & Cents ' . $formatted_decimal . '/' . $multiplier;
             } else {
-                $words .= ' & ' . $decimal_part . '/' . $multiplier;
+                $words .= ' & ' . $formatted_decimal . '/' . $multiplier;
             }
-
         }
 
         return $words;
@@ -588,16 +586,6 @@
                         <?php
                         $decimal_point = isset($record['decimal_point']) ? intval($record['decimal_point']) : 3;
                         $currency_code = $record['currency_code'] ?? 'BHD';
-
-                        $subtotal = 0;
-                        $total_vat = 0;
-                        if (!empty($item_list)) {
-                            foreach ($item_list as $item) {
-                                $subtotal += floatval($item['Net_amount'] ?? 0);
-                                $total_vat += (floatval($item['Net_amount'] ?? 0) * floatval($item['gst'] ?? 0)) / 100;
-                            }
-                        }
-                        $grand_total_amount = $subtotal + $total_vat;
                         ?>
                         <div class="currency-badge">
                             <span>Currency: <?php echo htmlspecialchars($currency_code); ?></span>
@@ -621,31 +609,34 @@
                                 <?php
                                 $total_net_amount = 0;
                                 $total_vat_amount = 0;
-                                $grand_total = 0;
+                                $tot_vat = [];
 
                                 if (!empty($item_list)):
                                     foreach ($item_list as $i => $item):
-                                        $qty = $item['qty'] ?? 0;
-                                        $rate = $item['rate'] ?? 0;
-                                        $net = $item['Net_Amount'] ?? ($qty * $rate);
-                                        $vat_percentage = $item['gst'] ?? 0;
+                                        $qty = floatval($item['qty'] ?? 0);
+                                        $rate = floatval($item['rate'] ?? 0);
+                                        $net = isset($item['Net_Amount']) ? floatval($item['Net_Amount']) : ($qty * $rate);
+                                        $vat_percentage = floatval($item['gst'] ?? 0);
                                         $vat_amount = ($net * $vat_percentage) / 100;
-                                        $vat = $net * $vat_percentage / 100;
                                         $total_net_amount += $net;
                                         $total_vat_amount += $vat_amount;
-                                        if (!isset($tot_vat[$vat_percentage]))
-                                            $tot_vat[$vat_percentage] = 0;
-                                        $tot_vat[$vat_percentage] += $vat;
+                                        $rate_key = number_format($vat_percentage, 2, '.', '');
+                                        if (!isset($tot_vat[$rate_key])) {
+                                            $tot_vat[$rate_key] = 0;
+                                        }
+                                        $tot_vat[$rate_key] += $vat_amount;
                                         ?>
                                         <tr>
-                                            <!-- <td class="text-center"><?= $i + 1 ?></td> -->
-                                            <td class="text-center"><?php echo $item['serial_no']; ?></td>
+                                            <td class="text-center"><?php echo ($i + 1); ?></td>
                                             <td class="text-left">
                                                 <?php if (!empty($item['item_code'])): ?>
                                                     <div><strong><?= htmlspecialchars($item['item_code']) ?></strong></div>
                                                 <?php endif; ?>
 
                                                 <?= nl2br(htmlspecialchars($item['item_desc'] ?? '')) ?>
+                                                <?php if (!empty($item['serial_no']) && $item['serial_no'] != ($i + 1)): ?>
+                                                    <div style="font-size: 8pt; color: #555; margin-top: 2px;">(PO Item Ref: #<?= htmlspecialchars($item['serial_no']) ?>)</div>
+                                                <?php endif; ?>
                                             </td>
                                             <td class="text-center"><?= number_format($qty, 0) ?></td>
                                             <td class="text-center"><?= htmlspecialchars($item['uom'] ?? '-') ?></td>
@@ -655,7 +646,6 @@
                                         </tr>
                                         <?php
                                     endforeach;
-                                    $grand_total = $total_net_amount + $total_vat_amount;
                                 else:
                                     ?>
                                     <tr>
@@ -664,6 +654,49 @@
                                         </td>
                                     </tr>
                                 <?php endif; ?>
+
+                                <?php
+                                $addt_charges_net = 0;
+                                $addt_charges_vat = 0;
+                                if (!empty($addt_chrg_list)) {
+                                    foreach ($addt_chrg_list as $addt_chrg) {
+                                        $chrg_amt = floatval($addt_chrg['addt_charges_amt'] ?? 0);
+                                        $chrg_vat_rate = floatval($addt_chrg['addt_charges_vat'] ?? 0);
+                                        $chrg_vat_amt = floatval($addt_chrg['addt_charges_vat_amt'] ?? 0);
+                                        $addt_charges_net += $chrg_amt;
+                                        $addt_charges_vat += $chrg_vat_amt;
+                                        $rate_key = number_format($chrg_vat_rate, 2, '.', '');
+                                        if (!isset($tot_vat[$rate_key])) {
+                                            $tot_vat[$rate_key] = 0;
+                                        }
+                                        $tot_vat[$rate_key] += $chrg_vat_amt;
+                                    }
+                                }
+
+                                $subtotal_before_discount = $total_net_amount + $addt_charges_net;
+                                $vat_before_discount = $total_vat_amount + $addt_charges_vat;
+
+                                $has_discount = (isset($record['is_discount']) && $record['is_discount'] == 1 && floatval($record['discount'] ?? 0) > 0);
+                                $discount_amount = $has_discount ? floatval($record['discount']) : 0;
+                                $subtotal_after_discount = max(0, $subtotal_before_discount - $discount_amount);
+
+                                if ($has_discount && $subtotal_before_discount > 0) {
+                                    $discount_ratio = $discount_amount / $subtotal_before_discount;
+                                    $final_vat_amount = round($vat_before_discount * (1 - $discount_ratio), $decimal_point);
+                                } else {
+                                    $final_vat_amount = round($vat_before_discount, $decimal_point);
+                                }
+
+                                $final_grand_total = $subtotal_after_discount + $final_vat_amount;
+
+                                $vat_label = 'VAT Amount';
+                                if (count($tot_vat) === 1) {
+                                    $single_rate = floatval(key($tot_vat));
+                                    if ($single_rate > 0) {
+                                        $vat_label = 'VAT ' . ($single_rate + 0) . '%';
+                                    }
+                                }
+                                ?>
 
                                 <!-- Bank Details + Summary Row -->
                                 <?php if (!empty($bank_details) && (!empty($bank_details['bank_name']) || !empty($bank_details['account_name']))): ?>
@@ -695,97 +728,79 @@
                                         </td>
                                         <td colspan="3" class="text-right" style="vertical-align:middle;">
                                             <div class="summary-section">
-                                                <div class="summary-row" style="border-bottom:1px solid #000;">
-                                                    <span>TOTAL EXCL. VAT</span>
-                                                    <span><?php echo number_format($total_net_amount, $decimal_point); ?></span>
-                                                </div>
-
-                                                <!-- Additional Charges -->
-                                                <?php
-                                                $grand_total = $total_net_amount;
-                                                foreach ($addt_chrg_list as $i => $addt_chrg):
-                                                    $total_vat_amount += $addt_chrg['addt_charges_vat_amt'];
-                                                    if (!isset($tot_vat[floatval($addt_chrg['addt_charges_vat'])]))
-                                                        $tot_vat[floatval($addt_chrg['addt_charges_vat'])] = 0;
-                                                    $tot_vat[floatval($addt_chrg['addt_charges_vat'])] += $addt_chrg['addt_charges_vat_amt'];
-                                                    $grand_total += $addt_chrg['addt_charges_amt'];
-                                                    ?>
+                                                <?php if (!empty($addt_chrg_list)): ?>
                                                     <div class="summary-row" style="border-bottom:1px solid #000;">
-                                                        <span><?php echo htmlspecialchars($addt_chrg['addt_charges_type_name']); ?></span>
-                                                        <span><?php echo number_format($addt_chrg['addt_charges_amt'], $decimal_point); ?></span>
+                                                        <span>TOTAL EXCL. VAT (ITEMS)</span>
+                                                        <span><?php echo number_format($total_net_amount, $decimal_point); ?></span>
                                                     </div>
+                                                    <?php foreach ($addt_chrg_list as $addt_chrg): ?>
+                                                        <div class="summary-row" style="border-bottom:1px solid #000;">
+                                                            <span><?php echo htmlspecialchars($addt_chrg['addt_charges_type_name']); ?></span>
+                                                            <span><?php echo number_format($addt_chrg['addt_charges_amt'], $decimal_point); ?></span>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
 
-                                                <?php endforeach; ?>
-
-                                                <?php if (isset($record['is_discount']) && $record['is_discount'] == 1 && $record['discount'] > 0): ?>
+                                                <?php if ($has_discount): ?>
                                                     <div class="summary-row" style="border-bottom:1px solid #000;">
                                                         <span>TOTAL</span>
-                                                        <span><?php echo number_format($grand_total, $decimal_point); ?></span>
+                                                        <span><?php echo number_format($subtotal_before_discount, $decimal_point); ?></span>
                                                     </div>
                                                     <div class="summary-row" style="border-bottom:1px solid #000;">
                                                         <span>Discount</span>
-                                                        <span><?php echo number_format($record['discount'], $decimal_point); ?></span>
+                                                        <span><?php echo number_format($discount_amount, $decimal_point); ?></span>
                                                     </div>
-                                                    <?php
-                                                    $grand_total -= floatval($record['discount']);
-                                                    ?>
                                                     <div class="summary-row" style="border-bottom:1px solid #000;">
                                                         <span>TOTAL EXCL. VAT</span>
-                                                        <span><?php echo number_format($grand_total, $decimal_point); ?></span>
+                                                        <span><?php echo number_format($subtotal_after_discount, $decimal_point); ?></span>
                                                     </div>
-                                                <?php elseif (!empty($addt_chrg_list)): ?>
+                                                <?php else: ?>
                                                     <div class="summary-row" style="border-bottom:1px solid #000;">
                                                         <span>TOTAL EXCL. VAT</span>
-                                                        <span><?php echo number_format($grand_total, $decimal_point); ?></span>
+                                                        <span><?php echo number_format($subtotal_before_discount, $decimal_point); ?></span>
                                                     </div>
                                                 <?php endif; ?>
+
                                                 <div class="summary-row" style="border-bottom:1px solid #000;">
-                                                    <span>VAT Amount</span>
-                                                    <span><?php echo number_format($total_vat_amount, $decimal_point); ?></span>
+                                                    <span><?php echo htmlspecialchars($vat_label); ?></span>
+                                                    <span><?php echo number_format($final_vat_amount, $decimal_point); ?></span>
                                                 </div>
                                                 <div class="summary-row">
                                                     <span>TOTAL <?php echo htmlspecialchars($currency_code); ?></span>
-                                                    <span><?php echo number_format(($grand_total + $total_vat_amount), $decimal_point); ?></span>
+                                                    <span><?php echo number_format($final_grand_total, $decimal_point); ?></span>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                 <?php else: ?>
-                                    <tr>
-                                        <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
-                                            <strong>TOTAL EXCL. VAT</strong>
-                                        </td>
-                                        <td colspan="2" class="text-right" style="padding:10px; border:1px solid #000;">
-                                            <strong><?php echo number_format($total_net_amount, $decimal_point); ?></strong>
-                                        </td>
-                                    </tr>
-                                    <!-- Additional Charges -->
-                                    <?php
-                                    $grand_total = $total_net_amount;
-                                    foreach ($addt_chrg_list as $i => $addt_chrg):
-                                        $total_vat_amount += $addt_chrg['addt_charges_vat_amt'];
-                                        if (!isset($tot_vat[floatval($addt_chrg['addt_charges_vat'])]))
-                                            $tot_vat[floatval($addt_chrg['addt_charges_vat'])] = 0;
-                                        $tot_vat[floatval($addt_chrg['addt_charges_vat'])] += $addt_chrg['addt_charges_vat_amt'];
-                                        $grand_total += $addt_chrg['addt_charges_amt'];
-                                        ?>
-                                        <tr class="items-table">
+                                    <?php if (!empty($addt_chrg_list)): ?>
+                                        <tr>
                                             <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
-                                                <strong><?php echo htmlspecialchars($addt_chrg['addt_charges_type_name']); ?></strong>
+                                                <strong>TOTAL EXCL. VAT (ITEMS)</strong>
                                             </td>
                                             <td colspan="2" class="text-right" style="padding:10px; border:1px solid #000;">
-                                                <strong><?php echo number_format($addt_chrg['addt_charges_amt'], $decimal_point); ?></strong>
+                                                <strong><?php echo number_format($total_net_amount, $decimal_point); ?></strong>
                                             </td>
                                         </tr>
-                                    <?php endforeach; ?>
+                                        <?php foreach ($addt_chrg_list as $addt_chrg): ?>
+                                            <tr class="items-table">
+                                                <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
+                                                    <strong><?php echo htmlspecialchars($addt_chrg['addt_charges_type_name']); ?></strong>
+                                                </td>
+                                                <td colspan="2" class="text-right" style="padding:10px; border:1px solid #000;">
+                                                    <strong><?php echo number_format($addt_chrg['addt_charges_amt'], $decimal_point); ?></strong>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
 
-                                    <?php if (isset($record['is_discount']) && $record['is_discount'] == 1 && $record['discount'] > 0): ?>
+                                    <?php if ($has_discount): ?>
                                         <tr class="items-table">
                                             <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
                                                 <strong>TOTAL</strong>
                                             </td>
                                             <td colspan="2" class="text-right" style="padding:10px; border:1px solid #000;">
-                                                <strong><?php echo number_format($grand_total, $decimal_point); ?></strong>
+                                                <strong><?php echo number_format($subtotal_before_discount, $decimal_point); ?></strong>
                                             </td>
                                         </tr>
                                         <tr class="items-table">
@@ -793,36 +808,34 @@
                                                 <strong>Discount</strong>
                                             </td>
                                             <td colspan="2" class="text-right" style="padding:10px; border:1px solid #000;">
-                                                <strong><?php echo number_format($record['discount'], $decimal_point); ?></strong>
+                                                <strong><?php echo number_format($discount_amount, $decimal_point); ?></strong>
                                             </td>
                                         </tr>
-                                        <?php
-                                        $grand_total -= floatval($record['discount']);
-                                        ?>
                                         <tr class="items-table">
                                             <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
                                                 <strong>TOTAL EXCL. VAT</strong>
                                             </td>
                                             <td colspan="2" class="text-right" style="padding:10px; border:1px solid #000;">
-                                                <strong><?php echo number_format($grand_total, $decimal_point); ?></strong>
+                                                <strong><?php echo number_format($subtotal_after_discount, $decimal_point); ?></strong>
                                             </td>
                                         </tr>
-                                    <?php elseif (!empty($addt_chrg_list)): ?>
-                                        <tr class="items-table">
+                                    <?php else: ?>
+                                        <tr>
                                             <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
                                                 <strong>TOTAL EXCL. VAT</strong>
                                             </td>
                                             <td colspan="2" class="text-right" style="padding:10px; border:1px solid #000;">
-                                                <strong><?php echo number_format($grand_total, $decimal_point); ?></strong>
+                                                <strong><?php echo number_format($subtotal_before_discount, $decimal_point); ?></strong>
                                             </td>
                                         </tr>
                                     <?php endif; ?>
+
                                     <tr>
                                         <td colspan="5" class="text-right" style="padding:10px; border:1px solid #000;">
-                                            <strong>VAT Amount</strong>
+                                            <strong><?php echo htmlspecialchars($vat_label); ?></strong>
                                         </td>
                                         <td colspan="2" class="text-right" style="padding:10px; border:1px solid #000;">
-                                            <strong><?php echo number_format(($total_vat_amount), $decimal_point); ?></strong>
+                                            <strong><?php echo number_format($final_vat_amount, $decimal_point); ?></strong>
                                         </td>
                                     </tr>
                                     <tr>
@@ -832,7 +845,7 @@
                                         </td>
                                         <td colspan="2" class="text-right"
                                             style="padding:12px; border:1px solid #000; font-size:11pt;">
-                                            <strong><?php echo number_format(($grand_total + $total_vat_amount), $decimal_point); ?></strong>
+                                            <strong><?php echo number_format($final_grand_total, $decimal_point); ?></strong>
                                         </td>
                                     </tr>
                                 <?php endif; ?>
@@ -840,7 +853,7 @@
                         </table>
 
                         <!-- Total in Words -->
-                        <?php $amount_in_words = convertAmountToWords(($grand_total + $total_vat_amount), $currency_code, $decimal_point); ?>
+                        <?php $amount_in_words = convertAmountToWords($final_grand_total, $currency_code, $decimal_point); ?>
                         <div class="amount-in-words">
                             <strong>Total <?php echo htmlspecialchars($currency_code); ?>:</strong>
                             <?php echo $amount_in_words; ?> Only.

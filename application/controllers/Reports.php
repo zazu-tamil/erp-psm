@@ -4309,11 +4309,20 @@ class Reports extends CI_Controller
             $item_vat = (float) ($row['item_vat'] ?? 0);
             $total_addt_vat = (float) ($row['total_addt_vat'] ?? 0);
 
-            // TOTAL EXCL. VAT = Item Total - Discount + Addt Charges
-            $total_excl_vat = $item_total - $total_discount + $total_addt_chrg;
+            // Subtotal before discount
+            $subtotal_before_discount = $item_total + $total_addt_chrg;
+            $vat_before_discount = $item_vat + $total_addt_vat;
 
-            // Total Vat Amt = Item VAT + Addt Charges VAT
-            $total_vat_amt = $item_vat + $total_addt_vat;
+            // TOTAL EXCL. VAT (Net Taxable Amount)
+            $total_excl_vat = max(0, $subtotal_before_discount - $total_discount);
+
+            // VAT calculated after discount
+            if ($total_discount > 0 && $subtotal_before_discount > 0) {
+                $discount_ratio = $total_discount / $subtotal_before_discount;
+                $total_vat_amt = round($vat_before_discount * (1 - $discount_ratio), (int) ($row['decimal_point'] ?? 3));
+            } else {
+                $total_vat_amt = round($vat_before_discount, (int) ($row['decimal_point'] ?? 3));
+            }
 
             // Grand Total Amt = TOTAL EXCL. VAT + Total Vat Amt
             $grand_total_amt = $total_excl_vat + $total_vat_amt;
