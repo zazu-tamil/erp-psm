@@ -4607,18 +4607,6 @@ class Accounts extends CI_Controller
 
         $data['js'] = 'accounts/cash-in-out-statement.inc';
 
-        if (isset($_POST['srch_from_date'])) {
-            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
-            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
-            $data['srch_bank_cash'] = $srch_bank_cash = $this->input->post('srch_bank_cash');
-            $data['srch_payment_type'] = $srch_payment_type = $this->input->post('srch_payment_type');
-        } else {
-            $data['srch_from_date'] = $srch_from_date = date('Y-m-') . '01';
-            $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
-            $data['srch_bank_cash'] = $srch_bank_cash = 'all';
-            $data['srch_payment_type'] = $srch_payment_type = '';
-        }
-
         // Get bank list for filter dropdown
         $sql_banks = "SELECT bank_id, bank_name, branch FROM company_bank_info WHERE status = 'Active' ORDER BY bank_name ASC";
         $data['bank_list'] = $this->db->query($sql_banks)->result_array();
@@ -4631,6 +4619,72 @@ class Accounts extends CI_Controller
             $bank_cash_options['bank_' . $bank['bank_id']] = $bank['bank_name'] . ' (' . $bank['branch'] . ')';
         }
         $data['bank_cash_options'] = $bank_cash_options;
+
+        // Fetch opening dates for banks from cb_opening_balance_info
+        $sql_all_bank_ops = "
+            SELECT bank_id, MIN(opening_date) AS op_date
+            FROM cb_opening_balance_info
+            WHERE (status != 'Delete' OR status IS NULL) AND ac_type = 'Bank'
+            GROUP BY bank_id
+        ";
+        $all_bank_ops = $this->db->query($sql_all_bank_ops)->result_array();
+        $bank_op_dates = array();
+        $min_global_op_date = null;
+        $general_op_date = null;
+
+        foreach ($all_bank_ops as $bop) {
+            if (!empty($bop['op_date'])) {
+                if (empty($bop['bank_id'])) {
+                    $general_op_date = $bop['op_date'];
+                } else {
+                    $bank_op_dates['bank_' . $bop['bank_id']] = $bop['op_date'];
+                }
+                if ($min_global_op_date === null || $bop['op_date'] < $min_global_op_date) {
+                    $min_global_op_date = $bop['op_date'];
+                }
+            }
+        }
+        $bank_op_dates['all'] = $min_global_op_date;
+        $bank_op_dates['general'] = $general_op_date;
+
+        $srch_bank_cash = $this->input->post('srch_bank_cash') ?: 'all';
+        $srch_payment_type = $this->input->post('srch_payment_type') ?: '';
+
+        // Determine relevant opening balance date based on selected bank
+        if ($srch_bank_cash === 'all') {
+            $op_date = $bank_op_dates['all'] ?? null;
+        } else {
+            $op_date = $bank_op_dates[$srch_bank_cash] ?? $bank_op_dates['general'] ?? $bank_op_dates['all'] ?? null;
+        }
+
+        if (isset($_POST['srch_from_date'])) {
+            $srch_from_date = $this->input->post('srch_from_date');
+            $srch_to_date = $this->input->post('srch_to_date');
+        } else {
+            // Default to opening date if configured so report displays from opening balance date onwards
+            $srch_from_date = !empty($op_date) ? $op_date : (date('Y-m-') . '01');
+            $srch_to_date = date('Y-m-d');
+        }
+
+        // Enforce that from_date cannot be earlier than opening_date
+        if (!empty($op_date)) {
+            if (empty($srch_from_date) || $srch_from_date < $op_date) {
+                $srch_from_date = $op_date;
+            }
+            if (!empty($srch_to_date) && $srch_to_date < $op_date) {
+                $srch_to_date = $op_date;
+            }
+        }
+        if (!empty($srch_from_date) && !empty($srch_to_date) && $srch_to_date < $srch_from_date) {
+            $srch_to_date = $srch_from_date;
+        }
+
+        $data['srch_from_date'] = $srch_from_date;
+        $data['srch_to_date'] = $srch_to_date;
+        $data['srch_bank_cash'] = $srch_bank_cash;
+        $data['srch_payment_type'] = $srch_payment_type;
+        $data['op_date'] = $op_date;
+        $data['bank_op_dates'] = $bank_op_dates;
 
         // Build precise table-specific where clauses for filter (Bank Only)
         $w_tr = "tr.status = 'Active' AND tr.receipt_mode = 'Bank'";
@@ -4686,7 +4740,12 @@ class Accounts extends CI_Controller
                       WHERE $w_op";
         $cb_op = (float) $this->db->query($sql_cb_op)->row('op_amount');
 
-        // B. Combined transactions before srch_from_date
+        // B. Combined transactions before srch_from_date (only transactions on or after opening_date)
+        $w_date_before = "t.tr_date < '" . $this->db->escape_str($srch_from_date) . "'";
+        if (!empty($op_date)) {
+            $w_date_before = "t.tr_date >= '" . $this->db->escape_str($op_date) . "' AND " . $w_date_before;
+        }
+
         $sql_tr_before = "
             SELECT COALESCE(SUM(amount_in), 0) AS total_in, COALESCE(SUM(amount_out), 0) AS total_out
             FROM (
@@ -4708,7 +4767,7 @@ class Accounts extends CI_Controller
                 UNION ALL
                 SELECT entry_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM cb_contra_entry_info ce WHERE ce.status = 'Active' AND ce.from_ac_type = 'Bank' AND $w_ce_from
             ) t
-            WHERE t.tr_date < '" . $this->db->escape_str($srch_from_date) . "'
+            WHERE $w_date_before
         ";
         $tr_before_res = $this->db->query($sql_tr_before)->row_array();
         $total_tr_in_before = (float) $tr_before_res['total_in'];

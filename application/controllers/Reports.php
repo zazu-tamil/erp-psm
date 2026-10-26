@@ -4452,7 +4452,7 @@ class Reports extends CI_Controller
 
         // Fetch active vendors/suppliers for dropdown
         $sql = "
-            SELECT vendor_id, vendor_name 
+            SELECT vendor_id, vendor_name l
             FROM vendor_info 
             WHERE status = 'Active' 
             ORDER BY vendor_name ASC";
