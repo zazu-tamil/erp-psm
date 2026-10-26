@@ -7453,13 +7453,80 @@ ORDER BY
 
         $having = "1=1";
         if ($srch_status === 'Pending') {
-            $having .= " AND balance_amount > 0.001";
+            $having .= " AND (balance_amount > 0.001 OR (f.bill_type = 'Advance Payment' AND paid_amount > 0.001))";
         } elseif ($srch_status === 'Paid') {
-            $having .= " AND balance_amount <= 0.001";
+            $having .= " AND balance_amount <= 0.001 AND f.bill_type != 'Advance Payment'";
         } elseif ($srch_status === 'Partial') {
             $having .= " AND paid_amount > 0.001 AND balance_amount > 0.001";
         } elseif ($srch_status === 'Unpaid') {
             $having .= " AND paid_amount <= 0.001";
+        }
+
+        $has_cap = $this->db->table_exists('customer_advance_payment_info');
+        $cap_union = "";
+        $adv_join = "";
+        $calc_paid = "IFNULL(r.paid_amount, 0)";
+
+        if ($has_cap) {
+            $calc_paid = "(IFNULL(r.paid_amount, 0) + IFNULL(adv.advance_amount, 0))";
+            $cap_union = "
+                UNION ALL
+
+                -- 3. Unmapped Customer Advance Payments
+                SELECT
+                    a.adv_payment_id AS tender_enq_invoice_id,
+                    a.tender_enquiry_id,
+                    a.adv_payment_date AS invoice_date,
+                    CONCAT('ADV-', LPAD(a.adv_payment_id, 4, '0')) AS invoice_no,
+                    a.customer_id,
+                    b.customer_name,
+                    0 AS tax_amount,
+                    0.000 AS total_amount,
+                    'Advance Payment' AS bill_type,
+                    'BHD' AS currency_code,
+                    3 AS decimal_point
+                FROM customer_advance_payment_info a
+                LEFT JOIN customer_info b ON a.customer_id = b.customer_id AND b.status = 'Active'
+                WHERE a.status = 'Active'
+                AND (a.invoice_ids IS NULL OR TRIM(a.invoice_ids) = '')
+                AND (a.invoice_no IS NULL OR TRIM(a.invoice_no) = '')
+            ";
+
+            $adv_join = "
+            LEFT JOIN (
+                SELECT 
+                    tender_enq_invoice_id, 
+                    bill_type, 
+                    SUM(adv_amount) AS advance_amount
+                FROM (
+                    -- Invoices mapped by invoice_ids or invoice_no
+                    SELECT 
+                        teii.tender_enq_invoice_id,
+                        'Invoice' AS bill_type,
+                        (cap.adv_payment_amt / GREATEST(1, (LENGTH(REPLACE(cap.invoice_ids, ' ', '')) - LENGTH(REPLACE(REPLACE(cap.invoice_ids, ' ', ''), ',', '')) + 1))) AS adv_amount
+                    FROM customer_advance_payment_info cap
+                    JOIN tender_enq_invoice_info teii 
+                        ON (
+                            (cap.invoice_ids IS NOT NULL AND cap.invoice_ids != '' AND FIND_IN_SET(teii.tender_enq_invoice_id, REPLACE(cap.invoice_ids, ' ', '')) > 0)
+                            OR ((cap.invoice_ids IS NULL OR cap.invoice_ids = '') AND cap.invoice_no IS NOT NULL AND cap.invoice_no != '' AND FIND_IN_SET(TRIM(teii.invoice_no), REPLACE(cap.invoice_no, ' ', '')) > 0)
+                        )
+                    WHERE cap.status = 'Active' AND teii.status = 'Active'
+
+                    UNION ALL
+
+                    -- Unmapped Advance Payments
+                    SELECT 
+                        cap.adv_payment_id AS tender_enq_invoice_id,
+                        'Advance Payment' AS bill_type,
+                        cap.adv_payment_amt AS adv_amount
+                    FROM customer_advance_payment_info cap
+                    WHERE cap.status = 'Active'
+                    AND (cap.invoice_ids IS NULL OR TRIM(cap.invoice_ids) = '')
+                    AND (cap.invoice_no IS NULL OR TRIM(cap.invoice_no) = '')
+                ) AS adv_combined
+                GROUP BY tender_enq_invoice_id, bill_type
+            ) AS adv ON adv.tender_enq_invoice_id = f.tender_enq_invoice_id AND adv.bill_type = f.bill_type
+            ";
         }
 
         $sql = "
@@ -7476,11 +7543,11 @@ ORDER BY
                 f.currency_code,
                 f.decimal_point,
                 get_tender_info(f.tender_enquiry_id) as tender_details,
-                IFNULL(r.paid_amount, 0) AS paid_amount,
-                ROUND((f.total_amount - IFNULL(r.paid_amount, 0)), f.decimal_point) AS balance_amount,
+                $calc_paid AS paid_amount,
+                ROUND((f.total_amount - $calc_paid), f.decimal_point) AS balance_amount,
                 CASE 
-                    WHEN (f.total_amount - IFNULL(r.paid_amount, 0)) <= 0.001 THEN 'Paid'
-                    WHEN IFNULL(r.paid_amount, 0) > 0.001 THEN 'Partial'
+                    WHEN (f.total_amount - $calc_paid) <= 0.001 THEN 'Paid'
+                    WHEN $calc_paid > 0.001 THEN 'Partial'
                     ELSE 'Pending'
                 END AS payment_status
             FROM (
@@ -7522,6 +7589,7 @@ ORDER BY
                 FROM customer_opening_balance_info AS a
                 LEFT JOIN customer_info AS b ON a.customer_id = b.customer_id AND b.status = 'Active'
                 WHERE a.balance_type = 'DR'
+                $cap_union
             ) AS f
 
             LEFT JOIN (
@@ -7533,6 +7601,7 @@ ORDER BY
                 WHERE status != 'Delete' AND status != 'Deleted'
                 GROUP BY tender_enq_invoice_id, bill_type
             ) AS r ON r.tender_enq_invoice_id = f.tender_enq_invoice_id AND r.bill_type = f.bill_type
+            $adv_join
 
             WHERE $where
             HAVING $having

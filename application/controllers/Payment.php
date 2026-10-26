@@ -1862,8 +1862,12 @@ class Payment extends CI_Controller
                 $cin_in = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM cb_cash_inward_info WHERE status = 'Active' AND ac_type = 'Bank' AND bank_id = $bank_id AND inward_date < '$esc_date'")->row('amt');
                 $pt_in = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM petty_cash_transactions WHERE status != 'Deleted' AND ac_type = 'Bank' AND bank_id = $bank_id AND transaction_type IN ('Inward', 'Income') AND transaction_date < '$esc_date'")->row('amt');
                 $contra_in = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM cb_contra_entry_info WHERE status = 'Active' AND to_ac_type = 'Bank' AND to_bank_id = $bank_id AND entry_date < '$esc_date'")->row('amt');
+                $cap_in = 0.0;
+                if ($this->db->table_exists('customer_advance_payment_info')) {
+                    $cap_in = (float) $this->db->query("SELECT COALESCE(SUM(adv_payment_amt), 0) AS amt FROM customer_advance_payment_info WHERE status = 'Active' AND ac_type_opt = 'Bank' AND bank_id = $bank_id AND adv_payment_date < '$esc_date'")->row('amt');
+                }
 
-                $total_inward = $tr_in + $cin_in + $pt_in + $contra_in;
+                $total_inward = $tr_in + $cin_in + $pt_in + $contra_in + $cap_in;
 
                 // 3. Outwards before payment_date
                 $w_vp_exclude = $exclude_payment_id ? " AND vendor_payment_id != $exclude_payment_id" : "";
@@ -1923,8 +1927,13 @@ class Payment extends CI_Controller
             $cin_in = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM cb_cash_inward_info WHERE status = 'Active' AND ac_type = 'Cash' $w_cat_cin AND inward_date < '$esc_date'")->row('amt');
             $pt_in = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM petty_cash_transactions WHERE status != 'Deleted' AND ac_type = 'Cash' $w_cat_pt AND transaction_type IN ('Inward', 'Income') AND transaction_date < '$esc_date'")->row('amt');
             $contra_in = (float) $this->db->query("SELECT COALESCE(SUM(amount), 0) AS amt FROM cb_contra_entry_info WHERE status = 'Active' AND to_ac_type = 'Cash' $w_cat_ce_to AND entry_date < '$esc_date'")->row('amt');
+            $cap_in = 0.0;
+            if ($this->db->table_exists('customer_advance_payment_info')) {
+                $w_cat_cap = ($cash_category_id > 0) ? " AND cash_category_id = $cash_category_id" : "";
+                $cap_in = (float) $this->db->query("SELECT COALESCE(SUM(adv_payment_amt), 0) AS amt FROM customer_advance_payment_info WHERE status = 'Active' AND ac_type_opt = 'Cash' $w_cat_cap AND adv_payment_date < '$esc_date'")->row('amt');
+            }
 
-            $total_inward = $tr_in + $cin_in + $pt_in + $contra_in;
+            $total_inward = $tr_in + $cin_in + $pt_in + $contra_in + $cap_in;
 
             // 3. Outwards before payment_date
             $w_vp_exclude = $exclude_payment_id ? " AND vendor_payment_id != $exclude_payment_id" : "";
@@ -2173,5 +2182,464 @@ class Payment extends CI_Controller
         }
 
         $this->load->view('page/payment/voucher-print', $data);
+    }
+
+    public function customer_adv_payment_list()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+            echo "<h3 style='color:red;'>Permission Denied</h3>";
+            exit;
+        }
+
+        // Dynamically ensure customer_advance_payment_info table exists
+        if (!$this->db->table_exists('customer_advance_payment_info')) {
+            $this->db->query("CREATE TABLE IF NOT EXISTS `customer_advance_payment_info` (
+                `adv_payment_id` INT(11) NOT NULL AUTO_INCREMENT,
+                `ac_type_opt` VARCHAR(50) NULL DEFAULT 'Bank',
+                `bank_id` INT(11) NULL DEFAULT NULL,
+                `cash_category_id` INT(11) NULL DEFAULT NULL,
+                `tender_enquiry_id` INT(11) NULL DEFAULT NULL,
+                `customer_id` INT(11) NULL DEFAULT NULL,
+                `tender_po_id` INT(11) NULL DEFAULT NULL,
+                `invoice_ids` TEXT NULL DEFAULT NULL,
+                `invoice_no` VARCHAR(255) NULL DEFAULT NULL,
+                `adv_payment_date` DATE NULL DEFAULT NULL,
+                `adv_payment_amt` DECIMAL(15,3) NULL DEFAULT '0.000',
+                `remarks` TEXT NULL DEFAULT NULL,
+                `status` ENUM('Active','Inactive','Delete') NULL DEFAULT 'Active',
+                `created_by` INT(11) NULL DEFAULT NULL,
+                `created_date` DATETIME NULL DEFAULT NULL,
+                `updated_by` INT(11) NULL DEFAULT NULL,
+                `updated_date` DATETIME NULL DEFAULT NULL,
+                PRIMARY KEY (`adv_payment_id`),
+                INDEX (`customer_id`),
+                INDEX (`tender_enquiry_id`),
+                INDEX (`adv_payment_date`),
+                INDEX (`status`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;");
+        }
+
+        // Ensure menu_info and role_permission exist for customer-adv-payment
+        if ($this->db->table_exists('menu_info')) {
+            $m_chk = $this->db->get_where('menu_info', ['menu_slug' => 'customer-adv-payment'])->row_array();
+            if (!$m_chk) {
+                $tender_parent = $this->db->select('menu_id')->where(['menu_title' => 'Tender', 'parent_id' => 0, 'status !=' => 'Delete'])->get('menu_info')->row('menu_id');
+                $parent_id = !empty($tender_parent) ? (int)$tender_parent : 7;
+                $this->db->insert('menu_info', [
+                    'parent_id' => $parent_id,
+                    'menu_title' => 'Customer Advance Payment',
+                    'menu_slug' => 'customer-adv-payment',
+                    'menu_icon' => 'fa fa-list',
+                    'is_header' => 0,
+                    'sort_order' => 20,
+                    'status' => 'Active'
+                ]);
+                $new_menu_id = $this->db->insert_id();
+
+                if ($this->db->table_exists('role_permission') && $this->db->table_exists('role_info') && $new_menu_id) {
+                    $roles = $this->db->select('role_id')->where('status !=', 'Delete')->get('role_info')->result_array();
+                    foreach ($roles as $r) {
+                        $exists = $this->db->get_where('role_permission', ['role_id' => $r['role_id'], 'menu_id' => $new_menu_id])->num_rows();
+                        if (!$exists) {
+                            $this->db->insert('role_permission', [
+                                'role_id' => $r['role_id'],
+                                'menu_id' => $new_menu_id,
+                                'can_view' => 1,
+                                'can_add' => 1,
+                                'can_edit' => 1,
+                                'can_delete' => 1
+                            ]);
+                        }
+                    }
+                }
+            }
+        }
+
+        $data['js'] = 'payment/customer-advance-payment.inc';
+        $data['title'] = 'Customer Advance Payment';
+
+        if ($this->input->post('mode') == 'Add') {
+            $ac_type_opt = $this->input->post('ac_type_opt') ?: 'Bank';
+            $bank_id = ($ac_type_opt == 'Bank') ? ($this->input->post('bank_id') ?: null) : null;
+            $cash_category_id = ($ac_type_opt == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null;
+
+            $invoice_ids = $this->input->post('invoice_ids');
+            $invoice_ids_str = '';
+            $invoice_no_str = '';
+            if (!empty($invoice_ids) && is_array($invoice_ids)) {
+                $clean_ids = array_filter(array_map('intval', $invoice_ids));
+                if (!empty($clean_ids)) {
+                    $invoice_ids_str = implode(',', $clean_ids);
+                    $invoices_res = $this->db->select('invoice_no')
+                        ->from('tender_enq_invoice_info')
+                        ->where_in('tender_enq_invoice_id', $clean_ids)
+                        ->get()
+                        ->result_array();
+                    $invoice_nos = array_column($invoices_res, 'invoice_no');
+                    $invoice_no_str = implode(', ', $invoice_nos);
+                }
+            }
+
+            $ins = array(
+                'ac_type_opt' => $ac_type_opt,
+                'bank_id' => $bank_id,
+                'cash_category_id' => $cash_category_id,
+                'tender_enquiry_id' => $this->input->post('tender_enquiry_id') ?: null,
+                'customer_id' => $this->input->post('customer_id'),
+                'tender_po_id' => $this->input->post('tender_po_id') ?: null,
+                'invoice_ids' => !empty($invoice_ids_str) ? $invoice_ids_str : null,
+                'invoice_no' => !empty($invoice_no_str) ? $invoice_no_str : null,
+                'adv_payment_date' => $this->input->post('adv_payment_date') ? date('Y-m-d', strtotime($this->input->post('adv_payment_date'))) : null,
+                'adv_payment_amt' => $this->input->post('adv_payment_amt'),
+                'remarks' => $this->input->post('remarks') ?: null,
+                'status' => $this->input->post('status') ? $this->input->post('status') : 'Active',
+                'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'created_date' => date('Y-m-d H:i:s'),
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            );
+
+            $this->db->insert('customer_advance_payment_info', $ins);
+            $this->session->set_flashdata('success', 'Customer Advance Payment added successfully.');
+            redirect('customer-adv-payment');
+        }
+
+        if ($this->input->post('mode') == 'Edit') {
+            $ac_type_opt = $this->input->post('ac_type_opt') ?: 'Bank';
+            $bank_id = ($ac_type_opt == 'Bank') ? ($this->input->post('bank_id') ?: null) : null;
+            $cash_category_id = ($ac_type_opt == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null;
+
+            $invoice_ids = $this->input->post('invoice_ids');
+            $invoice_ids_str = '';
+            $invoice_no_str = '';
+            if (!empty($invoice_ids) && is_array($invoice_ids)) {
+                $clean_ids = array_filter(array_map('intval', $invoice_ids));
+                if (!empty($clean_ids)) {
+                    $invoice_ids_str = implode(',', $clean_ids);
+                    $invoices_res = $this->db->select('invoice_no')
+                        ->from('tender_enq_invoice_info')
+                        ->where_in('tender_enq_invoice_id', $clean_ids)
+                        ->get()
+                        ->result_array();
+                    $invoice_nos = array_column($invoices_res, 'invoice_no');
+                    $invoice_no_str = implode(', ', $invoice_nos);
+                }
+            }
+
+            $upd = array(
+                'ac_type_opt' => $ac_type_opt,
+                'bank_id' => $bank_id,
+                'cash_category_id' => $cash_category_id,
+                'tender_enquiry_id' => $this->input->post('tender_enquiry_id') ?: null,
+                'customer_id' => $this->input->post('customer_id'),
+                'tender_po_id' => $this->input->post('tender_po_id') ?: null,
+                'invoice_ids' => !empty($invoice_ids_str) ? $invoice_ids_str : null,
+                'invoice_no' => !empty($invoice_no_str) ? $invoice_no_str : null,
+                'adv_payment_date' => $this->input->post('adv_payment_date') ? date('Y-m-d', strtotime($this->input->post('adv_payment_date'))) : null,
+                'adv_payment_amt' => $this->input->post('adv_payment_amt'),
+                'remarks' => $this->input->post('remarks') ?: null,
+                'status' => $this->input->post('status') ? $this->input->post('status') : 'Active',
+                'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
+                'updated_date' => date('Y-m-d H:i:s')
+            );
+
+            $this->db->where('adv_payment_id', $this->input->post('adv_payment_id'));
+            $this->db->update('customer_advance_payment_info', $upd);
+            $this->session->set_flashdata('success', 'Customer Advance Payment updated successfully.');
+            redirect('customer-adv-payment');
+        }
+
+        if ($this->input->post('mode') == 'Delete') {
+            $id = $this->input->post('del_id');
+            $this->db->where('adv_payment_id', $id)->update('customer_advance_payment_info', ['status' => 'Delete']);
+            echo json_encode(['status' => true]);
+            exit;
+        }
+
+        $where = "1=1";
+
+        if ($this->uri->segment(2) == 'clear_filter') {
+            $this->session->unset_userdata('srch_cust_adv_customer_id');
+            $this->session->unset_userdata('srch_cust_adv_from_date');
+            $this->session->unset_userdata('srch_cust_adv_to_date');
+            redirect('customer-adv-payment');
+        }
+
+        // Date Filter
+        if ($this->input->post('srch_from_date') !== null) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $this->session->set_userdata('srch_cust_adv_from_date', $srch_from_date);
+            $this->session->set_userdata('srch_cust_adv_to_date', $srch_to_date);
+        } elseif ($this->session->userdata('srch_cust_adv_from_date')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_cust_adv_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_cust_adv_to_date');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = '';
+            $data['srch_to_date'] = $srch_to_date = '';
+        }
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $where .= " AND a.adv_payment_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'";
+        }
+
+        if ($this->input->post('srch_customer_id') !== null) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->input->post('srch_customer_id');
+            $this->session->set_userdata('srch_cust_adv_customer_id', $srch_customer_id);
+        } elseif ($this->session->userdata('srch_cust_adv_customer_id')) {
+            $data['srch_customer_id'] = $srch_customer_id = $this->session->userdata('srch_cust_adv_customer_id');
+        } else {
+            $data['srch_customer_id'] = $srch_customer_id = '';
+        }
+        if (!empty($srch_customer_id)) {
+            $where .= " AND a.customer_id = '" . $this->db->escape_str($srch_customer_id) . "'";
+        }
+
+        $this->load->library('pagination');
+
+        $this->db->where('status != ', 'Delete');
+        if (!empty($srch_customer_id)) {
+            $this->db->where('customer_id', $srch_customer_id);
+        }
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $this->db->where('adv_payment_date >=', $srch_from_date);
+            $this->db->where('adv_payment_date <=', $srch_to_date);
+        }
+        $this->db->from('customer_advance_payment_info as a');
+        $data['total_records'] = $cnt = $this->db->count_all_results();
+
+        $data['sno'] = $this->uri->segment(2, 0);
+
+        $config['base_url'] = site_url('customer-adv-payment');
+        $config['total_rows'] = $cnt;
+        $config['per_page'] = 50;
+        $config['uri_segment'] = 2;
+        $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a href="#" class="page-link">';
+        $config['cur_tag_close'] = '<span class="sr-only">(current)</span></a></li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = "Prev";
+        $config['next_link'] = "Next";
+        $this->pagination->initialize($config);
+
+        $sql = "
+            SELECT 
+                a.*,  
+                c.customer_name,
+                po.customer_po_no as po_no,
+                get_tender_info(a.tender_enquiry_id) as tender_info,
+                b.bank_name,
+                cc.category_name
+            FROM customer_advance_payment_info as a   
+            LEFT JOIN company_bank_info as b on b.bank_id = a.bank_id and b.status = 'Active'
+            LEFT JOIN cash_category as cc on cc.cash_category_id = a.cash_category_id and cc.status = 'Active'
+            LEFT JOIN customer_info as c on c.customer_id = a.customer_id and c.status = 'Active' 
+            LEFT JOIN customer_tender_po_info as po on po.tender_po_id = a.tender_po_id
+            WHERE a.status != 'Delete' 
+            AND $where   
+            ORDER BY a.adv_payment_id DESC
+            LIMIT " . (int)$this->uri->segment(2, 0) . "," . (int)$config['per_page'] . "                
+        ";
+
+        $query = $this->db->query($sql);
+        $raw_records = $query->result_array();
+
+        $all_inv_ids = [];
+        foreach ($raw_records as $r) {
+            if (!empty($r['invoice_ids'])) {
+                foreach (explode(',', $r['invoice_ids']) as $iid) {
+                    $iid = (int) trim($iid);
+                    if ($iid > 0) {
+                        $all_inv_ids[$iid] = $iid;
+                    }
+                }
+            }
+        }
+
+        $inv_map = [];
+        if (!empty($all_inv_ids)) {
+            $inv_rows = $this->db->select('tender_enq_invoice_id, invoice_no')
+                ->from('tender_enq_invoice_info')
+                ->where_in('tender_enq_invoice_id', array_values($all_inv_ids))
+                ->get()
+                ->result_array();
+            foreach ($inv_rows as $ir) {
+                $inv_map[$ir['tender_enq_invoice_id']] = $ir['invoice_no'];
+            }
+        }
+
+        $data['record_list'] = array();
+        foreach ($raw_records as $row) {
+            if (empty($row['invoice_no']) && !empty($row['invoice_ids'])) {
+                $mapped = [];
+                foreach (explode(',', $row['invoice_ids']) as $iid) {
+                    $iid = (int) trim($iid);
+                    if (isset($inv_map[$iid])) {
+                        $mapped[] = $inv_map[$iid];
+                    }
+                }
+                $row['invoice_no'] = implode(', ', $mapped);
+            }
+            $data['record_list'][] = $row;
+        }
+
+        // Dropdown: Customers
+        $sql = "
+            SELECT customer_id, customer_name 
+            FROM customer_info 
+            WHERE status = 'Active' 
+            ORDER BY customer_name ASC";
+        $query = $this->db->query($sql);
+        $data['customer_opt'] = ['' => 'Select Customer'];
+        foreach ($query->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
+        // Dropdown: Tender Enquiries
+        $sql = "
+            SELECT 
+                a.tender_enquiry_id, 
+                get_tender_info(a.tender_enquiry_id) as tender_details
+            FROM tender_enquiry_info AS a 
+            WHERE a.status = 'Active'  
+            ORDER BY a.tender_enquiry_id DESC
+        ";
+        $query = $this->db->query($sql);
+        $data['tender_enquiry_opt'] = ['' => 'Select Tender Enquiry'];
+        foreach ($query->result_array() as $row) {
+            $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_details'];
+        }
+
+        // Dropdown: Banks
+        $data['bank_opt'] = [];
+        $sql = "
+            SELECT bank_id, bank_name
+            FROM company_bank_info
+            WHERE status = 'Active'
+            ORDER BY bank_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['bank_opt'][$row['bank_id']] = $row['bank_name'];
+        }
+
+        // Dropdown: Cash Categories
+        $data['cash_categories_opt'] = [];
+        $sql = "
+            SELECT cash_category_id, category_name
+            FROM cash_category
+            WHERE status = 'Active'
+            AND category_type IN ('Inward', 'Both', 'Cash')
+            ORDER BY category_name ASC
+        ";
+        $query = $this->db->query($sql);
+        foreach ($query->result_array() as $row) {
+            $data['cash_categories_opt'][$row['cash_category_id']] = $row['category_name'];
+        }
+
+        $data['ac_type_opt_list'] = [
+            '' => 'Select Account Type',
+            'Bank' => 'Bank',
+            'Cash' => 'Cash'
+        ];
+
+        $data['pagination'] = $this->pagination->create_links();
+
+        $this->load->view('page/payment/customer-adv-payment-list', $data);
+    }
+
+    public function get_customer_by_tender_id_ajax()
+    {
+        $tender_enquiry_id = $this->input->post('tender_enquiry_id');
+        $sql = "
+            SELECT DISTINCT c.customer_id, c.customer_name 
+            FROM tender_enquiry_info te
+            JOIN customer_info c ON te.customer_id = c.customer_id
+            WHERE te.tender_enquiry_id = ? AND c.status = 'Active'
+        ";
+        $query = $this->db->query($sql, [$tender_enquiry_id]);
+        $customer = $query->row_array();
+
+        echo json_encode($customer ?: null);
+        exit;
+    }
+
+    public function get_customer_po_by_customer_ajax()
+    {
+        $tender_enquiry_id = $this->input->post('tender_enquiry_id');
+        $customer_id = $this->input->post('customer_id');
+
+        $this->db->select('po.tender_po_id, po.customer_po_no as po_no');
+        $this->db->from('customer_tender_po_info po');
+        if (!empty($tender_enquiry_id)) {
+            $this->db->where('po.tender_enquiry_id', $tender_enquiry_id);
+        } elseif (!empty($customer_id)) {
+            $this->db->join('tender_enquiry_info te', 'te.tender_enquiry_id = po.tender_enquiry_id');
+            $this->db->where('te.customer_id', $customer_id);
+        }
+        $this->db->where('po.status !=', 'Delete');
+        $query = $this->db->get();
+        $pos = $query->result_array();
+
+        echo json_encode($pos);
+        exit;
+    }
+
+    public function get_customer_invoices_ajax()
+    {
+        $customer_id = $this->input->post('customer_id');
+        $tender_enquiry_id = $this->input->post('tender_enquiry_id');
+        $tender_po_id = $this->input->post('tender_po_id');
+        $selected_invoices = $this->input->post('selected_invoices');
+
+        if (empty($customer_id) && empty($selected_invoices)) {
+            echo json_encode([]);
+            exit;
+        }
+
+        $this->db->select('tender_enq_invoice_id, invoice_no, invoice_date, total_amount, tender_po_id, tender_enquiry_id');
+        $this->db->from('tender_enq_invoice_info');
+
+        $this->db->group_start();
+        $this->db->where('status !=', 'Delete');
+        if (!empty($customer_id)) {
+            $this->db->where('customer_id', $customer_id);
+        }
+        if (!empty($tender_po_id)) {
+            $this->db->where('tender_po_id', $tender_po_id);
+        } elseif (!empty($tender_enquiry_id)) {
+            $this->db->group_start();
+            $this->db->where('tender_enquiry_id', $tender_enquiry_id);
+            $this->db->or_where('tender_enquiry_id', 0);
+            $this->db->or_where('tender_enquiry_id IS NULL');
+            $this->db->group_end();
+        }
+        $this->db->group_end();
+
+        if (!empty($selected_invoices)) {
+            $selArr = array_filter(array_map('intval', explode(',', $selected_invoices)));
+            if (!empty($selArr)) {
+                $this->db->or_where_in('tender_enq_invoice_id', $selArr);
+            }
+        }
+
+        $this->db->order_by('invoice_date', 'DESC');
+        $this->db->order_by('tender_enq_invoice_id', 'DESC');
+        $query = $this->db->get();
+        $invoices = $query->result_array();
+
+        echo json_encode($invoices);
+        exit;
     }
 }

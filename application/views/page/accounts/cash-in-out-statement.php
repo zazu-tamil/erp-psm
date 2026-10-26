@@ -258,7 +258,16 @@
                             <td><?php echo date('d-m-Y', strtotime($row['tr_date'])); ?></td>
                             <td><?php echo !empty($row['ref_no']) ? htmlspecialchars($row['ref_no']) : '-'; ?></td>
                             <td>
-                                <span class="label label-default" style="font-size: 11px;">
+                                <?php
+                                $type_badge = 'label-default';
+                                if ($row['tr_type'] == 'Customer Receipt') $type_badge = 'label-success';
+                                elseif ($row['tr_type'] == 'Customer Advance') $type_badge = 'label-info';
+                                elseif ($row['tr_type'] == 'Supplier Payment') $type_badge = 'label-danger';
+                                elseif ($row['tr_type'] == 'Supplier Advance') $type_badge = 'label-warning';
+                                elseif ($row['tr_type'] == 'Contra Inward') $type_badge = 'bg-purple';
+                                elseif ($row['tr_type'] == 'Contra Outward') $type_badge = 'bg-maroon';
+                                ?>
+                                <span class="label <?php echo $type_badge; ?>" style="font-size: 11px;">
                                     <?php echo htmlspecialchars($row['tr_type']); ?>
                                 </span>
                             </td>

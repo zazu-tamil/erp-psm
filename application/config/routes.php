@@ -402,6 +402,15 @@ $route['vendor/get_vendor_invoices_ajax'] = 'vendor/get_vendor_invoices_ajax';
 $route['vendor/get_vendor_by_tender_id_ajax'] = 'vendor/get_vendor_by_tender_id_ajax';
 $route['vendor/get_vendor_po_by_vendor_ajax'] = 'vendor/get_vendor_po_by_vendor_ajax';
 
+//customer adv payment
+$route['customer-adv-payment'] = 'payment/customer_adv_payment_list';
+$route['customer-adv-payment/(:any)'] = 'payment/customer_adv_payment_list/$1';
+$route['customer-adv-receipt'] = 'payment/customer_adv_payment_list';
+$route['customer-adv-receipt/(:any)'] = 'payment/customer_adv_payment_list/$1';
+$route['payment/get_customer_by_tender_id_ajax'] = 'payment/get_customer_by_tender_id_ajax';
+$route['payment/get_customer_po_by_customer_ajax'] = 'payment/get_customer_po_by_customer_ajax';
+$route['payment/get_customer_invoices_ajax'] = 'payment/get_customer_invoices_ajax';
+
 
 
 $route['supplier-summary-report'] = 'reports/supplier_summary_report';
