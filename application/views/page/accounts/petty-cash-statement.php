@@ -92,8 +92,12 @@
                                 <i class="fa fa-calendar"></i>
                             </div>
                             <input type="date" class="form-control pull-right" id="srch_from_date" name="srch_from_date" 
-                                   value="<?php echo set_value('srch_from_date', $srch_from_date); ?>" required="true">
+                                   value="<?php echo set_value('srch_from_date', $srch_from_date); ?>" 
+                                   min="<?php echo !empty($op_date) ? $op_date : ''; ?>" required="true">
                         </div>
+                        <?php if (!empty($op_date)) { ?>
+                            <small class="text-muted"><i class="fa fa-info-circle text-info"></i> Opening: <?php echo date('d-m-Y', strtotime($op_date)); ?></small>
+                        <?php } ?>
                     </div>
                     <div class="form-group col-md-3">
                         <label>To Date</label>
@@ -102,7 +106,8 @@
                                 <i class="fa fa-calendar"></i>
                             </div>
                             <input type="date" class="form-control pull-right" id="srch_to_date" name="srch_to_date" 
-                                   value="<?php echo set_value('srch_to_date', $srch_to_date); ?>" required="true">
+                                   value="<?php echo set_value('srch_to_date', $srch_to_date); ?>" 
+                                   min="<?php echo !empty($op_date) ? $op_date : ''; ?>" required="true">
                         </div>
                     </div>
                     <div class="form-group col-md-4">

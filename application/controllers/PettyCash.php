@@ -596,15 +596,69 @@ class PettyCash extends CI_Controller
             redirect();
         }
 
-        if (isset($_POST['srch_from_date'])) {
-            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
-            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
-            $data['srch_cash_category_id'] = $srch_cash_category_id = $this->input->post('srch_cash_category_id');
-        } else {
-            $data['srch_from_date'] = $srch_from_date = date('Y-m-') . '01';
-            $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
-            $data['srch_cash_category_id'] = $srch_cash_category_id = '';
+        // Fetch opening dates for cash categories from cb_opening_balance_info
+        $sql_all_cash_ops = "
+            SELECT cash_category_id, MIN(opening_date) AS op_date
+            FROM cb_opening_balance_info
+            WHERE (status != 'Delete' OR status IS NULL) AND ac_type = 'Cash'
+            GROUP BY cash_category_id
+        ";
+        $all_cash_ops = $this->db->query($sql_all_cash_ops)->result_array();
+        $cash_op_dates = array();
+        $min_global_op_date = null;
+        $general_op_date = null;
+
+        foreach ($all_cash_ops as $cop) {
+            if (!empty($cop['op_date'])) {
+                if (empty($cop['cash_category_id'])) {
+                    $general_op_date = $cop['op_date'];
+                } else {
+                    $cash_op_dates['cat_' . $cop['cash_category_id']] = $cop['op_date'];
+                }
+                if ($min_global_op_date === null || $cop['op_date'] < $min_global_op_date) {
+                    $min_global_op_date = $cop['op_date'];
+                }
+            }
         }
+        $cash_op_dates['all'] = $min_global_op_date;
+        $cash_op_dates['general'] = $general_op_date;
+
+        $srch_cash_category_id = $this->input->post('srch_cash_category_id') ?: '';
+
+        // Determine relevant opening balance date based on selected category
+        if (empty($srch_cash_category_id)) {
+            $op_date = $cash_op_dates['all'] ?? null;
+        } else {
+            $op_date = $cash_op_dates['cat_' . $srch_cash_category_id] ?? $cash_op_dates['general'] ?? $cash_op_dates['all'] ?? null;
+        }
+
+        if (isset($_POST['srch_from_date'])) {
+            $srch_from_date = $this->input->post('srch_from_date');
+            $srch_to_date = $this->input->post('srch_to_date');
+        } else {
+            // Default to opening date if configured so report displays from opening balance date onwards
+            $srch_from_date = !empty($op_date) ? $op_date : (date('Y-m-') . '01');
+            $srch_to_date = date('Y-m-d');
+        }
+
+        // Enforce that from_date cannot be earlier than opening_date
+        if (!empty($op_date)) {
+            if (empty($srch_from_date) || $srch_from_date < $op_date) {
+                $srch_from_date = $op_date;
+            }
+            if (!empty($srch_to_date) && $srch_to_date < $op_date) {
+                $srch_to_date = $op_date;
+            }
+        }
+        if (!empty($srch_from_date) && !empty($srch_to_date) && $srch_to_date < $srch_from_date) {
+            $srch_to_date = $srch_from_date;
+        }
+
+        $data['srch_from_date'] = $srch_from_date;
+        $data['srch_to_date'] = $srch_to_date;
+        $data['srch_cash_category_id'] = $srch_cash_category_id;
+        $data['op_date'] = $op_date;
+        $data['cash_op_dates'] = $cash_op_dates;
 
         // Build where conditions: enforce Cash only
         $w_tr = "tr.status = 'Active' AND tr.receipt_mode = 'Cash'";
@@ -642,7 +696,12 @@ class PettyCash extends CI_Controller
                       WHERE $w_op";
         $cb_op = (float)$this->db->query($sql_cb_op)->row('op_amount');
 
-        // B. Combined transactions before srch_from_date
+        // B. Combined transactions before srch_from_date (only transactions on or after opening_date)
+        $w_date_before = "t.tr_date < '" . $this->db->escape_str($srch_from_date) . "'";
+        if (!empty($op_date)) {
+            $w_date_before = "t.tr_date >= '" . $this->db->escape_str($op_date) . "' AND " . $w_date_before;
+        }
+
         $sql_tr_before = "
             SELECT COALESCE(SUM(amount_in), 0) AS total_in, COALESCE(SUM(amount_out), 0) AS total_out
             FROM (
@@ -664,7 +723,7 @@ class PettyCash extends CI_Controller
                 UNION ALL
                 SELECT entry_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM cb_contra_entry_info ce WHERE ce.status = 'Active' AND ce.from_ac_type = 'Cash' AND $w_ce_from
             ) t
-            WHERE t.tr_date < '" . $this->db->escape_str($srch_from_date) . "'
+            WHERE $w_date_before
         ";
         $tr_before_res = $this->db->query($sql_tr_before)->row_array();
         $total_tr_in_before = (float)$tr_before_res['total_in'];
