@@ -86,7 +86,7 @@
                                     <?php } ?>
                                 </td>
                                 <td class="text-right" style="font-weight: bold; color: #2c3e50;">
-                                    <?php echo number_format($ls['opening_amount'], 2); ?>
+                                    <?php echo number_format($ls['opening_amount'], 3); ?>
                                 </td>
                                 <td style="color: #64748b; font-style: italic;"><?php echo htmlspecialchars($ls['remarks'] ?? '—'); ?></td>
                                 <td class="text-center">
@@ -149,7 +149,7 @@
                                 <div class="row">
                                     <div class="form-group col-md-12">
                                         <label>Opening Amount</label>
-                                        <input class="form-control" type="number" step="0.01" name="opening_amount" placeholder="0.00" required="true">
+                                        <input class="form-control" type="number" step="0.000" name="opening_amount" placeholder="0.000" required="true">
                                     </div>
                                 </div>
                                 <div class="row">
@@ -204,7 +204,7 @@
                                 <div class="row">
                                     <div class="form-group col-md-12">
                                         <label>Opening Amount</label>
-                                        <input class="form-control" type="number" step="0.01" name="opening_amount" id="opening_amount" required="true">
+                                        <input class="form-control" type="number" step="0.000" name="opening_amount" id="opening_amount" required="true">
                                     </div>
                                 </div>
                                 <div class="row">
