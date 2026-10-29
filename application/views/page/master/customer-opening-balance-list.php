@@ -86,7 +86,7 @@
                                     <?php } ?>
                                 </td>
                                 <td class="text-right" style="font-weight: bold; color: #2c3e50;">
-                                    <?php echo number_format($ls['opening_amount'], 2); ?>
+                                    <?php echo number_format($ls['opening_amount'], 3); ?>
                                 </td>
                                 <td style="color: #64748b; font-style: italic;"><?php echo htmlspecialchars($ls['remarks'] ?? '—'); ?></td>
                                 <td class="text-center">

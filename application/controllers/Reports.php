@@ -3658,6 +3658,9 @@ class Reports extends CI_Controller
                         SELECT amount FROM tender_receipt_info
                         WHERE status = 'Active' AND customer_id = '$esc_customer' AND receipt_date >= '$esc_op' AND receipt_date < '$esc_from'
                         UNION ALL
+                        SELECT adv_payment_amt AS amount FROM customer_advance_payment_info
+                        WHERE status = 'Active' AND customer_id = '$esc_customer' AND adv_payment_date >= '$esc_op' AND adv_payment_date < '$esc_from'
+                        UNION ALL
                         SELECT total_amount AS amount FROM credit_debit_note_info
                         WHERE status != 'Delete' AND party_type = 'Customer' AND note_type = 'Credit' AND customer_id = '$esc_customer' AND note_date >= '$esc_op' AND note_date < '$esc_from'
                     ) AS rec
@@ -3696,6 +3699,9 @@ class Reports extends CI_Controller
                     FROM (
                         SELECT amount FROM tender_receipt_info
                         WHERE status = 'Active' AND receipt_date < '$esc_from'
+                        UNION ALL
+                        SELECT adv_payment_amt AS amount FROM customer_advance_payment_info
+                        WHERE status = 'Active' AND adv_payment_date < '$esc_from'
                         UNION ALL
                         SELECT total_amount AS amount FROM credit_debit_note_info
                         WHERE status != 'Delete' AND party_type = 'Customer' AND note_type = 'Credit' AND note_date < '$esc_from'
@@ -3755,6 +3761,23 @@ class Reports extends CI_Controller
                   " . (!empty($from_date) ? "AND a.receipt_date >= '$esc_from'" : "") . "
                   " . (!empty($to_date) ? "AND a.receipt_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
                   
+                UNION ALL
+                
+                SELECT 
+                    a.adv_payment_date AS tr_date,
+                    CONCAT('CADV-', a.adv_payment_id) AS voucher_no,
+                    'Customer Advance' AS description,
+                    0.000 AS debit_amt,
+                    a.adv_payment_amt AS credit_amt,
+                    'receipt' AS type,
+                    c.customer_name
+                FROM customer_advance_payment_info a
+                LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
+                WHERE a.status = 'Active'
+                  " . (!empty($customer_id) ? "AND a.customer_id = '$esc_customer'" : "") . "
+                  " . (!empty($from_date) ? "AND a.adv_payment_date >= '$esc_from'" : "") . "
+                  " . (!empty($to_date) ? "AND a.adv_payment_date <= '" . $this->db->escape_str($to_date) . "'" : "") . "
+
                 UNION ALL
                 
                 SELECT 
@@ -3934,6 +3957,24 @@ class Reports extends CI_Controller
             $rec_map[$cId][] = $r;
         }
 
+        // 4. Fetch all customer advances up to as_on_date
+        $adv_map = [];
+        if ($this->db->table_exists('customer_advance_payment_info')) {
+            $adv_sql = "
+                SELECT customer_id, adv_payment_date, adv_payment_amt AS amount
+                FROM customer_advance_payment_info
+                WHERE status = 'Active' AND adv_payment_date <= '$esc_as_on' {$cust_where}
+            ";
+            $adv_rows = $this->db->query($adv_sql)->result_array();
+            foreach ($adv_rows as $a) {
+                $cId = $a['customer_id'];
+                if (!isset($adv_map[$cId])) {
+                    $adv_map[$cId] = [];
+                }
+                $adv_map[$cId][] = $a;
+            }
+        }
+
         // Aggregate records per customer
         $record_list = [];
         $total_summary = [
@@ -3988,6 +4029,14 @@ class Reports extends CI_Controller
                             }
                         }
                     }
+                    // Advances on or after opening_date up to as_on_date
+                    if (!empty($adv_map[$cId])) {
+                        foreach ($adv_map[$cId] as $item) {
+                            if (empty($op_date) || $item['adv_payment_date'] >= $op_date) {
+                                $cust_adv_rec += (float) $item['amount'];
+                            }
+                        }
+                    }
                 } else {
                     // as_on_date is prior to configured opening_date
                     $opening_bal = 0.000;
@@ -4003,6 +4052,11 @@ class Reports extends CI_Controller
                             } else {
                                 $cust_inv_rec += (float) $item['amount'];
                             }
+                        }
+                    }
+                    if (!empty($adv_map[$cId])) {
+                        foreach ($adv_map[$cId] as $item) {
+                            $cust_adv_rec += (float) $item['amount'];
                         }
                     }
                 }
@@ -4021,6 +4075,11 @@ class Reports extends CI_Controller
                         } else {
                             $cust_inv_rec += (float) $item['amount'];
                         }
+                    }
+                }
+                if (!empty($adv_map[$cId])) {
+                    foreach ($adv_map[$cId] as $item) {
+                        $cust_adv_rec += (float) $item['amount'];
                     }
                 }
             }
@@ -4452,7 +4511,7 @@ class Reports extends CI_Controller
 
         // Fetch active vendors/suppliers for dropdown
         $sql = "
-            SELECT vendor_id, vendor_name 
+            SELECT vendor_id, vendor_name l
             FROM vendor_info 
             WHERE status = 'Active' 
             ORDER BY vendor_name ASC";

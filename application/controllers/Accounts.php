@@ -3583,11 +3583,21 @@ class Accounts extends CI_Controller
 
             // 3. Sundry Debtors (Debit = outstanding customer balance up to $to_date, Credit = customer receipts in range)
             // Receipts in range (from $from_date to $to_date)
-            $receipts_range = (float) $this->db->query("
+            $receipts_gen_range = (float) $this->db->query("
                 SELECT SUM(amount) AS amt 
                 FROM tender_receipt_info 
                 WHERE status = 'Active' AND receipt_date BETWEEN '$esc_from' AND '$esc_to'
             ")->row('amt');
+
+            $receipts_adv_range = 0.0;
+            if ($this->db->table_exists('customer_advance_payment_info')) {
+                $receipts_adv_range = (float) $this->db->query("
+                    SELECT SUM(adv_payment_amt) AS amt 
+                    FROM customer_advance_payment_info 
+                    WHERE status = 'Active' AND adv_payment_date BETWEEN '$esc_from' AND '$esc_to'
+                ")->row('amt');
+            }
+            $receipts_range = $receipts_gen_range + $receipts_adv_range;
 
             // Outstanding balance up to $to_date
             $debtors_op = (float) $this->db->query("
@@ -3603,11 +3613,21 @@ class Accounts extends CI_Controller
                 WHERE status = 'Active' AND invoice_date <= '$esc_to'
             ")->row('amt');
 
-            $receipts_cumulative = (float) $this->db->query("
+            $receipts_gen_cumulative = (float) $this->db->query("
                 SELECT SUM(amount) AS amt 
                 FROM tender_receipt_info 
                 WHERE status = 'Active' AND receipt_date <= '$esc_to'
             ")->row('amt');
+
+            $receipts_adv_cumulative = 0.0;
+            if ($this->db->table_exists('customer_advance_payment_info')) {
+                $receipts_adv_cumulative = (float) $this->db->query("
+                    SELECT SUM(adv_payment_amt) AS amt 
+                    FROM customer_advance_payment_info 
+                    WHERE status = 'Active' AND adv_payment_date <= '$esc_to'
+                ")->row('amt');
+            }
+            $receipts_cumulative = $receipts_gen_cumulative + $receipts_adv_cumulative;
 
             $debtors_balance = $debtors_op + $invoices - $receipts_cumulative;
 
@@ -4607,18 +4627,6 @@ class Accounts extends CI_Controller
 
         $data['js'] = 'accounts/cash-in-out-statement.inc';
 
-        if (isset($_POST['srch_from_date'])) {
-            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
-            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
-            $data['srch_bank_cash'] = $srch_bank_cash = $this->input->post('srch_bank_cash');
-            $data['srch_payment_type'] = $srch_payment_type = $this->input->post('srch_payment_type');
-        } else {
-            $data['srch_from_date'] = $srch_from_date = date('Y-m-') . '01';
-            $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
-            $data['srch_bank_cash'] = $srch_bank_cash = 'all';
-            $data['srch_payment_type'] = $srch_payment_type = '';
-        }
-
         // Get bank list for filter dropdown
         $sql_banks = "SELECT bank_id, bank_name, branch FROM company_bank_info WHERE status = 'Active' ORDER BY bank_name ASC";
         $data['bank_list'] = $this->db->query($sql_banks)->result_array();
@@ -4632,10 +4640,77 @@ class Accounts extends CI_Controller
         }
         $data['bank_cash_options'] = $bank_cash_options;
 
+        // Fetch opening dates for banks from cb_opening_balance_info
+        $sql_all_bank_ops = "
+            SELECT bank_id, MIN(opening_date) AS op_date
+            FROM cb_opening_balance_info
+            WHERE (status != 'Delete' OR status IS NULL) AND ac_type = 'Bank'
+            GROUP BY bank_id
+        ";
+        $all_bank_ops = $this->db->query($sql_all_bank_ops)->result_array();
+        $bank_op_dates = array();
+        $min_global_op_date = null;
+        $general_op_date = null;
+
+        foreach ($all_bank_ops as $bop) {
+            if (!empty($bop['op_date'])) {
+                if (empty($bop['bank_id'])) {
+                    $general_op_date = $bop['op_date'];
+                } else {
+                    $bank_op_dates['bank_' . $bop['bank_id']] = $bop['op_date'];
+                }
+                if ($min_global_op_date === null || $bop['op_date'] < $min_global_op_date) {
+                    $min_global_op_date = $bop['op_date'];
+                }
+            }
+        }
+        $bank_op_dates['all'] = $min_global_op_date;
+        $bank_op_dates['general'] = $general_op_date;
+
+        $srch_bank_cash = $this->input->post('srch_bank_cash') ?: 'all';
+        $srch_payment_type = $this->input->post('srch_payment_type') ?: '';
+
+        // Determine relevant opening balance date based on selected bank
+        if ($srch_bank_cash === 'all') {
+            $op_date = $bank_op_dates['all'] ?? null;
+        } else {
+            $op_date = $bank_op_dates[$srch_bank_cash] ?? $bank_op_dates['general'] ?? $bank_op_dates['all'] ?? null;
+        }
+
+        if (isset($_POST['srch_from_date'])) {
+            $srch_from_date = $this->input->post('srch_from_date');
+            $srch_to_date = $this->input->post('srch_to_date');
+        } else {
+            // Default to opening date if configured so report displays from opening balance date onwards
+            $srch_from_date = !empty($op_date) ? $op_date : (date('Y-m-') . '01');
+            $srch_to_date = date('Y-m-d');
+        }
+
+        // Enforce that from_date cannot be earlier than opening_date
+        if (!empty($op_date)) {
+            if (empty($srch_from_date) || $srch_from_date < $op_date) {
+                $srch_from_date = $op_date;
+            }
+            if (!empty($srch_to_date) && $srch_to_date < $op_date) {
+                $srch_to_date = $op_date;
+            }
+        }
+        if (!empty($srch_from_date) && !empty($srch_to_date) && $srch_to_date < $srch_from_date) {
+            $srch_to_date = $srch_from_date;
+        }
+
+        $data['srch_from_date'] = $srch_from_date;
+        $data['srch_to_date'] = $srch_to_date;
+        $data['srch_bank_cash'] = $srch_bank_cash;
+        $data['srch_payment_type'] = $srch_payment_type;
+        $data['op_date'] = $op_date;
+        $data['bank_op_dates'] = $bank_op_dates;
+
         // Build precise table-specific where clauses for filter (Bank Only)
         $w_tr = "tr.status = 'Active' AND tr.receipt_mode = 'Bank'";
         $w_vp = "vp.status = 'Active' AND vp.payment_mode = 'Bank'";
         $w_vap = "vap.status = 'Active' AND vap.ac_type_opt = 'Bank'";
+        $w_cap = "cap.status = 'Active' AND cap.ac_type_opt = 'Bank'";
         $w_pt = "pt.status != 'Deleted' AND pt.ac_type = 'Bank'";
         $w_cin = "cin.status = 'Active' AND cin.ac_type = 'Bank'";
         $w_cout = "cout.status = 'Active' AND cout.ac_type = 'Bank'";
@@ -4647,6 +4722,7 @@ class Accounts extends CI_Controller
             $w_tr .= " AND tr.bank_id = $bank_id";
             $w_vp .= " AND vp.bank_id = $bank_id";
             $w_vap .= " AND vap.bank_id = $bank_id";
+            $w_cap .= " AND cap.bank_id = $bank_id";
             $w_pt .= " AND pt.bank_id = $bank_id";
             $w_cin .= " AND cin.bank_id = $bank_id";
             $w_cout .= " AND cout.bank_id = $bank_id";
@@ -4673,6 +4749,7 @@ class Accounts extends CI_Controller
             $w_cin .= " AND cin.bank_type = '" . $this->db->escape_str($srch_payment_type) . "'";
             $w_cout .= " AND cout.bank_type = '" . $this->db->escape_str($srch_payment_type) . "'";
             $w_vap .= " AND 1=0";
+            $w_cap .= " AND 1=0";
             $w_pt .= " AND 1=0";
             $w_ce_from .= " AND 1=0";
             $w_ce_to .= " AND 1=0";
@@ -4686,7 +4763,12 @@ class Accounts extends CI_Controller
                       WHERE $w_op";
         $cb_op = (float) $this->db->query($sql_cb_op)->row('op_amount');
 
-        // B. Combined transactions before srch_from_date
+        // B. Combined transactions before srch_from_date (only transactions on or after opening_date)
+        $w_date_before = "t.tr_date < '" . $this->db->escape_str($srch_from_date) . "'";
+        if (!empty($op_date)) {
+            $w_date_before = "t.tr_date >= '" . $this->db->escape_str($op_date) . "' AND " . $w_date_before;
+        }
+
         $sql_tr_before = "
             SELECT COALESCE(SUM(amount_in), 0) AS total_in, COALESCE(SUM(amount_out), 0) AS total_out
             FROM (
@@ -4695,6 +4777,8 @@ class Accounts extends CI_Controller
                 SELECT payment_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM vendor_payment_info vp WHERE $w_vp
                 UNION ALL
                 SELECT adv_payment_date AS tr_date, 0 AS amount_in, adv_payment_amt AS amount_out FROM vendor_advance_payment_info vap WHERE $w_vap
+                UNION ALL
+                SELECT adv_payment_date AS tr_date, adv_payment_amt AS amount_in, 0 AS amount_out FROM customer_advance_payment_info cap WHERE $w_cap
                 UNION ALL
                 SELECT transaction_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM petty_cash_transactions pt WHERE $w_pt AND pt.transaction_type IN ('Inward', 'Income')
                 UNION ALL
@@ -4708,7 +4792,7 @@ class Accounts extends CI_Controller
                 UNION ALL
                 SELECT entry_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM cb_contra_entry_info ce WHERE ce.status = 'Active' AND ce.from_ac_type = 'Bank' AND $w_ce_from
             ) t
-            WHERE t.tr_date < '" . $this->db->escape_str($srch_from_date) . "'
+            WHERE $w_date_before
         ";
         $tr_before_res = $this->db->query($sql_tr_before)->row_array();
         $total_tr_in_before = (float) $tr_before_res['total_in'];
@@ -4788,6 +4872,30 @@ class Accounts extends CI_Controller
                 LEFT JOIN vendor_info v ON v.vendor_id = vap.vendor_id
                 LEFT JOIN company_bank_info b ON b.bank_id = vap.bank_id
                 WHERE $w_vap AND vap.adv_payment_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+
+                UNION ALL
+
+                -- Customer Advance Payments (Bank)
+                SELECT 
+                    CONVERT('Customer Advance' USING utf8) AS tr_type, 
+                    CONVERT(CONCAT('CADV-', cap.adv_payment_id) USING utf8) AS ref_no, 
+                    cap.adv_payment_date AS tr_date, 
+                    cap.adv_payment_amt AS amount_in, 
+                    0 AS amount_out, 
+                    CONVERT(cap.ac_type_opt USING utf8) AS mode, 
+                    cap.bank_id, 
+                    CONVERT(COALESCE(b.bank_name, 'Cash') USING utf8) AS bank_name,
+                    CONVERT(c.customer_name USING utf8) AS party_name, 
+                    CONVERT(COALESCE(cap.remarks, 'Advance Receipt') USING utf8) AS remarks,
+                    cap.created_date,
+                    CONVERT(NULL USING utf8) AS bank_type,
+                    CONVERT(NULL USING utf8) AS cheque_no,
+                    NULL AS cheque_date,
+                    CONVERT(NULL USING utf8) AS cheque_bank
+                FROM customer_advance_payment_info cap
+                LEFT JOIN customer_info c ON c.customer_id = cap.customer_id
+                LEFT JOIN company_bank_info b ON b.bank_id = cap.bank_id
+                WHERE $w_cap AND cap.adv_payment_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
 
                 UNION ALL
 

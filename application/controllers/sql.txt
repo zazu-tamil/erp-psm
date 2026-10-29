@@ -1136,3 +1136,58 @@ ALTER TABLE `cb_cash_outward_info`
     ADD COLUMN `cheque_date` DATE NULL DEFAULT NULL AFTER `cash_category_id`,
     ADD COLUMN `cheque_no` VARCHAR(50) NULL DEFAULT NULL AFTER `cheque_date`,
     ADD COLUMN `cheque_bank` VARCHAR(100) NULL DEFAULT NULL AFTER `cheque_no`;
+
+26-10-2026
+
+-- Create Customer Advance Payment Info Table
+CREATE TABLE IF NOT EXISTS `customer_advance_payment_info` (
+  `adv_payment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `ac_type_opt` enum('Bank','Cash') NOT NULL DEFAULT 'Bank',
+  `bank_id` int(11) DEFAULT NULL,
+  `cash_category_id` int(11) DEFAULT NULL,
+  `tender_enquiry_id` int(11) DEFAULT NULL,
+  `customer_id` int(11) NOT NULL,
+  `tender_po_id` int(11) DEFAULT NULL,
+  `invoice_ids` text DEFAULT NULL,
+  `invoice_no` varchar(255) DEFAULT NULL,
+  `adv_payment_date` date NOT NULL,
+  `adv_payment_amt` decimal(15,3) NOT NULL DEFAULT 0.000,
+  `remarks` text DEFAULT NULL,
+  `status` enum('Active','Inactive','Delete') NOT NULL DEFAULT 'Active',
+  `created_by` int(11) DEFAULT NULL,
+  `created_date` datetime DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `updated_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`adv_payment_id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `tender_enquiry_id` (`tender_enquiry_id`),
+  KEY `tender_po_id` (`tender_po_id`),
+  KEY `bank_id` (`bank_id`),
+  KEY `cash_category_id` (`cash_category_id`),
+  KEY `adv_payment_date` (`adv_payment_date`),
+  KEY `status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Add Customer Advance Payment to menu_info
+INSERT INTO `menu_info` (`parent_id`, `menu_title`, `menu_slug`, `menu_icon`, `is_header`, `sort_order`, `status`)
+SELECT 
+    COALESCE((SELECT menu_id FROM `menu_info` WHERE `menu_title` = 'Tender' AND `parent_id` = 0 AND `status` != 'Delete' LIMIT 1), 7) AS parent_id,
+    'Customer Advance Payment' AS menu_title,
+    'customer-adv-payment' AS menu_slug,
+    'fa fa-list' AS menu_icon,
+    0 AS is_header,
+    20 AS sort_order,
+    'Active' AS status
+WHERE NOT EXISTS (SELECT 1 FROM `menu_info` WHERE `menu_slug` = 'customer-adv-payment');
+
+-- Grant permissions for Customer Advance Payment to active roles
+INSERT INTO `role_permission` (`role_id`, `menu_id`, `can_view`, `can_add`, `can_edit`, `can_delete`)
+SELECT r.role_id, m.menu_id, 1, 1, 1, 1
+FROM `role_info` r
+JOIN `menu_info` m ON m.menu_slug = 'customer-adv-payment' AND m.status != 'Delete'
+WHERE r.status != 'Delete'
+  AND NOT EXISTS (
+    SELECT 1 FROM `role_permission` rp WHERE rp.role_id = r.role_id AND rp.menu_id = m.menu_id
+  );
+
+

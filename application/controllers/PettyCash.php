@@ -596,20 +596,75 @@ class PettyCash extends CI_Controller
             redirect();
         }
 
-        if (isset($_POST['srch_from_date'])) {
-            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
-            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
-            $data['srch_cash_category_id'] = $srch_cash_category_id = $this->input->post('srch_cash_category_id');
-        } else {
-            $data['srch_from_date'] = $srch_from_date = date('Y-m-') . '01';
-            $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
-            $data['srch_cash_category_id'] = $srch_cash_category_id = '';
+        // Fetch opening dates for cash categories from cb_opening_balance_info
+        $sql_all_cash_ops = "
+            SELECT cash_category_id, MIN(opening_date) AS op_date
+            FROM cb_opening_balance_info
+            WHERE (status != 'Delete' OR status IS NULL) AND ac_type = 'Cash'
+            GROUP BY cash_category_id
+        ";
+        $all_cash_ops = $this->db->query($sql_all_cash_ops)->result_array();
+        $cash_op_dates = array();
+        $min_global_op_date = null;
+        $general_op_date = null;
+
+        foreach ($all_cash_ops as $cop) {
+            if (!empty($cop['op_date'])) {
+                if (empty($cop['cash_category_id'])) {
+                    $general_op_date = $cop['op_date'];
+                } else {
+                    $cash_op_dates['cat_' . $cop['cash_category_id']] = $cop['op_date'];
+                }
+                if ($min_global_op_date === null || $cop['op_date'] < $min_global_op_date) {
+                    $min_global_op_date = $cop['op_date'];
+                }
+            }
         }
+        $cash_op_dates['all'] = $min_global_op_date;
+        $cash_op_dates['general'] = $general_op_date;
+
+        $srch_cash_category_id = $this->input->post('srch_cash_category_id') ?: '';
+
+        // Determine relevant opening balance date based on selected category
+        if (empty($srch_cash_category_id)) {
+            $op_date = $cash_op_dates['all'] ?? null;
+        } else {
+            $op_date = $cash_op_dates['cat_' . $srch_cash_category_id] ?? $cash_op_dates['general'] ?? $cash_op_dates['all'] ?? null;
+        }
+
+        if (isset($_POST['srch_from_date'])) {
+            $srch_from_date = $this->input->post('srch_from_date');
+            $srch_to_date = $this->input->post('srch_to_date');
+        } else {
+            // Default to opening date if configured so report displays from opening balance date onwards
+            $srch_from_date = !empty($op_date) ? $op_date : (date('Y-m-') . '01');
+            $srch_to_date = date('Y-m-d');
+        }
+
+        // Enforce that from_date cannot be earlier than opening_date
+        if (!empty($op_date)) {
+            if (empty($srch_from_date) || $srch_from_date < $op_date) {
+                $srch_from_date = $op_date;
+            }
+            if (!empty($srch_to_date) && $srch_to_date < $op_date) {
+                $srch_to_date = $op_date;
+            }
+        }
+        if (!empty($srch_from_date) && !empty($srch_to_date) && $srch_to_date < $srch_from_date) {
+            $srch_to_date = $srch_from_date;
+        }
+
+        $data['srch_from_date'] = $srch_from_date;
+        $data['srch_to_date'] = $srch_to_date;
+        $data['srch_cash_category_id'] = $srch_cash_category_id;
+        $data['op_date'] = $op_date;
+        $data['cash_op_dates'] = $cash_op_dates;
 
         // Build where conditions: enforce Cash only
         $w_tr = "tr.status = 'Active' AND tr.receipt_mode = 'Cash'";
         $w_vp = "vp.status = 'Active' AND vp.payment_mode = 'Cash'";
         $w_vap = "vap.status = 'Active' AND vap.ac_type_opt = 'Cash'";
+        $w_cap = "cap.status = 'Active' AND cap.ac_type_opt = 'Cash'";
         $w_pt = "pt.status != 'Deleted' AND pt.ac_type = 'Cash'";
         $w_cin = "cin.status = 'Active' AND cin.ac_type = 'Cash'";
         $w_cout = "cout.status = 'Active' AND cout.ac_type = 'Cash'";
@@ -622,6 +677,7 @@ class PettyCash extends CI_Controller
             $w_tr .= " AND tr.cash_category_id = " . (int)$srch_cash_category_id;
             $w_vp .= " AND vp.cash_category_id = " . (int)$srch_cash_category_id;
             $w_vap .= " AND vap.cash_category_id = " . (int)$srch_cash_category_id;
+            $w_cap .= " AND (cap.cash_category_id = " . (int)$srch_cash_category_id . " OR cap.cash_category_id IS NULL OR cap.cash_category_id = 0)";
             $w_pt .= " AND pt.cash_category_id = " . (int)$srch_cash_category_id;
             $w_cin .= " AND cin.cash_category_id = " . (int)$srch_cash_category_id;
             $w_cout .= " AND cout.cash_category_id = " . (int)$srch_cash_category_id;
@@ -642,7 +698,12 @@ class PettyCash extends CI_Controller
                       WHERE $w_op";
         $cb_op = (float)$this->db->query($sql_cb_op)->row('op_amount');
 
-        // B. Combined transactions before srch_from_date
+        // B. Combined transactions before srch_from_date (only transactions on or after opening_date)
+        $w_date_before = "t.tr_date < '" . $this->db->escape_str($srch_from_date) . "'";
+        if (!empty($op_date)) {
+            $w_date_before = "t.tr_date >= '" . $this->db->escape_str($op_date) . "' AND " . $w_date_before;
+        }
+
         $sql_tr_before = "
             SELECT COALESCE(SUM(amount_in), 0) AS total_in, COALESCE(SUM(amount_out), 0) AS total_out
             FROM (
@@ -651,6 +712,8 @@ class PettyCash extends CI_Controller
                 SELECT payment_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM vendor_payment_info vp WHERE $w_vp
                 UNION ALL
                 SELECT adv_payment_date AS tr_date, 0 AS amount_in, adv_payment_amt AS amount_out FROM vendor_advance_payment_info vap WHERE $w_vap
+                UNION ALL
+                SELECT adv_payment_date AS tr_date, adv_payment_amt AS amount_in, 0 AS amount_out FROM customer_advance_payment_info cap WHERE $w_cap
                 UNION ALL
                 SELECT transaction_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM petty_cash_transactions pt WHERE $w_pt AND pt.transaction_type IN ('Inward', 'Income')
                 UNION ALL
@@ -664,7 +727,7 @@ class PettyCash extends CI_Controller
                 UNION ALL
                 SELECT entry_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM cb_contra_entry_info ce WHERE ce.status = 'Active' AND ce.from_ac_type = 'Cash' AND $w_ce_from
             ) t
-            WHERE t.tr_date < '" . $this->db->escape_str($srch_from_date) . "'
+            WHERE $w_date_before
         ";
         $tr_before_res = $this->db->query($sql_tr_before)->row_array();
         $total_tr_in_before = (float)$tr_before_res['total_in'];
@@ -807,7 +870,24 @@ class PettyCash extends CI_Controller
                 LEFT JOIN cb_sub_account_head_lvl3_info e ON e.sub_account_headlvl3_id = cout.sub_account_headlvl3_id
                 LEFT JOIN cb_voucher_type_info vt ON vt.voucher_type_id = cout.voucher_type_id
                 LEFT JOIN cash_category cc ON cc.cash_category_id = cout.cash_category_id AND cc.status = 'Active'
-                WHERE $w_cout AND cout.outward_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
+                UNION ALL
+
+                -- Customer Advance Payments
+                SELECT 
+                    CONVERT('Customer Advance' USING utf8) AS tr_type, 
+                    CONVERT(CONCAT('CADV-', cap.adv_payment_id) USING utf8) AS ref_no, 
+                    cap.adv_payment_date AS tr_date, 
+                    cap.adv_payment_amt AS amount_in, 
+                    0 AS amount_out, 
+                    CONVERT('Cash' USING utf8) AS mode, 
+                    CONVERT(cc.category_name USING utf8) AS cash_category_name,
+                    CONVERT(c.customer_name USING utf8) AS party_name, 
+                    CONVERT(COALESCE(cap.remarks, '') USING utf8) AS remarks,
+                    cap.created_date
+                FROM customer_advance_payment_info cap
+                LEFT JOIN customer_info c ON c.customer_id = cap.customer_id
+                LEFT JOIN cash_category cc ON cc.cash_category_id = cap.cash_category_id AND cc.status = 'Active'
+                WHERE $w_cap AND cap.adv_payment_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
 
                 UNION ALL
 

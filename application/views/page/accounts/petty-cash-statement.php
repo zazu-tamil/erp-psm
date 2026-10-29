@@ -92,8 +92,12 @@
                                 <i class="fa fa-calendar"></i>
                             </div>
                             <input type="date" class="form-control pull-right" id="srch_from_date" name="srch_from_date" 
-                                   value="<?php echo set_value('srch_from_date', $srch_from_date); ?>" required="true">
+                                   value="<?php echo set_value('srch_from_date', $srch_from_date); ?>" 
+                                   min="<?php echo !empty($op_date) ? $op_date : ''; ?>" required="true">
                         </div>
+                        <?php if (!empty($op_date)) { ?>
+                            <small class="text-muted"><i class="fa fa-info-circle text-info"></i> Opening: <?php echo date('d-m-Y', strtotime($op_date)); ?></small>
+                        <?php } ?>
                     </div>
                     <div class="form-group col-md-3">
                         <label>To Date</label>
@@ -102,7 +106,8 @@
                                 <i class="fa fa-calendar"></i>
                             </div>
                             <input type="date" class="form-control pull-right" id="srch_to_date" name="srch_to_date" 
-                                   value="<?php echo set_value('srch_to_date', $srch_to_date); ?>" required="true">
+                                   value="<?php echo set_value('srch_to_date', $srch_to_date); ?>" 
+                                   min="<?php echo !empty($op_date) ? $op_date : ''; ?>" required="true">
                         </div>
                     </div>
                     <div class="form-group col-md-4">
@@ -248,7 +253,16 @@
                             <td><?php echo date('d-m-Y', strtotime($row['tr_date'])); ?></td>
                             <td><?php echo !empty($row['ref_no']) ? htmlspecialchars($row['ref_no']) : '-'; ?></td>
                             <td>
-                                <span class="label label-default" style="font-size: 11px;">
+                                <?php
+                                $type_badge = 'label-default';
+                                if ($row['tr_type'] == 'Customer Receipt') $type_badge = 'label-success';
+                                elseif ($row['tr_type'] == 'Customer Advance') $type_badge = 'label-info';
+                                elseif ($row['tr_type'] == 'Supplier Payment') $type_badge = 'label-danger';
+                                elseif ($row['tr_type'] == 'Supplier Advance') $type_badge = 'label-warning';
+                                elseif ($row['tr_type'] == 'Contra Inward') $type_badge = 'bg-purple';
+                                elseif ($row['tr_type'] == 'Contra Outward') $type_badge = 'bg-maroon';
+                                ?>
+                                <span class="label <?php echo $type_badge; ?>" style="font-size: 11px;">
                                     <?php echo htmlspecialchars($row['tr_type']); ?>
                                 </span>
                             </td>

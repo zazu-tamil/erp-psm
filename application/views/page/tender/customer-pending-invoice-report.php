@@ -242,6 +242,8 @@
                                 <td>
                                     <?php if ($row['bill_type'] == 'Opening Balance'): ?>
                                         <span class="label label-success"><?php echo htmlspecialchars($row['bill_type']); ?></span>
+                                    <?php elseif ($row['bill_type'] == 'Advance Payment'): ?>
+                                        <span class="label label-info"><?php echo htmlspecialchars($row['bill_type']); ?></span>
                                     <?php else: ?>
                                         <span class="label label-primary"><?php echo htmlspecialchars($row['bill_type']); ?></span>
                                     <?php endif; ?>
@@ -263,6 +265,8 @@
                                         <span class="status-badge-paid"><i class="fa fa-check"></i> Paid</span>
                                     <?php elseif ($row['payment_status'] == 'Partial'): ?>
                                         <span class="status-badge-partial"><i class="fa fa-adjust"></i> Partial</span>
+                                    <?php elseif ($row['bill_type'] == 'Advance Payment'): ?>
+                                        <span class="status-badge-partial" style="background:#e1f5fe; color:#0277bd; border-color:#b3e5fc;"><i class="fa fa-clock-o"></i> Advance</span>
                                     <?php else: ?>
                                         <span class="status-badge-pending"><i class="fa fa-hourglass-start"></i> Pending</span>
                                     <?php endif; ?>
