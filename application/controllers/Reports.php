@@ -5893,4 +5893,322 @@ class Reports extends CI_Controller
         echo $html;
     }
 
+    public function vendor_paid_material_pending_inward_report()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        // Handle Reset
+        if ($this->input->post('reset') == '1' || $this->input->get('reset') == '1') {
+            $this->session->unset_userdata('vpm_from_date');
+            $this->session->unset_userdata('vpm_to_date');
+            $this->session->unset_userdata('vpm_vendor_id');
+            $this->session->unset_userdata('vpm_payment_type');
+            $this->session->unset_userdata('vpm_inward_status');
+            redirect('vendor-paid-material-pending-inward-report');
+            return;
+        }
+
+        $data = array();
+        $data['js'] = 'reports/vendor-paid-material-pending-inward-report.inc';
+        $data['s_url'] = 'vendor-paid-material-pending-inward-report';
+        $data['title'] = 'Vendor Paid Material Pending Inward Report';
+
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $data['vendor_id'] = $vendor_id = $this->input->post('vendor_id');
+            $data['payment_type'] = $payment_type = $this->input->post('payment_type');
+            $data['inward_status'] = $inward_status = $this->input->post('inward_status');
+
+            $this->session->set_userdata('vpm_from_date', $srch_from_date);
+            $this->session->set_userdata('vpm_to_date', $srch_to_date);
+            $this->session->set_userdata('vpm_vendor_id', $vendor_id);
+            $this->session->set_userdata('vpm_payment_type', $payment_type);
+            $this->session->set_userdata('vpm_inward_status', $inward_status);
+        } elseif ($this->session->userdata('vpm_from_date') || $this->session->userdata('vpm_to_date') || $this->session->userdata('vpm_vendor_id') || $this->session->userdata('vpm_payment_type') || $this->session->userdata('vpm_inward_status')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('vpm_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('vpm_to_date');
+            $data['vendor_id'] = $vendor_id = $this->session->userdata('vpm_vendor_id');
+            $data['payment_type'] = $payment_type = $this->session->userdata('vpm_payment_type');
+            $data['inward_status'] = $inward_status = $this->session->userdata('vpm_inward_status');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = '';
+            $data['srch_to_date'] = $srch_to_date = '';
+            $data['vendor_id'] = $vendor_id = '';
+            $data['payment_type'] = $payment_type = '';
+            $data['inward_status'] = $inward_status = '';
+        }
+
+        // Vendors dropdown
+        $sql_vend = "
+            SELECT vendor_id, vendor_name 
+            FROM vendor_info 
+            WHERE status = 'Active' 
+            ORDER BY vendor_name ASC";
+        $q_vend = $this->db->query($sql_vend);
+        $data['vendor_opt'] = ['' => 'All Vendors'];
+        foreach ($q_vend->result_array() as $row) {
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+        }
+
+        // Date conditions
+        $where_adv = "";
+        $where_pay = "";
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $where_adv .= " AND (vap.adv_payment_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "')";
+            $where_pay .= " AND (vp.payment_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "')";
+        } elseif (!empty($srch_from_date)) {
+            $where_adv .= " AND vap.adv_payment_date >= '" . $this->db->escape_str($srch_from_date) . "'";
+            $where_pay .= " AND vp.payment_date >= '" . $this->db->escape_str($srch_from_date) . "'";
+        } elseif (!empty($srch_to_date)) {
+            $where_adv .= " AND vap.adv_payment_date <= '" . $this->db->escape_str($srch_to_date) . "'";
+            $where_pay .= " AND vp.payment_date <= '" . $this->db->escape_str($srch_to_date) . "'";
+        }
+
+        // Vendor conditions
+        if (!empty($vendor_id)) {
+            $where_adv .= " AND vap.vendor_id = '" . $this->db->escape_str($vendor_id) . "'";
+            $where_pay .= " AND vpi.vendor_id = '" . $this->db->escape_str($vendor_id) . "'";
+        }
+
+        // Outer filters
+        $outer_conds = array();
+        if (!empty($payment_type)) {
+            $outer_conds[] = " payment_type = '" . $this->db->escape_str($payment_type) . "'";
+        }
+        if (!empty($inward_status)) {
+            $outer_conds[] = " inward_status = '" . $this->db->escape_str($inward_status) . "'";
+        } else {
+            $outer_conds[] = " inward_status IN ('Inward Not Entered', 'Partial Inward')";
+        }
+
+        $outer_where = "";
+        if (!empty($outer_conds)) {
+            $outer_where = " WHERE " . implode(" AND ", $outer_conds);
+        }
+
+        $sql = "
+            SELECT * FROM (
+                -- PART A: Advance Payments against PO
+                SELECT 
+                    'Advance Payment' AS payment_type,
+                    vap.adv_payment_id AS payment_ref_id,
+                    vap.adv_payment_date AS payment_date,
+                    vap.adv_payment_amt AS paid_amount,
+                    vap.vendor_id,
+                    v.vendor_name,
+                    vpo.vendor_po_id,
+                    vpo.po_no,
+                    vpo.po_date,
+                    NULL AS invoice_id,
+                    vap.invoice_no AS invoice_no,
+                    NULL AS invoice_date,
+                    COALESCE(po_totals.total_po_qty, 0) AS ordered_qty,
+                    COALESCE(inw_totals.total_inward_qty, 0) AS inward_qty,
+                    GREATEST(0, COALESCE(po_totals.total_po_qty, 0) - COALESCE(inw_totals.total_inward_qty, 0)) AS pending_qty,
+                    CASE 
+                        WHEN vpo.vendor_po_id IS NULL OR vpo.vendor_po_id = 0 THEN 'PO Not Linked'
+                        WHEN COALESCE(inw_totals.total_inward_qty, 0) <= 0 THEN 'Inward Not Entered'
+                        WHEN COALESCE(inw_totals.total_inward_qty, 0) < COALESCE(po_totals.total_po_qty, 0) THEN 'Partial Inward'
+                        ELSE 'Inward Entered'
+                    END AS inward_status
+                FROM vendor_advance_payment_info vap
+                JOIN vendor_info v ON v.vendor_id = vap.vendor_id AND v.status = 'Active'
+                LEFT JOIN vendor_po_info vpo ON vpo.vendor_po_id = vap.vendor_po_id AND vpo.status = 'Active'
+                LEFT JOIN (
+                    SELECT poi.vendor_po_id, SUM(poi.qty) AS total_po_qty
+                    FROM vendor_po_item_info poi
+                    WHERE poi.status = 'Active'
+                    GROUP BY poi.vendor_po_id
+                ) po_totals ON po_totals.vendor_po_id = vpo.vendor_po_id
+                LEFT JOIN (
+                    SELECT poi.vendor_po_id, SUM(inwi.qty) AS total_inward_qty
+                    FROM vendor_pur_inward_item_info inwi
+                    JOIN vendor_pur_inward_info inw ON inw.vendor_pur_inward_id = inwi.vendor_pur_inward_id AND inw.status = 'Active'
+                    JOIN vendor_po_item_info poi ON poi.vendor_po_item_id = inwi.vendor_po_item_id
+                    WHERE inwi.status = 'Active'
+                    GROUP BY poi.vendor_po_id
+                ) inw_totals ON inw_totals.vendor_po_id = vpo.vendor_po_id
+                WHERE vap.status = 'Active'
+                  $where_adv
+
+                UNION ALL
+
+                -- PART B: Bill Payments against Purchase Invoices
+                SELECT 
+                    'Bill Payment' AS payment_type,
+                    vp.vendor_payment_id AS payment_ref_id,
+                    vp.payment_date AS payment_date,
+                    vpbi.bill_amount AS paid_amount,
+                    vpi.vendor_id,
+                    v.vendor_name,
+                    vpo.vendor_po_id,
+                    vpo.po_no,
+                    vpo.po_date,
+                    vpi.vendor_purchase_invoice_id AS invoice_id,
+                    vpi.invoice_no AS invoice_no,
+                    vpi.invoice_date AS invoice_date,
+                    COALESCE(inv_totals.total_inv_qty, po_totals.total_po_qty, 0) AS ordered_qty,
+                    COALESCE(inw_totals.total_inward_qty, 0) AS inward_qty,
+                    GREATEST(0, COALESCE(inv_totals.total_inv_qty, po_totals.total_po_qty, 0) - COALESCE(inw_totals.total_inward_qty, 0)) AS pending_qty,
+                    CASE 
+                        WHEN vpi.vendor_po_id IS NULL OR vpi.vendor_po_id = 0 THEN 'Direct Invoice'
+                        WHEN COALESCE(inw_totals.total_inward_qty, 0) <= 0 THEN 'Inward Not Entered'
+                        WHEN COALESCE(inw_totals.total_inward_qty, 0) < COALESCE(inv_totals.total_inv_qty, po_totals.total_po_qty, 0) THEN 'Partial Inward'
+                        ELSE 'Inward Entered'
+                    END AS inward_status
+                FROM vendor_payment_bill_info vpbi
+                JOIN vendor_payment_info vp ON vp.vendor_payment_id = vpbi.vendor_payment_id AND vp.status = 'Active'
+                JOIN vendor_purchase_invoice_info vpi ON vpi.vendor_purchase_invoice_id = vpbi.bill_id AND vpbi.bill_type = 'Purchase Invoice' AND vpi.status = 'Active'
+                JOIN vendor_info v ON v.vendor_id = vpi.vendor_id AND v.status = 'Active'
+                LEFT JOIN vendor_po_info vpo ON vpo.vendor_po_id = vpi.vendor_po_id AND vpo.status = 'Active'
+                LEFT JOIN (
+                    SELECT inv_i.vendor_purchase_invoice_id, SUM(inv_i.qty) AS total_inv_qty
+                    FROM vendor_purchase_invoice_item_info inv_i
+                    WHERE inv_i.status = 'Active'
+                    GROUP BY inv_i.vendor_purchase_invoice_id
+                ) inv_totals ON inv_totals.vendor_purchase_invoice_id = vpi.vendor_purchase_invoice_id
+                LEFT JOIN (
+                    SELECT poi.vendor_po_id, SUM(poi.qty) AS total_po_qty
+                    FROM vendor_po_item_info poi
+                    WHERE poi.status = 'Active'
+                    GROUP BY poi.vendor_po_id
+                ) po_totals ON po_totals.vendor_po_id = vpo.vendor_po_id
+                LEFT JOIN (
+                    SELECT poi.vendor_po_id, SUM(inwi.qty) AS total_inward_qty
+                    FROM vendor_pur_inward_item_info inwi
+                    JOIN vendor_pur_inward_info inw ON inw.vendor_pur_inward_id = inwi.vendor_pur_inward_id AND inw.status = 'Active'
+                    JOIN vendor_po_item_info poi ON poi.vendor_po_item_id = inwi.vendor_po_item_id
+                    WHERE inwi.status = 'Active'
+                    GROUP BY poi.vendor_po_id
+                ) inw_totals ON inw_totals.vendor_po_id = vpo.vendor_po_id
+                WHERE vpbi.status = 'Active'
+                  $where_pay
+            ) unified_records
+            $outer_where
+            ORDER BY payment_date DESC
+        ";
+
+        $data['record_list'] = $this->db->query($sql)->result_array();
+
+        // Calculate KPIs
+        $data['kpi_total_paid'] = 0;
+        $data['kpi_total_pending_qty'] = 0;
+        $data['kpi_not_entered_count'] = 0;
+        $data['kpi_partial_count'] = 0;
+
+        foreach ($data['record_list'] as $rec) {
+            $data['kpi_total_paid'] += (float)$rec['paid_amount'];
+            $data['kpi_total_pending_qty'] += (float)$rec['pending_qty'];
+            if ($rec['inward_status'] == 'Inward Not Entered') {
+                $data['kpi_not_entered_count']++;
+            } elseif ($rec['inward_status'] == 'Partial Inward') {
+                $data['kpi_partial_count']++;
+            }
+        }
+
+        // Excel Export
+        if ($this->input->post('export_excel') == '1') {
+            $filename = "Vendor_Paid_Material_Pending_Inward_" . date('YmdHis') . ".xls";
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=\"$filename\"");
+            echo $this->load->view('page/reports/vendor-paid-material-pending-inward-report-xls', $data, TRUE);
+            return;
+        }
+
+        $this->load->view('page/reports/vendor-paid-material-pending-inward-report', $data);
+    }
+
+    public function get_paid_inward_item_comparison_ajax()
+    {
+        $po_id = (int)$this->input->post('po_id');
+        $invoice_id = (int)$this->input->post('invoice_id');
+
+        $items = [];
+        if ($invoice_id > 0) {
+            $sql = "
+                SELECT 
+                    inv_item.item_code,
+                    inv_item.item_desc,
+                    inv_item.qty AS ordered_qty,
+                    inv_item.rate,
+                    (
+                        SELECT COALESCE(SUM(inw_item.qty), 0)
+                        FROM vendor_pur_inward_item_info inw_item
+                        JOIN vendor_pur_inward_info inw ON inw.vendor_pur_inward_id = inw_item.vendor_pur_inward_id
+                        WHERE inw_item.vendor_po_item_id = inv_item.vendor_po_item_id
+                          AND inw_item.status = 'Active'
+                          AND inw.status = 'Active'
+                    ) AS inward_qty
+                FROM vendor_purchase_invoice_item_info inv_item
+                WHERE inv_item.vendor_purchase_invoice_id = ?
+                  AND inv_item.status = 'Active'
+            ";
+            $items = $this->db->query($sql, [$invoice_id])->result_array();
+        } elseif ($po_id > 0) {
+            $sql = "
+                SELECT 
+                    poi.item_code,
+                    poi.item_desc,
+                    poi.qty AS ordered_qty,
+                    poi.rate,
+                    (
+                        SELECT COALESCE(SUM(inw_item.qty), 0)
+                        FROM vendor_pur_inward_item_info inw_item
+                        JOIN vendor_pur_inward_info inw ON inw.vendor_pur_inward_id = inw_item.vendor_pur_inward_id
+                        WHERE inw_item.vendor_po_item_id = poi.vendor_po_item_id
+                          AND inw_item.status = 'Active'
+                          AND inw.status = 'Active'
+                    ) AS inward_qty
+                FROM vendor_po_item_info poi
+                WHERE poi.vendor_po_id = ?
+                  AND poi.status = 'Active'
+            ";
+            $items = $this->db->query($sql, [$po_id])->result_array();
+        } else {
+            echo '<div class="alert alert-warning"><i class="fa fa-info-circle"></i> No PO or Invoice linked to this payment.</div>';
+            return;
+        }
+
+        if (empty($items)) {
+            echo '<p class="text-muted text-center" style="padding:20px;">No material item lines found for this record.</p>';
+            return;
+        }
+
+        $html = '<table class="table table-bordered table-striped">';
+        $html .= '<thead class="bg-primary"><tr>';
+        $html .= '<th style="width: 40px;">S.No</th>';
+        $html .= '<th>Item Code</th>';
+        $html .= '<th>Description</th>';
+        $html .= '<th class="text-right">Ordered Qty</th>';
+        $html .= '<th class="text-right">Inward Qty</th>';
+        $html .= '<th class="text-right">Pending Qty</th>';
+        $html .= '<th class="text-center">Status</th>';
+        $html .= '</tr></thead><tbody>';
+
+        foreach ($items as $idx => $item) {
+            $pending = max(0, (float)$item['ordered_qty'] - (float)$item['inward_qty']);
+            $status_label = ($item['inward_qty'] <= 0) 
+                ? '<span class="label label-danger">Not Received</span>' 
+                : (($item['inward_qty'] < $item['ordered_qty']) 
+                    ? '<span class="label label-warning">Partially Received</span>' 
+                    : '<span class="label label-success">Fully Received</span>');
+
+            $html .= '<tr>';
+            $html .= '<td>' . ($idx + 1) . '</td>';
+            $html .= '<td>' . htmlspecialchars($item['item_code'] ?? '-') . '</td>';
+            $html .= '<td>' . htmlspecialchars($item['item_desc'] ?? '') . '</td>';
+            $html .= '<td align="right">' . number_format($item['ordered_qty'], 2) . '</td>';
+            $html .= '<td align="right" style="color:green;">' . number_format($item['inward_qty'], 2) . '</td>';
+            $html .= '<td align="right" style="font-weight:bold; color:red;">' . number_format($pending, 2) . '</td>';
+            $html .= '<td align="center">' . $status_label . '</td>';
+            $html .= '</tr>';
+        }
+
+        $html .= '</tbody></table>';
+        echo $html;
+    }
+
 }

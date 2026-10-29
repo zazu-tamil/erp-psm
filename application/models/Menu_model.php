@@ -348,6 +348,33 @@ class Menu_model extends CI_Model {
             ));
         }
 
+        // 7h. Ensure vendor-paid-material-pending-inward-report exists
+        $vpm_menu = $this->db->where('menu_slug', 'vendor-paid-material-pending-inward-report')
+                             ->where('status !=', 'Delete')
+                             ->get('menu_info')
+                             ->row_array();
+        if (!$vpm_menu) {
+            $this->db->insert('menu_info', array(
+                'parent_id'   => $supplier_parent_id,
+                'menu_title'  => 'Paid Material Pending Inward',
+                'menu_slug'   => 'vendor-paid-material-pending-inward-report',
+                'menu_icon'   => 'fa fa-clock-o',
+                'is_header'   => 0,
+                'sort_order'  => 3,
+                'status'      => 'Active'
+            ));
+            $vpm_menu_id = $this->db->insert_id();
+        } else {
+            $vpm_menu_id = (int)$vpm_menu['menu_id'];
+            $this->db->where('menu_id', $vpm_menu_id)->update('menu_info', array(
+                'parent_id'  => $supplier_parent_id,
+                'menu_title' => 'Paid Material Pending Inward',
+                'menu_icon'  => 'fa fa-clock-o',
+                'sort_order' => 3,
+                'status'     => 'Active'
+            ));
+        }
+
         // 8. Update parent_id for Tender Reports
         $tender_slugs = array(
             'tender-enquiry-timeline',
@@ -369,6 +396,7 @@ class Menu_model extends CI_Model {
         $supplier_slugs = array(
             'vendor-pending-invoice-report',
             'vendor-invoice-without-inward-report',
+            'vendor-paid-material-pending-inward-report',
             'supplier-invoice-report',
             'dp-custom-invoice-report',
             'vendor-statement-report',
@@ -389,16 +417,17 @@ class Menu_model extends CI_Model {
         // Fix sort orders inside Supplier Report
         $this->db->where('menu_slug', 'vendor-pending-invoice-report')->update('menu_info', array('sort_order' => 1));
         $this->db->where('menu_slug', 'vendor-invoice-without-inward-report')->update('menu_info', array('sort_order' => 2));
-        $this->db->where('menu_slug', 'supplier-invoice-report')->update('menu_info', array('sort_order' => 3));
-        $this->db->where('menu_slug', 'dp-custom-invoice-report')->update('menu_info', array('sort_order' => 4));
-        $this->db->where('menu_slug', 'vendor-statement-report')->update('menu_info', array('sort_order' => 5));
-        $this->db->where('menu_slug', 'vendor-balance-report')->update('menu_info', array('sort_order' => 6));
-        $this->db->where('menu_slug', 'supplier-summary-report')->update('menu_info', array('sort_order' => 7));
+        $this->db->where('menu_slug', 'vendor-paid-material-pending-inward-report')->update('menu_info', array('sort_order' => 3));
+        $this->db->where('menu_slug', 'supplier-invoice-report')->update('menu_info', array('sort_order' => 4));
+        $this->db->where('menu_slug', 'dp-custom-invoice-report')->update('menu_info', array('sort_order' => 5));
+        $this->db->where('menu_slug', 'vendor-statement-report')->update('menu_info', array('sort_order' => 6));
+        $this->db->where('menu_slug', 'vendor-balance-report')->update('menu_info', array('sort_order' => 7));
+        $this->db->where('menu_slug', 'supplier-summary-report')->update('menu_info', array('sort_order' => 8));
 
         // 11. Ensure role_permission for all active roles
         $roles = $this->db->where('status !=', 'Delete')->get('role_info')->result_array();
         if (!empty($roles)) {
-            $check_ids = array($tender_parent_id, $supplier_parent_id, $c_menu_id, $v_menu_id, $vb_menu_id, $cb_menu_id, $cir_menu_id, $sir_menu_id, $dpc_menu_id, $viw_menu_id);
+            $check_ids = array($tender_parent_id, $supplier_parent_id, $c_menu_id, $v_menu_id, $vb_menu_id, $cb_menu_id, $cir_menu_id, $sir_menu_id, $dpc_menu_id, $viw_menu_id, $vpm_menu_id);
             foreach ($roles as $role) {
                 $role_id = (int)$role['role_id'];
                 foreach ($check_ids as $mid) {
