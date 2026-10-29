@@ -721,7 +721,7 @@ class PettyCash extends CI_Controller
                 UNION ALL
                 SELECT inward_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM cb_cash_inward_info cin WHERE $w_cin
                 UNION ALL
-                SELECT outward_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM cb_cash_outward_info cout WHERE $w_cout
+                SELECT outward_date AS tr_date, 0 AS amount_in, amount AS amount_out FROM cb_cash_outward_info cout WHERE cout.status = 'Active' and $w_cout
                 UNION ALL
                 SELECT entry_date AS tr_date, amount AS amount_in, 0 AS amount_out FROM cb_contra_entry_info ce WHERE ce.status = 'Active' AND ce.to_ac_type = 'Cash' AND $w_ce_to
                 UNION ALL
@@ -869,7 +869,10 @@ class PettyCash extends CI_Controller
                 LEFT JOIN cb_sub_account_head_info sh ON sh.sub_account_head_id = cout.sub_account_head_id
                 LEFT JOIN cb_sub_account_head_lvl3_info e ON e.sub_account_headlvl3_id = cout.sub_account_headlvl3_id
                 LEFT JOIN cb_voucher_type_info vt ON vt.voucher_type_id = cout.voucher_type_id
-                LEFT JOIN cash_category cc ON cc.cash_category_id = cout.cash_category_id AND cc.status = 'Active'
+                LEFT JOIN cash_category cc ON cc.cash_category_id = cout.cash_category_id 
+                AND cc.status = 'Active' 
+                where cout.status = 'Active'
+                and $w_cout and cout.outward_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "'
                 UNION ALL
 
                 -- Customer Advance Payments
