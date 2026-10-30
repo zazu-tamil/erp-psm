@@ -2634,37 +2634,60 @@ class Reports extends CI_Controller
         $this->load->view('page/reports/vendor-invoice-pending-report', $data);
     }
 
-    public function in_stock_item_report()
+    public function in_stock_item_report($action = '')
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in')) {
             redirect();
         }
 
         $data['title'] = 'In Stock Item Report';
-        $data['js'] = 'reports/in-stock-item-report.inc'; // ← your custom js if any
+        $data['js'] = 'reports/in-stock-item-report.inc';
 
-
-
-
-        $where = "1=1";
+        // Reset filter
+        if ($action === 'reset' || $this->input->get('reset') == '1') {
+            $this->session->unset_userdata('srch_instock_vendor_id');
+            $this->session->unset_userdata('srch_instock_keyword');
+            redirect('in-stock-item-report');
+        }
 
         // ===================== SEARCH FILTERS =====================
         if ($this->input->post('srch_vendor_id') !== null) {
             $data['srch_vendor_id'] = $srch_vendor_id = $this->input->post('srch_vendor_id');
-            $this->session->set_userdata('srch_vendor_id', $srch_vendor_id);
-        } elseif ($this->session->userdata('srch_vendor_id')) {
-            $data['srch_vendor_id'] = $srch_vendor_id = $this->session->userdata('srch_vendor_id');
+            if ($this->input->post('export_excel') != '1') {
+                $this->session->set_userdata('srch_instock_vendor_id', $srch_vendor_id);
+            }
+        } elseif ($this->session->userdata('srch_instock_vendor_id')) {
+            $data['srch_vendor_id'] = $srch_vendor_id = $this->session->userdata('srch_instock_vendor_id');
         } else {
             $data['srch_vendor_id'] = $srch_vendor_id = '';
         }
+
+        if ($this->input->post('srch_keyword') !== null) {
+            $data['srch_keyword'] = $srch_keyword = trim($this->input->post('srch_keyword'));
+            if ($this->input->post('export_excel') != '1') {
+                $this->session->set_userdata('srch_instock_keyword', $srch_keyword);
+            }
+        } elseif ($this->session->userdata('srch_instock_keyword')) {
+            $data['srch_keyword'] = $srch_keyword = $this->session->userdata('srch_instock_keyword');
+        } else {
+            $data['srch_keyword'] = $srch_keyword = '';
+        }
+
+        $where = "1=1";
 
         if (!empty($srch_vendor_id)) {
             $where .= " AND aii_stock.vendor_id = '" . $this->db->escape_str($srch_vendor_id) . "'";
         }
 
+        if (!empty($srch_keyword)) {
+            $escaped_kw = $this->db->escape_like_str($srch_keyword);
+            $where .= " AND (aii_stock.item_code LIKE '%" . $escaped_kw . "%' 
+                         OR aii_stock.item_desc LIKE '%" . $escaped_kw . "%' 
+                         OR aii_stock.tender_details LIKE '%" . $escaped_kw . "%' 
+                         OR aii_stock.inward_no LIKE '%" . $escaped_kw . "%')";
+        }
 
-        //vendor_opt
-
+        // vendor_opt
         $sql = "
             SELECT vendor_id, vendor_name 
             FROM vendor_info 
@@ -2676,26 +2699,30 @@ class Reports extends CI_Controller
             $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
         }
 
-        $data['record_list'] = [];
-
         $sql = "
           SELECT *
             FROM 
             (
                 SELECT 
                     a.vendor_pur_inward_item_id, 
+                    b.inward_no,
+                    b.inward_date,
                     a.item_code,
                     a.item_desc,
                     a.uom,
+                    IFNULL(a.rate, 0) AS rate,
                     b.vendor_id,                     
                     c.vendor_name,
                     get_tender_info(b.tender_enquiry_id) AS tender_details,
+                    b.tender_enquiry_id,
                     a.qty AS inward_qty, 
                     IFNULL(dc.total_dc_qty, 0) AS dc_qty, 
-                    '' AS instock,
-                    (a.qty - IFNULL(dc.total_dc_qty, 0)) AS instock_item_qty 
+                    (a.qty - IFNULL(dc.total_dc_qty, 0)) AS instock_item_qty,
+                    ROUND((a.qty - IFNULL(dc.total_dc_qty, 0)) * IFNULL(a.rate, 0), 2) AS stock_value,
+                    'Inward Stock' AS stock_source,
+                    'Inward Stock' AS source_type
                 FROM vendor_pur_inward_item_info AS a 
-                LEFT JOIN vendor_pur_inward_info AS b 
+                JOIN vendor_pur_inward_info AS b 
                     ON a.vendor_pur_inward_id = b.vendor_pur_inward_id 
                     AND b.status = 'Active' 
                 LEFT JOIN vendor_info AS c 
@@ -2706,6 +2733,9 @@ class Reports extends CI_Controller
                         tdc.vendor_pur_inward_item_id,
                         SUM(tdc.qty) AS total_dc_qty
                     FROM tender_dc_item_info AS tdc
+                    JOIN tender_dc_info AS tdc_head 
+                        ON tdc.tender_dc_id = tdc_head.tender_dc_id 
+                        AND tdc_head.status = 'Active'
                     WHERE tdc.status = 'Active'
                     GROUP BY tdc.vendor_pur_inward_item_id
                 ) dc 
@@ -2716,16 +2746,22 @@ class Reports extends CI_Controller
 
                 SELECT
                     0 AS vendor_pur_inward_item_id,
+                    'Direct Stock' AS inward_no,
+                    DATE(a.created_date) AS inward_date,
                     a.item_code,
                     a.item_desc,
                     a.uom,
+                    IFNULL(a.rate, 0) AS rate,
                     a.vendor_id,                    
                     b.vendor_name,
                     '' AS tender_details,
+                    0 AS tender_enquiry_id,
                     a.qty AS inward_qty, 
                     0 AS dc_qty, 
-                    'instock' AS instock,
-                    a.qty AS instock_item_qty
+                    a.qty AS instock_item_qty,
+                    ROUND(a.qty * IFNULL(a.rate, 0), 2) AS stock_value,
+                    'Manual Stock' AS stock_source,
+                    'Manual Stock' AS source_type
                 FROM in_stock_item_info AS a 
                 LEFT JOIN vendor_info AS b 
                     ON a.vendor_id = b.vendor_id 
@@ -2736,11 +2772,39 @@ class Reports extends CI_Controller
 
             WHERE instock_item_qty > 0 
             AND $where
-            ORDER BY item_code ASC;
+            ORDER BY item_code ASC, inward_date DESC;
         ";
 
         $query = $this->db->query($sql);
-        $data['record_list'] = $query->result_array();
+        $record_list = $query->result_array();
+
+        // Calculate KPIs
+        $tot_inward_qty = 0;
+        $tot_dc_qty = 0;
+        $tot_stock_qty = 0;
+        $tot_stock_value = 0;
+        foreach ($record_list as $row) {
+            $tot_inward_qty += (float)$row['inward_qty'];
+            $tot_dc_qty += (float)$row['dc_qty'];
+            $tot_stock_qty += (float)$row['instock_item_qty'];
+            $tot_stock_value += (float)$row['stock_value'];
+        }
+
+        $data['record_list'] = $record_list;
+        $data['tot_inward_qty'] = $tot_inward_qty;
+        $data['tot_dc_qty'] = $tot_dc_qty;
+        $data['tot_stock_qty'] = $tot_stock_qty;
+        $data['tot_stock_value'] = $tot_stock_value;
+        $data['tot_items_count'] = count($record_list);
+
+        // Excel Export
+        if ($this->input->post('export_excel') == '1' || $this->input->get('export') == 'excel') {
+            $filename = "In_Stock_Item_Report_" . date('YmdHis') . ".xls";
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=\"$filename\"");
+            echo $this->load->view('page/reports/in-stock-item-report-xls', $data, TRUE);
+            return;
+        }
 
         $this->load->view('page/reports/in-stock-item-report', $data);
     }

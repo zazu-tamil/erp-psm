@@ -1,0 +1,58 @@
+2. Purchase Return Module (Return to Vendor)
+2.1 Workflow
+User navigates to Vendor 
+→
+→ Purchase Return 
+→
+→ Add Purchase Return.
+Selects Supplier and the source document (Supplier Inward or Purchase Invoice).
+The system automatically populates the original material item lines showing:
+Inward Qty (originally received)
+Already Returned Qty (from prior returns)
+Available / Max Returnable Qty (
+=
+Inward Qty
+−
+Already Returned
+=Inward Qty−Already Returned)
+Return Qty (user input, validated 
+≤
+Max Returnable
+≤Max Returnable)
+Unit Rate, Tax/VAT %, Line Total
+User selects Reason for Return (Damaged Goods, Wrong Specification, Quality Rejection, Surplus).
+On Save:
+Saves purchase_return_info and purchase_return_item_info.
+Automatically generates a Supplier Debit Note in credit_debit_note_info to credit the vendor ledger.
+Updates net stock in the Item Inward-Outward Register.
+Provides a printable Purchase Return Delivery Challan / Gate Pass.
+3. Sales Return Module (Customer Return)
+3.1 Workflow
+User navigates to Tender / Customer 
+→
+→ Sales Return 
+→
+→ Add Sales Return.
+Selects Customer and source document (Delivery Challan / DC or Sales Invoice).
+The system automatically loads the delivered item lines:
+Delivered Qty (from Tender DC)
+Already Returned Qty (from prior returns)
+Max Returnable Qty (
+=
+Delivered Qty
+−
+Already Returned
+=Delivered Qty−Already Returned)
+Return Qty (user input, validated 
+≤
+Max Returnable
+≤Max Returnable)
+Unit Rate, Tax/VAT %, Total Credit
+User selects Restock Destination:
+Restock to Active Warehouse Inventory (ready for re-dispatch).
+Quarantine / Damaged Stock (held for inspection).
+On Save:
+Saves sales_return_info and sales_return_item_info.
+Automatically generates a Customer Credit Note in credit_debit_note_info.
+Reflects as a Credit (-) in the Customer Statement Report.
+Provides a printable Sales Return Material Inward Slip.
