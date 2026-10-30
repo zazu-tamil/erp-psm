@@ -232,7 +232,7 @@ $route['na-cash-out-statement'] = 'accounts/na_cash_out_statement';
 $route['cash-in-out-statement'] = 'accounts/cash_in_out_statement';
 $route['petty-cash-statement'] = 'PettyCash/petty_cash_statement';
 $route['outward-summary'] = 'accounts/outward_summary';
-$route['inward-summary'] = 'accounts/inward_summary';
+$route['inward-summary'] = 'accounts/inward_summary'; 
 
 $route['tds-report'] = 'accounts/tds_report';
 $route['bills-report'] = 'accounts/bills_report';
