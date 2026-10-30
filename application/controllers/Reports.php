@@ -6211,4 +6211,314 @@ class Reports extends CI_Controller
         echo $html;
     }
 
+    public function customer_dc_without_invoice_report()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        // Handle Reset
+        if ($this->input->post('reset') == '1' || $this->input->get('reset') == '1') {
+            $this->session->unset_userdata('cdw_from_date');
+            $this->session->unset_userdata('cdw_to_date');
+            $this->session->unset_userdata('cdw_customer_id');
+            $this->session->unset_userdata('cdw_status');
+            redirect('customer-dc-without-invoice-report');
+            return;
+        }
+
+        $data = array();
+        $data['js'] = 'reports/customer-dc-without-invoice-report.inc';
+        $data['s_url'] = 'customer-dc-without-invoice-report';
+        $data['title'] = 'Customer DC Generated But Not Invoiced Report';
+
+        if (isset($_POST['srch_from_date'])) {
+            $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
+            $data['customer_id'] = $customer_id = $this->input->post('customer_id');
+            $data['invoicing_status'] = $invoicing_status = $this->input->post('invoicing_status');
+
+            $this->session->set_userdata('cdw_from_date', $srch_from_date);
+            $this->session->set_userdata('cdw_to_date', $srch_to_date);
+            $this->session->set_userdata('cdw_customer_id', $customer_id);
+            $this->session->set_userdata('cdw_status', $invoicing_status);
+        } elseif ($this->session->userdata('cdw_from_date') || $this->session->userdata('cdw_to_date') || $this->session->userdata('cdw_customer_id') || $this->session->userdata('cdw_status')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('cdw_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('cdw_to_date');
+            $data['customer_id'] = $customer_id = $this->session->userdata('cdw_customer_id');
+            $data['invoicing_status'] = $invoicing_status = $this->session->userdata('cdw_status');
+        } else {
+            $data['srch_from_date'] = $srch_from_date = '';
+            $data['srch_to_date'] = $srch_to_date = '';
+            $data['customer_id'] = $customer_id = '';
+            $data['invoicing_status'] = $invoicing_status = '';
+        }
+
+        // Customers dropdown
+        $sql_cust = "
+            SELECT customer_id, customer_name 
+            FROM customer_info 
+            WHERE status = 'Active' 
+            ORDER BY customer_name ASC";
+        $q_cust = $this->db->query($sql_cust);
+        $data['customer_opt'] = ['' => 'All Customers'];
+        foreach ($q_cust->result_array() as $row) {
+            $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
+        }
+
+        // Date conditions on DC Date
+        $where_dc = "";
+        if (!empty($srch_from_date) && !empty($srch_to_date)) {
+            $where_dc .= " AND (dc.dc_date BETWEEN '" . $this->db->escape_str($srch_from_date) . "' AND '" . $this->db->escape_str($srch_to_date) . "')";
+        } elseif (!empty($srch_from_date)) {
+            $where_dc .= " AND dc.dc_date >= '" . $this->db->escape_str($srch_from_date) . "'";
+        } elseif (!empty($srch_to_date)) {
+            $where_dc .= " AND dc.dc_date <= '" . $this->db->escape_str($srch_to_date) . "'";
+        }
+
+        // Customer condition
+        if (!empty($customer_id)) {
+            $where_dc .= " AND dc.customer_id = '" . $this->db->escape_str($customer_id) . "'";
+        }
+
+        // Outer filters
+        $outer_conds = array();
+        if ($invoicing_status == 'Not Invoiced') {
+            $outer_conds[] = " invoicing_status = 'Not Invoiced'";
+        } elseif ($invoicing_status == 'Partial Invoiced') {
+            $outer_conds[] = " invoicing_status = 'Partial Invoiced'";
+        } elseif ($invoicing_status == 'All') {
+            // Include fully invoiced as well
+        } else {
+            // Default: All Pending (Not Invoiced + Partial Invoiced)
+            $outer_conds[] = " invoicing_status IN ('Not Invoiced', 'Partial Invoiced')";
+        }
+
+        $outer_where = "";
+        if (!empty($outer_conds)) {
+            $outer_where = " WHERE " . implode(" AND ", $outer_conds);
+        }
+
+        $sql = "
+            SELECT * FROM (
+                SELECT 
+                    dc.tender_dc_id,
+                    dc.dc_no,
+                    dc.dc_date,
+                    dc.customer_id,
+                    c.customer_name,
+                    c.customer_code,
+                    ci.company_name,
+                    te.tender_enquiry_id,
+                    te.enquiry_no,
+                    po.customer_po_no,
+                    po.po_date,
+                    COALESCE(dc_items.total_dc_qty, 0) AS delivered_qty,
+                    COALESCE(inv_summary.total_invoiced_qty, 0) AS invoiced_qty,
+                    GREATEST(0, COALESCE(dc_items.total_dc_qty, 0) - COALESCE(inv_summary.total_invoiced_qty, 0)) AS pending_qty,
+                    COALESCE(inv_summary.invoice_nos, 'None') AS invoice_nos,
+                    COALESCE(inv_summary.invoice_dates, '-') AS invoice_dates,
+                    COALESCE(inv_summary.invoice_ids, '') AS invoice_ids,
+                    CASE 
+                        WHEN inv_summary.invoice_count IS NULL OR inv_summary.invoice_count = 0 THEN 'Not Invoiced'
+                        WHEN COALESCE(inv_summary.total_invoiced_qty, 0) < COALESCE(dc_items.total_dc_qty, 0) THEN 'Partial Invoiced'
+                        ELSE 'Fully Invoiced'
+                    END AS invoicing_status,
+                    DATEDIFF(CURRENT_DATE, dc.dc_date) AS aging_days
+                FROM tender_dc_info dc
+                JOIN customer_info c ON c.customer_id = dc.customer_id AND c.status = 'Active'
+                LEFT JOIN company_info ci ON ci.company_id = dc.company_id AND ci.status = 'Active'
+                LEFT JOIN tender_enquiry_info te ON te.tender_enquiry_id = dc.tender_enquiry_id AND te.status != 'Delete'
+                LEFT JOIN customer_tender_po_info po ON po.tender_po_id = dc.tender_po_id AND po.status = 'Active'
+                LEFT JOIN (
+                    SELECT 
+                        dci.tender_dc_id, 
+                        SUM(dci.qty) AS total_dc_qty 
+                    FROM tender_dc_item_info dci 
+                    WHERE dci.status = 'Active' 
+                    GROUP BY dci.tender_dc_id
+                ) dc_items ON dc_items.tender_dc_id = dc.tender_dc_id
+                LEFT JOIN (
+                    SELECT 
+                        dc_ref.tender_dc_id,
+                        GROUP_CONCAT(DISTINCT inv.invoice_no ORDER BY inv.invoice_date ASC SEPARATOR '<br>') AS invoice_nos,
+                        GROUP_CONCAT(DISTINCT DATE_FORMAT(inv.invoice_date, '%d/%m/%Y') ORDER BY inv.invoice_date ASC SEPARATOR '<br>') AS invoice_dates,
+                        GROUP_CONCAT(DISTINCT inv.tender_enq_invoice_id SEPARATOR ',') AS invoice_ids,
+                        COUNT(DISTINCT inv.tender_enq_invoice_id) AS invoice_count,
+                        SUM(inv_items.inv_qty) AS total_invoiced_qty
+                    FROM tender_dc_info dc_ref
+                    JOIN tender_enq_invoice_info inv 
+                        ON FIND_IN_SET(dc_ref.tender_dc_id, inv.tender_dc_id) AND inv.status = 'Active'
+                    LEFT JOIN (
+                        SELECT 
+                            tender_enq_invoice_id, 
+                            SUM(qty) AS inv_qty 
+                        FROM tender_enq_invoice_item_info 
+                        WHERE status = 'Active' 
+                        GROUP BY tender_enq_invoice_id
+                    ) inv_items ON inv_items.tender_enq_invoice_id = inv.tender_enq_invoice_id
+                    WHERE dc_ref.status = 'Active'
+                    GROUP BY dc_ref.tender_dc_id
+                ) inv_summary ON inv_summary.tender_dc_id = dc.tender_dc_id
+                WHERE dc.status = 'Active'
+                  $where_dc
+            ) report_data
+            $outer_where
+            ORDER BY dc_date DESC, tender_dc_id DESC
+        ";
+
+        $data['record_list'] = $this->db->query($sql)->result_array();
+
+        // Calculate KPIs
+        $data['kpi_total_uninvoiced_dcs'] = 0;
+        $data['kpi_total_delivered_qty'] = 0;
+        $data['kpi_total_pending_qty'] = 0;
+        $data['kpi_not_invoiced_count'] = 0;
+        $data['kpi_partial_invoiced_count'] = 0;
+        $data['kpi_overdue_15_count'] = 0;
+
+        foreach ($data['record_list'] as $rec) {
+            $data['kpi_total_delivered_qty'] += (float)$rec['delivered_qty'];
+            $data['kpi_total_pending_qty'] += (float)$rec['pending_qty'];
+            if ($rec['invoicing_status'] == 'Not Invoiced') {
+                $data['kpi_total_uninvoiced_dcs']++;
+                $data['kpi_not_invoiced_count']++;
+            } elseif ($rec['invoicing_status'] == 'Partial Invoiced') {
+                $data['kpi_total_uninvoiced_dcs']++;
+                $data['kpi_partial_invoiced_count']++;
+            }
+            if ((int)$rec['aging_days'] > 15) {
+                $data['kpi_overdue_15_count']++;
+            }
+        }
+
+        // Excel Export
+        if ($this->input->post('export_excel') == '1') {
+            $filename = "Customer_DC_Without_Invoice_" . date('YmdHis') . ".xls";
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=\"$filename\"");
+            echo $this->load->view('page/reports/customer-dc-without-invoice-report-xls', $data, TRUE);
+            return;
+        }
+
+        $this->load->view('page/reports/customer-dc-without-invoice-report', $data);
+    }
+
+    public function get_dc_invoice_item_comparison_ajax()
+    {
+        $dc_id = (int)$this->input->post('dc_id');
+
+        if ($dc_id <= 0) {
+            echo '<div class="alert alert-warning"><i class="fa fa-info-circle"></i> Invalid DC ID provided.</div>';
+            return;
+        }
+
+        // Fetch DC Header details
+        $dc_sql = "
+            SELECT 
+                dc.tender_dc_id,
+                dc.dc_no,
+                dc.dc_date,
+                c.customer_name,
+                po.customer_po_no
+            FROM tender_dc_info dc
+            JOIN customer_info c ON c.customer_id = dc.customer_id AND c.status = 'Active'
+            LEFT JOIN customer_tender_po_info po ON po.tender_po_id = dc.tender_po_id AND po.status = 'Active'
+            WHERE dc.tender_dc_id = ? AND dc.status = 'Active'
+        ";
+        $dc_head = $this->db->query($dc_sql, [$dc_id])->row_array();
+
+        if (empty($dc_head)) {
+            echo '<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> Delivery Challan not found.</div>';
+            return;
+        }
+
+        // Fetch items from tender_dc_item_info
+        $items_sql = "
+            SELECT 
+                dci.tender_dc_item_id,
+                dci.item_code,
+                dci.item_desc,
+                dci.uom,
+                dci.qty AS delivered_qty
+            FROM tender_dc_item_info dci
+            WHERE dci.tender_dc_id = ? AND dci.status = 'Active'
+            ORDER BY dci.tender_dc_item_id ASC
+        ";
+        $items = $this->db->query($items_sql, [$dc_id])->result_array();
+
+        if (empty($items)) {
+            echo '<p class="text-muted text-center" style="padding:20px;">No material item lines found for this Delivery Challan.</p>';
+            return;
+        }
+
+        // Fetch any linked invoices
+        $inv_sql = "
+            SELECT 
+                inv.tender_enq_invoice_id,
+                inv.invoice_no,
+                inv.invoice_date,
+                inv.total_amount
+            FROM tender_enq_invoice_info inv
+            WHERE FIND_IN_SET(?, inv.tender_dc_id) AND inv.status = 'Active'
+            ORDER BY inv.invoice_date ASC
+        ";
+        $linked_invoices = $this->db->query($inv_sql, [$dc_id])->result_array();
+
+        $html = '<div style="margin-bottom: 15px;">';
+        $html .= '<strong>Customer:</strong> ' . htmlspecialchars($dc_head['customer_name']) . ' &nbsp;|&nbsp; ';
+        $html .= '<strong>DC No:</strong> ' . htmlspecialchars($dc_head['dc_no']) . ' &nbsp;|&nbsp; ';
+        $html .= '<strong>DC Date:</strong> ' . date('d/m/Y', strtotime($dc_head['dc_date']));
+        if (!empty($dc_head['customer_po_no'])) {
+            $html .= ' &nbsp;|&nbsp; <strong>PO No:</strong> ' . htmlspecialchars($dc_head['customer_po_no']);
+        }
+        $html .= '</div>';
+
+        if (!empty($linked_invoices)) {
+            $html .= '<div class="alert alert-info" style="padding: 8px 12px; margin-bottom: 12px;">';
+            $html .= '<strong><i class="fa fa-file-text-o"></i> Linked Invoices:</strong> ';
+            $inv_strs = [];
+            foreach ($linked_invoices as $li) {
+                $inv_strs[] = htmlspecialchars($li['invoice_no']) . ' (' . date('d/m/Y', strtotime($li['invoice_date'])) . ')';
+            }
+            $html .= implode(', ', $inv_strs);
+            $html .= '</div>';
+        }
+
+        $html .= '<table class="table table-bordered table-striped">';
+        $html .= '<thead class="bg-primary"><tr>';
+        $html .= '<th style="width: 40px;">S.No</th>';
+        $html .= '<th>Item Code</th>';
+        $html .= '<th>Item Description</th>';
+        $html .= '<th style="width: 70px;">UOM</th>';
+        $html .= '<th class="text-right">Delivered Qty</th>';
+        $html .= '<th class="text-center">Status</th>';
+        $html .= '</tr></thead><tbody>';
+
+        $total_del = 0;
+        foreach ($items as $idx => $item) {
+            $total_del += (float)$item['delivered_qty'];
+            $status_badge = empty($linked_invoices) 
+                ? '<span class="label label-danger"><i class="fa fa-times"></i> Not Invoiced</span>' 
+                : '<span class="label label-warning"><i class="fa fa-check"></i> Linked to Invoice</span>';
+
+            $html .= '<tr>';
+            $html .= '<td>' . ($idx + 1) . '</td>';
+            $html .= '<td>' . htmlspecialchars($item['item_code'] ?? '-') . '</td>';
+            $html .= '<td>' . htmlspecialchars($item['item_desc'] ?? '') . '</td>';
+            $html .= '<td>' . htmlspecialchars($item['uom'] ?? '') . '</td>';
+            $html .= '<td align="right" style="font-weight:bold;">' . number_format($item['delivered_qty'], 2) . '</td>';
+            $html .= '<td align="center">' . $status_badge . '</td>';
+            $html .= '</tr>';
+        }
+
+        $html .= '</tbody><tfoot>';
+        $html .= '<tr style="font-weight: bold; background-color: #f4f4f4;">';
+        $html .= '<td colspan="4" align="right">Total Delivered Units:</td>';
+        $html .= '<td align="right" style="color:#0073b7;">' . number_format($total_del, 2) . '</td>';
+        $html .= '<td></td>';
+        $html .= '</tr></tfoot></table>';
+        echo $html;
+    }
+
 }

@@ -361,6 +361,8 @@ $route['vendor-invoice-without-inward-report'] = 'reports/vendor_invoice_without
 $route['get-invoice-inward-item-comparison'] = 'reports/get_invoice_inward_item_comparison_ajax';
 $route['vendor-paid-material-pending-inward-report'] = 'reports/vendor_paid_material_pending_inward_report';
 $route['get-paid-inward-item-comparison'] = 'reports/get_paid_inward_item_comparison_ajax';
+$route['customer-dc-without-invoice-report'] = 'reports/customer_dc_without_invoice_report';
+$route['get-dc-invoice-item-comparison'] = 'reports/get_dc_invoice_item_comparison_ajax';
 
 //in_stock_item_info
 $route['in-stock-item-list'] = 'tender/in_stock_item_list';

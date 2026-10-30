@@ -375,12 +375,40 @@ class Menu_model extends CI_Model {
             ));
         }
 
+        // 7i. Ensure customer-dc-without-invoice-report exists under Tender Reports
+        $cdw_menu = $this->db->where('menu_slug', 'customer-dc-without-invoice-report')
+                             ->where('status !=', 'Delete')
+                             ->get('menu_info')
+                             ->row_array();
+        if (!$cdw_menu) {
+            $this->db->insert('menu_info', array(
+                'parent_id'   => $tender_parent_id,
+                'menu_title'  => 'DC Without Invoice Report',
+                'menu_slug'   => 'customer-dc-without-invoice-report',
+                'menu_icon'   => 'fa fa-truck',
+                'is_header'   => 0,
+                'sort_order'  => 5,
+                'status'      => 'Active'
+            ));
+            $cdw_menu_id = $this->db->insert_id();
+        } else {
+            $cdw_menu_id = (int)$cdw_menu['menu_id'];
+            $this->db->where('menu_id', $cdw_menu_id)->update('menu_info', array(
+                'parent_id'  => $tender_parent_id,
+                'menu_title' => 'DC Without Invoice Report',
+                'menu_icon'  => 'fa fa-truck',
+                'sort_order' => 5,
+                'status'     => 'Active'
+            ));
+        }
+
         // 8. Update parent_id for Tender Reports
         $tender_slugs = array(
             'tender-enquiry-timeline',
             'tender-enquiry-summary-report',
             'item-rate-report',
             'item-inward-outward-report',
+            'customer-dc-without-invoice-report',
             'customer-invoice-report',
             'customer-pending-invoice-report',
             'customer-statement-report',
@@ -427,7 +455,7 @@ class Menu_model extends CI_Model {
         // 11. Ensure role_permission for all active roles
         $roles = $this->db->where('status !=', 'Delete')->get('role_info')->result_array();
         if (!empty($roles)) {
-            $check_ids = array($tender_parent_id, $supplier_parent_id, $c_menu_id, $v_menu_id, $vb_menu_id, $cb_menu_id, $cir_menu_id, $sir_menu_id, $dpc_menu_id, $viw_menu_id, $vpm_menu_id);
+            $check_ids = array($tender_parent_id, $supplier_parent_id, $c_menu_id, $v_menu_id, $vb_menu_id, $cb_menu_id, $cir_menu_id, $sir_menu_id, $dpc_menu_id, $viw_menu_id, $vpm_menu_id, $cdw_menu_id);
             foreach ($roles as $role) {
                 $role_id = (int)$role['role_id'];
                 foreach ($check_ids as $mid) {
