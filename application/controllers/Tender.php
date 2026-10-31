@@ -5189,6 +5189,7 @@ ORDER BY
         left join vendor_rate_enquiry_item_info as e on e.vendor_rate_enquiry_item_id = d.vendor_rate_enquiry_item_id and e.`status` = 'Active'
         left join tender_enquiry_item_info as f on f.tender_enquiry_item_id = e.tender_enquiry_item_id and f.`status` = 'Active'
         where a.`status`='Active'
+        and c.`status` = 'Active'
         and a.tender_dc_id = ?
         group by a.tender_dc_id , b.tender_dc_item_id , f.tender_enquiry_item_id
 

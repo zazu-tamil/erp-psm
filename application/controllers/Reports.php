@@ -6399,6 +6399,9 @@ class Reports extends CI_Controller
                         dci.tender_dc_id, 
                         SUM(dci.qty) AS total_dc_qty 
                     FROM tender_dc_item_info dci 
+                    JOIN vendor_pur_inward_item_info c 
+                        ON c.vendor_pur_inward_item_id = dci.vendor_pur_inward_item_id 
+                        AND c.status = 'Active'
                     WHERE dci.status = 'Active' 
                     GROUP BY dci.tender_dc_id
                 ) dc_items ON dc_items.tender_dc_id = dc.tender_dc_id
@@ -6506,6 +6509,9 @@ class Reports extends CI_Controller
                 dci.uom,
                 dci.qty AS delivered_qty
             FROM tender_dc_item_info dci
+            JOIN vendor_pur_inward_item_info c 
+                ON c.vendor_pur_inward_item_id = dci.vendor_pur_inward_item_id 
+                AND c.status = 'Active'
             WHERE dci.tender_dc_id = ? AND dci.status = 'Active'
             ORDER BY dci.tender_dc_item_id ASC
         ";
