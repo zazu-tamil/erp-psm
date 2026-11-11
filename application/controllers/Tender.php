@@ -4540,6 +4540,167 @@ ORDER BY
         $this->load->view('page/tender/tender-po-invoice-print', $data);
     }
 
+    private function _ensure_dc_stock_columns()
+    {
+        $dc_cols = [
+            'in_stock_item_id' => ['type' => 'INT', 'constraint' => 11, 'null' => TRUE, 'default' => NULL],
+            'stock_source' => ['type' => 'VARCHAR', 'constraint' => 50, 'null' => TRUE, 'default' => 'Inward'],
+            'source_tender_enquiry_id' => ['type' => 'INT', 'constraint' => 11, 'null' => TRUE, 'default' => NULL],
+            'tender_po_item_id' => ['type' => 'INT', 'constraint' => 11, 'null' => TRUE, 'default' => NULL],
+        ];
+        $this->load->dbforge();
+        foreach ($dc_cols as $fld => $fld_def) {
+            if (!$this->db->field_exists($fld, 'tender_dc_item_info')) {
+                $this->dbforge->add_column('tender_dc_item_info', [$fld => $fld_def]);
+            }
+        }
+    }
+
+    public function get_tender_po_items_ajax()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            echo json_encode([]);
+            return;
+        }
+        $tender_po_id = (int)$this->input->post('tender_po_id');
+        if (!$tender_po_id) {
+            echo json_encode([]);
+            return;
+        }
+        $sql = "
+            SELECT 
+                tender_po_item_id,
+                serial_no,
+                item_code,
+                item_desc,
+                uom,
+                qty,
+                rate
+            FROM tender_po_item_info
+            WHERE tender_po_id = ? AND status = 'Active'
+            ORDER BY serial_no ASC, tender_po_item_id ASC
+        ";
+        $items = $this->db->query($sql, [$tender_po_id])->result_array();
+        echo json_encode($items);
+    }
+
+    public function get_available_instock_items_ajax()
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            echo json_encode([]);
+            return;
+        }
+        $this->_ensure_dc_stock_columns();
+
+        $search = trim($this->input->post('search') ?? '');
+        $current_dc_id = (int)($this->input->post('current_dc_id') ?? 0);
+
+        $exclude_dc_clause = ($current_dc_id > 0) ? " AND tdc_head.tender_dc_id != $current_dc_id " : "";
+        $exclude_dc_clause_man = ($current_dc_id > 0) ? " AND tdc_head.tender_dc_id != $current_dc_id " : "";
+
+        $search_condition = "";
+        if (!empty($search)) {
+            $esc_kw = $this->db->escape_like_str($search);
+            $search_condition = " AND (s.item_code LIKE '%$esc_kw%' OR s.item_desc LIKE '%$esc_kw%' OR s.inward_no LIKE '%$esc_kw%' OR s.vendor_name LIKE '%$esc_kw%' OR s.tender_details LIKE '%$esc_kw%') ";
+        }
+
+        $sql = "
+            SELECT * FROM (
+                -- 1. Inward Stock from vendor_pur_inward_item_info
+                SELECT 
+                    a.vendor_pur_inward_item_id, 
+                    a.vendor_pur_inward_id,
+                    0 AS in_stock_item_id,
+                    b.inward_no,
+                    b.inward_date,
+                    a.item_code,
+                    a.item_desc,
+                    a.category_id,
+                    a.item_id,
+                    a.uom,
+                    IFNULL(a.rate, 0) AS rate,
+                    b.vendor_id, 
+                    c.vendor_name,
+                    get_tender_info(b.tender_enquiry_id) AS tender_details,
+                    b.tender_enquiry_id AS source_tender_enquiry_id,
+                    a.qty AS inward_qty, 
+                    IFNULL(dc.total_dc_qty, 0) AS dc_qty, 
+                    ROUND((a.qty - IFNULL(dc.total_dc_qty, 0)), 2) AS avail_qty, 
+                    'Inward' AS stock_source
+                FROM vendor_pur_inward_item_info AS a 
+                JOIN vendor_pur_inward_info AS b 
+                    ON a.vendor_pur_inward_id = b.vendor_pur_inward_id 
+                    AND b.status = 'Active' 
+                LEFT JOIN vendor_info AS c 
+                    ON b.vendor_id = c.vendor_id 
+                    AND c.status = 'Active' 
+                LEFT JOIN (
+                    SELECT 
+                        tdc.vendor_pur_inward_item_id,
+                        SUM(tdc.qty) AS total_dc_qty
+                    FROM tender_dc_item_info AS tdc
+                    JOIN tender_dc_info AS tdc_head 
+                        ON tdc.tender_dc_id = tdc_head.tender_dc_id 
+                        AND tdc_head.status = 'Active'
+                    WHERE tdc.status = 'Active'
+                    $exclude_dc_clause
+                    GROUP BY tdc.vendor_pur_inward_item_id
+                ) dc 
+                    ON dc.vendor_pur_inward_item_id = a.vendor_pur_inward_item_id
+                WHERE a.status = 'Active' 
+
+                UNION ALL
+
+                -- 2. Direct Warehouse Stock from in_stock_item_info
+                SELECT
+                    0 AS vendor_pur_inward_item_id,
+                    0 AS vendor_pur_inward_id,
+                    a.in_stock_item_id,
+                    'Direct Stock' AS inward_no,
+                    DATE(a.created_date) AS inward_date,
+                    a.item_code,
+                    a.item_desc,
+                    0 AS category_id,
+                    0 AS item_id,
+                    a.uom,
+                    IFNULL(a.rate, 0) AS rate,
+                    a.vendor_id, 
+                    b.vendor_name,
+                    'Warehouse Direct Stock' AS tender_details,
+                    0 AS source_tender_enquiry_id,
+                    a.qty AS inward_qty, 
+                    IFNULL(dc_man.total_dc_qty, 0) AS dc_qty, 
+                    ROUND((a.qty - IFNULL(dc_man.total_dc_qty, 0)), 2) AS avail_qty, 
+                    'Manual Stock' AS stock_source
+                FROM in_stock_item_info AS a 
+                LEFT JOIN vendor_info AS b 
+                    ON a.vendor_id = b.vendor_id 
+                    AND b.status = 'Active'
+                LEFT JOIN (
+                    SELECT 
+                        tdc.in_stock_item_id,
+                        SUM(tdc.qty) AS total_dc_qty
+                    FROM tender_dc_item_info AS tdc
+                    JOIN tender_dc_info AS tdc_head 
+                        ON tdc.tender_dc_id = tdc_head.tender_dc_id 
+                        AND tdc_head.status = 'Active'
+                    WHERE tdc.status = 'Active' AND tdc.in_stock_item_id IS NOT NULL AND tdc.in_stock_item_id > 0
+                    $exclude_dc_clause_man
+                    GROUP BY tdc.in_stock_item_id
+                ) dc_man
+                    ON dc_man.in_stock_item_id = a.in_stock_item_id
+                WHERE a.status = 'Active'
+            ) AS s
+            WHERE s.avail_qty > 0.001
+            $search_condition
+            ORDER BY s.item_code ASC, s.inward_date DESC
+            LIMIT 100
+        ";
+
+        $records = $this->db->query($sql)->result_array();
+        echo json_encode($records);
+    }
+
     public function tender_dc_add()
     {
         if (!$this->session->userdata(SESS_HD . 'logged_in'))
@@ -4549,6 +4710,8 @@ ORDER BY
             echo "<h3 style='color:red;'>Permission Denied</h3>";
             exit;
         }
+
+        $this->_ensure_dc_stock_columns();
 
         $data['js'] = 'tender/tender-dc-add.inc';
         $data['title'] = 'Add Tender DN';
@@ -4572,13 +4735,15 @@ ORDER BY
             $this->db->insert('tender_dc_info', $header);
             $tender_dc_id = $this->db->insert_id();
 
-
-
             $selected_idxs = $this->input->post('selected_items') ?? [];
 
             if (!empty($selected_idxs)) {
                 $vendor_pur_inward_id = $this->input->post('vendor_pur_inward_id') ?? [];
                 $vendor_pur_inward_item_id = $this->input->post('vendor_pur_inward_item_id') ?? [];
+                $in_stock_item_id = $this->input->post('in_stock_item_id') ?? [];
+                $stock_source = $this->input->post('stock_source') ?? [];
+                $source_tender_enquiry_id = $this->input->post('source_tender_enquiry_id') ?? [];
+                $tender_po_item_id = $this->input->post('tender_po_item_id') ?? [];
                 $category_ids = $this->input->post('category_id') ?? [];
                 $item_desc = $this->input->post('item_desc') ?? [];
                 $item_ids = $this->input->post('item_id') ?? [];
@@ -4588,12 +4753,16 @@ ORDER BY
                 foreach ($selected_idxs as $idx) {
                     $item_data = [
                         'tender_dc_id' => $tender_dc_id,
-                        'vendor_pur_inward_id' => $vendor_pur_inward_id[$idx] ?? 0,
-                        'vendor_pur_inward_item_id' => $vendor_pur_inward_item_id[$idx] ?? 0,
+                        'vendor_pur_inward_id' => !empty($vendor_pur_inward_id[$idx]) ? (int)$vendor_pur_inward_id[$idx] : 0,
+                        'vendor_pur_inward_item_id' => !empty($vendor_pur_inward_item_id[$idx]) ? (int)$vendor_pur_inward_item_id[$idx] : 0,
+                        'in_stock_item_id' => !empty($in_stock_item_id[$idx]) ? (int)$in_stock_item_id[$idx] : NULL,
+                        'stock_source' => !empty($stock_source[$idx]) ? $stock_source[$idx] : 'Inward',
+                        'source_tender_enquiry_id' => !empty($source_tender_enquiry_id[$idx]) ? (int)$source_tender_enquiry_id[$idx] : NULL,
+                        'tender_po_item_id' => !empty($tender_po_item_id[$idx]) ? (int)$tender_po_item_id[$idx] : NULL,
                         'category_id' => $category_ids[$idx] ?? 0,
                         'item_id' => $item_ids[$idx] ?? 0,
-                        'item_code' => $item_code[$idx] ?? 0,
-                        'item_desc' => $item_desc[$idx] ?? 0,
+                        'item_code' => $item_code[$idx] ?? '',
+                        'item_desc' => $item_desc[$idx] ?? '',
                         'uom' => $uoms[$idx] ?? '',
                         'qty' => $qtys[$idx] ?? 0,
                         'status' => 'Active',
@@ -4653,6 +4822,8 @@ ORDER BY
             exit;
         }
 
+        $this->_ensure_dc_stock_columns();
+
         $data['js'] = 'tender/tender-dc-edit.inc';
         $data['title'] = 'Edit Tender DN';
 
@@ -4689,10 +4860,6 @@ ORDER BY
 
             /* ----------------- 2. FETCH ITEM POST ARRAYS ----------------- */
 
-            /* =====================================================
-      SELECTED ITEM SAVE
-   ===================================================== */
-
             $miss_item_ids = [];
 
             $selected_idxs = $this->input->post('selected_items') ?? [];
@@ -4702,6 +4869,10 @@ ORDER BY
                 $tender_dc_item_ids = $this->input->post('tender_dc_item_id') ?? [];
                 $vendor_pur_inward_id = $this->input->post('vendor_pur_inward_id') ?? [];
                 $vendor_pur_inward_item_id = $this->input->post('vendor_pur_inward_item_id') ?? [];
+                $in_stock_item_id = $this->input->post('in_stock_item_id') ?? [];
+                $stock_source = $this->input->post('stock_source') ?? [];
+                $source_tender_enquiry_id = $this->input->post('source_tender_enquiry_id') ?? [];
+                $tender_po_item_id = $this->input->post('tender_po_item_id') ?? [];
                 $category_id = $this->input->post('category_id') ?? [];
                 $item_id = $this->input->post('item_id') ?? [];
                 $item_code = $this->input->post('item_code') ?? [];
@@ -4712,13 +4883,16 @@ ORDER BY
                 $user_id = $this->session->userdata(SESS_HD . 'user_id');
                 $now = date('Y-m-d H:i:s');
 
-
                 foreach ($selected_idxs as $idx) {
 
                     $item_data = [
                         'tender_dc_id' => $tender_dc_id,
-                        'vendor_pur_inward_id' => $vendor_pur_inward_id[$idx] ?? 0,
-                        'vendor_pur_inward_item_id' => $vendor_pur_inward_item_id[$idx] ?? 0,
+                        'vendor_pur_inward_id' => !empty($vendor_pur_inward_id[$idx]) ? (int)$vendor_pur_inward_id[$idx] : 0,
+                        'vendor_pur_inward_item_id' => !empty($vendor_pur_inward_item_id[$idx]) ? (int)$vendor_pur_inward_item_id[$idx] : 0,
+                        'in_stock_item_id' => !empty($in_stock_item_id[$idx]) ? (int)$in_stock_item_id[$idx] : NULL,
+                        'stock_source' => !empty($stock_source[$idx]) ? $stock_source[$idx] : 'Inward',
+                        'source_tender_enquiry_id' => !empty($source_tender_enquiry_id[$idx]) ? (int)$source_tender_enquiry_id[$idx] : NULL,
+                        'tender_po_item_id' => !empty($tender_po_item_id[$idx]) ? (int)$tender_po_item_id[$idx] : NULL,
                         'category_id' => $category_id[$idx] ?? NULL,
                         'item_id' => $item_id[$idx] ?? NULL,
                         'item_code' => $item_code[$idx] ?? '',
@@ -4728,9 +4902,8 @@ ORDER BY
                         'status' => 'Active'
                     ];
 
-
                     /* ===============================
-                       UPDATE EXISTING
+                       UPDATE EXISTING OR INSERT NEW
                     =============================== */
                     if (!empty($tender_dc_item_ids[$idx])) {
 
@@ -4770,9 +4943,6 @@ ORDER BY
                 'updated_date' => date('Y-m-d H:i:s')
             ]);
 
-
-
-
             /* ----------------- 5. COMPLETE TRANSACTION ----------------- */
 
             $this->db->trans_complete();
@@ -4783,7 +4953,6 @@ ORDER BY
                 $this->session->set_flashdata('success', 'DC updated successfully.');
             }
 
-            //redirect('tender-dc-list/');
             redirect('tender-dc-edit/' . $tender_dc_id);
         }
 
@@ -4795,7 +4964,6 @@ ORDER BY
             $data['company_opt'][$row['company_id']] = $row['company_name'];
         }
 
-
         $sql = "
             SELECT customer_id,customer_name
             FROM customer_info
@@ -4806,18 +4974,6 @@ ORDER BY
         $data['customer_opt'] = [];
         foreach ($query->result_array() as $row) {
             $data['customer_opt'][$row['customer_id']] = $row['customer_name'];
-        }
-
-        $sql = "
-            SELECT company_id,company_name
-            FROM company_info
-            WHERE status = 'Active' 
-            ORDER BY company_name ASC
-        ";
-        $query = $this->db->query($sql);
-        $data['company_opt'] = [];
-        foreach ($query->result_array() as $row) {
-            $data['company_opt'][$row['company_id']] = $row['company_name'];
         }
 
         $sql = "
@@ -4837,68 +4993,101 @@ ORDER BY
             $data['tender_enquiry_opt'][$row['tender_enquiry_id']] = $row['tender_details'];
         }
 
-
         $data['header'] = $this->db->where('tender_dc_id', $tender_dc_id)->get('tender_dc_info')->row_array();
 
-
         $sql = "
-            SELECT  
-            a.*, 
-            vendor.vendor_name,
-            ii.item_code, 
-            d.vendor_pur_inward_item_id,
-            d.qty AS inward_qty,
-            b.tender_dc_item_id,
-            d.*,
-           if(b.tender_dc_item_id is null , d.item_code , b.item_code ) as item_code,
-           if(b.tender_dc_item_id is null , d.item_desc , b.item_desc ) as item_desc,
-            IFNULL(dc_sum.total_dc_qty, 0) AS total_dc_qty, 
-            (d.qty - IFNULL(dc_sum.total_dc_qty, 0)) AS avail_qty, 
-            IF(b.vendor_pur_inward_item_id = d.vendor_pur_inward_item_id, 1, 0) AS chk, 
-            b.qty AS dc_qty
-            FROM tender_dc_info AS a
-
-            LEFT JOIN vendor_pur_inward_info AS c 
-            ON a.tender_enquiry_id = c.tender_enquiry_id 
-            AND c.status = 'Active'
-
-            LEFT JOIN vendor_pur_inward_item_info AS d 
-            ON c.vendor_pur_inward_id = d.vendor_pur_inward_id
-            AND d.status = 'Active'
-
-            LEFT JOIN tender_dc_item_info AS b 
-            ON a.tender_dc_id = b.tender_dc_id
-            AND b.vendor_pur_inward_item_id = d.vendor_pur_inward_item_id
-            AND b.status = 'Active'
-
-            LEFT JOIN (
             SELECT 
-            d1.vendor_pur_inward_item_id,
-            SUM(d1.qty) AS total_dc_qty
-            FROM tender_dc_item_info d1
-            LEFT JOIN tender_dc_info dd
-            ON dd.tender_dc_id = d1.tender_dc_id
-            AND dd.status = 'Active'
-            WHERE d1.status = 'Active'
-            GROUP BY d1.vendor_pur_inward_item_id
-            ) AS dc_sum
-            ON dc_sum.vendor_pur_inward_item_id = d.vendor_pur_inward_item_id
+                b.tender_dc_item_id,
+                a.tender_dc_id,
+                a.dc_no,
+                a.dc_date,
+                b.vendor_pur_inward_id,
+                b.vendor_pur_inward_item_id,
+                b.in_stock_item_id,
+                b.stock_source,
+                b.source_tender_enquiry_id,
+                b.tender_po_item_id,
+                b.category_id,
+                b.item_id,
+                b.item_code,
+                b.item_desc,
+                b.uom,
+                b.qty AS dc_qty,
+                1 AS chk,
+                COALESCE(v1.vendor_name, v2.vendor_name, 'Direct Stock') AS vendor_name,
+                COALESCE(pi1.inward_no, 'Direct Stock') AS inward_no,
+                COALESCE(pi1.inward_date, a.dc_date) AS inward_date,
+                ROUND(
+                    CASE 
+                        WHEN b.stock_source = 'Manual Stock' THEN (isi.qty - IFNULL(dc_isi.tot_dc, 0) + b.qty)
+                        ELSE (d.qty - IFNULL(dc_sum.tot_dc, 0) + b.qty)
+                    END, 2
+                ) AS avail_qty
+            FROM tender_dc_item_info AS b
+            JOIN tender_dc_info AS a ON a.tender_dc_id = b.tender_dc_id
+            LEFT JOIN vendor_pur_inward_item_info AS d ON d.vendor_pur_inward_item_id = b.vendor_pur_inward_item_id
+            LEFT JOIN vendor_pur_inward_info AS pi1 ON pi1.vendor_pur_inward_id = d.vendor_pur_inward_id
+            LEFT JOIN vendor_info AS v1 ON v1.vendor_id = pi1.vendor_id
+            LEFT JOIN in_stock_item_info AS isi ON isi.in_stock_item_id = b.in_stock_item_id
+            LEFT JOIN vendor_info AS v2 ON v2.vendor_id = isi.vendor_id
+            LEFT JOIN (
+                SELECT vendor_pur_inward_item_id, SUM(qty) AS tot_dc 
+                FROM tender_dc_item_info 
+                WHERE status = 'Active' 
+                GROUP BY vendor_pur_inward_item_id
+            ) AS dc_sum ON dc_sum.vendor_pur_inward_item_id = b.vendor_pur_inward_item_id
+            LEFT JOIN (
+                SELECT in_stock_item_id, SUM(qty) AS tot_dc 
+                FROM tender_dc_item_info 
+                WHERE status = 'Active' AND in_stock_item_id IS NOT NULL AND in_stock_item_id > 0
+                GROUP BY in_stock_item_id
+            ) AS dc_isi ON dc_isi.in_stock_item_id = b.in_stock_item_id
+            WHERE a.status = 'Active'
+              AND b.status = 'Active'
+              AND a.tender_dc_id = ?
 
-            LEFT JOIN vendor_info AS vendor 
-            ON c.vendor_id = vendor.vendor_id 
-            AND vendor.status = 'Active'
+            UNION ALL
 
-            LEFT JOIN item_info AS ii 
-            ON d.item_id = ii.item_id      
-            AND ii.status = 'Active'
-
-            WHERE a.status = 'Active' 
-            and a.tender_dc_id = ?
-
-            GROUP BY d.vendor_pur_inward_item_id
-
+            SELECT 
+                NULL AS tender_dc_item_id,
+                a.tender_dc_id,
+                a.dc_no,
+                a.dc_date,
+                d.vendor_pur_inward_id,
+                d.vendor_pur_inward_item_id,
+                0 AS in_stock_item_id,
+                'Inward' AS stock_source,
+                a.tender_enquiry_id AS source_tender_enquiry_id,
+                NULL AS tender_po_item_id,
+                d.category_id,
+                d.item_id,
+                d.item_code,
+                d.item_desc,
+                d.uom,
+                0 AS dc_qty,
+                0 AS chk,
+                vendor.vendor_name,
+                c.inward_no,
+                c.inward_date,
+                ROUND((d.qty - IFNULL(dc_rem.total_dc_qty, 0)), 2) AS avail_qty
+            FROM tender_dc_info AS a
+            JOIN vendor_pur_inward_info AS c ON a.tender_enquiry_id = c.tender_enquiry_id AND c.status = 'Active'
+            JOIN vendor_pur_inward_item_info AS d ON c.vendor_pur_inward_id = d.vendor_pur_inward_id AND d.status = 'Active'
+            LEFT JOIN vendor_info AS vendor ON c.vendor_id = vendor.vendor_id AND vendor.status = 'Active'
+            LEFT JOIN (
+                SELECT vendor_pur_inward_item_id, SUM(qty) AS total_dc_qty
+                FROM tender_dc_item_info
+                WHERE status = 'Active'
+                GROUP BY vendor_pur_inward_item_id
+            ) AS dc_rem ON dc_rem.vendor_pur_inward_item_id = d.vendor_pur_inward_item_id
+            WHERE a.status = 'Active' AND a.tender_dc_id = ?
+              AND d.vendor_pur_inward_item_id NOT IN (
+                  SELECT vendor_pur_inward_item_id FROM tender_dc_item_info 
+                  WHERE tender_dc_id = ? AND status = 'Active' AND vendor_pur_inward_item_id > 0
+              )
+              AND (d.qty - IFNULL(dc_rem.total_dc_qty, 0)) > 0
         ";
-        $query = $this->db->query($sql, [$tender_dc_id]);
+        $query = $this->db->query($sql, [$tender_dc_id, $tender_dc_id, $tender_dc_id]);
         $data['items'] = $query->result_array();
 
 
@@ -5171,11 +5360,12 @@ ORDER BY
 
         $sql = "
         select
-        f.serial_no,
+        COALESCE(f.serial_no, poi.serial_no, 999) as serial_no,
         e.tender_enquiry_item_id,
         d.vendor_rate_enquiry_item_id,
         c.vendor_po_item_id,
         b.vendor_pur_inward_item_id,
+        b.in_stock_item_id,
         a.tender_dc_id,
         b.tender_dc_item_id,
         b.item_code,
@@ -5188,12 +5378,12 @@ ORDER BY
         left join vendor_po_item_info as d on d.vendor_po_item_id = c.vendor_po_item_id and d.`status` = 'Active'
         left join vendor_rate_enquiry_item_info as e on e.vendor_rate_enquiry_item_id = d.vendor_rate_enquiry_item_id and e.`status` = 'Active'
         left join tender_enquiry_item_info as f on f.tender_enquiry_item_id = e.tender_enquiry_item_id and f.`status` = 'Active'
+        left join tender_po_item_info as poi on poi.tender_po_item_id = b.tender_po_item_id and poi.status = 'Active'
         where a.`status`='Active'
-        and c.`status` = 'Active'
+        and (c.`status` = 'Active' OR b.in_stock_item_id > 0 OR b.vendor_pur_inward_item_id = 0 OR b.vendor_pur_inward_item_id IS NULL)
         and a.tender_dc_id = ?
-        group by a.tender_dc_id , b.tender_dc_item_id , f.tender_enquiry_item_id
-
-        order by f.serial_no asc, b.vendor_pur_inward_item_id ,b.tender_dc_item_id asc ;
+        group by a.tender_dc_id , b.tender_dc_item_id
+        order by serial_no asc, b.tender_dc_item_id asc ;
         ";
 
         $query = $this->db->query($sql, [$tender_dc_id]);
@@ -5497,7 +5687,10 @@ ORDER BY
             left join customer_tender_po_info as h1 on h1.tender_po_id = a.tender_po_id and h1.status = 'Active'
             left join tender_quotation_info as g1 on g1.tender_quotation_id = h1.tender_quotation_id and g1.status = 'Active'
             left join tender_quotation_item_info as g on g.tender_enquiry_item_id = f.tender_enquiry_item_id and g.tender_quotation_id = h1.tender_quotation_id and g.status = 'Active'
-            left join tender_po_item_info as h on h.tender_quotation_item_id = g.tender_quotation_item_id  and h.tender_po_id = a.tender_po_id  and h.status = 'Active'
+            left join tender_po_item_info as h on (
+                (b.tender_po_item_id IS NOT NULL AND b.tender_po_item_id > 0 AND h.tender_po_item_id = b.tender_po_item_id)
+                OR ((b.tender_po_item_id IS NULL OR b.tender_po_item_id = 0) AND h.tender_quotation_item_id = g.tender_quotation_item_id)
+            ) and h.tender_po_id = a.tender_po_id and h.status = 'Active'
             left join tender_enq_invoice_item_info as i on i.tender_po_item_id = h.tender_po_item_id and i.tender_enq_invoice_id = ? and i.status = 'Active'
             where a.status = 'Active' 
             and b.status = 'Active'
@@ -5575,7 +5768,10 @@ ORDER BY
             left join customer_tender_po_info as h1 on h1.tender_po_id = a.tender_po_id and h1.status = 'Active'
             left join tender_quotation_info as g1 on g1.tender_quotation_id = h1.tender_quotation_id and g1.status = 'Active'
             left join tender_quotation_item_info as g on g.tender_enquiry_item_id = f.tender_enquiry_item_id and g.tender_quotation_id = h1.tender_quotation_id and g.status = 'Active'
-            left join tender_po_item_info as h on h.tender_quotation_item_id = g.tender_quotation_item_id  and h.tender_po_id = a.tender_po_id  and h.status = 'Active'
+            left join tender_po_item_info as h on (
+                (b.tender_po_item_id IS NOT NULL AND b.tender_po_item_id > 0 AND h.tender_po_item_id = b.tender_po_item_id)
+                OR ((b.tender_po_item_id IS NULL OR b.tender_po_item_id = 0) AND h.tender_quotation_item_id = g.tender_quotation_item_id)
+            ) and h.tender_po_id = a.tender_po_id and h.status = 'Active'
             left join tender_enq_invoice_item_info as i on i.tender_po_item_id = h.tender_po_item_id and i.tender_enq_invoice_id = ? and i.status = 'Active'
             where a.status = 'Active' 
             and b.status = 'Active'

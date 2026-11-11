@@ -2757,15 +2757,27 @@ class Reports extends CI_Controller
                     '' AS tender_details,
                     0 AS tender_enquiry_id,
                     a.qty AS inward_qty, 
-                    0 AS dc_qty, 
-                    a.qty AS instock_item_qty,
-                    ROUND(a.qty * IFNULL(a.rate, 0), 2) AS stock_value,
+                    IFNULL(dc_man.total_dc_qty, 0) AS dc_qty, 
+                    ROUND((a.qty - IFNULL(dc_man.total_dc_qty, 0)), 2) AS instock_item_qty,
+                    ROUND((a.qty - IFNULL(dc_man.total_dc_qty, 0)) * IFNULL(a.rate, 0), 2) AS stock_value,
                     'Manual Stock' AS stock_source,
                     'Manual Stock' AS source_type
                 FROM in_stock_item_info AS a 
                 LEFT JOIN vendor_info AS b 
                     ON a.vendor_id = b.vendor_id 
                     AND b.status = 'Active'
+                LEFT JOIN (
+                    SELECT 
+                        tdc.in_stock_item_id,
+                        SUM(tdc.qty) AS total_dc_qty
+                    FROM tender_dc_item_info AS tdc
+                    JOIN tender_dc_info AS tdc_head 
+                        ON tdc.tender_dc_id = tdc_head.tender_dc_id 
+                        AND tdc_head.status = 'Active'
+                    WHERE tdc.status = 'Active' AND tdc.in_stock_item_id IS NOT NULL AND tdc.in_stock_item_id > 0
+                    GROUP BY tdc.in_stock_item_id
+                ) dc_man 
+                    ON dc_man.in_stock_item_id = a.in_stock_item_id
                 WHERE a.status = 'Active' 
 
             ) AS aii_stock 
@@ -6463,9 +6475,6 @@ class Reports extends CI_Controller
                         dci.tender_dc_id, 
                         SUM(dci.qty) AS total_dc_qty 
                     FROM tender_dc_item_info dci 
-                    JOIN vendor_pur_inward_item_info c 
-                        ON c.vendor_pur_inward_item_id = dci.vendor_pur_inward_item_id 
-                        AND c.status = 'Active'
                     WHERE dci.status = 'Active' 
                     GROUP BY dci.tender_dc_id
                 ) dc_items ON dc_items.tender_dc_id = dc.tender_dc_id
