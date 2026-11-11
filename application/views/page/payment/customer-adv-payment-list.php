@@ -64,6 +64,35 @@
                                 <?php echo form_dropdown('bank_id', ['' => 'Select Bank'] + $bank_opt, '', 'id="bank_id" class="form-control select2" style="width:100%"'); ?>
                             </div>
 
+                            <div class="form-group col-md-6" id="bank_pay_type_div">
+                                <label>Payment Type <span class="text-red">*</span></label><br>
+                                <label class="radio-inline" style="font-weight: 600; cursor: pointer; margin-top: 5px;">
+                                    <input type="radio" name="pay_type" id="pay_type_online" value="Online" checked> Online
+                                </label>
+                                <label class="radio-inline" style="font-weight: 600; cursor: pointer; margin-top: 5px;">
+                                    <input type="radio" name="pay_type" id="pay_type_cheque" value="Cheque"> Cheque
+                                </label>
+                            </div>
+
+                            <div class="col-md-12" id="cheque_fields_div" style="display:none;">
+                                <div style="background: #fbfbfb; border: 1px dashed #00c0ef; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                                    <div class="row">
+                                        <div class="form-group col-md-4" style="margin-bottom: 0;">
+                                            <label>Cheque Date <span class="text-red">*</span></label>
+                                            <input type="date" name="cheque_date" id="cheque_date" class="form-control">
+                                        </div>
+                                        <div class="form-group col-md-4" style="margin-bottom: 0;">
+                                            <label>Cheque No <span class="text-red">*</span></label>
+                                            <input type="text" name="cheque_no" id="cheque_no" class="form-control" placeholder="Cheque number">
+                                        </div>
+                                        <div class="form-group col-md-4" style="margin-bottom: 0;">
+                                            <label>Cheque Bank <span class="text-red">*</span></label>
+                                            <input type="text" name="cheque_bank" id="cheque_bank" class="form-control" placeholder="Issuing bank name">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="form-group col-md-6" id="cash_category_div" style="display:none;">
                                 <label>Cash Category <span class="text-red">*</span></label>
                                 <?php echo form_dropdown('cash_category_id', ['' => 'Select Cash Category'] + $cash_categories_opt, '', 'id="cash_category_id" class="form-control select2" style="width:100%"'); ?>
@@ -206,8 +235,20 @@
                                      <span class="label <?php echo ($row['ac_type_opt'] == 'Cash') ? 'label-warning' : 'label-info'; ?>">
                                          <?php echo htmlspecialchars($row['ac_type_opt'] ?? '-'); ?>
                                      </span>
-                                     <?php if ($row['ac_type_opt'] == 'Bank' && !empty($row['bank_name'])): ?>
-                                         <br><small class="text-muted"><?php echo htmlspecialchars($row['bank_name']); ?></small>
+                                     <?php if ($row['ac_type_opt'] == 'Bank'): ?>
+                                         <?php if (!empty($row['bank_name'])): ?>
+                                             <br><small class="text-muted"><?php echo htmlspecialchars($row['bank_name']); ?></small>
+                                         <?php endif; ?>
+                                         <?php if (!empty($row['pay_type'])): ?>
+                                             <br><small class="text-primary"><i class="fa <?php echo ($row['pay_type'] == 'Cheque') ? 'fa-money' : 'fa-credit-card'; ?>"></i> <?php echo htmlspecialchars($row['pay_type']); ?></small>
+                                         <?php endif; ?>
+                                         <?php if (($row['pay_type'] ?? '') == 'Cheque'): ?>
+                                             <br><small class="text-muted">
+                                                 <?php if (!empty($row['cheque_no'])): ?>No: <?php echo htmlspecialchars($row['cheque_no']); ?> | <?php endif; ?>
+                                                 <?php if (!empty($row['cheque_bank'])): ?><?php echo htmlspecialchars($row['cheque_bank']); ?> | <?php endif; ?>
+                                                 <?php if (!empty($row['cheque_date'])): ?>Dt: <?php echo date('d-m-Y', strtotime($row['cheque_date'])); ?><?php endif; ?>
+                                             </small>
+                                         <?php endif; ?>
                                      <?php elseif ($row['ac_type_opt'] == 'Cash' && !empty($row['category_name'])): ?>
                                          <br><small class="text-muted"><?php echo htmlspecialchars($row['category_name']); ?></small>
                                      <?php endif; ?>
@@ -230,6 +271,10 @@
                                              data-ac="<?php echo $row['ac_type_opt']; ?>"
                                              data-bank="<?php echo $row['bank_id'] ?? ''; ?>"
                                              data-cash="<?php echo $row['cash_category_id'] ?? ''; ?>"
+                                             data-pay-type="<?php echo htmlspecialchars($row['pay_type'] ?? 'Online'); ?>"
+                                             data-cheque-date="<?php echo htmlspecialchars($row['cheque_date'] ?? ''); ?>"
+                                             data-cheque-no="<?php echo htmlspecialchars($row['cheque_no'] ?? ''); ?>"
+                                             data-cheque-bank="<?php echo htmlspecialchars($row['cheque_bank'] ?? ''); ?>"
                                              data-date="<?php echo $row['adv_payment_date']; ?>"
                                              data-amt="<?php echo $row['adv_payment_amt']; ?>"
                                              data-remarks="<?php echo htmlspecialchars($row['remarks'] ?? ''); ?>"

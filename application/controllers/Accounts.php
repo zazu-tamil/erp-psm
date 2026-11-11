@@ -5123,10 +5123,18 @@ class Accounts extends CI_Controller
                     `from_ac_type` VARCHAR(50) NOT NULL,
                     `from_bank_id` INT(11) NULL DEFAULT NULL,
                     `from_cash_category_id` INT(11) NULL DEFAULT NULL,
+                    `from_pay_type` VARCHAR(20) NULL DEFAULT NULL,
+                    `from_cheque_date` DATE NULL DEFAULT NULL,
+                    `from_cheque_no` VARCHAR(50) NULL DEFAULT NULL,
+                    `from_cheque_bank` VARCHAR(100) NULL DEFAULT NULL,
                     `from_remarks` TEXT NULL,
                     `to_ac_type` VARCHAR(50) NOT NULL,
                     `to_bank_id` INT(11) NULL DEFAULT NULL,
                     `to_cash_category_id` INT(11) NULL DEFAULT NULL,
+                    `to_pay_type` VARCHAR(20) NULL DEFAULT NULL,
+                    `to_cheque_date` DATE NULL DEFAULT NULL,
+                    `to_cheque_no` VARCHAR(50) NULL DEFAULT NULL,
+                    `to_cheque_bank` VARCHAR(100) NULL DEFAULT NULL,
                     `to_remarks` TEXT NULL,
                     `amount` DECIMAL(10,3) NOT NULL,
                     `status` ENUM('Active', 'Delete') NOT NULL DEFAULT 'Active',
@@ -5138,10 +5146,38 @@ class Accounts extends CI_Controller
             ");
         }
 
+        // Dynamically ensure columns exist in cb_contra_entry_info
+        $contra_extra_cols = [
+            'from_pay_type' => ['type' => 'VARCHAR', 'constraint' => 20, 'null' => TRUE, 'default' => NULL],
+            'from_cheque_date' => ['type' => 'DATE', 'null' => TRUE, 'default' => NULL],
+            'from_cheque_no' => ['type' => 'VARCHAR', 'constraint' => 50, 'null' => TRUE, 'default' => NULL],
+            'from_cheque_bank' => ['type' => 'VARCHAR', 'constraint' => 100, 'null' => TRUE, 'default' => NULL],
+            'to_pay_type' => ['type' => 'VARCHAR', 'constraint' => 20, 'null' => TRUE, 'default' => NULL],
+            'to_cheque_date' => ['type' => 'DATE', 'null' => TRUE, 'default' => NULL],
+            'to_cheque_no' => ['type' => 'VARCHAR', 'constraint' => 50, 'null' => TRUE, 'default' => NULL],
+            'to_cheque_bank' => ['type' => 'VARCHAR', 'constraint' => 100, 'null' => TRUE, 'default' => NULL],
+        ];
+        foreach ($contra_extra_cols as $fld => $fld_def) {
+            if (!$this->db->field_exists($fld, 'cb_contra_entry_info')) {
+                $this->load->dbforge();
+                $this->dbforge->add_column('cb_contra_entry_info', [$fld => $fld_def]);
+            }
+        }
+
         // ── ADD ──────────────────────────────────────────────────────
         if ($this->input->post('mode') == 'Add') {
             $from_ac_type = $this->input->post('from_ac_type');
             $to_ac_type = $this->input->post('to_ac_type');
+
+            $from_pay_type = ($from_ac_type == 'Bank') ? ($this->input->post('from_pay_type') ?: 'Online') : null;
+            $from_cheque_date = ($from_ac_type == 'Bank' && $from_pay_type == 'Cheque' && $this->input->post('from_cheque_date')) ? date('Y-m-d', strtotime($this->input->post('from_cheque_date'))) : null;
+            $from_cheque_no = ($from_ac_type == 'Bank' && $from_pay_type == 'Cheque') ? ($this->input->post('from_cheque_no') ?: null) : null;
+            $from_cheque_bank = ($from_ac_type == 'Bank' && $from_pay_type == 'Cheque') ? ($this->input->post('from_cheque_bank') ?: null) : null;
+
+            $to_pay_type = ($to_ac_type == 'Bank') ? ($this->input->post('to_pay_type') ?: 'Online') : null;
+            $to_cheque_date = ($to_ac_type == 'Bank' && $to_pay_type == 'Cheque' && $this->input->post('to_cheque_date')) ? date('Y-m-d', strtotime($this->input->post('to_cheque_date'))) : null;
+            $to_cheque_no = ($to_ac_type == 'Bank' && $to_pay_type == 'Cheque') ? ($this->input->post('to_cheque_no') ?: null) : null;
+            $to_cheque_bank = ($to_ac_type == 'Bank' && $to_pay_type == 'Cheque') ? ($this->input->post('to_cheque_bank') ?: null) : null;
 
             $ins = array(
                 'franchise_id' => ($this->session->userdata('cr_franchise_id') == '' ? 0 : $this->session->userdata('cr_franchise_id')),
@@ -5149,10 +5185,18 @@ class Accounts extends CI_Controller
                 'from_ac_type' => $from_ac_type,
                 'from_bank_id' => ($from_ac_type == 'Bank') ? ($this->input->post('from_bank_id') ?: null) : null,
                 'from_cash_category_id' => ($from_ac_type == 'Cash') ? ($this->input->post('from_cash_category_id') ?: null) : null,
+                'from_pay_type' => $from_pay_type,
+                'from_cheque_date' => $from_cheque_date,
+                'from_cheque_no' => $from_cheque_no,
+                'from_cheque_bank' => $from_cheque_bank,
                 'from_remarks' => $this->input->post('from_remarks'),
                 'to_ac_type' => $to_ac_type,
                 'to_bank_id' => ($to_ac_type == 'Bank') ? ($this->input->post('to_bank_id') ?: null) : null,
                 'to_cash_category_id' => ($to_ac_type == 'Cash') ? ($this->input->post('to_cash_category_id') ?: null) : null,
+                'to_pay_type' => $to_pay_type,
+                'to_cheque_date' => $to_cheque_date,
+                'to_cheque_no' => $to_cheque_no,
+                'to_cheque_bank' => $to_cheque_bank,
                 'to_remarks' => $this->input->post('to_remarks'),
                 'amount' => $this->input->post('amount'),
                 'status' => 'Active',
@@ -5168,15 +5212,33 @@ class Accounts extends CI_Controller
             $from_ac_type = $this->input->post('from_ac_type');
             $to_ac_type = $this->input->post('to_ac_type');
 
+            $from_pay_type = ($from_ac_type == 'Bank') ? ($this->input->post('from_pay_type') ?: 'Online') : null;
+            $from_cheque_date = ($from_ac_type == 'Bank' && $from_pay_type == 'Cheque' && $this->input->post('from_cheque_date')) ? date('Y-m-d', strtotime($this->input->post('from_cheque_date'))) : null;
+            $from_cheque_no = ($from_ac_type == 'Bank' && $from_pay_type == 'Cheque') ? ($this->input->post('from_cheque_no') ?: null) : null;
+            $from_cheque_bank = ($from_ac_type == 'Bank' && $from_pay_type == 'Cheque') ? ($this->input->post('from_cheque_bank') ?: null) : null;
+
+            $to_pay_type = ($to_ac_type == 'Bank') ? ($this->input->post('to_pay_type') ?: 'Online') : null;
+            $to_cheque_date = ($to_ac_type == 'Bank' && $to_pay_type == 'Cheque' && $this->input->post('to_cheque_date')) ? date('Y-m-d', strtotime($this->input->post('to_cheque_date'))) : null;
+            $to_cheque_no = ($to_ac_type == 'Bank' && $to_pay_type == 'Cheque') ? ($this->input->post('to_cheque_no') ?: null) : null;
+            $to_cheque_bank = ($to_ac_type == 'Bank' && $to_pay_type == 'Cheque') ? ($this->input->post('to_cheque_bank') ?: null) : null;
+
             $upd = array(
                 'entry_date' => $this->input->post('entry_date'),
                 'from_ac_type' => $from_ac_type,
                 'from_bank_id' => ($from_ac_type == 'Bank') ? ($this->input->post('from_bank_id') ?: null) : null,
                 'from_cash_category_id' => ($from_ac_type == 'Cash') ? ($this->input->post('from_cash_category_id') ?: null) : null,
+                'from_pay_type' => $from_pay_type,
+                'from_cheque_date' => $from_cheque_date,
+                'from_cheque_no' => $from_cheque_no,
+                'from_cheque_bank' => $from_cheque_bank,
                 'from_remarks' => $this->input->post('from_remarks'),
                 'to_ac_type' => $to_ac_type,
                 'to_bank_id' => ($to_ac_type == 'Bank') ? ($this->input->post('to_bank_id') ?: null) : null,
                 'to_cash_category_id' => ($to_ac_type == 'Cash') ? ($this->input->post('to_cash_category_id') ?: null) : null,
+                'to_pay_type' => $to_pay_type,
+                'to_cheque_date' => $to_cheque_date,
+                'to_cheque_no' => $to_cheque_no,
+                'to_cheque_bank' => $to_cheque_bank,
                 'to_remarks' => $this->input->post('to_remarks'),
                 'amount' => $this->input->post('amount'),
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),

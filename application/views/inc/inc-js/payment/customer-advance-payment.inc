@@ -45,23 +45,53 @@
         });
 
         // Account Type Toggle
-        $('#ac_type_opt').on('change', function() {
-            var val = $(this).val();
+        function handleAcTypeChange(val) {
             if (val === 'Bank') {
                 $('#bank_div').show();
                 $('#bank_id').prop('required', true);
+                $('#bank_pay_type_div').show();
+                var payType = $('input[name="pay_type"]:checked').val() || 'Online';
+                if (payType === 'Cheque') {
+                    $('#cheque_fields_div').show();
+                    $('#cheque_date, #cheque_no, #cheque_bank').prop('required', true);
+                } else {
+                    $('#cheque_fields_div').hide();
+                    $('#cheque_date, #cheque_no, #cheque_bank').prop('required', false);
+                }
                 $('#cash_category_div').hide();
                 $('#cash_category_id').val('').trigger('change.select2').prop('required', false);
             } else if (val === 'Cash') {
                 $('#bank_div').hide();
                 $('#bank_id').val('').trigger('change.select2').prop('required', false);
+                $('#bank_pay_type_div').hide();
+                $('#cheque_fields_div').hide();
+                $('#pay_type_online').prop('checked', true);
+                $('#cheque_date, #cheque_no, #cheque_bank').val('').prop('required', false);
                 $('#cash_category_div').show();
                 $('#cash_category_id').prop('required', true);
             } else {
                 $('#bank_div').hide();
                 $('#bank_id').val('').trigger('change.select2').prop('required', false);
+                $('#bank_pay_type_div').hide();
+                $('#cheque_fields_div').hide();
+                $('#pay_type_online').prop('checked', true);
+                $('#cheque_date, #cheque_no, #cheque_bank').val('').prop('required', false);
                 $('#cash_category_div').hide();
                 $('#cash_category_id').val('').trigger('change.select2').prop('required', false);
+            }
+        }
+
+        $('#ac_type_opt').on('change', function() {
+            handleAcTypeChange($(this).val());
+        });
+
+        $('input[name="pay_type"]').on('change', function() {
+            if ($('#ac_type_opt').val() === 'Bank' && $(this).val() === 'Cheque') {
+                $('#cheque_fields_div').show();
+                $('#cheque_date, #cheque_no, #cheque_bank').prop('required', true);
+            } else {
+                $('#cheque_fields_div').hide();
+                $('#cheque_date, #cheque_no, #cheque_bank').prop('required', false);
             }
         });
 
@@ -213,6 +243,10 @@
             $('#ac_type_opt').val('Bank').trigger('change');
             $('#bank_id').val('').trigger('change.select2');
             $('#cash_category_id').val('').trigger('change.select2');
+            $('#pay_type_online').prop('checked', true);
+            $('#cheque_date, #cheque_no, #cheque_bank').val('').prop('required', false);
+            $('#cheque_fields_div').hide();
+            $('#bank_pay_type_div').show();
             $('#status').val('Active').trigger('change.select2');
             $('#remarks').val('');
 
@@ -231,6 +265,10 @@
             var ac_type = $(this).data('ac');
             var bank_id = $(this).data('bank');
             var cash_id = $(this).data('cash');
+            var pay_type = $(this).data('pay-type') || 'Online';
+            var cheque_date = $(this).data('cheque-date') || '';
+            var cheque_no = $(this).data('cheque-no') || '';
+            var cheque_bank = $(this).data('cheque-bank') || '';
             var date = $(this).data('date');
             var amt = $(this).data('amt');
             var remarks = $(this).data('remarks');
@@ -273,8 +311,26 @@
             $('#ac_type_opt').val(ac_type).trigger('change');
             if (ac_type === 'Bank') {
                 $('#bank_id').val(bank_id).trigger('change.select2');
+                $('#bank_pay_type_div').show();
+                $("input[name='pay_type'][value='" + pay_type + "']").prop('checked', true);
+                if (pay_type === 'Cheque') {
+                    $('#cheque_fields_div').show();
+                    $('#cheque_date').val(cheque_date).prop('required', true);
+                    $('#cheque_no').val(cheque_no).prop('required', true);
+                    $('#cheque_bank').val(cheque_bank).prop('required', true);
+                } else {
+                    $('#cheque_fields_div').hide();
+                    $('#cheque_date, #cheque_no, #cheque_bank').val('').prop('required', false);
+                }
             } else if (ac_type === 'Cash') {
                 $('#cash_category_id').val(cash_id).trigger('change.select2');
+                $('#bank_pay_type_div, #cheque_fields_div').hide();
+                $('#pay_type_online').prop('checked', true);
+                $('#cheque_date, #cheque_no, #cheque_bank').val('').prop('required', false);
+            } else {
+                $('#bank_pay_type_div, #cheque_fields_div').hide();
+                $('#pay_type_online').prop('checked', true);
+                $('#cheque_date, #cheque_no, #cheque_bank').val('').prop('required', false);
             }
 
             $('#adv_payment_date').val(date);
@@ -283,6 +339,18 @@
             $('#status').val(status).trigger('change.select2');
 
             $('#addModal').modal('show');
+        });
+
+        $('#btnCancel').on('click', function() {
+            $('#frmAdd')[0].reset();
+            $('#mode').val('Add');
+            $('#adv_payment_id').val('');
+            $('#customer_id').html(allCustomersHtml);
+            $('#addModal .select2').val('').trigger('change.select2');
+            $('#invoice_ids').html('').val([]).trigger('change.select2');
+            $('#pay_type_online').prop('checked', true);
+            $('#cheque_date, #cheque_no, #cheque_bank').val('').prop('required', false);
+            $('#cheque_fields_div').hide();
         });
 
         // Delete confirmation

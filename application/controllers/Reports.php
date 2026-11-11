@@ -2403,7 +2403,7 @@ class Reports extends CI_Controller
         $data['vendor_opt'] = [];
         $data['vendor_opt'][''] = 'All Vendors';
         foreach ($query->result_array() as $row) {
-            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'] ?? '';
         }
 
         $sql = "
@@ -2554,7 +2554,7 @@ class Reports extends CI_Controller
         $query = $this->db->query($sql);
         $data['customer_opt'] = [];
         foreach ($query->result_array() as $row) {
-            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'] ?? '';
         }
 
 
@@ -2696,7 +2696,7 @@ class Reports extends CI_Controller
         $query = $this->db->query($sql);
         $data['vendor_opt'] = [];
         foreach ($query->result_array() as $row) {
-            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'] ?? '';
         }
 
         $sql = "
@@ -3212,7 +3212,7 @@ class Reports extends CI_Controller
         if (!empty($vendor_id) && !empty($data['vendors'])) {
             foreach ($data['vendors'] as $v) {
                 if ($v['id'] == $vendor_id) {
-                    $selected_vendor_name = $v['vendor_name'];
+                    $selected_vendor_name = $v['vendor_name'] ?? 'All Suppliers';
                     break;
                 }
             }
@@ -3546,7 +3546,7 @@ class Reports extends CI_Controller
         if (!empty($vendor_id)) {
             foreach ($data['vendors'] as $v) {
                 if ($v['vendor_id'] == $vendor_id) {
-                    $selected_vendor_name = $v['vendor_name'];
+                    $selected_vendor_name = $v['vendor_name'] ?? 'All Suppliers';
                     break;
                 }
             }
@@ -4575,7 +4575,7 @@ class Reports extends CI_Controller
 
         // Fetch active vendors/suppliers for dropdown
         $sql = "
-            SELECT vendor_id, vendor_name l
+            SELECT vendor_id, vendor_name
             FROM vendor_info 
             WHERE status = 'Active' 
             ORDER BY vendor_name ASC";
@@ -4594,7 +4594,7 @@ class Reports extends CI_Controller
         if (!empty($srch_vendor_id)) {
             foreach ($data['vendor_list'] as $v) {
                 if ($v['vendor_id'] == $srch_vendor_id) {
-                    $selected_vendor_name = $v['vendor_name'];
+                    $selected_vendor_name = $v['vendor_name'] ?? 'All Suppliers';
                     break;
                 }
             }
@@ -4749,7 +4749,7 @@ class Reports extends CI_Controller
         $data['vendor_opt'] = [];
         if (!empty($data['vendor_list'])) {
             foreach ($data['vendor_list'] as $row) {
-                $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+                $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'] ?? '';
             }
         }
 
@@ -5728,7 +5728,7 @@ class Reports extends CI_Controller
 
         $data['vendor_opt'] = [];
         foreach ($data['vendor_list'] as $row) {
-            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'] ?? '';
         }
 
         $data['customer_opt'] = [];
@@ -5755,7 +5755,7 @@ class Reports extends CI_Controller
         if (!empty($srch_vendor_id)) {
             foreach ($data['vendor_list'] as $v) {
                 if ($v['vendor_id'] == $srch_vendor_id) {
-                    $selected_vendor_name = $v['vendor_name'];
+                    $selected_vendor_name = $v['vendor_name'] ?? 'All Suppliers';
                     break;
                 }
             }
@@ -6014,7 +6014,7 @@ class Reports extends CI_Controller
         $q_vend = $this->db->query($sql_vend);
         $data['vendor_opt'] = ['' => 'All Vendors'];
         foreach ($q_vend->result_array() as $row) {
-            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'];
+            $data['vendor_opt'][$row['vendor_id']] = $row['vendor_name'] ?? '';
         }
 
         // Date conditions

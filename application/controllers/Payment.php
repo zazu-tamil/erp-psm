@@ -2199,6 +2199,10 @@ class Payment extends CI_Controller
                 `ac_type_opt` VARCHAR(50) NULL DEFAULT 'Bank',
                 `bank_id` INT(11) NULL DEFAULT NULL,
                 `cash_category_id` INT(11) NULL DEFAULT NULL,
+                `pay_type` VARCHAR(20) NULL DEFAULT NULL,
+                `cheque_date` DATE NULL DEFAULT NULL,
+                `cheque_no` VARCHAR(50) NULL DEFAULT NULL,
+                `cheque_bank` VARCHAR(100) NULL DEFAULT NULL,
                 `tender_enquiry_id` INT(11) NULL DEFAULT NULL,
                 `customer_id` INT(11) NULL DEFAULT NULL,
                 `tender_po_id` INT(11) NULL DEFAULT NULL,
@@ -2218,6 +2222,20 @@ class Payment extends CI_Controller
                 INDEX (`adv_payment_date`),
                 INDEX (`status`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;");
+        }
+
+        // Dynamically ensure columns exist in customer_advance_payment_info
+        $c_extra_cols = [
+            'pay_type' => ['type' => 'VARCHAR', 'constraint' => 20, 'null' => TRUE, 'default' => NULL],
+            'cheque_date' => ['type' => 'DATE', 'null' => TRUE, 'default' => NULL],
+            'cheque_no' => ['type' => 'VARCHAR', 'constraint' => 50, 'null' => TRUE, 'default' => NULL],
+            'cheque_bank' => ['type' => 'VARCHAR', 'constraint' => 100, 'null' => TRUE, 'default' => NULL],
+        ];
+        foreach ($c_extra_cols as $fld => $fld_def) {
+            if (!$this->db->field_exists($fld, 'customer_advance_payment_info')) {
+                $this->load->dbforge();
+                $this->dbforge->add_column('customer_advance_payment_info', [$fld => $fld_def]);
+            }
         }
 
         // Ensure menu_info and role_permission exist for customer-adv-payment
@@ -2263,6 +2281,10 @@ class Payment extends CI_Controller
             $ac_type_opt = $this->input->post('ac_type_opt') ?: 'Bank';
             $bank_id = ($ac_type_opt == 'Bank') ? ($this->input->post('bank_id') ?: null) : null;
             $cash_category_id = ($ac_type_opt == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null;
+            $pay_type = ($ac_type_opt == 'Bank') ? ($this->input->post('pay_type') ?: 'Online') : null;
+            $cheque_date = ($ac_type_opt == 'Bank' && $pay_type == 'Cheque' && $this->input->post('cheque_date')) ? date('Y-m-d', strtotime($this->input->post('cheque_date'))) : null;
+            $cheque_no = ($ac_type_opt == 'Bank' && $pay_type == 'Cheque') ? ($this->input->post('cheque_no') ?: null) : null;
+            $cheque_bank = ($ac_type_opt == 'Bank' && $pay_type == 'Cheque') ? ($this->input->post('cheque_bank') ?: null) : null;
 
             $invoice_ids = $this->input->post('invoice_ids');
             $invoice_ids_str = '';
@@ -2285,6 +2307,10 @@ class Payment extends CI_Controller
                 'ac_type_opt' => $ac_type_opt,
                 'bank_id' => $bank_id,
                 'cash_category_id' => $cash_category_id,
+                'pay_type' => $pay_type,
+                'cheque_date' => $cheque_date,
+                'cheque_no' => $cheque_no,
+                'cheque_bank' => $cheque_bank,
                 'tender_enquiry_id' => $this->input->post('tender_enquiry_id') ?: null,
                 'customer_id' => $this->input->post('customer_id'),
                 'tender_po_id' => $this->input->post('tender_po_id') ?: null,
@@ -2309,6 +2335,10 @@ class Payment extends CI_Controller
             $ac_type_opt = $this->input->post('ac_type_opt') ?: 'Bank';
             $bank_id = ($ac_type_opt == 'Bank') ? ($this->input->post('bank_id') ?: null) : null;
             $cash_category_id = ($ac_type_opt == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null;
+            $pay_type = ($ac_type_opt == 'Bank') ? ($this->input->post('pay_type') ?: 'Online') : null;
+            $cheque_date = ($ac_type_opt == 'Bank' && $pay_type == 'Cheque' && $this->input->post('cheque_date')) ? date('Y-m-d', strtotime($this->input->post('cheque_date'))) : null;
+            $cheque_no = ($ac_type_opt == 'Bank' && $pay_type == 'Cheque') ? ($this->input->post('cheque_no') ?: null) : null;
+            $cheque_bank = ($ac_type_opt == 'Bank' && $pay_type == 'Cheque') ? ($this->input->post('cheque_bank') ?: null) : null;
 
             $invoice_ids = $this->input->post('invoice_ids');
             $invoice_ids_str = '';
@@ -2331,6 +2361,10 @@ class Payment extends CI_Controller
                 'ac_type_opt' => $ac_type_opt,
                 'bank_id' => $bank_id,
                 'cash_category_id' => $cash_category_id,
+                'pay_type' => $pay_type,
+                'cheque_date' => $cheque_date,
+                'cheque_no' => $cheque_no,
+                'cheque_bank' => $cheque_bank,
                 'tender_enquiry_id' => $this->input->post('tender_enquiry_id') ?: null,
                 'customer_id' => $this->input->post('customer_id'),
                 'tender_po_id' => $this->input->post('tender_po_id') ?: null,

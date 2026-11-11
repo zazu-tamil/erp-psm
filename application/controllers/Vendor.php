@@ -6409,6 +6409,19 @@ class Vendor extends CI_Controller
             ]);
         }
 
+        $v_extra_cols = [
+            'pay_type' => ['type' => 'VARCHAR', 'constraint' => 20, 'null' => TRUE, 'default' => NULL],
+            'cheque_date' => ['type' => 'DATE', 'null' => TRUE, 'default' => NULL],
+            'cheque_no' => ['type' => 'VARCHAR', 'constraint' => 50, 'null' => TRUE, 'default' => NULL],
+            'cheque_bank' => ['type' => 'VARCHAR', 'constraint' => 100, 'null' => TRUE, 'default' => NULL],
+        ];
+        foreach ($v_extra_cols as $fld => $fld_def) {
+            if (!$this->db->field_exists($fld, 'vendor_advance_payment_info')) {
+                $this->load->dbforge();
+                $this->dbforge->add_column('vendor_advance_payment_info', [$fld => $fld_def]);
+            }
+        }
+
         $data['js'] = 'vendor/vendor-advance-payment.inc';
         $data['title'] = 'Vendor Advance Payment';
 
@@ -6416,6 +6429,10 @@ class Vendor extends CI_Controller
             $ac_type_opt = $this->input->post('ac_type_opt');
             $bank_id = ($ac_type_opt == 'Bank') ? ($this->input->post('bank_id') ?: null) : null;
             $cash_category_id = ($ac_type_opt == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null;
+            $pay_type = ($ac_type_opt == 'Bank') ? ($this->input->post('pay_type') ?: 'Online') : null;
+            $cheque_date = ($ac_type_opt == 'Bank' && $pay_type == 'Cheque' && $this->input->post('cheque_date')) ? date('Y-m-d', strtotime($this->input->post('cheque_date'))) : null;
+            $cheque_no = ($ac_type_opt == 'Bank' && $pay_type == 'Cheque') ? ($this->input->post('cheque_no') ?: null) : null;
+            $cheque_bank = ($ac_type_opt == 'Bank' && $pay_type == 'Cheque') ? ($this->input->post('cheque_bank') ?: null) : null;
 
             $invoice_ids = $this->input->post('invoice_ids');
             $invoice_ids_str = '';
@@ -6438,6 +6455,10 @@ class Vendor extends CI_Controller
                 'ac_type_opt' => $ac_type_opt,
                 'bank_id' => $bank_id,
                 'cash_category_id' => $cash_category_id,
+                'pay_type' => $pay_type,
+                'cheque_date' => $cheque_date,
+                'cheque_no' => $cheque_no,
+                'cheque_bank' => $cheque_bank,
                 'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
                 'vendor_id' => $this->input->post('vendor_id'),
                 'vendor_po_id' => $this->input->post('vendor_po_id') ?: null,
@@ -6461,6 +6482,10 @@ class Vendor extends CI_Controller
             $ac_type_opt = $this->input->post('ac_type_opt');
             $bank_id = ($ac_type_opt == 'Bank') ? ($this->input->post('bank_id') ?: null) : null;
             $cash_category_id = ($ac_type_opt == 'Cash') ? ($this->input->post('cash_category_id') ?: null) : null;
+            $pay_type = ($ac_type_opt == 'Bank') ? ($this->input->post('pay_type') ?: 'Online') : null;
+            $cheque_date = ($ac_type_opt == 'Bank' && $pay_type == 'Cheque' && $this->input->post('cheque_date')) ? date('Y-m-d', strtotime($this->input->post('cheque_date'))) : null;
+            $cheque_no = ($ac_type_opt == 'Bank' && $pay_type == 'Cheque') ? ($this->input->post('cheque_no') ?: null) : null;
+            $cheque_bank = ($ac_type_opt == 'Bank' && $pay_type == 'Cheque') ? ($this->input->post('cheque_bank') ?: null) : null;
 
             $invoice_ids = $this->input->post('invoice_ids');
             $invoice_ids_str = '';
@@ -6483,6 +6508,10 @@ class Vendor extends CI_Controller
                 'ac_type_opt' => $ac_type_opt,
                 'bank_id' => $bank_id,
                 'cash_category_id' => $cash_category_id,
+                'pay_type' => $pay_type,
+                'cheque_date' => $cheque_date,
+                'cheque_no' => $cheque_no,
+                'cheque_bank' => $cheque_bank,
                 'tender_enquiry_id' => $this->input->post('tender_enquiry_id'),
                 'vendor_id' => $this->input->post('vendor_id'),
                 'vendor_po_id' => $this->input->post('vendor_po_id') ?: null,

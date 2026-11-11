@@ -80,10 +80,34 @@
                             <td>
                                 <span class="label <?php echo $row['from_ac_type'] === 'Bank' ? 'bg-blue' : 'bg-green'; ?>" style="font-size: 11px; margin-right: 5px;"><?php echo $row['from_ac_type']; ?></span>
                                 <strong><?php echo htmlspecialchars($from_name); ?></strong>
+                                <?php if ($row['from_ac_type'] === 'Bank'): ?>
+                                    <?php if (!empty($row['from_pay_type'])): ?>
+                                        <br><small class="text-primary"><i class="fa <?php echo ($row['from_pay_type'] == 'Cheque') ? 'fa-money' : 'fa-credit-card'; ?>"></i> <?php echo htmlspecialchars($row['from_pay_type']); ?></small>
+                                    <?php endif; ?>
+                                    <?php if (($row['from_pay_type'] ?? '') === 'Cheque'): ?>
+                                        <br><small class="text-muted">
+                                            <?php if (!empty($row['from_cheque_no'])): ?>No: <?php echo htmlspecialchars($row['from_cheque_no']); ?> | <?php endif; ?>
+                                            <?php if (!empty($row['from_cheque_bank'])): ?><?php echo htmlspecialchars($row['from_cheque_bank']); ?> | <?php endif; ?>
+                                            <?php if (!empty($row['from_cheque_date'])): ?>Dt: <?php echo date('d-m-Y', strtotime($row['from_cheque_date'])); ?><?php endif; ?>
+                                        </small>
+                                    <?php endif; ?>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <span class="label <?php echo $row['to_ac_type'] === 'Bank' ? 'bg-blue' : 'bg-green'; ?>" style="font-size: 11px; margin-right: 5px;"><?php echo $row['to_ac_type']; ?></span>
                                 <strong><?php echo htmlspecialchars($to_name); ?></strong>
+                                <?php if ($row['to_ac_type'] === 'Bank'): ?>
+                                    <?php if (!empty($row['to_pay_type'])): ?>
+                                        <br><small class="text-primary"><i class="fa <?php echo ($row['to_pay_type'] == 'Cheque') ? 'fa-money' : 'fa-credit-card'; ?>"></i> <?php echo htmlspecialchars($row['to_pay_type']); ?></small>
+                                    <?php endif; ?>
+                                    <?php if (($row['to_pay_type'] ?? '') === 'Cheque'): ?>
+                                        <br><small class="text-muted">
+                                            <?php if (!empty($row['to_cheque_no'])): ?>No: <?php echo htmlspecialchars($row['to_cheque_no']); ?> | <?php endif; ?>
+                                            <?php if (!empty($row['to_cheque_bank'])): ?><?php echo htmlspecialchars($row['to_cheque_bank']); ?> | <?php endif; ?>
+                                            <?php if (!empty($row['to_cheque_date'])): ?>Dt: <?php echo date('d-m-Y', strtotime($row['to_cheque_date'])); ?><?php endif; ?>
+                                        </small>
+                                    <?php endif; ?>
+                                <?php endif; ?>
                             </td>
                             <td class="text-right text-bold"><?php echo number_format($row['amount'], 3); ?></td>
                             <td>
@@ -102,11 +126,19 @@
                                     data-from-type="<?php echo $row['from_ac_type']; ?>"
                                     data-from-bank="<?php echo $row['from_bank_id']; ?>"
                                     data-from-cash="<?php echo $row['from_cash_category_id']; ?>"
-                                    data-from-remarks="<?php echo htmlspecialchars($row['from_remarks']); ?>"
+                                    data-from-pay-type="<?php echo htmlspecialchars($row['from_pay_type'] ?? 'Online'); ?>"
+                                    data-from-cheque-date="<?php echo htmlspecialchars($row['from_cheque_date'] ?? ''); ?>"
+                                    data-from-cheque-no="<?php echo htmlspecialchars($row['from_cheque_no'] ?? ''); ?>"
+                                    data-from-cheque-bank="<?php echo htmlspecialchars($row['from_cheque_bank'] ?? ''); ?>"
+                                    data-from-remarks="<?php echo htmlspecialchars($row['from_remarks'] ?? ''); ?>"
                                     data-to-type="<?php echo $row['to_ac_type']; ?>"
                                     data-to-bank="<?php echo $row['to_bank_id']; ?>"
                                     data-to-cash="<?php echo $row['to_cash_category_id']; ?>"
-                                    data-to-remarks="<?php echo htmlspecialchars($row['to_remarks']); ?>"
+                                    data-to-pay-type="<?php echo htmlspecialchars($row['to_pay_type'] ?? 'Online'); ?>"
+                                    data-to-cheque-date="<?php echo htmlspecialchars($row['to_cheque_date'] ?? ''); ?>"
+                                    data-to-cheque-no="<?php echo htmlspecialchars($row['to_cheque_no'] ?? ''); ?>"
+                                    data-to-cheque-bank="<?php echo htmlspecialchars($row['to_cheque_bank'] ?? ''); ?>"
+                                    data-to-remarks="<?php echo htmlspecialchars($row['to_remarks'] ?? ''); ?>"
                                     data-amount="<?php echo $row['amount']; ?>"><span class="fa fa-pencil"></span></button>
                                 <button type="button" class="btn btn-danger btn-xs btn-delete" 
                                     data-id="<?php echo $row['contra_entry_id']; ?>"><span class="fa fa-trash"></span></button>
@@ -162,6 +194,29 @@
                                     <?php } ?>
                                 </select>
                             </div>
+                            <div class="form-group add_from_pay_type_wrapper" style="display: none;">
+                                <label>Payment Type <span class="text-red">*</span></label><br>
+                                <label class="radio-inline" style="font-weight: 600; cursor: pointer;">
+                                    <input type="radio" name="from_pay_type" id="add_from_pay_type_online" value="Online" checked> Online
+                                </label>
+                                <label class="radio-inline" style="font-weight: 600; cursor: pointer;">
+                                    <input type="radio" name="from_pay_type" id="add_from_pay_type_cheque" value="Cheque"> Cheque
+                                </label>
+                            </div>
+                            <div class="add_from_cheque_wrapper" style="display: none; background: #fdfefe; border: 1px solid #d2d6de; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label style="font-size: 12px;">Cheque Date <span class="text-red">*</span></label>
+                                    <input type="date" class="form-control input-sm" name="from_cheque_date" id="add_from_cheque_date">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label style="font-size: 12px;">Cheque No <span class="text-red">*</span></label>
+                                    <input type="text" class="form-control input-sm" name="from_cheque_no" id="add_from_cheque_no" placeholder="Cheque number">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="font-size: 12px;">Cheque Bank <span class="text-red">*</span></label>
+                                    <input type="text" class="form-control input-sm" name="from_cheque_bank" id="add_from_cheque_bank" placeholder="Cheque bank name">
+                                </div>
+                            </div>
                             <div class="form-group add_from_cash_wrapper" style="display: none;">
                                 <label>Cash Category <span class="text-red">*</span></label>
                                 <select class="form-control select2" name="from_cash_category_id" id="add_from_cash_category_id" style="width: 100%;">
@@ -196,6 +251,29 @@
                                         <option value="<?php echo $bank['bank_id']; ?>"><?php echo htmlspecialchars($bank['bank_name'].' ('.$bank['branch'].')'); ?></option>
                                     <?php } ?>
                                 </select>
+                            </div>
+                            <div class="form-group add_to_pay_type_wrapper" style="display: none;">
+                                <label>Payment Type <span class="text-red">*</span></label><br>
+                                <label class="radio-inline" style="font-weight: 600; cursor: pointer;">
+                                    <input type="radio" name="to_pay_type" id="add_to_pay_type_online" value="Online" checked> Online
+                                </label>
+                                <label class="radio-inline" style="font-weight: 600; cursor: pointer;">
+                                    <input type="radio" name="to_pay_type" id="add_to_pay_type_cheque" value="Cheque"> Cheque
+                                </label>
+                            </div>
+                            <div class="add_to_cheque_wrapper" style="display: none; background: #fdfefe; border: 1px solid #d2d6de; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label style="font-size: 12px;">Cheque Date <span class="text-red">*</span></label>
+                                    <input type="date" class="form-control input-sm" name="to_cheque_date" id="add_to_cheque_date">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label style="font-size: 12px;">Cheque No <span class="text-red">*</span></label>
+                                    <input type="text" class="form-control input-sm" name="to_cheque_no" id="add_to_cheque_no" placeholder="Cheque number">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="font-size: 12px;">Cheque Bank <span class="text-red">*</span></label>
+                                    <input type="text" class="form-control input-sm" name="to_cheque_bank" id="add_to_cheque_bank" placeholder="Cheque bank name">
+                                </div>
                             </div>
                             <div class="form-group add_to_cash_wrapper" style="display: none;">
                                 <label>Cash Category <span class="text-red">*</span></label>
@@ -266,6 +344,29 @@
                                     <?php } ?>
                                 </select>
                             </div>
+                            <div class="form-group edit_from_pay_type_wrapper" style="display: none;">
+                                <label>Payment Type <span class="text-red">*</span></label><br>
+                                <label class="radio-inline" style="font-weight: 600; cursor: pointer;">
+                                    <input type="radio" name="from_pay_type" id="edit_from_pay_type_online" value="Online" checked> Online
+                                </label>
+                                <label class="radio-inline" style="font-weight: 600; cursor: pointer;">
+                                    <input type="radio" name="from_pay_type" id="edit_from_pay_type_cheque" value="Cheque"> Cheque
+                                </label>
+                            </div>
+                            <div class="edit_from_cheque_wrapper" style="display: none; background: #fdfefe; border: 1px solid #d2d6de; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label style="font-size: 12px;">Cheque Date <span class="text-red">*</span></label>
+                                    <input type="date" class="form-control input-sm" name="from_cheque_date" id="edit_from_cheque_date">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label style="font-size: 12px;">Cheque No <span class="text-red">*</span></label>
+                                    <input type="text" class="form-control input-sm" name="from_cheque_no" id="edit_from_cheque_no" placeholder="Cheque number">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="font-size: 12px;">Cheque Bank <span class="text-red">*</span></label>
+                                    <input type="text" class="form-control input-sm" name="from_cheque_bank" id="edit_from_cheque_bank" placeholder="Cheque bank name">
+                                </div>
+                            </div>
                             <div class="form-group edit_from_cash_wrapper" style="display: none;">
                                 <label>Cash Category <span class="text-red">*</span></label>
                                 <select class="form-control select2" name="from_cash_category_id" id="edit_from_cash_category_id" style="width: 100%;">
@@ -300,6 +401,29 @@
                                         <option value="<?php echo $bank['bank_id']; ?>"><?php echo htmlspecialchars($bank['bank_name'].' ('.$bank['branch'].')'); ?></option>
                                     <?php } ?>
                                 </select>
+                            </div>
+                            <div class="form-group edit_to_pay_type_wrapper" style="display: none;">
+                                <label>Payment Type <span class="text-red">*</span></label><br>
+                                <label class="radio-inline" style="font-weight: 600; cursor: pointer;">
+                                    <input type="radio" name="to_pay_type" id="edit_to_pay_type_online" value="Online" checked> Online
+                                </label>
+                                <label class="radio-inline" style="font-weight: 600; cursor: pointer;">
+                                    <input type="radio" name="to_pay_type" id="edit_to_pay_type_cheque" value="Cheque"> Cheque
+                                </label>
+                            </div>
+                            <div class="edit_to_cheque_wrapper" style="display: none; background: #fdfefe; border: 1px solid #d2d6de; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label style="font-size: 12px;">Cheque Date <span class="text-red">*</span></label>
+                                    <input type="date" class="form-control input-sm" name="to_cheque_date" id="edit_to_cheque_date">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label style="font-size: 12px;">Cheque No <span class="text-red">*</span></label>
+                                    <input type="text" class="form-control input-sm" name="to_cheque_no" id="edit_to_cheque_no" placeholder="Cheque number">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="font-size: 12px;">Cheque Bank <span class="text-red">*</span></label>
+                                    <input type="text" class="form-control input-sm" name="to_cheque_bank" id="edit_to_cheque_bank" placeholder="Cheque bank name">
+                                </div>
                             </div>
                             <div class="form-group edit_to_cash_wrapper" style="display: none;">
                                 <label>Cash Category <span class="text-red">*</span></label>
