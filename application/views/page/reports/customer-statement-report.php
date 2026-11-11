@@ -339,6 +339,26 @@ $min_date_attr = (!empty($customer_id) && !empty($op_exists)) ? 'min="' . $op_de
                                                 echo 'label-danger';
                                             }
                                         ?>" style="font-size: 11px; padding: .2em .6em .3em;"><?php echo htmlspecialchars($row['description']); ?></span>
+                                        <?php if (!empty($row['pay_type'])): ?>
+                                            <div style="margin-top: 4px; font-size: 11px;">
+                                                <span class="label <?php echo (strtolower($row['pay_type']) == 'cheque') ? 'label-warning' : 'label-info'; ?>">
+                                                    <?php echo htmlspecialchars(ucfirst($row['pay_type'])); ?>
+                                                </span>
+                                                <?php if (strtolower($row['pay_type']) == 'cheque'): ?>
+                                                    <div style="color: #64748b; font-size: 11px; margin-top: 2px;">
+                                                        <?php if (!empty($row['cheque_no'])): ?>
+                                                            <span><strong>Chq:</strong> <?php echo htmlspecialchars($row['cheque_no']); ?></span>
+                                                        <?php endif; ?>
+                                                        <?php if (!empty($row['cheque_date']) && $row['cheque_date'] != '0000-00-00'): ?>
+                                                            <span> | <strong>Dt:</strong> <?php echo date('d-m-Y', strtotime($row['cheque_date'])); ?></span>
+                                                        <?php endif; ?>
+                                                        <?php if (!empty($row['cheque_bank'])): ?>
+                                                            <span> | <strong>Bank:</strong> <?php echo htmlspecialchars($row['cheque_bank']); ?></span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="text-right" style="color: #27ae60; font-weight: 500;">
                                         <?php echo ($row['debit_amt'] > 0) ? number_format($row['debit_amt'], 3) : '-'; ?>

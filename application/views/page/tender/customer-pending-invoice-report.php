@@ -244,6 +244,26 @@
                                         <span class="label label-success"><?php echo htmlspecialchars($row['bill_type']); ?></span>
                                     <?php elseif ($row['bill_type'] == 'Advance Payment'): ?>
                                         <span class="label label-info"><?php echo htmlspecialchars($row['bill_type']); ?></span>
+                                        <?php if (!empty($row['pay_type'])): ?>
+                                            <div style="margin-top: 4px; font-size: 11px;">
+                                                <span class="label <?php echo (strtolower($row['pay_type']) == 'cheque') ? 'label-warning' : 'label-info'; ?>">
+                                                    <?php echo htmlspecialchars(ucfirst($row['pay_type'])); ?>
+                                                </span>
+                                                <?php if (strtolower($row['pay_type']) == 'cheque'): ?>
+                                                    <div style="color: #64748b; font-size: 10px; margin-top: 2px;">
+                                                        <?php if (!empty($row['cheque_no'])): ?>
+                                                            <span><strong>Chq:</strong> <?php echo htmlspecialchars($row['cheque_no']); ?></span>
+                                                        <?php endif; ?>
+                                                        <?php if (!empty($row['cheque_date']) && $row['cheque_date'] != '0000-00-00'): ?>
+                                                            <span> | <strong>Dt:</strong> <?php echo date('d-m-Y', strtotime($row['cheque_date'])); ?></span>
+                                                        <?php endif; ?>
+                                                        <?php if (!empty($row['cheque_bank'])): ?>
+                                                            <span> | <strong>Bank:</strong> <?php echo htmlspecialchars($row['cheque_bank']); ?></span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
                                     <?php else: ?>
                                         <span class="label label-primary"><?php echo htmlspecialchars($row['bill_type']); ?></span>
                                     <?php endif; ?>

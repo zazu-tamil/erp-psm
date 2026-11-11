@@ -277,6 +277,26 @@
                                         elseif ($bt == 'Advance Payment') $bClass = 'label-warning';
                                     ?>
                                     <span class="label <?php echo $bClass; ?>" style="font-size: 85%;"><?php echo htmlspecialchars($bt); ?></span>
+                                    <?php if ($bt == 'Advance Payment' && !empty($row['pay_type'])): ?>
+                                        <div style="margin-top: 4px; font-size: 11px;">
+                                            <span class="label <?php echo (strtolower($row['pay_type']) == 'cheque') ? 'label-warning' : 'label-info'; ?>">
+                                                <?php echo htmlspecialchars(ucfirst($row['pay_type'])); ?>
+                                            </span>
+                                            <?php if (strtolower($row['pay_type']) == 'cheque'): ?>
+                                                <div style="color: #64748b; font-size: 10px; margin-top: 2px;">
+                                                    <?php if (!empty($row['cheque_no'])): ?>
+                                                        <span><strong>Chq:</strong> <?php echo htmlspecialchars($row['cheque_no']); ?></span>
+                                                    <?php endif; ?>
+                                                    <?php if (!empty($row['cheque_date']) && $row['cheque_date'] != '0000-00-00'): ?>
+                                                        <span> | <strong>Dt:</strong> <?php echo date('d-m-Y', strtotime($row['cheque_date'])); ?></span>
+                                                    <?php endif; ?>
+                                                    <?php if (!empty($row['cheque_bank'])): ?>
+                                                        <span> | <strong>Bank:</strong> <?php echo htmlspecialchars($row['cheque_bank']); ?></span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="text-center">
                                     <span class="label label-default" style="font-weight: 600; font-size: 11px; background:#e0e7ee; color:#2c3e50; border:1px solid #c2d1df;"><?php echo $currCode; ?></span>

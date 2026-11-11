@@ -7485,7 +7485,11 @@ ORDER BY
                     0.000 AS total_amount,
                     'Advance Payment' AS bill_type,
                     'BHD' AS currency_code,
-                    3 AS decimal_point
+                    3 AS decimal_point,
+                    a.pay_type,
+                    a.cheque_no,
+                    a.cheque_date,
+                    a.cheque_bank
                 FROM customer_advance_payment_info a
                 LEFT JOIN customer_info b ON a.customer_id = b.customer_id AND b.status = 'Active'
                 WHERE a.status = 'Active'
@@ -7543,6 +7547,10 @@ ORDER BY
                 f.bill_type,
                 f.currency_code,
                 f.decimal_point,
+                f.pay_type,
+                f.cheque_no,
+                f.cheque_date,
+                f.cheque_bank,
                 get_tender_info(f.tender_enquiry_id) as tender_details,
                 $calc_paid AS paid_amount,
                 ROUND((f.total_amount - $calc_paid), f.decimal_point) AS balance_amount,
@@ -7564,7 +7572,11 @@ ORDER BY
                     a.total_amount,
                     'Invoice' AS bill_type,
                     COALESCE(cur.currency_code, po_cur.currency_code, 'BHD') AS currency_code,
-                    COALESCE(cur.decimal_point, po_cur.decimal_point, 3) AS decimal_point
+                    COALESCE(cur.decimal_point, po_cur.decimal_point, 3) AS decimal_point,
+                    NULL AS pay_type,
+                    NULL AS cheque_no,
+                    NULL AS cheque_date,
+                    NULL AS cheque_bank
                 FROM tender_enq_invoice_info AS a
                 LEFT JOIN customer_info AS b ON a.customer_id = b.customer_id AND b.status = 'Active'
                 LEFT JOIN currencies_info AS cur ON cur.currency_id = a.currency_id AND cur.status = 'Active'
@@ -7586,7 +7598,11 @@ ORDER BY
                     a.opening_amount AS total_amount,
                     'Opening Balance' AS bill_type,
                     'BHD' AS currency_code,
-                    3 AS decimal_point
+                    3 AS decimal_point,
+                    NULL AS pay_type,
+                    NULL AS cheque_no,
+                    NULL AS cheque_date,
+                    NULL AS cheque_bank
                 FROM customer_opening_balance_info AS a
                 LEFT JOIN customer_info AS b ON a.customer_id = b.customer_id AND b.status = 'Active'
                 WHERE a.balance_type = 'DR'

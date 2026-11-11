@@ -4748,11 +4748,11 @@ class Accounts extends CI_Controller
             $w_vp .= " AND vp.payment_type = '" . $this->db->escape_str($srch_payment_type) . "'";
             $w_cin .= " AND cin.bank_type = '" . $this->db->escape_str($srch_payment_type) . "'";
             $w_cout .= " AND cout.bank_type = '" . $this->db->escape_str($srch_payment_type) . "'";
-            $w_vap .= " AND 1=0";
-            $w_cap .= " AND 1=0";
+            $w_vap .= " AND vap.pay_type = '" . $this->db->escape_str($srch_payment_type) . "'";
+            $w_cap .= " AND cap.pay_type = '" . $this->db->escape_str($srch_payment_type) . "'";
+            $w_ce_to .= " AND ce.to_pay_type = '" . $this->db->escape_str($srch_payment_type) . "'";
+            $w_ce_from .= " AND ce.from_pay_type = '" . $this->db->escape_str($srch_payment_type) . "'";
             $w_pt .= " AND 1=0";
-            $w_ce_from .= " AND 1=0";
-            $w_ce_to .= " AND 1=0";
             $w_op .= " AND 1=0";
         }
 
@@ -4864,10 +4864,10 @@ class Accounts extends CI_Controller
                     CONVERT(v.vendor_name USING utf8) AS party_name, 
                     CONVERT('Advance Payment' USING utf8) AS remarks,
                     vap.created_date,
-                    CONVERT(NULL USING utf8) AS bank_type,
-                    CONVERT(NULL USING utf8) AS cheque_no,
-                    NULL AS cheque_date,
-                    CONVERT(NULL USING utf8) AS cheque_bank
+                    CONVERT(vap.pay_type USING utf8) AS bank_type,
+                    CONVERT(vap.cheque_no USING utf8) AS cheque_no,
+                    vap.cheque_date,
+                    CONVERT(vap.cheque_bank USING utf8) AS cheque_bank
                 FROM vendor_advance_payment_info vap
                 LEFT JOIN vendor_info v ON v.vendor_id = vap.vendor_id
                 LEFT JOIN company_bank_info b ON b.bank_id = vap.bank_id
@@ -4888,10 +4888,10 @@ class Accounts extends CI_Controller
                     CONVERT(c.customer_name USING utf8) AS party_name, 
                     CONVERT(COALESCE(cap.remarks, 'Advance Receipt') USING utf8) AS remarks,
                     cap.created_date,
-                    CONVERT(NULL USING utf8) AS bank_type,
-                    CONVERT(NULL USING utf8) AS cheque_no,
-                    NULL AS cheque_date,
-                    CONVERT(NULL USING utf8) AS cheque_bank
+                    CONVERT(cap.pay_type USING utf8) AS bank_type,
+                    CONVERT(cap.cheque_no USING utf8) AS cheque_no,
+                    cap.cheque_date,
+                    CONVERT(cap.cheque_bank USING utf8) AS cheque_bank
                 FROM customer_advance_payment_info cap
                 LEFT JOIN customer_info c ON c.customer_id = cap.customer_id
                 LEFT JOIN company_bank_info b ON b.bank_id = cap.bank_id
@@ -5011,10 +5011,10 @@ class Accounts extends CI_Controller
                     CONVERT(IF(ce.from_ac_type = 'Bank', fb.bank_name, CONCAT('Cash (', fcc.category_name, ')')) USING utf8) AS party_name, 
                     CONVERT(ce.to_remarks USING utf8) AS remarks,
                     ce.created_at AS created_date,
-                    CONVERT(NULL USING utf8) AS bank_type,
-                    CONVERT(NULL USING utf8) AS cheque_no,
-                    NULL AS cheque_date,
-                    CONVERT(NULL USING utf8) AS cheque_bank
+                    CONVERT(ce.to_pay_type USING utf8) AS bank_type,
+                    CONVERT(ce.to_cheque_no USING utf8) AS cheque_no,
+                    ce.to_cheque_date AS cheque_date,
+                    CONVERT(ce.to_cheque_bank USING utf8) AS cheque_bank
                 FROM cb_contra_entry_info ce
                 LEFT JOIN company_bank_info b ON b.bank_id = ce.to_bank_id
                 LEFT JOIN company_bank_info fb ON fb.bank_id = ce.from_bank_id
@@ -5036,10 +5036,10 @@ class Accounts extends CI_Controller
                     CONVERT(IF(ce.to_ac_type = 'Bank', tb.bank_name, CONCAT('Cash (', tcc.category_name, ')')) USING utf8) AS party_name, 
                     CONVERT(ce.from_remarks USING utf8) AS remarks,
                     ce.created_at AS created_date,
-                    CONVERT(NULL USING utf8) AS bank_type,
-                    CONVERT(NULL USING utf8) AS cheque_no,
-                    NULL AS cheque_date,
-                    CONVERT(NULL USING utf8) AS cheque_bank
+                    CONVERT(ce.from_pay_type USING utf8) AS bank_type,
+                    CONVERT(ce.from_cheque_no USING utf8) AS cheque_no,
+                    ce.from_cheque_date AS cheque_date,
+                    CONVERT(ce.from_cheque_bank USING utf8) AS cheque_bank
                 FROM cb_contra_entry_info ce
                 LEFT JOIN company_bank_info b ON b.bank_id = ce.from_bank_id
                 LEFT JOIN company_bank_info tb ON tb.bank_id = ce.to_bank_id

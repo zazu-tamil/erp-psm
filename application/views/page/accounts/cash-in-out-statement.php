@@ -279,16 +279,18 @@
                             <td>
                                 <?php 
                                 echo htmlspecialchars($row['bank_name']); 
-                                if (in_array(strtolower($row['bank_type']), ['cheque', 'check']) && !empty($row['cheque_no'])) {
-                                    echo "<br><small class='text-muted'>Chq: " . htmlspecialchars($row['cheque_no']);
-                                    if (!empty($row['cheque_date'])) {
-                                        echo " | Dt: " . date('d-m-Y', strtotime($row['cheque_date']));
+                                $b_type = strtolower($row['bank_type'] ?? '');
+                                if (in_array($b_type, ['cheque', 'check'])) {
+                                    $chq_parts = [];
+                                    if (!empty($row['cheque_no'])) $chq_parts[] = "Chq: " . htmlspecialchars($row['cheque_no']);
+                                    if (!empty($row['cheque_date'])) $chq_parts[] = "Dt: " . date('d-m-Y', strtotime($row['cheque_date']));
+                                    if (!empty($row['cheque_bank'])) $chq_parts[] = "Bk: " . htmlspecialchars($row['cheque_bank']);
+                                    if (!empty($chq_parts)) {
+                                        echo "<br><small class='text-muted'>" . implode(' | ', $chq_parts) . "</small>";
+                                    } else {
+                                        echo "<br><small class='text-muted'>Cheque</small>";
                                     }
-                                    if (!empty($row['cheque_bank'])) {
-                                        echo " | Bk: " . htmlspecialchars($row['cheque_bank']);
-                                    }
-                                    echo "</small>";
-                                } elseif (strtolower($row['bank_type']) == 'online') {
+                                } elseif ($b_type == 'online') {
                                     echo "<br><small class='text-muted'>Online</small>";
                                 }
                                 ?>

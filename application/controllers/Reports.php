@@ -3047,7 +3047,11 @@ class Reports extends CI_Controller
                 purchase_amt,
                 paid_amt,
                 type,
-                vendor_name
+                vendor_name,
+                pay_type,
+                cheque_no,
+                cheque_date,
+                cheque_bank
             FROM (
                 SELECT 
                     a.invoice_date AS tr_date,
@@ -3056,7 +3060,11 @@ class Reports extends CI_Controller
                     COALESCE(a.total_amount_inc_addl, a.total_amount) AS purchase_amt,
                     0.000 AS paid_amt,
                     'purchase' AS type,
-                    v.vendor_name
+                    v.vendor_name,
+                    NULL AS pay_type,
+                    NULL AS cheque_no,
+                    NULL AS cheque_date,
+                    NULL AS cheque_bank
                 FROM vendor_purchase_invoice_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3073,7 +3081,11 @@ class Reports extends CI_Controller
                     COALESCE(a.total_amount_inc_addl, a.total_amount) AS purchase_amt,
                     0.000 AS paid_amt,
                     'purchase' AS type,
-                    v.vendor_name
+                    v.vendor_name,
+                    NULL AS pay_type,
+                    NULL AS cheque_no,
+                    NULL AS cheque_date,
+                    NULL AS cheque_bank
                 FROM vendor_purchase_multiple_invoice_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3090,7 +3102,11 @@ class Reports extends CI_Controller
                     a.tot_amt_with_tax AS purchase_amt,
                     0.000 AS paid_amt,
                     'purchase' AS type,
-                    v.vendor_name
+                    v.vendor_name,
+                    NULL AS pay_type,
+                    NULL AS cheque_no,
+                    NULL AS cheque_date,
+                    NULL AS cheque_bank
                 FROM local_purchase_bill_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3107,7 +3123,11 @@ class Reports extends CI_Controller
                     a.g_total AS purchase_amt,
                     0.000 AS paid_amt,
                     'purchase' AS type,
-                    v.vendor_name
+                    v.vendor_name,
+                    NULL AS pay_type,
+                    NULL AS cheque_no,
+                    NULL AS cheque_date,
+                    NULL AS cheque_bank
                 FROM dp_bill_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3124,7 +3144,11 @@ class Reports extends CI_Controller
                     a.customs_payable AS purchase_amt,
                     0.000 AS paid_amt,
                     'purchase' AS type,
-                    v.vendor_name
+                    v.vendor_name,
+                    NULL AS pay_type,
+                    NULL AS cheque_no,
+                    NULL AS cheque_date,
+                    NULL AS cheque_bank
                 FROM customs_bill_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3142,7 +3166,11 @@ class Reports extends CI_Controller
                     0.000 AS purchase_amt,
                     a.amount AS paid_amt,
                     'payment' AS type,
-                    v.vendor_name
+                    v.vendor_name,
+                    a.payment_type AS pay_type,
+                    a.cheque_no,
+                    a.cheque_date,
+                    a.cheque_bank
                 FROM vendor_payment_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3159,7 +3187,11 @@ class Reports extends CI_Controller
                     0.000 AS purchase_amt,
                     a.adv_payment_amt AS paid_amt,
                     'payment' AS type,
-                    v.vendor_name
+                    v.vendor_name,
+                    a.pay_type,
+                    a.cheque_no,
+                    a.cheque_date,
+                    a.cheque_bank
                 FROM vendor_advance_payment_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3176,7 +3208,11 @@ class Reports extends CI_Controller
                     a.total_amount AS purchase_amt,
                     0.000 AS paid_amt,
                     'purchase' AS type,
-                    v.vendor_name
+                    v.vendor_name,
+                    NULL AS pay_type,
+                    NULL AS cheque_no,
+                    NULL AS cheque_date,
+                    NULL AS cheque_bank
                 FROM credit_debit_note_info a
                 LEFT JOIN vendor_info v ON a.supplier_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status != 'Delete' AND a.party_type = 'Supplier' AND a.note_type = 'Credit'
@@ -3193,7 +3229,11 @@ class Reports extends CI_Controller
                     0.000 AS purchase_amt,
                     a.total_amount AS paid_amt,
                     'payment' AS type,
-                    v.vendor_name
+                    v.vendor_name,
+                    NULL AS pay_type,
+                    NULL AS cheque_no,
+                    NULL AS cheque_date,
+                    NULL AS cheque_bank
                 FROM credit_debit_note_info a
                 LEFT JOIN vendor_info v ON a.supplier_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status != 'Delete' AND a.party_type = 'Supplier' AND a.note_type = 'Debit'
@@ -3791,7 +3831,11 @@ class Reports extends CI_Controller
                 debit_amt,
                 credit_amt,
                 type,
-                customer_name
+                customer_name,
+                pay_type,
+                cheque_no,
+                cheque_date,
+                cheque_bank
             FROM (
                 SELECT 
                     a.invoice_date AS tr_date,
@@ -3800,7 +3844,11 @@ class Reports extends CI_Controller
                     a.total_amount AS debit_amt,
                     0.000 AS credit_amt,
                     'invoice' AS type,
-                    c.customer_name
+                    c.customer_name,
+                    NULL AS pay_type,
+                    NULL AS cheque_no,
+                    NULL AS cheque_date,
+                    NULL AS cheque_bank
                 FROM tender_enq_invoice_info a
                 LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3817,7 +3865,11 @@ class Reports extends CI_Controller
                     0.000 AS debit_amt,
                     a.amount AS credit_amt,
                     'receipt' AS type,
-                    c.customer_name
+                    c.customer_name,
+                    a.receipt_type AS pay_type,
+                    a.cheque_no,
+                    a.cheque_date,
+                    a.cheque_bank
                 FROM tender_receipt_info a
                 LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3834,7 +3886,11 @@ class Reports extends CI_Controller
                     0.000 AS debit_amt,
                     a.adv_payment_amt AS credit_amt,
                     'receipt' AS type,
-                    c.customer_name
+                    c.customer_name,
+                    a.pay_type,
+                    a.cheque_no,
+                    a.cheque_date,
+                    a.cheque_bank
                 FROM customer_advance_payment_info a
                 LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3851,7 +3907,11 @@ class Reports extends CI_Controller
                     a.total_amount AS debit_amt,
                     0.000 AS credit_amt,
                     'invoice' AS type,
-                    c.customer_name
+                    c.customer_name,
+                    NULL AS pay_type,
+                    NULL AS cheque_no,
+                    NULL AS cheque_date,
+                    NULL AS cheque_bank
                 FROM credit_debit_note_info a
                 LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
                 WHERE a.status != 'Delete' AND a.party_type = 'Customer' AND a.note_type = 'Debit'
@@ -3868,7 +3928,11 @@ class Reports extends CI_Controller
                     0.000 AS debit_amt,
                     a.total_amount AS credit_amt,
                     'receipt' AS type,
-                    c.customer_name
+                    c.customer_name,
+                    NULL AS pay_type,
+                    NULL AS cheque_no,
+                    NULL AS cheque_date,
+                    NULL AS cheque_bank
                 FROM credit_debit_note_info a
                 LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
                 WHERE a.status != 'Delete' AND a.party_type = 'Customer' AND a.note_type = 'Credit'

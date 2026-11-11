@@ -166,6 +166,17 @@ $card4_span = 1;
                         <span style="font-weight: bold; color: <?php echo ($row['type'] == 'invoice') ? '#27ae60' : '#c0392b'; ?>;">
                             <?php echo htmlspecialchars($row['description']); ?>
                         </span>
+                        <?php if (!empty($row['pay_type'])) { ?>
+                            <br><small style="color: #64748b;">[<?php echo htmlspecialchars(ucfirst($row['pay_type'])); ?>]
+                            <?php if (strtolower($row['pay_type']) == 'cheque') {
+                                $chq_parts = [];
+                                if (!empty($row['cheque_no'])) $chq_parts[] = 'Chq: ' . $row['cheque_no'];
+                                if (!empty($row['cheque_date']) && $row['cheque_date'] != '0000-00-00') $chq_parts[] = 'Dt: ' . date('d-m-Y', strtotime($row['cheque_date']));
+                                if (!empty($row['cheque_bank'])) $chq_parts[] = 'Bank: ' . $row['cheque_bank'];
+                                if (!empty($chq_parts)) echo ' (' . htmlspecialchars(implode(', ', $chq_parts)) . ')';
+                            } ?>
+                            </small>
+                        <?php } ?>
                     </td>
                     <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: right; color: #27ae60; mso-number-format:'#,##0.000';">
                         <?php echo ($row['debit_amt'] > 0) ? number_format($row['debit_amt'], 3) : '0.000'; ?>

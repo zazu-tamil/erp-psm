@@ -6964,6 +6964,10 @@ class Vendor extends CI_Controller
                 f.bill_type,
                 f.currency_code,
                 f.decimal_point,
+                f.pay_type,
+                f.cheque_no,
+                f.cheque_date,
+                f.cheque_bank,
                 get_tender_info(f.tender_enquiry_id) as tender_details,
                 IFNULL(adv.advance_amount, 0) AS advance_amount,
                 IFNULL(p.paid_amount, 0) AS paid_amount,
@@ -6986,7 +6990,11 @@ class Vendor extends CI_Controller
                     COALESCE(a.total_amount_inc_addl, a.total_amount, 0) AS total_amount,
                     'Purchase Invoice' AS bill_type,
                     COALESCE(cur.currency_code, 'BHD') AS currency_code,
-                    COALESCE(cur.decimal_point, 3) AS decimal_point
+                    COALESCE(cur.decimal_point, 3) AS decimal_point,
+                    NULL AS pay_type,
+                    NULL AS cheque_no,
+                    NULL AS cheque_date,
+                    NULL AS cheque_bank
                 FROM vendor_purchase_invoice_info a
                 LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
                 LEFT JOIN vendor_po_info vpo ON vpo.vendor_po_id = a.vendor_po_id AND vpo.status = 'Active'
@@ -7006,7 +7014,11 @@ class Vendor extends CI_Controller
                     COALESCE(a.total_amount_inc_addl, a.total_amount, 0) AS total_amount,
                     'Multiple Purchase Invoice' AS bill_type,
                     'BHD' AS currency_code,
-                    3 AS decimal_point
+                    3 AS decimal_point,
+                    NULL AS pay_type,
+                    NULL AS cheque_no,
+                    NULL AS cheque_date,
+                    NULL AS cheque_bank
                 FROM vendor_purchase_multiple_invoice_info a
                 LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
                 WHERE a.status = 'Active'
@@ -7024,7 +7036,11 @@ class Vendor extends CI_Controller
                     a.tot_amt_with_tax AS total_amount,
                     'Local Bill' AS bill_type,
                     'BHD' AS currency_code,
-                    3 AS decimal_point
+                    3 AS decimal_point,
+                    NULL AS pay_type,
+                    NULL AS cheque_no,
+                    NULL AS cheque_date,
+                    NULL AS cheque_bank
                 FROM local_purchase_bill_info a
                 LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
                 WHERE a.status = 'Active'
@@ -7042,7 +7058,11 @@ class Vendor extends CI_Controller
                     a.g_total AS total_amount,
                     'Delivery Bill' AS bill_type,
                     'BHD' AS currency_code,
-                    3 AS decimal_point
+                    3 AS decimal_point,
+                    NULL AS pay_type,
+                    NULL AS cheque_no,
+                    NULL AS cheque_date,
+                    NULL AS cheque_bank
                 FROM dp_bill_info a
                 LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
                 WHERE a.status = 'Active'
@@ -7060,7 +7080,11 @@ class Vendor extends CI_Controller
                     a.customs_payable  AS total_amount,
                     'Customs Bill' AS bill_type,
                     'BHD' AS currency_code,
-                    3 AS decimal_point
+                    3 AS decimal_point,
+                    NULL AS pay_type,
+                    NULL AS cheque_no,
+                    NULL AS cheque_date,
+                    NULL AS cheque_bank
                 FROM customs_bill_info a
                 LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
                 WHERE a.status = 'Active' AND a.ac_type_opt = 'Accountable'
@@ -7078,7 +7102,11 @@ class Vendor extends CI_Controller
                     a.opening_amount AS total_amount,
                     'Opening Balance' AS bill_type,
                     'BHD' AS currency_code,
-                    3 AS decimal_point
+                    3 AS decimal_point,
+                    NULL AS pay_type,
+                    NULL AS cheque_no,
+                    NULL AS cheque_date,
+                    NULL AS cheque_bank
                 FROM vendor_opening_balance_info a
                 LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
                 WHERE a.balance_type = 'CR'
@@ -7096,7 +7124,11 @@ class Vendor extends CI_Controller
                     0.000 AS total_amount,
                     'Advance Payment' AS bill_type,
                     'BHD' AS currency_code,
-                    3 AS decimal_point
+                    3 AS decimal_point,
+                    a.pay_type,
+                    a.cheque_no,
+                    a.cheque_date,
+                    a.cheque_bank
                 FROM vendor_advance_payment_info a
                 LEFT JOIN vendor_info b ON a.vendor_id = b.vendor_id AND b.status = 'Active'
                 WHERE a.status = 'Active'
