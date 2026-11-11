@@ -2737,6 +2737,7 @@ class Reports extends CI_Controller
                         ON tdc.tender_dc_id = tdc_head.tender_dc_id 
                         AND tdc_head.status = 'Active'
                     WHERE tdc.status = 'Active'
+                    and tdc.vendor_pur_inward_item_id  in (select vendor_pur_inward_item_id from vendor_pur_inward_item_info where status = 'Active') 
                     GROUP BY tdc.vendor_pur_inward_item_id
                 ) dc 
                     ON dc.vendor_pur_inward_item_id = a.vendor_pur_inward_item_id
@@ -2774,7 +2775,9 @@ class Reports extends CI_Controller
                     JOIN tender_dc_info AS tdc_head 
                         ON tdc.tender_dc_id = tdc_head.tender_dc_id 
                         AND tdc_head.status = 'Active'
-                    WHERE tdc.status = 'Active' AND tdc.in_stock_item_id IS NOT NULL AND tdc.in_stock_item_id > 0
+                    WHERE tdc.status = 'Active' 
+                    and tdc.vendor_pur_inward_item_id  in (select vendor_pur_inward_item_id from vendor_pur_inward_item_info where status = 'Active') 
+                    AND tdc.in_stock_item_id IS NOT NULL AND tdc.in_stock_item_id > 0
                     GROUP BY tdc.in_stock_item_id
                 ) dc_man 
                     ON dc_man.in_stock_item_id = a.in_stock_item_id
@@ -6476,6 +6479,7 @@ class Reports extends CI_Controller
                         SUM(dci.qty) AS total_dc_qty 
                     FROM tender_dc_item_info dci 
                     WHERE dci.status = 'Active' 
+                    and dci.vendor_pur_inward_item_id  in (select vendor_pur_inward_item_id from vendor_pur_inward_item_info where status = 'Active') 
                     GROUP BY dci.tender_dc_id
                 ) dc_items ON dc_items.tender_dc_id = dc.tender_dc_id
                 LEFT JOIN (
