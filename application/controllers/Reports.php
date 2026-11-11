@@ -6373,7 +6373,7 @@ class Reports extends CI_Controller
         $data = array();
         $data['js'] = 'reports/customer-dc-without-invoice-report.inc';
         $data['s_url'] = 'customer-dc-without-invoice-report';
-        $data['title'] = 'Customer DC Generated But Not Invoiced Report';
+        $data['title'] = 'Customer DN Generated But Not Invoiced Report';
 
         if (isset($_POST['srch_from_date'])) {
             $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');

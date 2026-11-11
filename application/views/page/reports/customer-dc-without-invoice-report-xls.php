@@ -8,7 +8,7 @@ $total_count = 0;
     <thead>
         <tr>
             <th colspan="13" style="font-size:16px; font-weight:bold; text-align:center; background-color:#3c8dbc; color:#ffffff;">
-                Customer Delivery Challan Generated But Not Invoiced Report
+                Customer Delivery Note Generated But Not Invoiced Report
             </th>
         </tr>
         <tr>

@@ -383,7 +383,7 @@ class Menu_model extends CI_Model {
         if (!$cdw_menu) {
             $this->db->insert('menu_info', array(
                 'parent_id'   => $tender_parent_id,
-                'menu_title'  => 'DC Without Invoice Report',
+                'menu_title'  => 'DN Without Invoice Report',
                 'menu_slug'   => 'customer-dc-without-invoice-report',
                 'menu_icon'   => 'fa fa-truck',
                 'is_header'   => 0,
@@ -395,7 +395,7 @@ class Menu_model extends CI_Model {
             $cdw_menu_id = (int)$cdw_menu['menu_id'];
             $this->db->where('menu_id', $cdw_menu_id)->update('menu_info', array(
                 'parent_id'  => $tender_parent_id,
-                'menu_title' => 'DC Without Invoice Report',
+                'menu_title' => 'DN Without Invoice Report',
                 'menu_icon'  => 'fa fa-truck',
                 'sort_order' => 5,
                 'status'     => 'Active'

@@ -113,7 +113,7 @@
     <!-- Data Table Box -->
     <div class="box box-primary">
         <div class="box-header with-border">
-            <h3 class="box-title"><i class="fa fa-list"></i> Customer Delivery Challan Records</h3>
+            <h3 class="box-title"><i class="fa fa-list"></i> Customer Delivery Note Records</h3>
         </div>
 
         <div class="box-body table-responsive">
