@@ -2,7 +2,7 @@
 <section class="content-header">
     <h1><?php echo htmlspecialchars($title); ?></h1>
     <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-folder-open"></i> Customer</a></li>
+        <li><a href="#"><i class="fa fa-folder-open"></i> Tender</a></li>
         <li class="active">Customer Advance Payment List</li>
     </ol>
 </section>

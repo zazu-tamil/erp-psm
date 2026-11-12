@@ -2238,19 +2238,24 @@ class Payment extends CI_Controller
             }
         }
 
-        // Ensure menu_info and role_permission exist for customer-adv-payment
+        // Ensure menu_info and role_permission exist for customer-adv-payment under Tender -> Tender Receipt List
         if ($this->db->table_exists('menu_info')) {
+            $tender_parent = $this->db->select('menu_id')->where(['menu_title' => 'Tender', 'parent_id' => 0, 'status !=' => 'Delete'])->get('menu_info')->row('menu_id');
+            $parent_id = !empty($tender_parent) ? (int)$tender_parent : 7;
+
+            $receipt_menu = $this->db->where('menu_slug', 'customer-invoice-receipt')->where('status !=', 'Delete')->get('menu_info')->row_array();
+            $target_parent_id = !empty($receipt_menu['parent_id']) ? (int)$receipt_menu['parent_id'] : $parent_id;
+            $target_sort = !empty($receipt_menu['sort_order']) ? ((int)$receipt_menu['sort_order'] + 1) : 21;
+
             $m_chk = $this->db->get_where('menu_info', ['menu_slug' => 'customer-adv-payment'])->row_array();
             if (!$m_chk) {
-                $tender_parent = $this->db->select('menu_id')->where(['menu_title' => 'Tender', 'parent_id' => 0, 'status !=' => 'Delete'])->get('menu_info')->row('menu_id');
-                $parent_id = !empty($tender_parent) ? (int)$tender_parent : 7;
                 $this->db->insert('menu_info', [
-                    'parent_id' => $parent_id,
+                    'parent_id' => $target_parent_id,
                     'menu_title' => 'Customer Advance Payment',
                     'menu_slug' => 'customer-adv-payment',
                     'menu_icon' => 'fa fa-list',
                     'is_header' => 0,
-                    'sort_order' => 20,
+                    'sort_order' => $target_sort,
                     'status' => 'Active'
                 ]);
                 $new_menu_id = $this->db->insert_id();
@@ -2271,6 +2276,12 @@ class Payment extends CI_Controller
                         }
                     }
                 }
+            } else {
+                $this->db->where('menu_id', $m_chk['menu_id'])->update('menu_info', [
+                    'parent_id' => $target_parent_id,
+                    'sort_order' => $target_sort,
+                    'status' => 'Active'
+                ]);
             }
         }
 

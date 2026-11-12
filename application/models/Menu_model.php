@@ -22,6 +22,7 @@ class Menu_model extends CI_Model {
         $this->ensure_split_reports_menu();
         $this->ensure_item_inward_outward_menu();
         $this->ensure_multi_customer_bill_menu();
+        $this->ensure_customer_adv_payment_menu();
         $this->db->where('status !=', 'Delete');
         $this->db->order_by('parent_id', 'ASC');
         $this->db->order_by('sort_order', 'ASC');
@@ -659,6 +660,99 @@ class Menu_model extends CI_Model {
                                          ->update('role_permission', array('can_view' => 1));
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Dynamically ensures that "Customer Advance Payment" menu is positioned under
+     * "Tender" alongside / right after "Tender Receipt List", and NOT under "Master -> Customer Info".
+     */
+    public function ensure_customer_adv_payment_menu()
+    {
+        // 1. Locate Tender Receipt List or Tender parent
+        $receipt_menu = $this->db->where('menu_slug', 'customer-invoice-receipt')
+                                 ->where('status !=', 'Delete')
+                                 ->get('menu_info')
+                                 ->row_array();
+
+        $tender_parent = $this->db->where('menu_title', 'Tender')
+                                  ->where('parent_id', 0)
+                                  ->where('status !=', 'Delete')
+                                  ->get('menu_info')
+                                  ->row_array();
+
+        $target_parent_id = 0;
+        $target_sort_order = 21;
+
+        if (!empty($receipt_menu) && (int)$receipt_menu['parent_id'] > 0) {
+            $target_parent_id = (int)$receipt_menu['parent_id'];
+            $target_sort_order = (int)$receipt_menu['sort_order'] + 1;
+        } elseif (!empty($tender_parent)) {
+            $target_parent_id = (int)$tender_parent['menu_id'];
+            $target_sort_order = 21;
+        }
+
+        if ($target_parent_id <= 0) {
+            return;
+        }
+
+        // 2. Find existing Customer Advance Payment menu
+        $adv_menu = $this->db->where('menu_slug', 'customer-adv-payment')
+                             ->where('status !=', 'Delete')
+                             ->get('menu_info')
+                             ->row_array();
+
+        $adv_menu_id = 0;
+        if (!$adv_menu) {
+            $this->db->insert('menu_info', array(
+                'parent_id'   => $target_parent_id,
+                'menu_title'  => 'Customer Advance Payment',
+                'menu_slug'   => 'customer-adv-payment',
+                'menu_icon'   => 'fa fa-list',
+                'is_header'   => 0,
+                'sort_order'  => $target_sort_order,
+                'status'      => 'Active'
+            ));
+            $adv_menu_id = $this->db->insert_id();
+        } else {
+            $adv_menu_id = (int)$adv_menu['menu_id'];
+            // Reparent if currently under Master -> Customer Info or misparented
+            if ((int)$adv_menu['parent_id'] !== $target_parent_id || (int)$adv_menu['sort_order'] !== $target_sort_order) {
+                $this->db->where('menu_id', $adv_menu_id)->update('menu_info', array(
+                    'parent_id'   => $target_parent_id,
+                    'menu_title'  => 'Customer Advance Payment',
+                    'menu_icon'   => 'fa fa-list',
+                    'sort_order'  => $target_sort_order,
+                    'status'      => 'Active'
+                ));
+            }
+        }
+
+        // 3. Ensure role permissions exist
+        if ($adv_menu_id > 0) {
+            $roles = $this->db->where('status !=', 'Delete')->get('role_info')->result_array();
+            if (!empty($roles)) {
+                foreach ($roles as $role) {
+                    $role_id = (int)$role['role_id'];
+                    $has_perm = $this->db->where('role_id', $role_id)
+                                         ->where('menu_id', $adv_menu_id)
+                                         ->count_all_results('role_permission');
+                    if ($has_perm == 0) {
+                        $this->db->insert('role_permission', array(
+                            'role_id'    => $role_id,
+                            'menu_id'    => $adv_menu_id,
+                            'can_view'   => 1,
+                            'can_add'    => 1,
+                            'can_edit'   => 1,
+                            'can_delete' => 1
+                        ));
+                    } else {
+                        $this->db->where('role_id', $role_id)
+                                 ->where('menu_id', $adv_menu_id)
+                                 ->update('role_permission', array('can_view' => 1));
                     }
                 }
             }

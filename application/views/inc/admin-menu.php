@@ -161,14 +161,14 @@ $current_page = $this->uri->segment(1, 0);
                 </li>
             </ul>
         </li>
-        <li class="<?= in_array($current_page, ['customer-adv-payment', 'customer-adv-receipt']) ? 'active' : '' ?>">
-            <a href="<?= site_url('customer-adv-payment') ?>">
-                <i class="fa fa-list"></i> Customer Advance Payment
-            </a>
-        </li>
         <li class="<?= ($current_page === 'customer-invoice-receipt') ? 'active' : '' ?>">
             <a href="<?= site_url('customer-invoice-receipt') ?>">
                 <i class="fa fa-list"></i> Tender Receipt List
+            </a>
+        </li>
+        <li class="<?= in_array($current_page, ['customer-adv-payment', 'customer-adv-receipt']) ? 'active' : '' ?>">
+            <a href="<?= site_url('customer-adv-payment') ?>">
+                <i class="fa fa-list"></i> Customer Advance Payment
             </a>
         </li>
 
