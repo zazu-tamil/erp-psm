@@ -3070,16 +3070,16 @@ class Reports extends CI_Controller
             FROM (
                 SELECT 
                     a.invoice_date AS tr_date,
-                    a.invoice_no AS voucher_no,
-                    'Purchase Invoice' AS description,
+                    CONVERT(a.invoice_no USING utf8) AS voucher_no,
+                    CONVERT('Purchase Invoice' USING utf8) AS description,
                     COALESCE(a.total_amount_inc_addl, a.total_amount) AS purchase_amt,
                     0.000 AS paid_amt,
-                    'purchase' AS type,
-                    v.vendor_name,
-                    NULL AS pay_type,
-                    NULL AS cheque_no,
+                    CONVERT('purchase' USING utf8) AS type,
+                    CONVERT(v.vendor_name USING utf8) AS vendor_name,
+                    CONVERT(NULL USING utf8) AS pay_type,
+                    CONVERT(NULL USING utf8) AS cheque_no,
                     NULL AS cheque_date,
-                    NULL AS cheque_bank
+                    CONVERT(NULL USING utf8) AS cheque_bank
                 FROM vendor_purchase_invoice_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3091,16 +3091,16 @@ class Reports extends CI_Controller
 
                 SELECT 
                     a.invoice_date AS tr_date,
-                    a.invoice_no AS voucher_no,
-                    'Multiple Purchase Invoice' AS description,
+                    CONVERT(a.invoice_no USING utf8) AS voucher_no,
+                    CONVERT('Multiple Purchase Invoice' USING utf8) AS description,
                     COALESCE(a.total_amount_inc_addl, a.total_amount) AS purchase_amt,
                     0.000 AS paid_amt,
-                    'purchase' AS type,
-                    v.vendor_name,
-                    NULL AS pay_type,
-                    NULL AS cheque_no,
+                    CONVERT('purchase' USING utf8) AS type,
+                    CONVERT(v.vendor_name USING utf8) AS vendor_name,
+                    CONVERT(NULL USING utf8) AS pay_type,
+                    CONVERT(NULL USING utf8) AS cheque_no,
                     NULL AS cheque_date,
-                    NULL AS cheque_bank
+                    CONVERT(NULL USING utf8) AS cheque_bank
                 FROM vendor_purchase_multiple_invoice_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3112,16 +3112,16 @@ class Reports extends CI_Controller
                 
                 SELECT 
                     a.invoice_date AS tr_date,
-                    a.invoice_no AS voucher_no,
-                    'Local Bill' AS description,
+                    CONVERT(a.invoice_no USING utf8) AS voucher_no,
+                    CONVERT('Local Bill' USING utf8) AS description,
                     a.tot_amt_with_tax AS purchase_amt,
                     0.000 AS paid_amt,
-                    'purchase' AS type,
-                    v.vendor_name,
-                    NULL AS pay_type,
-                    NULL AS cheque_no,
+                    CONVERT('purchase' USING utf8) AS type,
+                    CONVERT(v.vendor_name USING utf8) AS vendor_name,
+                    CONVERT(NULL USING utf8) AS pay_type,
+                    CONVERT(NULL USING utf8) AS cheque_no,
                     NULL AS cheque_date,
-                    NULL AS cheque_bank
+                    CONVERT(NULL USING utf8) AS cheque_bank
                 FROM local_purchase_bill_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3133,16 +3133,16 @@ class Reports extends CI_Controller
                 
                 SELECT 
                     a.invoice_date AS tr_date,
-                    a.invoice_no AS voucher_no,
-                    'Delivery Bill' AS description,
+                    CONVERT(a.invoice_no USING utf8) AS voucher_no,
+                    CONVERT('Delivery Bill' USING utf8) AS description,
                     a.g_total AS purchase_amt,
                     0.000 AS paid_amt,
-                    'purchase' AS type,
-                    v.vendor_name,
-                    NULL AS pay_type,
-                    NULL AS cheque_no,
+                    CONVERT('purchase' USING utf8) AS type,
+                    CONVERT(v.vendor_name USING utf8) AS vendor_name,
+                    CONVERT(NULL USING utf8) AS pay_type,
+                    CONVERT(NULL USING utf8) AS cheque_no,
                     NULL AS cheque_date,
-                    NULL AS cheque_bank
+                    CONVERT(NULL USING utf8) AS cheque_bank
                 FROM dp_bill_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3154,16 +3154,16 @@ class Reports extends CI_Controller
                 
                 SELECT 
                     a.invoice_date AS tr_date,
-                    a.invoice_no AS voucher_no,
-                    'Customer Bill' AS description,
+                    CONVERT(a.invoice_no USING utf8) AS voucher_no,
+                    CONVERT('Customer Bill' USING utf8) AS description,
                     a.customs_payable AS purchase_amt,
                     0.000 AS paid_amt,
-                    'purchase' AS type,
-                    v.vendor_name,
-                    NULL AS pay_type,
-                    NULL AS cheque_no,
+                    CONVERT('purchase' USING utf8) AS type,
+                    CONVERT(v.vendor_name USING utf8) AS vendor_name,
+                    CONVERT(NULL USING utf8) AS pay_type,
+                    CONVERT(NULL USING utf8) AS cheque_no,
                     NULL AS cheque_date,
-                    NULL AS cheque_bank
+                    CONVERT(NULL USING utf8) AS cheque_bank
                 FROM customs_bill_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3176,16 +3176,16 @@ class Reports extends CI_Controller
                 
                 SELECT 
                     a.payment_date AS tr_date,
-                    a.payment_no AS voucher_no,
-                    'Vendor Payment' AS description,
+                    CONVERT(a.payment_no USING utf8) AS voucher_no,
+                    CONVERT('Vendor Payment' USING utf8) AS description,
                     0.000 AS purchase_amt,
                     a.amount AS paid_amt,
-                    'payment' AS type,
-                    v.vendor_name,
-                    a.payment_type AS pay_type,
-                    a.cheque_no,
+                    CONVERT('payment' USING utf8) AS type,
+                    CONVERT(v.vendor_name USING utf8) AS vendor_name,
+                    CONVERT(a.payment_type USING utf8) AS pay_type,
+                    CONVERT(a.cheque_no USING utf8) AS cheque_no,
                     a.cheque_date,
-                    a.cheque_bank
+                    CONVERT(a.cheque_bank USING utf8) AS cheque_bank
                 FROM vendor_payment_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3197,16 +3197,16 @@ class Reports extends CI_Controller
                 
                 SELECT 
                     a.adv_payment_date AS tr_date,
-                    CONCAT('ADV-', a.adv_payment_id) AS voucher_no,
-                    'Vendor Advance Payment' AS description,
+                    CONVERT(CONCAT('ADV-', a.adv_payment_id) USING utf8) AS voucher_no,
+                    CONVERT('Vendor Advance Payment' USING utf8) AS description,
                     0.000 AS purchase_amt,
                     a.adv_payment_amt AS paid_amt,
-                    'payment' AS type,
-                    v.vendor_name,
-                    a.pay_type,
-                    a.cheque_no,
+                    CONVERT('payment' USING utf8) AS type,
+                    CONVERT(v.vendor_name USING utf8) AS vendor_name,
+                    CONVERT(a.pay_type USING utf8) AS pay_type,
+                    CONVERT(a.cheque_no USING utf8) AS cheque_no,
                     a.cheque_date,
-                    a.cheque_bank
+                    CONVERT(a.cheque_bank USING utf8) AS cheque_bank
                 FROM vendor_advance_payment_info a
                 LEFT JOIN vendor_info v ON a.vendor_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3218,16 +3218,16 @@ class Reports extends CI_Controller
                 
                 SELECT 
                     a.note_date AS tr_date,
-                    a.note_no AS voucher_no,
-                    'Credit Note' AS description,
+                    CONVERT(a.note_no USING utf8) AS voucher_no,
+                    CONVERT('Credit Note' USING utf8) AS description,
                     a.total_amount AS purchase_amt,
                     0.000 AS paid_amt,
-                    'purchase' AS type,
-                    v.vendor_name,
-                    NULL AS pay_type,
-                    NULL AS cheque_no,
+                    CONVERT('purchase' USING utf8) AS type,
+                    CONVERT(v.vendor_name USING utf8) AS vendor_name,
+                    CONVERT(NULL USING utf8) AS pay_type,
+                    CONVERT(NULL USING utf8) AS cheque_no,
                     NULL AS cheque_date,
-                    NULL AS cheque_bank
+                    CONVERT(NULL USING utf8) AS cheque_bank
                 FROM credit_debit_note_info a
                 LEFT JOIN vendor_info v ON a.supplier_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status != 'Delete' AND a.party_type = 'Supplier' AND a.note_type = 'Credit'
@@ -3239,16 +3239,16 @@ class Reports extends CI_Controller
                 
                 SELECT 
                     a.note_date AS tr_date,
-                    a.note_no AS voucher_no,
-                    'Debit Note' AS description,
+                    CONVERT(a.note_no USING utf8) AS voucher_no,
+                    CONVERT('Debit Note' USING utf8) AS description,
                     0.000 AS purchase_amt,
                     a.total_amount AS paid_amt,
-                    'payment' AS type,
-                    v.vendor_name,
-                    NULL AS pay_type,
-                    NULL AS cheque_no,
+                    CONVERT('payment' USING utf8) AS type,
+                    CONVERT(v.vendor_name USING utf8) AS vendor_name,
+                    CONVERT(NULL USING utf8) AS pay_type,
+                    CONVERT(NULL USING utf8) AS cheque_no,
                     NULL AS cheque_date,
-                    NULL AS cheque_bank
+                    CONVERT(NULL USING utf8) AS cheque_bank
                 FROM credit_debit_note_info a
                 LEFT JOIN vendor_info v ON a.supplier_id = v.vendor_id AND v.status = 'Active'
                 WHERE a.status != 'Delete' AND a.party_type = 'Supplier' AND a.note_type = 'Debit'
@@ -3854,16 +3854,16 @@ class Reports extends CI_Controller
             FROM (
                 SELECT 
                     a.invoice_date AS tr_date,
-                    a.invoice_no AS voucher_no,
-                    'Sales Invoice' AS description,
+                    CONVERT(a.invoice_no, CHAR) AS voucher_no,
+                    CONVERT('Sales Invoice' USING utf8) AS description,
                     a.total_amount AS debit_amt,
                     0.000 AS credit_amt,
-                    'invoice' AS type,
-                    c.customer_name,
-                    NULL AS pay_type,
-                    NULL AS cheque_no,
+                    CONVERT('invoice' USING utf8) AS type,
+                    CONVERT(c.customer_name USING utf8) AS customer_name,
+                    CONVERT(NULL USING utf8) AS pay_type,
+                    CONVERT(NULL USING utf8) AS cheque_no,
                     NULL AS cheque_date,
-                    NULL AS cheque_bank
+                    CONVERT(NULL USING utf8) AS cheque_bank
                 FROM tender_enq_invoice_info a
                 LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3875,16 +3875,16 @@ class Reports extends CI_Controller
                 
                 SELECT 
                     a.receipt_date AS tr_date,
-                    a.receipt_no AS voucher_no,
-                    'Customer Payment' AS description,
+                    CONVERT(a.receipt_no USING utf8) AS voucher_no,
+                    CONVERT('Customer Payment' USING utf8) AS description,
                     0.000 AS debit_amt,
                     a.amount AS credit_amt,
-                    'receipt' AS type,
-                    c.customer_name,
-                    a.receipt_type AS pay_type,
-                    a.cheque_no,
+                    CONVERT('receipt' USING utf8) AS type,
+                    CONVERT(c.customer_name USING utf8) AS customer_name,
+                    CONVERT(a.receipt_type USING utf8) AS pay_type,
+                    CONVERT(a.cheque_no USING utf8) AS cheque_no,
                     a.cheque_date,
-                    a.cheque_bank
+                    CONVERT(a.cheque_bank USING utf8) AS cheque_bank
                 FROM tender_receipt_info a
                 LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3896,16 +3896,16 @@ class Reports extends CI_Controller
                 
                 SELECT 
                     a.adv_payment_date AS tr_date,
-                    CONCAT('CADV-', a.adv_payment_id) AS voucher_no,
-                    'Customer Advance' AS description,
+                    CONVERT(CONCAT('CADV-', a.adv_payment_id) USING utf8) AS voucher_no,
+                    CONVERT('Customer Advance' USING utf8) AS description,
                     0.000 AS debit_amt,
                     a.adv_payment_amt AS credit_amt,
-                    'receipt' AS type,
-                    c.customer_name,
-                    a.pay_type,
-                    a.cheque_no,
+                    CONVERT('receipt' USING utf8) AS type,
+                    CONVERT(c.customer_name USING utf8) AS customer_name,
+                    CONVERT(a.pay_type USING utf8) AS pay_type,
+                    CONVERT(a.cheque_no USING utf8) AS cheque_no,
                     a.cheque_date,
-                    a.cheque_bank
+                    CONVERT(a.cheque_bank USING utf8) AS cheque_bank
                 FROM customer_advance_payment_info a
                 LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
                 WHERE a.status = 'Active'
@@ -3917,16 +3917,16 @@ class Reports extends CI_Controller
                 
                 SELECT 
                     a.note_date AS tr_date,
-                    a.note_no AS voucher_no,
-                    'Debit Note' AS description,
+                    CONVERT(a.note_no USING utf8) AS voucher_no,
+                    CONVERT('Debit Note' USING utf8) AS description,
                     a.total_amount AS debit_amt,
                     0.000 AS credit_amt,
-                    'invoice' AS type,
-                    c.customer_name,
-                    NULL AS pay_type,
-                    NULL AS cheque_no,
+                    CONVERT('invoice' USING utf8) AS type,
+                    CONVERT(c.customer_name USING utf8) AS customer_name,
+                    CONVERT(NULL USING utf8) AS pay_type,
+                    CONVERT(NULL USING utf8) AS cheque_no,
                     NULL AS cheque_date,
-                    NULL AS cheque_bank
+                    CONVERT(NULL USING utf8) AS cheque_bank
                 FROM credit_debit_note_info a
                 LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
                 WHERE a.status != 'Delete' AND a.party_type = 'Customer' AND a.note_type = 'Debit'
@@ -3938,16 +3938,16 @@ class Reports extends CI_Controller
 
                 SELECT 
                     a.note_date AS tr_date,
-                    a.note_no AS voucher_no,
-                    'Credit Note' AS description,
+                    CONVERT(a.note_no USING utf8) AS voucher_no,
+                    CONVERT('Credit Note' USING utf8) AS description,
                     0.000 AS debit_amt,
                     a.total_amount AS credit_amt,
-                    'receipt' AS type,
-                    c.customer_name,
-                    NULL AS pay_type,
-                    NULL AS cheque_no,
+                    CONVERT('receipt' USING utf8) AS type,
+                    CONVERT(c.customer_name USING utf8) AS customer_name,
+                    CONVERT(NULL USING utf8) AS pay_type,
+                    CONVERT(NULL USING utf8) AS cheque_no,
                     NULL AS cheque_date,
-                    NULL AS cheque_bank
+                    CONVERT(NULL USING utf8) AS cheque_bank
                 FROM credit_debit_note_info a
                 LEFT JOIN customer_info c ON a.customer_id = c.customer_id AND c.status = 'Active'
                 WHERE a.status != 'Delete' AND a.party_type = 'Customer' AND a.note_type = 'Credit'
