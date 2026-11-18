@@ -3157,573 +3157,714 @@ class Accounts extends CI_Controller
         $data['js'] = 'accounts/account-trial-balance.inc';
 
         // ---------- DATE FILTERS ----------
-        if (isset($_POST['srch_from_date'])) {
+        $get_from = $this->input->get('srch_from_date');
+        $get_to = $this->input->get('srch_to_date');
+
+        if (!empty($get_from) && !empty($get_to)) {
+            $data['srch_from_date'] = $srch_from_date = $get_from;
+            $data['srch_to_date'] = $srch_to_date = $get_to;
+            $this->session->set_userdata('tb_srch_from_date', $srch_from_date);
+            $this->session->set_userdata('tb_srch_to_date', $srch_to_date);
+        } elseif (isset($_POST['srch_from_date'])) {
             $data['srch_from_date'] = $srch_from_date = $this->input->post('srch_from_date');
             $data['srch_to_date'] = $srch_to_date = $this->input->post('srch_to_date');
-            $this->session->set_userdata('srch_from_date', $srch_from_date);
-            $this->session->set_userdata('srch_to_date', $srch_to_date);
-        } elseif ($this->session->userdata('srch_from_date')) {
-            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('srch_from_date');
-            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('srch_to_date');
+            $this->session->set_userdata('tb_srch_from_date', $srch_from_date);
+            $this->session->set_userdata('tb_srch_to_date', $srch_to_date);
+        } elseif ($this->session->userdata('tb_srch_from_date')) {
+            $data['srch_from_date'] = $srch_from_date = $this->session->userdata('tb_srch_from_date');
+            $data['srch_to_date'] = $srch_to_date = $this->session->userdata('tb_srch_to_date');
         } else {
-            $data['srch_from_date'] = $srch_from_date = date('Y-m-01');
+            $data['srch_from_date'] = $srch_from_date = date('Y-01-01');
             $data['srch_to_date'] = $srch_to_date = date('Y-m-d');
         }
 
         // ---------- AC TYPE FILTER ----------
-        if (isset($_POST['srch_ac_type'])) {
+        $get_ac = $this->input->get('srch_ac_type');
+        if ($get_ac !== null) {
+            $data['srch_ac_type'] = $srch_ac_type = $get_ac;
+            $this->session->set_userdata('tb_srch_ac_type', $srch_ac_type);
+        } elseif (isset($_POST['srch_ac_type'])) {
             $data['srch_ac_type'] = $srch_ac_type = $this->input->post('srch_ac_type');
-            $this->session->set_userdata('srch_ac_type', $srch_ac_type);
-        } elseif ($this->session->userdata('srch_ac_type')) {
-            $data['srch_ac_type'] = $srch_ac_type = $this->session->userdata('srch_ac_type');
+            $this->session->set_userdata('tb_srch_ac_type', $srch_ac_type);
+        } elseif ($this->session->userdata('tb_srch_ac_type')) {
+            $data['srch_ac_type'] = $srch_ac_type = $this->session->userdata('tb_srch_ac_type');
         } else {
             $data['srch_ac_type'] = $srch_ac_type = '';
         }
 
-        $data['ac_type_opt'] = array('Bank' => 'Bank', 'Cash' => 'Cash');
+        $data['ac_type_opt'] = [
+            '' => 'All Accounts (Comprehensive)',
+            'Bank' => 'Bank Accounts Only',
+            'Cash' => 'Cash in Hand Only'
+        ];
 
-        // ---------- BUILD QUERY FOR ACCOUNTS & SUB-ACCOUNTS ----------
-        $ac_type_where_in = "";
-        $ac_type_where_out = "";
-        $params_op_in = [$srch_from_date];
-        $params_op_out = [$srch_from_date];
-        $params_pr_in = [$srch_from_date, $srch_to_date];
-        $params_pr_out = [$srch_from_date, $srch_to_date];
+        // ---------- VIEW & DISPLAY PREFERENCES ----------
+        $data['view_mode'] = $this->input->post('view_mode') ?: ($this->input->get('view_mode') ?: 'detailed');
+        $data['col_mode'] = $this->input->post('col_mode') ?: ($this->input->get('col_mode') ?: '6col');
+        $data['hide_zero'] = ($this->input->post('hide_zero') !== null) ? $this->input->post('hide_zero') : ($this->input->get('hide_zero') !== null ? $this->input->get('hide_zero') : '0');
 
-        if (!empty($srch_ac_type)) {
-            $ac_type_where_in = " AND ac_type = ? ";
-            $ac_type_where_out = " AND ac_type = ? ";
-            $params_op_in[] = $srch_ac_type;
-            $params_op_out[] = $srch_ac_type;
-            $params_pr_in[] = $srch_ac_type;
-            $params_pr_out[] = $srch_ac_type;
+        // Build data records using double-entry accounting engine
+        $data['record_list'] = $this->_build_trial_balance_records($srch_from_date, $srch_to_date, $srch_ac_type);
+
+        // Check for Excel Export
+        $is_excel = ($this->input->post('export_excel') == '1' || $this->input->get('export') == 'excel');
+        if ($is_excel) {
+            $filename = "Trial_Balance_[" . $srch_from_date . "_to_" . $srch_to_date . "].xls";
+            header("Content-Type: application/vnd.ms-excel; charset=utf-8");
+            header("Content-Disposition: attachment; filename=\"$filename\"");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+            $data['is_excel'] = true;
         }
 
-        $all_params = array_merge($params_op_in, $params_op_out, $params_pr_in, $params_pr_out);
+        $this->load->view('page/accounts/account-trial-balance', $data);
+    }
 
-        $sql = "
+    /**
+     * Helper to query a single float value from SQL
+     */
+    private function _tb_query_float($sql)
+    {
+        $query = $this->db->query($sql);
+        if ($query && $query->num_rows() > 0) {
+            $row = $query->row_array();
+            return (float) reset($row);
+        }
+        return 0.0;
+    }
+
+    /**
+     * Double-Entry Engine: Aggregates Opening Balances, Period Transactions, and Closing Balances
+     */
+    private function _build_trial_balance_records($from_date, $to_date, $srch_ac_type = '')
+    {
+        $esc_from = $this->db->escape_str($from_date);
+        $esc_to = $this->db->escape_str($to_date);
+
+        $record_list = [];
+
+        // =========================================================================
+        // 1. CASH & BANK ACCOUNTS (ASSETS)
+        // =========================================================================
+        $cb_op = [];
+        $cb_op_query = $this->db->query("SELECT ac_type, bank_id, amount, opening_date FROM cb_opening_balance_info WHERE status != 'Delete'");
+        if ($cb_op_query) {
+            foreach ($cb_op_query->result_array() as $r) {
+                $k = ($r['ac_type'] == 'Cash') ? 'cash' : 'bank_' . $r['bank_id'];
+                $cb_op[$k] = [
+                    'amt' => (float) $r['amount'],
+                    'date' => $r['opening_date'],
+                    'ac_type' => $r['ac_type'],
+                    'bank_id' => $r['bank_id']
+                ];
+            }
+        }
+
+        // 1A. Cash in Hand
+        if (empty($srch_ac_type) || $srch_ac_type == 'Cash') {
+            $cash_base_op = $cb_op['cash']['amt'] ?? 0.0;
+
+            $cash_prior_in = $this->_tb_query_float("SELECT SUM(amount) FROM tender_receipt_info WHERE status = 'Active' AND receipt_mode = 'Cash' AND receipt_date < '$esc_from'")
+                + $this->_tb_query_float("SELECT SUM(adv_payment_amt) FROM customer_advance_payment_info WHERE status = 'Active' AND ac_type_opt = 'Cash' AND adv_payment_date < '$esc_from'")
+                + $this->_tb_query_float("SELECT SUM(amount) FROM cb_cash_inward_info WHERE status = 'Active' AND ac_type = 'Cash' AND inward_date < '$esc_from'")
+                + $this->_tb_query_float("SELECT SUM(amount) FROM cb_contra_entry_info WHERE status = 'Active' AND to_ac_type = 'Cash' AND entry_date < '$esc_from'");
+
+            $cash_prior_out = $this->_tb_query_float("SELECT SUM(amount) FROM vendor_payment_info WHERE status = 'Active' AND payment_mode = 'Cash' AND payment_date < '$esc_from'")
+                + $this->_tb_query_float("SELECT SUM(adv_payment_amt) FROM vendor_advance_payment_info WHERE status = 'Active' AND ac_type_opt = 'Cash' AND adv_payment_date < '$esc_from'")
+                + $this->_tb_query_float("SELECT SUM(amount) FROM cb_cash_outward_info WHERE status = 'Active' AND ac_type = 'Cash' AND outward_date < '$esc_from'")
+                + $this->_tb_query_float("SELECT SUM(amount) FROM cb_contra_entry_info WHERE status = 'Active' AND from_ac_type = 'Cash' AND entry_date < '$esc_from'");
+
+            $cash_op_bal = $cash_base_op + $cash_prior_in - $cash_prior_out;
+
+            $cash_period_in = $this->_tb_query_float("SELECT SUM(amount) FROM tender_receipt_info WHERE status = 'Active' AND receipt_mode = 'Cash' AND receipt_date BETWEEN '$esc_from' AND '$esc_to'")
+                + $this->_tb_query_float("SELECT SUM(adv_payment_amt) FROM customer_advance_payment_info WHERE status = 'Active' AND ac_type_opt = 'Cash' AND adv_payment_date BETWEEN '$esc_from' AND '$esc_to'")
+                + $this->_tb_query_float("SELECT SUM(amount) FROM cb_cash_inward_info WHERE status = 'Active' AND ac_type = 'Cash' AND inward_date BETWEEN '$esc_from' AND '$esc_to'")
+                + $this->_tb_query_float("SELECT SUM(amount) FROM cb_contra_entry_info WHERE status = 'Active' AND to_ac_type = 'Cash' AND entry_date BETWEEN '$esc_from' AND '$esc_to'");
+
+            $cash_period_out = $this->_tb_query_float("SELECT SUM(amount) FROM vendor_payment_info WHERE status = 'Active' AND payment_mode = 'Cash' AND payment_date BETWEEN '$esc_from' AND '$esc_to'")
+                + $this->_tb_query_float("SELECT SUM(adv_payment_amt) FROM vendor_advance_payment_info WHERE status = 'Active' AND ac_type_opt = 'Cash' AND adv_payment_date BETWEEN '$esc_from' AND '$esc_to'")
+                + $this->_tb_query_float("SELECT SUM(amount) FROM cb_cash_outward_info WHERE status = 'Active' AND ac_type = 'Cash' AND outward_date BETWEEN '$esc_from' AND '$esc_to'")
+                + $this->_tb_query_float("SELECT SUM(amount) FROM cb_contra_entry_info WHERE status = 'Active' AND from_ac_type = 'Cash' AND entry_date BETWEEN '$esc_from' AND '$esc_to'");
+
+            $cash_cl_bal = $cash_op_bal + $cash_period_in - $cash_period_out;
+
+            $record_list[] = [
+                'account_category' => 'ASSETS',
+                'account_head_name' => 'Cash & Bank Accounts',
+                'sub_account_head_name' => 'Cash-in-Hand',
+                'nature_type' => 'Asset',
+                'opening_debit' => ($cash_op_bal >= 0) ? $cash_op_bal : 0.0,
+                'opening_credit' => ($cash_op_bal < 0) ? -$cash_op_bal : 0.0,
+                'period_debit' => $cash_period_in,
+                'period_credit' => $cash_period_out,
+                'closing_debit' => ($cash_cl_bal >= 0) ? $cash_cl_bal : 0.0,
+                'closing_credit' => ($cash_cl_bal < 0) ? -$cash_cl_bal : 0.0,
+                'drilldown_url' => site_url('cash_ledger?srch_ac_type=Cash&srch_from_date=' . $from_date . '&srch_to_date=' . $to_date),
+                'account_head_id' => 0,
+                'sub_account_head_id' => 0
+            ];
+        }
+
+        // 1B. Bank Accounts
+        if (empty($srch_ac_type) || $srch_ac_type == 'Bank') {
+            $banks = $this->db->query("SELECT bank_id, bank_name, account_name, account_number FROM company_bank_info WHERE status = 'Active'")->result_array();
+            foreach ($banks as $b) {
+                $b_id = (int) $b['bank_id'];
+                $key = 'bank_' . $b_id;
+                $b_base_op = $cb_op[$key]['amt'] ?? 0.0;
+
+                $b_prior_in = $this->_tb_query_float("SELECT SUM(amount) FROM tender_receipt_info WHERE status = 'Active' AND receipt_mode = 'Bank' AND bank_id = $b_id AND receipt_date < '$esc_from'")
+                    + $this->_tb_query_float("SELECT SUM(adv_payment_amt) FROM customer_advance_payment_info WHERE status = 'Active' AND ac_type_opt = 'Bank' AND bank_id = $b_id AND adv_payment_date < '$esc_from'")
+                    + $this->_tb_query_float("SELECT SUM(amount) FROM cb_cash_inward_info WHERE status = 'Active' AND ac_type = 'Bank' AND bank_id = $b_id AND inward_date < '$esc_from'")
+                    + $this->_tb_query_float("SELECT SUM(amount) FROM cb_contra_entry_info WHERE status = 'Active' AND to_ac_type = 'Bank' AND to_bank_id = $b_id AND entry_date < '$esc_from'");
+
+                $b_prior_out = $this->_tb_query_float("SELECT SUM(amount) FROM vendor_payment_info WHERE status = 'Active' AND payment_mode = 'Bank' AND bank_id = $b_id AND payment_date < '$esc_from'")
+                    + $this->_tb_query_float("SELECT SUM(adv_payment_amt) FROM vendor_advance_payment_info WHERE status = 'Active' AND ac_type_opt = 'Bank' AND bank_id = $b_id AND adv_payment_date < '$esc_from'")
+                    + $this->_tb_query_float("SELECT SUM(amount) FROM cb_cash_outward_info WHERE status = 'Active' AND ac_type = 'Bank' AND bank_id = $b_id AND outward_date < '$esc_from'")
+                    + $this->_tb_query_float("SELECT SUM(amount) FROM cb_contra_entry_info WHERE status = 'Active' AND from_ac_type = 'Bank' AND from_bank_id = $b_id AND entry_date < '$esc_from'");
+
+                $b_op_bal = $b_base_op + $b_prior_in - $b_prior_out;
+
+                $b_period_in = $this->_tb_query_float("SELECT SUM(amount) FROM tender_receipt_info WHERE status = 'Active' AND receipt_mode = 'Bank' AND bank_id = $b_id AND receipt_date BETWEEN '$esc_from' AND '$esc_to'")
+                    + $this->_tb_query_float("SELECT SUM(adv_payment_amt) FROM customer_advance_payment_info WHERE status = 'Active' AND ac_type_opt = 'Bank' AND bank_id = $b_id AND adv_payment_date BETWEEN '$esc_from' AND '$esc_to'")
+                    + $this->_tb_query_float("SELECT SUM(amount) FROM cb_cash_inward_info WHERE status = 'Active' AND ac_type = 'Bank' AND bank_id = $b_id AND inward_date BETWEEN '$esc_from' AND '$esc_to'")
+                    + $this->_tb_query_float("SELECT SUM(amount) FROM cb_contra_entry_info WHERE status = 'Active' AND to_ac_type = 'Bank' AND to_bank_id = $b_id AND entry_date BETWEEN '$esc_from' AND '$esc_to'");
+
+                $b_period_out = $this->_tb_query_float("SELECT SUM(amount) FROM vendor_payment_info WHERE status = 'Active' AND payment_mode = 'Bank' AND bank_id = $b_id AND payment_date BETWEEN '$esc_from' AND '$esc_to'")
+                    + $this->_tb_query_float("SELECT SUM(adv_payment_amt) FROM vendor_advance_payment_info WHERE status = 'Active' AND ac_type_opt = 'Bank' AND bank_id = $b_id AND adv_payment_date BETWEEN '$esc_from' AND '$esc_to'")
+                    + $this->_tb_query_float("SELECT SUM(amount) FROM cb_cash_outward_info WHERE status = 'Active' AND ac_type = 'Bank' AND bank_id = $b_id AND outward_date BETWEEN '$esc_from' AND '$esc_to'")
+                    + $this->_tb_query_float("SELECT SUM(amount) FROM cb_contra_entry_info WHERE status = 'Active' AND from_ac_type = 'Bank' AND from_bank_id = $b_id AND entry_date BETWEEN '$esc_from' AND '$esc_to'");
+
+                $b_cl_bal = $b_op_bal + $b_period_in - $b_period_out;
+
+                $bank_title = trim($b['bank_name']);
+                if (!empty($b['account_number'])) {
+                    $bank_title .= ' (' . trim($b['account_number']) . ')';
+                }
+
+                $record_list[] = [
+                    'account_category' => 'ASSETS',
+                    'account_head_name' => 'Cash & Bank Accounts',
+                    'sub_account_head_name' => $bank_title,
+                    'nature_type' => 'Asset',
+                    'opening_debit' => ($b_op_bal >= 0) ? $b_op_bal : 0.0,
+                    'opening_credit' => ($b_op_bal < 0) ? -$b_op_bal : 0.0,
+                    'period_debit' => $b_period_in,
+                    'period_credit' => $b_period_out,
+                    'closing_debit' => ($b_cl_bal >= 0) ? $b_cl_bal : 0.0,
+                    'closing_credit' => ($b_cl_bal < 0) ? -$b_cl_bal : 0.0,
+                    'drilldown_url' => site_url('cash_ledger?srch_ac_type=Bank&srch_bank_id=' . $b_id . '&srch_from_date=' . $from_date . '&srch_to_date=' . $to_date),
+                    'account_head_id' => 0,
+                    'sub_account_head_id' => 0
+                ];
+            }
+        }
+
+        // If Cash or Bank filter is applied, return only Cash & Bank records
+        if (!empty($srch_ac_type)) {
+            return $record_list;
+        }
+
+        // =========================================================================
+        // 2. SUNDRY DEBTORS (TRADE RECEIVABLES - ASSET)
+        // =========================================================================
+        $deb_base_op = $this->_tb_query_float("
+            SELECT SUM(CASE WHEN balance_type = 'DR' THEN opening_amount ELSE -opening_amount END) 
+            FROM customer_opening_balance_info c 
+            JOIN customer_info ci ON ci.customer_id = c.customer_id 
+            WHERE ci.status = 'Active'
+        ");
+
+        $deb_prior_inv = $this->_tb_query_float("
+            SELECT SUM(total_amount) 
+            FROM tender_enq_invoice_info 
+            WHERE status = 'Active' AND invoice_date < '$esc_from'
+        ");
+
+        $deb_prior_rec = $this->_tb_query_float("
+            SELECT SUM(amount) 
+            FROM tender_receipt_info 
+            WHERE status = 'Active' AND receipt_date < '$esc_from'
+        ") + $this->_tb_query_float("
+            SELECT SUM(adv_payment_amt) 
+            FROM customer_advance_payment_info 
+            WHERE status = 'Active' AND adv_payment_date < '$esc_from'
+        ");
+
+        $deb_op_bal = $deb_base_op + $deb_prior_inv - $deb_prior_rec;
+
+        $deb_period_dr = $this->_tb_query_float("
+            SELECT SUM(total_amount) 
+            FROM tender_enq_invoice_info 
+            WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'
+        ");
+
+        $deb_period_cr = $this->_tb_query_float("
+            SELECT SUM(amount) 
+            FROM tender_receipt_info 
+            WHERE status = 'Active' AND receipt_date BETWEEN '$esc_from' AND '$esc_to'
+        ") + $this->_tb_query_float("
+            SELECT SUM(adv_payment_amt) 
+            FROM customer_advance_payment_info 
+            WHERE status = 'Active' AND adv_payment_date BETWEEN '$esc_from' AND '$esc_to'
+        ");
+
+        $deb_cl_bal = $deb_op_bal + $deb_period_dr - $deb_period_cr;
+
+        $record_list[] = [
+            'account_category' => 'ASSETS',
+            'account_head_name' => 'Sundry Debtors',
+            'sub_account_head_name' => 'Trade Receivables (Customers)',
+            'nature_type' => 'Asset',
+            'opening_debit' => ($deb_op_bal >= 0) ? $deb_op_bal : 0.0,
+            'opening_credit' => ($deb_op_bal < 0) ? -$deb_op_bal : 0.0,
+            'period_debit' => $deb_period_dr,
+            'period_credit' => $deb_period_cr,
+            'closing_debit' => ($deb_cl_bal >= 0) ? $deb_cl_bal : 0.0,
+            'closing_credit' => ($deb_cl_bal < 0) ? -$deb_cl_bal : 0.0,
+            'drilldown_url' => site_url('customer-balance-report?srch_from_date=' . $from_date . '&srch_to_date=' . $to_date),
+            'account_head_id' => 0,
+            'sub_account_head_id' => 0
+        ];
+
+        // =========================================================================
+        // 3. SUNDRY CREDITORS (TRADE PAYABLES - LIABILITY)
+        // =========================================================================
+        $cred_base_op = $this->_tb_query_float("
+            SELECT SUM(CASE WHEN balance_type = 'CR' THEN opening_amount ELSE -opening_amount END) 
+            FROM vendor_opening_balance_info v 
+            JOIN vendor_info vi ON vi.vendor_id = v.vendor_id 
+            WHERE vi.status = 'Active'
+        ");
+
+        $cred_prior_bills = $this->_tb_query_float("
+            SELECT SUM(COALESCE(total_amount_inc_addl, total_amount)) FROM (
+                SELECT total_amount_inc_addl, total_amount FROM vendor_purchase_invoice_info WHERE status = 'Active' AND invoice_date < '$esc_from'
+                UNION ALL
+                SELECT total_amount_inc_addl, total_amount FROM vendor_purchase_multiple_invoice_info WHERE status = 'Active' AND invoice_date < '$esc_from'
+            ) as t
+        ")
+        + $this->_tb_query_float("SELECT SUM(tot_amt_with_tax) FROM local_purchase_bill_info WHERE status = 'Active' AND invoice_date < '$esc_from'")
+        + $this->_tb_query_float("SELECT SUM(g_total) FROM dp_bill_info WHERE status = 'Active' AND invoice_date < '$esc_from'")
+        + $this->_tb_query_float("SELECT SUM(bill_amount + vat_amt) FROM customs_bill_info WHERE status = 'Active' AND ac_type_opt = 'Accountable' AND invoice_date < '$esc_from'");
+
+        $cred_prior_pmts = $this->_tb_query_float("
+            SELECT SUM(amount) FROM vendor_payment_info WHERE status = 'Active' AND payment_date < '$esc_from'
+        ") + $this->_tb_query_float("
+            SELECT SUM(adv_payment_amt) FROM vendor_advance_payment_info WHERE status = 'Active' AND adv_payment_date < '$esc_from'
+        ");
+
+        $cred_op_bal = $cred_base_op + $cred_prior_bills - $cred_prior_pmts;
+
+        $cred_period_cr = $this->_tb_query_float("
+            SELECT SUM(COALESCE(total_amount_inc_addl, total_amount)) FROM (
+                SELECT total_amount_inc_addl, total_amount FROM vendor_purchase_invoice_info WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'
+                UNION ALL
+                SELECT total_amount_inc_addl, total_amount FROM vendor_purchase_multiple_invoice_info WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'
+            ) as t
+        ")
+        + $this->_tb_query_float("SELECT SUM(tot_amt_with_tax) FROM local_purchase_bill_info WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'")
+        + $this->_tb_query_float("SELECT SUM(g_total) FROM dp_bill_info WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'")
+        + $this->_tb_query_float("SELECT SUM(bill_amount + vat_amt) FROM customs_bill_info WHERE status = 'Active' AND ac_type_opt = 'Accountable' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'");
+
+        $cred_period_dr = $this->_tb_query_float("
+            SELECT SUM(amount) FROM vendor_payment_info WHERE status = 'Active' AND payment_date BETWEEN '$esc_from' AND '$esc_to'
+        ") + $this->_tb_query_float("
+            SELECT SUM(adv_payment_amt) FROM vendor_advance_payment_info WHERE status = 'Active' AND adv_payment_date BETWEEN '$esc_from' AND '$esc_to'
+        ");
+
+        $cred_cl_bal = $cred_op_bal + $cred_period_cr - $cred_period_dr;
+
+        $record_list[] = [
+            'account_category' => 'LIABILITIES',
+            'account_head_name' => 'Sundry Creditors',
+            'sub_account_head_name' => 'Trade Payables (Vendors & Service Providers)',
+            'nature_type' => 'Liability',
+            'opening_debit' => ($cred_op_bal < 0) ? -$cred_op_bal : 0.0,
+            'opening_credit' => ($cred_op_bal >= 0) ? $cred_op_bal : 0.0,
+            'period_debit' => $cred_period_dr,
+            'period_credit' => $cred_period_cr,
+            'closing_debit' => ($cred_cl_bal < 0) ? -$cred_cl_bal : 0.0,
+            'closing_credit' => ($cred_cl_bal >= 0) ? $cred_cl_bal : 0.0,
+            'drilldown_url' => site_url('vendor-balance-report?srch_from_date=' . $from_date . '&srch_to_date=' . $to_date),
+            'account_head_id' => 0,
+            'sub_account_head_id' => 0
+        ];
+
+        // =========================================================================
+        // 4. DUTIES & TAXES (VAT - OUTPUT & INPUT)
+        // =========================================================================
+        // Output VAT (Liability)
+        $vat_out_prior = $this->_tb_query_float("
+            SELECT SUM(tax_amount) 
+            FROM tender_enq_invoice_info 
+            WHERE status = 'Active' AND invoice_date < '$esc_from'
+        ");
+
+        $vat_out_pr = $this->_tb_query_float("
+            SELECT SUM(tax_amount) 
+            FROM tender_enq_invoice_info 
+            WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'
+        ");
+
+        $vat_out_cl = $vat_out_prior + $vat_out_pr;
+
+        $record_list[] = [
+            'account_category' => 'LIABILITIES',
+            'account_head_name' => 'Duties & Taxes',
+            'sub_account_head_name' => 'Output VAT (Sales Invoices)',
+            'nature_type' => 'Liability',
+            'opening_debit' => 0.0,
+            'opening_credit' => $vat_out_prior,
+            'period_debit' => 0.0,
+            'period_credit' => $vat_out_pr,
+            'closing_debit' => 0.0,
+            'closing_credit' => $vat_out_cl,
+            'drilldown_url' => site_url('sales-nbr-report?srch_from_date=' . $from_date . '&srch_to_date=' . $to_date),
+            'account_head_id' => 0,
+            'sub_account_head_id' => 0
+        ];
+
+        // Input VAT (Asset)
+        $vat_in_prior = $this->_tb_query_float("
+            SELECT SUM(COALESCE(total_tax_amount_inc_addl, tax_amount, 0)) FROM (
+                SELECT total_tax_amount_inc_addl, tax_amount FROM vendor_purchase_invoice_info WHERE status = 'Active' AND invoice_date < '$esc_from'
+                UNION ALL
+                SELECT total_tax_amount_inc_addl, tax_amount FROM vendor_purchase_multiple_invoice_info WHERE status = 'Active' AND invoice_date < '$esc_from'
+            ) as t
+        ")
+        + $this->_tb_query_float("SELECT SUM(vat_amt) FROM local_purchase_bill_info WHERE status = 'Active' AND invoice_date < '$esc_from'")
+        + $this->_tb_query_float("SELECT SUM(custom_vat_amt + dp_vat_amt) FROM dp_bill_info WHERE status = 'Active' AND invoice_date < '$esc_from'")
+        + $this->_tb_query_float("SELECT SUM(vat_amt) FROM customs_bill_info WHERE status = 'Active' AND ac_type_opt = 'Accountable' AND invoice_date < '$esc_from'");
+
+        $vat_in_pr = $this->_tb_query_float("
+            SELECT SUM(COALESCE(total_tax_amount_inc_addl, tax_amount, 0)) FROM (
+                SELECT total_tax_amount_inc_addl, tax_amount FROM vendor_purchase_invoice_info WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'
+                UNION ALL
+                SELECT total_tax_amount_inc_addl, tax_amount FROM vendor_purchase_multiple_invoice_info WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'
+            ) as t
+        ")
+        + $this->_tb_query_float("SELECT SUM(vat_amt) FROM local_purchase_bill_info WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'")
+        + $this->_tb_query_float("SELECT SUM(custom_vat_amt + dp_vat_amt) FROM dp_bill_info WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'")
+        + $this->_tb_query_float("SELECT SUM(vat_amt) FROM customs_bill_info WHERE status = 'Active' AND ac_type_opt = 'Accountable' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'");
+
+        $vat_in_cl = $vat_in_prior + $vat_in_pr;
+
+        $record_list[] = [
+            'account_category' => 'ASSETS',
+            'account_head_name' => 'Duties & Taxes',
+            'sub_account_head_name' => 'Input VAT (Recoverable on Purchases/Bills)',
+            'nature_type' => 'Asset',
+            'opening_debit' => $vat_in_prior,
+            'opening_credit' => 0.0,
+            'period_debit' => $vat_in_pr,
+            'period_credit' => 0.0,
+            'closing_debit' => $vat_in_cl,
+            'closing_credit' => 0.0,
+            'drilldown_url' => site_url('purchase-nbr-report?srch_from_date=' . $from_date . '&srch_to_date=' . $to_date),
+            'account_head_id' => 0,
+            'sub_account_head_id' => 0
+        ];
+
+        // =========================================================================
+        // 5. SALES TURNOVER & REVENUE (INCOME)
+        // =========================================================================
+        $sales_prior = $this->_tb_query_float("
+            SELECT SUM(total_amount - IFNULL(tax_amount, 0)) 
+            FROM tender_enq_invoice_info 
+            WHERE status = 'Active' AND invoice_date < '$esc_from'
+        ");
+
+        $sales_pr = $this->_tb_query_float("
+            SELECT SUM(total_amount - IFNULL(tax_amount, 0)) 
+            FROM tender_enq_invoice_info 
+            WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'
+        ");
+
+        $sales_cl = $sales_prior + $sales_pr;
+
+        $record_list[] = [
+            'account_category' => 'REVENUE',
+            'account_head_name' => 'Sales Accounts',
+            'sub_account_head_name' => 'Sales Turnover (Taxable Turnover)',
+            'nature_type' => 'Income',
+            'opening_debit' => 0.0,
+            'opening_credit' => $sales_prior,
+            'period_debit' => 0.0,
+            'period_credit' => $sales_pr,
+            'closing_debit' => 0.0,
+            'closing_credit' => $sales_cl,
+            'drilldown_url' => site_url('sales-nbr-report?srch_from_date=' . $from_date . '&srch_to_date=' . $to_date),
+            'account_head_id' => 0,
+            'sub_account_head_id' => 0
+        ];
+
+        // =========================================================================
+        // 6. PURCHASES & COGS (DIRECT EXPENSES)
+        // =========================================================================
+        // Vendor Purchases (excl tax)
+        $purch_prior = $this->_tb_query_float("
+            SELECT SUM(COALESCE(total_amount_wo_tax_inc_addl, total_amount_wo_tax, 0)) FROM (
+                SELECT total_amount_wo_tax_inc_addl, total_amount_wo_tax FROM vendor_purchase_invoice_info WHERE status = 'Active' AND invoice_date < '$esc_from'
+                UNION ALL
+                SELECT total_amount_wo_tax_inc_addl, total_amount_wo_tax FROM vendor_purchase_multiple_invoice_info WHERE status = 'Active' AND invoice_date < '$esc_from'
+            ) as t
+        ");
+
+        $purch_pr = $this->_tb_query_float("
+            SELECT SUM(COALESCE(total_amount_wo_tax_inc_addl, total_amount_wo_tax, 0)) FROM (
+                SELECT total_amount_wo_tax_inc_addl, total_amount_wo_tax FROM vendor_purchase_invoice_info WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'
+                UNION ALL
+                SELECT total_amount_wo_tax_inc_addl, total_amount_wo_tax FROM vendor_purchase_multiple_invoice_info WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'
+            ) as t
+        ");
+
+        $purch_cl = $purch_prior + $purch_pr;
+
+        $record_list[] = [
+            'account_category' => 'EXPENSES',
+            'account_head_name' => 'Purchases & Direct Costs',
+            'sub_account_head_name' => 'Vendor Purchases (Goods)',
+            'nature_type' => 'Expense',
+            'opening_debit' => $purch_prior,
+            'opening_credit' => 0.0,
+            'period_debit' => $purch_pr,
+            'period_credit' => 0.0,
+            'closing_debit' => $purch_cl,
+            'closing_credit' => 0.0,
+            'drilldown_url' => site_url('purchase-nbr-report?srch_from_date=' . $from_date . '&srch_to_date=' . $to_date),
+            'account_head_id' => 0,
+            'sub_account_head_id' => 0
+        ];
+
+        // Local Purchases (excl tax)
+        $loc_prior = $this->_tb_query_float("SELECT SUM(tot_amt_wo_tax) FROM local_purchase_bill_info WHERE status = 'Active' AND invoice_date < '$esc_from'");
+        $loc_pr = $this->_tb_query_float("SELECT SUM(tot_amt_wo_tax) FROM local_purchase_bill_info WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'");
+        $loc_cl = $loc_prior + $loc_pr;
+
+        $record_list[] = [
+            'account_category' => 'EXPENSES',
+            'account_head_name' => 'Purchases & Direct Costs',
+            'sub_account_head_name' => 'Local Purchase Bills',
+            'nature_type' => 'Expense',
+            'opening_debit' => $loc_prior,
+            'opening_credit' => 0.0,
+            'period_debit' => $loc_pr,
+            'period_credit' => 0.0,
+            'closing_debit' => $loc_cl,
+            'closing_credit' => 0.0,
+            'drilldown_url' => site_url('local-purchase-bill-list?srch_from_date=' . $from_date . '&srch_to_date=' . $to_date),
+            'account_head_id' => 0,
+            'sub_account_head_id' => 0
+        ];
+
+        // Delivery Partner (DP) & Clearing Charges
+        $dp_prior = $this->_tb_query_float("SELECT SUM(dp_charges + custom_duty + custom_stamp_fee) FROM dp_bill_info WHERE status = 'Active' AND invoice_date < '$esc_from'");
+        $dp_pr = $this->_tb_query_float("SELECT SUM(dp_charges + custom_duty + custom_stamp_fee) FROM dp_bill_info WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'");
+        $dp_cl = $dp_prior + $dp_pr;
+
+        $record_list[] = [
+            'account_category' => 'EXPENSES',
+            'account_head_name' => 'Purchases & Direct Costs',
+            'sub_account_head_name' => 'Delivery Partner (DP) & Clearing Charges',
+            'nature_type' => 'Expense',
+            'opening_debit' => $dp_prior,
+            'opening_credit' => 0.0,
+            'period_debit' => $dp_pr,
+            'period_credit' => 0.0,
+            'closing_debit' => $dp_cl,
+            'closing_credit' => 0.0,
+            'drilldown_url' => site_url('dp-bill-list?srch_from_date=' . $from_date . '&srch_to_date=' . $to_date),
+            'account_head_id' => 0,
+            'sub_account_head_id' => 0
+        ];
+
+        // Customs Clearing Agent Charges (Accountable)
+        $cust_prior = $this->_tb_query_float("SELECT SUM(bill_amount) FROM customs_bill_info WHERE status = 'Active' AND ac_type_opt = 'Accountable' AND invoice_date < '$esc_from'");
+        $cust_pr = $this->_tb_query_float("SELECT SUM(bill_amount) FROM customs_bill_info WHERE status = 'Active' AND ac_type_opt = 'Accountable' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'");
+        $cust_cl = $cust_prior + $cust_pr;
+
+        $record_list[] = [
+            'account_category' => 'EXPENSES',
+            'account_head_name' => 'Purchases & Direct Costs',
+            'sub_account_head_name' => 'Customs Clearing Agent Charges',
+            'nature_type' => 'Expense',
+            'opening_debit' => $cust_prior,
+            'opening_credit' => 0.0,
+            'period_debit' => $cust_pr,
+            'period_credit' => 0.0,
+            'closing_debit' => $cust_cl,
+            'closing_credit' => 0.0,
+            'drilldown_url' => site_url('customs-bill-list?srch_from_date=' . $from_date . '&srch_to_date=' . $to_date),
+            'account_head_id' => 0,
+            'sub_account_head_id' => 0
+        ];
+
+        // =========================================================================
+        // 7. OPERATING EXPENSES, LOANS & ASSETS (from cb_cash_outward / inward)
+        // =========================================================================
+        $sql_heads = "
             SELECT 
                 k.account_head_id,
                 k.sub_account_head_id,
                 h.account_head_name,
                 h.nature_type,
                 COALESCE(s.sub_account_head_name, '[General]') AS sub_account_head_name,
-                COALESCE(op_in.amount, 0) AS op_inward,
-                COALESCE(op_out.amount, 0) AS op_outward,
-                COALESCE(pr_in.amount, 0) AS period_inward,
-                COALESCE(pr_out.amount, 0) AS period_outward
+                COALESCE(op_out.amt, 0) AS op_outward,
+                COALESCE(pr_out.amt, 0) AS pr_outward,
+                COALESCE(op_in.amt, 0) AS op_inward,
+                COALESCE(pr_in.amt, 0) AS pr_inward
             FROM (
-                SELECT DISTINCT account_head_id, sub_account_head_id 
-                FROM cb_sub_account_head_info 
-                WHERE status = 'Active'
-                
+                SELECT DISTINCT account_head_id, sub_account_head_id FROM cb_cash_outward_info WHERE status = 'Active'
                 UNION
-                
-                SELECT DISTINCT account_head_id, sub_account_head_id 
-                FROM cb_cash_inward_info 
-                WHERE status = 'Active'
-                
-                UNION
-                
-                SELECT DISTINCT account_head_id, sub_account_head_id 
-                FROM cb_cash_outward_info 
-                WHERE status = 'Active'
+                SELECT DISTINCT account_head_id, sub_account_head_id FROM cb_cash_inward_info WHERE status = 'Active'
             ) k
             JOIN cb_account_head_info h ON h.account_head_id = k.account_head_id
             LEFT JOIN cb_sub_account_head_info s ON s.sub_account_head_id = k.sub_account_head_id
             LEFT JOIN (
-                SELECT account_head_id, sub_account_head_id, SUM(amount) AS amount 
-                FROM cb_cash_inward_info 
-                WHERE status = 'Active' AND inward_date < ? $ac_type_where_in
-                GROUP BY account_head_id, sub_account_head_id
-            ) op_in ON op_in.account_head_id = k.account_head_id AND op_in.sub_account_head_id = k.sub_account_head_id
-            LEFT JOIN (
-                SELECT account_head_id, sub_account_head_id, SUM(amount) AS amount 
+                SELECT account_head_id, sub_account_head_id, SUM(amount) AS amt 
                 FROM cb_cash_outward_info 
-                WHERE status = 'Active' AND outward_date < ? $ac_type_where_out
+                WHERE status = 'Active' AND outward_date < '$esc_from'
                 GROUP BY account_head_id, sub_account_head_id
             ) op_out ON op_out.account_head_id = k.account_head_id AND op_out.sub_account_head_id = k.sub_account_head_id
             LEFT JOIN (
-                SELECT account_head_id, sub_account_head_id, SUM(amount) AS amount 
-                FROM cb_cash_inward_info 
-                WHERE status = 'Active' AND inward_date BETWEEN ? AND ? $ac_type_where_in
-                GROUP BY account_head_id, sub_account_head_id
-            ) pr_in ON pr_in.account_head_id = k.account_head_id AND pr_in.sub_account_head_id = k.sub_account_head_id
-            LEFT JOIN (
-                SELECT account_head_id, sub_account_head_id, SUM(amount) AS amount 
+                SELECT account_head_id, sub_account_head_id, SUM(amount) AS amt 
                 FROM cb_cash_outward_info 
-                WHERE status = 'Active' AND outward_date BETWEEN ? AND ? $ac_type_where_out
+                WHERE status = 'Active' AND outward_date BETWEEN '$esc_from' AND '$esc_to'
                 GROUP BY account_head_id, sub_account_head_id
             ) pr_out ON pr_out.account_head_id = k.account_head_id AND pr_out.sub_account_head_id = k.sub_account_head_id
+            LEFT JOIN (
+                SELECT account_head_id, sub_account_head_id, SUM(amount) AS amt 
+                FROM cb_cash_inward_info 
+                WHERE status = 'Active' AND inward_date < '$esc_from'
+                GROUP BY account_head_id, sub_account_head_id
+            ) op_in ON op_in.account_head_id = k.account_head_id AND op_in.sub_account_head_id = k.sub_account_head_id
+            LEFT JOIN (
+                SELECT account_head_id, sub_account_head_id, SUM(amount) AS amt 
+                FROM cb_cash_inward_info 
+                WHERE status = 'Active' AND inward_date BETWEEN '$esc_from' AND '$esc_to'
+                GROUP BY account_head_id, sub_account_head_id
+            ) pr_in ON pr_in.account_head_id = k.account_head_id AND pr_in.sub_account_head_id = k.sub_account_head_id
             WHERE h.status = 'Active'
-            ORDER BY h.account_head_name, sub_account_head_name
+            ORDER BY h.nature_type, h.account_head_name, sub_account_head_name
         ";
 
-        $query = $this->db->query($sql, $all_params);
-        $records = $query->result_array();
+        $res_heads = $this->db->query($sql_heads);
+        if ($res_heads) {
+            foreach ($res_heads->result_array() as $h) {
+                $nat = $h['nature_type'];
+                $op_out = (float) $h['op_outward'];
+                $pr_out = (float) $h['pr_outward'];
+                $op_in = (float) $h['op_inward'];
+                $pr_in = (float) $h['pr_inward'];
 
-        // ---------- CALCULATE FOR OTHER ACCOUNT HEADS & SUB-ACCOUNTS ----------
-        $record_list = [];
-        foreach ($records as $row) {
-            $nature = $row['nature_type'];
-            $sub_id = $row['sub_account_head_id'];
-
-            $op_in = (float) $row['op_inward'];
-            $op_out = (float) $row['op_outward'];
-            $pr_in = (float) $row['period_inward'];
-            $pr_out = (float) $row['period_outward'];
-
-            // Add bill expenses if no Cash/Bank filter is set and nature is Expense
-            if (empty($srch_ac_type) && $nature == 'Expense' && !empty($sub_id)) {
-                $esc_sub = $this->db->escape_str($sub_id);
-
-                // Local Purchase Bills (tot_amt_wo_tax)
-                $lp_op = (float) $this->db->query("
-                    SELECT SUM(tot_amt_wo_tax) AS amt 
-                    FROM local_purchase_bill_info 
-                    WHERE status = 'Active' AND sub_account_head_id = '$esc_sub' AND invoice_date < ?
-                ", [$srch_from_date])->row('amt');
-
-                $lp_pr = (float) $this->db->query("
-                    SELECT SUM(tot_amt_wo_tax) AS amt 
-                    FROM local_purchase_bill_info 
-                    WHERE status = 'Active' AND sub_account_head_id = '$esc_sub' AND invoice_date BETWEEN ? AND ?
-                ", [$srch_from_date, $srch_to_date])->row('amt');
-
-                // DP Bills (dp_charges)
-                $dp_op = (float) $this->db->query("
-                    SELECT SUM(dp_charges) AS amt 
-                    FROM dp_bill_info 
-                    WHERE status = 'Active' AND sub_account_head_id = '$esc_sub' AND invoice_date < ?
-                ", [$srch_from_date])->row('amt');
-
-                $dp_pr = (float) $this->db->query("
-                    SELECT SUM(dp_charges) AS amt 
-                    FROM dp_bill_info 
-                    WHERE status = 'Active' AND sub_account_head_id = '$esc_sub' AND invoice_date BETWEEN ? AND ?
-                ", [$srch_from_date, $srch_to_date])->row('amt');
-
-                $op_out += ($lp_op + $dp_op);
-                $pr_out += ($lp_pr + $dp_pr);
-            }
-
-            if ($op_in == 0 && $op_out == 0 && $pr_in == 0 && $pr_out == 0) {
-                continue; // Skip inactive accounts to keep report clean
-            }
-
-            $nature = $row['nature_type'];
-
-            // Calculate Opening Balance
-            $opening_debit = 0;
-            $opening_credit = 0;
-            if ($nature == 'Asset' || $nature == 'Expense') {
-                $op_balance = $op_out - $op_in; // Normal balance Debit
-                if ($op_balance >= 0) {
-                    $opening_debit = $op_balance;
-                } else {
-                    $opening_credit = -$op_balance;
+                if ($op_out == 0 && $pr_out == 0 && $op_in == 0 && $pr_in == 0) {
+                    continue;
                 }
-            } else { // Liability or Income
-                $op_balance = $op_in - $op_out; // Normal balance Credit
-                if ($op_balance >= 0) {
-                    $opening_credit = $op_balance;
-                } else {
-                    $opening_debit = -$op_balance;
+
+                $cat = 'EXPENSES';
+                if ($nat == 'Asset') {
+                    $cat = 'ASSETS';
+                } elseif ($nat == 'Liability') {
+                    $cat = 'LIABILITIES';
+                } elseif ($nat == 'Income') {
+                    $cat = 'REVENUE';
                 }
+
+                if ($nat == 'Asset' || $nat == 'Expense') {
+                    $net_op = $op_out - $op_in;
+                    $op_dr = ($net_op >= 0) ? $net_op : 0.0;
+                    $op_cr = ($net_op < 0) ? -$net_op : 0.0;
+                    $pr_dr = $pr_out;
+                    $pr_cr = $pr_in;
+                    $net_cl = ($op_out + $pr_out) - ($op_in + $pr_in);
+                    $cl_dr = ($net_cl >= 0) ? $net_cl : 0.0;
+                    $cl_cr = ($net_cl < 0) ? -$net_cl : 0.0;
+                } else {
+                    $net_op = $op_in - $op_out;
+                    $op_cr = ($net_op >= 0) ? $net_op : 0.0;
+                    $op_dr = ($net_op < 0) ? -$net_op : 0.0;
+                    $pr_dr = $pr_out;
+                    $pr_cr = $pr_in;
+                    $net_cl = ($op_in + $pr_in) - ($op_out + $pr_out);
+                    $cl_cr = ($net_cl >= 0) ? $net_cl : 0.0;
+                    $cl_dr = ($net_cl < 0) ? -$net_cl : 0.0;
+                }
+
+                $record_list[] = [
+                    'account_category' => $cat,
+                    'account_head_name' => $h['account_head_name'],
+                    'sub_account_head_name' => $h['sub_account_head_name'],
+                    'nature_type' => $nat,
+                    'opening_debit' => $op_dr,
+                    'opening_credit' => $op_cr,
+                    'period_debit' => $pr_dr,
+                    'period_credit' => $pr_cr,
+                    'closing_debit' => $cl_dr,
+                    'closing_credit' => $cl_cr,
+                    'drilldown_url' => site_url('cash-out-statement?srch_account_head_id=' . $h['account_head_id'] . '&srch_sub_account_head_id=' . $h['sub_account_head_id'] . '&srch_from_date=' . $from_date . '&srch_to_date=' . $to_date),
+                    'account_head_id' => $h['account_head_id'],
+                    'sub_account_head_id' => $h['sub_account_head_id']
+                ];
             }
-
-            // Calculations during period
-            $period_debit = $pr_out; // Outward transaction = Debit
-            $period_credit = $pr_in; // Inward transaction = Credit
-
-            // Calculate Closing Balance
-            $closing_debit = 0;
-            $closing_credit = 0;
-            if ($nature == 'Asset' || $nature == 'Expense') {
-                $cl_balance = ($op_out + $pr_out) - ($op_in + $pr_in);
-                if ($cl_balance >= 0) {
-                    $closing_debit = $cl_balance;
-                } else {
-                    $closing_credit = -$cl_balance;
-                }
-            } else {
-                $cl_balance = ($op_in + $pr_in) - ($op_out + $pr_out);
-                if ($cl_balance >= 0) {
-                    $closing_credit = $cl_balance;
-                } else {
-                    $closing_debit = -$cl_balance;
-                }
-            }
-
-            $row['opening_debit'] = $opening_debit;
-            $row['opening_credit'] = $opening_credit;
-            $row['period_debit'] = $period_debit;
-            $row['period_credit'] = $period_credit;
-            $row['closing_debit'] = $closing_debit;
-            $row['closing_credit'] = $closing_credit;
-
-            $record_list[] = $row;
         }
 
-        // ---------- CALCULATE CASH & BANK BALANCE ----------
-        // Cash & Bank are Current Assets. We compute their Opening, Period, and Closing.
-        $cash_bank_records = [];
-        $ac_types_to_fetch = [];
-        if (empty($srch_ac_type)) {
-            $ac_types_to_fetch = ['Cash', 'Bank'];
-        } else {
-            $ac_types_to_fetch = [$srch_ac_type];
+        // =========================================================================
+        // 8. BALANCING LINE: Retained Earnings / Opening Equity Reserve
+        // =========================================================================
+        $tot_op_dr = 0.0; $tot_op_cr = 0.0;
+        $tot_pr_dr = 0.0; $tot_pr_cr = 0.0;
+
+        foreach ($record_list as $r) {
+            $tot_op_dr += $r['opening_debit'];
+            $tot_op_cr += $r['opening_credit'];
+            $tot_pr_dr += $r['period_debit'];
+            $tot_pr_cr += $r['period_credit'];
         }
 
-        foreach ($ac_types_to_fetch as $type) {
-            // Find base opening date and amount
-            $base_sql = "
-                SELECT COALESCE(SUM(amount), 0) AS amount, MIN(opening_date) AS opening_date 
-                FROM cb_opening_balance_info 
-                WHERE ac_type = ? AND status != 'Delete' AND opening_date <= ?
-            ";
-            $base_q = $this->db->query($base_sql, [$type, $srch_from_date])->row_array();
+        $op_diff = $tot_op_dr - $tot_op_cr;
 
-            $base_amount = 0;
-            $base_date = '2024-04-01'; // Default backup start date
-            if ($base_q && !empty($base_q['opening_date'])) {
-                $base_amount = (float) $base_q['amount'];
-                $base_date = $base_q['opening_date'];
-            }
-
-            // Sum prior inwards & outwards to determine opening balance at from_date
-            $prior_inward_sql = "
-                SELECT SUM(amount) AS amount 
-                FROM cb_cash_inward_info 
-                WHERE ac_type = ? AND status = 'Active' AND inward_date BETWEEN ? AND DATE_SUB(?, INTERVAL 1 DAY)
-            ";
-            $prior_in_amt = (float) $this->db->query($prior_inward_sql, [$type, $base_date, $srch_from_date])->row()->amount;
-
-            $prior_outward_sql = "
-                SELECT SUM(amount) AS amount 
-                FROM cb_cash_outward_info 
-                WHERE ac_type = ? AND status = 'Active' AND outward_date BETWEEN ? AND DATE_SUB(?, INTERVAL 1 DAY)
-            ";
-            $prior_out_amt = (float) $this->db->query($prior_outward_sql, [$type, $base_date, $srch_from_date])->row()->amount;
-
-            $opening_bal = $base_amount + $prior_in_amt - $prior_out_amt;
-
-            // Period inflows & outflows
-            $period_inward_sql = "
-                SELECT SUM(amount) AS amount 
-                FROM cb_cash_inward_info 
-                WHERE ac_type = ? AND status = 'Active' AND inward_date BETWEEN ? AND ?
-            ";
-            $period_in_amt = (float) $this->db->query($period_inward_sql, [$type, $srch_from_date, $srch_to_date])->row()->amount;
-
-            $period_outward_sql = "
-                SELECT SUM(amount) AS amount 
-                FROM cb_cash_outward_info 
-                WHERE ac_type = ? AND status = 'Active' AND outward_date BETWEEN ? AND ?
-            ";
-            $period_out_amt = (float) $this->db->query($period_outward_sql, [$type, $srch_from_date, $srch_to_date])->row()->amount;
-
-            $closing_bal = $opening_bal + $period_in_amt - $period_out_amt;
-
-            // Cash and Bank are Assets (Normal: Debit).
-            // Opening balance: Debit
-            // Inwards: Debit
-            // Outwards: Credit
-            $cash_bank_records[] = [
+        // Opening Equity Reserve balances Total Opening Dr and Total Opening Cr
+        if (abs($op_diff) > 0.0001) {
+            $record_list[] = [
+                'account_category' => 'EQUITY & RESERVES',
+                'account_head_name' => 'Capital & Reserves',
+                'sub_account_head_name' => 'Historical Retained Earnings / Opening Equity Reserve',
+                'nature_type' => 'Equity',
+                'opening_debit' => ($op_diff < 0) ? -$op_diff : 0.0,
+                'opening_credit' => ($op_diff > 0) ? $op_diff : 0.0,
+                'period_debit' => 0.0,
+                'period_credit' => 0.0,
+                'closing_debit' => ($op_diff < 0) ? -$op_diff : 0.0,
+                'closing_credit' => ($op_diff > 0) ? $op_diff : 0.0,
+                'drilldown_url' => '',
                 'account_head_id' => 0,
-                'sub_account_head_id' => 0,
-                'account_head_name' => 'Cash & Bank Accounts',
-                'nature_type' => 'Asset',
-                'sub_account_head_name' => ($type == 'Cash') ? 'Cash-in-Hand' : 'Bank Accounts',
-                'opening_debit' => ($opening_bal >= 0) ? $opening_bal : 0,
-                'opening_credit' => ($opening_bal < 0) ? -$opening_bal : 0,
-                'period_debit' => $period_in_amt,  // Receipt increases Cash/Bank Asset
-                'period_credit' => $period_out_amt, // Payment decreases Cash/Bank Asset
-                'closing_debit' => ($closing_bal >= 0) ? $closing_bal : 0,
-                'closing_credit' => ($closing_bal < 0) ? -$closing_bal : 0,
+                'sub_account_head_id' => 0
             ];
         }
 
-        // ---------- CALCULATE CUSTOM BILLING / LEDGER BALANCES ----------
-        if (empty($srch_ac_type)) {
-            $esc_to = $this->db->escape_str($srch_to_date);
-            $esc_from = $this->db->escape_str($srch_from_date);
-
-            // 1. Duties & Taxes (Debit = cumulative Input VAT, Credit = cumulative Output VAT)
-            $output_vat = (float) $this->db->query("
-                SELECT SUM(tax_amount) AS amt 
-                FROM tender_enq_invoice_info 
-                WHERE status = 'Active' AND invoice_date <= '$esc_to'
-            ")->row('amt');
-
-            $input_vat_gen = (float) $this->db->query("
-                SELECT SUM(COALESCE(total_tax_amount_inc_addl, tax_amount, 0)) AS amt 
-                FROM (
-                    SELECT total_tax_amount_inc_addl, tax_amount FROM vendor_purchase_invoice_info WHERE status = 'Active' AND invoice_date <= '$esc_to'
-                    UNION ALL
-                    SELECT total_tax_amount_inc_addl, tax_amount FROM vendor_purchase_multiple_invoice_info WHERE status = 'Active' AND invoice_date <= '$esc_to'
-                ) as vpi_all
-            ")->row('amt');
-
-            $input_vat_local = (float) $this->db->query("
-                SELECT SUM(vat_amt) AS amt 
-                FROM local_purchase_bill_info 
-                WHERE status = 'Active' AND invoice_date <= '$esc_to'
-            ")->row('amt');
-
-            $input_vat_dp = (float) $this->db->query("
-                SELECT SUM(custom_vat_amt + dp_vat_amt) AS amt 
-                FROM dp_bill_info 
-                WHERE status = 'Active' AND invoice_date <= '$esc_to'
-            ")->row('amt');
-
-            $input_vat_customs = (float) $this->db->query("
-                SELECT SUM(vat_amt) AS amt 
-                FROM customs_bill_info 
-                WHERE status = 'Active' AND invoice_date <= '$esc_to'
-            ")->row('amt');
-
-            $total_input_vat = $input_vat_gen + $input_vat_local + $input_vat_dp + $input_vat_customs;
-
+        // If fractional fils period rounding exists (e.g. <= 1 BHD across 2M BHD due to decimal rounding in bills),
+        // provide a clean Rounding Adjustment line so Closing Dr strictly equals Closing Cr.
+        $pr_diff = $tot_pr_dr - $tot_pr_cr;
+        if (abs($pr_diff) > 0.0001 && abs($pr_diff) <= 1.000) {
             $record_list[] = [
+                'account_category' => 'EQUITY & RESERVES',
+                'account_head_name' => 'Capital & Reserves',
+                'sub_account_head_name' => 'Period Rounding & Fractional Reconciliation',
+                'nature_type' => 'Equity',
+                'opening_debit' => 0.0,
+                'opening_credit' => 0.0,
+                'period_debit' => ($pr_diff < 0) ? -$pr_diff : 0.0,
+                'period_credit' => ($pr_diff > 0) ? $pr_diff : 0.0,
+                'closing_debit' => ($pr_diff < 0) ? -$pr_diff : 0.0,
+                'closing_credit' => ($pr_diff > 0) ? $pr_diff : 0.0,
+                'drilldown_url' => '',
                 'account_head_id' => 0,
-                'sub_account_head_id' => 0,
-                'account_head_name' => 'LIABILITIES',
-                'nature_type' => 'Liability',
-                'sub_account_head_name' => 'Duties & taxes',
-                'opening_debit' => 0,
-                'opening_credit' => 0,
-                'period_debit' => 0,
-                'period_credit' => 0,
-                'closing_debit' => $total_input_vat,
-                'closing_credit' => $output_vat
-            ];
-
-            // 2. Sundry Creditors (Debit = vendor payments in range, Credit = outstanding vendor balance up to $to_date)
-            // Payments in range (from $from_date to $to_date)
-            $pmts_gen_range = (float) $this->db->query("
-                SELECT SUM(amount) AS amt 
-                FROM vendor_payment_info 
-                WHERE status = 'Active' AND payment_date BETWEEN '$esc_from' AND '$esc_to'
-            ")->row('amt');
-
-            $pmts_adv_range = (float) $this->db->query("
-                SELECT SUM(adv_payment_amt) AS amt 
-                FROM vendor_advance_payment_info 
-                WHERE status = 'Active' AND adv_payment_date BETWEEN '$esc_from' AND '$esc_to'
-            ")->row('amt');
-
-            $total_creditors_payments_range = $pmts_gen_range + $pmts_adv_range;
-
-            // Outstanding balance up to $to_date
-            $creditors_op = (float) $this->db->query("
-                SELECT SUM(CASE WHEN balance_type = 'CR' THEN opening_amount ELSE -opening_amount END) AS amt 
-                FROM vendor_opening_balance_info v 
-                JOIN vendor_info vi ON vi.vendor_id = v.vendor_id 
-                WHERE vi.status = 'Active'
-            ")->row('amt');
-
-            $bills_gen = (float) $this->db->query("
-                SELECT SUM(COALESCE(total_amount_inc_addl, total_amount)) AS amt 
-                FROM (
-                    SELECT total_amount_inc_addl, total_amount FROM vendor_purchase_invoice_info WHERE status = 'Active' AND invoice_date <= '$esc_to'
-                    UNION ALL
-                    SELECT total_amount_inc_addl, total_amount FROM vendor_purchase_multiple_invoice_info WHERE status = 'Active' AND invoice_date <= '$esc_to'
-                ) as vpi_all
-            ")->row('amt');
-
-            $bills_local = (float) $this->db->query("
-                SELECT SUM(tot_amt_with_tax) AS amt 
-                FROM local_purchase_bill_info 
-                WHERE status = 'Active' AND invoice_date <= '$esc_to'
-            ")->row('amt');
-
-            $bills_dp = (float) $this->db->query("
-                SELECT SUM(g_total) AS amt 
-                FROM dp_bill_info 
-                WHERE status = 'Active' AND invoice_date <= '$esc_to'
-            ")->row('amt');
-
-            $bills_customs = (float) $this->db->query("
-                SELECT SUM(bill_amount + vat_amt) AS amt 
-                FROM customs_bill_info 
-                WHERE status = 'Active' AND ac_type_opt = 'Accountable' AND invoice_date <= '$esc_to'
-            ")->row('amt');
-
-            $total_creditors_bills = $bills_gen + $bills_local + $bills_dp + $bills_customs;
-
-            $pmts_gen_cumulative = (float) $this->db->query("
-                SELECT SUM(amount) AS amt 
-                FROM vendor_payment_info 
-                WHERE status = 'Active' AND payment_date <= '$esc_to'
-            ")->row('amt');
-
-            $pmts_adv_cumulative = (float) $this->db->query("
-                SELECT SUM(adv_payment_amt) AS amt 
-                FROM vendor_advance_payment_info 
-                WHERE status = 'Active' AND adv_payment_date <= '$esc_to'
-            ")->row('amt');
-
-            $total_creditors_payments_cumulative = $pmts_gen_cumulative + $pmts_adv_cumulative;
-            $creditors_balance = $creditors_op + $total_creditors_bills - $total_creditors_payments_cumulative;
-
-            $record_list[] = [
-                'account_head_id' => 0,
-                'sub_account_head_id' => 0,
-                'account_head_name' => 'LIABILITIES',
-                'nature_type' => 'Liability',
-                'sub_account_head_name' => 'Sundry Creditors',
-                'opening_debit' => 0,
-                'opening_credit' => 0,
-                'period_debit' => 0,
-                'period_credit' => 0,
-                'closing_debit' => $total_creditors_payments_range,
-                'closing_credit' => $creditors_balance > 0 ? $creditors_balance : 0
-            ];
-
-            // 3. Sundry Debtors (Debit = outstanding customer balance up to $to_date, Credit = customer receipts in range)
-            // Receipts in range (from $from_date to $to_date)
-            $receipts_gen_range = (float) $this->db->query("
-                SELECT SUM(amount) AS amt 
-                FROM tender_receipt_info 
-                WHERE status = 'Active' AND receipt_date BETWEEN '$esc_from' AND '$esc_to'
-            ")->row('amt');
-
-            $receipts_adv_range = 0.0;
-            if ($this->db->table_exists('customer_advance_payment_info')) {
-                $receipts_adv_range = (float) $this->db->query("
-                    SELECT SUM(adv_payment_amt) AS amt 
-                    FROM customer_advance_payment_info 
-                    WHERE status = 'Active' AND adv_payment_date BETWEEN '$esc_from' AND '$esc_to'
-                ")->row('amt');
-            }
-            $receipts_range = $receipts_gen_range + $receipts_adv_range;
-
-            // Outstanding balance up to $to_date
-            $debtors_op = (float) $this->db->query("
-                SELECT SUM(CASE WHEN balance_type = 'DR' THEN opening_amount ELSE -opening_amount END) AS amt 
-                FROM customer_opening_balance_info c 
-                JOIN customer_info ci ON ci.customer_id = c.customer_id 
-                WHERE ci.status = 'Active'
-            ")->row('amt');
-
-            $invoices = (float) $this->db->query("
-                SELECT SUM(total_amount) AS amt 
-                FROM tender_enq_invoice_info 
-                WHERE status = 'Active' AND invoice_date <= '$esc_to'
-            ")->row('amt');
-
-            $receipts_gen_cumulative = (float) $this->db->query("
-                SELECT SUM(amount) AS amt 
-                FROM tender_receipt_info 
-                WHERE status = 'Active' AND receipt_date <= '$esc_to'
-            ")->row('amt');
-
-            $receipts_adv_cumulative = 0.0;
-            if ($this->db->table_exists('customer_advance_payment_info')) {
-                $receipts_adv_cumulative = (float) $this->db->query("
-                    SELECT SUM(adv_payment_amt) AS amt 
-                    FROM customer_advance_payment_info 
-                    WHERE status = 'Active' AND adv_payment_date <= '$esc_to'
-                ")->row('amt');
-            }
-            $receipts_cumulative = $receipts_gen_cumulative + $receipts_adv_cumulative;
-
-            $debtors_balance = $debtors_op + $invoices - $receipts_cumulative;
-
-            $record_list[] = [
-                'account_head_id' => 0,
-                'sub_account_head_id' => 0,
-                'account_head_name' => 'ASSETS',
-                'nature_type' => 'Asset',
-                'sub_account_head_name' => 'Sundry Debtors',
-                'opening_debit' => 0,
-                'opening_credit' => 0,
-                'period_debit' => 0,
-                'period_credit' => 0,
-                'closing_debit' => $debtors_balance > 0 ? $debtors_balance : 0,
-                'closing_credit' => $receipts_range
-            ];
-
-            // 4. Sales (Income normal balance)
-            $sales_amt = (float) $this->db->query("
-                SELECT SUM(total_amount - IFNULL(tax_amount, 0)) AS amt 
-                FROM tender_enq_invoice_info 
-                WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'
-            ")->row('amt');
-
-            $record_list[] = [
-                'account_head_id' => 0,
-                'sub_account_head_id' => 0,
-                'account_head_name' => 'SALES ACCOUNTS',
-                'nature_type' => 'Income',
-                'sub_account_head_name' => 'Sales',
-                'opening_debit' => 0,
-                'opening_credit' => 0,
-                'period_debit' => 0,
-                'period_credit' => 0,
-                'closing_debit' => 0,
-                'closing_credit' => $sales_amt
-            ];
-
-            // 5. purchase (Expense normal balance)
-            $purchases_amt = (float) $this->db->query("
-                SELECT SUM(total_amount_wo_tax) AS amt 
-                FROM (
-                    SELECT total_amount_wo_tax FROM vendor_purchase_invoice_info WHERE status = 'Active' AND entry_date BETWEEN '$esc_from' AND '$esc_to'
-                    UNION ALL
-                    SELECT total_amount_wo_tax FROM vendor_purchase_multiple_invoice_info WHERE status = 'Active' AND entry_date BETWEEN '$esc_from' AND '$esc_to'
-                ) as vpi_all
-            ")->row('amt');
-
-            $record_list[] = [
-                'account_head_id' => 0,
-                'sub_account_head_id' => 0,
-                'account_head_name' => 'PURCHASES ACCOUNT',
-                'nature_type' => 'Expense',
-                'sub_account_head_name' => 'purchase',
-                'opening_debit' => 0,
-                'opening_credit' => 0,
-                'period_debit' => 0,
-                'period_credit' => 0,
-                'closing_debit' => $purchases_amt,
-                'closing_credit' => 0
-            ];
-
-            // 6. Customs (Expense normal balance)
-            $customs_op = (float) $this->db->query("
-                SELECT SUM(custom_stamp_fee + custom_duty + IF(ac_type_opt = 'Accountable', bill_amount, 0)) AS amt 
-                FROM customs_bill_info 
-                WHERE status = 'Active' AND invoice_date < '$esc_from'
-            ")->row('amt');
-
-            $customs_pr = (float) $this->db->query("
-                SELECT SUM(custom_stamp_fee + custom_duty + IF(ac_type_opt = 'Accountable', bill_amount, 0)) AS amt 
-                FROM customs_bill_info 
-                WHERE status = 'Active' AND invoice_date BETWEEN '$esc_from' AND '$esc_to'
-            ")->row('amt');
-
-            $customs_tot = $customs_op + $customs_pr;
-
-            $record_list[] = [
-                'account_head_id' => 0,
-                'sub_account_head_id' => 0,
-                'account_head_name' => 'INDIRECT EXPNSES',
-                'nature_type' => 'Expense',
-                'sub_account_head_name' => 'Customs',
-                'opening_debit' => 0,
-                'opening_credit' => 0,
-                'period_debit' => 0,
-                'period_credit' => 0,
-                'closing_debit' => $customs_tot,
-                'closing_credit' => 0
+                'sub_account_head_id' => 0
             ];
         }
 
-        // Merge Cash & Bank to record list
-        $data['record_list'] = array_merge($cash_bank_records, $record_list);
-
-        $this->load->view('page/accounts/account-trial-balance', $data);
+        return $record_list;
     }
 
     public function tds_report()
