@@ -7306,12 +7306,12 @@ class Vendor extends CI_Controller
                     * IFNULL(a.gst, 0) / 100
                 ) AS vat_amt
 
-            FROM vendor_purchase_invoice_item_info AS a
-
+            FROM vendor_purchase_invoice_item_info AS a 
+            left join vendor_po_item_info as b on b.vendor_po_item_id = a.vendor_po_item_id
             WHERE 
                 a.vendor_purchase_invoice_id = ?
                 AND a.status = 'Active'
-
+                and b.status = 'Active'
             ORDER BY a.vendor_purchase_invoice_item_id ASC
         ";
 

@@ -1802,7 +1802,7 @@ class Reports extends CI_Controller
         $tender_enquiry_id = (int) $this->input->post('tender_enquiry_id');
         $vendor_id = (int) $this->input->post('vendor_id');
         $vendor_contact_person_id = $this->input->post('vendor_contact_person_id') !== '' ? (int) $this->input->post('vendor_contact_person_id') : 0;
-        $update_bills = $this->input->post('update_bills') !== null ? (int) $this->input->post('update_bills') : 1;
+        $update_bills = $this->input->post('update_bills') !== null ? (int) $this->input->post('update_bills') : 0;
 
         if (empty($tender_enquiry_id) || empty($vendor_id)) {
             echo json_encode(['status' => false, 'message' => 'Tender Enquiry ID and Vendor are required.']);
