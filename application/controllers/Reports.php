@@ -2684,7 +2684,8 @@ class Reports extends CI_Controller
             $where .= " AND (aii_stock.item_code LIKE '%" . $escaped_kw . "%' 
                          OR aii_stock.item_desc LIKE '%" . $escaped_kw . "%' 
                          OR aii_stock.tender_details LIKE '%" . $escaped_kw . "%' 
-                         OR aii_stock.inward_no LIKE '%" . $escaped_kw . "%')";
+                         OR aii_stock.inward_no LIKE '%" . $escaped_kw . "%'
+                         OR aii_stock.po_no LIKE '%" . $escaped_kw . "%')";
         }
 
         // vendor_opt
@@ -2710,7 +2711,7 @@ class Reports extends CI_Controller
                     a.item_code,
                     a.item_desc,
                     a.uom,
-                    IFNULL(a.rate, 0) AS rate,
+                    IFNULL(poi.rate, a.rate) AS rate,
                     b.vendor_id,                     
                     c.vendor_name,
                     get_tender_info(b.tender_enquiry_id) AS tender_details,
@@ -2718,9 +2719,13 @@ class Reports extends CI_Controller
                     a.qty AS inward_qty, 
                     IFNULL(dc.total_dc_qty, 0) AS dc_qty, 
                     (a.qty - IFNULL(dc.total_dc_qty, 0)) AS instock_item_qty,
-                    ROUND((a.qty - IFNULL(dc.total_dc_qty, 0)) * IFNULL(a.rate, 0), 2) AS stock_value,
+                    ROUND((a.qty - IFNULL(dc.total_dc_qty, 0)) * IFNULL(poi.rate, a.rate), 2) AS stock_value,
                     'Inward Stock' AS stock_source,
-                    'Inward Stock' AS source_type
+                    'Inward Stock' AS source_type,
+                    CONVERT(IFNULL(cur.currency_code, 'BHD') USING utf8) AS currency_code,
+                    IFNULL(poi.rate, a.rate) AS po_rate,
+                    IFNULL(poi.amount, a.amount) AS po_amount,
+                    CONVERT(po.po_no USING utf8) AS po_no
                 FROM vendor_pur_inward_item_info AS a 
                 JOIN vendor_pur_inward_info AS b 
                     ON a.vendor_pur_inward_id = b.vendor_pur_inward_id 
@@ -2728,6 +2733,15 @@ class Reports extends CI_Controller
                 LEFT JOIN vendor_info AS c 
                     ON b.vendor_id = c.vendor_id 
                     AND c.status = 'Active' 
+                LEFT JOIN vendor_po_item_info AS poi
+                    ON a.vendor_po_item_id = poi.vendor_po_item_id
+                    AND poi.status = 'Active'
+                LEFT JOIN vendor_po_info AS po
+                    ON poi.vendor_po_id = po.vendor_po_id
+                    AND po.status = 'Active'
+                LEFT JOIN currencies_info AS cur
+                    ON po.currency_id = cur.currency_id
+                    AND cur.status = 'Active'
                 LEFT JOIN (
                     SELECT 
                         tdc.vendor_pur_inward_item_id,
@@ -2762,7 +2776,11 @@ class Reports extends CI_Controller
                     ROUND((a.qty - IFNULL(dc_man.total_dc_qty, 0)), 2) AS instock_item_qty,
                     ROUND((a.qty - IFNULL(dc_man.total_dc_qty, 0)) * IFNULL(a.rate, 0), 2) AS stock_value,
                     'Manual Stock' AS stock_source,
-                    'Manual Stock' AS source_type
+                    'Manual Stock' AS source_type,
+                    CONVERT('BHD' USING utf8) AS currency_code,
+                    IFNULL(a.rate, 0) AS po_rate,
+                    IFNULL(a.amount, 0) AS po_amount,
+                    CONVERT(NULL USING utf8) AS po_no
                 FROM in_stock_item_info AS a 
                 LEFT JOIN vendor_info AS b 
                     ON a.vendor_id = b.vendor_id 
@@ -2798,11 +2816,13 @@ class Reports extends CI_Controller
         $tot_dc_qty = 0;
         $tot_stock_qty = 0;
         $tot_stock_value = 0;
+        $tot_po_amount = 0;
         foreach ($record_list as $row) {
             $tot_inward_qty += (float)$row['inward_qty'];
             $tot_dc_qty += (float)$row['dc_qty'];
             $tot_stock_qty += (float)$row['instock_item_qty'];
             $tot_stock_value += (float)$row['stock_value'];
+            $tot_po_amount += (float)$row['po_amount'];
         }
 
         $data['record_list'] = $record_list;
@@ -2810,6 +2830,7 @@ class Reports extends CI_Controller
         $data['tot_dc_qty'] = $tot_dc_qty;
         $data['tot_stock_qty'] = $tot_stock_qty;
         $data['tot_stock_value'] = $tot_stock_value;
+        $data['tot_po_amount'] = $tot_po_amount;
         $data['tot_items_count'] = count($record_list);
 
         // Excel Export

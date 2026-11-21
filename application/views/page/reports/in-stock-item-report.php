@@ -43,7 +43,7 @@
                     <div class="form-group col-md-4">
                         <label for="srch_keyword">Keyword Search</label>
                         <input type="text" name="srch_keyword" id="srch_keyword" class="form-control" 
-                               placeholder="Item code, description, inward no, tender..." 
+                               placeholder="Item code, description, inward no, PO no, tender..." 
                                value="<?php echo htmlspecialchars($srch_keyword ?? ''); ?>">
                     </div>
                     <div class="form-group col-md-4" style="margin-top: 25px;">
@@ -126,7 +126,9 @@
                         <th class="text-right">Inward Qty</th>
                         <th class="text-right">DC Qty</th>
                         <th class="text-right">In-Stock Qty</th>
+                        <th class="text-center">Currency</th>
                         <th class="text-right">Rate</th>
+                        <th class="text-right">Amount</th>
                         <th class="text-right">Stock Value</th>
                     </tr>
                 </thead>
@@ -136,16 +138,20 @@
                     $t_dc = 0;
                     $t_stk = 0;
                     $t_val = 0;
+                    $t_po_amt = 0;
                     foreach ($record_list as $j => $ls): 
                         $inw_qty = (float)($ls['inward_qty'] ?? 0);
                         $dc_qty = (float)($ls['dc_qty'] ?? 0);
                         $stk_qty = (float)($ls['instock_item_qty'] ?? 0);
                         $stk_val = (float)($ls['stock_value'] ?? 0);
-                        $rate = (float)($ls['rate'] ?? 0);
+                        $rate = (float)($ls['po_rate'] ?? $ls['rate'] ?? 0);
+                        $po_amt = (float)($ls['po_amount'] ?? 0);
+                        $cur = $ls['currency_code'] ?? 'BHD';
                         $t_inw += $inw_qty;
                         $t_dc += $dc_qty;
                         $t_stk += $stk_qty;
                         $t_val += $stk_val;
+                        $t_po_amt += $po_amt;
                         $inw_date = (!empty($ls['inward_date']) && $ls['inward_date'] != '0000-00-00') ? date('d-m-Y', strtotime($ls['inward_date'])) : '-';
                         $source = $ls['source_type'] ?? $ls['stock_source'] ?? '';
                     ?>
@@ -154,6 +160,9 @@
                             <td>
                                 <strong><?php echo htmlspecialchars($ls['inward_no'] ?? '-'); ?></strong>
                                 <br><small class="text-muted"><i class="fa fa-calendar"></i> <?php echo $inw_date; ?></small>
+                                <?php if (!empty($ls['po_no'])): ?>
+                                    <br><span class="label label-default text-xs" title="Purchase Order"><i class="fa fa-shopping-cart"></i> PO: <?php echo htmlspecialchars($ls['po_no']); ?></span>
+                                <?php endif; ?>
                                 <?php if ($source === 'Manual Stock'): ?>
                                     <br><span class="label label-info text-xs">Direct Entry</span>
                                 <?php endif; ?>
@@ -170,13 +179,19 @@
                                     <?php echo number_format($stk_qty, 2); ?>
                                 </span>
                             </td>
-                            <td class="text-right"><?php echo number_format($rate, 2); ?></td>
+                            <td class="text-center">
+                                <span class="label label-primary" style="font-size: 11px; font-weight: 600;">
+                                    <?php echo htmlspecialchars($cur); ?>
+                                </span>
+                            </td>
+                            <td class="text-right"><?php echo number_format($rate, 3); ?></td>
+                            <td class="text-right"><?php echo number_format($po_amt, 3); ?></td>
                             <td class="text-right"><strong><?php echo number_format($stk_val, 2); ?></strong></td>
                         </tr>
                     <?php endforeach; ?>
                     <?php if (empty($record_list)): ?>
                         <tr>
-                            <td colspan="12" class="text-center text-muted" style="padding: 20px;">
+                            <td colspan="14" class="text-center text-muted" style="padding: 20px;">
                                 <i class="fa fa-info-circle fa-2x"></i><br>No in-stock items found for the selected criteria.
                             </td>
                         </tr>
@@ -189,7 +204,9 @@
                         <td class="text-right"><?php echo number_format($t_inw, 2); ?></td>
                         <td class="text-right text-orange"><?php echo number_format($t_dc, 2); ?></td>
                         <td class="text-right text-green" style="font-size: 14px;"><?php echo number_format($t_stk, 2); ?></td>
+                        <td class="text-center">-</td>
                         <td class="text-right">-</td>
+                        <td class="text-right"><?php echo number_format($t_po_amt, 3); ?></td>
                         <td class="text-right text-green" style="font-size: 14px;"><?php echo number_format($t_val, 2); ?></td>
                     </tr>
                 </tfoot>
