@@ -163,6 +163,200 @@ if (!empty($payment)) {
     $back_url = function_exists('site_url') ? site_url('vendor-payment-list') : 'vendor-payment-list';
     $receiver_sig_label = 'Receiver Signature';
 
+} elseif (!empty($advance)) {
+    $voucher_title = 'Payment Voucher';
+    $meta_no_label = 'Voucher No';
+    $vno_num = (int) ($advance['payment_no'] ?? 0);
+    $voucher_no = $vno_num > 0 ? str_pad($vno_num, 4, '0', STR_PAD_LEFT) : '0000';
+    $voucher_date = $advance['adv_payment_date'] ?? date('d-m-Y');
+    $company_name = !empty($advance['company_name']) ? $advance['company_name'] : 'AL HILLO TRADING CO W.L.L';
+    $company_address = !empty($advance['company_address']) ? $advance['company_address'] : '';
+    $party_label = 'Vendor Name';
+    $party_name = $advance['vendor_name'] ?? '-';
+    $mode_label = 'Payment Mode';
+
+    // Payment mode text
+    $ac_type = $advance['ac_type_opt'] ?? 'Cash';
+    if ($ac_type === 'Cash') {
+        $payment_mode_text = 'Cash';
+        if (!empty($advance['category_name'])) {
+            $payment_mode_text .= ' (' . $advance['category_name'] . ')';
+        }
+    } elseif ($ac_type === 'Bank') {
+        $pay_type = $advance['pay_type'] ?? '';
+        $bank_extra = array();
+
+        if (strtolower($pay_type) === 'online' || empty($pay_type)) {
+            $bank_extra[] = 'Online';
+            if (!empty($advance['bank_name'])) {
+                $bank_extra[] = $advance['bank_name'];
+            }
+        } elseif (strtolower($pay_type) === 'cheque') {
+            $bank_extra[] = 'Cheque';
+            if (!empty($advance['cheque_date']) && $advance['cheque_date'] !== '0000-00-00' && $advance['cheque_date'] !== '1970-01-01') {
+                $bank_extra[] = 'Date: ' . date('d-m-Y', strtotime($advance['cheque_date']));
+            }
+            if (!empty($advance['cheque_no'])) {
+                $bank_extra[] = 'No: ' . $advance['cheque_no'];
+            }
+            if (!empty($advance['cheque_bank'])) {
+                $bank_extra[] = 'Bank: ' . $advance['cheque_bank'];
+            }
+        } else {
+            if (!empty($pay_type)) {
+                $bank_extra[] = $pay_type;
+            }
+            if (!empty($advance['bank_name'])) {
+                $bank_extra[] = $advance['bank_name'];
+            }
+            if (!empty($advance['cheque_no'])) {
+                $bank_extra[] = 'Cheque: ' . $advance['cheque_no'];
+            }
+        }
+
+        $payment_mode_text = (!empty($bank_extra) ? implode(' | ', $bank_extra) : 'Bank');
+    } else {
+        $payment_mode_text = $ac_type;
+    }
+
+    $amount = (float) ($advance['adv_payment_amt'] ?? 0);
+    $curr_code = !empty($advance['currency_code']) ? strtoupper($advance['currency_code']) : '';
+    if ($curr_code === 'USD') {
+        $curr_symbol = '$';
+        $curr_unit = 'dollars';
+        $sub_unit = 'cents';
+    } elseif ($curr_code === 'EUR') {
+        $curr_symbol = '€';
+        $curr_unit = 'euros';
+        $sub_unit = 'cents';
+    } elseif ($curr_code === 'BHD' && !empty($advance['currency_symbol']) && $advance['currency_symbol'] !== '.د.ب' && $advance['currency_symbol'] !== '.\u062f.\u0628') {
+        $curr_symbol = $advance['currency_symbol'];
+        $curr_unit = 'bahraini dinars';
+        $sub_unit = 'fils';
+    } else {
+        $curr_symbol = 'BD';
+        $curr_unit = 'bahraini dinars';
+        $sub_unit = 'fils';
+    }
+    $amount_in_words = voucher_amount_to_words($amount, $curr_unit, $sub_unit, 3);
+
+    $bill_label = 'Reference';
+    $ref_parts = array();
+    $ref_parts[] = '<span style="color:#d9534f; font-weight:bold;">Advance Payment</span>';
+    if (!empty($advance['po_no'])) {
+        $ref_parts[] = '<strong>PO No:</strong> ' . htmlspecialchars($advance['po_no']);
+    }
+    if (!empty($advance['tender_details'])) {
+        $ref_parts[] = '<strong>Tender / Enquiry:</strong> ' . $advance['tender_details'];
+    }
+    if (!empty($advance['invoice_no'])) {
+        $ref_parts[] = '<strong>Invoices:</strong> ' . htmlspecialchars($advance['invoice_no']);
+    }
+    if (!empty($advance['remarks'])) {
+        $ref_parts[] = '<strong>Remarks:</strong> ' . nl2br(htmlspecialchars($advance['remarks']));
+    }
+    $bill_nos = !empty($ref_parts) ? implode('<br>', $ref_parts) : '-';
+
+    $back_url = function_exists('site_url') ? site_url('vendor-adv-payment') : 'vendor-adv-payment';
+    $receiver_sig_label = 'Receiver Signature';
+
+} elseif (!empty($customer_advance)) {
+    $voucher_title = 'Receipt';
+    $meta_no_label = 'Receipt No';
+    $rno_num = (int) ($customer_advance['receipt_no'] ?? 0);
+    $voucher_no = $rno_num > 0 ? str_pad($rno_num, 4, '0', STR_PAD_LEFT) : '0000';
+    $voucher_date = $customer_advance['adv_payment_date'] ?? date('d-m-Y');
+    $company_name = !empty($customer_advance['company_name']) ? $customer_advance['company_name'] : 'AL HILLO TRADING CO W.L.L';
+    $company_address = !empty($customer_advance['company_address']) ? $customer_advance['company_address'] : '';
+    $party_label = 'Received From';
+    $party_name = $customer_advance['customer_name'] ?? '-';
+    $mode_label = 'Receipt Mode';
+
+    // Receipt mode text
+    $ac_type = $customer_advance['ac_type_opt'] ?? 'Cash';
+    if ($ac_type === 'Cash') {
+        $payment_mode_text = 'Cash';
+        if (!empty($customer_advance['category_name'])) {
+            $payment_mode_text .= ' (' . $customer_advance['category_name'] . ')';
+        }
+    } elseif ($ac_type === 'Bank') {
+        $pay_type = $customer_advance['pay_type'] ?? '';
+        $bank_extra = array();
+
+        if (strtolower($pay_type) === 'online' || empty($pay_type)) {
+            $bank_extra[] = 'Online';
+            if (!empty($customer_advance['bank_name'])) {
+                $bank_extra[] = $customer_advance['bank_name'];
+            }
+        } elseif (strtolower($pay_type) === 'cheque') {
+            $bank_extra[] = 'Cheque';
+            if (!empty($customer_advance['cheque_date']) && $customer_advance['cheque_date'] !== '0000-00-00' && $customer_advance['cheque_date'] !== '1970-01-01') {
+                $bank_extra[] = 'Date: ' . date('d-m-Y', strtotime($customer_advance['cheque_date']));
+            }
+            if (!empty($customer_advance['cheque_no'])) {
+                $bank_extra[] = 'No: ' . $customer_advance['cheque_no'];
+            }
+            if (!empty($customer_advance['cheque_bank'])) {
+                $bank_extra[] = 'Bank: ' . $customer_advance['cheque_bank'];
+            }
+        } else {
+            if (!empty($pay_type)) {
+                $bank_extra[] = $pay_type;
+            }
+            if (!empty($customer_advance['bank_name'])) {
+                $bank_extra[] = $customer_advance['bank_name'];
+            }
+            if (!empty($customer_advance['cheque_no'])) {
+                $bank_extra[] = 'Cheque: ' . $customer_advance['cheque_no'];
+            }
+        }
+
+        $payment_mode_text = (!empty($bank_extra) ? implode(' | ', $bank_extra) : 'Bank');
+    } else {
+        $payment_mode_text = $ac_type;
+    }
+
+    $amount = (float) ($customer_advance['adv_payment_amt'] ?? 0);
+    $curr_code = !empty($customer_advance['currency_code']) ? strtoupper($customer_advance['currency_code']) : '';
+    if ($curr_code === 'USD') {
+        $curr_symbol = '$';
+        $curr_unit = 'dollars';
+        $sub_unit = 'cents';
+    } elseif ($curr_code === 'EUR') {
+        $curr_symbol = '€';
+        $curr_unit = 'euros';
+        $sub_unit = 'cents';
+    } elseif ($curr_code === 'BHD' && !empty($customer_advance['currency_symbol']) && $customer_advance['currency_symbol'] !== '.د.ب' && $customer_advance['currency_symbol'] !== '.\u062f.\u0628') {
+        $curr_symbol = $customer_advance['currency_symbol'];
+        $curr_unit = 'bahraini dinars';
+        $sub_unit = 'fils';
+    } else {
+        $curr_symbol = 'BD';
+        $curr_unit = 'bahraini dinars';
+        $sub_unit = 'fils';
+    }
+    $amount_in_words = voucher_amount_to_words($amount, $curr_unit, $sub_unit, 3);
+
+    $bill_label = 'Reference';
+    $ref_parts = array();
+    $ref_parts[] = '<span style="color:#00a65a; font-weight:bold;">Customer Advance Receipt</span>';
+    if (!empty($customer_advance['po_no'])) {
+        $ref_parts[] = '<strong>Customer PO No:</strong> ' . htmlspecialchars($customer_advance['po_no']);
+    }
+    if (!empty($customer_advance['tender_details'])) {
+        $ref_parts[] = '<strong>Tender / Enquiry:</strong> ' . $customer_advance['tender_details'];
+    }
+    if (!empty($customer_advance['invoice_no'])) {
+        $ref_parts[] = '<strong>Invoices:</strong> ' . htmlspecialchars($customer_advance['invoice_no']);
+    }
+    if (!empty($customer_advance['remarks'])) {
+        $ref_parts[] = '<strong>Remarks:</strong> ' . nl2br(htmlspecialchars($customer_advance['remarks']));
+    }
+    $bill_nos = !empty($ref_parts) ? implode('<br>', $ref_parts) : '-';
+
+    $back_url = function_exists('site_url') ? site_url('customer-adv-payment') : 'customer-adv-payment';
+    $receiver_sig_label = 'Authorized / Received By Signature';
+
 } elseif (!empty($outward)) {
     $voucher_title = 'Payment Voucher';
     $meta_no_label = 'Voucher No';

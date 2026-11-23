@@ -2196,6 +2196,7 @@ class Payment extends CI_Controller
         if (!$this->db->table_exists('customer_advance_payment_info')) {
             $this->db->query("CREATE TABLE IF NOT EXISTS `customer_advance_payment_info` (
                 `adv_payment_id` INT(11) NOT NULL AUTO_INCREMENT,
+                `receipt_no` VARCHAR(50) NULL DEFAULT NULL,
                 `ac_type_opt` VARCHAR(50) NULL DEFAULT 'Bank',
                 `bank_id` INT(11) NULL DEFAULT NULL,
                 `cash_category_id` INT(11) NULL DEFAULT NULL,
@@ -2226,6 +2227,7 @@ class Payment extends CI_Controller
 
         // Dynamically ensure columns exist in customer_advance_payment_info
         $c_extra_cols = [
+            'receipt_no' => ['type' => 'VARCHAR', 'constraint' => 50, 'null' => TRUE, 'default' => NULL],
             'pay_type' => ['type' => 'VARCHAR', 'constraint' => 20, 'null' => TRUE, 'default' => NULL],
             'cheque_date' => ['type' => 'DATE', 'null' => TRUE, 'default' => NULL],
             'cheque_no' => ['type' => 'VARCHAR', 'constraint' => 50, 'null' => TRUE, 'default' => NULL],
@@ -2602,6 +2604,84 @@ class Payment extends CI_Controller
         $data['pagination'] = $this->pagination->create_links();
 
         $this->load->view('page/payment/customer-adv-payment-list', $data);
+    }
+
+    public function customer_adv_payment_print($adv_payment_id)
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $adv_payment_id = (int) $adv_payment_id;
+
+        $sql = "
+            SELECT 
+                a.adv_payment_id,
+                a.receipt_no,
+                DATE_FORMAT(a.adv_payment_date, '%d-%m-%Y') AS adv_payment_date,
+                a.adv_payment_amt,
+                a.ac_type_opt,
+                a.pay_type,
+                a.cheque_no,
+                a.cheque_date,
+                a.cheque_bank,
+                a.invoice_no,
+                a.invoice_ids,
+                a.remarks,
+                a.tender_enquiry_id,
+                get_tender_info(a.tender_enquiry_id) AS tender_details,
+                c.customer_name,
+                b.bank_name,
+                cc.category_name,
+                po.customer_po_no AS po_no,
+                COALESCE(po.company_id, te.company_id) AS po_company_id,
+                curr.currency_code,
+                curr.symbol AS currency_symbol,
+                comp.company_name,
+                comp.address AS company_address
+            FROM customer_advance_payment_info a
+            LEFT JOIN customer_info c ON c.customer_id = a.customer_id AND c.status = 'Active'
+            LEFT JOIN company_bank_info b ON b.bank_id = a.bank_id AND b.status = 'Active'
+            LEFT JOIN cash_category cc ON cc.cash_category_id = a.cash_category_id AND cc.status = 'Active'
+            LEFT JOIN customer_tender_po_info po ON po.tender_po_id = a.tender_po_id
+            LEFT JOIN tender_enquiry_info te ON te.tender_enquiry_id = a.tender_enquiry_id
+            LEFT JOIN tender_quotation_info tq ON tq.tender_enquiry_id = a.tender_enquiry_id
+            LEFT JOIN currencies_info curr ON curr.currency_id = COALESCE(po.currency_id, tq.currency_id)
+            LEFT JOIN company_info comp ON comp.company_id = COALESCE(po.company_id, te.company_id) AND comp.status = 'Active'
+            WHERE a.adv_payment_id = ?
+        ";
+
+        $query = $this->db->query($sql, array($adv_payment_id));
+        $data['customer_advance'] = $query->row_array();
+
+        if (empty($data['customer_advance'])) {
+            show_404();
+        }
+
+        // If invoice_no is empty but invoice_ids exists, look up invoice numbers
+        if (empty($data['customer_advance']['invoice_no']) && !empty($data['customer_advance']['invoice_ids'])) {
+            $inv_ids = array_filter(array_map('intval', explode(',', $data['customer_advance']['invoice_ids'])));
+            if (!empty($inv_ids)) {
+                $inv_rows = $this->db->select('invoice_no')
+                    ->from('tender_enq_invoice_info')
+                    ->where_in('tender_enq_invoice_id', $inv_ids)
+                    ->get()
+                    ->result_array();
+                $data['customer_advance']['invoice_no'] = implode(', ', array_column($inv_rows, 'invoice_no'));
+            }
+        }
+
+        if (empty($data['customer_advance']['company_name']) || empty($data['customer_advance']['company_address'])) {
+            $default_comp = $this->db->select('company_name, address')->where('status', 'Active')->get('company_info')->row_array();
+            if (empty($data['customer_advance']['company_name'])) {
+                $data['customer_advance']['company_name'] = $default_comp['company_name'] ?? 'AL HILLO TRADING CO W.L.L';
+            }
+            if (empty($data['customer_advance']['company_address'])) {
+                $data['customer_advance']['company_address'] = $default_comp['address'] ?? '';
+            }
+        }
+
+        $this->load->view('page/payment/voucher-print', $data);
     }
 
     public function get_customer_by_tender_id_ajax()

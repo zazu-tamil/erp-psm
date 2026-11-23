@@ -261,6 +261,7 @@
             $('#invoice_ids').html('').val(null).trigger('change');
             $('#invoice_ids').select2('close');
             $('#status').val('Active').trigger('change.select2');
+            $('#remarks').val('');
             $('#pay_type_online').prop('checked', true);
             $('#cheque_date, #cheque_no, #cheque_bank').val('').prop('required', false);
             handleAcTypeChange('');
@@ -282,6 +283,7 @@
             var cheque_date = $(this).data('cheque-date') || '';
             var cheque_no = $(this).data('cheque-no') || '';
             var cheque_bank = $(this).data('cheque-bank') || '';
+            var remarks = $(this).data('remarks') || '';
             
             window.isEditing = true;
             window.editVendor = vendor;
@@ -318,6 +320,7 @@
             
             $('#adv_payment_date').val($(this).data('date'));
             $('#adv_payment_amt').val($(this).data('amt'));
+            $('#remarks').val(remarks);
             $('#status').val($(this).data('status')).trigger('change');
 
             if (!tender && vendor) {
@@ -335,6 +338,7 @@
             $('#addModal .select2').val('').trigger('change.select2');
             $('#invoice_ids').html('').val(null).trigger('change');
             $('#invoice_ids').select2('close');
+            $('#remarks').val('');
             $('#pay_type_online').prop('checked', true);
             $('#cheque_date, #cheque_no, #cheque_bank').val('').prop('required', false);
             $('#bank_pay_type_div, #cheque_fields_div').hide();

@@ -186,6 +186,7 @@
                 <thead>
                     <tr>
                         <th class="text-center" style="width: 45px;">S.No</th>
+                        <th>Voucher No</th>
                         <th>Payment Date</th>
                         <th>Tender Enquiry No</th>
                         <th>Customer Name</th>
@@ -195,7 +196,7 @@
                         <th class="text-right">Amount</th>
                         <th>Remarks</th>
                         <th>Status</th>
-                        <th class="text-center" colspan="2" style="width: 80px;">Action</th>
+                        <th class="text-center" colspan="3" style="width: 110px;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -203,6 +204,7 @@
                         <?php foreach ($record_list as $j => $row): ?>
                             <tr>
                                 <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
+                                <td><strong><?php echo htmlspecialchars($row['receipt_no'] ?? '-'); ?></strong></td>
                                 <td><?php echo $row['adv_payment_date'] ? date('d-m-Y', strtotime($row['adv_payment_date'])) : '-'; ?></td>
                                 <td>
                                     <?php if (!empty($row['tender_info'])): ?>
@@ -262,6 +264,12 @@
                                 </td>
 
                                 <td class="text-center" style="width: 35px;">
+                                    <a href="<?php echo site_url('customer-adv-payment-print/' . $row['adv_payment_id']); ?>"
+                                        target="_blank" class="btn btn-info btn-xs" title="Print Voucher">
+                                        <i class="fa fa-print"></i>
+                                    </a>
+                                </td>
+                                <td class="text-center" style="width: 35px;">
                                      <button class="btn btn-primary btn-xs edit_record" 
                                              data-id="<?php echo $row['adv_payment_id']; ?>"
                                              data-tender="<?php echo $row['tender_enquiry_id'] ?? ''; ?>"
@@ -293,7 +301,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="12" class="text-center text-danger">No customer advance records found.</td>
+                            <td colspan="13" class="text-center text-danger">No customer advance records found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>

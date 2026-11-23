@@ -6410,6 +6410,8 @@ class Vendor extends CI_Controller
         }
 
         $v_extra_cols = [
+            'remarks' => ['type' => 'TEXT', 'null' => TRUE, 'default' => NULL],
+            'payment_no' => ['type' => 'VARCHAR', 'constraint' => 50, 'null' => TRUE, 'default' => NULL],
             'pay_type' => ['type' => 'VARCHAR', 'constraint' => 20, 'null' => TRUE, 'default' => NULL],
             'cheque_date' => ['type' => 'DATE', 'null' => TRUE, 'default' => NULL],
             'cheque_no' => ['type' => 'VARCHAR', 'constraint' => 50, 'null' => TRUE, 'default' => NULL],
@@ -6466,6 +6468,7 @@ class Vendor extends CI_Controller
                 'invoice_no' => !empty($invoice_no_str) ? $invoice_no_str : null,
                 'adv_payment_date' => $this->input->post('adv_payment_date') ? date('Y-m-d', strtotime($this->input->post('adv_payment_date'))) : null,
                 'adv_payment_amt' => $this->input->post('adv_payment_amt'),
+                'remarks' => $this->input->post('remarks') ?: null,
                 'status' => $this->input->post('status') ? $this->input->post('status') : 'Active',
                 'created_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'created_date' => date('Y-m-d H:i:s'),
@@ -6519,6 +6522,7 @@ class Vendor extends CI_Controller
                 'invoice_no' => !empty($invoice_no_str) ? $invoice_no_str : null,
                 'adv_payment_date' => $this->input->post('adv_payment_date') ? date('Y-m-d', strtotime($this->input->post('adv_payment_date'))) : null,
                 'adv_payment_amt' => $this->input->post('adv_payment_amt'),
+                'remarks' => $this->input->post('remarks') ?: null,
                 'status' => $this->input->post('status') ? $this->input->post('status') : 'Active',
                 'updated_by' => $this->session->userdata(SESS_HD . 'user_id'),
                 'updated_date' => date('Y-m-d H:i:s')
@@ -6732,6 +6736,70 @@ class Vendor extends CI_Controller
         $data['pagination'] = $this->pagination->create_links();
 
         $this->load->view('page/vendor/vendor-adv-payment-list', $data);
+    }
+
+    public function vendor_adv_payment_print($adv_payment_id)
+    {
+        if (!$this->session->userdata(SESS_HD . 'logged_in')) {
+            redirect();
+        }
+
+        $adv_payment_id = (int) $adv_payment_id;
+
+        $sql = "
+            SELECT 
+                a.adv_payment_id,
+                a.payment_no,
+                DATE_FORMAT(a.adv_payment_date, '%d-%m-%Y') AS adv_payment_date,
+                a.adv_payment_amt,
+                a.ac_type_opt,
+                a.pay_type,
+                a.cheque_no,
+                a.cheque_date,
+                a.cheque_bank,
+                a.invoice_no,
+                a.invoice_ids,
+                a.remarks,
+                a.tender_enquiry_id,
+                get_tender_info(a.tender_enquiry_id) AS tender_details,
+                v.vendor_name,
+                b.bank_name,
+                cc.category_name,
+                po.po_no,
+                po.company_id AS po_company_id,
+                curr.currency_code,
+                curr.symbol AS currency_symbol,
+                comp.company_name,
+                comp.address AS company_address
+            FROM vendor_advance_payment_info a
+            LEFT JOIN vendor_info v ON v.vendor_id = a.vendor_id AND v.status = 'Active'
+            LEFT JOIN company_bank_info b ON b.bank_id = a.bank_id AND b.status = 'Active'
+            LEFT JOIN cash_category cc ON cc.cash_category_id = a.cash_category_id AND cc.status = 'Active'
+            LEFT JOIN vendor_po_info po ON po.vendor_po_id = a.vendor_po_id
+            LEFT JOIN currencies_info curr ON curr.currency_id = po.currency_id
+            LEFT JOIN company_info comp ON comp.company_id = po.company_id AND comp.status = 'Active'
+            WHERE a.adv_payment_id = ? AND a.status != 'Delete'
+        ";
+
+        $query = $this->db->query($sql, array($adv_payment_id));
+        $data['advance'] = $query->row_array();
+
+        if (empty($data['advance'])) {
+            show_404();
+        }
+
+        // Company fallback
+        if (empty($data['advance']['company_name']) || empty($data['advance']['company_address'])) {
+            $default_comp = $this->db->select('company_name, address')->where('status', 'Active')->get('company_info')->row_array();
+            if (empty($data['advance']['company_name'])) {
+                $data['advance']['company_name'] = $default_comp['company_name'] ?? 'AL HILLO TRADING CO W.L.L';
+            }
+            if (empty($data['advance']['company_address'])) {
+                $data['advance']['company_address'] = $default_comp['address'] ?? '';
+            }
+        }
+
+        $this->load->view('page/payment/voucher-print', $data);
     }
 
     public function get_vendor_by_tender_id_ajax()

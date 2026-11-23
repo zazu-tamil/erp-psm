@@ -119,6 +119,12 @@
                                 </select>
                             </div>
                             <div class="clearfix"></div>
+
+                            <div class="form-group col-md-12">
+                                <label for="remarks">Remarks</label>
+                                <textarea name="remarks" id="remarks" class="form-control" rows="2" placeholder="Enter remarks..."></textarea>
+                            </div>
+                            <div class="clearfix"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -182,6 +188,7 @@
                 <thead>
                     <tr>
                         <th class="text-center">S.No</th>
+                        <th>Voucher No</th>
                         <th>Payment Date</th>
                         <th>Tender Enquiry No</th>
                         <th>Vendor Name</th>
@@ -190,7 +197,7 @@
                         <th>A/C Type</th>
                         <th class="text-right">Amount</th>
                         <th>Status </th>
-                        <th class="text-center" colspan="2">Action</th>
+                        <th class="text-center" colspan="3">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -198,6 +205,7 @@
                         <?php foreach ($record_list as $j => $row): ?>
                             <tr>
                                 <td class="text-center"><?php echo ($j + 1 + $sno); ?></td>
+                                <td><strong><?php echo htmlspecialchars($row['payment_no'] ?? '-'); ?></strong></td>
                                 <td><?php echo $row['adv_payment_date'] ? date('d-m-Y', strtotime($row['adv_payment_date'])) : '-'; ?></td>
                                 <td>
                                     <small class="label label-success"><?php echo $row['tender_info']; ?></small>
@@ -246,6 +254,12 @@
                                 <td><?php echo htmlspecialchars($row['status'] ?? '-'); ?></td>
 
                                 <td class="text-center">
+                                    <a href="<?php echo site_url('vendor-adv-payment-print/' . $row['adv_payment_id']); ?>"
+                                        target="_blank" class="btn btn-info btn-xs" title="Print Voucher">
+                                        <i class="fa fa-print"></i>
+                                    </a>
+                                </td>
+                                <td class="text-center">
                                      <button class="btn btn-primary btn-xs edit_record" 
                                              data-id="<?php echo $row['adv_payment_id']; ?>"
                                              data-tender="<?php echo $row['tender_enquiry_id']; ?>"
@@ -261,6 +275,7 @@
                                              data-cheque-bank="<?php echo htmlspecialchars($row['cheque_bank'] ?? ''); ?>"
                                              data-date="<?php echo $row['adv_payment_date']; ?>"
                                              data-amt="<?php echo $row['adv_payment_amt']; ?>"
+                                             data-remarks="<?php echo htmlspecialchars($row['remarks'] ?? ''); ?>"
                                              data-status="<?php echo $row['status']; ?>"
                                              title="Edit">
                                          <i class="fa fa-edit"></i>
@@ -276,7 +291,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="11" class="text-center text-danger">No records found.</td>
+                            <td colspan="12" class="text-center text-danger">No records found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>

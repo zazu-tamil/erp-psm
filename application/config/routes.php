@@ -402,6 +402,7 @@ $route['get-vendor-opening-balance'] = 'reports/get_vendor_opening_balance_ajax'
 
 //vendor adv payment
 $route['vendor-adv-payment'] = 'vendor/vendor_adv_payment_list';
+$route['vendor-adv-payment-print/(:num)'] = 'vendor/vendor_adv_payment_print/$1';
 $route['vendor-adv-payment/(:any)'] = 'vendor/vendor_adv_payment_list/$1';
 $route['vendor/get_vendor_invoices_ajax'] = 'vendor/get_vendor_invoices_ajax';
 $route['vendor/get_vendor_by_tender_id_ajax'] = 'vendor/get_vendor_by_tender_id_ajax';
@@ -409,8 +410,10 @@ $route['vendor/get_vendor_po_by_vendor_ajax'] = 'vendor/get_vendor_po_by_vendor_
 
 //customer adv payment
 $route['customer-adv-payment'] = 'payment/customer_adv_payment_list';
+$route['customer-adv-payment-print/(:num)'] = 'payment/customer_adv_payment_print/$1';
 $route['customer-adv-payment/(:any)'] = 'payment/customer_adv_payment_list/$1';
 $route['customer-adv-receipt'] = 'payment/customer_adv_payment_list';
+$route['customer-adv-receipt-print/(:num)'] = 'payment/customer_adv_payment_print/$1';
 $route['customer-adv-receipt/(:any)'] = 'payment/customer_adv_payment_list/$1';
 $route['payment/get_customer_by_tender_id_ajax'] = 'payment/get_customer_by_tender_id_ajax';
 $route['payment/get_customer_po_by_customer_ajax'] = 'payment/get_customer_po_by_customer_ajax';
